@@ -290,7 +290,7 @@
                 <div
                     class="absolute bottom-0 left-1/2 transform -translate-x-1/2 z-20 w-[420px] pointer-events-none drop-shadow-2xl">
                     <div class="relative">
-                        <img src="{{ asset('images/ilustrasi.webp') }}" alt="Ilustrasi Perencana"
+                        <img src="{{ asset('images/landing_page_ilustrasi.png') }}" alt="Ilustrasi Perencana"
                             class="relative z-10 w-full h-auto object-contain"
                             style="-webkit-mask-image: linear-gradient(to bottom, black 78%, transparent 100%); mask-image: linear-gradient(to bottom, black 78%, transparent 100%);">
                         <div
@@ -700,7 +700,7 @@
                         </div>
 
                         <div class="relative z-10 w-[500px] max-w-none translate-y-2 animate-float">
-                            <img src="{{ asset('images/asn-learning.png') }}"
+                            <img src="{{ asset('images/lms_ilustrasi.png') }}"
                                 alt="Aparatur sedang belajar menggunakan laptop"
                                 class="relative z-10 w-full object-contain drop-shadow-2xl"
                                 style="-webkit-mask-image: linear-gradient(to bottom, black 78%, transparent 100%); mask-image: linear-gradient(to bottom, black 78%, transparent 100%);">
@@ -903,7 +903,7 @@
                                 stroke-width="18" />
                         </svg>
                     </div>
-                    <img src="{{ asset('images/faq-illustration.webp') }}" alt="Pusat Bantuan Kemnaker"
+                    <img src="{{ asset('images/faq-illustrasi.png') }}" alt="Pusat Bantuan Kemnaker"
                         class="relative z-10 w-full max-w-[520px] h-auto object-contain drop-shadow-2xl animate-float mt-8"
                         style="-webkit-mask-image: linear-gradient(to bottom, black 87%, transparent 100%); mask-image: linear-gradient(to bottom, black 87%, transparent 100%);">
                 </div>
@@ -915,7 +915,7 @@
     <!-- ========================================== -->
     <!-- CTA SECTION                                -->
     <!-- ========================================== -->
-    <section id="cta" class="py-24 md:py-36 lg:py-8 px-4 md:px-16 relative overflow-hidden"
+    <section id="cta" class="py-24 md:py-36 lg:py-48 px-4 md:px-16 relative overflow-hidden"
         style="background-color: #13416B;">
         <!-- Efek Glow Latar Belakang -->
         <div
@@ -963,14 +963,14 @@
                 </div>
 
                 <!-- Kolom Kanan: Ilustrasi CTA -->
-                <div
+                {{-- <div
                     class="relative hidden lg:col-span-5 xl:col-span-4 lg:flex h-full items-end justify-end reveal-right">
                     <div class="absolute right-10 bottom-10 h-[280px] w-[280px] rounded-full bg-white/5 blur-xl"></div>
-                    <img src="{{ asset('images/cta-illustration.webp') }}"
+                    <img src="{{ asset('images/cta_illustrasi.png') }}"
                         alt="Kepala Pusat Perencanaan Ketenagakerjaan"
-                        class="relative z-10 w-full max-w-[320px] object-contain drop-shadow-2xl animate-float translate-y-8"
+                        class="relative z-10 w-full h-full  max-w-[780px] object-contain drop-shadow-2xl animate-float translate-y-8"
                         style="-webkit-mask-image: linear-gradient(to bottom, black 80%, transparent 100%); mask-image: linear-gradient(to bottom, black 80%, transparent 100%);">
-                </div>
+                </div> --}}
 
             </div>
         </div>

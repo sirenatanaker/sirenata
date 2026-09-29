@@ -39,14 +39,14 @@
                 </h1>
                 
                 <!-- Deskripsi Diperpanjang -->
-                <p class="text-sm md:text-base text-blue-100/90 leading-relaxed max-w-xl lg:max-w-2xl font-medium">
+                <p class="text-sm md:text-base text-blue-100/90 leading-relaxed max-w-xl md:max-w-md lg:max-w-xl font-medium">
                     Selesaikan modul pelatihan Anda, ikuti evaluasi dengan baik, dan raih sertifikat kelulusan untuk mendukung perjalanan karier serta profesionalisme Anda.
                 </p>
             </div>
 
             <!-- Sisi Kanan: Ilustrasi Pegawai Kemnaker -->
             <div class="hidden sm:flex absolute bottom-0 right-0 lg:right-5 z-10 w-[45%] lg:w-[35%] h-[90%] lg:h-[95%] pointer-events-none justify-end items-end">
-                <img src="{{ asset('images/pegawai_kemnaker.webp') }}" 
+                <img src="{{ asset('images/modul_ilustrasi.png') }}" 
                      alt="Pegawai Kemnaker" 
                      class="w-full h-full object-contain object-bottom drop-shadow-[0_15px_25px_rgba(0,0,0,0.3)] relative z-20"
                      onerror="this.style.display='none'">
