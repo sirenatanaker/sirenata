@@ -120,15 +120,22 @@
                     </select>
                 </header>
 
-                <div class="p-5 sm:p-6 flex-1">
-                    <div id="rtkChartScroll"
-                        class="max-h-[500px] overflow-y-auto custom-scrollbar pr-2 {{ $rtkMasaAktifPerProvinsi->count() > 0 ? '' : 'hidden' }}">
-                        <div id="rtkCombinedChartContainer" class="relative w-full" style="min-height: 400px;">
-                            <canvas id="rtkCombinedBarChart"></canvas>
+                <div class="p-5 sm:p-6 flex-1 flex flex-col">
+                    <div class="relative flex-1 min-h-[400px]">
+                        {{-- Area scroll: label sumbu Y ikut scroll, sumbu X tetap menempel di bawah --}}
+                        <div id="rtkChartScroll"
+                            class="absolute inset-0 overflow-y-auto custom-scrollbar {{ $rtkMasaAktifPerProvinsi->count() > 0 ? '' : 'hidden' }}">
+                            <div class="flex flex-col min-h-full">
+                                <div id="rtkCombinedChartContainer" class="relative w-full shrink-0">
+                                    <canvas id="rtkCombinedBarChart"></canvas>
+                                </div>
+                                <div id="rtkAxisX"
+                                    class="sticky bottom-0 z-10 mt-auto h-7 shrink-0 bg-white border-t border-slate-200">
+                                </div>
+                            </div>
                         </div>
-                    </div>
 
-                    <div id="rtkCombinedEmptyState"
+                        <div id="rtkCombinedEmptyState"
                         class="bg-slate-50 rounded-xl p-10 text-center border border-dashed border-slate-200 {{ $rtkMasaAktifPerProvinsi->count() > 0 ? 'hidden' : '' }}">
                         <div
                             class="w-12 h-12 bg-white border border-slate-200 rounded-full flex items-center justify-center mx-auto mb-3 text-slate-400">
@@ -137,6 +144,7 @@
                         <p class="text-sm font-semibold text-slate-700">Belum ada data RTK</p>
                         <p class="text-xs text-slate-500 mt-1">Belum ada penyusunan dokumen RTK Provinsi yang
                             tercatat.</p>
+                    </div>
                     </div>
                 </div>
             </section>
@@ -147,9 +155,7 @@
                 <header class="px-5 sm:px-6 py-4 border-b border-slate-100">
                     <div class="flex items-center justify-between gap-3">
                         <div class="flex items-center gap-3">
-                            {{-- <div class="w-10 h-10 rounded-md bg-[#547996] text-white flex items-center justify-center shrink-0">
-                                <i class="fas fa-clipboard-check"></i>
-                            </div> --}}
+                           
                             <h2 class="text-lg font-semibold text-slate-900">Perlu Persetujuan</h2>
                         </div>
                         <span
@@ -296,10 +302,36 @@
 
                 // =========================================================
                 // 1. GRAFIK KOMPARASI RTK (HORIZONTAL FLOATING BAR)
+                //    Sumbu X berupa elemen HTML sticky di bawah area scroll,
+                //    jadi tetap terlihat saat label sumbu Y di-scroll.
                 // =========================================================
-                @if ($rtkMasaAktifPerProvinsi->count() > 0)
-                    const rtkCombinedCtx = document.getElementById('rtkCombinedBarChart').getContext('2d');
+                const RTK_MIN_ROW_HEIGHT = 50;
+                const RTK_AXIS_HEIGHT = 28;
+                const rtkChartColorPalette = ['#13416B', '#547996', '#8BB1CC'];
 
+                // Data sedikit: baris melebar mengisi area (tanpa ruang kosong).
+                // Data banyak: 50px per baris, sisanya di-scroll.
+                function fitRtkChartHeight(rowCount) {
+                    const scrollEl = document.getElementById('rtkChartScroll');
+                    if (!scrollEl.clientHeight || !rowCount) return;
+
+                    const available = scrollEl.clientHeight - RTK_AXIS_HEIGHT;
+                    const rowHeight = Math.max(RTK_MIN_ROW_HEIGHT, Math.floor(available / rowCount));
+                    document.getElementById('rtkCombinedChartContainer').style.height = (rowHeight * rowCount) + 'px';
+                }
+
+                // Label tahun sumbu X (HTML), sejajar dengan area plot chart
+                function renderRtkAxis(chart) {
+                    const xScale = chart.scales.x;
+                    let html = '';
+
+                    for (let year = Math.ceil(xScale.min); year <= Math.floor(xScale.max); year++) {
+                        html += `<span class="absolute text-xs text-slate-500" style="top:6px;left:${xScale.getPixelForValue(year)}px;transform:translateX(-50%)">${year}</span>`;
+                    }
+                    document.getElementById('rtkAxisX').innerHTML = html;
+                }
+
+                @if ($rtkMasaAktifPerProvinsi->count() > 0)
                     const rtkLabelsRaw = @json($rtkMasaAktifPerProvinsi->pluck('province_name'));
                     const rtkLabels = rtkLabelsRaw.map(label => formatMultilineLabel(label));
 
@@ -307,11 +339,11 @@
                     const rtkEndData = @json($rtkMasaAktifPerProvinsi->pluck('end_date'));
 
                     const floatingData = rtkStartData.map((start, index) => [start, rtkEndData[index]]);
+                    const barColors = floatingData.map((_, i) => rtkChartColorPalette[i % rtkChartColorPalette.length]);
 
-                    const chartColorPalette = ['#13416B', '#547996', '#8BB1CC'];
-                    const barColors = floatingData.map((_, i) => chartColorPalette[i % chartColorPalette.length]);
+                    fitRtkChartHeight(rtkLabelsRaw.length);
 
-                    window.rtkCombinedChartInstance = new Chart(rtkCombinedCtx, {
+                    window.rtkCombinedChartInstance = new Chart(document.getElementById('rtkCombinedBarChart').getContext('2d'), {
                         type: 'bar',
                         data: {
                             labels: rtkLabels,
@@ -322,29 +354,25 @@
                                 borderRadius: 6,
                                 borderSkipped: false,
                                 barPercentage: 0.6,
-                                categoryPercentage: 0.8
+                                categoryPercentage: 0.8,
+                                maxBarThickness: 48
                             }]
                         },
                         options: {
                             indexAxis: 'y',
                             responsive: true,
                             maintainAspectRatio: false,
+                            layout: { padding: { right: 16 } },
                             plugins: {
-                                legend: {
-                                    display: false
-                                },
+                                legend: { display: false },
                                 tooltip: {
                                     backgroundColor: 'rgba(19, 65, 107, 0.95)',
                                     padding: 12,
                                     cornerRadius: 6,
-                                    titleFont: {
-                                        size: 13,
-                                        weight: 'bold'
-                                    },
+                                    titleFont: { size: 13, weight: 'bold' },
                                     callbacks: {
                                         title: function(context) {
-                                            return Array.isArray(context[0].label) ? context[0].label.join(
-                                                ' ') : context[0].label;
+                                            return Array.isArray(context[0].label) ? context[0].label.join(' ') : context[0].label;
                                         },
                                         label: function(context) {
                                             const startYear = context.raw[0];
@@ -358,94 +386,80 @@
                                 x: {
                                     min: Math.min(...rtkStartData) - 1,
                                     max: Math.max(...rtkEndData) + 1,
-                                    grid: {
-                                        color: '#f1f5f9'
-                                    },
-                                    ticks: {
-                                        font: {
-                                            size: 11
-                                        },
-                                        stepSize: 1,
-                                        callback: function(value) {
-                                            return value;
-                                        }
-                                    }
+                                    border: { display: false },
+                                    grid: { color: '#f1f5f9', drawTicks: false },
+                                    // Label tahun digambar di #rtkAxisX (sticky), bukan di canvas
+                                    ticks: { display: false, stepSize: 1 }
                                 },
                                 y: {
-                                    grid: {
-                                        display: false
-                                    },
-                                    ticks: {
-                                        font: {
-                                            size: 11,
-                                            family: "'Inter', sans-serif"
-                                        },
-                                        autoSkip: false
-                                    },
+                                    grid: { display: false },
+                                    ticks: { font: { size: 11, family: "'Inter', sans-serif" }, autoSkip: false },
                                     afterFit: function(scaleInstance) {
                                         scaleInstance.width = window.innerWidth >= 640 ? 160 : 120;
                                     }
                                 }
                             }
-                        }
+                        },
+                        plugins: [{
+                            id: 'rtkAxisSync',
+                            afterLayout: (chart) => renderRtkAxis(chart)
+                        }]
                     });
-
-                    const initialRtkHeight = Math.max(400, rtkLabelsRaw.length * 50);
-                    document.getElementById('rtkCombinedChartContainer').style.height = initialRtkHeight + 'px';
                 @endif
+
+                // Sesuaikan tinggi chart ketika ukuran area berubah (resize / kartu sebelah selesai dirender)
+                new ResizeObserver(() => {
+                    if (window.rtkCombinedChartInstance) {
+                        fitRtkChartHeight(window.rtkCombinedChartInstance.data.labels.length);
+                    }
+                }).observe(document.getElementById('rtkChartScroll'));
 
                 window.fetchRtkPusatData = function(year) {
                     fetch(`{{ route('admin-pusat.dashboard') }}?rtk_year=${year}`, {
-                            headers: {
-                                'X-Requested-With': 'XMLHttpRequest'
-                            }
+                            headers: { 'X-Requested-With': 'XMLHttpRequest' }
                         })
                         .then(response => response.json())
                         .then(data => {
                             const rtkData = data.rtkMasaAktifPerProvinsi;
-                            const containerScroll = document.querySelector('#rtkCombinedChartContainer')
-                                .parentElement;
-                            const container = document.getElementById('rtkCombinedChartContainer');
+                            const containerScroll = document.getElementById('rtkChartScroll');
                             const emptyState = document.getElementById('rtkCombinedEmptyState');
 
                             if (!rtkData || rtkData.length === 0) {
                                 containerScroll.classList.add('hidden');
                                 emptyState.classList.remove('hidden');
-                            } else {
-                                containerScroll.classList.remove('hidden');
-                                emptyState.classList.add('hidden');
+                                return;
+                            }
 
-                                const rawLabels = rtkData.map(item => item.province_name);
-                                const labels = rawLabels.map(label => formatMultilineLabel(label));
-                                const start = rtkData.map(item => item.start_date);
-                                const end = rtkData.map(item => item.end_date);
+                            containerScroll.classList.remove('hidden');
+                            emptyState.classList.add('hidden');
 
-                                const newFloatingData = start.map((s, index) => [s, end[index]]);
-                                const chartColorPalette = ['#13416B', '#547996', '#8BB1CC'];
-                                const newBarColors = newFloatingData.map((_, i) => chartColorPalette[i %
-                                    chartColorPalette.length]);
+                            const rawLabels = rtkData.map(item => item.province_name);
+                            const labels = rawLabels.map(label => formatMultilineLabel(label));
+                            const start = rtkData.map(item => item.start_date);
+                            const end = rtkData.map(item => item.end_date);
 
-                                if (window.rtkCombinedChartInstance) {
-                                    container.style.height = Math.max(400, rawLabels.length * 50) + 'px';
+                            const newFloatingData = start.map((s, index) => [s, end[index]]);
+                            const newBarColors = newFloatingData.map((_, i) => rtkChartColorPalette[i % rtkChartColorPalette.length]);
 
-                                    window.rtkCombinedChartInstance.data.labels = labels;
-                                    window.rtkCombinedChartInstance.data.datasets[0].data = newFloatingData;
-                                    window.rtkCombinedChartInstance.data.datasets[0].backgroundColor =
-                                        newBarColors;
+                            if (window.rtkCombinedChartInstance) {
+                                const chart = window.rtkCombinedChartInstance;
 
-                                    const minYear = Math.min(...start) - 1;
-                                    const maxYear = Math.max(...end) + 1;
-                                    window.rtkCombinedChartInstance.options.scales.x.min = isFinite(minYear) ?
-                                        minYear : 2020;
-                                    window.rtkCombinedChartInstance.options.scales.x.max = isFinite(maxYear) ?
-                                        maxYear : 2030;
+                                fitRtkChartHeight(rawLabels.length);
 
-                                    window.rtkCombinedChartInstance.update();
-                                }
+                                chart.data.labels = labels;
+                                chart.data.datasets[0].data = newFloatingData;
+                                chart.data.datasets[0].backgroundColor = newBarColors;
+
+                                const minYear = Math.min(...start) - 1;
+                                const maxYear = Math.max(...end) + 1;
+                                chart.options.scales.x.min = isFinite(minYear) ? minYear : 2020;
+                                chart.options.scales.x.max = isFinite(maxYear) ? maxYear : 2030;
+
+                                chart.update();
+                                containerScroll.scrollTop = 0;
                             }
                         });
                 };
-
 
                 // =========================================================
                 // 2. PERSETUJUAN (INFINITE SCROLL)
