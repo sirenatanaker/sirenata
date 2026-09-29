@@ -572,7 +572,7 @@ class DashbordController extends Controller
 
                     'verification_label' => $isVerifApproved
                         ? 'Sudah diverifikasi'
-                        : 'Belum diverifikasi',
+                        : 'Menunggu diverifikasi',
 
                     'verification_color' => $isVerifApproved
                         ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
