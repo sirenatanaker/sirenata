@@ -634,13 +634,13 @@
 
                 <!-- Kanan: Ilustrasi LMS -->
                 <div class="order-1 min-w-0 lg:order-2 lg:sticky lg:top-24">
-                    <div class="mb-8 max-w-2xl text-left reveal-right">
-                        {{-- <div class="mb-3 flex items-center gap-3">
+                    <div class="-mb-2 max-w-xl text-left reveal-right">
+                        <div class="mb-3 flex items-center gap-3">
                             <span class="font-kalam text-lg font-bold text-[#13416B]">
                                 LMS Terintegrasi
                             </span>
                             <div class="h-[2px] w-16 bg-[#13416B]/30"></div>
-                        </div> --}}
+                        </div>
 
                         <h2 class="text-3xl font-extrabold leading-tight text-slate-900 sm:text-4xl md:text-5xl"
                             style="font-family: 'Oswald', sans-serif;">
@@ -699,10 +699,10 @@
                             </div>
                         </div>
 
-                        <div class="relative z-10 w-[500px] max-w-none translate-y-2 animate-float">
+                        <div class="relative z-10 w-[540px] max-w-none translate-y-2 animate-float">
                             <img src="{{ asset('images/LMS.webp') }}"
                                 alt="Aparatur sedang belajar menggunakan laptop"
-                                class="relative z-10 w-full object-contain drop-shadow-2xl"
+                                class="relative z-10 w-full object-contain drop-shadow-xl"
                                 style="-webkit-mask-image: linear-gradient(to bottom, black 78%, transparent 100%); mask-image: linear-gradient(to bottom, black 78%, transparent 100%);">
                             <div
                                 class="pointer-events-none absolute inset-x-[-8%] bottom-0 h-28 bg-gradient-to-t from-slate-50/90 via-slate-50/45 to-transparent blur-md">
