@@ -222,46 +222,7 @@ class ProjectController extends Controller
         return view('project::edit', compact('project', 'users', 'routePrefix'));
     }
 
-    public function update(Request $request, $id)
-    {
-        $project = Project::findOrFail($id);
 
-        $allowedUserIds = User::role('user')->where(function ($query) {
-            $query->doesntHave('scopeArea')
-                ->orWhereHas('scopeArea', function ($q) {
-                    $q->whereNull('province_code')->whereNull('regency_code');
-                });
-        })->pluck('id')->toArray();
-
-        $request->validate([
-            'proyekName' => 'required|string|max:255',
-            'startDate' => 'required|date',
-            'endDate' => 'required|date',
-            'duration' => 'nullable|integer',
-            'teamLeader' => [
-                'required',
-                'exists:users,id',
-                \Illuminate\Validation\Rule::in($allowedUserIds)
-            ],
-            'teamMembers' => 'nullable|array',
-            'teamMembers.*' => [
-                'exists:users,id',
-                \Illuminate\Validation\Rule::in($allowedUserIds)
-            ],
-        ]);
-
-        $project->update([
-            'name' => $request->proyekName,
-            'start_date' => $request->startDate,
-            'end_date' => $request->endDate,
-            'duration' => $request->duration,
-            'team_leader' => $request->teamLeader,
-            'team_members' => $request->teamMembers,
-        ]);
-
-        ToastMagic::success('Proyek berhasil diperbarui!');
-        return redirect()->route($this->routePrefix . 'index');
-    }
 
     public function destroy($id)
     {
@@ -294,25 +255,31 @@ class ProjectController extends Controller
         $project = Project::findOrFail($id);
 
         $request->validate([
-            'prerequisite_course_ids' => 'nullable|array|required_if:is_prerequisite_active,1',
+            'prerequisite_course_ids'   => 'nullable|array|required_if:is_prerequisite_active,1',
             'prerequisite_course_ids.*' => 'exists:courses,id',
-            'status' => 'required|in:Draft,On Progress,Completed',
+            'status'                    => 'required|in:Draft,Menunggu Tim,On Progress,Completed,Kedaluwarsa',
         ]);
 
         $prerequisiteCourseIds = $request->input('prerequisite_course_ids', []);
         $previousStatus = $project->status;
+        $newStatus = $request->status;
 
-        // Simpan prasyarat dan status (Setuju / Tolak)
-        $project->update([
-            'prerequisite_course_id' => $prerequisiteCourseIds[0] ?? null,
+        $updateData = [
+            'prerequisite_course_id'  => $prerequisiteCourseIds[0] ?? null,
             'prerequisite_course_ids' => $prerequisiteCourseIds ?: null,
-            'is_prerequisite_active' => $request->has('is_prerequisite_active'),
-            'status' => $request->status, // Admin Pusat mengubah dari Draft menjadi On Progress
-        ]);
+            'is_prerequisite_active'  => $request->has('is_prerequisite_active'),
+            'status'                  => $newStatus,
+        ];
 
-        // KEJADIAN: keputusan terhadap proyek daerah.
-        // Listener di modul Dashboard akan membuat notifikasi
-        // untuk Admin Provinsi & Admin Kab/Kota (event-driven push).
+        // Jika berubah dari Draft -> Menunggu Tim ATAU dari Kedaluwarsa -> Menunggu Tim (Buka Kembali)
+        if (($previousStatus === 'Draft' && $newStatus === 'Menunggu Tim') ||
+            ($previousStatus === 'Kedaluwarsa' && $newStatus === 'Menunggu Tim')
+        ) {
+            $updateData['approved_at'] = now(); // Reset/Set timestamp persetujuan
+        }
+
+        $project->update($updateData);
+
         if ($previousStatus !== $project->status) {
             event(new \Modules\Project\Events\ProjectApprovalDecided(
                 projectId: $project->id,
@@ -325,7 +292,53 @@ class ProjectController extends Controller
             ));
         }
 
-        ToastMagic::success('Prasyarat kursus dan persetujuan proyek berhasil diperbarui!');
+        ToastMagic::success('Status dan prasyarat proyek berhasil diperbarui!');
         return redirect()->route($this->routePrefix . 'index', ['type' => 'daerah']);
+    }
+
+    /**
+     * Digunakan oleh Admin Daerah/Sistem untuk mengisi detail tim.
+     */
+    public function update(Request $request, $id)
+    {
+        $project = Project::findOrFail($id);
+
+        // Proteksi Real-time: Jika masa 14 hari sudah terlampaui saat menekan simpan
+        if ($project->status === 'Menunggu Tim' && $project->approved_at) {
+            if (now()->diffInDays($project->approved_at) >= 14) {
+                $project->update(['status' => 'Kedaluwarsa']);
+
+                ToastMagic::error('Masa tenggang penentuan tim (14 hari) telah berakhir. Status proyek berubah menjadi Kedaluwarsa.');
+                return redirect()->back();
+            }
+        }
+
+        $request->validate([
+            'proyekName'  => 'required|string|max:255',
+            'startDate'   => 'required|date',
+            'endDate'     => 'required|date',
+            'duration'    => 'nullable|integer',
+            'teamLeader'  => 'required|exists:users,id',
+            'teamMembers' => 'nullable|array',
+        ]);
+
+        $updateData = [
+            'name'        => $request->proyekName,
+            'start_date'  => $request->startDate,
+            'end_date'    => $request->endDate,
+            'duration'    => $request->duration,
+            'team_leader' => $request->teamLeader,
+            'team_members' => $request->teamMembers,
+        ];
+
+        // Transisi otomatis: Menunggu Tim -> On Progress (saat Ketua Tim terisi)
+        if ($project->status === 'Menunggu Tim' && !empty($request->teamLeader)) {
+            $updateData['status'] = 'On Progress';
+        }
+
+        $project->update($updateData);
+
+        ToastMagic::success('Proyek berhasil diperbarui!');
+        return redirect()->route($this->routePrefix . 'index');
     }
 }
