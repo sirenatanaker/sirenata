@@ -40,7 +40,7 @@
                         <select name="status"
                             class="pl-9 pr-3 py-2.5 w-full rounded-lg border border-slate-300 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
                             <option value="">Semua Status</option>
-                            @foreach (['On Progress', 'Completed', 'Draft'] as $status)
+                            @foreach (['Draft', 'Menunggu Tim', 'On Progress', 'Completed', 'Kedaluwarsa'] as $status)
                                 <option value="{{ $status }}" @selected(request('status') === $status)>
                                     {{ $status }}
                                 </option>
@@ -112,8 +112,10 @@
                                     @php
                                         $status = $project->status ?? 'Draft';
                                         $statusColor = match ($status) {
-                                            'On Progress' => 'amber-solid',
+                                            'Menunggu Tim' => 'amber-solid',
+                                            'On Progress' => 'blue-solid',
                                             'Completed' => 'green-solid',
+                                            'Kedaluwarsa' => 'red-solid',
                                             default => 'slate-solid',
                                         };
                                     @endphp
@@ -126,7 +128,6 @@
                                 @endphp
                                 @if ($creatorScope?->regency)
                                     <div class="flex items-start gap-2">
-                                     
                                         <div>
                                             <span class="block text-sm font-semibold text-slate-700">{{ $creatorScope->regency->name }}</span>
                                             <span class="block text-xs text-slate-400">{{ $creatorScope->province->name ?? 'Kab/Kota' }}</span>
@@ -134,7 +135,6 @@
                                     </div>
                                 @elseif ($creatorScope?->province)
                                     <div class="flex items-center gap-2">
-                                        
                                         <span class="text-sm font-semibold text-slate-700">{{ $creatorScope->province->name }}</span>
                                     </div>
                                 @elseif ($project->type === 'Nasional')
@@ -168,6 +168,10 @@
 
                                     if ($project->status === 'Draft') {
                                         $remainingLabel = 'Menunggu persetujuan';
+                                    } elseif ($project->status === 'Menunggu Tim') {
+                                        $remainingLabel = 'Batas Tim: ' . $project->sisa_hari_penentuan_tim . ' hari lagi';
+                                    } elseif ($project->status === 'Kedaluwarsa') {
+                                        $remainingLabel = 'Penentuan tim kedaluwarsa';
                                     } elseif ($endDate) {
                                         $today = now()->startOfDay();
 
@@ -188,7 +192,9 @@
                                     </div>
                                 </div>
                                 @if ($projectScope === 'daerah' && $remainingLabel)
-                                    <span class="block mt-1 text-xs text-slate-500">{{ $remainingLabel }}</span>
+                                    <span class="block mt-1 text-xs {{ $project->status === 'Kedaluwarsa' ? 'text-red-500 font-semibold' : ($project->status === 'Menunggu Tim' ? 'text-amber-600 font-semibold' : 'text-slate-500') }}">
+                                        {{ $remainingLabel }}
+                                    </span>
                                 @endif
                             </x-table.td>
                             <x-table.td align="center">
@@ -219,7 +225,7 @@
                                                 <a href="{{ route('admin-pusat.project.prerequisite', $project->id) }}"
                                                     class="inline-flex items-center w-full p-2 hover:bg-slate-100 rounded text-indigo-600 font-medium">
                                                     <i class="fas fa-clipboard-check w-5 text-center mr-1"></i>
-                                                    {{ $project->status === 'Draft' ? 'Tinjau & Setujui' : 'Atur Prasyarat' }}
+                                                    {{ $project->status === 'Draft' ? 'Tinjau & Setujui' : ($project->status === 'Kedaluwarsa' ? 'Buka Kembali' : 'Atur Prasyarat') }}
                                                 </a>
                                             </li>
                                         @endcan

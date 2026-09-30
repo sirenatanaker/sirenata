@@ -9,8 +9,10 @@
         $breadcrumbLabel = $projectScope === 'daerah' ? 'Proyek Daerah' : 'Proyek Pusat';
 
         $statusColor = match ($project->status) {
-            'On Progress' => 'amber-solid',
+            'Menunggu Tim' => 'amber-solid',
+            'On Progress' => 'blue-solid',
             'Completed' => 'green-solid',
+            'Kedaluwarsa' => 'red-solid',
             default => 'slate-solid',
         };
 
@@ -53,8 +55,19 @@
         <div class="bg-white rounded-md border border-slate-200 shadow-sm p-5 sm:p-6">
             <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 pb-5">
                 <div>
-                    <div class="flex items-center gap-2 mb-2">
+                    <div class="flex flex-wrap items-center gap-2 mb-2">
                         <x-badge :color="$statusColor" :text="$project->status === 'Completed' ? 'Selesai' : ($project->status ?? 'Draft')" class="uppercase tracking-wider" />
+                        
+                        <!-- Indikator Batas Waktu Menunggu Tim -->
+                        @if ($project->status === 'Menunggu Tim')
+                            <span class="inline-flex items-center text-xs font-semibold text-amber-700 bg-amber-50 px-2.5 py-1 rounded-md border border-amber-200">
+                                <i class="fas fa-clock mr-1.5"></i> Batas Penentuan Tim: Sisa {{ $project->sisa_hari_penentuan_tim }} Hari
+                            </span>
+                        @elseif ($project->status === 'Kedaluwarsa')
+                            <span class="inline-flex items-center text-xs font-semibold text-red-700 bg-red-50 px-2.5 py-1 rounded-md border border-red-200">
+                                <i class="fas fa-exclamation-circle mr-1.5"></i> Penentuan Tim Kedaluwarsa
+                            </span>
+                        @endif
                     </div>
                     <h1 class="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">{{ $project->name }}</h1>
                     <p class="text-xs sm:text-sm text-slate-500 mt-1">
@@ -66,7 +79,8 @@
                     @if (str_contains($routePrefix, 'admin-pusat'))
                         @can('project-edit')
                             <x-button :href="route($routePrefix . 'prerequisite', $project->id)" variant="primary" class="rounded-md">
-                                <i class="fas fa-edit mr-2 text-xs"></i> Edit Prasyarat & Status
+                                <i class="fas fa-edit mr-2 text-xs"></i> 
+                                {{ $project->status === 'Kedaluwarsa' ? 'Buka Kembali Proyek' : 'Edit Prasyarat & Status' }}
                             </x-button>
                         @endcan
                     @endif

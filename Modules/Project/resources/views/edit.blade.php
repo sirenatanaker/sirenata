@@ -40,8 +40,10 @@
                 </div>
                 @php
                     $statusColor = match ($project->status) {
-                        'On Progress' => 'amber-solid',
+                        'Menunggu Tim' => 'amber-solid',
+                        'On Progress' => 'blue-solid',
                         'Completed' => 'green-solid',
+                        'Kedaluwarsa' => 'red-solid',
                         default => 'slate-solid',
                     };
                 @endphp
@@ -92,10 +94,17 @@
                         yang ada.</p>
                 </div>
 
-                <!-- PENGATURAN TIM PROYEK -->
-                @if ($project->status === 'On Progress' || $project->status === 'Completed')
+                <!-- PENGATURAN TIM PROYEK (Ditampilkan saat status 'Menunggu Tim', 'On Progress', atau 'Completed') -->
+                @if (in_array($project->status, ['Menunggu Tim', 'On Progress', 'Completed']))
                     <div class="border-t border-slate-200 pt-6 mt-6">
-                        <h3 class="text-lg font-bold text-slate-800 mb-4">Pengaturan Tim Proyek</h3>
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-lg font-bold text-slate-800">Pengaturan Tim Proyek</h3>
+                            @if ($project->status === 'Menunggu Tim')
+                                <span class="inline-flex items-center text-xs font-semibold text-amber-700 bg-amber-50 px-2.5 py-1 rounded-md border border-amber-200">
+                                    <i class="fas fa-clock mr-1.5"></i> Batas Penentuan Tim: Sisa {{ $project->sisa_hari_penentuan_tim }} Hari
+                                </span>
+                            @endif
+                        </div>
 
                         @if ($project->is_prerequisite_active)
                             <div
@@ -146,7 +155,7 @@
                                         x-text="selectedMembers.length + ' Anggota Terpilih'"></span>
                                 </div>
 
-                                <!-- Badges Anggota Terpilih (Diperbesar) -->
+                                <!-- Badges Anggota Terpilih -->
                                 <div class="flex flex-wrap gap-2 my-2.5" x-show="selectedMembers.length > 0">
                                     <template x-for="user in selectedMemberObjects" :key="user.id">
                                         <span
@@ -208,6 +217,17 @@
 
                         </div>
                     </div>
+                @elseif ($project->status === 'Kedaluwarsa')
+                    <!-- TAMPILAN JIKA KEDALUWARSA -->
+                    <div class="border-t border-slate-200 pt-6 mt-6">
+                        <div class="bg-red-50 border border-red-200 p-4 rounded-lg flex items-start gap-3">
+                            <i class="fas fa-exclamation-circle text-red-600 mt-0.5"></i>
+                            <div class="text-sm text-red-800 leading-relaxed">
+                                <strong>Penentuan Tim Kedaluwarsa</strong><br>
+                                Batas waktu penentuan tim (14 hari) telah habis. Silakan hubungi Admin Pusat untuk membuka kembali akses penentuan tim proyek ini.
+                            </div>
+                        </div>
+                    </div>
                 @else
                     <!-- TAMPILAN JIKA MASIH DRAFT -->
                     <div class="border-t border-slate-200 pt-6 mt-6">
@@ -216,7 +236,7 @@
                             <div class="text-sm text-amber-800 leading-relaxed">
                                 <strong>Menunggu Persetujuan Pusat</strong><br>
                                 Form pemilihan Ketua dan Anggota Tim dikunci dan akan muncul otomatis pada halaman ini
-                                setelah Admin Pusat menyetujui dan mengaktifkan proyek ini.
+                                setelah Admin Pusat menyetujui dan mengaktifkan prasyarat proyek ini.
                             </div>
                         </div>
                     </div>
@@ -226,7 +246,7 @@
                     <x-button :href="route($routePrefix . 'index')" variant="secondary" class="flex-1">
                         Batal
                     </x-button>
-                    <x-button type="submit" variant="primary" class="flex-1">
+                    <x-button type="submit" variant="primary" class="flex-1" :disabled="$project->status === 'Kedaluwarsa'">
                         Simpan Perubahan
                     </x-button>
                 </div>
