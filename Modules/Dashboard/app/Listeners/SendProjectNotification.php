@@ -28,10 +28,22 @@ class SendProjectNotification
             return;
         }
 
-        $approved = $event->newStatus === 'On Progress'
+        // 1. Diterima oleh Pusat -> Status berubah menjadi 'Menunggu Tim'
+        $approvedByPusat = $event->newStatus === 'Menunggu Tim'
             && in_array($event->previousStatus, ['Draft', null], true);
 
-        if (! $approved && $event->newStatus !== 'Completed') {
+        // 2. Tim Selesai Ditentukan -> Status berubah menjadi 'On Progress'
+        $teamAssigned = $event->newStatus === 'On Progress'
+            && $event->previousStatus === 'Menunggu Tim';
+
+        // 3. Proyek Selesai -> Status 'Completed'
+        $completed = $event->newStatus === 'Completed';
+
+        // 4. Proyek Kedaluwarsa -> Status 'Kedaluwarsa'
+        $expired = $event->newStatus === 'Kedaluwarsa';
+
+        // Jika tidak memenuhi kriteria status di atas, abaikan
+        if (! $approvedByPusat && ! $teamAssigned && ! $completed && ! $expired) {
             return;
         }
 
