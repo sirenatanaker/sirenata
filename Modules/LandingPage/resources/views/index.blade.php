@@ -290,7 +290,7 @@
                 <div
                     class="absolute bottom-0 left-1/2 transform -translate-x-1/2 z-20 w-[420px] pointer-events-none drop-shadow-2xl">
                     <div class="relative">
-                        <img src="{{ asset('images/header.webp') }}" alt="Ilustrasi Perencana"
+                        <img src="{{ asset('images/Header.webp') }}" alt="Ilustrasi Perencana"
                             class="relative z-10 w-full h-auto object-contain"
                             style="-webkit-mask-image: linear-gradient(to bottom, black 78%, transparent 100%); mask-image: linear-gradient(to bottom, black 78%, transparent 100%);">
                         <div
