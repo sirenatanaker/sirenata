@@ -29,7 +29,7 @@
                         <input type="text" x-model="query" @input.debounce.500ms="fetchResults"
                             @focus="if(query.length > 1) isOpen = true"
                             class="bg-slate-50 border border-slate-200 text-slate-900 text-xs sm:text-sm rounded-xl focus:ring-[#13416B] focus:border-[#13416B] block w-full ps-9 sm:ps-11 pe-8 sm:pe-10 py-2.5 sm:py-3 transition-colors shadow-sm"
-                            placeholder="Cari kursus, katalog atau perpustakaan..." autocomplete="off">
+                            placeholder="Cari kursus dan koleksi perpustakaan..." autocomplete="off">
 
                         <!-- Ikon Loading -->
                         <div x-show="isLoading" x-cloak
