@@ -276,14 +276,14 @@
                     style="border-radius: 60% 40% 30% 70% / 60% 40% 30% 40%;">
 
                     <!-- Gelombang Garis / Pita Organik (Soft Overlay) -->
-                    <svg class="absolute inset-0 w-full h-full opacity-30 pointer-events-none" viewBox="0 0 400 350"
+                    {{-- <svg class="absolute inset-0 w-full h-full opacity-30 pointer-events-none" viewBox="0 0 400 350"
                         fill="none" preserveAspectRatio="none">
                         <path d="M-50 80 C 80 180, 250 110, 450 140 L 450 200 C 250 170, 80 240, -50 140 Z"
                             fill="white" />
                         <path d="M-50 160 C 80 260, 250 190, 450 220 L 450 280 C 250 250, 80 320, -50 220 Z"
                             fill="white" />
                         <path d="M-50 0 C 80 100, 250 30, 450 60 L 450 110 C 250 80, 80 150, -50 50 Z" fill="white" />
-                    </svg>
+                    </svg> --}}
                 </div>
 
                 <!-- ILUSTRASI ORANG DI TENGAH (z-20) -->
