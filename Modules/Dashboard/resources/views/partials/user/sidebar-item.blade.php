@@ -11,7 +11,7 @@
                 <i class="fas fa-home text-base sm:text-lg lg:text-base transition duration-200 {{ $isDashboard ? 'text-[#13416B]' : 'group-hover:text-[#13416B]' }}"></i>
             </span>
             <span
-                class="text-[10px] sm:text-xs lg:text-[15px] mt-1 sm:mt-1.5 lg:mt-0 lg:ms-3 text-center lg:text-left line-clamp-1">Dashboard</span>
+                class="text-[8px] sm:text-xs lg:text-[15px] mt-1 sm:mt-1.5 lg:mt-0 lg:ms-3 text-center lg:text-left line-clamp-1">Dashboard</span>
         </a>
     </li>
 
@@ -25,7 +25,7 @@
                 <i class="fas fa-graduation-cap text-base sm:text-lg lg:text-base transition duration-200 {{ $isKursus ? 'text-[#13416B]' : 'group-hover:text-[#13416B]' }}"></i>
             </span>
             <span
-                class="text-[10px] sm:text-xs lg:text-[15px] mt-1 sm:mt-1.5 lg:mt-0 lg:ms-3 text-center lg:text-left line-clamp-1">Kursus
+                class="text-[8px] sm:text-xs lg:text-[15px] mt-1 sm:mt-1.5 lg:mt-0 lg:ms-3 text-center lg:text-left line-clamp-1">Kursus
                 Saya</span>
         </a>
     </li>
@@ -40,7 +40,7 @@
                 <i class="fas fa-book-open text-base sm:text-lg lg:text-base transition duration-200 {{ $isKatalog ? 'text-[#13416B]' : 'group-hover:text-[#13416B]' }}"></i>
             </span>
             <span
-                class="text-[10px] sm:text-xs lg:text-[15px] mt-1 sm:mt-1.5 lg:mt-0 lg:ms-3 text-center lg:text-left line-clamp-1">Katalog</span>
+                class="text-[8px] sm:text-xs lg:text-[15px] mt-1 sm:mt-1.5 lg:mt-0 lg:ms-3 text-center lg:text-left line-clamp-1">Katalog</span>
         </a>
     </li>
 
@@ -54,7 +54,7 @@
                 <i class="fas fa-bookmark text-base sm:text-lg lg:text-base transition duration-200 {{ $isLibrary ? 'text-[#13416B]' : 'group-hover:text-[#13416B]' }}"></i>
             </span>
             <span
-                class="text-[10px] sm:text-xs lg:text-[15px] mt-1 sm:mt-1.5 lg:mt-0 lg:ms-3 text-center lg:text-left line-clamp-1">Perpustakaan</span>
+                class="text-[8px] sm:text-xs lg:text-[15px] mt-1 sm:mt-1.5 lg:mt-0 lg:ms-3 text-center lg:text-left line-clamp-1">Perpustakaan</span>
         </a>
     </li>
 
@@ -68,7 +68,7 @@
                 <i class="fas fa-calculator text-base sm:text-lg lg:text-base transition duration-200 {{ $isKalkulator ? 'text-[#13416B]' : 'group-hover:text-[#13416B]' }}"></i>
             </span>
             <span
-                class="text-[10px] sm:text-xs lg:text-[15px] mt-1 sm:mt-1.5 lg:mt-0 lg:ms-3 text-center lg:text-left line-clamp-1 flex justify-center lg:justify-start items-center gap-1">Penghitung RTK</span>
+                class="text-[8px] sm:text-xs lg:text-[15px] mt-1 sm:mt-1.5 lg:mt-0 lg:ms-3 text-center lg:text-left line-clamp-1 flex justify-center lg:justify-start items-center gap-1">Penghitung RTK</span>
         </a>
     </li>
 
