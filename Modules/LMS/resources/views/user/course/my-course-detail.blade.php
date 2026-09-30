@@ -417,7 +417,7 @@
                                 data-section-id="{{ $sectionId }}"
                                 class="border {{ $isLocked ? 'border-slate-100 bg-slate-50' : 'border-slate-200 bg-white' }} rounded-xl overflow-hidden shadow-sm transition-all duration-500"
                                 :class="{
-                                    'border-[#13416B] shadow-md ring-1 ring-[#13416B]/30': activeAccordion == id && !
+                                    'border-[#13416B] shadow-md ring-1 ring-gray-100': activeAccordion == id && !
                                         locked
                                 }">
 
