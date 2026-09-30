@@ -389,27 +389,28 @@
         $sRtk = parseStat($stats['rtk'] ?? '1.2K', '+');
         $sCourse = parseStat($stats['courses'] ?? 15);
 
-        // ---- Dekorasi halftone 1/4 lingkaran (pusat di pojok kanan bawah) ----
-        $size = 420; // sisi kotak SVG (px)
+        // ---- Dekorasi halftone 1/4 elips (pusat di pojok kanan bawah, melebar ke kiri) ----
+        $W = 760; // lebar kotak SVG (px) -> makin besar makin melebar ke kiri
+        $H = 420; // tinggi kotak SVG (px)
         $step = 22; // jarak antar dot
         $rowH = $step * 0.866; // grid heksagonal (staggered)
-        $R = $size - 10; // radius busur
+        $Rx = $W - 10; // radius horizontal
+        $Ry = $H - 10; // radius vertikal
         $dots = [];
-        $rows = (int) ceil($size / $rowH);
+        $rows = (int) ceil($H / $rowH);
 
         for ($j = 0; $j < $rows; $j++) {
-            $y = $size - $step / 2 - $j * $rowH;
+            $y = $H - $step / 2 - $j * $rowH;
             $shift = $j % 2 ? $step / 2 : 0;
-            for ($i = 0; $i <= (int) ceil($size / $step); $i++) {
-                $x = $size - $step / 2 - $shift - $i * $step;
+            for ($i = 0; $i <= (int) ceil($W / $step); $i++) {
+                $x = $W - $step / 2 - $shift - $i * $step;
                 if ($x < 0 || $y < 0) {
                     continue;
                 }
-                $d = sqrt(($size - $x) ** 2 + ($size - $y) ** 2);
-                if ($d > $R) {
+                $t = sqrt((($W - $x) / $Rx) ** 2 + (($H - $y) / $Ry) ** 2);
+                if ($t > 1) {
                     continue;
                 }
-                $t = $d / $R;
                 $r = round(0.6 + 3.8 * pow(1 - $t, 1.2), 2); // besar di pojok, kecil di ujung
                 $o = round(pow(1 - $t, 1.3), 2); // makin redup ke ujung
                 if ($o < 0.04) {
@@ -420,12 +421,12 @@
         }
     @endphp
 
-    <section class="py-16 bg-slate-900 relative overflow-hidden">
+    <section class="py-12 bg-slate-900 relative overflow-hidden">
 
-        <!-- Dekorasi Halftone 1/4 Bumi -->
-        <div class="absolute bottom-0 right-0 w-[260px] h-[260px] sm:w-[420px] sm:h-[420px] pointer-events-none opacity-40"
+        <!-- Dekorasi Halftone 1/4 Elips -->
+        <div class="absolute bottom-0 right-0 w-[380px] h-[210px] sm:w-[760px] sm:h-[420px] pointer-events-none opacity-40"
             aria-hidden="true">
-            <svg class="w-full h-full" viewBox="0 0 {{ $size }} {{ $size }}" fill="#ffffff"
+            <svg class="w-full h-full" viewBox="0 0 {{ $W }} {{ $H }}" fill="#ffffff"
                 xmlns="http://www.w3.org/2000/svg">
                 @foreach ($dots as $dot)
                     <circle cx="{{ $dot['x'] }}" cy="{{ $dot['y'] }}" r="{{ $dot['r'] }}"
@@ -438,10 +439,10 @@
             <!-- Header Kecil Section -->
             <div class="mb-10 text-left">
                 <span class="text-xs font-semibold tracking-widest text-slate-400 uppercase block mb-1">Statistik
-                    </span>
+                </span>
                 <h3 class="text-2xl sm:text-3xl font-bold text-white tracking-tight"
                     style="font-family: 'Oswald', sans-serif;">
-                    Capaian Implementasi 
+                    Capaian Implementasi
                 </h3>
             </div>
 
@@ -806,10 +807,55 @@
             );
             $lmsCategoryCount = $courses->pluck('category_id')->filter()->unique()->count();
             $lmsParticipantCount = $stats['participants'] ?? 1200;
+
+            // ---- Dekorasi halftone 1/4 elips (pusat di pojok kanan bawah) ----
+            // Variabel diberi prefix "lms" supaya tidak bentrok dengan section Stats Banner di halaman yang sama
+            $lmsW = 640;
+            $lmsH = 260;
+            $lmsStep = 22;
+            $lmsRowH = $lmsStep * 0.866;
+            $lmsRx = $lmsW - 10;
+            $lmsRy = $lmsH - 10;
+            $lmsDots = [];
+            $lmsRows = (int) ceil($lmsH / $lmsRowH);
+
+            for ($j = 0; $j < $lmsRows; $j++) {
+                $y = $lmsH - $lmsStep / 2 - $j * $lmsRowH;
+                $shift = $j % 2 ? $lmsStep / 2 : 0;
+                for ($i = 0; $i <= (int) ceil($lmsW / $lmsStep); $i++) {
+                    $x = $lmsW - $lmsStep / 2 - $shift - $i * $lmsStep;
+                    if ($x < 0 || $y < 0) {
+                        continue;
+                    }
+                    $t = sqrt((($lmsW - $x) / $lmsRx) ** 2 + (($lmsH - $y) / $lmsRy) ** 2);
+                    if ($t > 1) {
+                        continue;
+                    }
+                    $r = round(0.6 + 3.8 * pow(1 - $t, 1.2), 2);
+                    $o = round(pow(1 - $t, 1.3), 2);
+                    if ($o < 0.04) {
+                        continue;
+                    }
+                    $lmsDots[] = ['x' => round($x, 2), 'y' => round($y, 2), 'r' => $r, 'o' => $o];
+                }
+            }
         @endphp
 
-        <section class="overflow-hidden border-t border-slate-800 bg-slate-900 pb-12 pt-6">
-            <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 reveal-up">
+        <section class="relative overflow-hidden border-t border-slate-800 bg-slate-900 pb-12 pt-6">
+
+            <!-- Dekorasi Halftone 1/4 Elips -->
+            <div class="pointer-events-none absolute bottom-0 right-0 h-[130px] w-[320px] opacity-40 sm:h-[260px] sm:w-[640px]"
+                aria-hidden="true">
+                <svg class="h-full w-full" viewBox="0 0 {{ $lmsW }} {{ $lmsH }}" fill="#ffffff"
+                    xmlns="http://www.w3.org/2000/svg">
+                    @foreach ($lmsDots as $dot)
+                        <circle cx="{{ $dot['x'] }}" cy="{{ $dot['y'] }}" r="{{ $dot['r'] }}"
+                            fill-opacity="{{ $dot['o'] }}" />
+                    @endforeach
+                </svg>
+            </div>
+
+            <div class="reveal-up relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                 <div class="grid grid-cols-2 gap-8 divide-x-0 md:grid-cols-4 md:divide-x md:divide-slate-700">
                     <div class="p-4 text-center">
                         <h4 class="stat-counter mb-2 text-4xl font-extrabold text-white"
