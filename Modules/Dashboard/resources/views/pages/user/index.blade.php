@@ -198,7 +198,7 @@
                                             {{ $lastCourse->name }}
                                         </h3>
                                         <p
-                                            class="text-[10px] sm:text-[11px] text-slate-500 line-clamp-1 sm:line-clamp-2">
+                                            class="text-[10px] sm:text-[11px] text-slate-500 line-clamp-1 sm:line-clamp-2 hidden md:block">
                                             {{ $lastCourse->description ?? 'Lanjutkan materi pembelajaran Anda pada kursus ini.' }}
                                         </p>
                                     </div>
@@ -367,10 +367,12 @@
                                     <div class="min-w-0 flex-1 flex flex-col justify-between h-full w-full py-0.5">
                                         <div>
                                             <div class="flex items-start justify-between gap-2 mb-1">
+                                                <!-- Title untuk Layar Desktop / Tablet (sm ke atas) -->
                                                 <h3
-                                                    class="font-bold text-slate-800 text-sm truncate group-hover:text-[#13416B] transition-colors">
+                                                    class="hidden sm:block font-bold text-slate-800 text-sm truncate group-hover:text-[#13416B] transition-colors">
                                                     {{ $course->name }}
                                                 </h3>
+
                                                 @if ($course->pivot->status === 'completed')
                                                     <span
                                                         class="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-bold uppercase text-green-700 bg-green-100 border border-green-200 shrink-0">Selesai</span>
@@ -382,9 +384,18 @@
                                                         class="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-bold uppercase text-slate-500 bg-slate-50 border border-slate-200 shrink-0">Terdaftar</span>
                                                 @endif
                                             </div>
-                                            <p class="text-[11px] sm:text-xs text-slate-500 line-clamp-1 mb-2">
+
+                                            <!-- Deskripsi Kursus: Di-hidden untuk Resolusi Mobile -->
+                                            <p
+                                                class="hidden sm:block text-[11px] sm:text-xs text-slate-500 line-clamp-1 mb-2">
                                                 {{ $course->description ?? 'Deskripsi kursus tidak tersedia.' }}
                                             </p>
+
+                                            <!-- Title untuk Resolusi Mobile: Ditaruh di posisi tempat Deskripsi berada -->
+                                            <h3
+                                                class="block sm:hidden font-bold text-slate-800 text-xs sm:text-sm line-clamp-2 mb-2 group-hover:text-[#13416B] transition-colors leading-snug">
+                                                {{ $course->name }}
+                                            </h3>
                                         </div>
 
                                         <div>
@@ -740,7 +751,7 @@
                         const provinceCode = $('#provinsi').val();
                         const regencyCode = $('#kabkota').val();
                         const asalInstansi = $('input[name="asalInstansi"]:checked')
-                    .val(); // Ambil tipe level (provinsi/kabkota)
+                            .val(); // Ambil tipe level (provinsi/kabkota)
 
                         $.ajax({
                             url: '{{ route('api.masterdata.institutions.index') }}',
