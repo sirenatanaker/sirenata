@@ -137,7 +137,7 @@
         {{-- KONTEN UTAMA                               --}}
         {{-- ========================================== --}}
         <!-- Grid diatur maksimal 3 kolom (lg:grid-cols-3) agar card lebih lebar di desktop -->
-        <div id="library-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8 px-4 md:px-0">
+        <div id="library-grid" class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8 ">
             @forelse($libraries as $library)
                 @php
                     $typeName = strtolower($library->libraryCategory->name ?? 'default');
@@ -167,7 +167,7 @@
                     class="group flex flex-col bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden hover:shadow-xl hover:border-[#13416B]/30 transition-all duration-300 hover:-translate-y-1">
 
                     {{-- Cover Area (Disesuaikan untuk mendukung URL Eksternal / Inisial maupun Upload Lokal) --}}
-                    <div class="relative aspect-[3/4] overflow-hidden bg-slate-100">
+                    <div class="relative aspect-[4/5] overflow-hidden bg-slate-100">
                         @if ($library->cover_image)
                             @php
                                 // Cek apakah cover_image adalah URL eksternal (seperti dari ui-avatars atau link web) atau file lokal dari storage
@@ -236,7 +236,7 @@
                         {{-- Kategori Badge Absolute --}}
                         <div class="absolute top-3 left-3 z-20">
                             <span
-                                class="px-2.5 py-1 text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-slate-800 bg-white/95 backdrop-blur-sm rounded shadow-sm border border-slate-100">
+                                class="px-2.5 py-1 text-[8px] sm:text-[10px] font-bold uppercase tracking-wider text-slate-800 bg-white/95 backdrop-blur-sm rounded shadow-sm border border-slate-100">
                                 {{ $library->libraryCategory->name ?? 'Materi' }}
                             </span>
                         </div>
@@ -244,7 +244,7 @@
 
                     {{-- Informasi Buku Area --}}
                     <div class="p-4 sm:p-5 flex flex-col flex-1 bg-white">
-                        <h3 class="font-bold text-slate-800 text-sm sm:text-base leading-snug line-clamp-2 mb-2 group-hover:text-[#13416B] transition-colors"
+                        <h3 class="font-bold text-slate-800 text-xs sm:text-base leading-snug line-clamp-2 mb-2 group-hover:text-[#13416B] transition-colors"
                             title="{{ $library->title }}">
                             {{ $library->title }}
                         </h3>
@@ -253,7 +253,7 @@
                         <div class="mt-auto pt-4 border-t border-slate-100">
                             <button x-data
                                 @click="$dispatch('open-modal', 'library-modal-{{ $library->id }}'); window.recordLibraryHistory('{{ $library->id }}')"
-                                class="w-full py-2.5 bg-slate-50 border border-slate-200 text-slate-700 rounded-xl group-hover:bg-[#13416B] group-hover:text-white group-hover:border-[#13416B] text-[11px] sm:text-xs font-bold transition-all duration-300 flex items-center justify-center gap-2">
+                                class="w-full py-2.5 bg-slate-50 border border-slate-200 text-slate-700 rounded-xl group-hover:bg-[#13416B] group-hover:text-white group-hover:border-[#13416B] text-[10px] sm:text-xs font-bold transition-all duration-300 flex items-center justify-center gap-2">
                                 <span>{{ $buttonLabel }}</span>
                              
                             </button>
