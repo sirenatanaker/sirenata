@@ -23,6 +23,7 @@ return new class extends Migration {
 
             $table->string('sk_document')->nullable()->comment('Path penyimpanan file Dokumen SK (PDF)');
             $table->foreignUuid('created_by')->nullable()->constrained('users')->nullOnDelete();
+            $table->timestamp('approved_at')->nullable();
             $table->boolean('is_prerequisite_active')->default(false)->comment('Apakah prasyarat kursus aktif?');
             $table->uuid('prerequisite_course_id')->nullable()->comment('ID dari tabel courses LMS');
             $table->json('prerequisite_course_ids')->nullable()->comment('Daftar ID kursus prasyarat LMS');

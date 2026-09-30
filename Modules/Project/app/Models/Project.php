@@ -23,16 +23,53 @@ class Project extends Model
         'created_by',
         'prerequisite_course_id',
         'prerequisite_course_ids',
-        'is_prerequisite_active'
+        'is_prerequisite_active',
+        'approved_at', 
     ];
 
     protected $casts = [
         'start_date' => 'date',
         'end_date' => 'date',
+        'approved_at' => 'datetime',
         'team_members' => 'array',
         'prerequisite_course_ids' => 'array',
         'is_prerequisite_active' => 'boolean',
     ];
+
+    /**
+     * Accessor Status: Pengecekan otomatis 14 hari tanpa command/scheduler.
+     */
+    public function getStatusAttribute($value)
+    {
+        // Jika status di database 'Menunggu Tim' dan approved_at sudah terisi
+        if ($value === 'Menunggu Tim' && $this->approved_at) {
+            // Hitung selisih hari dari approved_at ke hari ini
+            if (now()->diffInDays($this->approved_at) >= 14) {
+                // Otomatis update status ke database saat data diakses
+                $this->attributes['status'] = 'Kedaluwarsa';
+                $this->saveQuietly();
+
+                return 'Kedaluwarsa';
+            }
+        }
+
+        return $value;
+    }
+
+    /**
+     * Helper Atribut untuk mengambil sisa hari penentuan tim
+     */
+    public function getSisaHariPenentuanTimAttribute()
+    {
+        if ($this->status !== 'Menunggu Tim' || !$this->approved_at) {
+            return 0;
+        }
+
+        $deadline = $this->approved_at->copy()->addDays(14);
+        $sisaHari = now()->diffInDays($deadline, false);
+
+        return $sisaHari > 0 ? (int) $sisaHari : 0;
+    }
 
     public function leader()
     {
