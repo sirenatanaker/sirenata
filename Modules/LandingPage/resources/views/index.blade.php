@@ -10,6 +10,33 @@
                 font-family: 'Kalam', cursive;
             }
 
+            .section-title {
+                font-family: 'Oswald', sans-serif;
+                font-size: 1.5rem;
+                font-weight: 800;
+                line-height: 1.2;
+            }
+
+            @media (min-width: 640px) {
+                .section-title {
+                    font-size: 1.875rem;
+                }
+            }
+
+            @media (min-width: 1024px) {
+                .section-title {
+                    font-size: 3rem;
+                }
+
+                .section-title-stat {
+                    font-size: 1.875rem;
+                }
+
+                .section-title-cta {
+                    font-size: 3.75rem;
+                }
+            }
+
             html {
                 scroll-behavior: smooth;
             }
@@ -215,7 +242,7 @@
     <!-- ========================================== -->
     <!-- HERO SECTION (Split Layout & Kalem)        -->
     <!-- ========================================== -->
-    <section class="pt-24 pb-10 md:pt-36 md:pb-18 lg:min-h-screen lg:pt-28 lg:pb-16 flex items-center relative overflow-hidden bg-slate-50/50" id="home">
+    <section class="pt-28 pb-12 md:pt-28 md:pb-12 lg:min-h-screen lg:pt-28 lg:pb-16 flex items-center relative overflow-hidden bg-slate-50/50" id="home">
 
 
         <div
@@ -265,7 +292,7 @@
             </div>
 
             <!-- Kanan: Floating Cards & Orang -->
-            <div class="relative h-[280px] sm:h-[320px] lg:h-[550px] hidden sm:block reveal-right" style="transition-delay: 0.2s;">
+            <div class="relative hidden h-[380px] sm:block sm:h-[460px] lg:h-[550px] reveal-right" style="transition-delay: 0.2s;">
                 <!-- Lingkaran Garis Putar Dasar -->
                 <div
                     class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[250px] h-[250px] sm:w-[290px] sm:h-[290px] lg:w-[420px] lg:h-[420px] rounded-full border border-slate-200/60 animate-[spin_60s_linear_infinite] z-0">
@@ -288,7 +315,7 @@
 
                 <!-- ILUSTRASI ORANG DI TENGAH (z-20) -->
                 <div
-                    class="absolute bottom-0 left-1/2 transform -translate-x-1/2 z-20 w-[260px] sm:w-[290px] lg:w-[420px] pointer-events-none drop-shadow-2xl">
+                    class="absolute bottom-0 left-1/2 transform -translate-x-1/2 z-20 w-full max-w-[420px] pointer-events-none drop-shadow-2xl">
                     <div class="relative">
                         <img src="{{ asset('images/Header.webp') }}" alt="Ilustrasi Perencana"
                             class="relative z-10 w-full h-auto object-contain"
@@ -421,7 +448,7 @@
         }
     @endphp
 
-    <section class="py-12 bg-slate-900 relative overflow-hidden">
+    <section class="py-12 sm:py-18 lg:py-16 bg-slate-900 relative overflow-hidden">
 
         <!-- Dekorasi Halftone 1/4 Elips -->
         <div class="absolute bottom-0 right-0 w-[380px] h-[210px] sm:w-[760px] sm:h-[420px] pointer-events-none opacity-40"
@@ -440,8 +467,7 @@
             <div class="mb-10 text-left">
                 <span class="text-xs font-semibold tracking-widest text-slate-400 uppercase block mb-1">Statistik
                 </span>
-                <h3 class="text-2xl sm:text-3xl font-bold text-white tracking-tight"
-                    style="font-family: 'Oswald', sans-serif;">
+                <h3 class="section-title section-title-stat text-white tracking-tight">
                     Capaian Implementasi
                 </h3>
             </div>
@@ -500,7 +526,7 @@
     <!-- ========================================== -->
     <!-- FITUR UTAMA                                -->
     <!-- ========================================== -->
-    <section id="features" class="py-12 sm:py-14 lg:py-24 bg-white relative overflow-hidden">
+    <section id="features" class="py-12 sm:py-18 lg:py-16 bg-white relative overflow-hidden">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-8 sm:gap-6 lg:gap-24 items-center">
 
@@ -515,8 +541,7 @@
                     </div>
 
                     <!-- FONT OSWALD UNTUK TITLE -->
-                    <h2 class="text-2xl sm:text-3xl lg:text-5xl font-extrabold text-slate-900 mb-4 lg:mb-6 leading-tight"
-                        style="font-family: 'Oswald', sans-serif;">
+                    <h2 class="section-title text-slate-900 mb-4 lg:mb-6">
                         Solusi Terpadu <span class="text-[#13416B]">Perencanaan Ketenagakerjaan</span>
                     </h2>
                     <p class="text-slate-600 text-base lg:text-lg leading-relaxed mb-5 lg:mb-8">
@@ -615,15 +640,15 @@
     <!-- ========================================== -->
     @if (isset($courses) && $courses->count() > 0)
         <section id="courses"
-            class="pb-8 pt-12 sm:pt-14 lg:pt-20 px-4 sm:px-6 lg:px-8 bg-slate-50/60 border-t border-slate-200 relative overflow-hidden">
+            class="py-12 sm:py-18 lg:py-16 px-4 sm:px-6 lg:px-8 bg-slate-50/60 border-t border-slate-200 relative overflow-hidden">
             <div
                 class="mx-auto grid max-w-7xl grid-cols-1 items-start gap-8 sm:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] sm:gap-6 lg:grid-cols-[minmax(0,1.15fr)_minmax(360px,0.85fr)] lg:gap-16">
 
                 <div class="order-2 min-w-0 sm:order-1">
                     <!-- Grid Kursus Satu Kolom -->
                     <div
-                        class="custom-scrollbar h-[520px] max-h-[520px] scroll-smooth overflow-y-auto overscroll-contain pr-2 sm:h-[500px] sm:max-h-[500px] md:h-[480px] md:max-h-[480px] lg:mt-2 lg:h-[780px] lg:max-h-[780px]">
-                        <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:gap-5 reveal-up" style="transition-delay: 0.15s;">
+                        class="custom-scrollbar h-[520px] max-h-[520px] scroll-smooth overflow-y-auto overscroll-contain pr-2 sm:h-[500px] sm:max-h-[500px] md:h-[620px] md:max-h-[620px] lg:mt-2 lg:h-[780px] lg:max-h-[780px]">
+                        <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:gap-5">
                             @foreach ($courses as $course)
                                 @php
                                     // Penanganan URL Gambar Thumbnail
@@ -722,8 +747,7 @@
                             <div class="h-[2px] w-16 bg-[#13416B]/30"></div>
                         </div>
 
-                        <h2 class="text-2xl font-extrabold leading-tight text-slate-900 sm:text-3xl lg:text-5xl"
-                            style="font-family: 'Oswald', sans-serif;">
+                        <h2 class="section-title text-slate-900">
                             Tingkatkan Kapasitas <span class="text-[#13416B]">Aparatur Daerah</span>
                         </h2>
                         <p class="mt-3 max-w-xl text-sm leading-relaxed text-slate-600 md:mt-4 lg:text-lg">
@@ -733,13 +757,13 @@
                         </p>
                     </div>
 
-                    <div class="relative hidden h-[300px] items-center justify-center sm:flex lg:h-[560px] reveal-right">
-                        <div class="absolute left-1/2 top-1/2 h-[220px] w-[220px] -translate-x-1/2 -translate-y-1/2 bg-gradient-to-br from-[#E8F2F8] via-[#D5E8F3] to-amber-100 opacity-90 animate-blob lg:h-[390px] lg:w-[390px]"
+                    <div class="relative hidden h-[320px] items-center justify-center sm:flex sm:h-[380px] lg:h-[460px] reveal-right">
+                        <div class="absolute left-1/2 top-1/2 h-[190px] w-[190px] -translate-x-1/2 -translate-y-1/2 bg-gradient-to-br from-[#E8F2F8] via-[#D5E8F3] to-amber-100 opacity-90 animate-blob lg:h-[330px] lg:w-[330px]"
                             style="border-radius: 42% 58% 63% 37% / 48% 40% 60% 52%;">
                         </div>
 
                         <div
-                            class="absolute left-1/2 top-1/2 h-[250px] w-[250px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-[#13416B]/15 border-dashed animate-[spin_45s_linear_infinite] lg:h-[430px] lg:w-[430px]">
+                            class="absolute left-1/2 top-1/2 h-[220px] w-[220px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-[#13416B]/15 border-dashed animate-[spin_45s_linear_infinite] lg:h-[370px] lg:w-[370px]">
                         </div>
 
                         <svg class="absolute inset-0 h-full w-full opacity-50" viewBox="0 0 560 620" fill="none"
@@ -751,7 +775,7 @@
                         </svg>
 
                         <div
-                            class="absolute bottom-2 left-0 z-20 w-32 rounded-lg border border-white/80 bg-white/95 p-2.5 shadow-xl animate-card-float-2 md:w-32 md:p-2.5 lg:bottom-10 lg:w-44 lg:rounded-2xl lg:p-4">
+                            class="absolute bottom-2 left-3 z-20 w-32 rounded-lg border border-white/80 bg-white/95 p-2.5 shadow-xl animate-card-float-2 md:w-32 md:p-2.5 lg:bottom-8 lg:left-6 lg:w-44 lg:rounded-2xl lg:p-4">
                             <div class="mb-2 flex items-center justify-between lg:mb-3">
                                 <span class="text-[9px] font-bold uppercase tracking-wider text-slate-400 lg:text-[10px]">Progres
                                     Kursus</span>
@@ -767,7 +791,7 @@
                         </div>
 
                         <div
-                            class="absolute right-0 top-3 z-20 flex items-center gap-1.5 rounded-lg border border-white/80 bg-[#13416B] px-2 py-1.5 text-white shadow-xl animate-card-float-1 md:top-5 md:gap-1 md:px-1.5 md:py-1 lg:top-16 lg:gap-3 lg:rounded-2xl lg:px-4 lg:py-3">
+                            class="absolute right-3 top-3 z-20 flex items-center gap-1.5 rounded-lg border border-white/80 bg-[#13416B] px-2 py-1.5 text-white shadow-xl animate-card-float-1 md:top-5 md:gap-1 md:px-1.5 md:py-1 lg:right-6 lg:top-12 lg:gap-3 lg:rounded-2xl lg:px-4 lg:py-3">
                             <span
                                 class="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-400 text-[#13416B] md:h-7 md:w-7 lg:h-10 lg:w-10 lg:rounded-xl">
                                 <i class="fas fa-award text-sm lg:text-base"></i>
@@ -779,7 +803,7 @@
                             </div>
                         </div>
 
-                        <div class="relative z-10 w-[300px] max-w-full translate-y-2 animate-float lg:w-[540px] lg:max-w-none">
+                        <div class="relative z-10 w-full max-w-[440px] animate-float">
                             <img src="{{ asset('images/LMS.webp') }}"
                                 alt="Aparatur sedang belajar menggunakan laptop"
                                 class="relative z-10 w-full object-contain drop-shadow-xl"
@@ -841,7 +865,7 @@
             }
         @endphp
 
-        <section class="relative overflow-hidden border-t border-slate-800 bg-slate-900 pb-12 pt-6">
+        <section class="relative overflow-hidden border-t border-slate-800 bg-slate-900 py-12 sm:py-18 lg:py-16">
 
             <!-- Dekorasi Halftone 1/4 Elips -->
             <div class="pointer-events-none absolute bottom-0 right-0 h-[130px] w-[320px] opacity-40 sm:h-[260px] sm:w-[640px]"
@@ -889,7 +913,7 @@
     <!-- ========================================== -->
     <!-- FAQ SECTION                                -->
     <!-- ========================================== -->
-    <section id="faq" class="py-12 sm:py-14 lg:py-16 px-4 bg-white border-t border-slate-200 overflow-hidden">
+    <section id="faq" class="py-12 sm:py-18 lg:py-16 px-4 bg-white border-t border-slate-200 overflow-hidden">
         <div class="max-w-7xl mx-auto">
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-8 sm:gap-6 lg:gap-16 items-center">
 
@@ -901,8 +925,7 @@
                             Pusat Bantuan
                         </span> --}}
                         <!-- FONT OSWALD UNTUK TITLE -->
-                        <h2 class="text-2xl sm:text-3xl md:text-2xl lg:text-5xl font-extrabold text-slate-900 mb-4 lg:mb-6 leading-tight"
-                            style="font-family: 'Oswald', sans-serif;">
+                        <h2 class="section-title text-slate-900 mb-4 lg:mb-6">
                             Pertanyaan yang Sering <span class="text-[#13416B]">Diajukan</span>
                         </h2>
                         <p class="text-slate-600 text-sm lg:text-lg leading-relaxed">
@@ -1029,7 +1052,7 @@
                         </svg>
                     </div>
                     <img src="{{ asset('images/FAQ.webp') }}" alt="Pusat Bantuan Kemnaker"
-                        class="relative z-10 w-full max-w-[300px] lg:max-w-[520px] h-auto object-contain drop-shadow-2xl animate-float mt-4 lg:mt-8"
+                        class="relative z-10 w-full max-w-[300px] md:max-w-[360px] lg:max-w-[520px] h-auto object-contain drop-shadow-2xl animate-float mt-4 lg:mt-8"
                         style="-webkit-mask-image: linear-gradient(to bottom, black 87%, transparent 100%); mask-image: linear-gradient(to bottom, black 87%, transparent 100%);">
                 </div>
 
@@ -1040,7 +1063,7 @@
     <!-- ========================================== -->
     <!-- CTA SECTION                                -->
     <!-- ========================================== -->
-    <section id="cta" class="py-12 sm:py-16 md:py-28 lg:py-24 px-4 md:px-16 relative overflow-hidden"
+    <section id="cta" class="py-20 sm:py-16 md:py-28 lg:py-36 px-4 md:px-16 relative overflow-hidden"
         style="background-color: #13416B;">
         <!-- Efek Glow Latar Belakang -->
         <div
@@ -1062,8 +1085,7 @@
                 <!-- Kolom Kiri: Teks & Tombol -->
                 <div class="text-left reveal-left lg:col-span-7 xl:col-span-8 lg:pr-10">
                     <!-- FONT OSWALD UNTUK TITLE -->
-                    <h2 class="text-2xl sm:text-3xl lg:text-6xl font-extrabold text-white mb-4 lg:mb-6 leading-tight drop-shadow-sm"
-                        style="font-family: 'Oswald', sans-serif;">
+                    <h2 class="section-title section-title-cta text-white mb-4 lg:mb-6 drop-shadow-sm">
                         Siap Memulai Perencanaan?
                     </h2>
                     <p class="text-slate-300 mb-6 lg:mb-10 max-w-2xl text-base lg:text-xl leading-relaxed">
