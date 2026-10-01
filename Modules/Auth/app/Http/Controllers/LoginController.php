@@ -20,7 +20,7 @@ class LoginController extends Controller
      */
     public function login()
     {
-        return view('auth::auth.login');
+        return redirect()->route('siapkerja.redirect');
     }
 
     public function authenticate(LoginRequest $request): RedirectResponse

@@ -10,10 +10,8 @@ Route::prefix("auth")->group(function () {
 
     Route::middleware("guest")->group(function () {
         Route::get("/login", [LoginController::class, "login"])->name("login");
-        Route::post("/login", [LoginController::class, "authenticate"])->name("authenticate");
 
         Route::get("/register", [RegisterController::class, "register"])->name("register");
-        Route::post("/register", [RegisterController::class, "store"])->name("register.store");
 
         Route::get("/forgot-password", [PasswordResetController::class, "showForgotForm"])->name("forgot-password");
         Route::post("/forgot-password", [PasswordResetController::class, "sendResetLink"])->name("password.email");
@@ -27,6 +25,6 @@ Route::prefix("auth")->group(function () {
 
 
     Route::get('/siapkerja/redirect', [SiapKerjaController::class, 'redirect'])->name('siapkerja.redirect');
-    Route::get('/siapkerja/callback', [SiapKerjaController::class, 'callback'])->name('siapkerja.callback');
+    Route::get('/callback', [SiapKerjaController::class, 'callback'])->name('siapkerja.callback');
     Route::post('/siapkerja/logout', [SiapKerjaController::class, 'logout'])->name('siapkerja.logout');
 });

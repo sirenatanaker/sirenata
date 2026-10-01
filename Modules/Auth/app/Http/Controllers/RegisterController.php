@@ -21,7 +21,7 @@ class RegisterController extends Controller
      */
     public function register()
     {
-        return view('auth::auth.register');
+        return redirect()->route('siapkerja.redirect');
     }
 
     public function store(RegisterRequest $request)
