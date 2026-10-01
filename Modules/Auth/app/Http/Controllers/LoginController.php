@@ -4,6 +4,7 @@ namespace Modules\Auth\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 use Modules\Auth\Http\Requests\LoginRequest;
@@ -29,7 +30,10 @@ class LoginController extends Controller
         $remember = $request->boolean('remember');
 
         if ($this->authService->authenticate($credentials, $remember)) {
-            return redirect()->route(Auth::user()->getRedirectRoute());
+            /** @var User $user */
+            $user = Auth::user();
+
+            return redirect()->route($user->getRedirectRoute());
         }
 
         return back()->withErrors([

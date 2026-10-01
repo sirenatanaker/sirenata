@@ -39,7 +39,10 @@ class RegisterController extends Controller
             session(['api_token' => $token]);
 
             ToastMagic::success('User registered successfully');
-            return redirect()->route(Auth::user()->getRedirectRoute());
+            /** @var User $authenticatedUser */
+            $authenticatedUser = Auth::user();
+
+            return redirect()->route($authenticatedUser->getRedirectRoute());
         } catch (\Exception $e) {
             ToastMagic::error('Failed to register user');
             return back()->withInput();

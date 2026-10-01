@@ -48,7 +48,7 @@ class SiapKerjaController extends Controller
             'refresh_token' => $socialUser->refreshToken,
         ]);
 
-        return redirect()->route(Auth::user()->getRedirectRoute());
+        return redirect()->route($user->getRedirectRoute());
     }
 
     public function logout()
