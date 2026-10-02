@@ -285,7 +285,7 @@
                             class="w-10 h-10 rounded-full border-2 border-white shadow-sm" alt="User">
                         <div
                             class="w-10 h-10 rounded-full border-2 border-white shadow-sm bg-slate-50 flex items-center justify-center text-xs font-bold text-slate-600">
-                            +1K</div>
+                            +1.2K</div>
                     </div>
                     <p class="text-sm font-medium text-slate-600">Bergabung dengan pengguna lainnya.</p>
                 </div>
@@ -468,7 +468,7 @@
                 <span class="text-xs font-semibold tracking-widest text-slate-400 uppercase block mb-1">Statistik
                 </span>
                 <h3 class="section-title section-title-stat text-white tracking-tight">
-                    Capaian Implementasi
+                    SIRENATA dalam Angka
                 </h3>
             </div>
 
