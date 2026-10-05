@@ -24,31 +24,39 @@ class SiapKerjaController extends Controller
     // Step 3-6: Terima callback & login user
     public function callback()
     {
-        $socialUser = Socialite::driver('siapkerja')->user();
-        $isNewUser = !User::firstWhere('siapkerja_id', $socialUser->getId());
+        try {
+            $socialUser = Socialite::driver('siapkerja')->user();
+            $isNewUser = !User::firstWhere('siapkerja_id', $socialUser->getId());
 
-        $user = User::updateOrCreate(
-            ['siapkerja_id' => $socialUser->getId()],
-            [
-                'name'                    => $socialUser->getName(),
-                'email'                   => $socialUser->getEmail(),
-                'siapkerja_token'         => $socialUser->token,
-                'siapkerja_refresh_token' => $socialUser->refreshToken,
-            ]
-        );
+            $user = User::updateOrCreate(
+                ['siapkerja_id' => $socialUser->getId()],
+                [
+                    'name'                    => $socialUser->getName(),
+                    'email'                   => $socialUser->getEmail(),
+                    'siapkerja_token'         => $socialUser->token,
+                    'siapkerja_refresh_token' => $socialUser->refreshToken,
+                ]
+            );
 
-        if ($isNewUser) {
-            $user->assignRole(StackHolder::USER->value);
+            if ($isNewUser) {
+                $user->assignRole(StackHolder::USER->value);
+            }
+
+            Auth::login($user);
+
+            session([
+                'access_token'  => $socialUser->token,
+                'refresh_token' => $socialUser->refreshToken,
+            ]);
+
+            return redirect()->route($user->getRedirectRoute());
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('SiapKerja callback failed: ' . $e->getMessage(), [
+                'exception' => $e,
+            ]);
+
+            return redirect()->route('login')->with('error', 'Login SIAPKerja gagal: ' . $e->getMessage());
         }
-
-        Auth::login($user);
-
-        session([
-            'access_token'  => $socialUser->token,
-            'refresh_token' => $socialUser->refreshToken,
-        ]);
-
-        return redirect()->route($user->getRedirectRoute());
     }
 
     public function logout()

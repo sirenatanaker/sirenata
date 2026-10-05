@@ -29,14 +29,21 @@ class SiapKerjaProvider extends AbstractProvider implements ProviderInterface
     {
         $response = parent::getAccessTokenResponse($code);
 
-        \Illuminate\Support\Facades\Log::warning('SIAPKerja token response metadata', [
+        // API Kemnaker membungkus payload di dalam key 'data'
+        if (isset($response['data']) && is_array($response['data'])) {
+            $response = array_merge($response, $response['data']);
+        }
+
+        // Antisipasi jika key token bernama 'token' bukan 'access_token'
+        if (empty($response['access_token']) && !empty($response['token'])) {
+            $response['access_token'] = $response['token'];
+        }
+
+        \Illuminate\Support\Facades\Log::error('SIAPKerja token response metadata', [
             'response_keys' => is_array($response) ? array_keys($response) : [],
-            'has_access_token' => is_array($response)
-                && isset($response['access_token'])
-                && is_string($response['access_token'])
-                && $response['access_token'] !== '',
-            'token_type' => is_array($response) ? ($response['token_type'] ?? null) : null,
-            'scope' => is_array($response) ? ($response['scope'] ?? null) : null,
+            'has_access_token' => !empty($response['access_token']),
+            'token_type' => $response['token_type'] ?? null,
+            'scope' => $response['scope'] ?? null,
         ]);
 
         return $response;
