@@ -44,17 +44,30 @@ class SiapKerjaProvider extends AbstractProvider implements ProviderInterface
 
     protected function getUserByToken($token): array
     {
+        if (empty($token)) {
+            \Illuminate\Support\Facades\Log::error('SIAPKerja: access_token kosong, tidak bisa ambil data user');
+            throw new \RuntimeException('Access token dari SIAPKerja kosong. Cek client_id, client_secret, dan redirect_uri.');
+        }
+
         $response = $this->getHttpClient()->get(
             'https://account.kemnaker.go.id/api/v1/users/me',
             [
                 'headers' => [
                     'Authorization' => 'Bearer ' . $token,
-                    'Accept' => 'application/json',
+                    'Accept'        => 'application/json',
                 ],
             ]
         );
 
-        return json_decode($response->getBody(), true);
+        $body = json_decode($response->getBody(), true);
+
+        \Illuminate\Support\Facades\Log::info('SIAPKerja: getUserByToken response', [
+            'status'      => $response->getStatusCode(),
+            'has_data'    => isset($body['data']),
+            'data_keys'   => isset($body['data']) ? array_keys($body['data']) : [],
+        ]);
+
+        return $body;
     }
 
     protected function mapUserToObject(array $user): User
