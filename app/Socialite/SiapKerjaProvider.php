@@ -29,7 +29,7 @@ class SiapKerjaProvider extends AbstractProvider implements ProviderInterface
     {
         $response = parent::getAccessTokenResponse($code);
 
-        // API Kemnaker membungkus payload di dalam key 'data'
+      
         if (isset($response['data']) && is_array($response['data'])) {
             $response = array_merge($response, $response['data']);
         }

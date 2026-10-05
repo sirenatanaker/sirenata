@@ -21,7 +21,7 @@ class SiapKerjaController extends Controller
         return Socialite::driver('siapkerja')->redirect();
     }
 
-    // Step 3-6: Terima callback & login user
+
     public function callback()
     {
         try {
