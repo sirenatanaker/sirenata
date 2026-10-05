@@ -25,6 +25,23 @@ class SiapKerjaProvider extends AbstractProvider implements ProviderInterface
         return 'https://account.kemnaker.go.id/api/v1/tokens';
     }
 
+    public function getAccessTokenResponse($code)
+    {
+        $response = parent::getAccessTokenResponse($code);
+
+        \Illuminate\Support\Facades\Log::warning('SIAPKerja token response metadata', [
+            'response_keys' => is_array($response) ? array_keys($response) : [],
+            'has_access_token' => is_array($response)
+                && isset($response['access_token'])
+                && is_string($response['access_token'])
+                && $response['access_token'] !== '',
+            'token_type' => is_array($response) ? ($response['token_type'] ?? null) : null,
+            'scope' => is_array($response) ? ($response['scope'] ?? null) : null,
+        ]);
+
+        return $response;
+    }
+
     protected function getUserByToken($token): array
     {
         $response = $this->getHttpClient()->get(
