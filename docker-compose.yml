@@ -9,73 +9,48 @@ services:
         volumes:
             - .:/var/www
             - ./docker/php/custom.ini:/usr/local/etc/php/conf.d/custom.ini
-        env_file:
-            - .env
-        environment:
-            APP_ENV: production
-            APP_DEBUG: "false"
-            APP_KEY: ${APP_KEY}
-            APP_URL: ${DOCKER_APP_URL:-https://sirenata.kemnaker.go.id}
-            DEBUGBAR_ENABLED: "false"
-            SESSION_SECURE_COOKIE: "true"
-            SESSION_HTTP_ONLY: "true"
-            SESSION_SAME_SITE: lax
-            DB_CONNECTION: mysql
-            DB_HOST: elearning_db
-            DB_PORT: 3306
-            DB_DATABASE: ${DOCKER_DB_NAME:-${DB_DATABASE:-e-learning}}
-            DB_USERNAME: ${DOCKER_DB_USER:-${DB_USERNAME:-root}}
-            DB_PASSWORD: ${DOCKER_DB_PASSWORD:-${DB_PASSWORD}}
         networks:
-            - app_front
-            - data_back
-        security_opt:
-            - no-new-privileges:true
+            - elearning_network
 
     nginx:
         image: nginx:stable-alpine
         container_name: elearning_nginx
         restart: unless-stopped
         ports:
-            - "${NGINX_BIND_ADDRESS:-127.0.0.1}:${NGINX_PORT:-8081}:80"
+            - "8081:80"
         volumes:
             - .:/var/www
             - ./docker/nginx/app.conf:/etc/nginx/conf.d/default.conf
         networks:
-            - app_front
+            - elearning_network
         depends_on:
             - app
-        security_opt:
-            - no-new-privileges:true
 
     elearning_db:
         image: mysql:8.0
         container_name: elearning_db
         restart: unless-stopped
+        ports:
+            - "3307:3306"
         environment:
-            MYSQL_DATABASE: ${DOCKER_DB_NAME:-e-learning}
-            MYSQL_USER: ${DOCKER_DB_USER:-elearning_app}
-            MYSQL_PASSWORD: ${DOCKER_DB_PASSWORD:?Set DOCKER_DB_PASSWORD in .env}
-            MYSQL_ROOT_PASSWORD: ${DOCKER_DB_ROOT_PASSWORD:?Set DOCKER_DB_ROOT_PASSWORD in .env}
+            MYSQL_DATABASE: e-learning
+            MYSQL_ROOT_PASSWORD: elearning_secret_2026
         volumes:
             - dbdata:/var/lib/mysql
         networks:
-            - data_back
-        security_opt:
-            - no-new-privileges:true
+            - elearning_network
 
     phpmyadmin_elearning:
         image: phpmyadmin/phpmyadmin
         container_name: elearning_phpmyadmin
         restart: unless-stopped
-        profiles:
-            - tools
         ports:
-            - "127.0.0.1:8082:80"
+            - "8082:80"
         environment:
             PMA_HOST: elearning_db
+            MYSQL_ROOT_PASSWORD: elearning_secret_2026
         networks:
-            - data_back
+            - elearning_network
         depends_on:
             - elearning_db
 
@@ -83,17 +58,14 @@ services:
         image: redis:alpine
         container_name: elearning_redis
         restart: unless-stopped
+        ports:
+            - "6380:6379"
         networks:
-            - data_back
-        security_opt:
-            - no-new-privileges:true
+            - elearning_network
 
 networks:
-    app_front:
+    elearning_network:
         driver: bridge
-    data_back:
-        driver: bridge
-        internal: true
 
 volumes:
     dbdata:
