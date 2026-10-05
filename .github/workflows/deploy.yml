@@ -17,17 +17,8 @@ jobs:
         run: |
           cd ${{ secrets.DEPLOY_PATH }}
 
-          # 1. Bersihkan draf/perubahan lokal di VPS agar tidak bentrok saat git pull
-          git reset --hard HEAD
-          git clean -fd
-
-          # 2. Tarik update kode terbaru dari GitHub
           git pull origin main
 
-          # 3. Rebuild & jalankan container jika ada perubahan pada docker-compose / Dockerfile
-          docker compose up -d --build
-
-          # 4. Jalankan perintah manajemen dependency & optimasi Laravel
           docker exec elearning_app composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader
 
           docker exec elearning_app npm install
