@@ -17,13 +17,7 @@ jobs:
         run: |
           cd ${{ secrets.DEPLOY_PATH }}
 
-          # Ambil update terbaru dari GitHub dan paksa nimpa perubahan lokal di VPS
-          git fetch origin main
-          git reset --hard origin/main
-
-          # Jika konfigurasi docker-compose.yml Anda ada perubahan kontainer/service,
-          # buka komen baris berikut untuk merestart kontainer:
-          # docker compose down && docker compose up -d
+          git pull origin main
 
           docker exec elearning_app composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader
 

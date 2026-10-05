@@ -10,47 +10,19 @@ services:
             - .:/var/www
             - ./docker/php/custom.ini:/usr/local/etc/php/conf.d/custom.ini
         environment:
-            # Application
             APP_ENV: production
             APP_DEBUG: "false"
-            APP_KEY: ${APP_KEY:?Set APP_KEY in .env}
-            APP_URL: ${APP_URL:-https://sirenata.kemnaker.go.id}
+            APP_URL: ${DOCKER_APP_URL:-https://sirenata.kemnaker.go.id}
             DEBUGBAR_ENABLED: "false"
-
-            # Database — host pakai nama service container
-            DB_CONNECTION: mysql
-            DB_HOST: elearning_db
-            DB_PORT: 3306
-            DB_DATABASE: ${DB_DATABASE:?Set DB_DATABASE in .env}
-            DB_USERNAME: ${DB_USERNAME:?Set DB_USERNAME in .env}
-            DB_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD in .env}
-
-            # Redis — host pakai nama service container
-            REDIS_CLIENT: phpredis
-            REDIS_HOST: elearning_redis
-            REDIS_PORT: 6379
-            REDIS_PASSWORD: ${REDIS_PASSWORD:-}
-
-            # Session — redis agar SSO state tidak hilang antar request
-            SESSION_DRIVER: redis
-            SESSION_LIFETIME: 120
             SESSION_SECURE_COOKIE: "true"
             SESSION_HTTP_ONLY: "true"
             SESSION_SAME_SITE: lax
-            SESSION_DOMAIN: ${SESSION_DOMAIN:-}
-
-            # Cache & Queue
-            CACHE_STORE: redis
-            QUEUE_CONNECTION: redis
-
-            # Logging — stderr lebih baik di Docker (tampil di docker logs)
-            LOG_CHANNEL: stderr
-            LOG_LEVEL: warning
-
-            # SSO SiapKerja
-            SIAPKERJA_CLIENT_ID: ${SIAPKERJA_CLIENT_ID:?Set SIAPKERJA_CLIENT_ID in .env}
-            SIAPKERJA_CLIENT_SECRET: ${SIAPKERJA_CLIENT_SECRET:?Set SIAPKERJA_CLIENT_SECRET in .env}
-            SIAPKERJA_REDIRECT_URI: ${SIAPKERJA_REDIRECT_URI:-https://sirenata.kemnaker.go.id/auth/callback}
+            DB_CONNECTION: mysql
+            DB_HOST: elearning_db
+            DB_PORT: 3306
+            DB_DATABASE: ${DOCKER_DB_NAME:-e-learning}
+            DB_USERNAME: ${DOCKER_DB_USER:-elearning_app}
+            DB_PASSWORD: ${DOCKER_DB_PASSWORD:?Set DOCKER_DB_PASSWORD in .env}
         networks:
             - app_front
             - data_back
@@ -78,10 +50,10 @@ services:
         container_name: elearning_db
         restart: unless-stopped
         environment:
-            MYSQL_DATABASE: ${DB_DATABASE:?Set DB_DATABASE in .env}
-            MYSQL_USER: ${DB_USERNAME:?Set DB_USERNAME in .env}
-            MYSQL_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD in .env}
-            MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:?Set DB_ROOT_PASSWORD in .env}
+            MYSQL_DATABASE: ${DOCKER_DB_NAME:-e-learning}
+            MYSQL_USER: ${DOCKER_DB_USER:-elearning_app}
+            MYSQL_PASSWORD: ${DOCKER_DB_PASSWORD:?Set DOCKER_DB_PASSWORD in .env}
+            MYSQL_ROOT_PASSWORD: ${DOCKER_DB_ROOT_PASSWORD:?Set DOCKER_DB_ROOT_PASSWORD in .env}
         volumes:
             - dbdata:/var/lib/mysql
         networks:
@@ -103,8 +75,6 @@ services:
             - data_back
         depends_on:
             - elearning_db
-        security_opt:
-            - no-new-privileges:true
 
     elearning_redis:
         image: redis:alpine
