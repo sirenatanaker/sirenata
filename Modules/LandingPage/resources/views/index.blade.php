@@ -295,24 +295,24 @@
                 </div>
 
                 <!-- Avatar Social Proof -->
-                <div class="flex items-center gap-4">
-                    <div class="flex -space-x-3">
+                <div class="flex flex-row items-center gap-2 sm:gap-4">
+                    <div class="flex shrink-0 -space-x-2.5 sm:-space-x-3">
                         <img src="https://ui-avatars.com/api/?name=JD&background=random"
-                            class="w-10 h-10 rounded-full border-2 border-white shadow-sm" alt="User">
+                            class="h-8 w-8 rounded-full border-2 border-white shadow-sm sm:h-10 sm:w-10" alt="User">
                         <img src="https://ui-avatars.com/api/?name=FW&background=random"
-                            class="w-10 h-10 rounded-full border-2 border-white shadow-sm" alt="User">
+                            class="h-8 w-8 rounded-full border-2 border-white shadow-sm sm:h-10 sm:w-10" alt="User">
                         <img src="https://ui-avatars.com/api/?name=RM&background=random"
-                            class="w-10 h-10 rounded-full border-2 border-white shadow-sm" alt="User">
+                            class="h-8 w-8 rounded-full border-2 border-white shadow-sm sm:h-10 sm:w-10" alt="User">
                         <div
-                            class="w-10 h-10 rounded-full border-2 border-white shadow-sm bg-slate-50 flex items-center justify-center text-xs font-bold text-slate-600">
+                            class="flex h-8 w-8 items-center justify-center rounded-full border-2 border-white bg-slate-50 text-[10px] font-bold text-slate-600 shadow-sm sm:h-10 sm:w-10 sm:text-xs">
                             +1.2K</div>
                     </div>
-                    <p class="text-sm font-medium text-slate-600">Bergabung dengan pengguna lainnya.</p>
+                    <p class="min-w-0 max-w-[190px] text-xs font-medium leading-relaxed text-slate-600 sm:max-w-xs sm:text-sm">Bergabung dengan pengguna lainnya.</p>
                 </div>
             </div>
 
             <!-- Kanan: Floating Cards & Orang -->
-            <div class="relative hidden h-[380px] sm:block sm:h-[460px] lg:h-[550px] reveal-right" style="transition-delay: 0.2s;">
+            <div class="relative hidden h-[340px] sm:block sm:h-[360px] md:h-[380px] lg:h-[550px] reveal-right" style="transition-delay: 0.2s;">
                 <!-- Lingkaran Garis Putar Dasar -->
                 <div
                     class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[250px] h-[250px] sm:w-[290px] sm:h-[290px] lg:w-[420px] lg:h-[420px] rounded-full border border-slate-200/60 animate-[spin_60s_linear_infinite] z-0">
@@ -335,7 +335,7 @@
 
                 <!-- ILUSTRASI ORANG DI TENGAH (z-20) -->
                 <div
-                    class="absolute bottom-0 left-1/2 transform -translate-x-1/2 z-20 w-full max-w-[420px] pointer-events-none drop-shadow-2xl">
+                    class="absolute bottom-0 left-1/2 transform -translate-x-1/2 z-20 w-full max-w-[280px] pointer-events-none drop-shadow-2xl sm:max-w-[300px] md:max-w-[320px] lg:max-w-[420px]">
                     <div class="relative">
                         <img src="{{ asset('images/Header.webp') }}" alt="Ilustrasi Perencana"
                             class="relative z-10 w-full h-auto object-contain"

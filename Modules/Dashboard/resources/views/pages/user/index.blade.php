@@ -806,9 +806,6 @@
                                         institutions.forEach(institution => {
                                             $('#instansi').append(new Option(institution.name, institution.name));
                                         });
-                                    } else {
-                                        $('#instansi').append(new Option(
-                                            'Belum ada instansi terdaftar di wilayah ini', ''));
                                     }
 
                                     $('#instansi').append(new Option(
@@ -817,8 +814,6 @@
                                 }
                             },
                             error: function() {
-                                $('#instansi').append(new Option(
-                                    'Daftar gagal dimuat; Anda dapat memilih Lainnya', ''));
                                 $('#instansi').append(new Option(
                                     'Lainnya (instansi belum terdaftar)', 'lainnya'));
                                 $('#instansi').trigger('change');
