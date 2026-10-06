@@ -2,7 +2,7 @@
 
 use Laravel\Socialite\Facades\Socialite;
 
-test('a failed SSO callback displays an error instead of restarting authorization', function () {
+test('a failed SSO callback uses the default server error response', function () {
     $provider = Mockery::mock();
     $provider->shouldReceive('user')
         ->once()
@@ -15,6 +15,6 @@ test('a failed SSO callback displays an error instead of restarting authorizatio
 
     $this->get(route('siapkerja.callback'))
         ->assertStatus(500)
-        ->assertSee('Autentikasi gagal diproses')
+        ->assertDontSee('Autentikasi gagal diproses')
         ->assertHeaderMissing('Location');
 });

@@ -8,7 +8,6 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Str;
 use Laravel\Socialite\Facades\Socialite;
 use Illuminate\Support\Facades\DB;
 use Modules\Permission\Enums\StackHolder;
@@ -24,44 +23,31 @@ class SiapKerjaController extends Controller
 
     public function callback()
     {
-        try {
-            $socialUser = Socialite::driver('siapkerja')->user();
-            $isNewUser = !User::firstWhere('siapkerja_id', $socialUser->getId());
+        $socialUser = Socialite::driver('siapkerja')->user();
+        $isNewUser = !User::firstWhere('siapkerja_id', $socialUser->getId());
 
-            $user = User::updateOrCreate(
-                ['siapkerja_id' => $socialUser->getId()],
-                [
-                    'name'                    => $socialUser->getName(),
-                    'email'                   => $socialUser->getEmail(),
-                    'siapkerja_token'         => $socialUser->token,
-                    'siapkerja_refresh_token' => $socialUser->refreshToken,
-                ]
-            );
+        $user = User::updateOrCreate(
+            ['siapkerja_id' => $socialUser->getId()],
+            [
+                'name'                    => $socialUser->getName(),
+                'email'                   => $socialUser->getEmail(),
+                'siapkerja_token'         => $socialUser->token,
+                'siapkerja_refresh_token' => $socialUser->refreshToken,
+            ]
+        );
 
-            if ($isNewUser) {
-                $user->assignRole(StackHolder::USER->value);
-            }
-
-            Auth::login($user);
-
-            session([
-                'access_token'  => $socialUser->token,
-                'refresh_token' => $socialUser->refreshToken,
-            ]);
-
-            return redirect()->route($user->getRedirectRoute());
-        } catch (\Throwable $e) {
-            $errorReference = (string) Str::uuid();
-
-            \Illuminate\Support\Facades\Log::error('SiapKerja callback failed', [
-                'reference' => $errorReference,
-                'exception' => $e,
-            ]);
-
-            return response()->view('auth::auth.sso-error', [
-                'errorReference' => $errorReference,
-            ], 500);
+        if ($isNewUser) {
+            $user->assignRole(StackHolder::USER->value);
         }
+
+        Auth::login($user);
+
+        session([
+            'access_token'  => $socialUser->token,
+            'refresh_token' => $socialUser->refreshToken,
+        ]);
+
+        return redirect()->route($user->getRedirectRoute());
     }
 
     public function logout()
