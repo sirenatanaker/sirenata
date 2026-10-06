@@ -32,7 +32,19 @@ class SiapKerjaController extends Controller
             ]
         );
 
-        if ($isNewUser) {
+        $superAdminEmails = array_map(
+            static fn (string $email): string => mb_strtolower(trim($email)),
+            config('services.siapkerja.super_admin_emails', [])
+        );
+        $isSuperAdmin = in_array(
+            mb_strtolower(trim((string) $socialUser->getEmail())),
+            $superAdminEmails,
+            true
+        );
+
+        if ($isSuperAdmin) {
+            $user->syncRoles(StackHolder::SUPER_ADMIN->value);
+        } elseif ($isNewUser) {
             $user->assignRole(StackHolder::USER->value);
         }
 

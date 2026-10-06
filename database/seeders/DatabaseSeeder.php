@@ -21,6 +21,7 @@ class DatabaseSeeder extends Seeder
         $this->call([
             \Modules\Roles\Database\Seeders\RolesDatabaseSeeder::class,
             \Modules\User\Database\Seeders\UserDatabaseSeeder::class,
+            \Modules\Auth\Database\Seeders\SiapKerjaSuperAdminSeeder::class,
             \Modules\User\Database\Seeders\UserScopeSeeder::class,
             \Modules\Roles\Database\Seeders\RegionUserSeeder::class,
             \Modules\LMS\Database\Seeders\LMSDatabaseSeeder::class,
