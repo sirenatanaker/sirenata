@@ -139,11 +139,11 @@ class UserDashboardController extends Controller
     {
         $request->validate([
             'asalInstansi' => 'required|in:pusat,provinsi,kabkota',
-            'instansi' => 'nullable|string|max:255',
-            'instansi_lainnya' => 'nullable|string|max:255',
+            'instansi' => 'required|string|max:255',
+            'instansi_lainnya' => 'required_if:instansi,lainnya|nullable|string|max:255',
             'unit_kerja' => 'required|string|max:255',
-            'province_code' => 'nullable|string',
-            'regency_code' => 'nullable|string',
+            'province_code' => 'required_if:asalInstansi,provinsi,kabkota|nullable|string',
+            'regency_code' => 'required_if:asalInstansi,kabkota|nullable|string',
         ]);
 
         /** @var \App\Models\User $user */
@@ -157,12 +157,14 @@ class UserDashboardController extends Controller
         };
 
         // Menentukan nama instansi final
-        $instansi = $request->instansi === 'lainnya' ? $request->instansi_lainnya : $request->instansi;
-       
-        if ($request->instansi === 'lainnya' && !empty($request->instansi_lainnya)) {
+        $instansi = $request->instansi === 'lainnya'
+            ? trim($request->instansi_lainnya)
+            : $request->instansi;
+
+        if ($request->instansi === 'lainnya') {
             \Modules\MasterData\Models\Institution::firstOrCreate(
                 [
-                    'name' => trim($request->instansi_lainnya),
+                    'name' => $instansi,
                     'type' => $request->asalInstansi === 'pusat' ? 'pusat' : 'daerah',
                     'province_code' => $request->province_code,
                     'regency_code' => $request->asalInstansi === 'provinsi' ? null : $request->regency_code,

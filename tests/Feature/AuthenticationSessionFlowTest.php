@@ -27,10 +27,10 @@ test('the legacy SIAPKerja logout route also clears the authenticated session', 
     $this->assertGuest();
 });
 
-test('authenticated users returning to the landing page are sent to their dashboard', function () {
+test('authenticated users can return to the landing page', function () {
     $user = User::factory()->create();
 
     $this->actingAs($user)
         ->get(route('landingpage.index'))
-        ->assertRedirect(route('portal-dashboard'));
+        ->assertOk();
 });

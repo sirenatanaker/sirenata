@@ -3,7 +3,6 @@
 namespace Modules\LandingPage\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Modules\MasterData\Models\Province;
 use Modules\MasterData\Models\Regency;
@@ -17,10 +16,6 @@ class HomeController extends Controller
      */
     public function index()
     {
-        if (Auth::check()) {
-            return redirect()->route(Auth::user()->getRedirectRoute());
-        }
-
         $realParticipantCount = DB::table('course_student')->distinct()->count('user_id');
 
         $stats = [

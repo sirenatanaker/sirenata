@@ -431,40 +431,50 @@
     </div>
 
     @if (!$profile || empty($profile->instansi))
-        <div class="fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-sm"
+        <div class="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 backdrop-blur-sm"
             style="background-color: rgba(15, 23, 42, 0.6)">
             <div
-                class="bg-white rounded-xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto border border-slate-200">
-                <div class="p-6 sm:p-8">
-                    <div class="text-center mb-6">
+                class="bg-white rounded-2xl shadow-xl max-w-2xl w-full max-h-[calc(100dvh-1rem)] sm:max-h-[90vh] overflow-y-auto border border-slate-200 overscroll-contain">
+                <div class="p-4 sm:p-8">
+                    <div class="text-center mb-5 sm:mb-6">
                         <div
                             class="bg-[#13416B]/10 text-[#13416B] w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-3 border border-[#13416B]/20 shadow-sm">
                             <i class="fas fa-building text-2xl"></i>
                         </div>
-                        <h2 class="text-xl font-extrabold text-slate-900">Pilih Instansi Anda</h2>
-                        <p class="text-sm text-slate-500 mt-1">Lengkapi informasi institusi untuk melanjutkan akses
+                        <h2 class="text-lg sm:text-xl font-extrabold text-slate-900">Pilih Instansi Anda</h2>
+                        <p class="text-xs sm:text-sm text-slate-500 mt-1">Lengkapi informasi institusi untuk melanjutkan akses
                             pembelajaran</p>
                     </div>
 
                     <form id="instansiForm" method="POST" action="{{ route('user.update-instansi') }}"
                         class="space-y-5">
                         @csrf
+                        @if ($errors->any())
+                            <div class="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700" role="alert">
+                                <p class="font-semibold">Periksa kembali data yang diisi:</p>
+                                <ul class="mt-1 list-inside list-disc">
+                                    @foreach ($errors->all() as $error)
+                                        <li>{{ $error }}</li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                        @endif
                         <div>
                             <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">Asal
                                 Instansi <span class="text-red-500">*</span></label>
-                            <div class="grid grid-cols-3 gap-3">
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-3">
                                 <label
-                                    class="flex items-center justify-center px-3 py-2.5 border border-slate-200 rounded-lg cursor-pointer hover:border-[#13416B] hover:bg-[#13416B]/5 transition-all font-semibold text-sm text-slate-700">
+                                class="flex items-center justify-center px-3 py-3 sm:py-2.5 border border-slate-200 rounded-lg cursor-pointer hover:border-[#13416B] hover:bg-[#13416B]/5 transition-all font-semibold text-sm text-slate-700">
                                     <input type="radio" name="asalInstansi" value="pusat"
                                         class="mr-2 text-[#13416B] focus:ring-[#13416B]"> <span>Pusat</span>
                                 </label>
                                 <label
-                                    class="flex items-center justify-center px-3 py-2.5 border border-slate-200 rounded-lg cursor-pointer hover:border-[#13416B] hover:bg-[#13416B]/5 transition-all font-semibold text-sm text-slate-700">
+                                    class="flex items-center justify-center px-3 py-3 sm:py-2.5 border border-slate-200 rounded-lg cursor-pointer hover:border-[#13416B] hover:bg-[#13416B]/5 transition-all font-semibold text-sm text-slate-700">
                                     <input type="radio" name="asalInstansi" value="provinsi"
                                         class="mr-2 text-[#13416B] focus:ring-[#13416B]"> <span>Provinsi</span>
                                 </label>
                                 <label
-                                    class="flex items-center justify-center px-3 py-2.5 border border-slate-200 rounded-lg cursor-pointer hover:border-[#13416B] hover:bg-[#13416B]/5 transition-all font-semibold text-sm text-slate-700">
+                                    class="flex items-center justify-center px-3 py-3 sm:py-2.5 border border-slate-200 rounded-lg cursor-pointer hover:border-[#13416B] hover:bg-[#13416B]/5 transition-all font-semibold text-sm text-slate-700">
                                     <input type="radio" name="asalInstansi" value="kabkota"
                                         class="mr-2 text-[#13416B] focus:ring-[#13416B]"> <span>Kab/Kota</span>
                                 </label>
@@ -520,17 +530,17 @@
                             <label for="customInstansi"
                                 class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">Nama
                                 Instansi <span class="text-red-500">*</span></label>
-                            <input type="text" name="instansi_lainnya" id="customInstansi"
+                            <input type="text" name="instansi_lainnya" id="customInstansi" maxlength="255"
                                 placeholder="Masukkan nama instansi"
-                                class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-[#13416B] focus:border-[#13416B]" />
+                                class="w-full min-h-11 px-3 py-2 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-[#13416B] focus:border-[#13416B]" />
                         </div>
 
                         <div id="unitKerjaSection" class="hidden">
                             <label for="unitKerja"
                                 class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">Unit Kerja
                                 <span class="text-red-500">*</span></label>
-                            <input type="text" name="unit_kerja" id="unitKerja" placeholder="Contoh: Bagian SDM"
-                                class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-[#13416B] focus:border-[#13416B]" />
+                            <input type="text" name="unit_kerja" id="unitKerja" maxlength="255" placeholder="Contoh: Bagian SDM"
+                                class="w-full min-h-11 px-3 py-2 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-[#13416B] focus:border-[#13416B]" />
                         </div>
 
                         <div class="pt-3">
@@ -712,11 +722,23 @@
                         type: 'GET',
                         success: function(response) {
                             if (response.success) {
-                                response.data.forEach(k => {
-                                    $('#kementerian').append(new Option(k.name, k.name));
+                                response.data
+                                    .filter(institution => institution.name.trim().toLowerCase() !== 'lainnya')
+                                    .forEach(institution => {
+                                        $('#kementerian').append(new Option(institution.name, institution.name));
                                 });
+                                $('#kementerian').append(new Option(
+                                    'Lainnya (instansi belum terdaftar)', 'lainnya'));
                                 $('#kementerian').trigger('change');
                             }
+                        },
+                        error: function() {
+                            $('#kementerian').append(new Option(
+                                'Daftar instansi gagal dimuat; pilih Lainnya untuk melanjutkan',
+                                '', true, true));
+                            $('#kementerian').append(new Option(
+                                'Lainnya (instansi belum terdaftar)', 'lainnya'));
+                            $('#kementerian').trigger('change');
                         }
                     });
 
@@ -729,6 +751,17 @@
                         width: '100%'
                     });
 
+                    $('#kementerian').on('change', function() {
+                        const isOther = $(this).val() === 'lainnya';
+                        $('#customInstansiSection').toggleClass('hidden', !isOther);
+                        $('#unitKerjaSection').toggleClass('hidden', !isOther && !$(this).val());
+                        $('#customInstansi').val('').prop('required', isOther);
+                        $('#unitKerja').prop('required', Boolean($(this).val()));
+                        if (isOther) {
+                            $('#unitKerjaSection').removeClass('hidden');
+                        }
+                    });
+
                     // 3. Handler saat radio Asal Instansi berubah (Pusat / Provinsi / Kab Kota)
                     $('input[name="asalInstansi"]').on('change', function() {
                         const value = $(this).val();
@@ -736,9 +769,11 @@
                             .addClass('hidden');
                         $('#kementerian, #provinsi, #kabkota, #instansi, #customInstansi, #unitKerja').val('')
                             .trigger('change');
+                        $('#finalInstansiPusat').val('');
+                        $('#customInstansi, #unitKerja').prop('required', false);
 
                         if (value === 'pusat') {
-                            $('#kementerianSection, #unitKerjaSection').removeClass('hidden');
+                            $('#kementerianSection').removeClass('hidden');
                         } else if (value === 'provinsi' || value === 'kabkota') {
                             $('#provinsiSection').removeClass('hidden');
                         }
@@ -764,21 +799,29 @@
                             },
                             success: function(response) {
                                 if (response.success) {
-                                    if (response.data.length > 0) {
-                                        response.data.forEach(i => {
-                                            $('#instansi').append(new Option(i.name, i.name));
+                                    const institutions = response.data.filter(institution =>
+                                        institution.name.trim().toLowerCase() !== 'lainnya');
+
+                                    if (institutions.length > 0) {
+                                        institutions.forEach(institution => {
+                                            $('#instansi').append(new Option(institution.name, institution.name));
                                         });
                                     } else {
                                         $('#instansi').append(new Option(
-                                            'Tidak ada instansi spesifik di wilayah ini, pilih Lainnya',
-                                            ''));
+                                            'Belum ada instansi terdaftar di wilayah ini', ''));
                                     }
 
-                                    // Selalu sediakan opsi "Lainnya" di bagian akhir
                                     $('#instansi').append(new Option(
-                                        'Lainnya (Instansi tidak ada dalam daftar)', 'lainnya'));
-                                    $('#instansi').trigger('change'); // Wajib untuk memperbarui Select2
+                                        'Lainnya (instansi belum terdaftar)', 'lainnya'));
+                                    $('#instansi').trigger('change');
                                 }
+                            },
+                            error: function() {
+                                $('#instansi').append(new Option(
+                                    'Daftar gagal dimuat; Anda dapat memilih Lainnya', ''));
+                                $('#instansi').append(new Option(
+                                    'Lainnya (instansi belum terdaftar)', 'lainnya'));
+                                $('#instansi').trigger('change');
                             }
                         });
                     }
@@ -838,21 +881,31 @@
                         const value = $(this).val();
                         if (value === 'lainnya') {
                             $('#customInstansiSection').removeClass('hidden');
-                            $('#unitKerjaSection').addClass('hidden');
+                            $('#unitKerjaSection').toggleClass('hidden', !$('#customInstansi').val().trim());
+                            $('#customInstansi').prop('required', true);
+                            $('#unitKerja').prop('required', Boolean($('#customInstansi').val().trim()));
                         } else if (value) {
                             $('#customInstansiSection').addClass('hidden');
                             $('#unitKerjaSection').removeClass('hidden');
+                            $('#customInstansi').val('').prop('required', false);
+                            $('#unitKerja').prop('required', true);
                         } else {
                             $('#customInstansiSection, #unitKerjaSection').addClass('hidden');
+                            $('#customInstansi, #unitKerja').prop('required', false);
                         }
                     });
 
                     // 8. Handler input teks kustom instansi
                     $('#customInstansi').on('input', function() {
-                        if ($(this).val().trim()) {
+                        const isValid = Boolean($(this).val().trim());
+                        const isOtherSelected = $('#instansi').val() === 'lainnya' ||
+                            $('#kementerian').val() === 'lainnya';
+                        if (isValid && isOtherSelected) {
                             $('#unitKerjaSection').removeClass('hidden');
+                            $('#unitKerja').prop('required', true);
                         } else {
                             $('#unitKerjaSection').addClass('hidden');
+                            $('#unitKerja').prop('required', false);
                         }
                     });
 
@@ -873,9 +926,19 @@
                                 return;
                             }
 
-                            // Matikan select daerah agar tidak ikut terkirim, lalu isi hidden input pusat
+                            const isOther = kemVal === 'lainnya';
+                            if (isOther && !$('#customInstansi').val().trim()) {
+                                e.preventDefault();
+                                alert('Masukkan nama instansi yang belum terdaftar.');
+                                return;
+                            }
+
+                            $('#customInstansi').prop('required', isOther);
+                            $('#unitKerja').prop('required', true);
                             $('#instansi').prop('disabled', true);
-                            $('#finalInstansiPusat').val(kemVal);
+                            $('#finalInstansiPusat').val(isOther ? 'lainnya' : kemVal);
+                        } else {
+                            $('#instansi').prop('disabled', false);
                         }
 
                         if (asalInstansi === 'provinsi' || asalInstansi === 'kabkota') {
@@ -894,8 +957,9 @@
                                     alert('Pilih instansi terlebih dahulu!');
                                     return;
                                 }
-
                             }
+
+                            $('#unitKerja').prop('required', true);
                         }
                     });
                 });
