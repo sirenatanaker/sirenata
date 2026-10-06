@@ -1,6 +1,8 @@
 <?php
 
 use App\Models\User;
+use Illuminate\Support\Facades\Hash;
+use Modules\Roles\Models\Role;
 
 test('logout clears the authenticated session and returns to the landing page', function () {
     $user = User::factory()->create();
@@ -33,4 +35,61 @@ test('authenticated users can return to the landing page', function () {
     $this->actingAs($user)
         ->get(route('landingpage.index'))
         ->assertOk();
+});
+
+test('local users can sign in with the built-in email and password form', function () {
+    config(['app.env' => 'local']);
+
+    $user = User::factory()->create([
+        'password' => Hash::make('local-password'),
+    ]);
+
+    $this->get(route('login'))
+        ->assertOk()
+        ->assertSee('Masuk ke Akun Anda');
+
+    $this->post(route('authenticate'), [
+        'email' => $user->email,
+        'password' => 'local-password',
+    ])
+        ->assertRedirect(route($user->getRedirectRoute()));
+
+    $this->assertAuthenticatedAs($user);
+});
+
+test('local users can create an account with the built-in registration form', function () {
+    config(['app.env' => 'local']);
+
+    Role::create([
+        'name' => 'user',
+        'guard_name' => 'web',
+    ]);
+
+    $this->get(route('register'))
+        ->assertOk()
+        ->assertSee('Daftar Akun Baru');
+
+    $this->post(route('register.store'), [
+        'name' => 'Local Test User',
+        'email' => 'local-test@example.test',
+        'password' => 'local-password',
+        'password_confirmation' => 'local-password',
+    ])
+        ->assertRedirect(route('user.dashboard'));
+
+    $this->assertAuthenticated();
+    $this->assertDatabaseHas('users', [
+        'email' => 'local-test@example.test',
+        'name' => 'Local Test User',
+    ]);
+});
+
+test('non-local login and registration continue to use SIAPKerja', function () {
+    config(['app.env' => 'production']);
+
+    $this->get(route('login'))
+        ->assertRedirect(route('siapkerja.redirect'));
+
+    $this->get(route('register'))
+        ->assertRedirect(route('siapkerja.redirect'));
 });

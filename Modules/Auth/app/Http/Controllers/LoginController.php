@@ -21,11 +21,19 @@ class LoginController extends Controller
      */
     public function login()
     {
+        if (config('app.env') === 'local') {
+            return view('auth::auth.login');
+        }
+
         return redirect()->route('siapkerja.redirect');
     }
 
     public function authenticate(LoginRequest $request): RedirectResponse
     {
+        if (config('app.env') !== 'local') {
+            return redirect()->route('siapkerja.redirect');
+        }
+
         $credentials = $request->only('email', 'password');
         $remember = $request->boolean('remember');
 

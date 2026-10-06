@@ -21,31 +21,33 @@ class RegisterController extends Controller
      */
     public function register()
     {
+        if (config('app.env') === 'local') {
+            return view('auth::auth.register');
+        }
+
         return redirect()->route('siapkerja.redirect');
     }
 
     public function store(RegisterRequest $request)
     {
-        try {
-            $validated = $request->validated();
-            $user = $this->authService->register($validated);
-
-            Auth::login($user);
-            $request->session()->regenerate();
-
-
-            $user->tokens()->delete();
-            $token = $user->createToken('api-token')->plainTextToken;
-            session(['api_token' => $token]);
-
-            ToastMagic::success('User registered successfully');
-            /** @var User $authenticatedUser */
-            $authenticatedUser = Auth::user();
-
-            return redirect()->route($authenticatedUser->getRedirectRoute());
-        } catch (\Exception $e) {
-            ToastMagic::error('Failed to register user');
-            return back()->withInput();
+        if (config('app.env') !== 'local') {
+            return redirect()->route('siapkerja.redirect');
         }
+
+        $validated = $request->validated();
+        $user = $this->authService->register($validated);
+
+        Auth::login($user);
+        $request->session()->regenerate();
+
+        $user->tokens()->delete();
+        $token = $user->createToken('api-token')->plainTextToken;
+        session(['api_token' => $token]);
+
+        ToastMagic::success('User registered successfully');
+        /** @var User $authenticatedUser */
+        $authenticatedUser = Auth::user();
+
+        return redirect()->route($authenticatedUser->getRedirectRoute());
     }
 }
