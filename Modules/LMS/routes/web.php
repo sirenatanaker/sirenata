@@ -52,6 +52,9 @@ Route::prefix('admin-pusat')->middleware(['auth', 'role:admin-pusat'])->name('ad
 
 
 
+    Route::post('library-categories-inline', [AdminPusatLibraryCategoryController::class, 'storeInline'])->name('library-categories.inline.store');
+    Route::put('library-categories-inline/{libraryCategory}', [AdminPusatLibraryCategoryController::class, 'updateInline'])->name('library-categories.inline.update');
+    Route::delete('library-categories-inline/{libraryCategory}', [AdminPusatLibraryCategoryController::class, 'destroyInline'])->name('library-categories.inline.destroy');
     Route::resource('library-categories', AdminPusatLibraryCategoryController::class)->only(['index', 'store', 'update', 'destroy']);
     Route::resource('libraries', AdminPusatLibraryController::class)->only(['index', 'store', 'update', 'destroy']);
 

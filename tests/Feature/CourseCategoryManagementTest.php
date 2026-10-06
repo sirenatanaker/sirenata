@@ -24,6 +24,23 @@ test('the course form includes the category manager and existing category option
         ->assertSee('Kelola Kategori Kursus');
 });
 
+test('the course management listing displays courses in a table', function () {
+    $category = Category::create(['name' => 'Perencanaan']);
+    Course::create([
+        'category_id' => $category->id,
+        'name' => 'Kursus Perencanaan SDM',
+        'description' => 'Deskripsi kursus untuk tampilan tabel.',
+    ]);
+
+    $this->get(route('admin-pusat.management-course.courses.index'))
+        ->assertOk()
+        ->assertSee('<table', false)
+        ->assertSee('Nama Kursus')
+        ->assertSee('Peserta')
+        ->assertSee('Kursus Perencanaan SDM')
+        ->assertSee('Perencanaan');
+});
+
 test('admin pusat can create and rename a course category', function () {
     $createResponse = $this->postJson(route('admin-pusat.management-course.categories.store'), [
         'name' => 'Perencanaan Tenaga Kerja',

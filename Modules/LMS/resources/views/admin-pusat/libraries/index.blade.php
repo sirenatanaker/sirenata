@@ -76,7 +76,7 @@
                             <x-table.td><p class="text-slate-600">{{ $key + $libraries->firstItem() }}</p></x-table.td>
                             <x-table.td>
                                 @if($library->cover_image)
-                                    <img src="{{ Storage::url($library->cover_image) }}" alt="Cover" class="w-10 h-14 object-cover rounded shadow-sm">
+                                    <img src="{{ $library->cover_image_url }}" alt="Cover" class="w-10 h-14 object-cover rounded shadow-sm">
                                 @else
                                     <div class="w-10 h-14 bg-slate-200 rounded flex items-center justify-center text-slate-400">
                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
@@ -250,14 +250,11 @@
                     <x-form.input name="title" label="Judul Materi" required placeholder="Judul buku / dokumen" />
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <x-form.select name="library_category_id" label="Tipe Materi" required>
-                            <option value="">Pilih Kategori</option>
-                            @foreach($libraryCategories as $category)
-                                <option value="{{ $category->id }}" @selected(old('library_category_id') == $category->id)>
-                                    {{ $category->name }}
-                                </option>
-                            @endforeach
-                        </x-form.select>
+                        @include('lms::admin-pusat.libraries.partials.category-picker', [
+                            'label' => 'Pilih Kategori',
+                            'selectId' => 'create-library-category',
+                            'selectedCategoryId' => old('library_category_id', ''),
+                        ])
 
                         <!-- Cover / Thumbnail Section dengan Pilihan Mode Otomatis & Upload -->
                     <div class="col-span-1 sm:col-span-2 space-y-3" x-data="{ thumbMode: 'auto' }">
@@ -478,14 +475,11 @@
                         <x-form.input name="title" label="Judul Materi" required placeholder="Judul buku / dokumen" :value="$library->title" />
 
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <x-form.select name="library_category_id" label="Kategori Materi" required>
-                                <option value="">Pilih Kategori</option>
-                                @foreach($libraryCategories as $category)
-                                    <option value="{{ $category->id }}" @selected(old('library_category_id', $library->library_category_id) == $category->id)>
-                                        {{ $category->name }}
-                                    </option>
-                                @endforeach
-                            </x-form.select>
+                            @include('lms::admin-pusat.libraries.partials.category-picker', [
+                                'label' => 'Pilih Kategori',
+                                'selectId' => 'edit-library-category-' . $library->id,
+                                'selectedCategoryId' => old('library_category_id', $library->library_category_id),
+                            ])
 
                             <div>
                                 <x-form.input type="file" name="cover_image" label="Gambar Sampul" helper="(abaikan jika tidak ubah)" accept="image/*"

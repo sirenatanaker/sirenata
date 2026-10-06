@@ -169,14 +169,7 @@
                     {{-- Cover Area (Disesuaikan untuk mendukung URL Eksternal / Inisial maupun Upload Lokal) --}}
                     <div class="relative aspect-[4/5] overflow-hidden bg-slate-100">
                         @if ($library->cover_image)
-                            @php
-                                // Cek apakah cover_image adalah URL eksternal (seperti dari ui-avatars atau link web) atau file lokal dari storage
-                                $isExternalCover = filter_var($library->cover_image, FILTER_VALIDATE_URL);
-                                $coverSource = $isExternalCover
-                                    ? $library->cover_image
-                                    : Storage::url($library->cover_image);
-                            @endphp
-                            <img src="{{ $coverSource }}" alt="{{ $library->title }}"
+                            <img src="{{ $library->cover_image_url }}" alt="{{ $library->title }}"
                                 class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105">
                         @else
                             @php

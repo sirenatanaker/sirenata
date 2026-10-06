@@ -267,7 +267,7 @@
                                 <div
                                     class="w-14 h-14 sm:w-16 sm:h-16 rounded-md overflow-hidden shrink-0 shadow-sm relative bg-white border border-slate-200 flex items-center justify-center">
                                     @if ($lastLibrary->cover_image)
-                                        <img src="{{ str_starts_with($lastLibrary->cover_image, 'http') ? $lastLibrary->cover_image : asset('storage/' . $lastLibrary->cover_image) }}"
+                                        <img src="{{ $lastLibrary->cover_image_url }}"
                                             alt="Cover" class="w-full h-full object-cover">
                                         <div
                                             class="absolute bottom-1 right-1 w-5 h-5 bg-[#13416B] text-white rounded-full flex items-center justify-center text-[10px] shadow-sm">

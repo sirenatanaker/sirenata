@@ -4,6 +4,7 @@ namespace Modules\LMS\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Support\Facades\Storage;
 
 class Library extends Model
 {
@@ -19,6 +20,19 @@ class Library extends Model
         'external_link',
         'created_by',
     ];
+
+    public function getCoverImageUrlAttribute(): ?string
+    {
+        if (!$this->cover_image) {
+            return null;
+        }
+
+        if (filter_var($this->cover_image, FILTER_VALIDATE_URL)) {
+            return $this->cover_image;
+        }
+
+        return Storage::disk('public')->url($this->cover_image);
+    }
 
     public function libraryCategory()
     {

@@ -22,7 +22,7 @@ class CourseController extends Controller
     public function index(Request $request)
     {
         $page       = $request->get('page', 1);
-        $perPage    = $request->get('row_per_page', 12);
+        $perPage    = $request->integer('row_per_page', 12);
         $categoryId = $request->get('category_id');
         $search     = $request->get('search');
 

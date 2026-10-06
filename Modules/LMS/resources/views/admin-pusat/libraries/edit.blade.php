@@ -107,7 +107,7 @@
                                     </label>
                                     <div class="flex items-center gap-3">
                                         @if($library->cover_image)
-                                            <img src="{{ Storage::url($library->cover_image) }}" alt="Current Cover" class="w-12 h-16 object-cover rounded border border-gray-200 shadow-sm">
+                                            <img src="{{ $library->cover_image_url }}" alt="Current Cover" class="w-12 h-16 object-cover rounded border border-gray-200 shadow-sm">
                                         @endif
                                         <input type="file" name="cover_image" accept="image/*"
                                             class="flex-1 border border-gray-300 rounded-md p-1 text-sm text-gray-500 file:mr-4 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100">
