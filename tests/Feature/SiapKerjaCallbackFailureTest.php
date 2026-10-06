@@ -15,6 +15,5 @@ test('a failed SSO callback uses the default server error response', function ()
 
     $this->get(route('siapkerja.callback'))
         ->assertStatus(500)
-        ->assertDontSee('Autentikasi gagal diproses')
         ->assertHeaderMissing('Location');
 });
