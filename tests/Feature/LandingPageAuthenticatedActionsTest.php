@@ -11,3 +11,8 @@ test('authenticated users see dashboard actions instead of registration actions 
         ->assertDontSee('Daftar Sekarang')
         ->assertDontSee('Daftar Gratis Sekarang');
 });
+
+test('landing page can be rendered repeatedly in one process', function () {
+    $this->get(route('landingpage.index'))->assertOk();
+    $this->get(route('landingpage.index'))->assertOk();
+});

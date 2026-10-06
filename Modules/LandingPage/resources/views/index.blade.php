@@ -421,8 +421,7 @@
     <!-- STATS BANNER                               -->
     <!-- ========================================== -->
     @php
-        function parseStat($val, $defaultSuffix = '')
-        {
+        $parseStat = function ($val, $defaultSuffix = '') {
             $val = (string) $val;
             $num = floatval(preg_replace('/[^0-9.]/', '', $val));
             $suf = preg_replace('/[0-9.]/', '', $val);
@@ -430,11 +429,11 @@
                 $suf .= '+';
             }
             return ['num' => $num ? $num : 0, 'suf' => $suf ?: $defaultSuffix];
-        }
-        $sProv = parseStat($stats['provinces'] ?? 38);
-        $sReg = parseStat($stats['regencies'] ?? 514);
-        $sRtk = parseStat($stats['rtk'] ?? '1.2K', '+');
-        $sCourse = parseStat($stats['courses'] ?? 15);
+        };
+        $sProv = $parseStat($stats['provinces'] ?? 38);
+        $sReg = $parseStat($stats['regencies'] ?? 514);
+        $sRtk = $parseStat($stats['rtk'] ?? '1.2K', '+');
+        $sCourse = $parseStat($stats['courses'] ?? 15);
 
         // ---- Dekorasi halftone 1/4 elips (pusat di pojok kanan bawah, melebar ke kiri) ----
         $W = 760; // lebar kotak SVG (px) -> makin besar makin melebar ke kiri
