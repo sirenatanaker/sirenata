@@ -24,7 +24,7 @@ Route::prefix("auth")->group(function () {
         ->name("logout");
 
 
-    Route::get('/siapkerja/redirect', [SiapKerjaController::class, 'redirect'])->name('siapkerja.redirect');
+    Route::get('/redirect', [SiapKerjaController::class, 'redirect'])->name('siapkerja.redirect');
     Route::get('/callback', [SiapKerjaController::class, 'callback'])->name('siapkerja.callback');
     Route::post('/siapkerja/logout', [SiapKerjaController::class, 'logout'])->name('siapkerja.logout');
 });

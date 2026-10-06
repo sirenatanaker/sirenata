@@ -51,11 +51,16 @@ class SiapKerjaController extends Controller
 
             return redirect()->route($user->getRedirectRoute());
         } catch (\Throwable $e) {
-            \Illuminate\Support\Facades\Log::error('SiapKerja callback failed: ' . $e->getMessage(), [
+            $errorReference = (string) Str::uuid();
+
+            \Illuminate\Support\Facades\Log::error('SiapKerja callback failed', [
+                'reference' => $errorReference,
                 'exception' => $e,
             ]);
 
-            return redirect()->route('login')->with('error', 'Login SIAPKerja gagal: ' . $e->getMessage());
+            return response()->view('auth::auth.sso-error', [
+                'errorReference' => $errorReference,
+            ], 500);
         }
     }
 
