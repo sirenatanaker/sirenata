@@ -211,7 +211,7 @@
                 @else
                     <a href="{{ route(auth()->user()->getRedirectRoute()) }}"
                         class="px-6 py-2.5 font-bold text-white rounded-full shadow-md hover:shadow-lg transition-all"
-                        style="background-color: #13416B;">Dashboard</a>
+                        style="background-color: #13416B;">Masuk</a>
                 @endguest
             </div>
 
@@ -245,7 +245,7 @@
                 @else
                     <a href="{{ route(auth()->user()->getRedirectRoute()) }}"
                         class="block border-t border-slate-100 pt-4 mt-2 text-center py-3 rounded-xl font-bold text-white"
-                        style="background-color: #13416B;">Buka Dashboard</a>
+                        style="background-color: #13416B;">Masuk</a>
                 @endguest
             </div>
         </div>
@@ -285,7 +285,7 @@
                         <a href="{{ route(auth()->user()->getRedirectRoute()) }}"
                             class="inline-flex justify-center items-center px-8 py-3.5 rounded-full text-white font-bold shadow-md hover:shadow-lg transition-all"
                             style="background-color: #13416B;">
-                            Buka Dashboard
+                            Masuk
                         </a>
                     @endguest
                     <a href="#features"
@@ -1130,7 +1130,7 @@
                             <a href="{{ route(auth()->user()->getRedirectRoute()) }}"
                                 class="w-full sm:w-auto px-6 py-3 lg:px-8 lg:py-4 bg-white font-bold rounded-full shadow-lg text-sm lg:text-lg text-center"
                                 style="color: #13416B;">
-                                Buka Dashboard
+                                Masuk
                             </a>
                         @endguest
                     </div>

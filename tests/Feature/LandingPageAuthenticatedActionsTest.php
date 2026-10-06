@@ -6,7 +6,9 @@ test('authenticated users see dashboard actions instead of registration actions 
     $this->actingAs(User::factory()->create())
         ->get(route('landingpage.index'))
         ->assertOk()
-        ->assertSee('Buka Dashboard')
+        ->assertSee('Masuk')
+        ->assertDontSee('Buka Dashboard')
+        ->assertDontSee('>Dashboard</a>', false)
         ->assertDontSee('Daftar Gratis')
         ->assertDontSee('Daftar Sekarang')
         ->assertDontSee('Daftar Gratis Sekarang');
