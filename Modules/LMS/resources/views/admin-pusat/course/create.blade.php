@@ -20,17 +20,10 @@
                 @csrf
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <!-- Kategori (Category ID) -->
-                    <div class="col-span-1 md:col-span-2">
-                        <x-form.select name="category_id" id="category_id" label="Kategori" required>
-                            <option value="" disabled selected>-- Pilih Kategori --</option>
-                            @foreach ($categories as $category)
-                                <option value="{{ $category->id }}" @selected(old('category_id') == $category->id)>
-                                    {{ $category->name }}
-                                </option>
-                            @endforeach
-                        </x-form.select>
-                    </div>
+                    @include('lms::admin-pusat.course.partials.category-picker', [
+                        'categories' => $categories,
+                        'selectedCategoryId' => old('category_id', ''),
+                    ])
 
                     <!-- Nama Course -->
                     <div class="col-span-1 md:col-span-2">
