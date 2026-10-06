@@ -44,6 +44,7 @@ class LoginController extends Controller
     public function logout(Request $request): RedirectResponse
     {
         $this->authService->logout();
-        return redirect(route('login'))->with('success', 'You have been logged out!');
+
+        return redirect()->route('landingpage.index')->with('success', 'Anda telah keluar.');
     }
 }

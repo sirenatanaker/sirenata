@@ -54,18 +54,16 @@ class AuthService
      */
     public function logout(): void
     {
-        $user = Auth::user();
+        $guard = Auth::guard('web');
+        $user = $guard->user();
 
         if ($user) {
-            // Hapus token yang bernama 'api-token'
             $user->tokens()->where('name', 'api-token')->delete();
-            // Atau cukup gunakan $user->tokens()->delete(); jika ingin menghapus semua token user
         }
 
-        // Hapus dari session
-        session()->forget('api_token');
+        session()->forget(['api_token', 'access_token', 'refresh_token']);
 
-        Auth::logout();
+        $guard->logout();
         session()->invalidate();
         session()->regenerateToken();
     }

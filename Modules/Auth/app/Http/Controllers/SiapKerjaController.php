@@ -4,12 +4,8 @@ namespace Modules\Auth\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
-use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
 use Laravel\Socialite\Facades\Socialite;
-use Illuminate\Support\Facades\DB;
 use Modules\Permission\Enums\StackHolder;
 
 class SiapKerjaController extends Controller
@@ -48,16 +44,5 @@ class SiapKerjaController extends Controller
         ]);
 
         return redirect()->route($user->getRedirectRoute());
-    }
-
-    public function logout()
-    {
-        Auth::logout();
-        request()->session()->forget(['access_token', 'refresh_token']);
-
-        request()->session()->invalidate();
-        request()->session()->regenerateToken();
-
-        return redirect('/');
     }
 }
