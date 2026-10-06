@@ -269,8 +269,8 @@
                     Masa Depan <span class="text-[#13416B]">Ketenagakerjaan</span> Dimulai di Sini.
                 </h1>
                 <p class="text-base lg:text-lg text-slate-600 mb-5 lg:mb-8 leading-relaxed max-w-lg">
-                    Platform terpadu untuk manajemen Rencana Tenaga Kerja (Makro & Mikro) dan evaluasi IPK, dilengkapi
-                    fasilitas e-learning interaktif sebagai sarana transfer pengetahuan yang berkelanjutan dari pusat ke
+                    Platform terpadu untuk manajemen Rencana Tenaga Kerja, dilengkapi
+                    fasilitas e-learning sebagai sarana transfer pengetahuan yang berkelanjutan dari pusat ke
                     daerah.
                 </p>
 
