@@ -247,6 +247,9 @@ class UserDashboardController extends Controller
                     'subtitle' => $item->category->name ?? 'Kategori Umum',
                     'url' => route('user.course.my-course.detail', $item->slug),
                     'initials' => $getInitials($item->name),
+                    'cover' => $item->thumbnail
+                        ? (str_starts_with($item->thumbnail, 'http') ? $item->thumbnail : asset('storage/' . $item->thumbnail))
+                        : null,
                     'color' => 'bg-[#184A78]'
                 ];
             });
@@ -265,6 +268,9 @@ class UserDashboardController extends Controller
                     'subtitle' => 'Katalog: ' . ($item->category->name ?? 'Kategori Umum'),
                     'url' => route('user.course.index', $item->slug),
                     'initials' => $getInitials($item->name),
+                    'cover' => $item->thumbnail
+                        ? (str_starts_with($item->thumbnail, 'http') ? $item->thumbnail : asset('storage/' . $item->thumbnail))
+                        : null,
                     'color' => 'bg-emerald-600'
                 ];
             });
@@ -280,6 +286,7 @@ class UserDashboardController extends Controller
                     'subtitle' => $item->libraryCategory->name ?? 'Dokumen Perpustakaan',
                     'url' => route('user.library.index') . '?search=' . urlencode($item->title),
                     'initials' => $getInitials($item->title),
+                    'cover' => $item->cover_image_url,
                     'color' => 'bg-amber-600'
                 ];
             });

@@ -45,9 +45,9 @@
                         x-transition:leave="transition ease-in duration-150"
                         x-transition:leave-start="opacity-100 translate-y-0"
                         x-transition:leave-end="opacity-0 translate-y-1" x-cloak
-                        class="absolute top-full left-0 mt-2 bg-white border border-slate-200 rounded-xl shadow-xl z-50 overflow-hidden w-[calc(100vw-2rem)] max-w-full sm:w-full max-h-[70vh] flex flex-col">
+                        class="absolute top-full inset-x-0 mt-2 bg-white border border-slate-200 rounded-xl shadow-xl z-50 overflow-hidden w-full max-h-[70vh] flex flex-col">
 
-                        <div class="overflow-y-auto py-2 hide-scrollbar">
+                        <div class="overflow-y-auto py-1 sm:py-2 hide-scrollbar">
 
                             <!-- State Kosong / Tidak Ditemukan -->
                             <template
@@ -66,16 +66,19 @@
                             <template x-if="enrolledCourses.length > 0">
                                 <div>
                                     <div
-                                        class="px-5 py-2 bg-slate-50/80 border-y border-slate-100 text-[10px] font-bold text-slate-500 uppercase tracking-wider">
+                                        class="px-3 sm:px-5 py-2 bg-slate-50/80 border-y border-slate-100 text-[10px] font-bold text-slate-500 uppercase tracking-wider">
                                         Kursus Terdaftar</div>
                                     <ul>
                                         <template x-for="item in enrolledCourses">
                                             <li>
                                                 <a :href="item.url"
-                                                    class="flex items-center gap-3.5 px-5 py-3 hover:bg-slate-50 transition-colors border-l-2 border-transparent hover:border-[#13416B] group">
-                                                    <div class="w-10 h-10 rounded-lg flex items-center justify-center shrink-0 shadow-inner group-hover:scale-105 transition-transform text-white font-bold"
-                                                        :class="item.color">
-                                                        <span x-text="item.initials"></span>
+                                                    class="flex items-center gap-3 px-3 sm:px-5 py-2 sm:py-3 hover:bg-slate-50 transition-colors border-l-2 border-transparent hover:border-[#13416B] group">
+                                                    <div class="relative w-10 h-[50px] rounded-md overflow-hidden flex items-center justify-center shrink-0 border border-slate-200"
+                                                        :class="!item.cover && item.color">
+                                                        <img x-show="item.cover" :src="item.cover" :alt="item.title"
+                                                            class="w-full h-full object-cover" loading="lazy">
+                                                        <span x-show="!item.cover" x-text="item.initials"
+                                                            class="text-white font-bold"></span>
                                                     </div>
                                                     <div class="flex-1 min-w-0">
                                                         <p class="text-sm font-bold text-slate-800 truncate group-hover:text-[#13416B]"
@@ -96,16 +99,19 @@
                             <template x-if="availableCatalogs.length > 0">
                                 <div>
                                     <div
-                                        class="px-5 py-2 bg-slate-50/80 border-y border-slate-100 text-[10px] font-bold text-slate-500 uppercase tracking-wider">
+                                        class="px-3 sm:px-5 py-2 bg-slate-50/80 border-y border-slate-100 text-[10px] font-bold text-slate-500 uppercase tracking-wider">
                                         Katalog (Belum Terdaftar)</div>
                                     <ul>
                                         <template x-for="item in availableCatalogs">
                                             <li>
                                                 <a :href="item.url"
-                                                    class="flex items-center gap-3.5 px-5 py-3 hover:bg-slate-50 transition-colors border-l-2 border-transparent hover:border-[#13416B] group">
-                                                    <div class="w-10 h-10 rounded-lg flex items-center justify-center shrink-0 shadow-inner group-hover:scale-105 transition-transform text-white font-bold"
-                                                        :class="item.color">
-                                                        <span x-text="item.initials"></span>
+                                                    class="flex items-center gap-3 px-3 sm:px-5 py-2 sm:py-3 hover:bg-slate-50 transition-colors border-l-2 border-transparent hover:border-[#13416B] group">
+                                                    <div class="relative w-10 h-[50px] rounded-md overflow-hidden flex items-center justify-center shrink-0 border border-slate-200"
+                                                        :class="!item.cover && item.color">
+                                                        <img x-show="item.cover" :src="item.cover" :alt="item.title"
+                                                            class="w-full h-full object-cover" loading="lazy">
+                                                        <span x-show="!item.cover" x-text="item.initials"
+                                                            class="text-white font-bold"></span>
                                                     </div>
                                                     <div class="flex-1 min-w-0">
                                                         <p class="text-sm font-bold text-slate-800 truncate group-hover:text-[#13416B]"
@@ -126,16 +132,19 @@
                             <template x-if="libraries.length > 0">
                                 <div>
                                     <div
-                                        class="px-5 py-2 bg-slate-50/80 border-y border-slate-100 text-[10px] font-bold text-slate-500 uppercase tracking-wider">
+                                        class="px-3 sm:px-5 py-2 bg-slate-50/80 border-y border-slate-100 text-[10px] font-bold text-slate-500 uppercase tracking-wider">
                                         Buku / Perpustakaan</div>
                                     <ul>
                                         <template x-for="item in libraries">
                                             <li>
                                                 <a :href="item.url"
-                                                    class="flex items-center gap-3.5 px-5 py-3 hover:bg-slate-50 transition-colors border-l-2 border-transparent hover:border-[#13416B] group">
-                                                    <div class="w-10 h-10 rounded-lg flex items-center justify-center shrink-0 shadow-inner group-hover:scale-105 transition-transform text-white font-bold"
-                                                        :class="item.color">
-                                                        <span x-text="item.initials"></span>
+                                                    class="flex items-center gap-3 px-3 sm:px-5 py-2 sm:py-3 hover:bg-slate-50 transition-colors border-l-2 border-transparent hover:border-[#13416B] group">
+                                                    <div class="relative w-10 h-[50px] rounded-md overflow-hidden flex items-center justify-center shrink-0 border border-slate-200"
+                                                        :class="!item.cover && item.color">
+                                                        <img x-show="item.cover" :src="item.cover" :alt="item.title"
+                                                            class="w-full h-full object-cover" loading="lazy">
+                                                        <span x-show="!item.cover" x-text="item.initials"
+                                                            class="text-white font-bold"></span>
                                                     </div>
                                                     <div class="flex-1 min-w-0">
                                                         <p class="text-sm font-bold text-slate-800 truncate group-hover:text-[#13416B]"
