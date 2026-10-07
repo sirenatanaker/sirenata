@@ -30,32 +30,32 @@ class Notification extends Model
     public const TYPES = [
         'project.approved' => [
             'label' => 'Proyek',
-            'icon'  => 'fas fa-diagram-project',
+            'icon'  => 'workflow',
             'tile'  => 'bg-indigo-50 text-indigo-600 ring-indigo-100',
         ],
         'project.completed' => [
             'label' => 'Proyek',
-            'icon'  => 'fas fa-flag-checkered',
+            'icon'  => 'flag',
             'tile'  => 'bg-teal-50 text-teal-600 ring-teal-100',
         ],
         'rtkd.verified' => [
             'label' => 'Verifikasi RTKD',
-            'icon'  => 'fas fa-check-double',
+            'icon'  => 'list-checks',
             'tile'  => 'bg-blue-50 text-blue-600 ring-blue-100',
         ],
         'rtkd.approved' => [
             'label' => 'Persetujuan RTKD',
-            'icon'  => 'fas fa-circle-check',
+            'icon'  => 'circle-check',
             'tile'  => 'bg-emerald-50 text-emerald-600 ring-emerald-100',
         ],
         'rtkd.rejected' => [
             'label' => 'RTKD Ditolak',
-            'icon'  => 'fas fa-circle-xmark',
+            'icon'  => 'circle-x',
             'tile'  => 'bg-rose-50 text-rose-600 ring-rose-100',
         ],
         'system.general' => [
             'label' => 'Sistem',
-            'icon'  => 'fas fa-bell',
+            'icon'  => 'bell',
             'tile'  => 'bg-slate-100 text-slate-600 ring-slate-200',
         ],
     ];
@@ -158,7 +158,7 @@ class Notification extends Model
             'id'      => $this->id,
             'type'    => $this->type,
             'group'   => $this->meta['group'] ?? $meta['label'],
-            'icon'    => $this->meta['icon'] ?? $meta['icon'],
+            'icon'    => $meta['icon'],
             'tile'    => $this->meta['tile'] ?? $meta['tile'],
             'title'   => $this->title,
             'message' => $this->message,

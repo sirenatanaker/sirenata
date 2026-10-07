@@ -57,10 +57,10 @@
     <button type="button" @click="toggle()" :aria-expanded="open" aria-haspopup="true" aria-label="Notifikasi"
         class="relative inline-flex h-10 w-10 items-center justify-center rounded-xl text-slate-500 transition-colors duration-150 hover:bg-slate-100 hover:text-[#13416B] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#13416B]/30">
 
-        <svg class="h-[19px] w-[19px]" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"
+        <svg class="h-[19px] w-[19px]" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
             stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true">
-            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
-            <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+            <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9" />
+            <path d="M10 21h4" />
         </svg>
 
         <!-- Angka notifikasi (kanan atas) -->
@@ -107,7 +107,7 @@
 
             <!-- Kosong -->
             <div x-show="items.length === 0" x-cloak class="px-6 py-9 text-center">
-                <i class="far fa-bell text-2xl text-slate-200"></i>
+                <svg class="h-6 w-6 text-slate-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9m-8.27 13a2 2 0 0 0 3.54 0" /></svg>
                 <p class="mt-2 text-[13px] font-medium text-slate-500">Belum ada notifikasi</p>
                 <p class="mx-auto mt-1 max-w-[14rem] text-[11px] leading-relaxed text-slate-400">
                     Pemberitahuan persetujuan proyek dan status RTKD akan muncul di sini.
@@ -120,7 +120,12 @@
 
                     <!-- Ikon kecil warna kalem -->
                     <span class="mt-0.5 grid h-8 w-8 shrink-0 place-items-center rounded-lg ring-1 ring-inset" :class="item.tile">
-                        <i :class="item.icon" class="text-[13px]"></i>
+                        <svg x-show="item.icon === 'workflow'" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="6" height="6" rx="1" /><rect x="15" y="15" width="6" height="6" rx="1" /><path d="M9 6h3a3 3 0 0 1 3 3v6m-6 3H6a3 3 0 0 1-3-3v-3" /></svg>
+                        <svg x-show="item.icon === 'flag'" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 22V4m0 1c5-4 11 4 16 0v12c-5 4-11-4-16 0" /></svg>
+                        <svg x-show="item.icon === 'list-checks'" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 17 2 2 4-4m-6-8 2 2 4-4m4 2h8m-8 8h8" /></svg>
+                        <svg x-show="item.icon === 'circle-check'" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10" /><path d="m9 12 2 2 4-4" /></svg>
+                        <svg x-show="item.icon === 'circle-x'" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10" /><path d="m15 9-6 6m0-6 6 6" /></svg>
+                        <svg x-show="item.icon === 'bell'" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9m-8.27 13a2 2 0 0 0 3.54 0" /></svg>
                     </span>
 
                     <!-- Teks -->

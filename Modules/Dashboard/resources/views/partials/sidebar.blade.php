@@ -56,7 +56,7 @@
                 </a>
                 <!-- Tombol tutup opsional untuk layar kecil -->
                 <button @click="sidebarOpen = false" class="lg:hidden text-slate-400 hover:text-slate-600">
-                    <i class="fas fa-times text-xl"></i>
+                    <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12" /></svg>
                 </button>
             </div>
 
