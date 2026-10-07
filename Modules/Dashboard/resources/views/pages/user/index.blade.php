@@ -393,7 +393,7 @@
 
                                                 @if ($course->pivot->status === 'completed')
                                                     <span
-                                                        class="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-bold uppercase text-green-700 bg-green-100 border border-green-200 shrink-0">Selesai</span>
+                                                        class="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-bold uppercase text-green-700 bg-green-100 shrink-0">Selesai</span>
                                                 @elseif ($course->pivot->status === 'in_progress')
                                                     <span
                                                         class="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-bold uppercase text-[#13416B] bg-[#13416B]/10 border border-[#13416B]/20 shrink-0">Berjalan</span>
