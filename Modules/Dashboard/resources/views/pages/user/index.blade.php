@@ -454,7 +454,7 @@
             <div
                 class="bg-white rounded-2xl shadow-xl max-w-2xl w-full max-h-[calc(100dvh-1rem)] sm:max-h-[90vh] overflow-y-auto border border-slate-200 overscroll-contain">
                 <div class="p-4 sm:p-8">
-                    <div class="text-center mb-5 sm:mb-6">
+                    <div class="text-center mb-8">
                         {{-- <div
                             class="bg-[#13416B]/10 text-[#13416B] w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-3 border border-[#13416B]/20 shadow-sm">
                             <img src="{{ asset('images/logo.png') }}" alt="Logo Kemnaker"
@@ -481,21 +481,21 @@
                         <div>
                             <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">Asal
                                 Instansi <span class="text-red-500">*</span></label>
-                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-3">
+                            <div class="grid grid-cols-3 gap-1.5 sm:gap-3">
                                 <label
-                                class="flex items-center justify-center px-3 py-3 sm:py-2.5 border border-slate-200 rounded-lg cursor-pointer hover:border-[#13416B] hover:bg-[#13416B]/5 transition-all font-semibold text-sm text-slate-700">
+                                    class="flex items-center justify-center min-w-0 px-1.5 py-2 sm:px-3 sm:py-2.5 border border-slate-200 rounded-lg cursor-pointer hover:border-[#13416B] hover:bg-[#13416B]/5 transition-all font-semibold text-xs sm:text-sm text-slate-700">
                                     <input type="radio" name="asalInstansi" value="pusat"
-                                        class="mr-2 text-[#13416B] focus:ring-[#13416B]"> <span>Pusat</span>
+                                        class="mr-1.5 shrink-0 text-[#13416B] focus:ring-[#13416B]"> <span class="whitespace-nowrap">Pusat</span>
                                 </label>
                                 <label
-                                    class="flex items-center justify-center px-3 py-3 sm:py-2.5 border border-slate-200 rounded-lg cursor-pointer hover:border-[#13416B] hover:bg-[#13416B]/5 transition-all font-semibold text-sm text-slate-700">
+                                    class="flex items-center justify-center min-w-0 px-1.5 py-2 sm:px-3 sm:py-2.5 border border-slate-200 rounded-lg cursor-pointer hover:border-[#13416B] hover:bg-[#13416B]/5 transition-all font-semibold text-xs sm:text-sm text-slate-700">
                                     <input type="radio" name="asalInstansi" value="provinsi"
-                                        class="mr-2 text-[#13416B] focus:ring-[#13416B]"> <span>Provinsi</span>
+                                        class="mr-1.5 shrink-0 text-[#13416B] focus:ring-[#13416B]"> <span class="whitespace-nowrap">Provinsi</span>
                                 </label>
                                 <label
-                                    class="flex items-center justify-center px-3 py-3 sm:py-2.5 border border-slate-200 rounded-lg cursor-pointer hover:border-[#13416B] hover:bg-[#13416B]/5 transition-all font-semibold text-sm text-slate-700">
+                                    class="flex items-center justify-center min-w-0 px-1.5 py-2 sm:px-3 sm:py-2.5 border border-slate-200 rounded-lg cursor-pointer hover:border-[#13416B] hover:bg-[#13416B]/5 transition-all font-semibold text-xs sm:text-sm text-slate-700">
                                     <input type="radio" name="asalInstansi" value="kabkota"
-                                        class="mr-2 text-[#13416B] focus:ring-[#13416B]"> <span>Kab/Kota</span>
+                                        class="mr-1.5 shrink-0 text-[#13416B] focus:ring-[#13416B]"> <span class="whitespace-nowrap">Kab/Kota</span>
                                 </label>
                             </div>
                         </div>
@@ -564,7 +564,7 @@
 
                         <div class="pt-3">
                             <button type="submit"
-                                class="w-full bg-blue-500 text-white py-3 px-5 rounded-lg text-sm font-bold hover:bg-blue-600 transition-colors shadow-sm flex items-center justify-center gap-2">
+                                class="w-full bg-blue-600 text-white py-3 px-5 rounded-lg text-sm font-bold hover:bg-blue-700 transition-colors shadow-sm flex items-center justify-center gap-2">
                                 <i class="fas fa-save"></i> <span>Simpan & Lanjutkan</span>
                             </button>
                         </div>
