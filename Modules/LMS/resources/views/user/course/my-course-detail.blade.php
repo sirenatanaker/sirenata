@@ -562,21 +562,21 @@
                                         @if ($postTestBab)
                                             <div class="mt-4 pt-4 border-t border-slate-200/80">
                                                 <div
-                                                    class="flex flex-col sm:flex-row sm:items-center justify-between p-3.5 sm:p-5 rounded-xl border {{ $isPostTestBabCompleted ? 'border-[#13416B]/20 bg-[#13416B]/5' : 'bg-[#13416B] border-[#13416B]' }} hover:shadow-sm transition-all gap-4">
+                                                    class="flex flex-col sm:flex-row sm:items-center justify-between p-3.5 sm:p-5 rounded-xl border bg-[#13416B] border-[#13416B] hover:shadow-sm transition-all gap-4">
                                                     <div
                                                         class="flex items-start sm:items-center gap-3 sm:gap-4 flex-1 min-w-0">
                                                         <span
-                                                            class="flex items-center justify-center w-10 h-10 sm:w-11 sm:h-11 rounded-full {{ $isPostTestBabCompleted ? 'bg-[#13416B] text-white border border-[#13416B]' : 'bg-white/20 text-white border border-white/30' }} shrink-0 mt-0.5 sm:mt-0">
+                                                            class="flex items-center justify-center w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-white/20 text-white border border-white/30 shrink-0 mt-0.5 sm:mt-0">
                                                             <i class="fas fa-clipboard-check text-lg"></i>
                                                         </span>
                                                         <div class="flex-1 min-w-0">
                                                             <p
-                                                                class="font-bold text-sm leading-tight break-words {{ $isPostTestBabCompleted ? 'text-slate-800' : 'text-white' }}">
+                                                                class="font-bold text-sm leading-tight break-words text-white">
                                                                 {{ data_get($postTestBab, 'title', 'Post Test: ' . $sectionName) }}
                                                             </p>
                                                             @if (data_get($postTestBab, 'description'))
                                                                 <p
-                                                                    class="text-xs mt-1.5 line-clamp-2 {{ $isPostTestBabCompleted ? 'text-slate-500' : 'text-blue-100' }}">
+                                                                    class="text-xs mt-1.5 line-clamp-2 text-blue-100">
                                                                     {{ data_get($postTestBab, 'description') }}
                                                                 </p>
                                                             @endif
