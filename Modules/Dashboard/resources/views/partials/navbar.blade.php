@@ -3,7 +3,7 @@
     :class="sidebarOpen ? 'lg:pl-64' : 'pl-0'">
 
     <div
-        class="px-4 sm:px-6 lg:px-8 py-3.5 sm:py-4 flex items-center justify-between w-full gap-3 sm:gap-6 min-h-[72px] sm:min-h-[80px]">
+        class="px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between w-full gap-3 sm:gap-6 min-h-[72px] sm:min-h-[80px]">
 
         <!-- Bagian Kiri & Tengah (Toggle + Searchbar) -->
         <div class="flex items-center flex-1 gap-3 sm:gap-5">
@@ -13,7 +13,7 @@
                 <button @click="sidebarOpen = !sidebarOpen"
                     class="hidden lg:block p-2 sm:p-2.5 rounded-xl cursor-pointer text-slate-500 hover:bg-slate-100 hover:text-[#13416B] focus:outline-none transition-colors shrink-0">
                     <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                        <path stroke-linecap="round" stroke-width="2" d="M4 6h16M4 12h10M4 18h16" />
                     </svg>
                 </button>
 
@@ -28,7 +28,7 @@
                         <!-- Input Pencarian -->
                         <input type="text" x-model="query" @input.debounce.500ms="fetchResults"
                             @focus="if(query.length > 1) isOpen = true"
-                            class="bg-slate-50 border border-slate-200 text-slate-900 text-[10px] sm:text-sm rounded-xl focus:ring-[#13416B] focus:border-[#13416B] block w-full ps-9 sm:ps-11 pe-8 sm:pe-10 py-2.5 sm:py-3 transition-colors shadow-sm"
+                            class="bg-slate-50 border border-slate-200 text-slate-900 text-[10px] sm:text-sm rounded-xl focus:ring-[#13416B] focus:border-[#13416B] block w-full ps-9 sm:ps-11 pe-8 sm:pe-10 py-2 sm:py-2.5 transition-colors"
                             placeholder="Cari kursus dan koleksi perpustakaan..." autocomplete="off">
 
                         <!-- Ikon Loading -->
@@ -204,7 +204,7 @@
                 <button @click="sidebarOpen = !sidebarOpen"
                     class="block p-2 sm:p-2.5 rounded-xl cursor-pointer text-slate-500 hover:bg-slate-100 hover:text-[#13416B] focus:outline-none transition-colors shrink-0">
                     <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                        <path stroke-linecap="round" stroke-width="2" d="M4 6h16M4 12h10M4 18h16" />
                     </svg>
                 </button>
             @endif
