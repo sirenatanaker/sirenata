@@ -206,7 +206,7 @@
                     <a href="{{ route('login') }}"
                         class="px-5 py-2 font-bold text-slate-700 hover:bg-slate-100 rounded-full transition-colors">Masuk</a>
                     @unless (session('logged_out'))
-                        <a href="{{ route('login') }}"
+                        <a href="{{ config('services.siapkerja.register_url') }}"
                             class="px-6 py-2.5 font-bold text-white rounded-full shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all"
                             style="background-color: #13416B;">Daftar Gratis</a>
                     @endunless
@@ -242,7 +242,7 @@
                         <a href="{{ route('login') }}"
                             class="flex-1 text-center py-3 rounded-xl font-bold bg-slate-100 text-slate-700">Masuk</a>
                         @unless (session('logged_out'))
-                            <a href="{{ route('login') }}" class="flex-1 text-center py-3 rounded-xl font-bold text-white"
+                            <a href="{{ config('services.siapkerja.register_url') }}" class="flex-1 text-center py-3 rounded-xl font-bold text-white"
                                 style="background-color: #13416B;">Daftar</a>
                         @endunless
                     </div>
@@ -281,7 +281,7 @@
                 <div class="flex flex-col sm:flex-row gap-3 mb-6 lg:mb-10">
                     @guest
                         @unless (session('logged_out'))
-                            <a href="{{ route('login') }}"
+                            <a href="{{ config('services.siapkerja.register_url') }}"
                                 class="inline-flex justify-center items-center px-8 py-3.5 rounded-full text-white font-bold shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all"
                                 style="background-color: #13416B;">
                                 Daftar Sekarang
@@ -1130,7 +1130,7 @@
                         style="transition-delay: 0.2s;">
                         @guest
                             @unless (session('logged_out'))
-                                <a href="{{ route('login') }}"
+                                <a href="{{ config('services.siapkerja.register_url') }}"
                                     class="w-full sm:w-auto px-6 py-3 lg:px-8 lg:py-4 bg-white font-bold rounded-full shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all text-sm lg:text-lg text-center"
                                     style="color: #13416B;">
                                     Daftar Gratis Sekarang

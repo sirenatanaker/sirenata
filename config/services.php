@@ -39,6 +39,7 @@ return [
         'client_id'     => env('SIAPKERJA_CLIENT_ID'),
         'client_secret' => env('SIAPKERJA_CLIENT_SECRET'),
         'redirect'      => env('SIAPKERJA_REDIRECT_URI'),
+        'register_url'  => env('SIAPKERJA_REGISTER_URL'),
         'super_admin_emails' => array_values(array_filter(array_map(
             'trim',
             explode(',', (string) env('SIAPKERJA_SUPER_ADMIN_EMAILS', ''))

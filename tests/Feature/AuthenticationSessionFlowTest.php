@@ -55,6 +55,15 @@ test('authenticated users can return to the landing page', function () {
         ->assertOk();
 });
 
+test('landing page registration links point to SIAPKerja while login keeps using the SSO route', function () {
+    config(['app.env' => 'production']);
+
+    $this->get(route('landingpage.index'))
+        ->assertOk()
+        ->assertSee('href="https://account.kemnaker.go.id/register"', false)
+        ->assertSee('href="' . route('login') . '"', false);
+});
+
 test('local users can sign in with the built-in email and password form', function () {
     config(['app.env' => 'local']);
 
