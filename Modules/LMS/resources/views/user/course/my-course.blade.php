@@ -118,16 +118,15 @@
                             </h3>
 
                             {{-- INFO COURSE: Modul & Materi --}}
-                            <div class="flex items-center gap-3 mb-3 text-xs font-medium text-slate-500">
-                                <span
-                                    class="flex items-center gap-1.5 bg-slate-50 px-2 py-1 rounded border border-slate-100">
-                                    <i class="fas fa-layer-group text-slate-400"></i> {{ $course->total_modul ?? 0 }}
-                                    Modul
+                            <div class="flex flex-wrap items-center gap-2 mb-3 text-xs font-medium text-slate-500">
+                                <span class="flex items-center gap-1.5 bg-slate-50 px-2 py-1 rounded border border-slate-100">
+                                    <i class="fas fa-layer-group text-slate-400"></i> {{ $course->total_modul ?? 0 }} Modul
                                 </span>
-                                <span
-                                    class="flex items-center gap-1.5 bg-slate-50 px-2 py-1 rounded border border-slate-100">
-                                    <i class="fas fa-file-alt text-slate-400"></i> {{ $course->total_materi ?? 0 }}
-                                    Materi
+                                <span class="flex items-center gap-1.5 bg-slate-50 px-2 py-1 rounded border border-slate-100">
+                                    <i class="fas fa-list-ul text-slate-400"></i> {{ $course->total_materi ?? 0 }} Topik
+                                </span>
+                                <span class="flex items-center gap-1.5 bg-[#13416B]/5 text-[#13416B] px-2 py-1 rounded border border-[#13416B]/10">
+                                    <i class="fas fa-users"></i> {{ number_format($course->students_count ?? 0, 0, ',', '.') }} Peserta
                                 </span>
                             </div>
 
@@ -155,10 +154,13 @@
                                         class="w-full py-2.5 text-xs font-bold text-center rounded-xl transition-colors bg-emerald-50 text-emerald-700 group-hover:bg-emerald-600 group-hover:text-white border border-emerald-200 group-hover:border-emerald-600">
                                         <i class="fas fa-award mr-1"></i> Lihat Sertifikat
                                     </div>
+                                @elseif (($course->progress ?? 0) <= 0)
+                                    <div class="w-full py-2.5 text-xs font-bold text-center rounded-xl transition-colors bg-emerald-600 text-white border border-emerald-600 shadow-sm group-hover:bg-emerald-700 group-hover:border-emerald-700">
+                                        <i class="fas fa-play mr-1"></i> Mulai Belajar
+                                    </div>
                                 @else
-                                    <div
-                                        class="w-full py-2.5 text-xs font-bold text-center rounded-xl transition-colors bg-slate-50 text-slate-700 border border-slate-200 group-hover:bg-[#13416B] group-hover:text-white group-hover:border-[#13416B]">
-                                        Lanjutkan Modul
+                                    <div class="w-full py-2.5 text-xs font-bold text-center rounded-xl transition-colors bg-slate-50 text-slate-700 border border-slate-200 group-hover:bg-[#13416B] group-hover:text-white group-hover:border-[#13416B]">
+                                        Lanjutkan Belajar
                                     </div>
                                 @endif
                             </div>
