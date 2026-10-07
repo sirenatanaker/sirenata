@@ -197,11 +197,7 @@
                 ? 'text-[#13416B] bg-slate-100 font-bold'
                 : 'text-slate-500 hover:bg-slate-50 hover:text-[#13416B]' }}">
             <span class="w-6 shrink-0 flex items-center justify-center">
-                <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
-                    fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"
-                    stroke-linejoin="round" aria-hidden="true">
-                    <path d="M6 4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18l-6-4-6 4V4Z" />
-                </svg>
+                <i class="fas fa-bookmark text-[1.1rem]" aria-hidden="true"></i>
             </span>
 
             <span class="flex-1 text-left text-[15px]">Manajemen Perpustakaan</span>

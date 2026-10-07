@@ -2,6 +2,24 @@
     @push('styles')
         <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <style>
+            #instansiForm .select2-container .select2-selection--single {
+                height: 44px;
+                border: 1px solid #e2e8f0;
+                border-radius: 0.5rem;
+            }
+
+            #instansiForm .select2-container .select2-selection__rendered {
+                line-height: 42px;
+                padding-left: 12px;
+                padding-right: 32px;
+            }
+
+            #instansiForm .select2-container .select2-selection__arrow {
+                height: 42px;
+                right: 8px;
+            }
+        </style>
     @endpush
 
     <div class="p-0 sm:p-6 lg:p-8 max-w-full mx-auto space-y-6">
@@ -437,10 +455,11 @@
                 class="bg-white rounded-2xl shadow-xl max-w-2xl w-full max-h-[calc(100dvh-1rem)] sm:max-h-[90vh] overflow-y-auto border border-slate-200 overscroll-contain">
                 <div class="p-4 sm:p-8">
                     <div class="text-center mb-5 sm:mb-6">
-                        <div
+                        {{-- <div
                             class="bg-[#13416B]/10 text-[#13416B] w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-3 border border-[#13416B]/20 shadow-sm">
-                            <i class="fas fa-building text-2xl"></i>
-                        </div>
+                            <img src="{{ asset('images/logo.png') }}" alt="Logo Kemnaker"
+                                class="h-9 w-9 object-contain">
+                        </div> --}}
                         <h2 class="text-lg sm:text-xl font-extrabold text-slate-900">Pilih Instansi Anda</h2>
                         <p class="text-xs sm:text-sm text-slate-500 mt-1">Lengkapi informasi institusi untuk melanjutkan akses
                             pembelajaran</p>
@@ -496,7 +515,7 @@
                             <label for="provinsi"
                                 class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">Provinsi
                                 <span class="text-red-500">*</span></label>
-                            <select id="provinsi" class="w-full" name="province_code">
+                            <select id="provinsi" class="w-full " name="province_code">
                                 <option value="">Pilih Provinsi</option>
                                 @foreach ($provinces as $prov)
                                     <option value="{{ $prov->code }}" data-name="{{ $prov->name }}">
@@ -545,7 +564,7 @@
 
                         <div class="pt-3">
                             <button type="submit"
-                                class="w-full bg-[#13416B] text-white py-3 px-5 rounded-lg text-sm font-bold hover:bg-[#0f3354] transition-colors shadow-sm flex items-center justify-center gap-2">
+                                class="w-full bg-blue-500 text-white py-3 px-5 rounded-lg text-sm font-bold hover:bg-blue-600 transition-colors shadow-sm flex items-center justify-center gap-2">
                                 <i class="fas fa-save"></i> <span>Simpan & Lanjutkan</span>
                             </button>
                         </div>
@@ -747,7 +766,7 @@
                         placeholder: function() {
                             return $(this).find('option:first').text();
                         },
-                        allowClear: true,
+                        allowClear: false,
                         width: '100%'
                     });
 
