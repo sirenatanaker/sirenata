@@ -663,8 +663,14 @@ class CourseService
         $user = \Illuminate\Support\Facades\Auth::user();
         $enrolledCourseIds = $user ? $user->enrolledCourses()->pluck('courses.id')->toArray() : [];
 
-        return Course::with('category')
-            ->withCount('sections')
+        return Course::with([
+                'category',
+                // Kurikulum ringkas untuk modal "ringkasan sebelum daftar" (hanya kolom yang dibutuhkan)
+                'sections.contents' => fn($q) => $q
+                    ->select('id', 'course_section_id', 'name', 'position', 'video', 'document')
+                    ->orderBy('position'),
+            ])
+            ->withCount(['sections', 'students'])
             ->when($search, fn($query) => $query->where('name', 'like', "%{$search}%"))
             ->when(!empty($categoryIds), fn($query) => $query->whereIn('category_id', $categoryIds))
             ->whereNotIn('id', $enrolledCourseIds)

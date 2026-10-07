@@ -159,7 +159,9 @@
                                                     <i class="fas fa-trash-alt text-sm"></i>
                                                 </button>
                                                 
-                                                <button type="button" class="w-8 h-8 flex items-center justify-center text-slate-400 transition-transform duration-200 pointer-events-none" :class="{ 'rotate-180': expanded }">
+                                                <button type="button" @click.stop="expanded = !expanded" :aria-expanded="expanded"
+                                                    class="w-8 h-8 flex items-center justify-center text-slate-400 transition-transform duration-200"
+                                                    :class="{ 'rotate-180': expanded }" aria-label="Buka atau tutup bagian">
                                                     <i class="fas fa-chevron-down text-sm"></i>
                                                 </button>
                                             </div>
