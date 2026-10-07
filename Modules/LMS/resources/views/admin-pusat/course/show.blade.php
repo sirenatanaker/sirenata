@@ -22,9 +22,9 @@
         </nav>
 
         <!-- Header Card Utama (Adaptasi UI User) -->
-        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 sm:p-6 lg:p-8 flex flex-col md:flex-row gap-6 lg:gap-8 items-start transition-all">
+        <div class="bg-white rounded-md shadow-sm border border-slate-200 p-5 sm:p-6 lg:p-8 flex flex-col md:flex-row gap-6 lg:gap-8 items-start transition-all">
             <!-- Bagian Kiri: Thumbnail -->
-            <div class="w-full md:w-1/3 lg:w-1/4 shrink-0 rounded-xl overflow-hidden bg-slate-100 aspect-video md:aspect-[4/3] relative border border-slate-200 flex items-center justify-center">
+            <div class="w-full md:w-1/3 lg:w-1/4 shrink-0 rounded-md overflow-hidden bg-slate-100 aspect-video md:aspect-[4/3] relative border border-slate-200 flex items-center justify-center">
                 @if (!empty($course->thumbnail))
                     <img src="{{ $course->thumbnail }}" alt="{{ $course->name }}" class="w-full h-full object-cover" />
                 @else
@@ -59,11 +59,11 @@
         </div>
 
         <!-- Grid Layout Bawah -->
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 items-start">
             
             <!-- KOLOM KIRI (Kurikulum) -->
-            <div class="lg:col-span-2 space-y-6">
-                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+            <div class="order-2 lg:order-1 lg:col-span-2 space-y-6">
+                <div class="bg-white rounded-md shadow-sm border border-slate-200 overflow-hidden">
                     <!-- Header Kurikulum -->
                     <div class="px-5 sm:px-6 py-4 sm:py-5 border-b border-slate-100 bg-slate-50 flex flex-col sm:flex-row justify-between sm:items-center gap-4">
                         <div class="flex items-center gap-3">
@@ -119,7 +119,7 @@
                             <div class="space-y-4 sm:space-y-5">
                                 <!-- Looping Bagian Materi -->
                                 @foreach ($course->course_sections as $index => $section)
-                                    <div x-data="{ expanded: true }" class="border border-slate-200 rounded-xl overflow-hidden shadow-sm transition-all duration-300" :class="{ 'ring-1 ring-[#13416B]/20': expanded }">
+                                    <div x-data="{ expanded: true }" class="border border-slate-200 rounded-md overflow-hidden shadow-sm transition-all duration-300" :class="{ 'ring-1 ring-[#13416B]/20': expanded }">
                                         <!-- Header Section -->
                                         <div class="bg-slate-50/80 px-4 sm:px-5 py-3 sm:py-4 flex flex-col sm:flex-row justify-between sm:items-center gap-3 transition-colors cursor-pointer" @click="expanded = !expanded">
                                             <div class="flex items-center gap-3.5">
@@ -179,7 +179,7 @@
                                             <div class="p-3 sm:p-5 border-t border-slate-100 bg-slate-50/30 space-y-3">
                                                 <!-- List Content -->
                                                 @forelse ($section->contents as $content)
-                                                    <div class="flex flex-col sm:flex-row sm:items-center justify-between p-3.5 rounded-xl border border-slate-200 bg-white hover:border-[#13416B]/40 hover:shadow-sm transition-all duration-200 gap-3">
+                                                    <div class="flex flex-col sm:flex-row sm:items-center justify-between p-3.5 rounded-md border border-slate-200 bg-white hover:border-[#13416B]/40 hover:shadow-sm transition-all duration-200 gap-3">
                                                         
                                                         <div class="flex items-start sm:items-center gap-3.5 flex-1 min-w-0">
                                                             <span class="flex items-center justify-center w-10 h-10 rounded-full bg-blue-50 text-[#13416B] shrink-0 border border-blue-100 mt-0.5 sm:mt-0">
@@ -276,7 +276,7 @@
                                         ->whereNull('course_section_id')
                                         ->first();
                                 @endphp
-                                <div class="bg-gradient-to-r from-[#13416B] to-[#0f3354] rounded-2xl overflow-hidden shadow-md mt-8 relative">
+                                <div class="bg-gradient-to-r from-[#13416B] to-[#0f3354] rounded-md overflow-hidden shadow-md mt-8 relative">
                                     <div class="p-5 sm:p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5">
                                         <div class="flex items-start sm:items-center gap-4 flex-1">
                                             <div class="w-12 h-12 rounded-full bg-white/20 text-white flex items-center justify-center shrink-0 border border-white/30 mt-1 sm:mt-0">
@@ -304,7 +304,7 @@
                             </div>
                         @else
                             <!-- Empty State Kurikulum -->
-                            <div class="text-center py-12 px-4 border border-dashed border-slate-200 rounded-2xl bg-slate-50">
+                            <div class="text-center py-12 px-4 border border-dashed border-slate-200 rounded-md bg-slate-50">
                                 <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-white text-[#13416B] mb-4 border border-slate-200 shadow-sm">
                                     <i class="fas fa-folder-open text-2xl"></i>
                                 </div>
@@ -321,25 +321,25 @@
             </div>
 
             <!-- KOLOM KANAN (Sidebar: Aksi, Informasi, Catatan) -->
-            <div class="space-y-6 lg:sticky lg:top-24 lg:self-start">
+            <div class="order-1 lg:order-2 flex flex-col gap-3 sm:gap-6 lg:sticky lg:top-24 lg:self-start">
                 
                 <!-- Card Aksi -->
-                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 sm:p-6">
-                    <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">Aksi Course</h3>
+                <div class="order-1 bg-white rounded-md shadow-sm border border-slate-200 p-3 sm:p-6">
+                    <h3 class="text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 sm:mb-4">Aksi Course</h3>
                     <div class="space-y-3">
                         <a href="{{ route('admin-pusat.management-course.courses.edit', $course->slug) }}"
-                            class="flex items-center justify-center w-full px-4 py-3 text-sm font-bold text-white bg-amber-500 rounded-xl hover:bg-amber-600 transition-colors shadow-sm gap-2">
+                            class="flex items-center justify-center w-full px-3 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-sm font-bold text-white bg-amber-500 rounded-md sm:rounded-xl hover:bg-amber-600 transition-colors shadow-sm gap-2">
                             <i class="fas fa-edit"></i> Edit Informasi Course
                         </a>
                         <a href="{{ route('admin-pusat.management-course.courses.index') }}"
-                            class="flex items-center justify-center w-full px-4 py-3 text-sm font-bold text-slate-700 bg-white border border-slate-300 rounded-xl hover:bg-slate-50 transition-colors shadow-sm gap-2">
+                            class="flex items-center justify-center w-full px-3 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-sm font-bold text-slate-700 bg-white border border-slate-300 rounded-md sm:rounded-xl hover:bg-slate-50 transition-colors shadow-sm gap-2">
                             <i class="fas fa-arrow-left"></i> Kembali ke Daftar
                         </a>
                     </div>
                 </div>
 
                 <!-- Card Pengaturan Sertifikat (WIDGET BARU) -->
-                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 sm:p-6">
+                <div class="order-4 bg-white rounded-md shadow-sm border border-slate-200 p-3 sm:p-6">
                     <div class="flex items-center gap-3 mb-4 border-b border-slate-100 pb-4">
                         <div class="w-10 h-10 flex items-center justify-center bg-emerald-50 text-emerald-600 rounded-xl shrink-0 border border-emerald-100">
                             <i class="fas fa-certificate text-lg"></i>
@@ -359,19 +359,19 @@
                 </div>
 
                 <!-- Card Informasi Tambahan -->
-                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-                    <div class="px-5 sm:px-6 py-4 border-b border-slate-100 bg-slate-50/50">
-                        <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Informasi Tambahan</h3>
+                <div class="order-2 bg-white rounded-md shadow-sm border border-slate-200 overflow-hidden">
+                    <div class="px-3 sm:px-6 py-3 sm:py-4 border-b border-slate-100 bg-slate-50/50">
+                        <h3 class="text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-wider">Informasi Tambahan</h3>
                     </div>
                     <div class="p-0">
                         <ul class="divide-y divide-slate-100">
-                            <li class="flex justify-between items-center px-5 sm:px-6 py-3.5 hover:bg-slate-50 transition-colors">
-                                <span class="text-sm font-medium text-slate-500">Kategori</span>
-                                <span class="text-sm font-bold text-[#13416B]">{{ $course->category->name ?? '-' }}</span>
+                            <li class="flex justify-between items-center gap-2 px-3 sm:px-6 py-2.5 sm:py-3.5 hover:bg-slate-50 transition-colors">
+                                <span class="text-xs sm:text-sm font-medium text-slate-500">Kategori</span>
+                                <span class="text-xs sm:text-sm font-bold text-[#13416B] text-right">{{ $course->category->name ?? '-' }}</span>
                             </li>
-                            <li class="flex justify-between items-center px-5 sm:px-6 py-3.5 hover:bg-slate-50 transition-colors">
-                                <span class="text-sm font-medium text-slate-500">Dibuat Pada</span>
-                                <span class="text-sm font-bold text-slate-800">
+                            <li class="flex justify-between items-center gap-2 px-3 sm:px-6 py-2.5 sm:py-3.5 hover:bg-slate-50 transition-colors">
+                                <span class="text-xs sm:text-sm font-medium text-slate-500">Dibuat Pada</span>
+                                <span class="text-xs sm:text-sm font-bold text-slate-800 text-right">
                                     {{ \Carbon\Carbon::parse($course->created_at)->translatedFormat('d M Y') }}
                                 </span>
                             </li>
@@ -380,11 +380,11 @@
                 </div>
 
                 <!-- Card Peringatan / Wajib Post Test -->
-                <div class="bg-amber-50 rounded-2xl border border-amber-200 p-5 flex items-start gap-3 shadow-sm">
-                    <i class="fas fa-info-circle text-amber-500 mt-0.5 text-lg shrink-0"></i>
+                <div class="order-3 bg-amber-50 rounded-md border border-amber-200 p-3 sm:p-5 flex items-start gap-2 sm:gap-3 shadow-sm">
+                    <i class="fas fa-info-circle text-amber-500 mt-0.5 text-base sm:text-lg shrink-0"></i>
                     <div>
-                        <h4 class="text-sm font-bold text-amber-800 mb-1">Panduan Evaluasi</h4>
-                        <p class="text-[11px] sm:text-xs text-amber-700 leading-relaxed font-medium">
+                        <h4 class="text-xs sm:text-sm font-bold text-amber-800 mb-1">Panduan Evaluasi</h4>
+                        <p class="text-[10px] sm:text-xs text-amber-700 leading-relaxed font-medium">
                             Anda <strong>wajib menambahkan Post Test</strong> pada setiap akhir bagian (section) materi sebagai syarat kelulusan peserta untuk lanjut ke bagian berikutnya.
                         </p>
                     </div>
