@@ -7,13 +7,8 @@
         <header
             class="flex flex-col gap-4 rounded-xl border border-slate-200/80 bg-white p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between sm:p-5">
             <div class="flex min-w-0 items-start gap-3">
-                <span
-                    class="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-[#13416B]/[0.07] text-[#13416B] ring-1 ring-inset ring-[#13416B]/10">
-                    <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"
-                        stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true">
-                        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
-                        <path d="M13.73 21a2 2 0 0 1-3.46 0" />
-                    </svg>
+                <span class="grid h-11 w-11 shrink-0 place-items-center text-[#13416B]">
+                    <i class="far fa-bell text-xl" aria-hidden="true"></i>
                 </span>
                 <div class="min-w-0">
                     <h1 class="text-lg font-extrabold tracking-tight text-slate-800 sm:text-xl">Notifikasi</h1>
@@ -27,7 +22,7 @@
             <div class="flex flex-wrap items-center gap-2">
                 <span
                     class="inline-flex items-center gap-1.5 rounded-lg bg-slate-100 px-2.5 py-1.5 text-[11px] font-semibold text-slate-500">
-                    <i class="fas fa-rotate text-[10px]"></i> Diperbarui otomatis
+                    <i class="fas fa-sync-alt text-[10px]"></i> Diperbarui otomatis
                 </span>
 
                 <span data-unread-count="{{ (int) $unreadCount }}"
@@ -75,12 +70,12 @@
             <!-- Keterangan ikon (layar sedang ke atas) -->
             <div class="ml-auto hidden shrink-0 items-center gap-3 rounded-lg border border-slate-200 bg-white px-3 py-2 text-[11px] font-semibold text-slate-500 lg:flex">
                 <span class="inline-flex items-center gap-1.5"><i
-                        class="fas fa-circle-check text-emerald-500"></i> Disetujui</span>
+                        class="far fa-circle-check text-emerald-500"></i> Disetujui</span>
                 <span class="inline-flex items-center gap-1.5"><i class="fas fa-check-double text-blue-500"></i>
                     Diverifikasi</span>
-                <span class="inline-flex items-center gap-1.5"><i class="fas fa-circle-xmark text-rose-500"></i>
+                <span class="inline-flex items-center gap-1.5"><i class="far fa-circle-xmark text-rose-500"></i>
                     Ditolak</span>
-                <span class="inline-flex items-center gap-1.5"><i class="fas fa-diagram-project text-indigo-500"></i>
+                <span class="inline-flex items-center gap-1.5"><i class="fas fa-project-diagram text-indigo-500"></i>
                     Proyek</span>
             </div>
         </nav>
@@ -91,8 +86,7 @@
                 @include('dashboard::partials.notifications.item', ['notification' => $notification])
             @empty
                 <div class="px-6 py-14 text-center sm:py-20">
-                    <span
-                        class="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-slate-50 text-slate-300 ring-1 ring-inset ring-slate-100">
+                    <span class="mx-auto grid h-14 w-14 place-items-center text-slate-300">
                         <i class="far fa-bell-slash text-2xl"></i>
                     </span>
                     <p class="mt-4 text-sm font-bold text-slate-700">

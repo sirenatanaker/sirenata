@@ -57,11 +57,7 @@
     <button type="button" @click="toggle()" :aria-expanded="open" aria-haspopup="true" aria-label="Notifikasi"
         class="relative inline-flex h-10 w-10 items-center justify-center rounded-xl text-slate-500 transition-colors duration-150 hover:bg-slate-100 hover:text-[#13416B] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#13416B]/30">
 
-        <svg class="h-[19px] w-[19px]" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
-            stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true">
-            <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9" />
-            <path d="M10 21h4" />
-        </svg>
+        <i class="far fa-bell text-[17px]" aria-hidden="true"></i>
 
         <!-- Angka notifikasi (kanan atas) -->
         <span x-show="unreadCount > 0" x-cloak
@@ -94,10 +90,7 @@
                 {{-- Tombol buang semua (X) --}}
                 <button type="button" @click="clearAll" :disabled="items.length === 0 || busy" aria-label="Buang semua notifikasi"
                     class="grid h-6 w-6 cursor-pointer place-items-center rounded-md text-slate-300 transition-colors hover:bg-slate-100 hover:text-slate-500 disabled:cursor-not-allowed disabled:opacity-40">
-                    <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                        viewBox="0 0 24 24" aria-hidden="true">
-                        <path d="M18 6 6 18M6 6l12 12" />
-                    </svg>
+                    <i class="fas fa-times text-xs" aria-hidden="true"></i>
                 </button>
             </div>
         </div>
@@ -107,7 +100,7 @@
 
             <!-- Kosong -->
             <div x-show="items.length === 0" x-cloak class="px-6 py-9 text-center">
-                <svg class="h-6 w-6 text-slate-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9m-8.27 13a2 2 0 0 0 3.54 0" /></svg>
+                <i class="far fa-bell text-2xl text-slate-300" aria-hidden="true"></i>
                 <p class="mt-2 text-[13px] font-medium text-slate-500">Belum ada notifikasi</p>
                 <p class="mx-auto mt-1 max-w-[14rem] text-[11px] leading-relaxed text-slate-400">
                     Pemberitahuan persetujuan proyek dan status RTKD akan muncul di sini.
@@ -119,13 +112,8 @@
                 <div class="notif-fade group relative flex items-start gap-3 border-b border-slate-100 px-4 py-3 last:border-b-0 hover:bg-slate-50/80">
 
                     <!-- Ikon kecil warna kalem -->
-                    <span class="mt-0.5 grid h-8 w-8 shrink-0 place-items-center rounded-lg ring-1 ring-inset" :class="item.tile">
-                        <svg x-show="item.icon === 'workflow'" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="6" height="6" rx="1" /><rect x="15" y="15" width="6" height="6" rx="1" /><path d="M9 6h3a3 3 0 0 1 3 3v6m-6 3H6a3 3 0 0 1-3-3v-3" /></svg>
-                        <svg x-show="item.icon === 'flag'" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 22V4m0 1c5-4 11 4 16 0v12c-5 4-11-4-16 0" /></svg>
-                        <svg x-show="item.icon === 'list-checks'" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 17 2 2 4-4m-6-8 2 2 4-4m4 2h8m-8 8h8" /></svg>
-                        <svg x-show="item.icon === 'circle-check'" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10" /><path d="m9 12 2 2 4-4" /></svg>
-                        <svg x-show="item.icon === 'circle-x'" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10" /><path d="m15 9-6 6m0-6 6 6" /></svg>
-                        <svg x-show="item.icon === 'bell'" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9m-8.27 13a2 2 0 0 0 3.54 0" /></svg>
+                    <span class="mt-0.5 grid h-8 w-8 shrink-0 place-items-center">
+                        <i :class="item.icon" class="text-[13px]" aria-hidden="true"></i>
                     </span>
 
                     <!-- Teks -->
@@ -143,10 +131,7 @@
                     <!-- Tombol buang (X) -->
                     <button type="button" @click.stop="dismiss(item)" aria-label="Hapus notifikasi"
                         class="mt-1 grid h-6 w-6 shrink-0 cursor-pointer place-items-center rounded-md text-slate-300 transition-colors hover:bg-slate-100 hover:text-slate-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#13416B]/30">
-                        <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2"
-                            stroke-linecap="round" viewBox="0 0 24 24" aria-hidden="true">
-                            <path d="M18 6 6 18M6 6l12 12" />
-                        </svg>
+                        <i class="fas fa-times text-xs" aria-hidden="true"></i>
                     </button>
                 </div>
             </template>

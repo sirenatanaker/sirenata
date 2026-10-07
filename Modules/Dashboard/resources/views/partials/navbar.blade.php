@@ -11,17 +11,15 @@
             @if (auth()->check() && auth()->user()->hasRole('user'))
                 <!-- Toggle Sidebar KHUSUS USER (Hanya di Desktop karena mobile pakai Bottom Nav) -->
                 <button @click="sidebarOpen = !sidebarOpen"
-                    class="hidden lg:block p-2 sm:p-2.5 rounded-xl cursor-pointer text-slate-500 hover:bg-slate-100 hover:text-[#13416B] focus:outline-none transition-colors shrink-0">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true">
-                        <path d="M4 6h16M4 12h16M4 18h16" />
-                    </svg>
+                    class="hidden lg:inline-flex p-2.5 items-center justify-center rounded-xl cursor-pointer text-slate-500 transition-colors hover:bg-slate-100 hover:text-[#13416B] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#13416B]/30 shrink-0">
+                    <i class="fas fa-bars text-lg" aria-hidden="true"></i>
                 </button>
 
                 <!-- Searchbar AUTO-SUGGEST KHUSUS USER -->
                 <div class="flex-1 w-full max-w-full relative" x-data="searchSuggest()" @click.outside="isOpen = false">
                     <div class="relative w-full group">
-                        <div class="absolute inset-y-0 start-0 flex items-center ps-3.5 sm:ps-4 pointer-events-none">
-                            <svg class="h-4 w-4 text-slate-400 group-focus-within:text-[#13416B] transition-colors" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" /></svg>
+                        <div class="absolute inset-y-0 start-0 flex items-center ps-2 pointer-events-none">
+                            <i class="fas fa-search text-sm text-slate-400 transition-colors group-focus-within:text-[#13416B]" aria-hidden="true"></i>
                         </div>
 
                         <!-- Input Pencarian -->
@@ -33,7 +31,7 @@
                         <!-- Ikon Loading -->
                         <div x-show="isLoading" x-cloak
                             class="absolute inset-y-0 end-0 flex items-center pe-3 sm:pe-4 pointer-events-none">
-                            <svg class="h-4 w-4 animate-spin text-[#13416B]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 2v4m0 12v4m10-10h-4M6 12H2m17.07-7.07-2.83 2.83M7.76 16.24l-2.83 2.83m14.14 0-2.83-2.83M7.76 7.76 4.93 4.93" /></svg>
+                            <i class="fas fa-circle-notch fa-spin text-[#13416B] text-xs sm:text-sm" aria-hidden="true"></i>
                         </div>
                     </div>
 
@@ -52,9 +50,8 @@
                             <template
                                 x-if="!isLoading && enrolledCourses.length === 0 && availableCatalogs.length === 0 && libraries.length === 0 && query.length > 1">
                                 <div class="p-6 text-center">
-                                    <div
-                                        class="w-12 h-12 bg-slate-50 text-slate-300 rounded-full flex items-center justify-center mx-auto mb-3 border border-slate-100">
-                                        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" /></svg>
+                                    <div class="mb-3 flex items-center justify-center text-slate-300">
+                                        <i class="fas fa-search text-xl" aria-hidden="true"></i>
                                     </div>
                                     <p class="text-sm font-bold text-slate-700">Tidak ada hasil ditemukan</p>
                                     <p class="text-xs text-slate-500 mt-1">Coba gunakan kata kunci yang lebih umum.</p>
@@ -85,7 +82,7 @@
                                                         <p class="text-[10px] text-slate-500 truncate mt-0.5"
                                                             x-text="item.subtitle"></p>
                                                     </div>
-                                                    <svg class="h-4 w-4 text-slate-300 opacity-0 group-hover:opacity-100 transition-opacity" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6" /></svg>
+                                                    <i class="fas fa-chevron-right text-xs text-slate-300 opacity-0 group-hover:opacity-100 transition-opacity" aria-hidden="true"></i>
                                                 </a>
                                             </li>
                                         </template>
@@ -117,7 +114,7 @@
                                                         <p class="text-[10px] text-slate-500 truncate mt-0.5"
                                                             x-text="item.subtitle"></p>
                                                     </div>
-                                                    <svg class="h-4 w-4 text-slate-300 opacity-0 group-hover:opacity-100 transition-opacity" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6" /></svg>
+                                                    <i class="fas fa-chevron-right text-xs text-slate-300 opacity-0 group-hover:opacity-100 transition-opacity" aria-hidden="true"></i>
                                                 </a>
                                             </li>
                                         </template>
@@ -149,7 +146,7 @@
                                                         <p class="text-[10px] text-slate-500 truncate mt-0.5"
                                                             x-text="item.subtitle"></p>
                                                     </div>
-                                                    <svg class="h-4 w-4 text-slate-300 opacity-0 group-hover:opacity-100 transition-opacity" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6" /></svg>
+                                                    <i class="fas fa-chevron-right text-xs text-slate-300 opacity-0 group-hover:opacity-100 transition-opacity" aria-hidden="true"></i>
                                                 </a>
                                             </li>
                                         </template>
@@ -207,10 +204,8 @@
             @else
                 <!-- Toggle Sidebar SEMUA ROLE LAIN (Muncul di Mobile & Desktop) -->
                 <button @click="sidebarOpen = !sidebarOpen"
-                    class="block p-2 sm:p-2.5 rounded-xl cursor-pointer text-slate-500 hover:bg-slate-100 hover:text-[#13416B] focus:outline-none transition-colors shrink-0">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true">
-                        <path d="M4 6h16M4 12h16M4 18h16" />
-                    </svg>
+                    class="inline-flex p-2.5 items-center justify-center rounded-xl cursor-pointer text-slate-500 transition-colors hover:bg-slate-100 hover:text-[#13416B] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#13416B]/30 shrink-0">
+                    <i class="fas fa-bars text-lg" aria-hidden="true"></i>
                 </button>
             @endif
 
@@ -247,20 +242,17 @@
                             <!-- Akses Cepat Profil & Dashboard -->
                             @if (auth()->user()->hasRole('super-admin'))
                                 <li><a href="{{ route('super-admin.profile') }}"
-                                        class="flex items-center gap-3 p-2.5 rounded-xl hover:bg-[#13416B]/10 hover:text-[#13416B] font-medium transition-colors"><svg
-                                            class="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="5" /><path d="M20 21a8 8 0 0 0-16 0" /></svg> Profil</a></li>
+                                        class="flex items-center gap-3 p-2.5 rounded-xl hover:bg-[#13416B]/10 hover:text-[#13416B] font-medium transition-colors"><i class="far fa-user w-4 shrink-0 text-center" aria-hidden="true"></i> Profil</a></li>
                                
                             @elseif(auth()->user()->hasRole('admin-pusat'))
                                 <li><a href="{{ route('admin-pusat.profile') }}"
-                                        class="flex items-center gap-3 p-2.5 rounded-xl hover:bg-[#13416B]/10 hover:text-[#13416B] font-medium transition-colors"><svg
-                                            class="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="5" /><path d="M20 21a8 8 0 0 0-16 0" /></svg> Profil</a></li>
+                                        class="flex items-center gap-3 p-2.5 rounded-xl hover:bg-[#13416B]/10 hover:text-[#13416B] font-medium transition-colors"><i class="far fa-user w-4 shrink-0 text-center" aria-hidden="true"></i> Profil</a></li>
                                 
                             @elseif(auth()->user()->hasRole('admin-province'))
                                
                             @elseif(auth()->user()->hasRole('user'))
                                 <li><a href="{{ route('user.profile') }}"
-                                        class="flex items-center gap-3 p-2.5 rounded-xl hover:bg-[#13416B]/10 hover:text-[#13416B] font-medium transition-colors"><svg
-                                            class="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="5" /><path d="M20 21a8 8 0 0 0-16 0m16-14v6m3-3h-6" /></svg> Profil Saya</a></li>
+                                        class="flex items-center gap-3 p-2.5 rounded-xl hover:bg-[#13416B]/10 hover:text-[#13416B] font-medium transition-colors"><i class="far fa-user w-4 shrink-0 text-center" aria-hidden="true"></i> Profil Saya</a></li>
                             @endif
 
                             <li class="my-1 border-t border-slate-100"></li>
@@ -270,22 +262,22 @@
                                 @if (auth()->user()->hasRole(['super-admin', 'admin-pusat']))
                                     <a href="{{ route('admin-pusat.help') }}"
                                         class="flex items-center gap-3 p-2.5 rounded-xl text-slate-700 hover:bg-[#13416B]/10 hover:text-[#13416B] font-medium transition-colors">
-                                        <svg class="h-4 w-4 shrink-0 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10" /><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3m.1 4h.01" /></svg> Pusat Bantuan
+                                        <i class="fas fa-question-circle w-4 shrink-0 text-center text-slate-400" aria-hidden="true"></i> Pusat Bantuan
                                     </a>
                                 @elseif(auth()->user()->hasRole('admin-province'))
                                     <a href="{{ route('admin-province.help') }}"
                                         class="flex items-center gap-3 p-2.5 rounded-xl text-slate-700 hover:bg-[#13416B]/10 hover:text-[#13416B] font-medium transition-colors">
-                                        <svg class="h-4 w-4 shrink-0 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10" /><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3m.1 4h.01" /></svg> Pusat Bantuan
+                                        <i class="fas fa-question-circle w-4 shrink-0 text-center text-slate-400" aria-hidden="true"></i> Pusat Bantuan
                                     </a>
                                 @elseif(auth()->user()->hasRole('admin-kab-kota'))
                                     <a href="{{ route('admin-kab-kota.help') }}"
                                         class="flex items-center gap-3 p-2.5 rounded-xl text-slate-700 hover:bg-[#13416B]/10 hover:text-[#13416B] font-medium transition-colors">
-                                        <svg class="h-4 w-4 shrink-0 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10" /><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3m.1 4h.01" /></svg> Pusat Bantuan
+                                        <i class="fas fa-question-circle w-4 shrink-0 text-center text-slate-400" aria-hidden="true"></i> Pusat Bantuan
                                     </a>
                                 @else
                                     <a href="{{ route('user.help') }}"
                                         class="flex items-center gap-3 p-2.5 rounded-xl text-slate-700 hover:bg-[#13416B]/10 hover:text-[#13416B] font-medium transition-colors">
-                                        <svg class="h-4 w-4 shrink-0 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10" /><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3m.1 4h.01" /></svg> Pusat Bantuan
+                                        <i class="fas fa-question-circle w-4 shrink-0 text-center text-slate-400" aria-hidden="true"></i> Pusat Bantuan
                                     </a>
                                 @endif
                             </li>
@@ -295,7 +287,7 @@
                                     @csrf
                                     <button type="submit"
                                         class="flex w-full cursor-pointer items-center gap-3 p-2.5 rounded-xl text-red-600 hover:bg-red-50 font-bold transition-colors text-left">
-                                        <svg class="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4m7 14 5-5-5-5m5 5H9" /></svg> Keluar
+                                        <i class="fas fa-sign-out-alt w-4 shrink-0 text-center" aria-hidden="true"></i> Keluar
                                     </button>
                                 </form>
                             </li>
