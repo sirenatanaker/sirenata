@@ -251,7 +251,7 @@
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         @include('lms::admin-pusat.libraries.partials.category-picker', [
-                            'label' => 'Pilih Kategori',
+                            'label' => 'Tipe Koleksi',
                             'selectId' => 'create-library-category',
                             'selectedCategoryId' => old('library_category_id', ''),
                         ])
@@ -476,7 +476,7 @@
 
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             @include('lms::admin-pusat.libraries.partials.category-picker', [
-                                'label' => 'Pilih Kategori',
+                                'label' => 'Tipe Koleksi',
                                 'selectId' => 'edit-library-category-' . $library->id,
                                 'selectedCategoryId' => old('library_category_id', $library->library_category_id),
                             ])
