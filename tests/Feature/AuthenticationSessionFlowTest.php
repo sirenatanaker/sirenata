@@ -5,7 +5,10 @@ use Illuminate\Support\Facades\Hash;
 use Modules\Roles\Models\Role;
 
 test('logout clears the authenticated session and returns to the landing page', function () {
-    $user = User::factory()->create();
+    $user = User::factory()->create([
+        'siapkerja_token' => 'persisted-siapkerja-access-token',
+        'siapkerja_refresh_token' => 'persisted-siapkerja-refresh-token',
+    ]);
 
     $this->actingAs($user)
         ->withSession([
@@ -18,6 +21,11 @@ test('logout clears the authenticated session and returns to the landing page', 
         ->assertSessionHas('logged_out', true);
 
     $this->assertGuest();
+    $this->assertDatabaseHas('users', [
+        'id' => $user->id,
+        'siapkerja_token' => null,
+        'siapkerja_refresh_token' => null,
+    ]);
 
     $this->get(route('landingpage.index'))
         ->assertOk()

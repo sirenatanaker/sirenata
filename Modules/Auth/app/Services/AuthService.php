@@ -59,6 +59,10 @@ class AuthService
 
         if ($user) {
             $user->tokens()->where('name', 'api-token')->delete();
+            $user->forceFill([
+                'siapkerja_token' => null,
+                'siapkerja_refresh_token' => null,
+            ])->save();
         }
 
         session()->forget(['api_token', 'access_token', 'refresh_token']);
