@@ -595,7 +595,7 @@
                                                     </div>
 
                                                     <a href="{{ route('user.course.test.show', ['slug' => $courseSlug, 'postTestId' => $postTestBab->id]) }}"
-                                                        class="w-full sm:w-auto mt-1 sm:mt-0 px-5 py-2.5 {{ $isPostTestBabCompleted ? 'bg-white border border-[#13416B]/30 text-[#13416B] hover:bg-[#13416B]/10' : 'bg-amber-400 hover:bg-amber-500 text-gray-800 shadow-sm font-bold' }} rounded-xl text-xs transition-all text-center shrink-0 flex items-center justify-center gap-2">
+                                                        class="w-full sm:w-auto mt-1 sm:mt-0 px-5 py-2.5 {{ $isPostTestBabCompleted ? 'bg-white border border-[#13416B]/30 text-[#13416B] hover:bg-slate-100' : 'bg-amber-400 hover:bg-amber-500 text-gray-800 shadow-sm font-bold' }} rounded-xl text-xs transition-all text-center shrink-0 flex items-center justify-center gap-2">
                                                         <i
                                                             class="fas {{ $isPostTestBabCompleted ? 'fa-eye' : 'fa-pencil-alt' }}"></i>
                                                         {{ $isPostTestBabCompleted ? 'Lihat Hasil' : 'Kerjakan Evaluasi' }}

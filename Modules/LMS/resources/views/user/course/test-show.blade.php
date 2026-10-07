@@ -107,20 +107,20 @@
                             </div>
 
                             <!-- Action Buttons -->
-                            <div class="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center sm:justify-between border-t border-slate-100 p-8 mt-2">
+                            <div class="flex flex-row gap-2 sm:gap-4 justify-between border-t border-slate-100 p-4 sm:p-8 mt-2">
                                 <a href="{{ route('user.course.my-course.detail', $slug) }}"
-                                    class="w-full sm:w-auto px-6 py-3.5 rounded-xl font-bold bg-white text-slate-700 hover:bg-slate-50 transition-colors border border-slate-200 flex items-center justify-center gap-2 order-2 sm:order-1 text-sm shadow-sm">
-                                    <i class="fas fa-list"></i> Kembali ke Modul
+                                    class="flex-1 min-w-0 sm:flex-none px-2 sm:px-6 py-3 rounded-xl font-bold bg-white text-slate-700 hover:bg-slate-50 transition-colors border border-slate-200 flex items-center justify-center gap-1.5 sm:gap-2 text-[10px] sm:text-sm text-center shadow-sm">
+                                    <i class="fas fa-list shrink-0"></i> Kembali ke Modul
                                 </a>
 
-                                <div class="w-full sm:w-auto order-1 sm:order-2">
+                                <div class="flex-1 min-w-0 sm:flex-none sm:w-auto">
                                     @if (!$result->is_passed)
-                                        <a href="?retake=1" class="w-full sm:w-auto px-8 py-3.5 rounded-xl font-bold bg-[#13416B] text-white hover:bg-[#0f3354] transition-colors flex items-center justify-center gap-2 shadow-sm text-sm">
-                                            <i class="fas fa-redo"></i> Ulangi Evaluasi
+                                        <a href="?retake=1" class="w-full sm:w-auto px-2 sm:px-8 py-3 rounded-xl font-bold bg-[#13416B] text-white hover:bg-[#0f3354] transition-colors flex items-center justify-center gap-1.5 sm:gap-2 shadow-sm text-[10px] sm:text-sm text-center">
+                                            <i class="fas fa-redo shrink-0"></i> Ulangi Evaluasi
                                         </a>
                                     @else
-                                        <a href="?retake=1" class="w-full sm:w-auto px-6 py-3.5 rounded-xl font-bold bg-white text-[#13416B] border border-[#13416B]/30 hover:bg-[#13416B]/5 transition-colors flex items-center justify-center gap-2 text-sm shadow-sm">
-                                            <i class="fas fa-redo"></i> Perbaiki Nilai (Opsional)
+                                        <a href="?retake=1" class="w-full sm:w-auto px-2 sm:px-6 py-3 rounded-xl font-bold bg-white text-[#13416B] border border-[#13416B]/30 hover:bg-[#13416B]/5 transition-colors flex items-center justify-center gap-1.5 sm:gap-2 text-[10px] sm:text-sm text-center shadow-sm">
+                                            <i class="fas fa-redo shrink-0"></i> Perbaiki Nilai (Opsional)
                                         </a>
                                     @endif
                                 </div>
