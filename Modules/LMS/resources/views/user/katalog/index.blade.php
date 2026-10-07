@@ -171,8 +171,6 @@
                                 </div>
                             @endif
 
-                            <div class="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent"></div>
-
                             <div class="absolute top-3 left-3">
                                 <span class="px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-[#13416B] bg-white/95 backdrop-blur-sm rounded-md shadow-sm">
                                     {{ $course->category->name ?? 'Umum' }}
