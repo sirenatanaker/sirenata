@@ -53,6 +53,8 @@ class LoginController extends Controller
     {
         $this->authService->logout();
 
-        return redirect()->route('landingpage.index')->with('success', 'Anda telah keluar.');
+        return redirect()->route('landingpage.index')
+            ->with('success', 'Anda telah keluar.')
+            ->with('logged_out', true);
     }
 }

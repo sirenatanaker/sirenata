@@ -14,9 +14,19 @@ test('logout clears the authenticated session and returns to the landing page', 
             'refresh_token' => 'siapkerja-refresh-token',
         ])
         ->post(route('logout'))
-        ->assertRedirect(route('landingpage.index'));
+        ->assertRedirect(route('landingpage.index'))
+        ->assertSessionHas('logged_out', true);
 
     $this->assertGuest();
+
+    $this->get(route('landingpage.index'))
+        ->assertOk()
+        ->assertSee('Masuk')
+        ->assertDontSee('Daftar Gratis')
+        ->assertDontSee('Daftar Gratis Sekarang');
+
+    $this->get(route('landingpage.index'))
+        ->assertSee('Daftar Gratis');
 });
 
 test('the legacy SIAPKerja logout route also clears the authenticated session', function () {
