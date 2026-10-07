@@ -1,5 +1,5 @@
 <x-dashboard::layouts.dashboard title="Detail Course: {{ $course->name }}">
-    <div class="px-4 sm:px-6 lg:px-8 py-4 sm:py-6 max-w-full mx-auto space-y-6">
+    <div class="px-0 md:px-6 lg:px-8 py-4 sm:py-6 max-w-full mx-auto space-y-6">
         
         <!-- Custom Breadcrumb -->
         <nav class="hidden md:flex mb-2 py-4" aria-label="Breadcrumb">
@@ -45,15 +45,31 @@
                 </div>
 
                 <!-- Judul -->
-                <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 mb-3 tracking-tight leading-tight">
+                <h1 class="text-xl sm:text-3xl font-extrabold text-slate-900 mb-3 tracking-tight leading-tight">
                     {{ $course->name }}
                 </h1>
 
                 <!-- Deskripsi -->
-                <div class="prose prose-sm text-slate-600 mb-4 max-w-none">
+                <div class="text-xs sm:text-sm text-slate-600 mb-4 max-w-none">
                     <p class="leading-relaxed">
                         {{ $course->description }}
                     </p>
+                </div>
+
+                <div class="w-full border-t border-slate-100 pt-3 lg:hidden">
+                    <h3 class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Informasi Tambahan</h3>
+                    <ul class="divide-y divide-slate-100">
+                        <li class="flex justify-between items-center gap-2 py-2">
+                            <span class="text-xs font-medium text-slate-500">Kategori</span>
+                            <span class="text-xs font-bold text-[#13416B] text-right">{{ $course->category->name ?? '-' }}</span>
+                        </li>
+                        <li class="flex justify-between items-center gap-2 py-2">
+                            <span class="text-xs font-medium text-slate-500">Dibuat Pada</span>
+                            <span class="text-xs font-bold text-slate-800 text-right">
+                                {{ \Carbon\Carbon::parse($course->created_at)->translatedFormat('d M Y') }}
+                            </span>
+                        </li>
+                    </ul>
                 </div>
             </div>
         </div>
@@ -70,10 +86,10 @@
                             <div class="p-2.5 bg-white text-[#13416B] rounded-xl shrink-0 border border-slate-200 shadow-sm">
                                 <i class="fas fa-layer-group text-lg"></i>
                             </div>
-                            <h2 class="text-lg font-bold text-slate-800 tracking-wide">Kurikulum / Modul Belajar</h2>
+                            <h2 class="text-base sm:text-lg font-bold text-slate-800 tracking-wide">Kurikulum / Modul Belajar</h2>
                         </div>
                         <button type="button" x-data @click="$dispatch('open-modal', 'course_sections-{{ $course->slug }}')"
-                            class="px-4 py-2 text-sm font-bold text-white bg-[#13416B] rounded-xl hover:bg-[#0f3354] transition-colors shadow-sm flex items-center justify-center gap-2">
+                            class="px-3 sm:px-4 py-2 text-xs sm:text-sm font-bold text-white bg-[#13416B] rounded-xl hover:bg-[#0f3354] transition-colors shadow-sm flex items-center justify-center gap-2">
                             <i class="fas fa-plus"></i> Tambah Bagian
                         </button>
                     </div>
@@ -127,7 +143,7 @@
                                                     {{ $section->position ?? ($index + 1) }}
                                                 </span>
                                                 <div>
-                                                    <h3 class="font-bold text-slate-800 text-sm sm:text-base leading-snug">
+                                                    <h3 class="font-bold text-slate-800 text-xs sm:text-base leading-snug">
                                                         {{ $section->name }}
                                                     </h3>
                                                     <span class="text-[11px] font-medium text-slate-500 mt-0.5 block">
@@ -190,7 +206,7 @@
                                                                 @endif
                                                             </span>
                                                             <div class="flex-1 min-w-0">
-                                                                <p class="font-bold text-slate-800 text-sm leading-tight break-words">
+                                                                <p class="font-bold text-slate-800 text-xs sm:text-sm leading-tight break-words">
                                                                     {{ $content->name }}
                                                                 </p>
                                                             </div>
@@ -284,18 +300,18 @@
                                             </div>
                                             <div>
                                                 <p class="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-blue-200 mb-1">Tahap Akhir</p>
-                                                <h3 class="text-lg font-extrabold text-white tracking-wide leading-tight">Evaluasi Akhir Course</h3>
+                                                <h3 class="text-base sm:text-lg font-extrabold text-white tracking-wide leading-tight">Evaluasi Akhir Course</h3>
                                             </div>
                                         </div>
 
                                         @if ($existingFinalTest)
                                             <a href="{{ route('admin-pusat.management-course.post-tests.edit', $existingFinalTest->id) }}?course_slug={{ $course->slug }}"
-                                                class="w-full sm:w-auto px-5 py-2.5 bg-amber-500 text-white text-sm font-bold rounded-xl hover:bg-amber-600 transition-all shadow-sm flex items-center justify-center gap-2 shrink-0">
+                                                class="w-full sm:w-auto px-4 sm:px-5 py-2.5 bg-amber-500 text-white text-xs sm:text-sm font-bold rounded-xl hover:bg-amber-600 transition-all shadow-sm flex items-center justify-center gap-2 shrink-0">
                                                 <i class="fas fa-edit"></i> Edit Evaluasi
                                             </a>
                                         @else
                                             <a href="{{ route('admin-pusat.management-course.post-tests.create', ['course_slug' => $course->slug, 'course_id' => $course->id]) }}"
-                                                class="w-full sm:w-auto px-5 py-2.5 bg-white text-[#13416B] text-sm font-bold rounded-xl hover:bg-slate-50 transition-all shadow-sm flex items-center justify-center gap-2 shrink-0">
+                                                class="w-full sm:w-auto px-4 sm:px-5 py-2.5 bg-white text-[#13416B] text-xs sm:text-sm font-bold rounded-xl hover:bg-slate-50 transition-all shadow-sm flex items-center justify-center gap-2 shrink-0">
                                                 <i class="fas fa-plus"></i> Buat Evaluasi
                                             </a>
                                         @endif
@@ -320,6 +336,26 @@
                 </div>
             </div>
 
+            <!-- Card Sertifikat untuk mobile, setelah evaluasi akhir kurikulum -->
+            <div class="order-3 lg:hidden bg-white rounded-md shadow-sm border border-slate-200 p-3">
+                <div class="flex items-center gap-3 mb-4 border-b border-slate-100 pb-4">
+                    <div class="w-10 h-10 flex items-center justify-center bg-emerald-50 text-emerald-600 rounded-xl shrink-0 border border-emerald-100">
+                        <i class="fas fa-certificate text-lg"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-xs sm:text-sm font-bold text-slate-800 tracking-wide">Sertifikat Kelulusan</h3>
+                        <p class="text-[11px] text-slate-500 mt-0.5">Atur dokumen penghargaan</p>
+                    </div>
+                </div>
+                <p class="text-[11px] sm:text-xs text-slate-600 mb-5 leading-relaxed">
+                    Pastikan Anda telah mengatur template dan tanda tangan digital untuk sertifikat yang akan diterbitkan ke peserta kursus.
+                </p>
+                <a href="{{ route('admin-pusat.certificates.index') }}"
+                    class="flex items-center justify-center w-full px-4 py-3 text-xs sm:text-sm font-bold text-white bg-emerald-600 rounded-xl hover:bg-emerald-700 transition-colors shadow-sm gap-2">
+                    <i class="fas fa-cog"></i> Atur Sertifikat
+                </a>
+            </div>
+
             <!-- KOLOM KANAN (Sidebar: Aksi, Informasi, Catatan) -->
             <div class="order-1 lg:order-2 flex flex-col gap-3 sm:gap-6 lg:sticky lg:top-24 lg:self-start">
                 
@@ -339,27 +375,27 @@
                 </div>
 
                 <!-- Card Pengaturan Sertifikat (WIDGET BARU) -->
-                <div class="order-4 bg-white rounded-md shadow-sm border border-slate-200 p-3 sm:p-6">
+                <div class="hidden lg:block order-3 lg:order-4 bg-white rounded-md shadow-sm border border-slate-200 p-3 sm:p-6">
                     <div class="flex items-center gap-3 mb-4 border-b border-slate-100 pb-4">
                         <div class="w-10 h-10 flex items-center justify-center bg-emerald-50 text-emerald-600 rounded-xl shrink-0 border border-emerald-100">
                             <i class="fas fa-certificate text-lg"></i>
                         </div>
                         <div>
                             <h3 class="text-base font-bold text-slate-800 tracking-wide">Sertifikat Kelulusan</h3>
-                            <p class="text-[11px] text-slate-500 mt-0.5">Atur dokumen penghargaan</p>
+                            <p class="text-[10px] sm:text-[11px] text-slate-500 mt-0.5">Atur dokumen penghargaan</p>
                         </div>
                     </div>
-                    <p class="text-xs text-slate-600 mb-5 leading-relaxed">
+                    <p class="text-[11px] sm:text-xs text-slate-600 mb-5 leading-relaxed">
                         Pastikan Anda telah mengatur template dan tanda tangan digital untuk sertifikat yang akan diterbitkan ke peserta kursus.
                     </p>
                     <a href="{{ route('admin-pusat.certificates.index') }}"
-                        class="flex items-center justify-center w-full px-4 py-3 text-sm font-bold text-white bg-emerald-600 rounded-xl hover:bg-emerald-700 transition-colors shadow-sm gap-2">
+                        class="flex items-center justify-center w-full px-4 py-3 text-xs sm:text-sm font-bold text-white bg-emerald-600 rounded-xl hover:bg-emerald-700 transition-colors shadow-sm gap-2">
                         <i class="fas fa-cog"></i> Atur Sertifikat
                     </a>
                 </div>
 
                 <!-- Card Informasi Tambahan -->
-                <div class="order-2 bg-white rounded-md shadow-sm border border-slate-200 overflow-hidden">
+                <div class="hidden lg:block order-2 bg-white rounded-md shadow-sm border border-slate-200 overflow-hidden">
                     <div class="px-3 sm:px-6 py-3 sm:py-4 border-b border-slate-100 bg-slate-50/50">
                         <h3 class="text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-wider">Informasi Tambahan</h3>
                     </div>
@@ -380,7 +416,7 @@
                 </div>
 
                 <!-- Card Peringatan / Wajib Post Test -->
-                <div class="order-3 bg-amber-50 rounded-md border border-amber-200 p-3 sm:p-5 flex items-start gap-2 sm:gap-3 shadow-sm">
+                <div class="order-2 lg:order-3 bg-amber-50 rounded-md border border-amber-200 p-3 sm:p-5 flex items-start gap-2 sm:gap-3 shadow-sm">
                     <i class="fas fa-info-circle text-amber-500 mt-0.5 text-base sm:text-lg shrink-0"></i>
                     <div>
                         <h4 class="text-xs sm:text-sm font-bold text-amber-800 mb-1">Panduan Evaluasi</h4>
