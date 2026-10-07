@@ -664,6 +664,7 @@ class CourseService
         $enrolledCourseIds = $user ? $user->enrolledCourses()->pluck('courses.id')->toArray() : [];
 
         return Course::with('category')
+            ->withCount('sections')
             ->when($search, fn($query) => $query->where('name', 'like', "%{$search}%"))
             ->when(!empty($categoryIds), fn($query) => $query->whereIn('category_id', $categoryIds))
             ->whereNotIn('id', $enrolledCourseIds)

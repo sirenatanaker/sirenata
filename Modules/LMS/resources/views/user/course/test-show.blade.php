@@ -53,7 +53,7 @@
                     {{-- ======================================================= --}}
                     {{-- MODE 1: TAMPILAN HASIL TES KETIKA SUDAH SELESAI --}}
                     {{-- ======================================================= --}}
-                    <div class="pt-4 pb-4 bg-slate-50/50 overflow-hidden max-w-full mx-auto animate-fadeIn">
+                    <div class="pt-4 pb-4 bg-slate-50/50 border border-slate-200 overflow-hidden max-w-full mx-auto animate-fadeIn shadow-md">
                         <div class="text-center">
 
                             @if ($result->is_passed)

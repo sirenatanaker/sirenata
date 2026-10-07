@@ -157,7 +157,7 @@
             {{-- Grid Cards Responsif --}}
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6 px-4 md:px-0">
                 @forelse ($courses as $course)
-                    <div class="group flex flex-col bg-white rounded-xl border border-slate-200 shadow-sm hover:shadow-lg hover:border-[#13416B]/30 transition-all duration-300 overflow-hidden ">
+                    <div class="group flex flex-col bg-white rounded-xl border border-slate-200 shadow-sm hover:shadow-xl hover:border-[#13416B]/30 hover:-translate-y-1 transition-all duration-300 overflow-hidden">
                         
                         {{-- Thumbnail & Badge --}}
                         <div class="relative h-44 sm:h-48 overflow-hidden bg-slate-100">
@@ -179,11 +179,6 @@
                                 </span>
                             </div>
 
-                            <div class="absolute bottom-3 left-3">
-                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 text-[11px] font-semibold text-white bg-black/40 backdrop-blur-sm rounded-md">
-                                    <i class="fas fa-layer-group"></i> {{ $course->sections->count() }} Modul
-                                </span>
-                            </div>
                         </div>
 
                         {{-- Konten Text --}}
@@ -191,6 +186,12 @@
                             <h3 class="text-base font-bold text-slate-800 leading-snug mb-2 group-hover:text-[#13416B] transition-colors line-clamp-2" title="{{ $course->name }}">
                                 {{ $course->name }}
                             </h3>
+
+                            <div class="flex items-center gap-3 mb-3 text-xs font-medium text-slate-500">
+                                <span class="flex items-center gap-1.5 bg-slate-50 px-2 py-1 rounded border border-slate-100">
+                                    <i class="fas fa-layer-group text-slate-400"></i> {{ $course->sections_count }} Modul
+                                </span>
+                            </div>
 
                             <p class="text-xs text-slate-500 mb-5 line-clamp-2 leading-relaxed flex-1">
                                 {{ $course->description ?? 'Tidak ada deskripsi singkat yang tersedia untuk kursus ini.' }}

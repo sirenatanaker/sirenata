@@ -438,7 +438,10 @@ class CourseController extends Controller
             ToastMagic::error("Nilai Anda {$score} belum mencapai KKM ({$postTest->passing_score}). Silakan pelajari materi kembali dan ulangi tes.");
         }
 
-        return redirect()->route('user.course.my-course.detail', $slug);
+        return redirect()->route('user.course.test.show', [
+            'slug' => $slug,
+            'postTestId' => $postTest->id,
+        ]);
     }
 
     public function showTest(\Illuminate\Http\Request $request, string $slug, string $postTestId)
