@@ -510,27 +510,21 @@
                                                 class="flex flex-col sm:flex-row sm:items-center justify-between p-3.5 sm:p-4 rounded-xl border {{ $isContentLocked ? 'border-slate-200 bg-slate-50' : 'border-slate-200 bg-white hover:border-[#13416B]/40 hover:shadow-sm' }} transition-all duration-200 gap-3 sm:gap-4">
                                                 <div
                                                     class="flex items-start sm:items-center gap-3 sm:gap-4 flex-1 min-w-0">
-                                                    @if ($isContentLocked)
-                                                        <span
-                                                            class="flex items-center justify-center w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-slate-200 text-slate-400 shrink-0 border border-slate-300 mt-0.5 sm:mt-0">
-                                                            <i class="fas fa-lock text-sm"></i>
-                                                        </span>
-                                                    @elseif (!empty($videoUrlRaw))
-                                                        <span
-                                                            class="flex items-center justify-center w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-blue-50 text-blue-600 shrink-0 border border-blue-100  mt-0.5 sm:mt-0">
+                                                    @php
+                                                        $contentIconBox = $isContentLocked
+                                                            ? 'bg-slate-100 text-slate-400 border-slate-200'
+                                                            : 'bg-blue-50 text-blue-600 border-blue-100';
+                                                    @endphp
+                                                    <span
+                                                        class="flex items-center justify-center w-10 h-10 sm:w-11 sm:h-11 rounded-full {{ $contentIconBox }} shrink-0 border mt-0.5 sm:mt-0">
+                                                        @if (!empty($videoUrlRaw))
                                                             <i class="fas fa-play text-sm"></i>
-                                                        </span>
-                                                    @elseif(!empty($documentUrlRaw))
-                                                        <span
-                                                            class="flex items-center justify-center w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-blue-50 text-blue-600 shrink-0  border border-blue-100 mt-0.5 sm:mt-0">
+                                                        @elseif (!empty($documentUrlRaw))
                                                             <i class="fas fa-file-pdf text-lg"></i>
-                                                        </span>
-                                                    @else
-                                                        <span
-                                                            class="flex items-center justify-center w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-blue-50 text-blue-600 shrink-0 border border-blue-100 mt-0.5 sm:mt-0">
+                                                        @else
                                                             <i class="fas fa-file-alt text-lg"></i>
-                                                        </span>
-                                                    @endif
+                                                        @endif
+                                                    </span>
 
                                                     <div class="flex-1 min-w-0">
                                                         <p
@@ -592,8 +586,7 @@
                                                         class="flex items-start sm:items-center gap-3 sm:gap-4 flex-1 min-w-0">
                                                         <span
                                                             class="flex items-center justify-center w-10 h-10 sm:w-11 sm:h-11 rounded-full {{ $isPostTestBabLocked ? 'bg-slate-200 text-slate-400 border border-slate-300' : 'bg-white/20 text-white border border-white/30' }} shrink-0 mt-0.5 sm:mt-0">
-                                                            <i
-                                                                class="fas {{ $isPostTestBabLocked ? 'fa-lock' : 'fa-clipboard-check' }} text-lg"></i>
+                                                            <i class="fas fa-clipboard-check text-lg"></i>
                                                         </span>
                                                         <div class="flex-1 min-w-0">
                                                             <p
