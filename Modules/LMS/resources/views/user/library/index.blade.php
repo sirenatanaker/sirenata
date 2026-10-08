@@ -237,7 +237,7 @@
 
                     {{-- Informasi Buku Area --}}
                     <div class="p-4 sm:p-5 flex flex-col flex-1 bg-white">
-                        <h3 class="font-bold text-slate-800 text-[10px] md:text-sm lg:text-base leading-snug line-clamp-2 mb-2 group-hover:text-[#13416B] transition-colors"
+                        <h3 class="font-bold text-slate-800 text-[10px] md:text-sm leading-snug line-clamp-2 mb-2 group-hover:text-[#13416B] transition-colors"
                             title="{{ $library->title }}">
                             {{ $library->title }}
                         </h3>
