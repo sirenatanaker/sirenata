@@ -102,7 +102,7 @@
                              style="display: none;">
                             
                             <div class="flex items-center justify-between mb-4">
-                                <h3 class="text-sm font-bold text-slate-800">Kategori Modul</h3>
+                                <h3 class="text-sm font-bold text-slate-800">Kategori Kursus</h3>
                                 @if(!empty($selectedCategories))
                                     <a href="{{ route('user.catalog.index') }}" class="text-[11px] font-bold text-red-500 hover:text-red-700 hover:underline">Reset</a>
                                 @endif

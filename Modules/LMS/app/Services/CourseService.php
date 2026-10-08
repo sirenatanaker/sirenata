@@ -311,7 +311,11 @@ class CourseService
     {
         try {
             $user = Auth::user();
-            $course = Course::with(['category', 'sections.contents'])->where('slug', $slug)->first();
+            $course = Course::with([
+                'category',
+                // Urutan topik harus konsisten karena dipakai untuk penguncian berurutan
+                'sections.contents' => fn($q) => $q->orderBy('position'),
+            ])->where('slug', $slug)->first();
 
             if (!$course) {
                 return [

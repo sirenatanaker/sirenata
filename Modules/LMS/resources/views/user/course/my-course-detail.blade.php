@@ -31,7 +31,7 @@
             $courseSlug = data_get($course, 'slug') ?? request()->route('slug');
             $courseId = data_get($course, 'id') ?? data_get($course, 'course_id');
 
-            // 1. Hitung Total Materi (Teks/Video/Dokumen)
+            // 1. Hitung Total Topik (Teks/Video/Dokumen)
             $totalContents = collect(data_get($course, 'sections', []))->sum(
                 fn($s) => count(data_get($s, 'section_contents', [])),
             );
@@ -185,7 +185,7 @@
                         <i class="fas fa-file-alt"></i> Total Tahapan
                     </span>
                     <span class="text-base sm:text-lg font-extrabold text-slate-800">{{ $totalItems }} <span
-                            class="text-[10px] sm:text-xs font-medium text-slate-500">(Materi & Ujian)</span></span>
+                            class="text-[10px] sm:text-xs font-medium text-slate-500">(Topik & Evaluasi)</span></span>
                 </div>
                 <div class="p-3 sm:p-4 bg-slate-50 rounded-xl border border-slate-100 flex flex-col justify-between">
                     <span
@@ -206,9 +206,9 @@
                 class="block lg:hidden bg-slate-50 border-y border-x-0 sm:border sm:border-x border-slate-200 rounded-none sm:rounded-xl p-4 mb-6 flex items-start gap-3 shadow-sm mx-0">
                 <i class="fas fa-info-circle text-slate-400 mt-0.5 text-base shrink-0"></i>
                 <p class="text-[11px] sm:text-xs text-slate-600 leading-relaxed font-medium">
-                    Materi dipelajari berurutan. Buka kunci modul berikutnya dengan menekan <strong
-                        class="text-slate-800">Tandai Selesai</strong> di setiap materi dan lulus <strong
-                        class="text-slate-800">Evaluasi</strong>.
+                    Topik dipelajari berurutan. Tekan <strong
+                        class="text-slate-800">Tandai Selesai</strong> di setiap topik untuk membuka topik berikutnya,
+                    lalu lulus <strong class="text-slate-800">Evaluasi</strong> untuk membuka modul selanjutnya.
                 </p>
             </div>
         @endif
@@ -262,17 +262,14 @@
                                         /*
                                          * Modul terkunci tidak dipilih.
                                          */
-                                        if (section.querySelector('.fa-lock')) {
+                                        if (section.dataset.locked === '1') {
                                             continue;
                                         }
                     
                                         /*
                                          * Cari bagian yang belum selesai.
                                          */
-                                        const completedIcon =
-                                            section.querySelector('.fa-check');
-                    
-                                        if (!completedIcon) {
+                                        if (section.dataset.completed !== '1') {
                                             targetSection = section;
                                             break;
                                         }
@@ -415,6 +412,7 @@
 
                             <div x-data="{ id: 'section-{{ $index }}', locked: {{ $isLocked ? 'true' : 'false' }} }" id="section-{{ $index }}"
                                 data-section-id="{{ $sectionId }}"
+                                data-locked="{{ $isLocked ? 1 : 0 }}" data-completed="{{ $isSectionCompleted ? 1 : 0 }}"
                                 class="border {{ $isLocked ? 'border-slate-100 bg-slate-50' : 'border-slate-200 bg-white' }} rounded-xl overflow-hidden shadow-sm transition-all duration-500"
                                 :class="{
                                     'border-[#13416B] shadow-md ring-1 ring-gray-100': activeAccordion == id && !
@@ -494,21 +492,30 @@
                                     <div
                                         class="p-3 sm:p-5 border-t border-slate-100 bg-slate-50/50 space-y-3 sm:space-y-4">
 
-                                        {{-- Looping Materi --}}
+                                        {{-- Looping Topik (berurutan: topik berikutnya terkunci sampai topik sebelumnya selesai) --}}
+                                        @php $isPreviousContentDone = true; @endphp
+
                                         @forelse ($sectionContentsRaw as $content)
                                             @php
                                                 $contentId = data_get($content, 'id', Str::random(5));
-                                                $contentName = data_get($content, 'name', 'Materi Tanpa Judul');
+                                                $contentName = data_get($content, 'name', 'Topik Tanpa Judul');
                                                 $videoUrlRaw = data_get($content, 'video_url');
                                                 $documentUrlRaw = data_get($content, 'document_url');
                                                 $isContentItemCompleted = data_get($content, 'is_completed', false);
+                                                // Terkunci jika topik sebelumnya belum selesai (kecuali topik ini sudah pernah diselesaikan)
+                                                $isContentLocked = !$isPreviousContentDone && !$isContentItemCompleted;
                                             @endphp
 
                                             <div
-                                                class="flex flex-col sm:flex-row sm:items-center justify-between p-3.5 sm:p-4 rounded-xl border border-slate-200 bg-white hover:border-[#13416B]/40 hover:shadow-sm transition-all duration-200 gap-3 sm:gap-4">
+                                                class="flex flex-col sm:flex-row sm:items-center justify-between p-3.5 sm:p-4 rounded-xl border {{ $isContentLocked ? 'border-slate-200 bg-slate-50' : 'border-slate-200 bg-white hover:border-[#13416B]/40 hover:shadow-sm' }} transition-all duration-200 gap-3 sm:gap-4">
                                                 <div
                                                     class="flex items-start sm:items-center gap-3 sm:gap-4 flex-1 min-w-0">
-                                                    @if (!empty($videoUrlRaw))
+                                                    @if ($isContentLocked)
+                                                        <span
+                                                            class="flex items-center justify-center w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-slate-200 text-slate-400 shrink-0 border border-slate-300 mt-0.5 sm:mt-0">
+                                                            <i class="fas fa-lock text-sm"></i>
+                                                        </span>
+                                                    @elseif (!empty($videoUrlRaw))
                                                         <span
                                                             class="flex items-center justify-center w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-blue-50 text-blue-600 shrink-0 border border-blue-100  mt-0.5 sm:mt-0">
                                                             <i class="fas fa-play text-sm"></i>
@@ -527,7 +534,7 @@
 
                                                     <div class="flex-1 min-w-0">
                                                         <p
-                                                            class="font-bold text-slate-800 text-sm leading-tight break-words">
+                                                            class="font-bold {{ $isContentLocked ? 'text-slate-500' : 'text-slate-800' }} text-sm leading-tight break-words">
                                                             {{ $contentName }}
                                                         </p>
                                                         <div class="mt-2 flex items-center gap-1.5">
@@ -535,6 +542,11 @@
                                                                 <span
                                                                     class="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-100">
                                                                     <i class="fas fa-check"></i> Selesai
+                                                                </span>
+                                                            @elseif ($isContentLocked)
+                                                                <span
+                                                                    class="inline-flex items-center gap-1 text-[10px] font-bold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full border border-slate-200">
+                                                                    <i class="fas fa-lock text-[9px]"></i> Selesaikan topik sebelumnya
                                                                 </span>
                                                             @else
                                                                 <span
@@ -546,38 +558,53 @@
                                                     </div>
                                                 </div>
 
-                                                <a href="{{ route('user.course.content.show', ['slug' => $courseSlug, 'content' => $contentId]) }}"
-                                                    class="w-full sm:w-auto mt-2 sm:mt-0 px-4 py-2.5 sm:py-2 {{ $isContentItemCompleted ? 'bg-white border border-[#13416B]/30 text-[#13416B] hover:bg-[#13416B]/10' : 'bg-[#13416B] hover:bg-[#0f3354] text-white shadow-sm' }} rounded-xl text-xs font-bold transition-all text-center shrink-0 flex items-center justify-center gap-2">
-                                                    <i
-                                                        class="fas {{ $isContentItemCompleted ? 'fa-eye' : 'fa-play' }}"></i>
-                                                    {{ $isContentItemCompleted ? 'Lihat Kembali' : 'Pelajari Topik' }}
-                                                </a>
+                                                @if ($isContentLocked)
+                                                    <span aria-disabled="true"
+                                                        class="w-full sm:w-auto mt-2 sm:mt-0 px-4 py-2.5 sm:py-2 bg-slate-100 text-slate-400 border border-slate-200 rounded-xl text-xs font-bold text-center shrink-0 flex items-center justify-center gap-2 cursor-not-allowed select-none">
+                                                        <i class="fas fa-lock"></i> Terkunci
+                                                    </span>
+                                                @else
+                                                    <a href="{{ route('user.course.content.show', ['slug' => $courseSlug, 'content' => $contentId]) }}"
+                                                        class="w-full sm:w-auto mt-2 sm:mt-0 px-4 py-2.5 sm:py-2 {{ $isContentItemCompleted ? 'bg-white border border-[#13416B]/30 text-[#13416B] hover:bg-[#13416B]/10' : 'bg-[#13416B] hover:bg-[#0f3354] text-white shadow-sm' }} rounded-xl text-xs font-bold transition-all text-center shrink-0 flex items-center justify-center gap-2">
+                                                        <i
+                                                            class="fas {{ $isContentItemCompleted ? 'fa-eye' : 'fa-play' }}"></i>
+                                                        {{ $isContentItemCompleted ? 'Lihat Kembali' : 'Pelajari Topik' }}
+                                                    </a>
+                                                @endif
                                             </div>
+
+                                            @php $isPreviousContentDone = $isContentItemCompleted; @endphp
                                         @empty
                                             <div
                                                 class="p-4 text-center text-slate-500 text-sm bg-white rounded-xl border border-dashed border-slate-200">
                                                 <i class="fas fa-folder-open mb-2 text-slate-300 text-xl block"></i>
-                                                Materi sedang disiapkan.
+                                                Topik sedang disiapkan.
                                             </div>
                                         @endforelse
 
-                                        {{-- Post Test per Bab --}}
+                                        {{-- Evaluasi per Modul (terkunci sampai semua topik selesai) --}}
                                         @if ($postTestBab)
+                                            @php $isPostTestBabLocked = !$isContentCompleted && !$isPostTestBabCompleted; @endphp
                                             <div class="mt-4 pt-4 border-t border-slate-200/80">
                                                 <div
-                                                    class="flex flex-col sm:flex-row sm:items-center justify-between p-3.5 sm:p-5 rounded-xl border bg-[#13416B] border-[#13416B] hover:shadow-sm transition-all gap-4">
+                                                    class="flex flex-col sm:flex-row sm:items-center justify-between p-3.5 sm:p-5 rounded-xl border {{ $isPostTestBabLocked ? 'bg-slate-100 border-slate-200' : 'bg-[#13416B] border-[#13416B] hover:shadow-sm' }} transition-all gap-4">
                                                     <div
                                                         class="flex items-start sm:items-center gap-3 sm:gap-4 flex-1 min-w-0">
                                                         <span
-                                                            class="flex items-center justify-center w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-white/20 text-white border border-white/30 shrink-0 mt-0.5 sm:mt-0">
-                                                            <i class="fas fa-clipboard-check text-lg"></i>
+                                                            class="flex items-center justify-center w-10 h-10 sm:w-11 sm:h-11 rounded-full {{ $isPostTestBabLocked ? 'bg-slate-200 text-slate-400 border border-slate-300' : 'bg-white/20 text-white border border-white/30' }} shrink-0 mt-0.5 sm:mt-0">
+                                                            <i
+                                                                class="fas {{ $isPostTestBabLocked ? 'fa-lock' : 'fa-clipboard-check' }} text-lg"></i>
                                                         </span>
                                                         <div class="flex-1 min-w-0">
                                                             <p
-                                                                class="font-bold text-sm leading-tight break-words text-white">
+                                                                class="font-bold text-sm leading-tight break-words {{ $isPostTestBabLocked ? 'text-slate-600' : 'text-white' }}">
                                                                 {{ data_get($postTestBab, 'title', 'Post Test: ' . $sectionName) }}
                                                             </p>
-                                                            @if (data_get($postTestBab, 'description'))
+                                                            @if ($isPostTestBabLocked)
+                                                                <p class="text-xs mt-1.5 text-slate-500">
+                                                                    Selesaikan seluruh topik pada modul ini untuk membuka evaluasi.
+                                                                </p>
+                                                            @elseif (data_get($postTestBab, 'description'))
                                                                 <p
                                                                     class="text-xs mt-1.5 line-clamp-2 text-blue-100">
                                                                     {{ data_get($postTestBab, 'description') }}
@@ -594,12 +621,19 @@
                                                         </div>
                                                     </div>
 
-                                                    <a href="{{ route('user.course.test.show', ['slug' => $courseSlug, 'postTestId' => $postTestBab->id]) }}"
-                                                        class="w-full sm:w-auto mt-1 sm:mt-0 px-5 py-2.5 {{ $isPostTestBabCompleted ? 'bg-white border border-[#13416B]/30 text-[#13416B] hover:bg-slate-100' : 'bg-amber-400 hover:bg-amber-500 text-gray-800 shadow-sm font-bold' }} rounded-xl text-xs transition-all text-center shrink-0 flex items-center justify-center gap-2">
-                                                        <i
-                                                            class="fas {{ $isPostTestBabCompleted ? 'fa-eye' : 'fa-pencil-alt' }}"></i>
-                                                        {{ $isPostTestBabCompleted ? 'Lihat Hasil' : 'Kerjakan Evaluasi' }}
-                                                    </a>
+                                                    @if ($isPostTestBabLocked)
+                                                        <span aria-disabled="true"
+                                                            class="w-full sm:w-auto mt-1 sm:mt-0 px-5 py-2.5 bg-white text-slate-400 border border-slate-200 rounded-xl text-xs font-bold text-center shrink-0 flex items-center justify-center gap-2 cursor-not-allowed select-none">
+                                                            <i class="fas fa-lock"></i> Terkunci
+                                                        </span>
+                                                    @else
+                                                        <a href="{{ route('user.course.test.show', ['slug' => $courseSlug, 'postTestId' => $postTestBab->id]) }}"
+                                                            class="w-full sm:w-auto mt-1 sm:mt-0 px-5 py-2.5 {{ $isPostTestBabCompleted ? 'bg-white border border-[#13416B]/30 text-[#13416B] hover:bg-slate-100' : 'bg-amber-400 hover:bg-amber-500 text-gray-800 shadow-sm font-bold' }} rounded-xl text-xs transition-all text-center shrink-0 flex items-center justify-center gap-2">
+                                                            <i
+                                                                class="fas {{ $isPostTestBabCompleted ? 'fa-eye' : 'fa-pencil-alt' }}"></i>
+                                                            {{ $isPostTestBabCompleted ? 'Lihat Hasil' : 'Kerjakan Evaluasi' }}
+                                                        </a>
+                                                    @endif
                                                 </div>
                                             </div>
                                         @endif
@@ -863,9 +897,9 @@
                         class="hidden lg:flex bg-slate-50 border-y sm:border border-x-0 sm:border-x border-slate-200 rounded-none sm:rounded-md p-4 items-start gap-3 shadow-sm mx-0 sm:mx-auto">
                         <i class="fas fa-info-circle text-[#13416B]/60 mt-0.5 text-base shrink-0"></i>
                         <p class="text-xs text-slate-600 leading-relaxed font-medium">
-                            Materi dipelajari berurutan. Buka kunci modul berikutnya dengan menekan <strong
-                                class="text-slate-800">Tandai Selesai</strong> di setiap materi dan lulus <strong
-                                class="text-slate-800">Evaluasi</strong>.
+                            Topik dipelajari berurutan. Tekan <strong
+                                class="text-slate-800">Tandai Selesai</strong> di setiap topik untuk membuka topik berikutnya,
+                            lalu lulus <strong class="text-slate-800">Evaluasi</strong> untuk membuka modul selanjutnya.
                         </p>
                     </div>
                 @endif

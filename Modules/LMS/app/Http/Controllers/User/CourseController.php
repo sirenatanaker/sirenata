@@ -15,6 +15,7 @@ use Carbon\Carbon;
 use Modules\LMS\Models\Course;
 use Modules\LMS\Models\CertificateSetting;
 use Modules\LMS\Models\SectionContent;
+use Modules\LMS\Models\PostTest;
 use Modules\LMS\Services\Api\CourseProgressService;
 
 class CourseController extends Controller
@@ -329,8 +330,132 @@ class CourseController extends Controller
         return redirect()->back();
     }
 
+    // ======================================================================
+    // GUARD PENGUNCIAN BERURUTAN (server-side)
+    // Urutan: topik 1 → topik 2 → ... → evaluasi modul → modul berikutnya → evaluasi akhir
+    // ======================================================================
+
+    /** [ID topik yang sudah selesai, ID evaluasi yang sudah lulus] milik user saat ini */
+    private function userProgressIds(): array
+    {
+        $completedContentIds = \Modules\LMS\Models\StudentContentProgress::where('user_id', Auth::id())
+            ->pluck('section_content_id')->all();
+
+        $passedTestIds = DB::table('post_test_results')
+            ->where('user_id', Auth::id())
+            ->where('is_passed', 1)
+            ->pluck('post_test_id')->all();
+
+        return [$completedContentIds, $passedTestIds];
+    }
+
+    /** Modul dianggap selesai jika semua topik selesai dan evaluasi modul (jika ada) sudah lulus */
+    private function isSectionDone($section, array $completedContentIds, array $passedTestIds): bool
+    {
+        foreach ($section->contents as $c) {
+            if (!in_array($c->id, $completedContentIds)) {
+                return false;
+            }
+        }
+
+        $test = PostTest::where('course_section_id', $section->id)->first();
+
+        return !$test || in_array($test->id, $passedTestIds);
+    }
+
+    private function loadCourseOrdered(string $courseId): ?Course
+    {
+        return Course::with(['sections.contents' => fn($q) => $q->orderBy('position')])->find($courseId);
+    }
+
+    private function canAccessContent(SectionContent $content): bool
+    {
+        [$completed, $passed] = $this->userProgressIds();
+
+        // Topik yang sudah pernah selesai boleh dibuka lagi ("Lihat Kembali")
+        if (in_array($content->id, $completed)) {
+            return true;
+        }
+
+        $targetSection = $content->section;
+        $course = $targetSection ? $this->loadCourseOrdered($targetSection->course_id) : null;
+        if (!$course) {
+            return false;
+        }
+
+        foreach ($course->sections as $section) {
+            if ($section->id === $targetSection->id) {
+                foreach ($section->contents as $c) {
+                    if ($c->id === $content->id) {
+                        return true;
+                    }
+                    if (!in_array($c->id, $completed)) {
+                        return false; // ada topik sebelumnya yang belum selesai
+                    }
+                }
+                return true;
+            }
+
+            if (!$this->isSectionDone($section, $completed, $passed)) {
+                return false; // modul sebelumnya belum tuntas
+            }
+        }
+
+        return false;
+    }
+
+    private function canAccessTest(PostTest $test): bool
+    {
+        [$completed, $passed] = $this->userProgressIds();
+
+        // Evaluasi yang sudah lulus boleh dilihat kembali hasilnya
+        if (in_array($test->id, $passed)) {
+            return true;
+        }
+
+        $courseId = $test->course_id;
+        if ($test->course_section_id) {
+            $courseId = \Modules\LMS\Models\CourseSection::whereKey($test->course_section_id)->value('course_id');
+        }
+
+        $course = $courseId ? $this->loadCourseOrdered($courseId) : null;
+        if (!$course) {
+            return false;
+        }
+
+        foreach ($course->sections as $section) {
+            // Evaluasi modul: semua topik pada modul ini harus selesai
+            if ($test->course_section_id && $section->id === $test->course_section_id) {
+                foreach ($section->contents as $c) {
+                    if (!in_array($c->id, $completed)) {
+                        return false;
+                    }
+                }
+                return true;
+            }
+
+            if (!$this->isSectionDone($section, $completed, $passed)) {
+                return false;
+            }
+        }
+
+        // Evaluasi akhir: seluruh modul sudah tuntas
+        return is_null($test->course_section_id);
+    }
+
+    private function denyLocked(string $slug, string $message)
+    {
+        ToastMagic::error($message);
+        return redirect()->route('user.course.my-course.detail', $slug);
+    }
+
     public function completeContent(SectionContent $content)
     {
+        if (!$this->canAccessContent($content)) {
+            ToastMagic::error('Selesaikan topik sebelumnya terlebih dahulu.');
+            return redirect()->back();
+        }
+
         $progressService = app(CourseProgressService::class);
         $result = $progressService->completeContent($content);
 
@@ -360,6 +485,10 @@ class CourseController extends Controller
 
         $content = SectionContent::findOrFail($contentId);
 
+        if (!$this->canAccessContent($content)) {
+            return $this->denyLocked($slug, 'Topik ini masih terkunci. Selesaikan topik sebelumnya terlebih dahulu.');
+        }
+
         return view('lms::user.course.content-show', [
             'course'  => $course,
             'content' => $content,
@@ -370,6 +499,10 @@ class CourseController extends Controller
     public function submitTest(Request $request, string $slug, string $postTestId)
     {
         $postTest = \Modules\LMS\Models\PostTest::with('questions.choices')->findOrFail($postTestId);
+        if (!$this->canAccessTest($postTest)) {
+            return $this->denyLocked($slug, 'Evaluasi masih terkunci. Selesaikan seluruh topik sebelumnya terlebih dahulu.');
+        }
+
         $userAnswers = $request->input('answers', []);
 
         $totalQuestions = $postTest->questions->count();
@@ -455,6 +588,10 @@ class CourseController extends Controller
         }
 
         $postTest = \Modules\LMS\Models\PostTest::with('questions.choices')->findOrFail($postTestId);
+
+        if (!$this->canAccessTest($postTest)) {
+            return $this->denyLocked($slug, 'Evaluasi masih terkunci. Selesaikan seluruh topik sebelumnya terlebih dahulu.');
+        }
 
         $result = DB::table('post_test_results')
             ->where('user_id', Auth::id())
