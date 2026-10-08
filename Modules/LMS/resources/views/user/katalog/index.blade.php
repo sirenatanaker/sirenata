@@ -223,67 +223,70 @@
                 @keydown.escape.window="onEscape()"
             >
                 {{-- Grid Cards Responsif --}}
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6 px-4 md:px-0">
+                <div class="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6 px-0 sm:px-4 md:px-0">
                     @forelse ($courses as $course)
                         @php $totalTopik = $course->sections->sum(fn($s) => $s->contents->count()); @endphp
                         <div class="group flex flex-col bg-white rounded-xl border border-slate-200 shadow-sm hover:shadow-xl hover:border-[#13416B]/30 hover:-translate-y-1 transition-all duration-300 overflow-hidden">
 
                             {{-- Thumbnail & Badge --}}
-                            <div class="relative h-44 sm:h-48 overflow-hidden bg-slate-100">
+                            <div class="relative h-24 sm:h-48 overflow-hidden bg-slate-100">
                                 @if (!empty($course->thumbnail))
                                     <img src="{{ str_starts_with($course->thumbnail, 'http') ? $course->thumbnail : asset('storage/' . $course->thumbnail) }}"
                                         alt="{{ $course->name }}"
                                         class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
                                 @else
                                     <div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100">
-                                        <i class="fas fa-graduation-cap text-4xl text-slate-300"></i>
+                                        <i class="fas fa-graduation-cap text-2xl sm:text-4xl text-slate-300"></i>
                                     </div>
                                 @endif
 
-                                <div class="absolute top-3 left-3">
-                                    <span class="px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-[#13416B] bg-white/95 backdrop-blur-sm rounded-md shadow-sm">
+                                <div class="absolute top-2 left-2 sm:top-3 sm:left-3 max-w-[85%]">
+                                    <span class="block truncate px-1.5 py-0.5 sm:px-2.5 sm:py-1 text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-[#13416B] bg-white/95 backdrop-blur-sm rounded-md shadow-sm">
                                         {{ $course->category->name ?? 'Umum' }}
                                     </span>
                                 </div>
                             </div>
 
                             {{-- Konten Text --}}
-                            <div class="p-5 flex flex-col flex-1">
-                                <h3 class="text-base font-bold text-slate-800 leading-snug mb-2 group-hover:text-[#13416B] transition-colors line-clamp-2" title="{{ $course->name }}">
+                            <div class="p-3 sm:p-5 flex flex-col flex-1">
+                                <h3 class="text-[10px] sm:text-base font-bold text-slate-800 leading-snug mb-1.5 sm:mb-2 group-hover:text-[#13416B] transition-colors line-clamp-2" title="{{ $course->name }}">
                                     {{ $course->name }}
                                 </h3>
 
-                                {{-- Statistik: modul, topik, peserta --}}
-                                <div class="flex flex-wrap items-center gap-2 mb-3 text-xs font-medium text-slate-500">
-                                    <span class="flex items-center gap-1.5 bg-slate-50 px-2 py-1 rounded border border-slate-100">
+                                {{-- Statistik: modul, topik, peserta (ringkas di mobile) --}}
+                                <div class="flex flex-wrap items-center gap-1 sm:gap-2 mb-2.5 sm:mb-3 text-[9px] sm:text-xs font-medium text-slate-500">
+                                    <span class="flex items-center gap-1 sm:gap-1.5 bg-slate-50 px-1.5 py-0.5 sm:px-2 sm:py-1 rounded border border-slate-100">
                                         <i class="fas fa-layer-group text-slate-400"></i> {{ $course->sections_count }} Modul
                                     </span>
-                                    <span class="flex items-center gap-1.5 bg-slate-50 px-2 py-1 rounded border border-slate-100">
+                                    <span class="flex items-center gap-1 sm:gap-1.5 bg-slate-50 px-1.5 py-0.5 sm:px-2 sm:py-1 rounded border border-slate-100">
                                         <i class="fas fa-list-ul text-slate-400"></i> {{ $totalTopik }} Topik
                                     </span>
-                                    <span class="flex items-center gap-1.5 bg-[#13416B]/5 text-[#13416B] px-2 py-1 rounded border border-[#13416B]/10">
+                                    <span class="flex items-center gap-1 sm:gap-1.5 bg-[#13416B]/5 text-[#13416B] px-1.5 py-0.5 sm:px-2 sm:py-1 rounded border border-[#13416B]/10">
                                         <i class="fas fa-users"></i>
                                         @if ($course->students_count > 0)
                                             {{ number_format($course->students_count, 0, ',', '.') }} Peserta
                                         @else
-                                            Jadilah peserta pertama
+                                            <span class="sm:hidden">0 Peserta</span>
+                                            <span class="hidden sm:inline">Jadilah peserta pertama</span>
                                         @endif
                                     </span>
                                 </div>
 
-                                <p class="text-xs text-slate-500 mb-5 line-clamp-2 leading-relaxed flex-1">
+                                <p class="hidden sm:block text-xs text-slate-500 mb-5 line-clamp-2 leading-relaxed flex-1">
                                     {{ $course->description ?? 'Tidak ada deskripsi singkat yang tersedia untuk kursus ini.' }}
                                 </p>
 
-                                {{-- Footer Aksi --}}
-                                <div class="mt-auto pt-4 border-t border-slate-100 flex gap-2">
+                                {{-- Footer Aksi: ditumpuk di mobile, berdampingan di layar sm+ --}}
+                                <div class="mt-auto pt-3 sm:pt-4 border-t border-slate-100 flex flex-col sm:flex-row gap-1.5 sm:gap-2">
                                     <button type="button" @click="show('{{ $course->id }}')"
-                                        class="flex-1 py-2.5 text-sm font-bold text-center rounded-xl transition-colors bg-white text-[#13416B] border border-[#13416B]/30 hover:bg-[#13416B]/5">
-                                        Lihat Kurikulum
+                                        class="order-2 sm:order-1 flex-1 py-1.5 sm:py-2.5 text-[10px] sm:text-sm font-bold text-center rounded-lg sm:rounded-xl transition-colors bg-white text-[#13416B] border border-[#13416B]/30 hover:bg-[#13416B]/5">
+                                        <span class="sm:hidden">Kurikulum</span>
+                                        <span class="hidden sm:inline">Lihat Kurikulum</span>
                                     </button>
                                     <button type="button" @click="askEnroll('{{ $course->id }}')"
-                                        class="flex-1 py-2.5 text-sm font-bold text-center rounded-xl transition-colors bg-amber-500 text-white border border-amber-500 hover:bg-amber-600 shadow-sm">
+                                        class="order-1 sm:order-2 flex-1 py-1.5 sm:py-2.5 text-[11px] sm:text-sm inline-flex items-center justify-center gap-1.5 font-bold text-center rounded-lg sm:rounded-xl transition-colors bg-amber-500 text-white border border-amber-500 hover:bg-amber-600 shadow-sm">
                                         Daftar
+                                        <i class="fas fa-arrow-up transform rotate-45 text-[9px] sm:text-xs"></i>
                                     </button>
                                 </div>
                             </div>
