@@ -102,7 +102,7 @@
                              style="display: none;">
                             
                             <div class="flex items-center justify-between mb-4">
-                                <h3 class="text-sm font-bold text-slate-800">Kategori Kursus</h3>
+                                <h3 class="text-sm font-bold text-slate-800">Kategori Modul</h3>
                                 @if(!empty($selectedCategories))
                                     <a href="{{ route('user.catalog.index') }}" class="text-[11px] font-bold text-red-500 hover:text-red-700 hover:underline">Reset</a>
                                 @endif
@@ -249,7 +249,7 @@
 
                             {{-- Konten Text --}}
                             <div class="p-3 sm:p-5 flex flex-col flex-1">
-                                <h3 class="text-[10px] sm:text-base font-bold text-slate-800 leading-snug mb-1.5 sm:mb-2 group-hover:text-[#13416B] transition-colors line-clamp-2" title="{{ $course->name }}">
+                                <h3 class="text-xs sm:text-base font-bold text-slate-800 leading-snug mb-1.5 sm:mb-2 group-hover:text-[#13416B] transition-colors line-clamp-2" title="{{ $course->name }}">
                                     {{ $course->name }}
                                 </h3>
 

@@ -112,7 +112,7 @@
 
                         {{-- Konten Text --}}
                         <div class="p-3 sm:p-5 flex flex-col flex-1">
-                            <h3 class="text-[10px] sm:text-base font-bold text-slate-800 leading-snug mb-1.5 sm:mb-2 group-hover:text-[#13416B] transition-colors line-clamp-2"
+                            <h3 class="text-xs sm:text-base font-bold text-slate-800 leading-snug mb-1.5 sm:mb-2 group-hover:text-[#13416B] transition-colors line-clamp-2"
                                 title="{{ $course->course_name ?? $course->name }}">
                                 {{ $course->course_name ?? $course->name }}
                             </h3>

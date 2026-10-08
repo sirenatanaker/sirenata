@@ -84,7 +84,7 @@
             <div class="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6 px-0 sm:px-4 md:px-0">
                 @forelse ($courses as $course)
                     <a href="{{ route('user.course.my-course.detail', $course->slug) }}"
-                        class="group flex flex-col bg-white rounded-xl border border-slate-200 shadow-sm hover:shadow-xl hover:border-[#13416B]/30 hover:-translate-y-1 transition-all duration-300 overflow-hidden">
+                        class="group flex flex-col bg-white rounded-md border border-slate-200 shadow-sm hover:shadow-xl hover:border-[#13416B]/30 hover:-translate-y-1 transition-all duration-300 overflow-hidden">
 
                         <div class="relative h-24 sm:h-48 overflow-hidden bg-slate-100">
                             @if (!empty($course->thumbnail_url))
@@ -107,7 +107,7 @@
 
                         <div class="p-3 sm:p-5 flex flex-col flex-1">
                             <h3
-                                class="text-[10px] sm:text-base font-bold text-slate-800 leading-snug mb-1.5 sm:mb-2 group-hover:text-[#13416B] transition-colors line-clamp-2">
+                                class="text-xs sm:text-base font-bold text-slate-800 leading-snug mb-1.5 sm:mb-2 group-hover:text-[#13416B] transition-colors line-clamp-2">
                                 {{ $course->course_name ?? $course->name }}
                             </h3>
 
