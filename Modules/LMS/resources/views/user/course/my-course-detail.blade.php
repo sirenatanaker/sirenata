@@ -85,6 +85,18 @@
             // Kunci Sertifikat & Kelulusan (Wajib 100% DAN lulus evaluasi akhir jika evaluasinya ada)
             $isFullyCompleted = $currentProgress >= 100 && (!$evaluasiAkhir || $isEvaluasiAkhirCompleted);
 
+            // Warna progress: <50% kuning, 50-99% biru, 100% hijau
+            if ($currentProgress >= 100) {
+                $progressBarClass = 'bg-emerald-500';
+                $progressTextClass = 'text-emerald-600';
+            } elseif ($currentProgress >= 50) {
+                $progressBarClass = 'bg-[#13416B]';
+                $progressTextClass = 'text-[#13416B]';
+            } else {
+                $progressBarClass = 'bg-amber-500';
+                $progressTextClass = 'text-amber-600';
+            }
+
             if (empty($thumbnailUrl)) {
                 $encodedName = urlencode($courseName);
                 $thumbnailUrl = "https://ui-avatars.com/api/?name={$encodedName}&background=eff6ff&color=1e3a8a&size=512&font-size=0.33&bold=true";
@@ -133,12 +145,12 @@
                     <div class="flex justify-between items-center mb-2.5">
                         <span class="text-xs font-semibold text-slate-500">Progress Pembelajaran</span>
                         <span
-                            class="text-sm font-bold {{ $currentProgress >= 100 ? 'text-[#13416B]' : 'text-amber-600' }}">
+                            class="text-sm font-bold {{ $progressTextClass }}">
                             {{ $currentProgress }}%
                         </span>
                     </div>
                     <div class="w-full bg-slate-100 rounded-full h-2.5 overflow-hidden">
-                        <div class="{{ $currentProgress >= 100 ? 'bg-[#13416B]' : 'bg-amber-500' }} h-full rounded-full transition-all duration-700"
+                        <div class="{{ $progressBarClass }} h-full rounded-full transition-all duration-700"
                             style="width: {{ $currentProgress }}%"></div>
                     </div>
                 </div>
