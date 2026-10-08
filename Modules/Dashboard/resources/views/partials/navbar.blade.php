@@ -77,7 +77,7 @@
                                                             class="text-white font-bold"></span>
                                                     </div>
                                                     <div class="flex-1 min-w-0">
-                                                        <p class="text-sm font-bold text-slate-800 truncate group-hover:text-[#13416B]"
+                                                        <p class="text-xs md:text-sm font-bold text-slate-800 truncate group-hover:text-[#13416B]"
                                                             x-text="item.title"></p>
                                                         <p class="text-[10px] text-slate-500 truncate mt-0.5"
                                                             x-text="item.subtitle"></p>
@@ -109,7 +109,7 @@
                                                             class="text-white font-bold"></span>
                                                     </div>
                                                     <div class="flex-1 min-w-0">
-                                                        <p class="text-sm font-bold text-slate-800 truncate group-hover:text-[#13416B]"
+                                                        <p class="text-xs md:text-sm font-bold text-slate-800 truncate group-hover:text-[#13416B]"
                                                             x-text="item.title"></p>
                                                         <p class="text-[10px] text-slate-500 truncate mt-0.5"
                                                             x-text="item.subtitle"></p>
@@ -141,7 +141,7 @@
                                                             class="text-white font-bold"></span>
                                                     </div>
                                                     <div class="flex-1 min-w-0">
-                                                        <p class="text-sm font-bold text-slate-800 truncate group-hover:text-[#13416B]"
+                                                        <p class="text-xs md:text-sm font-bold text-slate-800 truncate group-hover:text-[#13416B]"
                                                             x-text="item.title"></p>
                                                         <p class="text-[10px] text-slate-500 truncate mt-0.5"
                                                             x-text="item.subtitle"></p>
