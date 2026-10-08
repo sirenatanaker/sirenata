@@ -106,11 +106,11 @@
                 {{-- Badges --}}
                 <div class="flex flex-wrap items-center gap-2 mb-3">
                     <span
-                        class="px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-[#13416B] bg-[#13416B]/10 border border-[#13416B]/20 rounded-md">
+                        class="px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-white bg-[#13416B] border border-[#13416B] rounded-md">
                         {{ data_get($course, 'category.name', 'Tanpa Kategori') }}
                     </span>
                     <span
-                        class="px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider {{ $isFullyCompleted ? 'text-emerald-700 bg-emerald-100 border border-emerald-200' : 'text-amber-700 bg-amber-100 border border-amber-200' }} rounded-md flex items-center gap-1">
+                        class="px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-white {{ $isFullyCompleted ? 'bg-emerald-600 border border-emerald-600' : 'bg-amber-500 border border-amber-500' }} rounded-md flex items-center gap-1">
                         <i class="fas {{ $isFullyCompleted ? 'fa-check-circle' : 'fa-clock' }}"></i>
                         {{ $isFullyCompleted ? 'Selesai' : 'Sedang Berjalan' }}
                     </span>
@@ -151,7 +151,7 @@
             class="bg-white rounded-none sm:rounded-md shadow-sm border-y border-x-0 sm:border sm:border-x border-slate-200 p-4 sm:p-6 mb-6">
             <div class="flex items-center gap-3 mb-4 sm:mb-5 pb-3 sm:pb-4 border-b border-slate-100">
                 <div
-                    class="w-10 h-10 flex items-center justify-center bg-[#13416B]/10 text-[#13416B] border border-[#13416B]/20 rounded-xl shrink-0">
+                    class="w-10 h-10 flex items-center justify-center bg-[#13416B]/10 text-[#13416B] border border-[#13416B]/20 rounded-md shrink-0">
                     <i class="fas fa-chart-pie text-lg"></i>
                 </div>
                 <div>
@@ -167,7 +167,7 @@
                         <i class="fas fa-info-circle"></i> Status
                     </span>
                     <span
-                        class="inline-flex items-center justify-center px-2 py-1.5 rounded-md text-[10px] sm:text-xs font-bold uppercase tracking-wider {{ $isFullyCompleted ? 'bg-emerald-100 text-emerald-700 border border-emerald-200' : 'bg-amber-100 text-amber-700 border border-amber-200' }}">
+                        class="inline-flex items-center justify-center px-2 py-1.5 rounded-md text-[10px] sm:text-xs font-bold uppercase tracking-wider text-white {{ $isFullyCompleted ? 'bg-emerald-600 border border-emerald-600' : 'bg-amber-500 border border-amber-500' }}">
                         {{ $isFullyCompleted ? 'Selesai' : 'Berjalan' }}
                     </span>
                 </div>
@@ -426,17 +426,17 @@
                                     <div class="flex items-start gap-3 sm:gap-4 flex-1 min-w-0 pr-2">
                                         @if ($isLocked)
                                             <span
-                                                class="flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-slate-200 text-slate-400 text-xs mt-0.5 shrink-0 border border-slate-300">
+                                                class="flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-slate-400 text-white text-xs mt-0.5 shrink-0 border border-slate-400">
                                                 <i class="fas fa-lock"></i>
                                             </span>
                                         @elseif($isSectionCompleted)
                                             <span
-                                                class="flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-emerald-50 text-emerald-600 text-xs mt-0.5 shrink-0 border border-emerald-200">
+                                                class="flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-emerald-500 text-white text-xs mt-0.5 shrink-0 border border-emerald-500">
                                                 <i class="fas fa-check"></i>
                                             </span>
                                         @else
                                             <span
-                                                class="flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-slate-100 text-slate-600 text-xs font-bold mt-0.5 shrink-0 border border-slate-200">
+                                                class="flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-[#13416B] text-white text-xs font-bold mt-0.5 shrink-0 border border-[#13416B]">
                                                 {{ $index + 1 }}
                                             </span>
                                         @endif
@@ -460,7 +460,7 @@
                                                         class="text-[10px] text-slate-300 hidden sm:inline-block">•</span>
                                                     <span
                                                         class="text-[11px] sm:text-xs text-slate-500 font-medium flex items-center gap-1 whitespace-nowrap">
-                                                        <i class="fas fa-clipboard-list text-slate-400"></i> 1 Evaluasi
+                                                        <i class="fas fa-file-signature text-slate-400"></i> 1 Evaluasi
                                                     </span>
                                                 @endif
 
@@ -534,17 +534,17 @@
                                                         <div class="mt-2 flex items-center gap-1.5">
                                                             @if ($isContentItemCompleted)
                                                                 <span
-                                                                    class="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-100">
+                                                                    class="inline-flex items-center gap-1 text-[10px] font-bold text-white bg-emerald-600 px-2 py-0.5 rounded-full border border-emerald-600">
                                                                     <i class="fas fa-check"></i> Selesai
                                                                 </span>
                                                             @elseif ($isContentLocked)
                                                                 <span
-                                                                    class="inline-flex items-center gap-1 text-[10px] font-bold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full border border-slate-200">
+                                                                    class="inline-flex items-center gap-1 text-[10px] font-bold text-white bg-slate-400 px-2 py-0.5 rounded-full border border-slate-400">
                                                                     <i class="fas fa-lock text-[9px]"></i> Selesaikan topik sebelumnya
                                                                 </span>
                                                             @else
                                                                 <span
-                                                                    class="inline-flex items-center text-[10px] font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-100">
+                                                                    class="inline-flex items-center text-[10px] font-bold text-white bg-amber-500 px-2 py-0.5 rounded-full border border-amber-500">
                                                                     Belum Selesai
                                                                 </span>
                                                             @endif
@@ -585,28 +585,24 @@
                                                     <div
                                                         class="flex items-start sm:items-center gap-3 sm:gap-4 flex-1 min-w-0">
                                                         <span
-                                                            class="flex items-center justify-center w-10 h-10 sm:w-11 sm:h-11 rounded-full {{ $isPostTestBabLocked ? 'bg-slate-200 text-slate-400 border border-slate-300' : 'bg-white/20 text-white border border-white/30' }} shrink-0 mt-0.5 sm:mt-0">
-                                                            <i class="fas fa-clipboard-check text-lg"></i>
+                                                            class="flex items-center justify-center w-10 h-10 sm:w-11 sm:h-11 rounded-full {{ $isPostTestBabLocked ? 'bg-slate-400 text-white border border-slate-400' : 'bg-white/20 text-white border border-white/30' }} shrink-0 mt-0.5 sm:mt-0">
+                                                            <i class="fas fa-file-signature text-lg"></i>
                                                         </span>
                                                         <div class="flex-1 min-w-0">
                                                             <p
                                                                 class="font-bold text-sm leading-tight break-words {{ $isPostTestBabLocked ? 'text-slate-600' : 'text-white' }}">
                                                                 {{ data_get($postTestBab, 'title', 'Post Test: ' . $sectionName) }}
                                                             </p>
-                                                            @if ($isPostTestBabLocked)
-                                                                <p class="text-xs mt-1.5 text-slate-500">
-                                                                    Selesaikan seluruh topik pada modul ini untuk membuka evaluasi.
-                                                                </p>
-                                                            @elseif (data_get($postTestBab, 'description'))
+                                                            @if (data_get($postTestBab, 'description'))
                                                                 <p
-                                                                    class="text-xs mt-1.5 line-clamp-2 text-blue-100">
+                                                                    class="text-xs mt-1.5 line-clamp-2 {{ $isPostTestBabLocked ? 'text-slate-500' : 'text-blue-100' }}">
                                                                     {{ data_get($postTestBab, 'description') }}
                                                                 </p>
                                                             @endif
                                                             @if ($isPostTestBabCompleted)
                                                                 <div class="mt-2 flex items-center gap-1.5">
                                                                     <span
-                                                                        class="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200">
+                                                                        class="inline-flex items-center gap-1 text-[10px] font-bold text-white bg-emerald-600 px-2 py-0.5 rounded-full border border-emerald-600">
                                                                         <i class="fas fa-check"></i> Selesai
                                                                     </span>
                                                                 </div>
@@ -660,7 +656,7 @@
                             class="px-4 py-4 sm:px-6 sm:py-5 {{ $isEvaluasiAkhirLocked ? 'bg-slate-50 border-b border-slate-200' : 'bg-gradient-to-r from-[#13416B] to-[#0f3354] text-white' }} flex flex-col sm:flex-row sm:items-center justify-between gap-4 sm:gap-6">
                             <div class="flex items-start sm:items-center gap-4 flex-1 min-w-0">
                                 <div
-                                    class="w-12 h-12 rounded-full flex items-center justify-center shrink-0 {{ $isEvaluasiAkhirLocked ? 'bg-slate-200 text-slate-400' : 'bg-white/20 text-white border border-white/30' }}">
+                                    class="w-12 h-12 rounded-full flex items-center justify-center shrink-0 {{ $isEvaluasiAkhirLocked ? 'bg-slate-400 text-white' : 'bg-white/20 text-white border border-white/30' }}">
                                     <i
                                         class="fas {{ $isEvaluasiAkhirLocked ? 'fa-lock' : 'fa-graduation-cap' }} text-xl"></i>
                                 </div>
@@ -732,7 +728,7 @@
                     {{-- Header Widget --}}
                     <div class="flex items-center gap-3 mb-5 pb-4 border-b border-slate-100">
                         <div
-                            class="w-10 h-10 flex items-center justify-center bg-[#13416B]/10 text-[#13416B] border border-[#13416B]/20 rounded-xl shrink-0">
+                            class="w-10 h-10 flex items-center justify-center bg-[#13416B]/10 text-[#13416B] border border-[#13416B]/20 rounded-md shrink-0">
                             <i class="fas fa-award"></i>
                         </div>
                         <div>
