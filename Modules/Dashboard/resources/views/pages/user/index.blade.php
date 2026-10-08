@@ -304,13 +304,13 @@
                         @if (isset($lastLibrary) && $lastLibrary)
                             <!-- Tautan mengarah ke halaman library dengan membawa parameter '?open=ID' -->
                             <a href="{{ route('user.library.index') }}?open={{ $lastLibrary->id }}"
-                                class="flex items-center sm:items-start gap-4 p-4 rounded-xl border border-slate-100 bg-slate-50 hover:bg-slate-100 hover:border-slate-300 transition-all group">
+                                class="flex items-stretch gap-4 p-4 rounded-xl border border-slate-100 bg-slate-50 hover:bg-slate-100 hover:border-slate-300 transition-all group">
 
                                 <div
-                                    class="w-14 h-14 sm:w-16 sm:h-16 rounded-md overflow-hidden shrink-0 shadow-sm relative bg-white border border-slate-200 flex items-center justify-center">
+                                    class="w-16 sm:w-20 min-h-[5.5rem] self-stretch rounded-md overflow-hidden shrink-0 shadow-sm relative bg-white border border-slate-200 flex items-center justify-center">
                                     @if ($lastLibrary->cover_image)
                                         <img src="{{ $lastLibrary->cover_image_url }}"
-                                            alt="Cover" class="w-full h-full object-cover">
+                                            alt="Cover" class="absolute inset-0 w-full h-full object-cover">
                                         <div
                                             class="absolute bottom-1 right-1 w-5 h-5 bg-[#13416B] text-white rounded-full flex items-center justify-center text-[10px] shadow-sm">
                                             <i class="{{ $lastLibrary->icon }}"></i>
@@ -332,7 +332,7 @@
                                         </span>
                                     </div>
                                     <h3
-                                        class="text-sm sm:text-base font-bold text-slate-800 line-clamp-1 group-hover:text-[#13416B] transition-colors mb-1">
+                                        class="text-sm sm:text-base font-bold text-slate-800 leading-snug line-clamp-2 group-hover:text-[#13416B] transition-colors mb-1">
                                         {{ $lastLibrary->title }}
                                     </h3>
                                     <p class="text-[11px] sm:text-xs text-slate-500 line-clamp-1 sm:line-clamp-2">
