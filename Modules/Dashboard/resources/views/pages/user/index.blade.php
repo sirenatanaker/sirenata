@@ -227,7 +227,7 @@
                                             {{ $lastCourse->name }}
                                         </h3>
                                         <p
-                                            class="text-[10px] sm:text-[11px] text-slate-500 line-clamp-1 sm:line-clamp-2 hidden md:block">
+                                            class="text-[10px] sm:text-[11px] text-slate-500 hidden md:line-clamp-2">
                                             {{ $lastCourse->description ?? 'Lanjutkan pembelajaran Anda pada kursus ini.' }}
                                         </p>
                                     </div>
@@ -430,7 +430,7 @@
 
                                             <!-- Deskripsi Kursus: Di-hidden untuk Resolusi Mobile -->
                                             <p
-                                                class="hidden sm:block text-[11px] sm:text-xs text-slate-500 line-clamp-1 mb-2">
+                                                class="hidden sm:line-clamp-2 text-[11px] sm:text-xs text-slate-500 mb-2">
                                                 {{ $course->description ?? 'Deskripsi kursus tidak tersedia.' }}
                                             </p>
 
@@ -473,7 +473,7 @@
                             <div class="absolute inset-x-0 bottom-2 flex justify-center">
                                 <a href="{{ route('user.course.my-course') }}"
                                     class="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-slate-800 hover:underline underline-offset-4 transition-colors">
-                                    Lihat semua kursus 
+                                    Lihat semua kursus
                                 </a>
                             </div>
                         @endif

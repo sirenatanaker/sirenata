@@ -123,7 +123,7 @@
                                 </span>
                             </div>
 
-                            <p class="hidden sm:block text-xs text-slate-500 mb-5 line-clamp-2 leading-relaxed flex-1">
+                            <p class="hidden sm:line-clamp-2 text-xs text-slate-500 mb-5 leading-relaxed flex-1">
                                 {{ $course->description ?? 'Tidak ada deskripsi singkat yang tersedia untuk kursus ini.' }}
                             </p>
 
