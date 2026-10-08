@@ -371,7 +371,7 @@
                                                         class="w-full flex items-center gap-3 px-3.5 py-3 text-left hover:bg-slate-50 transition-colors"
                                                         :aria-expanded="expanded === i">
                                                     <span class="shrink-0 w-6 h-6 rounded-full bg-[#13416B] text-white text-[11px] font-bold flex items-center justify-center" x-text="i + 1"></span>
-                                                    <span class="flex-1 min-w-0 text-sm font-semibold text-slate-800 truncate" x-text="section.name"></span>
+                                                    <span class="flex-1 min-w-0 text-sm font-semibold text-slate-800 leading-snug line-clamp-2 break-words" :title="section.name" x-text="section.name"></span>
                                                     <span class="shrink-0 text-[11px] font-medium text-slate-400" x-text="section.contents.length + ' topik'"></span>
                                                     <i class="fas fa-chevron-down text-[10px] text-slate-400 transition-transform duration-200"
                                                        :class="{ 'rotate-180': expanded === i }"></i>
