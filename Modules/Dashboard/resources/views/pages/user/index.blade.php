@@ -33,10 +33,10 @@
                 class="relative overflow-hidden bg-[#13416B] rounded-md p-5 sm:p-6 shadow-md transition-all duration-300 hover:shadow-lg hover:-translate-y-1 group z-0">
                 <div class="relative z-10 flex items-center justify-between">
                     <div>
-                        <p class="text-white/70 text-xs sm:text-sm font-bold uppercase mb-1 tracking-wider">Total Kursus
+                        <p class="text-white/85 text-xs sm:text-sm font-bold uppercase mb-1 tracking-wider">Total Kursus
                         </p>
                         <h3 class="text-2xl sm:text-3xl font-extrabold text-white">{{ $stats['total'] }}</h3>
-                        <p class="text-[10px] sm:text-xs text-white/60 mt-1">Seluruh modul pada sistem</p>
+                        <p class="text-[10px] sm:text-xs text-white/80 mt-1">Seluruh kursus pada sistem</p>
                     </div>
                     <!-- Badge Putih Solid, Ikon Dark Navy -->
                     <div
@@ -62,10 +62,10 @@
                 class="relative overflow-hidden bg-[#547996] rounded-md p-5 sm:p-6 shadow-md transition-all duration-300 hover:shadow-lg hover:-translate-y-1 group z-0">
                 <div class="relative z-10 flex items-center justify-between">
                     <div>
-                        <p class="text-white/70 text-xs sm:text-sm font-bold uppercase mb-1 tracking-wider">Rata-rata
+                        <p class="text-white/85 text-xs sm:text-sm font-bold uppercase mb-1 tracking-wider">Rata-rata
                             Progress</p>
                         <h3 class="text-2xl sm:text-3xl font-extrabold text-white">{{ $stats['avg_progress'] }}%</h3>
-                        <p class="text-[10px] sm:text-xs text-white/60 mt-1">Tingkat penyelesaian materi</p>
+                        <p class="text-[10px] sm:text-xs text-white/80 mt-1">Tingkat penyelesaian topik</p>
                     </div>
                     <!-- Badge Putih Solid, Ikon Slate Blue -->
                     <div
@@ -90,10 +90,10 @@
                 class="relative overflow-hidden bg-[#8BB1CC] rounded-md p-5 sm:p-6 shadow-md transition-all duration-300 hover:shadow-lg hover:-translate-y-1 group z-0">
                 <div class="relative z-10 flex items-center justify-between">
                     <div>
-                        <p class="text-white/70 text-xs sm:text-sm font-bold uppercase mb-1 tracking-wider">Kursus
+                        <p class="text-white/85 text-xs sm:text-sm font-bold uppercase mb-1 tracking-wider">Kursus
                             Selesai</p>
                         <h3 class="text-2xl sm:text-3xl font-extrabold text-white">{{ $stats['selesai'] }}</h3>
-                        <p class="text-[10px] sm:text-xs text-white/60 mt-1">Modul yang telah dituntaskan</p>
+                        <p class="text-[10px] sm:text-xs text-white/80 mt-1">Kursus yang telah dituntaskan</p>
                     </div>
                     <!-- Badge Putih Solid, Ikon Light Blue -->
                     <div
@@ -144,6 +144,11 @@
             @if (isset($chartDataByCourse) && count($chartDataByCourse) > 0)
                 <div class="relative w-full overflow-hidden" style="min-height: 280px;">
                     <canvas id="postTestChart"></canvas>
+                </div>
+                <div class="flex flex-wrap items-center gap-x-5 gap-y-1.5 mt-4 pt-3 border-t border-slate-100 text-[11px] text-slate-500">
+                    <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-sm bg-emerald-500"></span> Lulus (≥ KKM)</span>
+                    <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-sm bg-amber-500"></span> Di bawah KKM</span>
+                    <span class="flex items-center gap-1.5"><span class="inline-block h-3 border-l-2 border-slate-500"></span> Penanda KKM tiap evaluasi</span>
                 </div>
             @else
                 <div class="bg-slate-50 rounded-xl p-10 text-center border border-dashed border-slate-200 my-4">
@@ -196,6 +201,12 @@
                                 if (str_contains($lThumb, 'ui-avatars.com') && !str_contains($lThumb, 'font-size')) {
                                     $lThumb .= '&font-size=0.33';
                                 }
+
+                                // Warna progress: <50% kuning, 50-99% biru, 100% hijau
+                                $lPct = (int) ($lastCourse->progress ?? 0);
+                                if ($lPct >= 100) { $lBar = 'bg-emerald-500'; $lText = 'text-emerald-600'; }
+                                elseif ($lPct >= 50) { $lBar = 'bg-[#13416B]'; $lText = 'text-[#13416B]'; }
+                                else { $lBar = 'bg-amber-500'; $lText = 'text-amber-600'; }
                             @endphp
 
                             <div
@@ -212,12 +223,12 @@
                                         <span
                                             class="text-[9px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Aktivitas
                                             Terakhir</span>
-                                        <h3 class="font-bold text-slate-800 text-sm sm:text-base line-clamp-2 mb-1">
+<h3 class="font-bold text-slate-800 text-sm sm:text-base line-clamp-2 mb-1">
                                             {{ $lastCourse->name }}
                                         </h3>
                                         <p
                                             class="text-[10px] sm:text-[11px] text-slate-500 line-clamp-1 sm:line-clamp-2 hidden md:block">
-                                            {{ $lastCourse->description ?? 'Lanjutkan materi pembelajaran Anda pada kursus ini.' }}
+                                            {{ $lastCourse->description ?? 'Lanjutkan pembelajaran Anda pada kursus ini.' }}
                                         </p>
                                     </div>
 
@@ -225,21 +236,34 @@
                                         <div
                                             class="flex items-center justify-between text-[9px] sm:text-[10px] text-slate-500 mb-1 font-medium">
                                             <span>Progress</span>
-                                            <span class="font-bold text-[#13416B]">{{ $lastCourse->progress }}%</span>
+                                            <span class="font-bold {{ $lText }}">{{ $lastCourse->progress }}%</span>
                                         </div>
 
                                         <div
                                             class="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden shadow-inner mb-3">
-                                            <div class="bg-[#13416B] h-full rounded-full transition-all duration-300"
+                                            <div class="{{ $lBar }} h-full rounded-full transition-all duration-300"
                                                 style="width: {{ $lastCourse->progress }}%"></div>
                                         </div>
 
-                                        <a href="{{ route('user.course.my-course.detail', $lastCourse->slug) }}?target=auto"
-                                            class="flex items-center justify-center gap-1.5 w-full bg-[#13416B] text-white hover:bg-[#0f3354] px-4 py-2 rounded-lg font-bold transition-all shadow-sm text-xs group">
-                                            <i
-                                                class="fas fa-play text-[10px] group-hover:scale-110 transition-transform"></i>
-                                            <span>Lanjutkan Materi</span>
-                                        </a>
+                                        @if ($lPct >= 100)
+                                            <a href="{{ route('user.course.my-course.detail', $lastCourse->slug) }}"
+                                                class="flex items-center justify-center gap-1.5 w-full bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-600 hover:text-white hover:border-emerald-600 px-4 py-2 rounded-lg font-bold transition-all shadow-sm text-xs group">
+                                                <i class="fas fa-award text-[11px]"></i>
+                                                <span>Lihat Sertifikat</span>
+                                            </a>
+                                        @elseif ($lPct <= 0)
+                                            <a href="{{ route('user.course.my-course.detail', $lastCourse->slug) }}?target=auto"
+                                                class="flex items-center justify-center gap-1.5 w-full bg-emerald-600 text-white hover:bg-emerald-700 px-4 py-2 rounded-lg font-bold transition-all shadow-sm text-xs group">
+                                                <i class="fas fa-play text-[10px] group-hover:scale-110 transition-transform"></i>
+                                                <span>Mulai Belajar</span>
+                                            </a>
+                                        @else
+                                            <a href="{{ route('user.course.my-course.detail', $lastCourse->slug) }}?target=auto"
+                                                class="flex items-center justify-center gap-1.5 w-full bg-[#13416B] text-white hover:bg-[#0f3354] px-4 py-2 rounded-lg font-bold transition-all shadow-sm text-xs group">
+                                                <i class="fas fa-play text-[10px] group-hover:scale-110 transition-transform"></i>
+                                                <span>Lanjutkan Belajar</span>
+                                            </a>
+                                        @endif
                                     </div>
                                 </div>
                             </div>
@@ -251,7 +275,7 @@
                                     <i class="fas fa-book-open text-lg"></i>
                                 </div>
                                 <p class="text-xs font-semibold text-slate-700 mb-3">Belum ada aktivitas belajar</p>
-                                <a href="{{ route('user.course.my-course') }}"
+                                <a href="{{ route('user.catalog.index') }}"
                                     class="inline-flex items-center justify-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-lg text-[#13416B] text-xs font-bold hover:bg-slate-50 shadow-sm transition-all">
                                     <span>Lihat Katalog Kursus</span>
                                     <i class="fas fa-arrow-right text-[10px]"></i>
@@ -263,7 +287,7 @@
 
                 <!-- CARD 2: Terakhir Dilihat (Perpustakaan) -->
                 <div
-                    class="bg-white rounded-md p-4 sm:p-5 shadow-sm border border-slate-200 flex flex-col justify-between">
+                    class="bg-white rounded-md p-4 sm:p-5 shadow-sm border border-slate-200 flex flex-col justify-between flex-1">
                     <div>
                         <div class="flex items-center gap-3 mb-3 pb-3 border-b border-slate-100 shrink-0">
                             <div
@@ -329,12 +353,10 @@
                 </div>
             </div>
 
-            <!-- KOLOM KANAN: Kursus Saya (Tingginya mengikuti kolom kiri) -->
-            <!-- Beri tinggi tetap di HP (480px), namun di Desktop (lg) ia menjadi fleksibel -->
-            <div class="relative h-[480px] lg:h-auto">
-                <!-- Tambahan lg:absolute dan lg:inset-0 akan memaksa card ini menyalin tinggi kolom kiri di sebelahnya -->
+            <!-- KOLOM KANAN: Kursus Saya (3 kursus penuh + 1 mengintip terpotong/blur) -->
+            <div>
                 <div
-                    class="bg-white rounded-md p-5 sm:p-6 shadow-sm border border-slate-200 flex flex-col h-full lg:absolute lg:inset-0 w-full overflow-hidden">
+                    class="bg-white rounded-md p-5 sm:p-6 shadow-sm border border-slate-200 flex flex-col h-full w-full">
 
                     <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-100 shrink-0">
                         <div class="flex items-center gap-3">
@@ -347,16 +369,12 @@
                                 <p class="text-[11px] sm:text-xs text-slate-500">Daftar kursus yang Anda ikuti</p>
                             </div>
                         </div>
-                        <a href="{{ route('user.course.my-course') }}"
-                            class="text-xs font-bold text-[#13416B] hover:underline flex items-center gap-1 transition-colors">
-                            <span>Lihat semua</span>
-                        </a>
                     </div>
 
                     <!-- Area daftar kursus yang di set relatif dan menyembunyikan elemen berlebih -->
-                    <div class="relative flex-1 overflow-hidden">
+                    <div class="relative flex-1">
                         <div class="space-y-3 flex flex-col">
-                            @forelse ($recentCourses as $course)
+                            @forelse ($recentCourses->take(4) as $course)
                                 @php
                                     $rThumb = $course->thumbnail
                                         ? (str_starts_with($course->thumbnail, 'http')
@@ -371,10 +389,17 @@
                                     ) {
                                         $rThumb .= '&font-size=0.33';
                                     }
+
+                                    // Warna progress: <50% kuning, 50-99% biru, 100% hijau
+                                    $rPct = (int) ($course->pivot->progress ?? 0);
+                                    if ($rPct >= 100) { $rBar = 'bg-emerald-500'; $rText = 'text-emerald-600'; }
+                                    elseif ($rPct >= 50) { $rBar = 'bg-[#13416B]'; $rText = 'text-[#13416B]'; }
+                                    else { $rBar = 'bg-amber-500'; $rText = 'text-amber-600'; }
                                 @endphp
                                 <!-- Tambahan "shrink-0" memastikan card kursus tidak memipih/gepeng meskipun meluber -->
                                 <a href="{{ route('user.course.my-course.detail', $course->slug) }}"
-                                    class="shrink-0 flex flex-row gap-3 sm:gap-4 bg-white border border-slate-200 rounded-xl p-3 sm:p-4 transition-all duration-200 hover:border-[#13416B]/40 hover:shadow-sm group items-center sm:items-start">
+                                    @if ($loop->index === 3) aria-hidden="true" tabindex="-1" @endif
+                                    class="shrink-0 flex flex-row gap-3 sm:gap-4 bg-white border border-slate-200 rounded-xl p-3 sm:p-4 transition-all duration-200 hover:border-[#13416B]/40 hover:shadow-sm group items-center sm:items-start {{ $loop->index === 3 ? 'max-h-[64px] overflow-hidden pointer-events-none select-none' : '' }}">
 
                                     <div
                                         class="w-16 h-16 sm:w-20 sm:h-20 shrink-0 rounded-md overflow-hidden bg-slate-100 border border-slate-200 relative shadow-sm">
@@ -391,15 +416,15 @@
                                                     {{ $course->name }}
                                                 </h3>
 
-                                                @if ($course->pivot->status === 'completed')
+                                                @if ($course->pivot->status === 'completed' || $rPct >= 100)
                                                     <span
-                                                        class="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-bold uppercase text-green-700 bg-green-100 shrink-0">Selesai</span>
-                                                @elseif ($course->pivot->status === 'in_progress')
+                                                        class="inline-flex items-center px-1.5 py-0.5 rounded-md text-[9px] font-bold uppercase text-white bg-emerald-600 shrink-0">Selesai</span>
+                                                @elseif ($rPct > 0)
                                                     <span
-                                                        class="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-bold uppercase text-[#13416B] bg-[#13416B]/10 border border-[#13416B]/20 shrink-0">Berjalan</span>
+                                                        class="inline-flex items-center px-1.5 py-0.5 rounded-md text-[9px] font-bold uppercase text-white bg-amber-500 shrink-0">Berjalan</span>
                                                 @else
                                                     <span
-                                                        class="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-bold uppercase text-slate-500 bg-slate-50 border border-slate-200 shrink-0">Terdaftar</span>
+                                                        class="inline-flex items-center px-1.5 py-0.5 rounded-md text-[9px] font-bold uppercase text-white bg-slate-400 shrink-0">Belum Dimulai</span>
                                                 @endif
                                             </div>
 
@@ -421,11 +446,11 @@
                                                 class="flex items-center justify-between text-[9px] sm:text-[10px] text-slate-500 mb-1 font-medium">
                                                 <span>Progress</span>
                                                 <span
-                                                    class="font-bold text-slate-700">{{ $course->pivot->progress }}%</span>
+                                                    class="font-bold {{ $rText }}">{{ $course->pivot->progress }}%</span>
                                             </div>
                                             <div
                                                 class="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden shadow-inner">
-                                                <div class="bg-[#13416B] h-full rounded-full transition-all duration-300"
+                                                <div class="{{ $rBar }} h-full rounded-full transition-all duration-300"
                                                     style="width: {{ $course->pivot->progress }}%"></div>
                                             </div>
                                         </div>
@@ -438,10 +463,20 @@
                                 </div>
                             @endforelse
                         </div>
-                        <!-- Efek Gradasi Blur/Fade halus di Bagian Bawah -->
-                        <div
-                            class="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-white/90 via-white/40 to-transparent pointer-events-none z-10">
-                        </div>
+
+                        {{-- Kursus ke-4 dst. hanya mengintip (terpotong + blur); selengkapnya lewat "Lihat semua" --}}
+                        @if ($recentCourses->count() > 3)
+                            <div class="pointer-events-none absolute inset-x-0 bottom-0 h-24">
+                                <div class="absolute inset-0 backdrop-blur-[3px] [mask-image:linear-gradient(to_top,black,transparent)] [-webkit-mask-image:linear-gradient(to_top,black,transparent)]"></div>
+                                <div class="absolute inset-0 bg-gradient-to-t from-white via-white/85 to-transparent"></div>
+                            </div>
+                            <div class="absolute inset-x-0 bottom-2 flex justify-center">
+                                <a href="{{ route('user.course.my-course') }}"
+                                    class="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-slate-800 hover:underline underline-offset-4 transition-colors">
+                                    Lihat semua kursus 
+                                </a>
+                            </div>
+                        @endif
                     </div>
                 </div>
             </div>
@@ -562,9 +597,14 @@
                                 class="w-full min-h-11 px-3 py-2 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-[#13416B] focus:border-[#13416B]" />
                         </div>
 
+                        <div id="instansiClientError" class="hidden rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700 flex items-start gap-2" role="alert" aria-live="assertive">
+                            <i class="fas fa-exclamation-circle mt-0.5"></i>
+                            <span id="instansiClientErrorText"></span>
+                        </div>
+
                         <div class="pt-3">
                             <button type="submit"
-                                class="w-full bg-blue-600 text-white py-3 px-5 rounded-lg text-sm font-bold hover:bg-blue-700 transition-colors shadow-sm flex items-center justify-center gap-2">
+                                class="w-full bg-[#13416B] text-white py-3 px-5 rounded-lg text-sm font-bold hover:bg-[#0f3354] transition-colors shadow-sm flex items-center justify-center gap-2">
                                 <i class="fas fa-save"></i> <span>Simpan & Lanjutkan</span>
                             </button>
                         </div>
@@ -581,16 +621,69 @@
             document.addEventListener('DOMContentLoaded', function() {
                 const ctx = document.getElementById('postTestChart');
 
-                // Palet Warna diekstrak dari gambar referensi
-                // Menggunakan variasi Muted/Deep yang elegan
-                const chartColors = [
-                    '#13416B', // Base Navy (Blok D/M/A)
-                    '#547996', // Slate Blue (Blok E/H)
-                    '#8BB1CC', // Light Blue (Blok I/F/O)
-                    '#79A736', // Muted Green (Blok J)
-                    '#E58A18', // Muted Orange (Blok K)
-                    '#6E4B82' // Muted Purple (Blok L)
-                ];
+                // Warna batang berdasarkan hasil: lulus = hijau, di bawah KKM = kuning.
+                // KKM berbeda untuk setiap evaluasi, jadi dibaca per batang.
+                const COLOR_PASS = '#10b981';
+                const COLOR_FAIL = '#f59e0b';
+                const DEFAULT_KKM = 70; // cadangan jika data evaluasi tidak membawa nilai KKM
+
+                // Urutan KKM harus sejajar dengan labels/user_scores.
+                // Sumber (berurutan): passing_scores[] -> kkms[] -> kkm (tunggal) -> DEFAULT_KKM
+                const getKkms = (courseData) => {
+                    const count = (courseData.user_scores || []).length;
+                    const list = courseData.passing_scores || courseData.kkms;
+                    const single = Number(courseData.kkm) || DEFAULT_KKM;
+                    return Array.from({ length: count }, (_, i) => {
+                        const v = Array.isArray(list) ? Number(list[i]) : NaN;
+                        return v > 0 ? v : single;
+                    });
+                };
+                const scoreColors = (scores, kkms) => scores.map((v, i) => (Number(v) >= kkms[i] ? COLOR_PASS : COLOR_FAIL));
+
+                // Plugin: penanda KKM pada setiap batang + angka nilai di ujung batang
+                const kkmAndValuePlugin = {
+                    id: 'kkmAndValue',
+                    afterDatasetsDraw(chart, args, opts) {
+                        const {ctx, scales} = chart;
+                        const x = scales.x;
+                        const kkms = (opts && opts.kkms) || [];
+                        const meta = chart.getDatasetMeta(0);
+                        ctx.save();
+
+                        meta.data.forEach((bar, i) => {
+                            const value = chart.data.datasets[0].data[i];
+                            const kkm = kkms[i];
+                            const half = bar.height / 2;
+                            let textX = bar.x;
+
+                            if (kkm) {
+                                const kx = x.getPixelForValue(kkm);
+                                ctx.setLineDash([]);
+                                ctx.lineWidth = 2;
+                                ctx.strokeStyle = '#475569';
+                                ctx.beginPath();
+                                ctx.moveTo(kx, bar.y - half - 5);
+                                ctx.lineTo(kx, bar.y + half + 5);
+                                ctx.stroke();
+
+                                ctx.fillStyle = '#64748b';
+                                ctx.font = '600 9px sans-serif';
+                                ctx.textAlign = 'center';
+                                ctx.textBaseline = 'bottom';
+                                ctx.fillText('KKM ' + kkm, kx, bar.y - half - 6);
+                                textX = Math.max(bar.x, kx);
+                            }
+
+                            ctx.fillStyle = '#334155';
+                            ctx.font = '700 11px sans-serif';
+                            ctx.textAlign = 'left';
+                            ctx.textBaseline = 'middle';
+                            ctx.fillText(value, textX + 6, bar.y);
+                        });
+
+                        ctx.restore();
+                    }
+                };
 
                 function formatMultilineLabel(text) {
                     if (!text) return text;
@@ -618,11 +711,12 @@
                     let currentCourseId = courseKeys[0];
                     let currentData = allChartData[currentCourseId];
 
-                    const dynamicColors = currentData.user_scores.map((_, index) => chartColors[index % chartColors
-                        .length]);
+                    let currentKkms = getKkms(currentData);
+                    const dynamicColors = scoreColors(currentData.user_scores, currentKkms);
 
                     const postTestChart = new Chart(ctx.getContext('2d'), {
                         type: 'bar',
+                        plugins: [kkmAndValuePlugin],
                         data: {
                             labels: currentData.labels.map(label => formatMultilineLabel(label)),
                             datasets: [{
@@ -638,7 +732,16 @@
                             indexAxis: 'y',
                             responsive: true,
                             maintainAspectRatio: false,
+                            layout: {
+                                padding: {
+                                    top: 14,
+                                    right: 30
+                                }
+                            },
                             plugins: {
+                                kkmAndValue: {
+                                    kkms: currentKkms
+                                },
                                 legend: {
                                     display: false
                                 },
@@ -657,6 +760,11 @@
                                     callbacks: {
                                         title: function(context) {
                                             return context[0].label.replaceAll(',', ' ');
+                                        },
+                                        label: function(context) {
+                                            const kkm = postTestChart.options.plugins.kkmAndValue.kkms[context.dataIndex];
+                                            const status = Number(context.parsed.x) >= kkm ? 'Lulus' : 'Di bawah KKM';
+                                            return 'Skor Anda: ' + context.parsed.x + ' • KKM: ' + kkm + ' (' + status + ')';
                                         }
                                     }
                                 }
@@ -722,8 +830,9 @@
                                 postTestChart.data.labels = newData.labels.map(label => formatMultilineLabel(
                                     label));
                                 postTestChart.data.datasets[0].data = newData.user_scores;
-                                postTestChart.data.datasets[0].backgroundColor = newData.user_scores.map((_,
-                                    index) => chartColors[index % chartColors.length]);
+                                currentKkms = getKkms(newData);
+                                postTestChart.options.plugins.kkmAndValue.kkms = currentKkms;
+                                postTestChart.data.datasets[0].backgroundColor = scoreColors(newData.user_scores, currentKkms);
                                 postTestChart.update();
                             }
                         });
@@ -735,6 +844,18 @@
             });
             @if (!$profile || empty($profile->instansi))
                 $(document).ready(function() {
+                    // Pesan error inline (pengganti alert bawaan browser)
+                    function showFormError(message) {
+                        $('#instansiClientErrorText').text(message);
+                        $('#instansiClientError').removeClass('hidden');
+                        const box = document.getElementById('instansiClientError');
+                        if (box && box.scrollIntoView) box.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                    }
+                    function clearFormError() {
+                        $('#instansiClientError').addClass('hidden');
+                    }
+                    $('#instansiForm').on('change input', clearFormError);
+
                     // 1. Muat data pusat saat pertama kali modal muncul
                     $.ajax({
                         url: '{{ route('api.masterdata.institutions.index') }}?type=pusat',
@@ -928,7 +1049,7 @@
                         const asalInstansi = $('input[name="asalInstansi"]:checked').val();
                         if (!asalInstansi) {
                             e.preventDefault();
-                            alert('Pilih asal instansi terlebih dahulu!');
+                            showFormError('Pilih asal instansi terlebih dahulu!');
                             return;
                         }
 
@@ -936,14 +1057,14 @@
                             const kemVal = $('#kementerian').val();
                             if (!kemVal) {
                                 e.preventDefault();
-                                alert('Pilih Kementerian/Lembaga!');
+                                showFormError('Pilih Kementerian/Lembaga!');
                                 return;
                             }
 
                             const isOther = kemVal === 'lainnya';
                             if (isOther && !$('#customInstansi').val().trim()) {
                                 e.preventDefault();
-                                alert('Masukkan nama instansi yang belum terdaftar.');
+                                showFormError('Masukkan nama instansi yang belum terdaftar.');
                                 return;
                             }
 
@@ -961,14 +1082,14 @@
                                 const customVal = $('#customInstansi').val().trim();
                                 if (!customVal) {
                                     e.preventDefault();
-                                    alert('Masukkan nama instansi secara manual!');
+                                    showFormError('Masukkan nama instansi secara manual!');
                                     return;
                                 }
 
                             } else {
                                 if (!instansiVal) {
                                     e.preventDefault();
-                                    alert('Pilih instansi terlebih dahulu!');
+                                    showFormError('Pilih instansi terlebih dahulu!');
                                     return;
                                 }
                             }
