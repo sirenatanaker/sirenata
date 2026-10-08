@@ -489,6 +489,10 @@ class CourseController extends Controller
             return $this->denyLocked($slug, 'Topik ini masih terkunci. Selesaikan topik sebelumnya terlebih dahulu.');
         }
 
+        // Status selesai dibaca dari tabel progress siswa (bukan atribut bawaan model),
+        // supaya tombol di halaman topik berubah hijau setelah ditandai selesai.
+        $content->is_completed = $content->isCompletedByUser((string) Auth::id());
+
         return view('lms::user.course.content-show', [
             'course'  => $course,
             'content' => $content,

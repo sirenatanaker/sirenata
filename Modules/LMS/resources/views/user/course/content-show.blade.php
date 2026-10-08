@@ -1,6 +1,25 @@
-<x-dashboard::layouts.dashboard title="{{ data_get($content, 'name', 'Detail Materi') }} | SIRENATA">
+<x-dashboard::layouts.dashboard title="{{ data_get($content, 'name', 'Detail Topik') }} | SIRENATA">
     {{-- PERBAIKAN RESPONSIVE: Hilangkan padding luar di HP (p-0) agar mepet pojok, munculkan di layar sm ke atas --}}
-    <div class="p-0 sm:p-4 md:p-6 max-w-full mx-auto min-h-screen">
+    <div class="p-0 sm:p-4 md:p-6 max-w-full mx-auto min-h-screen"
+        x-data="{
+            reachedEnd: {{ data_get($content, 'is_completed') ? 'true' : 'false' }},
+            submitting: false,
+            init() {
+                if (this.reachedEnd) return;
+                const sentinel = this.$refs.endSentinel;
+                if (!sentinel || !('IntersectionObserver' in window)) { this.reachedEnd = true; return; }
+                const io = new IntersectionObserver((entries) => {
+                    if (entries[0].isIntersecting) {
+                        this.reachedEnd = true;
+                        io.disconnect();
+                    }
+                }, { threshold: 0 });
+                io.observe(sentinel);
+            },
+            scrollToEnd() {
+                this.$refs.endSentinel.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }">
         
         {{-- Main Content Container --}}
         {{-- Di HP tidak ada border-radius, di Desktop membulat (sm:rounded-2xl) --}}
@@ -33,7 +52,7 @@
                 <div class="border-b border-slate-100 pb-6 sm:pb-8 mb-6 sm:mb-8">
                     <div class="flex items-center gap-2 mb-3 sm:mb-4">
                         <span class="px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-[#13416B] bg-[#13416B]/10 rounded-lg border border-[#13416B]/20">
-                            Materi Pembelajaran
+                            Topik Pembelajaran
                         </span>
                     </div>
                     <h1 class="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-slate-900 leading-tight sm:leading-tight">
@@ -98,6 +117,9 @@
                         <p class="text-xs sm:text-sm text-slate-500 mt-2 max-w-sm mx-auto">Tutor belum mengunggah konten bacaan, video, maupun dokumen lampiran untuk modul ini.</p>
                     </div>
                 @endif
+
+                {{-- Penanda akhir konten: saat terlihat di layar, tombol "Tandai Selesai" dimunculkan --}}
+                <div x-ref="endSentinel" class="h-px w-full" aria-hidden="true"></div>
             </div>
 
             {{-- Action Footer --}}
@@ -108,16 +130,30 @@
                 </a>
 
                 @if (!data_get($content, 'is_completed'))
+                    {{-- Petunjuk: tampil sebelum user sampai di akhir konten --}}
+                    <button type="button" x-show="!reachedEnd" @click="scrollToEnd()"
+                        class="w-full sm:w-auto px-6 py-3 sm:py-3.5 text-sm font-bold text-slate-500 bg-slate-100 border border-slate-200 rounded-xl flex items-center justify-center gap-2 hover:bg-slate-200 transition-colors">
+                        <i class="fas fa-arrow-down text-xs animate-bounce"></i> Baca sampai akhir untuk menandai selesai
+                    </button>
+
+                    {{-- Tombol tandai selesai: muncul setelah konten dibaca sampai bawah --}}
                     <form action="{{ route('user.course.content.complete', ['content' => data_get($content, 'id')]) }}"
-                        method="POST" class="w-full sm:w-auto m-0">
+                        method="POST" class="w-full sm:w-auto m-0" style="display: none;"
+                        x-show="reachedEnd"
+                        x-transition:enter="transition ease-out duration-300"
+                        x-transition:enter-start="opacity-0 translate-y-2"
+                        x-transition:enter-end="opacity-100 translate-y-0"
+                        @submit="submitting = true">
                         @csrf
-                        <button type="submit"
-                            class="w-full sm:w-auto px-6 py-3 sm:py-3.5 text-sm font-bold text-white bg-[#13416B] rounded-xl hover:bg-[#0f3354] transition-all shadow-sm flex items-center justify-center gap-2">
-                            <i class="fas fa-check-circle text-base sm:text-lg"></i> Tandai Selesai & Lanjut
+                        <button type="submit" :disabled="submitting"
+                            class="w-full sm:w-auto px-6 py-3 sm:py-3.5 text-sm font-bold text-white bg-[#13416B] rounded-xl hover:bg-[#0f3354] transition-all shadow-sm flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed">
+                            <i class="fas fa-check-circle text-base sm:text-lg" x-show="!submitting"></i>
+                            <i class="fas fa-spinner fa-spin text-base sm:text-lg" x-show="submitting" style="display: none;"></i>
+                            <span x-text="submitting ? 'Menyimpan...' : 'Tandai Selesai & Lanjut'"></span>
                         </button>
                     </form>
                 @else
-                    <span class="w-full sm:w-auto px-6 py-3 sm:py-3.5 text-sm font-bold text-emerald-700 bg-emerald-100 border border-emerald-200 rounded-xl text-center flex items-center justify-center gap-2 shadow-sm">
+                    <span class="completed-pop w-full sm:w-auto px-6 py-3 sm:py-3.5 text-sm font-bold text-white bg-emerald-600 border border-emerald-600 rounded-xl text-center flex items-center justify-center gap-2 shadow-sm cursor-default select-none">
                         <i class="fas fa-check-double text-base sm:text-lg"></i> Selesai Dipelajari
                     </span>
                 @endif
@@ -127,6 +163,13 @@
 
     @push('styles')
     <style>
+        @keyframes completedPop {
+            0%   { transform: scale(0.94); opacity: 0.6; }
+            60%  { transform: scale(1.03); opacity: 1; }
+            100% { transform: scale(1); }
+        }
+        .completed-pop { animation: completedPop 0.45s ease-out; }
+
         .quill-content-render .ql-align-center { text-align: center !important; }
         .quill-content-render .ql-align-right { text-align: right !important; }
         .quill-content-render .ql-align-justify { text-align: justify !important; }
