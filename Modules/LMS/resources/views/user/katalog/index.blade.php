@@ -102,7 +102,7 @@
                              style="display: none;">
                             
                             <div class="flex items-center justify-between mb-4">
-                                <h3 class="text-sm font-bold text-slate-800">Kategori Kursus</h3>
+                                <h3 class="text-sm font-bold text-slate-800">Kategori Modul</h3>
                                 @if(!empty($selectedCategories))
                                     <a href="{{ route('user.catalog.index') }}" class="text-[11px] font-bold text-red-500 hover:text-red-700 hover:underline">Reset</a>
                                 @endif
@@ -189,7 +189,8 @@
                 x-data="{
                     courses: @js($coursePayload),
                     selected: null,
-                    open: false,
+                    open: false,          // modal lihat kurikulum
+                    confirmOpen: false,   // alert konfirmasi daftar
                     submitting: false,
                     expanded: 0,
                     show(id) {
@@ -197,18 +198,29 @@
                         this.expanded = 0;
                         this.submitting = false;
                         this.open = true;
-                        document.body.classList.add('overflow-hidden');
+                    },
+                    askEnroll(id) {
+                        this.selected = this.courses[id];
+                        this.submitting = false;
+                        this.confirmOpen = true;
                     },
                     close() {
                         if (this.submitting) return;
                         this.open = false;
-                        document.body.classList.remove('overflow-hidden');
+                    },
+                    cancelConfirm() {
+                        if (this.submitting) return;
+                        this.confirmOpen = false;
+                    },
+                    onEscape() {
+                        this.confirmOpen ? this.cancelConfirm() : this.close();
                     },
                     icon(type) {
                         return { video: 'fa-play-circle', document: 'fa-file-alt', text: 'fa-align-left' }[type] ?? 'fa-align-left';
                     }
                 }"
-                @keydown.escape.window="close()"
+                x-effect="document.body.classList.toggle('overflow-hidden', open || confirmOpen)"
+                @keydown.escape.window="onEscape()"
             >
                 {{-- Grid Cards Responsif --}}
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6 px-4 md:px-0">
@@ -269,7 +281,7 @@
                                         class="flex-1 py-2.5 text-sm font-bold text-center rounded-xl transition-colors bg-white text-[#13416B] border border-[#13416B]/30 hover:bg-[#13416B]/5">
                                         Lihat Kurikulum
                                     </button>
-                                    <button type="button" @click="show('{{ $course->id }}')"
+                                    <button type="button" @click="askEnroll('{{ $course->id }}')"
                                         class="flex-1 py-2.5 text-sm font-bold text-center rounded-xl transition-colors bg-amber-500 text-white border border-amber-500 hover:bg-amber-600 shadow-sm">
                                         Daftar
                                     </button>
@@ -384,30 +396,80 @@
                                     </div>
                                 </div>
 
-                                {{-- Footer: konfirmasi --}}
-                                <form :action="selected.enrollUrl" method="POST" @submit="submitting = true"
-                                      class="px-5 py-4 border-t border-slate-100 bg-white">
-                                    @csrf
-                                    <p class="text-xs text-slate-500 mb-3 text-center sm:text-left">
-                                        Apakah kamu yakin ingin mendaftar? Kursus akan masuk ke daftar <span class="font-semibold text-slate-700">Kursus Saya</span>.
-                                    </p>
+                                {{-- Footer: aksi --}}
+                                <div class="px-5 py-4 border-t border-slate-100 bg-white">
                                     <div class="flex flex-col-reverse sm:flex-row gap-2 sm:justify-end">
-                                        <button type="button" @click="close()" :disabled="submitting"
-                                                class="px-5 py-2.5 text-sm font-bold rounded-xl text-slate-600 bg-white border border-slate-300 hover:bg-slate-50 transition-colors disabled:opacity-50">
-                                            Batal
+                                        <button type="button" @click="close()"
+                                                class="px-5 py-2.5 text-sm font-bold rounded-xl text-slate-600 bg-white border border-slate-300 hover:bg-slate-50 transition-colors">
+                                            Tutup
                                         </button>
-                                        <button type="submit" :disabled="submitting"
-                                                class="px-5 py-2.5 text-sm font-bold rounded-xl text-white bg-amber-500 border border-amber-500 hover:bg-amber-600 shadow-sm transition-colors inline-flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed">
-                                            <svg x-show="submitting" class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
-                                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
-                                            </svg>
-                                            <span x-text="submitting ? 'Mendaftarkan...' : 'Ya, Daftar Sekarang'"></span>
+                                        <button type="button" @click="confirmOpen = true"
+                                                class="px-5 py-2.5 text-sm font-bold rounded-xl text-white bg-amber-500 border border-amber-500 hover:bg-amber-600 shadow-sm transition-colors">
+                                            Daftar Kursus Ini
                                         </button>
                                     </div>
-                                </form>
+                                </div>
                             </div>
                         </template>
+                    </div>
+                </div>
+
+                {{-- ========== ALERT KONFIRMASI DAFTAR ========== --}}
+                <div x-show="confirmOpen" x-cloak style="display: none;"
+                     class="fixed inset-0 z-[60] flex items-center justify-center p-4"
+                     role="alertdialog" aria-modal="true" aria-labelledby="confirm-title">
+
+                    <div x-show="confirmOpen"
+                         x-transition.opacity.duration.200ms
+                         @click="cancelConfirm()"
+                         class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"></div>
+
+                    <div x-show="confirmOpen"
+                         x-transition:enter="transition ease-out duration-200"
+                         x-transition:enter-start="opacity-0 scale-95"
+                         x-transition:enter-end="opacity-100 scale-100"
+                         x-transition:leave="transition ease-in duration-150"
+                         x-transition:leave-start="opacity-100 scale-100"
+                         x-transition:leave-end="opacity-0 scale-95"
+                         class="relative w-full max-w-md bg-white rounded-2xl shadow-2xl p-6 sm:p-7 text-center">
+
+                        <div class="w-14 h-14 mx-auto mb-4 rounded-full bg-amber-100 text-amber-500 border border-amber-200 flex items-center justify-center text-2xl">
+                            <i class="fas fa-question"></i>
+                        </div>
+
+                        <h3 id="confirm-title" class="text-lg font-bold text-slate-800 mb-2">Daftar ke kursus ini?</h3>
+                        <p class="text-sm text-slate-500 leading-relaxed mb-6">
+                            Kamu akan mendaftar ke
+                            <span class="font-semibold text-slate-700" x-text="selected ? selected.name : ''"></span>
+                            dan kursus ini akan langsung masuk ke daftar Kursus Saya.
+                        </p>
+
+                        <template x-if="selected">
+                            <form :action="selected.enrollUrl" method="POST" @submit="submitting = true">
+                                @csrf
+                                <div class="flex flex-col-reverse sm:flex-row gap-2">
+                                    <button type="button" @click="cancelConfirm()" :disabled="submitting"
+                                            class="flex-1 px-4 py-2.5 text-sm font-bold rounded-xl text-slate-600 bg-white border border-slate-300 hover:bg-slate-50 transition-colors disabled:opacity-50">
+                                        Batal
+                                    </button>
+                                    <button type="submit" :disabled="submitting"
+                                            class="flex-1 px-4 py-2.5 text-sm font-bold rounded-xl text-white bg-amber-500 border border-amber-500 hover:bg-amber-600 shadow-sm transition-colors inline-flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed">
+                                        <svg x-show="submitting" class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+                                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+                                        </svg>
+                                        <span x-text="submitting ? 'Mendaftarkan...' : 'Ya, Daftar'"></span>
+                                    </button>
+                                </div>
+                            </form>
+                        </template>
+
+                        <div x-show="!open && !submitting" class="mt-5 pt-4 border-t border-slate-100">
+                            <button type="button" @click="confirmOpen = false; open = true"
+                                    class="inline-flex items-center gap-1.5 text-xs font-semibold text-[#13416B] hover:underline">
+                                <i class="fas fa-list-ul text-[11px]"></i> Lihat kurikulum dulu
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>

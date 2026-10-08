@@ -137,7 +137,7 @@
         {{-- KONTEN UTAMA                               --}}
         {{-- ========================================== --}}
         <!-- Grid diatur maksimal 3 kolom (lg:grid-cols-3) agar card lebih lebar di desktop -->
-        <div id="library-grid" class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8 ">
+        <div id="library-grid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8 ">
             @forelse($libraries as $library)
                 @php
                     $typeName = strtolower($library->libraryCategory->name ?? 'default');
@@ -173,7 +173,7 @@
                                 class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105">
                         @else
                             @php
-                                // Palet warna konsisten dengan kursus (Deep/Muted Palette)
+                               
                                 $brandColors = [
                                     '13416B', // Base Navy
                                     '547996', // Slate Blue
@@ -237,7 +237,7 @@
 
                     {{-- Informasi Buku Area --}}
                     <div class="p-4 sm:p-5 flex flex-col flex-1 bg-white">
-                        <h3 class="font-bold text-slate-800 text-xs sm:text-base leading-snug line-clamp-2 mb-2 group-hover:text-[#13416B] transition-colors"
+                        <h3 class="font-bold text-slate-800 text-[10px] md:text-sm lg:text-base leading-snug line-clamp-2 mb-2 group-hover:text-[#13416B] transition-colors"
                             title="{{ $library->title }}">
                             {{ $library->title }}
                         </h3>
