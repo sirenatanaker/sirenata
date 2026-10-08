@@ -81,71 +81,71 @@
                 </nav>
             </div>
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6 px-4 md:px-0">
+            <div class="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6 px-0 sm:px-4 md:px-0">
                 @forelse ($courses as $course)
                     <a href="{{ route('user.course.my-course.detail', $course->slug) }}"
                         class="group flex flex-col bg-white rounded-md border border-emerald-100 shadow-sm hover:shadow-xl hover:border-emerald-300 hover:-translate-y-1 transition-all duration-300 overflow-hidden">
 
-                        <div class="relative h-44 sm:h-48 overflow-hidden bg-slate-100">
+                        <div class="relative h-24 sm:h-48 overflow-hidden bg-slate-100">
                             @if (!empty($course->thumbnail_url))
                                 <img src="{{ $course->thumbnail_url }}"
                                     alt="{{ $course->course_name ?? $course->name }}"
                                     class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
                             @else
                                 <div class="w-full h-full flex items-center justify-center">
-                                    <i class="fas fa-image text-4xl text-slate-300"></i>
+                                    <i class="fas fa-image text-2xl sm:text-4xl text-slate-300"></i>
                                 </div>
                             @endif
 
-                            <div class="absolute top-3 left-3">
+                            <div class="absolute top-2 left-2 sm:top-3 sm:left-3 max-w-[60%] sm:max-w-none">
                                 <span
-                                    class="px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-800 bg-white/90 backdrop-blur-sm rounded shadow-sm">
+                                    class="block truncate px-1.5 py-0.5 sm:px-2.5 sm:py-1 text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-slate-800 bg-white/90 backdrop-blur-sm rounded shadow-sm">
                                     {{ $course->category->name ?? 'Umum' }}
                                 </span>
                             </div>
 
-                            <div class="absolute top-3 right-3">
+                            <div class="absolute top-2 right-2 sm:top-3 sm:right-3">
                                 <span
-                                    class="px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-emerald-800 bg-emerald-100 border border-emerald-200 rounded shadow-sm flex items-center gap-1">
-                                    <i class="fas fa-check-circle"></i> Selesai
+                                    class="px-1.5 py-0.5 sm:px-2 sm:py-1 text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-emerald-800 bg-emerald-100 border border-emerald-200 rounded shadow-sm flex items-center gap-1">
+                                    <i class="fas fa-check-circle"></i> <span class="hidden sm:inline">Selesai</span>
                                 </span>
                             </div>
                         </div>
 
-                        <div class="p-5 flex flex-col flex-1">
+                        <div class="p-3 sm:p-5 flex flex-col flex-1">
                             <h3
-                                class="text-base font-bold text-slate-800 leading-snug mb-2 group-hover:text-emerald-600 transition-colors line-clamp-2">
+                                class="text-[10px] sm:text-base font-bold text-slate-800 leading-snug mb-1.5 sm:mb-2 group-hover:text-emerald-600 transition-colors line-clamp-2">
                                 {{ $course->course_name ?? $course->name }}
                             </h3>
 
-                            <div class="flex flex-wrap items-center gap-2 mb-3 text-xs font-medium text-slate-500">
-                                <span class="flex items-center gap-1.5 bg-slate-50 px-2 py-1 rounded border border-slate-100">
+                            <div class="flex flex-wrap items-center gap-1 sm:gap-2 mb-2.5 sm:mb-3 text-[9px] sm:text-xs font-medium text-slate-500">
+                                <span class="flex items-center gap-1 sm:gap-1.5 bg-slate-50 px-1.5 py-0.5 sm:px-2 sm:py-1 rounded border border-slate-100">
                                     <i class="fas fa-layer-group text-slate-400"></i> {{ $course->total_modul ?? 0 }} Modul
                                 </span>
-                                <span class="flex items-center gap-1.5 bg-slate-50 px-2 py-1 rounded border border-slate-100">
+                                <span class="flex items-center gap-1 sm:gap-1.5 bg-slate-50 px-1.5 py-0.5 sm:px-2 sm:py-1 rounded border border-slate-100">
                                     <i class="fas fa-list-ul text-slate-400"></i> {{ $course->total_materi ?? 0 }} Topik
                                 </span>
-                                <span class="flex items-center gap-1.5 bg-[#13416B]/5 text-[#13416B] px-2 py-1 rounded border border-[#13416B]/10">
+                                <span class="flex items-center gap-1 sm:gap-1.5 bg-[#13416B]/5 text-[#13416B] px-1.5 py-0.5 sm:px-2 sm:py-1 rounded border border-[#13416B]/10">
                                     <i class="fas fa-users"></i> {{ number_format($course->students_count ?? 0, 0, ',', '.') }} Peserta
                                 </span>
                             </div>
 
-                            <p class="text-xs text-slate-500 mb-5 line-clamp-2 leading-relaxed flex-1">
+                            <p class="hidden sm:block text-xs text-slate-500 mb-5 line-clamp-2 leading-relaxed flex-1">
                                 {{ $course->description ?? 'Tidak ada deskripsi singkat yang tersedia untuk kursus ini.' }}
                             </p>
 
-                            <div class="mt-auto pt-4 border-t border-slate-100">
+                            <div class="mt-auto pt-3 sm:pt-4 border-t border-slate-100">
                                 <div
-                                    class="flex items-center justify-between mb-2 text-[11px] font-bold uppercase tracking-wider">
+                                    class="flex items-center justify-between mb-1.5 sm:mb-2 text-[9px] sm:text-[11px] font-bold uppercase tracking-wider">
                                     <span class="text-slate-500">Progress</span>
                                     <span class="text-emerald-600">100%</span>
                                 </div>
-                                <div class="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden mb-4">
+                                <div class="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden mb-2.5 sm:mb-4">
                                     <div class="bg-emerald-500 h-full rounded-full" style="width: 100%"></div>
                                 </div>
 
                                 <div
-                                    class="w-full py-2.5 text-xs font-bold text-center rounded-xl transition-colors bg-emerald-50 text-emerald-700 border border-emerald-200 group-hover:bg-emerald-600 group-hover:text-white group-hover:border-emerald-600">
+                                    class="w-full py-1.5 sm:py-2.5 text-[10px] sm:text-xs font-bold text-center rounded-lg sm:rounded-xl transition-colors bg-emerald-50 text-emerald-700 border border-emerald-200 group-hover:bg-emerald-600 group-hover:text-white group-hover:border-emerald-600">
                                     <i class="fas fa-award mr-1"></i> Lihat Sertifikat
                                 </div>
                             </div>
