@@ -307,7 +307,7 @@
                                 class="flex items-stretch gap-4 p-4 rounded-xl border border-slate-100 bg-slate-50 hover:bg-slate-100 hover:border-slate-300 transition-all group">
 
                                 <div
-                                    class="w-16 sm:w-20 min-h-[5.5rem] self-stretch rounded-md overflow-hidden shrink-0 shadow-sm relative bg-white border border-slate-200 flex items-center justify-center">
+                                    class="w-20 min-h-[6.5rem] sm:min-h-[5.5rem] self-stretch rounded-md overflow-hidden shrink-0 shadow-sm relative bg-white border border-slate-200 flex items-center justify-center">
                                     @if ($lastLibrary->cover_image)
                                         <img src="{{ $lastLibrary->cover_image_url }}"
                                             alt="Cover" class="absolute inset-0 w-full h-full object-cover">
@@ -321,21 +321,21 @@
                                     @endif
                                 </div>
 
-                                <div class="flex-1 min-w-0 py-0.5">
+                                <div class="flex-1 min-w-0 py-0.5 flex flex-col justify-center sm:justify-start">
                                     <div class="flex justify-between items-center sm:items-start mb-1.5">
                                         <span
-                                            class="px-2.5 py-0.5 text-[10px] font-extrabold rounded-md bg-[#547996]/10 text-[#547996] border border-[#547996]/20">
+                                            class="inline-block truncate max-w-[55%] sm:max-w-none px-2 sm:px-2.5 py-0.5 text-[9px] sm:text-[10px] font-extrabold rounded-md bg-[#547996]/10 text-[#547996] border border-[#547996]/20">
                                             {{ $lastLibrary->libraryCategory->name ?? 'Kategori Umum' }}
                                         </span>
-                                        <span class="text-[10px] sm:text-[11px] text-slate-400 font-medium">
+                                        <span class="text-[9px] sm:text-[11px] text-slate-400 font-medium shrink-0">
                                             {{ \Carbon\Carbon::parse($lastLibrary->last_accessed_at)->diffForHumans() }}
                                         </span>
                                     </div>
                                     <h3
-                                        class="text-sm sm:text-base font-bold text-slate-800 leading-snug line-clamp-2 group-hover:text-[#13416B] transition-colors mb-1">
+                                        class="text-xs sm:text-base font-bold text-slate-800 leading-snug line-clamp-2 group-hover:text-[#13416B] transition-colors mb-1">
                                         {{ $lastLibrary->title }}
                                     </h3>
-                                    <p class="text-[11px] sm:text-xs text-slate-500 line-clamp-1 sm:line-clamp-2">
+                                    <p class="hidden sm:line-clamp-2 text-xs text-slate-500">
                                         {{ $lastLibrary->description ?? 'Tidak ada deskripsi' }}
                                     </p>
                                 </div>
