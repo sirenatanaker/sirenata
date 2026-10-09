@@ -1,29 +1,21 @@
 <x-dashboard::layouts.dashboard title="Edit Materi: {{ $content->name }}">
     <div class="p-2 sm:p-6 max-w-full mx-auto">
-        <!-- Breadcrumb Navigation -->
-        <nav class="flex mb-4 sm:mb-6" aria-label="Breadcrumb">
+        
+        <!-- Breadcrumb Navigation (Maksimal 2 Teks) -->
+        <nav class="flex mb-6 sm:mb-8" aria-label="Breadcrumb">
             <ol class="inline-flex items-center space-x-1 sm:space-x-3 flex-wrap">
                 <li>
                     <div class="flex items-center">
-                        <a href="{{ route('admin-pusat.management-course.courses.index') }}"
-                            class="ml-1 text-sm font-medium text-slate-500 hover:text-[#13416B] transition-colors md:ml-2">
-                            <i class="fas fa-home mr-2"></i> Daftar Course
-                        </a>
-                    </div>
-                </li>
-                <li>
-                    <div class="flex items-center">
-                        <i class="fas fa-chevron-right text-slate-300 text-xs mx-1"></i>
                         <a href="{{ route('admin-pusat.management-course.courses.show', $course->slug) }}"
                             class="ml-1 text-sm font-medium text-slate-500 hover:text-[#13416B] transition-colors md:ml-2">
-                            {{ $course->name }}
+                             {{ Str::limit($course->name, 40) }}
                         </a>
                     </div>
                 </li>
                 <li>
                     <div class="flex items-center">
                         <i class="fas fa-chevron-right text-slate-300 text-xs mx-1"></i>
-                        <span class="ml-1 text-sm font-bold text-slate-700 md:ml-2">{{ $content->section->name }}</span>
+                        <span class="ml-1 text-sm font-bold text-slate-700 md:ml-2">{{ $content->name }}</span>
                     </div>
                 </li>
             </ol>
@@ -34,10 +26,8 @@
             <div class="px-6 py-5 border-b border-slate-100 bg-slate-50 flex items-center justify-between">
                 <div>
                     <h2 class="text-lg font-extrabold text-slate-800">Edit Materi</h2>
-                    <p class="text-xs font-medium text-slate-500 mt-0.5">Bagian: <span
-                            class="text-[#13416B]">{{ $content->section->name }}</span></p>
+                    <p class="text-xs font-medium text-slate-500 mt-0.5">Bagian: <span class="text-[#13416B]">{{ $content->section->name }}</span></p>
                 </div>
-                <!-- Tombol kembali dihapus sesuai permintaan -->
             </div>
 
             <x-validation-errors class="p-6 pb-0" />
@@ -59,15 +49,34 @@
                         class="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm focus:border-[#13416B] focus:ring-1 focus:ring-[#13416B] transition-all" />
                 </div>
 
-                <!-- Dokumen -->
+                <!-- Rich Text Editor (Quill.js) -->
                 <div>
                     <label class="block text-sm font-bold text-slate-700 mb-2">
-                        Dokumen Lampiran <span class="text-slate-400 font-normal">(Opsional)</span>
+                        Isi Materi Pembelajaran <span class="text-slate-400 font-normal">(Opsional)</span>
+                    </label>
+                    <div class="prose max-w-none bg-white">
+                        <input type="hidden" name="content_text" id="content_text" value="{{ old('content_text', $content->content_text) }}">
+                        <div id="editor-container">{!! old('content_text', $content->content_text) !!}</div>
+                    </div>
+                    
+                    <!-- KOTAK PANDUAN VIDEO -->
+                    <div class="mt-4 p-4 bg-[#13416B]/5 border border-[#13416B]/10 rounded-xl flex items-start gap-3">
+                        <i class="fas fa-lightbulb text-[#13416B] mt-0.5 text-lg"></i>
+                        <div class="text-sm text-slate-600 leading-relaxed">
+                            <p class="font-bold text-[#13416B] mb-1">Tips Memasukkan & Mengatur Video:</p>
+                            <p>Gunakan ikon <i class="fas fa-video mx-1 text-slate-400"></i> pada toolbar di atas untuk menyisipkan video ke dalam teks materi. Anda dapat mengklik video yang sudah disisipkan di dalam editor untuk <b>mengubah ukuran (resize)</b> atau menggeser posisinya.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dokumen Lampiran (DIPINDAH KE BAWAH EDITOR & BISA MULTIPLE) -->
+                <div>
+                    <label class="block text-sm font-bold text-slate-700 mb-2">
+                        Dokumen Lampiran <span class="text-slate-400 font-normal">(Opsional - Bisa pilih banyak file)</span>
                     </label>
 
                     @if ($content->document_url)
-                        <div
-                            class="mb-3 text-sm flex items-center gap-2 p-3 bg-indigo-50 border border-indigo-100 rounded-lg">
+                        <div class="mb-3 text-sm flex items-center gap-2 p-3 bg-indigo-50 border border-indigo-100 rounded-lg">
                             <span class="text-slate-600 font-medium">Dokumen saat ini:</span>
                             <a href="{{ $content->document_url }}" target="_blank"
                                 class="text-[#13416B] hover:underline flex items-center gap-1.5 font-bold">
@@ -76,34 +85,10 @@
                         </div>
                     @endif
 
-                    <input type="file" name="document" accept=".pdf,.doc,.docx"
+                    <!-- Tambah atribut multiple dan ganti name menjadi array documents[] -->
+                    <input type="file" name="documents[]" multiple accept=".pdf,.doc,.docx"
                         class="w-full text-sm text-slate-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-bold file:bg-[#13416B]/10 file:text-[#13416B] hover:file:bg-[#13416B]/20 transition-all border border-slate-200 rounded-xl" />
-                    <p class="text-[11px] font-medium text-slate-400 mt-1.5"><i
-                            class="fas fa-info-circle mr-1"></i>Abaikan jika tidak ingin mengganti file lama. Format:
-                        PDF, DOC, DOCX (Max: 10MB).</p>
-                </div>
-
-                <!-- Rich Text Editor (Quill.js) -->
-                <div>
-                    <label class="block text-sm font-bold text-slate-700 mb-2">
-                        Isi Materi Pembelajaran <span class="text-slate-400 font-normal">(Opsional)</span>
-                    </label>
-                    <div class="prose max-w-none bg-white">
-                        <input type="hidden" name="content_text" id="content_text"
-                            value="{{ old('content_text', $content->content_text) }}">
-                        <div id="editor-container">{!! old('content_text', $content->content_text) !!}</div>
-                    </div>
-
-                    <!-- KOTAK PANDUAN VIDEO -->
-                    <div class="mt-4 p-4 bg-[#13416B]/5 border border-[#13416B]/10 rounded-xl flex items-start gap-3">
-                        <i class="fas fa-lightbulb text-[#13416B] mt-0.5 text-lg"></i>
-                        <div class="text-sm text-slate-600 leading-relaxed">
-                            <p class="font-bold text-[#13416B] mb-1">Tips Memasukkan & Mengatur Video:</p>
-                            <p>Gunakan ikon <i class="fas fa-video mx-1 text-slate-400"></i> pada toolbar di atas untuk
-                                menyisipkan video ke dalam teks materi. Anda dapat mengklik video yang sudah disisipkan
-                                di dalam editor untuk <b>mengubah ukuran (resize)</b> atau menggeser posisinya.</p>
-                        </div>
-                    </div>
+                    <p class="text-[11px] font-medium text-slate-400 mt-1.5"><i class="fas fa-info-circle mr-1"></i>Format: PDF, DOC, DOCX. Abaikan jika tidak ingin mengganti file. (Max: 10MB/file).</p>
                 </div>
 
                 <!-- Action Buttons -->
@@ -122,79 +107,59 @@
     </div>
 
     <!-- MODAL LINK -->
-    <div id="custom-link-modal"
-        class="fixed inset-0 z-[9999] hidden items-center justify-center bg-slate-900/50 backdrop-blur-sm transition-opacity">
+    <div id="custom-link-modal" class="fixed inset-0 z-[9999] hidden items-center justify-center bg-slate-900/50 backdrop-blur-sm transition-opacity">
         <div class="bg-white rounded-2xl shadow-xl w-full max-w-md p-6 border border-slate-200">
             <div class="flex justify-between items-center mb-5">
-                <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2"><i
-                        class="fas fa-link text-[#13416B]"></i> Tambahkan Tautan</h3>
-                <button type="button" id="btn-close-link"
-                    class="text-slate-400 hover:text-slate-600 transition-colors"><i
-                        class="fas fa-times text-lg"></i></button>
+                <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2"><i class="fas fa-link text-[#13416B]"></i> Tambahkan Tautan</h3>
+                <button type="button" id="btn-close-link" class="text-slate-400 hover:text-slate-600 transition-colors"><i class="fas fa-times text-lg"></i></button>
             </div>
             <div class="space-y-4">
                 <div>
                     <label class="block text-sm font-bold text-slate-700 mb-1.5">Teks yang ditampilkan</label>
-                    <input type="text" id="link-text-input" placeholder="Contoh: Klik disini"
-                        class="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm focus:border-[#13416B] focus:ring-1 focus:ring-[#13416B]">
+                    <input type="text" id="link-text-input" placeholder="Contoh: Klik disini" class="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm focus:border-[#13416B] focus:ring-1 focus:ring-[#13416B]">
                 </div>
                 <div>
-                    <label class="block text-sm font-bold text-slate-700 mb-1.5">URL / Tautan <span
-                            class="text-red-500">*</span></label>
-                    <input type="url" id="link-url-input" placeholder="https://..."
-                        class="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm focus:border-[#13416B] focus:ring-1 focus:ring-[#13416B]">
+                    <label class="block text-sm font-bold text-slate-700 mb-1.5">URL / Tautan <span class="text-red-500">*</span></label>
+                    <input type="url" id="link-url-input" placeholder="https://..." class="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm focus:border-[#13416B] focus:ring-1 focus:ring-[#13416B]">
                 </div>
             </div>
             <div class="flex justify-end gap-3 mt-8">
-                <button type="button" id="btn-cancel-link"
-                    class="px-5 py-2 text-sm font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors">Batal</button>
-                <button type="button" id="btn-save-link"
-                    class="px-5 py-2 text-sm font-bold text-white bg-[#13416B] hover:bg-[#0f3354] rounded-xl transition-colors"><i
-                        class="fas fa-check mr-1.5"></i> Simpan</button>
+                <button type="button" id="btn-cancel-link" class="px-5 py-2 text-sm font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors">Batal</button>
+                <button type="button" id="btn-save-link" class="px-5 py-2 text-sm font-bold text-white bg-[#13416B] hover:bg-[#0f3354] rounded-xl transition-colors"><i class="fas fa-check mr-1.5"></i> Simpan</button>
             </div>
         </div>
     </div>
 
     <!-- MODAL VIDEO BARU (RADIO BUTTON & PROGRESS BAR) -->
-    <div id="custom-video-modal"
-        class="fixed inset-0 z-[9999] hidden items-center justify-center bg-slate-900/50 backdrop-blur-sm transition-opacity">
+    <div id="custom-video-modal" class="fixed inset-0 z-[9999] hidden items-center justify-center bg-slate-900/50 backdrop-blur-sm transition-opacity">
         <div class="bg-white rounded-2xl shadow-xl w-full max-w-md p-6 border border-slate-200">
             <div class="flex justify-between items-center mb-5">
-                <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2"><i
-                        class="fas fa-video text-[#13416B]"></i> Sisipkan Video</h3>
-                <button type="button" id="btn-close-video"
-                    class="text-slate-400 hover:text-slate-600 transition-colors"><i
-                        class="fas fa-times text-lg"></i></button>
+                <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2"><i class="fas fa-video text-[#13416B]"></i> Sisipkan Video</h3>
+                <button type="button" id="btn-close-video" class="text-slate-400 hover:text-slate-600 transition-colors"><i class="fas fa-times text-lg"></i></button>
             </div>
-
+            
             <div class="space-y-4">
                 <!-- Pilihan Sumber Video -->
                 <div>
                     <label class="block text-sm font-bold text-slate-700 mb-2">Pilih Sumber Video:</label>
                     <div class="flex flex-col sm:flex-row gap-3">
-                        <label
-                            class="flex items-center gap-2 cursor-pointer bg-slate-50 p-2.5 rounded-lg border border-slate-200 flex-1 hover:bg-slate-100 transition">
-                            <input type="radio" name="video_source" value="upload" checked
-                                class="w-4 h-4 text-[#13416B] focus:ring-[#13416B]">
+                        <label class="flex items-center gap-2 cursor-pointer bg-slate-50 p-2.5 rounded-lg border border-slate-200 flex-1 hover:bg-slate-100 transition">
+                            <input type="radio" name="video_source" value="upload" checked class="w-4 h-4 text-[#13416B] focus:ring-[#13416B]">
                             <span class="text-sm font-bold text-slate-700">Upload (.mp4)</span>
                         </label>
-                        <label
-                            class="flex items-center gap-2 cursor-pointer bg-slate-50 p-2.5 rounded-lg border border-slate-200 flex-1 hover:bg-slate-100 transition">
-                            <input type="radio" name="video_source" value="link"
-                                class="w-4 h-4 text-[#13416B] focus:ring-[#13416B]">
+                        <label class="flex items-center gap-2 cursor-pointer bg-slate-50 p-2.5 rounded-lg border border-slate-200 flex-1 hover:bg-slate-100 transition">
+                            <input type="radio" name="video_source" value="link" class="w-4 h-4 text-[#13416B] focus:ring-[#13416B]">
                             <span class="text-sm font-bold text-slate-700">Link YouTube</span>
                         </label>
                     </div>
                 </div>
 
                 <!-- Panel Upload Video Internal -->
-                <div id="panel-upload"
-                    class="p-4 bg-slate-50 border border-slate-200 rounded-xl block transition-all">
+                <div id="panel-upload" class="p-4 bg-slate-50 border border-slate-200 rounded-xl block transition-all">
                     <label class="block text-sm font-bold text-slate-700 mb-2">Pilih File Video (Internal)</label>
-                    <input type="file" id="video-file-input" accept="video/mp4,video/webm,video/ogg"
-                        class="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-bold file:bg-[#13416B]/10 file:text-[#13416B] hover:file:bg-[#13416B]/20">
+                    <input type="file" id="video-file-input" accept="video/mp4,video/webm,video/ogg" class="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-bold file:bg-[#13416B]/10 file:text-[#13416B] hover:file:bg-[#13416B]/20">
                     <p class="text-[10px] font-medium text-slate-400 mt-2">Maksimal ukuran file: 100MB.</p>
-
+                    
                     <!-- Progress Bar Component -->
                     <div id="upload-progress-container" class="hidden mt-4">
                         <div class="flex justify-between text-xs font-bold text-slate-600 mb-1.5">
@@ -202,9 +167,7 @@
                             <span id="upload-progress-percent" class="text-[#13416B]">0%</span>
                         </div>
                         <div class="w-full bg-slate-200 rounded-full h-2.5 overflow-hidden">
-                            <div id="upload-progress-bar"
-                                class="bg-[#13416B] h-2.5 rounded-full transition-all duration-300" style="width: 0%">
-                            </div>
+                            <div id="upload-progress-bar" class="bg-[#13416B] h-2.5 rounded-full transition-all duration-300" style="width: 0%"></div>
                         </div>
                     </div>
                 </div>
@@ -212,24 +175,19 @@
                 <!-- Panel Link Video Eksternal -->
                 <div id="panel-link" class="p-4 bg-slate-50 border border-slate-200 rounded-xl hidden transition-all">
                     <label class="block text-sm font-bold text-slate-700 mb-2">Masukkan Tautan YouTube</label>
-                    <input type="url" id="video-url-input" placeholder="https://youtube.com/..."
-                        class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-[#13416B] focus:ring-1 focus:ring-[#13416B]">
+                    <input type="url" id="video-url-input" placeholder="https://youtube.com/..." class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-[#13416B] focus:ring-1 focus:ring-[#13416B]">
                 </div>
             </div>
 
             <div class="flex justify-end gap-3 mt-6">
-                <button type="button" id="btn-cancel-video"
-                    class="px-5 py-2 text-sm font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors">Batal</button>
-                <button type="button" id="btn-save-video"
-                    class="px-5 py-2 text-sm font-bold text-white bg-[#13416B] hover:bg-[#0f3354] rounded-xl transition-colors"><i
-                        class="fas fa-check mr-1.5"></i> Sisipkan</button>
+                <button type="button" id="btn-cancel-video" class="px-5 py-2 text-sm font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors">Batal</button>
+                <button type="button" id="btn-save-video" class="px-5 py-2 text-sm font-bold text-white bg-[#13416B] hover:bg-[#0f3354] rounded-xl transition-colors"><i class="fas fa-check mr-1.5"></i> Sisipkan</button>
             </div>
         </div>
     </div>
 
     @push('scripts')
-        <link rel="stylesheet"
-            href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css" />
         <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" />
         <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
@@ -265,7 +223,7 @@
                 }
             }
 
-            // CUSTOM IMAGE
+            // CUSTOM IMAGE FORMAT
             const BaseImage = Quill.import('formats/image');
             class CustomImage extends BaseImage {
                 static formats(domNode) {
@@ -289,36 +247,29 @@
                 static create(value) {
                     let isMp4 = value.match(/\.(mp4|webm|ogg)$/i);
                     let node = document.createElement(isMp4 ? 'video' : 'iframe');
-
+                    
                     if (isMp4) {
                         node.setAttribute('controls', '');
                         node.setAttribute('controlsList', 'nodownload');
                         node.setAttribute('src', value);
-                        // PERBAIKAN 1: Menghapus 'width: 100%;' dari style agar bisa dikecilkan
                         node.setAttribute('style', 'max-width: 100%; display: block; margin: auto; border-radius: 0.5rem;');
                     } else {
                         node.setAttribute('frameborder', '0');
                         node.setAttribute('allowfullscreen', true);
                         node.setAttribute('src', value);
-                        // PERBAIKAN 2: Menggunakan atribut width dan height awal untuk iframe, dan menghapus width: 100%
                         node.setAttribute('style', 'max-width: 100%; display: block; margin: auto; border-radius: 0.5rem;');
                         node.setAttribute('width', '560');
                         node.setAttribute('height', '315');
                     }
                     return node;
                 }
-
-                static value(node) {
-                    return node.getAttribute('src');
-                }
-
+                static value(node) { return node.getAttribute('src'); }
                 static formats(domNode) {
                     return ['style', 'width', 'height'].reduce(function(formats, attribute) {
                         if (domNode.hasAttribute(attribute)) formats[attribute] = domNode.getAttribute(attribute);
                         return formats;
                     }, {});
                 }
-
                 format(name, value) {
                     if (['style', 'width', 'height'].includes(name)) {
                         if (value) this.domNode.setAttribute(name, value);
@@ -329,10 +280,8 @@
             CustomVideo.blotName = 'video';
             CustomVideo.tagName = ['IFRAME', 'VIDEO'];
             Quill.register(CustomVideo, true);
-            
-            hljs.configure({
-                languages: ['javascript', 'php', 'html', 'css', 'python', 'java', 'sql', 'bash']
-            });
+
+            hljs.configure({ languages: ['javascript', 'php', 'html', 'css', 'python', 'java', 'sql', 'bash'] });
 
             var quill = new Quill('#editor-container', {
                 modules: {
@@ -341,35 +290,17 @@
                         specs: [
                             QuillBlotFormatter.ImageSpec,
                             QuillBlotFormatter.IframeVideoSpec,
-                            VideoElementSpec // Daftarkan spec custom kita disini!
+                            VideoElementSpec
                         ]
                     },
                     toolbar: {
                         container: [
-                            [{
-                                'size': ['small', false, 'large', 'huge']
-                            }],
-                            [{
-                                'header': [1, 2, 3, false]
-                            }],
+                            [{ 'size': ['small', false, 'large', 'huge'] }],
+                            [{ 'header': [1, 2, 3, false] }],
                             ['bold', 'italic', 'underline', 'strike'],
-                            [{
-                                'color': []
-                            }, {
-                                'background': []
-                            }],
-                            [{
-                                'list': 'ordered'
-                            }, {
-                                'list': 'bullet'
-                            }],
-                            [{
-                                'indent': '-1'
-                            }, {
-                                'indent': '+1'
-                            }, {
-                                'align': []
-                            }],
+                            [{ 'color': [] }, { 'background': [] }],
+                            [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+                            [{ 'indent': '-1' }, { 'indent': '+1' }, { 'align': [] }],
                             ['blockquote', 'code-block', 'formula'],
                             ['link', 'image', 'video'],
                             ['clean']
@@ -377,29 +308,25 @@
                         handlers: {
                             'link': function() {
                                 var range = quill.getSelection(true);
-                                var text = range && range.length > 0 ? quill.getText(range.index, range.length) :
-                                    '';
+                                var text = range && range.length > 0 ? quill.getText(range.index, range.length) : '';
                                 document.getElementById('link-text-input').value = text;
                                 document.getElementById('link-url-input').value = '';
                                 const modal = document.getElementById('custom-link-modal');
-                                modal.classList.remove('hidden');
-                                modal.classList.add('flex');
+                                modal.classList.remove('hidden'); modal.classList.add('flex');
                                 setTimeout(() => document.getElementById('link-url-input').focus(), 100);
                                 window.quillLinkRange = range;
                             },
                             'video': function() {
                                 var range = quill.getSelection(true);
                                 window.quillVideoRange = range;
-
-                                // Reset form upload
+                                
                                 document.getElementById('video-url-input').value = '';
                                 document.getElementById('video-file-input').value = '';
                                 document.getElementById('upload-progress-container').classList.add('hidden');
                                 document.getElementById('upload-progress-bar').style.width = '0%';
-
+                                
                                 const modal = document.getElementById('custom-video-modal');
-                                modal.classList.remove('hidden');
-                                modal.classList.add('flex');
+                                modal.classList.remove('hidden'); modal.classList.add('flex');
                             }
                         }
                     }
@@ -459,49 +386,41 @@
             }
             document.getElementById('btn-close-video').addEventListener('click', closeVideoModal);
             document.getElementById('btn-cancel-video').addEventListener('click', closeVideoModal);
-
+            
             document.getElementById('btn-save-video').addEventListener('click', function() {
                 var source = document.querySelector('input[name="video_source"]:checked').value;
                 var range = window.quillVideoRange;
                 var btn = this;
 
-                // JIKA PILIH UPLOAD INTERNAL
                 if (source === 'upload') {
                     var fileInput = document.getElementById('video-file-input').files[0];
                     if (!fileInput) return alert('Silakan pilih file video terlebih dahulu!');
 
                     btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1.5"></i> Mengunggah...';
                     btn.disabled = true;
-
-                    // Munculkan progress bar
+                    
                     document.getElementById('upload-progress-container').classList.remove('hidden');
 
                     const formData = new FormData();
                     formData.append('video', fileInput);
-                    formData.append('_token', '{{ csrf_token() }}');
+                    formData.append('_token', '{{ csrf_token() }}'); 
 
                     const xhr = new XMLHttpRequest();
                     xhr.open('POST', "{{ route('admin-pusat.management-course.upload-video-editor') }}", true);
-
-                    // 1. TAMBAHKAN KODE INI AGAR LARAVEL TAHU INI ADALAH AJAX / JSON
                     xhr.setRequestHeader('Accept', 'application/json');
 
-                    // Track Progress
                     xhr.upload.onprogress = function(e) {
                         if (e.lengthComputable) {
                             const percentComplete = (e.loaded / e.total) * 100;
                             const loadedMB = (e.loaded / (1024 * 1024)).toFixed(2);
                             const totalMB = (e.total / (1024 * 1024)).toFixed(2);
 
-                            document.getElementById('upload-progress-text').innerText =
-                                `${loadedMB} MB / ${totalMB} MB`;
-                            document.getElementById('upload-progress-percent').innerText =
-                                `${Math.round(percentComplete)}%`;
+                            document.getElementById('upload-progress-text').innerText = `${loadedMB} MB / ${totalMB} MB`;
+                            document.getElementById('upload-progress-percent').innerText = `${Math.round(percentComplete)}%`;
                             document.getElementById('upload-progress-bar').style.width = percentComplete + '%';
                         }
                     };
 
-                    // On Success & Error Handling yang Diperbarui
                     xhr.onload = function() {
                         if (xhr.status === 200 || xhr.status === 201) {
                             try {
@@ -514,24 +433,17 @@
                                     alert('Gagal mengunggah video: ' + (data.message || 'Error'));
                                 }
                             } catch (error) {
-                                alert(
-                                    'Respon server tidak valid. Pastikan endpoint controller mengembalikan JSON.'
-                                    );
+                                alert('Respon server tidak valid. Pastikan endpoint controller mengembalikan JSON.');
                             }
-                        }
-                        // 2. TANGKAP ERROR VALIDASI DARI LARAVEL (Misal file > 100MB atau bukan mp4)
-                        else if (xhr.status === 422) {
+                        } else if (xhr.status === 422) {
                             const errorData = JSON.parse(xhr.responseText);
-                            alert('Validasi Gagal: ' + errorData.message);
-                        }
-                        // 3. TANGKAP ERROR FILE TERLALU BESAR DARI SERVER (php.ini)
-                        else if (xhr.status === 413) {
+                            alert('Validasi Gagal: ' + (errorData.message || 'File tidak sesuai.'));
+                        } else if (xhr.status === 413) {
                             alert('Gagal: Ukuran video terlalu besar melebihi kapasitas server (post_max_size).');
                         } else {
-                            alert('Terjadi kesalahan server (Error ' + xhr.status + '). Coba periksa file Anda.');
+                            alert('Terjadi kesalahan server (Error ' + xhr.status + ').');
                         }
-
-                        // Reset button
+                        
                         btn.innerHTML = '<i class="fas fa-check mr-1.5"></i> Sisipkan';
                         btn.disabled = false;
                         document.getElementById('upload-progress-container').classList.add('hidden');
@@ -545,12 +457,11 @@
                     };
 
                     xhr.send(formData);
-                }
-                // JIKA PILIH LINK YOUTUBE
+                } 
                 else {
                     var urlInput = document.getElementById('video-url-input').value.trim();
                     if (!urlInput) return alert('Masukkan Link URL YouTube!');
-
+                    
                     quill.insertEmbed(range ? range.index : quill.getLength(), 'video', urlInput);
                     quill.setSelection((range ? range.index : quill.getLength()) + 1);
                     closeVideoModal();
@@ -560,8 +471,7 @@
             // SYNC VALUE UNTUK DIKIRIM KE BACKEND
             quill.on('text-change', function() {
                 var contentText = document.getElementById('content_text');
-                if (quill.getText().trim().length === 0 && !quill.root.innerHTML.includes('<img') && !quill.root
-                    .innerHTML.includes('<iframe') && !quill.root.innerHTML.includes('<video')) {
+                if (quill.getText().trim().length === 0 && !quill.root.innerHTML.includes('<img') && !quill.root.innerHTML.includes('<iframe') && !quill.root.innerHTML.includes('<video')) {
                     contentText.value = '';
                 } else {
                     contentText.value = quill.root.innerHTML;
@@ -569,33 +479,10 @@
             });
         </script>
         <style>
-            .ql-toolbar.ql-snow {
-                border-radius: 0.75rem 0.75rem 0 0;
-                border-color: #cbd5e1;
-                background-color: #f8fafc;
-                padding: 12px;
-            }
-
-            .ql-container.ql-snow {
-                border-radius: 0 0 0.75rem 0.75rem;
-                border-color: #cbd5e1;
-                min-height: 500px;
-                font-family: inherit;
-                font-size: 0.95rem;
-                line-height: 1.7;
-            }
-
-            .ql-editor {
-                min-height: 500px;
-                padding: 20px;
-            }
-
-            .ql-editor pre.ql-syntax {
-                background-color: #0f172a;
-                color: #e2e8f0;
-                padding: 1.25rem;
-                border-radius: 0.5rem;
-            }
+            .ql-toolbar.ql-snow { border-radius: 0.75rem 0.75rem 0 0; border-color: #cbd5e1; background-color: #f8fafc; padding: 12px; }
+            .ql-container.ql-snow { border-radius: 0 0 0.75rem 0.75rem; border-color: #cbd5e1; min-height: 500px; font-family: inherit; font-size: 0.95rem; line-height: 1.7; }
+            .ql-editor { min-height: 500px; padding: 20px; }
+            .ql-editor pre.ql-syntax { background-color: #0f172a; color: #e2e8f0; padding: 1.25rem; border-radius: 0.5rem; }
         </style>
     @endpush
 </x-dashboard::layouts.dashboard>

@@ -342,7 +342,7 @@
             <div class="order-3 lg:hidden bg-white rounded-md shadow-sm border border-slate-200 p-3">
                 <div class="flex items-center gap-3 mb-4 border-b border-slate-100 pb-4">
                     <div class="w-10 h-10 flex items-center justify-center bg-emerald-50 text-emerald-600 rounded-xl shrink-0 border border-emerald-100">
-                        <i class="fas fa-certificate text-lg"></i>
+                        <i class="fas fa-medal"></i>
                     </div>
                     <div>
                         <h3 class="text-xs sm:text-sm font-bold text-slate-800 tracking-wide">Sertifikat Kelulusan</h3>
@@ -380,7 +380,7 @@
                 <div class="hidden lg:block order-3 lg:order-4 bg-white rounded-md shadow-sm border border-slate-200 p-3 sm:p-6">
                     <div class="flex items-center gap-3 mb-4 border-b border-slate-100 pb-4">
                         <div class="w-10 h-10 flex items-center justify-center bg-emerald-50 text-emerald-600 rounded-xl shrink-0 border border-emerald-100">
-                            <i class="fas fa-certificate text-lg"></i>
+                             <i class="fas fa-medal"></i>
                         </div>
                         <div>
                             <h3 class="text-base font-bold text-slate-800 tracking-wide">Sertifikat Kelulusan</h3>
