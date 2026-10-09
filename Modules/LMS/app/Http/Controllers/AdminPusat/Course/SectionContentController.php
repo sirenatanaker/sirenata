@@ -135,9 +135,9 @@ class SectionContentController extends Controller
 
             // Panggil service tanpa token API dan argumen parameter yang bersih
             $result = $this->sectionContentService->updateContent($id, $payload, $documentFile);
-            
+
             Log::info('SectionContentController::update result', ['result' => $result]);
-            
+
             if (!$result['success']) {
                 ToastMagic::error($result['message']);
                 return redirect()->back()->withInput();
@@ -151,6 +151,23 @@ class SectionContentController extends Controller
         }
     }
 
+    public function uploadVideoEditor(Request $request)
+    {
+       
+        $request->validate([
+            'video' => 'required|file|mimetypes:video/mp4,video/webm,video/ogg|max:102400',
+        ]);
+
+        if ($request->hasFile('video')) {
+            $path = $request->file('video')->store('course-videos', 'public');
+            return response()->json([
+                'success' => true,
+                'url' => asset('storage/' . $path)
+            ]);
+        }
+
+        return response()->json(['success' => false, 'message' => 'File tidak ditemukan'], 400);
+    }
     /**
      * Remove the specified resource from storage.
      */

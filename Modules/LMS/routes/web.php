@@ -48,6 +48,8 @@ Route::prefix('admin-pusat')->middleware(['auth', 'role:admin-pusat'])->name('ad
 
             Route::post('/upload-image', [PostTestController::class, 'uploadImage'])->name('upload-image');
         });
+
+        Route::post('upload-video-editor', [SectionContentController::class, 'uploadVideoEditor'])->name('upload-video-editor');
     });
 
 
@@ -82,7 +84,7 @@ Route::prefix('admin-kab-kota')->middleware(['auth', 'role:admin-kab-kota'])->na
 });
 
 Route::prefix('user')->middleware(['auth', 'role:user'])->name('user.')->group(function () {
-    
+
     // --> PENAMBAHAN ROUTE UNTUK FITUR TERAKHIR DILIHAT (LIBRARY) <--
     Route::get('/library', [UserLibraryController::class, 'index'])->name('library.index');
     Route::get('/library/{id}', [UserLibraryController::class, 'show'])->name('library.show');
