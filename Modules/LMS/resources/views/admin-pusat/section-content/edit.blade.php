@@ -49,28 +49,28 @@
                         class="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm focus:border-[#13416B] focus:ring-1 focus:ring-[#13416B] transition-all" />
                 </div>
 
-                <!-- Rich Text Editor (Word-like Experience) -->
+                <!-- Rich Text Editor (Full Width) -->
                 <div>
-                    <div class="flex justify-between items-end mb-2">
-                        <label class="block text-sm font-bold text-slate-700">
-                            Isi Materi Pembelajaran <span class="text-slate-400 font-normal">(Opsional)</span>
-                        </label>
-                    </div>
-                    <!-- Quill Container -->
-                    <div class="word-like-editor-wrapper bg-slate-100 rounded-xl overflow-hidden border border-slate-300">
+                    <label class="block text-sm font-bold text-slate-700 mb-2">
+                        Isi Materi Pembelajaran <span class="text-slate-400 font-normal">(Opsional)</span>
+                    </label>
+                    <div class="prose max-w-none bg-white">
                         <input type="hidden" name="content_text" id="content_text" value="{{ old('content_text', $content->content_text) }}">
                         <div id="editor-container">{!! old('content_text', $content->content_text) !!}</div>
                     </div>
                     
                     <!-- KOTAK PANDUAN -->
-                    <div class="mt-3 flex items-start gap-2 text-xs text-slate-500 bg-slate-50 p-3 rounded-lg border border-slate-100">
-                        <i class="fas fa-info-circle text-[#13416B] mt-0.5"></i>
-                        <p><b>Tips MS Word Mode:</b> Editor ini didesain layaknya MS Word. Teks yang Anda ketik di area "kertas putih" akan menyesuaikan bentuk dan jarak aslinya. Sorot ikon di atas untuk melihat panduan fungsinya.</p>
+                    <div class="mt-4 p-4 bg-[#13416B]/5 border border-[#13416B]/10 rounded-xl flex items-start gap-3">
+                        <i class="fas fa-lightbulb text-[#13416B] mt-0.5 text-lg"></i>
+                        <div class="text-sm text-slate-600 leading-relaxed">
+                            <p class="font-bold text-[#13416B] mb-1">Tips Menggunakan Teks Editor:</p>
+                            <p>Arahkan mouse Anda ke atas setiap ikon di menu bar untuk melihat fungsinya. Gunakan pengaturan jarak baris dan spasi huruf agar tulisan nyaman dibaca. Untuk mengubah ukuran (resize) gambar/video, cukup klik pada media tersebut lalu geser sudutnya.</p>
+                        </div>
                     </div>
                 </div>
 
                 <!-- Dokumen Lampiran -->
-                <div class="pt-2">
+                <div>
                     <label class="block text-sm font-bold text-slate-700 mb-2">
                         Dokumen Lampiran <span class="text-slate-400 font-normal">(Opsional - Bisa pilih banyak file)</span>
                     </label>
@@ -195,31 +195,26 @@
 
             const Parchment = Quill.import('parchment');
             
-            // CUSTOM FONT (Seperti Word)
             const Font = Quill.import('formats/font');
             Font.whitelist = ['arial', 'times-new-roman', 'calibri', 'verdana', 'courier'];
             Quill.register(Font, true);
 
-            // CUSTOM FONT SIZE (Angka seperti Word)
             const Size = Quill.import('attributors/style/size');
             Size.whitelist = ['10px', '12px', '14px', '16px', '18px', '24px', '32px'];
             Quill.register(Size, true);
 
-            // CUSTOM LINE HEIGHT
             const LineHeightStyle = new Parchment.Attributor.Style('lineHeight', 'line-height', {
                 scope: Parchment.Scope.BLOCK,
                 whitelist: ['1', '1.2', '1.5', '2.0', '2.5']
             });
             Quill.register(LineHeightStyle, true);
 
-            // CUSTOM LETTER SPACING
             const LetterSpacingStyle = new Parchment.Attributor.Style('letterSpacing', 'letter-spacing', {
                 scope: Parchment.Scope.INLINE,
                 whitelist: ['1px', '2px', '3px', '4px']
             });
             Quill.register(LetterSpacingStyle, true);
 
-            // CUSTOM VIDEO & IMAGE SPEC
             class VideoElementSpec extends QuillBlotFormatter.BlotSpec {
                 constructor(formatter) { super(formatter); this.targetElement = null; }
                 init() {
@@ -282,29 +277,21 @@
 
             hljs.configure({ languages: ['javascript', 'php', 'html', 'css', 'python', 'java', 'sql', 'bash'] });
 
-            // INISIALISASI QUILL (WORD MODE)
             var quill = new Quill('#editor-container', {
                 modules: {
                     syntax: true,
                     blotFormatter: { specs: [ QuillBlotFormatter.ImageSpec, QuillBlotFormatter.IframeVideoSpec, VideoElementSpec ] },
                     toolbar: {
                         container: [
-                            // Grup 1: Text Styles (Font, Size, Header)
                             [{ 'font': ['arial', 'times-new-roman', 'calibri', 'verdana', 'courier'] }, { 'size': ['10px', '12px', '14px', '16px', '18px', '24px', '32px'] }],
                             [{ 'header': [1, 2, 3, 4, false] }],
-                            
-                            // Grup 2: Format & Color
                             ['bold', 'italic', 'underline', 'strike'],
                             [{ 'script': 'sub'}, { 'script': 'super' }],
                             [{ 'color': [] }, { 'background': [] }],
-                            
-                            // Grup 3: Paragraf & Spasi
                             [{ 'align': [] }],
                             [{ 'list': 'ordered' }, { 'list': 'bullet' }],
                             [{ 'indent': '-1' }, { 'indent': '+1' }],
                             [{ 'lineHeight': ['1', '1.2', '1.5', '2.0', '2.5'] }, { 'letterSpacing': ['1px', '2px', '3px', '4px'] }],
-                            
-                            // Grup 4: Media & Insert
                             ['blockquote', 'code-block', 'formula'],
                             ['link', 'image', 'video'],
                             ['clean']
@@ -335,7 +322,6 @@
                 theme: 'snow'
             });
 
-            // MENGUBAH TAMPILAN ICON SUPAYA MEMILIKI TOOLTIP
             setTimeout(() => {
                 document.querySelectorAll('.ql-toolbar button, .ql-toolbar .ql-picker').forEach(el => {
                     let title = '';
@@ -370,7 +356,6 @@
                 });
             }, 500);
 
-            // LOGIKA MODAL LINK & VIDEO (SAMA SEPERTI SEBELUMNYA)
             function closeLinkModal() { document.getElementById('custom-link-modal').classList.add('hidden'); document.getElementById('custom-link-modal').classList.remove('flex'); }
             document.getElementById('btn-close-link').addEventListener('click', closeLinkModal); document.getElementById('btn-cancel-link').addEventListener('click', closeLinkModal);
             document.getElementById('btn-save-link').addEventListener('click', function() {
@@ -435,69 +420,6 @@
         </script>
         
         <style>
-            /* ====== UI/UX MS WORD MODE ====== */
-            
-            /* Container utama: Meja abu-abu */
-            .word-like-editor-wrapper {
-                background-color: #f1f5f9; /* Meja / Latar belakang luar */
-                border-radius: 0.5rem;
-                display: flex;
-                flex-direction: column;
-            }
-
-            /* Toolbar MS Word (di atas, lengket) */
-            .ql-toolbar.ql-snow {
-                background-color: #f8fafc;
-                border: none !important;
-                border-bottom: 1px solid #cbd5e1 !important;
-                padding: 12px 16px;
-                position: sticky;
-                top: 0;
-                z-index: 40;
-                display: flex;
-                flex-wrap: wrap;
-                gap: 8px;
-            }
-            /* Grup-grup ikon di Toolbar agar terlihat rapi (divider bayangan) */
-            .ql-formats {
-                border-right: 1px solid #e2e8f0;
-                padding-right: 8px;
-                margin-right: 4px !important;
-            }
-            .ql-formats:last-child { border-right: none; }
-
-            /* Scroll area meja abu-abu */
-            .ql-container.ql-snow {
-                border: none !important;
-                height: 600px; /* Ketinggian ruang kerja */
-                overflow-y: auto;
-                padding: 2rem 1rem;
-                font-family: 'Arial', sans-serif;
-            }
-
-            /* Kertas A4 Putih di Tengah */
-            .ql-editor {
-                background-color: #ffffff;
-                width: 100%;
-                max-width: 800px; /* Ukuran kertas rata-rata */
-                min-height: 1100px; /* A4 aspect ratio (Panjang ke bawah) */
-                margin: 0 auto;
-                padding: 2.5cm 2cm; /* Margin dalam kertas layaknya Word */
-                box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -4px rgba(0,0,0,0.1);
-                border: 1px solid #cbd5e1;
-                font-size: 14px;
-                line-height: 1.5;
-            }
-
-            /* Responsif Kertas Putih untuk Layar Kecil */
-            @media (max-width: 768px) {
-                .ql-editor {
-                    padding: 1rem;
-                    min-height: 500px;
-                }
-                .ql-container.ql-snow { padding: 1rem 0.5rem; }
-            }
-
             /* TOOLTIP UI */
             .quill-tooltip { position: relative; }
             .quill-tooltip:hover::after {
@@ -509,8 +431,7 @@
             }
             @keyframes fadeInTooltip { to { opacity: 1; } }
 
-
-            /* LABEL DINAMIS: FONT SIZE (UKURAN ANGKA) */
+            /* LABEL DINAMIS: FONT SIZE */
             .ql-picker.ql-size { width: 70px !important; }
             .ql-picker.ql-size .ql-picker-item[data-value="10px"]::before { content: '10'; font-size: 10px !important;}
             .ql-picker.ql-size .ql-picker-item[data-value="12px"]::before { content: '12'; font-size: 12px !important;}
@@ -547,34 +468,37 @@
             .ql-picker.ql-font .ql-picker-label:not([data-value])::before { content: 'Arial (Utama)'; }
 
             /* LABEL DINAMIS: JARAK BARIS & HURUF */
-            .ql-picker.ql-lineHeight, .ql-picker.ql-letterSpacing { width: 130px !important; }
-            .ql-picker.ql-lineHeight .ql-picker-item[data-value="1"]::before { content: 'Rapat (1.0)'; }
-            .ql-picker.ql-lineHeight .ql-picker-item[data-value="1.2"]::before { content: 'Biasa (1.2)'; }
-            .ql-picker.ql-lineHeight .ql-picker-item[data-value="1.5"]::before { content: 'Longgar (1.5)'; }
-            .ql-picker.ql-lineHeight .ql-picker-item[data-value="2.0"]::before { content: 'Ganda (2.0)'; }
-            .ql-picker.ql-lineHeight .ql-picker-item[data-value="2.5"]::before { content: 'Ekstra (2.5)'; }
-            .ql-picker.ql-lineHeight .ql-picker-item:not([data-value])::before { content: 'Bawaan (Normal)'; }
+            .ql-picker.ql-lineHeight, .ql-picker.ql-letterSpacing { width: 170px !important; }
+            .ql-picker.ql-lineHeight .ql-picker-item[data-value="1"]::before { content: 'Jarak Baris (1.0)'; }
+            .ql-picker.ql-lineHeight .ql-picker-item[data-value="1.2"]::before { content: 'Jarak Baris (1.2)'; }
+            .ql-picker.ql-lineHeight .ql-picker-item[data-value="1.5"]::before { content: 'Jarak Baris (1.5)'; }
+            .ql-picker.ql-lineHeight .ql-picker-item[data-value="2.0"]::before { content: 'Jarak Baris (2.0)'; }
+            .ql-picker.ql-lineHeight .ql-picker-item[data-value="2.5"]::before { content: 'Jarak Baris (2.5)'; }
+            .ql-picker.ql-lineHeight .ql-picker-item:not([data-value])::before { content: 'Jarak Baris (Normal)'; }
 
-            .ql-picker.ql-lineHeight .ql-picker-label[data-value="1"]::before { content: 'Rapat (1.0)'; }
-            .ql-picker.ql-lineHeight .ql-picker-label[data-value="1.2"]::before { content: 'Biasa (1.2)'; }
-            .ql-picker.ql-lineHeight .ql-picker-label[data-value="1.5"]::before { content: 'Longgar (1.5)'; }
-            .ql-picker.ql-lineHeight .ql-picker-label[data-value="2.0"]::before { content: 'Ganda (2.0)'; }
-            .ql-picker.ql-lineHeight .ql-picker-label[data-value="2.5"]::before { content: 'Ekstra (2.5)'; }
-            .ql-picker.ql-lineHeight .ql-picker-label:not([data-value])::before { content: 'Jarak Baris'; }
+            .ql-picker.ql-lineHeight .ql-picker-label[data-value="1"]::before { content: 'Jarak Baris (1.0)'; }
+            .ql-picker.ql-lineHeight .ql-picker-label[data-value="1.2"]::before { content: 'Jarak Baris (1.2)'; }
+            .ql-picker.ql-lineHeight .ql-picker-label[data-value="1.5"]::before { content: 'Jarak Baris (1.5)'; }
+            .ql-picker.ql-lineHeight .ql-picker-label[data-value="2.0"]::before { content: 'Jarak Baris (2.0)'; }
+            .ql-picker.ql-lineHeight .ql-picker-label[data-value="2.5"]::before { content: 'Jarak Baris (2.5)'; }
+            .ql-picker.ql-lineHeight .ql-picker-label:not([data-value])::before { content: 'Jarak Baris (Normal)'; }
 
-            .ql-picker.ql-letterSpacing .ql-picker-item[data-value="1px"]::before { content: 'Lebar (+1)'; }
-            .ql-picker.ql-letterSpacing .ql-picker-item[data-value="2px"]::before { content: 'Lebar (+2)'; }
-            .ql-picker.ql-letterSpacing .ql-picker-item[data-value="3px"]::before { content: 'Ekstra (+3)'; }
-            .ql-picker.ql-letterSpacing .ql-picker-item[data-value="4px"]::before { content: 'Ekstra (+4)'; }
-            .ql-picker.ql-letterSpacing .ql-picker-item:not([data-value])::before { content: 'Bawaan (Normal)'; }
+            .ql-picker.ql-letterSpacing .ql-picker-item[data-value="1px"]::before { content: 'Jarak Huruf (+1)'; }
+            .ql-picker.ql-letterSpacing .ql-picker-item[data-value="2px"]::before { content: 'Jarak Huruf (+2)'; }
+            .ql-picker.ql-letterSpacing .ql-picker-item[data-value="3px"]::before { content: 'Jarak Huruf (+3)'; }
+            .ql-picker.ql-letterSpacing .ql-picker-item[data-value="4px"]::before { content: 'Jarak Huruf (+4)'; }
+            .ql-picker.ql-letterSpacing .ql-picker-item:not([data-value])::before { content: 'Jarak Huruf (Normal)'; }
 
-            .ql-picker.ql-letterSpacing .ql-picker-label[data-value="1px"]::before { content: 'Lebar (+1)'; }
-            .ql-picker.ql-letterSpacing .ql-picker-label[data-value="2px"]::before { content: 'Lebar (+2)'; }
-            .ql-picker.ql-letterSpacing .ql-picker-label[data-value="3px"]::before { content: 'Ekstra (+3)'; }
-            .ql-picker.ql-letterSpacing .ql-picker-label[data-value="4px"]::before { content: 'Ekstra (+4)'; }
-            .ql-picker.ql-letterSpacing .ql-picker-label:not([data-value])::before { content: 'Spasi Huruf'; }
+            .ql-picker.ql-letterSpacing .ql-picker-label[data-value="1px"]::before { content: 'Jarak Huruf (+1)'; }
+            .ql-picker.ql-letterSpacing .ql-picker-label[data-value="2px"]::before { content: 'Jarak Huruf (+2)'; }
+            .ql-picker.ql-letterSpacing .ql-picker-label[data-value="3px"]::before { content: 'Jarak Huruf (+3)'; }
+            .ql-picker.ql-letterSpacing .ql-picker-label[data-value="4px"]::before { content: 'Jarak Huruf (+4)'; }
+            .ql-picker.ql-letterSpacing .ql-picker-label:not([data-value])::before { content: 'Jarak Huruf (Normal)'; }
 
-            /* Supaya blok code (kode HTML) tetap berwarna gelap saat Word Mode */
+            /* STYLE EDITOR BAWAAN */
+            .ql-toolbar.ql-snow { border-radius: 0.75rem 0.75rem 0 0; border-color: #cbd5e1; background-color: #f8fafc; padding: 12px; }
+            .ql-container.ql-snow { border-radius: 0 0 0.75rem 0.75rem; border-color: #cbd5e1; min-height: 500px; font-family: inherit; font-size: 0.95rem; line-height: 1.7; }
+            .ql-editor { min-height: 500px; padding: 20px; }
             .ql-editor pre.ql-syntax { background-color: #0f172a; color: #e2e8f0; padding: 1.25rem; border-radius: 0.5rem; }
         </style>
     @endpush
