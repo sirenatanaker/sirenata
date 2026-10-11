@@ -51,21 +51,18 @@
 
                 <!-- Rich Text Editor (Full Width) -->
                 <div>
-                    <label class="block text-sm font-bold text-slate-700 mb-2">
-                        Isi Materi Pembelajaran <span class="text-slate-400 font-normal">(Opsional)</span>
-                    </label>
-                    <div class="prose max-w-none bg-white">
-                        <input type="hidden" name="content_text" id="content_text" value="{{ old('content_text', $content->content_text) }}">
-                        <div id="editor-container">{!! old('content_text', $content->content_text) !!}</div>
+                    <div class="flex items-center gap-2 mb-2">
+                        <label class="block text-sm font-bold text-slate-700">
+                            Isi Materi Pembelajaran
+                        </label>
+                        <button type="button" onclick="openEditorInfoModal()" class="text-[#13416B] hover:text-[#0f3354] transition-colors" title="Panduan Teks Editor">
+                            <i class="fas fa-info-circle text-lg"></i>
+                        </button>
                     </div>
-                    
-                    <!-- KOTAK PANDUAN -->
-                    <div class="mt-4 p-4 bg-[#13416B]/5 border border-[#13416B]/10 rounded-xl flex items-start gap-3">
-                        <i class="fas fa-lightbulb text-[#13416B] mt-0.5 text-lg"></i>
-                        <div class="text-sm text-slate-600 leading-relaxed">
-                            <p class="font-bold text-[#13416B] mb-1">Tips Menggunakan Teks Editor:</p>
-                            <p>Arahkan mouse Anda ke atas setiap ikon di menu bar untuk melihat fungsinya. Gunakan pengaturan jarak baris dan spasi huruf agar tulisan nyaman dibaca. Untuk mengubah ukuran (resize) gambar/video, cukup klik pada media tersebut lalu geser sudutnya.</p>
-                        </div>
+                    <div class="prose max-w-none bg-white relative">
+                        <input type="hidden" name="content_text" id="content_text" value="{{ old('content_text', $content->content_text) }}">
+                        <!-- Container Editor -->
+                        <div id="editor-container">{!! old('content_text', $content->content_text) !!}</div>
                     </div>
                 </div>
 
@@ -102,6 +99,127 @@
                     </button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <!-- MODAL INFO EDITOR -->
+    <div id="editor-info-modal" class="fixed inset-0 z-[9999] hidden items-center justify-center bg-slate-900/50 backdrop-blur-sm transition-opacity">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-2xl p-0 border border-slate-200 overflow-hidden flex flex-col max-h-[90vh]">
+            <!-- Header Modal -->
+            <div class="px-6 py-5 border-b border-slate-100 bg-slate-50 flex justify-between items-center shrink-0">
+                <h3 class="text-base font-extrabold text-slate-700 flex items-center gap-2"><i class="fas fa-info-circle text-[#13416B]"></i> Panduan Alat Teks Editor</h3>
+                <button type="button" onclick="closeEditorInfoModal()" class="text-slate-400 hover:text-slate-600 transition-colors"><i class="fas fa-times text-lg"></i></button>
+            </div>
+            
+            <!-- Body Modal (Scrollable) -->
+            <div class="p-6 overflow-y-auto grow space-y-6 text-sm text-slate-600 custom-scrollbar">
+                
+                <!-- Grup Format Teks -->
+                <div>
+                    <h4 class="font-bold text-slate-800 mb-3 border-b border-slate-100 pb-2">Format Teks & Paragraf</h4>
+                    <ul class="grid grid-cols-1 md:grid-cols-2 gap-y-3 gap-x-4 text-xs">
+                        <li class="flex gap-2 items-start">
+                            <span class="inline-flex items-center justify-between border border-slate-300 rounded px-2 py-0.5 bg-white shrink-0 w-[110px] text-[11px]">Arial <i class="fas fa-caret-down"></i></span>
+                            <span>Memilih jenis huruf (Font Family).</span>
+                        </li>
+                        <li class="flex gap-2 items-start">
+                            <span class="inline-flex items-center justify-between border border-slate-300 rounded px-2 py-0.5 bg-white shrink-0 w-[55px] text-[11px]">14 <i class="fas fa-caret-down"></i></span>
+                            <span>Menentukan ukuran huruf.</span>
+                        </li>
+                        <li class="flex gap-2 items-start">
+                            <span class="inline-flex items-center justify-center border border-slate-300 rounded w-7 h-7 bg-white font-bold shrink-0">B</span>
+                            <span>Menebalkan tulisan (Bold).</span>
+                        </li>
+                        <li class="flex gap-2 items-start">
+                            <span class="inline-flex items-center justify-center border border-slate-300 rounded w-7 h-7 bg-white italic shrink-0 font-serif">I</span>
+                            <span>Memiringkan tulisan (Italic).</span>
+                        </li>
+                        <li class="flex gap-2 items-start">
+                            <span class="inline-flex items-center justify-center border border-slate-300 rounded w-7 h-7 bg-white underline shrink-0">U</span>
+                            <span>Memberi garis bawah (Underline).</span>
+                        </li>
+                        <li class="flex gap-2 items-start">
+                            <span class="inline-flex items-center justify-center border border-slate-300 rounded w-7 h-7 bg-white line-through shrink-0">S</span>
+                            <span>Mencoret teks (Strikethrough).</span>
+                        </li>
+                        <li class="flex gap-2 items-start">
+                            <span class="inline-flex items-center justify-center border border-slate-300 rounded w-7 h-7 bg-white shrink-0">X<sub class="text-[9px]">2</sub></span>
+                            <span>Format angka/pangkat di bawah (Subscript).</span>
+                        </li>
+                        <li class="flex gap-2 items-start">
+                            <span class="inline-flex items-center justify-center border border-slate-300 rounded w-7 h-7 bg-white shrink-0">X<sup class="text-[9px]">2</sup></span>
+                            <span>Format angka/pangkat di atas (Superscript).</span>
+                        </li>
+                        <li class="flex gap-2 items-start">
+                            <span class="inline-flex items-center justify-center border border-slate-300 rounded w-10 h-7 bg-white shrink-0"><u class="text-blue-600 font-bold decoration-blue-600 decoration-2">A</u><i class="fas fa-caret-down text-[10px] ml-1"></i></span>
+                            <span>Mengubah warna teks (Text Color).</span>
+                        </li>
+                        <li class="flex gap-2 items-start">
+                            <span class="inline-flex items-center justify-center border border-slate-300 rounded w-10 h-7 bg-white shrink-0"><span class="bg-yellow-300 px-0.5 font-bold">A</span><i class="fas fa-caret-down text-[10px] ml-1"></i></span>
+                            <span>Warna latar belakang teks (Highlight).</span>
+                        </li>
+                        <li class="flex gap-2 items-start">
+                            <span class="inline-flex items-center justify-between border border-slate-300 rounded px-2 py-0.5 bg-white shrink-0 w-[140px] text-[11px]">Jarak Baris (Normal) <i class="fas fa-caret-down"></i></span>
+                            <span>Mengatur kerenggangan spasi baris atas dan bawah.</span>
+                        </li>
+                        <li class="flex gap-2 items-start">
+                            <span class="inline-flex items-center justify-between border border-slate-300 rounded px-2 py-0.5 bg-white shrink-0 w-[140px] text-[11px]">Jarak Huruf (Normal) <i class="fas fa-caret-down"></i></span>
+                            <span>Mengatur spasi / jarak antar huruf.</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Grup Sisipan & Media -->
+                <div>
+                    <h4 class="font-bold text-slate-800 mb-3 border-b border-slate-100 pb-2">Media & Lainnya</h4>
+                    <ul class="grid grid-cols-1 md:grid-cols-2 gap-y-3 gap-x-4 text-xs">
+                        <li class="flex gap-2 items-start">
+                            <span class="inline-flex items-center justify-center border border-slate-300 rounded w-7 h-7 bg-white shrink-0"><i class="fas fa-link text-slate-500 text-[11px]"></i></span>
+                            <span>Menyisipkan tautan/URL (Link) ke teks.</span>
+                        </li>
+                        <li class="flex gap-2 items-start">
+                            <span class="inline-flex items-center justify-center border border-slate-300 rounded w-7 h-7 bg-white shrink-0"><i class="fas fa-image text-slate-500 text-[11px]"></i></span>
+                            <span>Mengunggah dan menyisipkan Gambar.</span>
+                        </li>
+                        <li class="flex gap-2 items-start">
+                            <span class="inline-flex items-center justify-center border border-slate-300 rounded w-7 h-7 bg-white shrink-0"><i class="fas fa-video text-slate-500 text-[11px]"></i></span>
+                            <span>Menyisipkan Video (.mp4 / link YouTube).</span>
+                        </li>
+                        <li class="flex gap-2 items-start">
+                            <span class="inline-flex items-center justify-center border border-slate-300 rounded w-7 h-7 bg-white shrink-0"><i class="fas fa-quote-right text-slate-500 text-[11px]"></i></span>
+                            <span>Membuat format kutipan (Blockquote).</span>
+                        </li>
+                        <li class="flex gap-2 items-start">
+                            <span class="inline-flex items-center justify-center border border-slate-300 rounded w-7 h-7 bg-white shrink-0"><i class="fas fa-code text-slate-500 text-[11px]"></i></span>
+                            <span>Menyisipkan blok kode pemrograman.</span>
+                        </li>
+                        <li class="flex gap-2 items-start">
+                            <span class="inline-flex items-center justify-center border border-slate-300 rounded w-7 h-7 bg-white shrink-0"><i class="fas fa-square-root-variable text-slate-500 text-[11px]"></i></span>
+                            <span>Menyisipkan Rumus Matematika (Formula).</span>
+                        </li>
+                        <li class="flex gap-2 items-start">
+                            <span class="inline-flex items-center justify-center border border-slate-300 rounded w-7 h-7 bg-white shrink-0"><i class="fas fa-eraser text-slate-500 text-[11px]"></i></span>
+                            <span>Menghapus semua format (warna/tebal/miring) pada teks.</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Tips Tambahan -->
+                <div class="bg-indigo-50 border border-indigo-100 rounded-xl p-4">
+                    <h4 class="text-sm font-bold text-indigo-900 mb-2 flex items-center gap-2"><i class="fas fa-lightbulb text-indigo-500"></i> Tips Tambahan Editor:</h4>
+                    <ul class="list-disc pl-5 space-y-1.5 text-xs text-indigo-800">
+                        <li><b>Mengubah Ukuran (Resize) Gambar & Video:</b> Setelah menyisipkan gambar atau video, cukup <b>klik pada media tersebut</b>. Akan muncul kotak dengan titik di sudutnya. Tarik titik (drag) tersebut untuk mengecilkan atau membesarkan ukuran secara bebas.</li>
+                        <li><b>Tampilan Halaman:</b> Teks editor ini sengaja tidak dibuat menyerupai kertas batas tengah, melainkan <b>melebar penuh (Full Width)</b>. Tujuannya agar Anda bisa memiliki gambaran visual yang nyata mengenai proporsi peletakan teks dan media di halaman materi siswa nanti.</li>
+                        <li><b>Shortcut Keyboard:</b> Anda tetap bisa menggunakan pintasan dasar seperti <kbd class="bg-white border px-1 rounded shadow-sm text-[10px]">Ctrl+B</kbd> untuk Bold, <kbd class="bg-white border px-1 rounded shadow-sm text-[10px]">Ctrl+I</kbd> untuk Italic, dan <kbd class="bg-white border px-1 rounded shadow-sm text-[10px]">Ctrl+Z</kbd> untuk Undo/Mengembalikan perintah.</li>
+                    </ul>
+                </div>
+
+            </div>
+            
+            <!-- Footer Modal -->
+            <div class="px-6 py-4 border-t border-slate-100 bg-slate-50 flex justify-end shrink-0">
+                <button type="button" onclick="closeEditorInfoModal()" class="px-5 py-2 text-sm font-bold text-white bg-[#13416B] hover:bg-[#0f3354] rounded-xl transition-colors">Tutup Panduan</button>
+            </div>
         </div>
     </div>
 
@@ -191,130 +309,74 @@
         <script src="https://cdn.jsdelivr.net/npm/quill-blot-formatter@1.0.5/dist/quill-blot-formatter.min.js"></script>
 
         <script>
+            // LOGIKA MODAL INFO EDITOR
+            function openEditorInfoModal() { document.getElementById('editor-info-modal').classList.remove('hidden'); document.getElementById('editor-info-modal').classList.add('flex'); }
+            function closeEditorInfoModal() { document.getElementById('editor-info-modal').classList.add('hidden'); document.getElementById('editor-info-modal').classList.remove('flex'); }
+
             Quill.register('modules/blotFormatter', QuillBlotFormatter.default);
 
             const Parchment = Quill.import('parchment');
-            
-            const Font = Quill.import('formats/font');
-            Font.whitelist = ['arial', 'times-new-roman', 'calibri', 'verdana', 'courier'];
-            Quill.register(Font, true);
-
-            const Size = Quill.import('attributors/style/size');
-            Size.whitelist = ['10px', '12px', '14px', '16px', '18px', '24px', '32px'];
-            Quill.register(Size, true);
-
-            const LineHeightStyle = new Parchment.Attributor.Style('lineHeight', 'line-height', {
-                scope: Parchment.Scope.BLOCK,
-                whitelist: ['1', '1.2', '1.5', '2.0', '2.5']
-            });
-            Quill.register(LineHeightStyle, true);
-
-            const LetterSpacingStyle = new Parchment.Attributor.Style('letterSpacing', 'letter-spacing', {
-                scope: Parchment.Scope.INLINE,
-                whitelist: ['1px', '2px', '3px', '4px']
-            });
-            Quill.register(LetterSpacingStyle, true);
+            const Font = Quill.import('formats/font'); Font.whitelist = ['arial', 'times-new-roman', 'calibri', 'verdana', 'courier']; Quill.register(Font, true);
+            const Size = Quill.import('attributors/style/size'); Size.whitelist = ['10px', '12px', '14px', '16px', '18px', '24px', '32px']; Quill.register(Size, true);
+            const LineHeightStyle = new Parchment.Attributor.Style('lineHeight', 'line-height', { scope: Parchment.Scope.BLOCK, whitelist: ['1', '1.2', '1.5', '2.0', '2.5'] }); Quill.register(LineHeightStyle, true);
+            const LetterSpacingStyle = new Parchment.Attributor.Style('letterSpacing', 'letter-spacing', { scope: Parchment.Scope.INLINE, whitelist: ['1px', '2px', '3px', '4px'] }); Quill.register(LetterSpacingStyle, true);
 
             class VideoElementSpec extends QuillBlotFormatter.BlotSpec {
                 constructor(formatter) { super(formatter); this.targetElement = null; }
-                init() {
-                    this.formatter.quill.root.addEventListener('click', (event) => {
-                        const el = event.target;
-                        if (el.tagName === 'VIDEO') { this.targetElement = el; this.formatter.show(this); }
-                    });
-                    this.formatter.quill.on('text-change', () => {
-                        if (this.targetElement && !this.formatter.quill.root.contains(this.targetElement)) this.formatter.hide();
-                    });
-                }
+                init() { this.formatter.quill.root.addEventListener('click', (event) => { const el = event.target; if (el.tagName === 'VIDEO') { this.targetElement = el; this.formatter.show(this); } }); this.formatter.quill.on('text-change', () => { if (this.targetElement && !this.formatter.quill.root.contains(this.targetElement)) this.formatter.hide(); }); }
                 getTargetElement() { return this.targetElement; }
             }
-            
             const BaseImage = Quill.import('formats/image');
-            class CustomImage extends BaseImage {
-                static formats(domNode) {
-                    return ['style', 'width', 'height'].reduce(function(formats, attribute) {
-                        if (domNode.hasAttribute(attribute)) formats[attribute] = domNode.getAttribute(attribute); return formats;
-                    }, {});
-                }
-                format(name, value) {
-                    if (['style', 'width', 'height'].includes(name)) {
-                        if (value) this.domNode.setAttribute(name, value); else this.domNode.removeAttribute(name);
-                    } else super.format(name, value);
-                }
-            }
-            Quill.register(CustomImage, true);
-
+            class CustomImage extends BaseImage { static formats(domNode) { return ['style', 'width', 'height'].reduce(function(formats, attribute) { if (domNode.hasAttribute(attribute)) formats[attribute] = domNode.getAttribute(attribute); return formats; }, {}); } format(name, value) { if (['style', 'width', 'height'].includes(name)) { if (value) this.domNode.setAttribute(name, value); else this.domNode.removeAttribute(name); } else super.format(name, value); } } Quill.register(CustomImage, true);
             const BlockEmbed = Quill.import('blots/block/embed');
             class CustomVideo extends BlockEmbed {
-                static create(value) {
-                    let isMp4 = value.match(/\.(mp4|webm|ogg)$/i);
-                    let node = document.createElement(isMp4 ? 'video' : 'iframe');
-                    if (isMp4) {
-                        node.setAttribute('controls', ''); node.setAttribute('controlsList', 'nodownload');
-                        node.setAttribute('src', value); node.setAttribute('style', 'max-width: 100%; display: block; margin: auto; border-radius: 0.5rem;');
-                    } else {
-                        node.setAttribute('frameborder', '0'); node.setAttribute('allowfullscreen', true);
-                        node.setAttribute('src', value); node.setAttribute('style', 'max-width: 100%; display: block; margin: auto; border-radius: 0.5rem;');
-                        node.setAttribute('width', '560'); node.setAttribute('height', '315');
-                    }
-                    return node;
-                }
-                static value(node) { return node.getAttribute('src'); }
-                static formats(domNode) {
-                    return ['style', 'width', 'height'].reduce(function(formats, attribute) {
-                        if (domNode.hasAttribute(attribute)) formats[attribute] = domNode.getAttribute(attribute); return formats;
-                    }, {});
-                }
-                format(name, value) {
-                    if (['style', 'width', 'height'].includes(name)) {
-                        if (value) this.domNode.setAttribute(name, value); else this.domNode.removeAttribute(name);
-                    } else super.format(name, value);
-                }
-            }
-            CustomVideo.blotName = 'video';
-            CustomVideo.tagName = ['IFRAME', 'VIDEO'];
-            Quill.register(CustomVideo, true);
+                static create(value) { let isMp4 = value.match(/\.(mp4|webm|ogg)$/i); let node = document.createElement(isMp4 ? 'video' : 'iframe'); if (isMp4) { node.setAttribute('controls', ''); node.setAttribute('controlsList', 'nodownload'); node.setAttribute('src', value); node.setAttribute('style', 'max-width: 100%; display: block; margin: auto; border-radius: 0.5rem;'); } else { node.setAttribute('frameborder', '0'); node.setAttribute('allowfullscreen', true); node.setAttribute('src', value); node.setAttribute('style', 'max-width: 100%; display: block; margin: auto; border-radius: 0.5rem;'); node.setAttribute('width', '560'); node.setAttribute('height', '315'); } return node; }
+                static value(node) { return node.getAttribute('src'); } static formats(domNode) { return ['style', 'width', 'height'].reduce(function(formats, attribute) { if (domNode.hasAttribute(attribute)) formats[attribute] = domNode.getAttribute(attribute); return formats; }, {}); } format(name, value) { if (['style', 'width', 'height'].includes(name)) { if (value) this.domNode.setAttribute(name, value); else this.domNode.removeAttribute(name); } else super.format(name, value); }
+            } CustomVideo.blotName = 'video'; CustomVideo.tagName = ['IFRAME', 'VIDEO']; Quill.register(CustomVideo, true);
 
             hljs.configure({ languages: ['javascript', 'php', 'html', 'css', 'python', 'java', 'sql', 'bash'] });
 
+            // OVERRIDE ICON QUILL DEFAULT DENGAN CUSTOM HTML
+            var icons = Quill.import('ui/icons');
+            icons['bold'] = '<strong class="text-[14px] font-sans">B</strong>';
+            icons['italic'] = '<em class="text-[14px] font-serif">I</em>';
+            icons['underline'] = '<u class="text-[14px] font-sans">U</u>';
+            icons['strike'] = '<s class="text-[14px] font-sans">S</s>';
+            icons['script']['sub'] = '<span class="text-[13px] font-sans">X<sub class="text-[10px]">2</sub></span>';
+            icons['script']['super'] = '<span class="text-[13px] font-sans">X<sup class="text-[10px]">2</sup></span>';
+            icons['link'] = '<i class="fas fa-link text-[12px] text-slate-500 ql-icon-custom"></i>';
+            icons['image'] = '<i class="fas fa-image text-[12px] text-slate-500 ql-icon-custom"></i>';
+            icons['video'] = '<i class="fas fa-video text-[12px] text-slate-500 ql-icon-custom"></i>';
+            icons['blockquote'] = '<i class="fas fa-quote-right text-[12px] text-slate-500 ql-icon-custom"></i>';
+            icons['code-block'] = '<i class="fas fa-code text-[12px] text-slate-500 ql-icon-custom"></i>';
+            icons['formula'] = '<i class="fas fa-square-root-variable text-[12px] text-slate-500 ql-icon-custom"></i>';
+            icons['clean'] = '<i class="fas fa-eraser text-[12px] text-slate-500 ql-icon-custom"></i>';
+            icons['list']['ordered'] = '<i class="fas fa-list-ol text-[12px] text-slate-500 ql-icon-custom"></i>';
+            icons['list']['bullet'] = '<i class="fas fa-list-ul text-[12px] text-slate-500 ql-icon-custom"></i>';
+            icons['indent']['-1'] = '<i class="fas fa-outdent text-[12px] text-slate-500 ql-icon-custom"></i>';
+            icons['indent']['+1'] = '<i class="fas fa-indent text-[12px] text-slate-500 ql-icon-custom"></i>';
+            icons['header']['1'] = '<b class="text-[12px] font-sans">H1</b>';
+            icons['header']['2'] = '<b class="text-[12px] font-sans">H2</b>';
+
             var quill = new Quill('#editor-container', {
+                bounds: '#editor-container', // <--- PENTING: Mencegah modal/tooltip rumus terpotong ke luar editor
                 modules: {
                     syntax: true,
                     blotFormatter: { specs: [ QuillBlotFormatter.ImageSpec, QuillBlotFormatter.IframeVideoSpec, VideoElementSpec ] },
                     toolbar: {
                         container: [
                             [{ 'font': ['arial', 'times-new-roman', 'calibri', 'verdana', 'courier'] }, { 'size': ['10px', '12px', '14px', '16px', '18px', '24px', '32px'] }],
-                            [{ 'header': [1, 2, 3, 4, false] }],
                             ['bold', 'italic', 'underline', 'strike'],
                             [{ 'script': 'sub'}, { 'script': 'super' }],
                             [{ 'color': [] }, { 'background': [] }],
-                            [{ 'align': [] }],
-                            [{ 'list': 'ordered' }, { 'list': 'bullet' }],
-                            [{ 'indent': '-1' }, { 'indent': '+1' }],
                             [{ 'lineHeight': ['1', '1.2', '1.5', '2.0', '2.5'] }, { 'letterSpacing': ['1px', '2px', '3px', '4px'] }],
-                            ['blockquote', 'code-block', 'formula'],
+                            [{ 'align': [] }, { 'list': 'ordered' }, { 'list': 'bullet' }, { 'indent': '-1' }, { 'indent': '+1' }],
                             ['link', 'image', 'video'],
-                            ['clean']
+                            ['blockquote', 'code-block', 'formula', 'clean']
                         ],
                         handlers: {
-                            'link': function() {
-                                var range = quill.getSelection(true);
-                                var text = range && range.length > 0 ? quill.getText(range.index, range.length) : '';
-                                document.getElementById('link-text-input').value = text;
-                                document.getElementById('link-url-input').value = '';
-                                const modal = document.getElementById('custom-link-modal');
-                                modal.classList.remove('hidden'); modal.classList.add('flex');
-                                setTimeout(() => document.getElementById('link-url-input').focus(), 100);
-                                window.quillLinkRange = range;
-                            },
-                            'video': function() {
-                                var range = quill.getSelection(true);
-                                window.quillVideoRange = range;
-                                document.getElementById('video-url-input').value = ''; document.getElementById('video-file-input').value = '';
-                                document.getElementById('upload-progress-container').classList.add('hidden'); document.getElementById('upload-progress-bar').style.width = '0%';
-                                const modal = document.getElementById('custom-video-modal');
-                                modal.classList.remove('hidden'); modal.classList.add('flex');
-                            }
+                            'link': function() { var range = quill.getSelection(true); var text = range && range.length > 0 ? quill.getText(range.index, range.length) : ''; document.getElementById('link-text-input').value = text; document.getElementById('link-url-input').value = ''; const modal = document.getElementById('custom-link-modal'); modal.classList.remove('hidden'); modal.classList.add('flex'); setTimeout(() => document.getElementById('link-url-input').focus(), 100); window.quillLinkRange = range; },
+                            'video': function() { var range = quill.getSelection(true); window.quillVideoRange = range; document.getElementById('video-url-input').value = ''; document.getElementById('video-file-input').value = ''; document.getElementById('upload-progress-container').classList.add('hidden'); document.getElementById('upload-progress-bar').style.width = '0%'; const modal = document.getElementById('custom-video-modal'); modal.classList.remove('hidden'); modal.classList.add('flex'); }
                         }
                     }
                 },
@@ -342,97 +404,90 @@
                     else if(el.classList.contains('ql-indent')) title = el.value === '-1' ? 'Geser Kiri (Decrease Indent)' : 'Geser Kanan (Increase Indent)';
                     else if(el.classList.contains('ql-size')) title = 'Ukuran Huruf (Font Size)';
                     else if(el.classList.contains('ql-font')) title = 'Jenis Huruf (Font Family)';
-                    else if(el.classList.contains('ql-header')) title = 'Judul / Heading';
                     else if(el.classList.contains('ql-color')) title = 'Warna Teks';
                     else if(el.classList.contains('ql-background')) title = 'Warna Sorotan (Highlight)';
                     else if(el.classList.contains('ql-align')) title = 'Rata Teks (Alignment)';
                     else if(el.classList.contains('ql-lineHeight')) title = 'Jarak Antar Baris (Line Spacing)';
                     else if(el.classList.contains('ql-letterSpacing')) title = 'Spasi Huruf';
-
-                    if(title) {
-                        el.setAttribute('data-tooltip', title);
-                        el.classList.add('quill-tooltip');
-                    }
+                    if(title) { el.setAttribute('data-tooltip', title); el.classList.add('quill-tooltip'); }
                 });
             }, 500);
 
             function closeLinkModal() { document.getElementById('custom-link-modal').classList.add('hidden'); document.getElementById('custom-link-modal').classList.remove('flex'); }
             document.getElementById('btn-close-link').addEventListener('click', closeLinkModal); document.getElementById('btn-cancel-link').addEventListener('click', closeLinkModal);
-            document.getElementById('btn-save-link').addEventListener('click', function() {
-                var text = document.getElementById('link-text-input').value.trim(); var url = document.getElementById('link-url-input').value.trim(); var range = window.quillLinkRange;
-                if (!url) return alert('URL wajib diisi!'); if (!/^https?:\/\//i.test(url)) url = 'https://' + url; if (!text) text = url;
-                quill.focus();
-                if (range && range.length > 0) { quill.deleteText(range.index, range.length); quill.insertText(range.index, text, 'link', url); quill.setSelection(range.index + text.length); } 
-                else { var cursorPosition = range ? range.index : quill.getLength(); quill.insertText(cursorPosition, text, 'link', url); quill.setSelection(cursorPosition + text.length); }
-                closeLinkModal();
-            });
+            document.getElementById('btn-save-link').addEventListener('click', function() { var text = document.getElementById('link-text-input').value.trim(); var url = document.getElementById('link-url-input').value.trim(); var range = window.quillLinkRange; if (!url) return alert('URL wajib diisi!'); if (!/^https?:\/\//i.test(url)) url = 'https://' + url; if (!text) text = url; quill.focus(); if (range && range.length > 0) { quill.deleteText(range.index, range.length); quill.insertText(range.index, text, 'link', url); quill.setSelection(range.index + text.length); } else { var cursorPosition = range ? range.index : quill.getLength(); quill.insertText(cursorPosition, text, 'link', url); quill.setSelection(cursorPosition + text.length); } closeLinkModal(); });
 
-            document.querySelectorAll('input[name="video_source"]').forEach(radio => {
-                radio.addEventListener('change', function() {
-                    if (this.value === 'upload') {
-                        document.getElementById('panel-upload').classList.remove('hidden'); document.getElementById('panel-upload').classList.add('block');
-                        document.getElementById('panel-link').classList.remove('block'); document.getElementById('panel-link').classList.add('hidden');
-                    } else {
-                        document.getElementById('panel-link').classList.remove('hidden'); document.getElementById('panel-link').classList.add('block');
-                        document.getElementById('panel-upload').classList.remove('block'); document.getElementById('panel-upload').classList.add('hidden');
-                    }
-                });
-            });
+            document.querySelectorAll('input[name="video_source"]').forEach(radio => { radio.addEventListener('change', function() { if (this.value === 'upload') { document.getElementById('panel-upload').classList.remove('hidden'); document.getElementById('panel-upload').classList.add('block'); document.getElementById('panel-link').classList.remove('block'); document.getElementById('panel-link').classList.add('hidden'); } else { document.getElementById('panel-link').classList.remove('hidden'); document.getElementById('panel-link').classList.add('block'); document.getElementById('panel-upload').classList.remove('block'); document.getElementById('panel-upload').classList.add('hidden'); } }); });
 
             function closeVideoModal() { document.getElementById('custom-video-modal').classList.add('hidden'); document.getElementById('custom-video-modal').classList.remove('flex'); }
             document.getElementById('btn-close-video').addEventListener('click', closeVideoModal); document.getElementById('btn-cancel-video').addEventListener('click', closeVideoModal);
             
             document.getElementById('btn-save-video').addEventListener('click', function() {
-                var source = document.querySelector('input[name="video_source"]:checked').value;
-                var range = window.quillVideoRange; var btn = this;
+                var source = document.querySelector('input[name="video_source"]:checked').value; var range = window.quillVideoRange; var btn = this;
                 if (source === 'upload') {
-                    var fileInput = document.getElementById('video-file-input').files[0];
-                    if (!fileInput) return alert('Silakan pilih file video terlebih dahulu!');
-                    btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1.5"></i> Mengunggah...'; btn.disabled = true;
-                    document.getElementById('upload-progress-container').classList.remove('hidden');
-                    const formData = new FormData(); formData.append('video', fileInput); formData.append('_token', '{{ csrf_token() }}'); 
-                    const xhr = new XMLHttpRequest(); xhr.open('POST', "{{ route('admin-pusat.management-course.upload-video-editor') }}", true); xhr.setRequestHeader('Accept', 'application/json'); 
-                    xhr.upload.onprogress = function(e) {
-                        if (e.lengthComputable) {
-                            const percentComplete = (e.loaded / e.total) * 100; const loadedMB = (e.loaded / (1024 * 1024)).toFixed(2); const totalMB = (e.total / (1024 * 1024)).toFixed(2);
-                            document.getElementById('upload-progress-text').innerText = `${loadedMB} MB / ${totalMB} MB`; document.getElementById('upload-progress-percent').innerText = `${Math.round(percentComplete)}%`; document.getElementById('upload-progress-bar').style.width = percentComplete + '%';
-                        }
-                    };
-                    xhr.onload = function() {
-                        if (xhr.status === 200 || xhr.status === 201) {
-                            try { const data = JSON.parse(xhr.responseText); if (data.success) { quill.insertEmbed(range ? range.index : quill.getLength(), 'video', data.url); quill.setSelection((range ? range.index : quill.getLength()) + 1); closeVideoModal(); } else alert('Gagal mengunggah video: ' + (data.message || 'Error')); } catch (error) { alert('Respon server tidak valid.'); }
-                        } else if (xhr.status === 422) { alert('Validasi Gagal.'); } else if (xhr.status === 413) { alert('Ukuran terlalu besar.'); } else alert('Kesalahan server (Error ' + xhr.status + ').');
-                        btn.innerHTML = '<i class="fas fa-check mr-1.5"></i> Sisipkan'; btn.disabled = false; document.getElementById('upload-progress-container').classList.add('hidden');
-                    };
-                    xhr.onerror = function() { alert('Gagal mengunggah.'); btn.innerHTML = '<i class="fas fa-check mr-1.5"></i> Sisipkan'; btn.disabled = false; document.getElementById('upload-progress-container').classList.add('hidden'); };
-                    xhr.send(formData);
-                } else {
-                    var urlInput = document.getElementById('video-url-input').value.trim(); if (!urlInput) return alert('Masukkan Link URL!');
-                    quill.insertEmbed(range ? range.index : quill.getLength(), 'video', urlInput); quill.setSelection((range ? range.index : quill.getLength()) + 1); closeVideoModal();
-                }
+                    var fileInput = document.getElementById('video-file-input').files[0]; if (!fileInput) return alert('Silakan pilih file video terlebih dahulu!');
+                    btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1.5"></i> Mengunggah...'; btn.disabled = true; document.getElementById('upload-progress-container').classList.remove('hidden');
+                    const formData = new FormData(); formData.append('video', fileInput); formData.append('_token', '{{ csrf_token() }}'); const xhr = new XMLHttpRequest(); xhr.open('POST', "{{ route('admin-pusat.management-course.upload-video-editor') }}", true); xhr.setRequestHeader('Accept', 'application/json'); 
+                    xhr.upload.onprogress = function(e) { if (e.lengthComputable) { const percentComplete = (e.loaded / e.total) * 100; const loadedMB = (e.loaded / (1024 * 1024)).toFixed(2); const totalMB = (e.total / (1024 * 1024)).toFixed(2); document.getElementById('upload-progress-text').innerText = `${loadedMB} MB / ${totalMB} MB`; document.getElementById('upload-progress-percent').innerText = `${Math.round(percentComplete)}%`; document.getElementById('upload-progress-bar').style.width = percentComplete + '%'; } };
+                    xhr.onload = function() { if (xhr.status === 200 || xhr.status === 201) { try { const data = JSON.parse(xhr.responseText); if (data.success) { quill.insertEmbed(range ? range.index : quill.getLength(), 'video', data.url); quill.setSelection((range ? range.index : quill.getLength()) + 1); closeVideoModal(); } else alert('Gagal mengunggah video: ' + (data.message || 'Error')); } catch (error) { alert('Respon server tidak valid.'); } } else if (xhr.status === 422) { alert('Validasi Gagal.'); } else if (xhr.status === 413) { alert('Ukuran terlalu besar.'); } else alert('Kesalahan server (Error ' + xhr.status + ').'); btn.innerHTML = '<i class="fas fa-check mr-1.5"></i> Sisipkan'; btn.disabled = false; document.getElementById('upload-progress-container').classList.add('hidden'); };
+                    xhr.onerror = function() { alert('Gagal mengunggah.'); btn.innerHTML = '<i class="fas fa-check mr-1.5"></i> Sisipkan'; btn.disabled = false; document.getElementById('upload-progress-container').classList.add('hidden'); }; xhr.send(formData);
+                } else { var urlInput = document.getElementById('video-url-input').value.trim(); if (!urlInput) return alert('Masukkan Link URL!'); quill.insertEmbed(range ? range.index : quill.getLength(), 'video', urlInput); quill.setSelection((range ? range.index : quill.getLength()) + 1); closeVideoModal(); }
             });
 
             quill.on('text-change', function() {
                 var contentText = document.getElementById('content_text');
-                if (quill.getText().trim().length === 0 && !quill.root.innerHTML.includes('<img') && !quill.root.innerHTML.includes('<iframe') && !quill.root.innerHTML.includes('<video')) { contentText.value = ''; } 
-                else { contentText.value = quill.root.innerHTML; }
+                if (quill.getText().trim().length === 0 && !quill.root.innerHTML.includes('<img') && !quill.root.innerHTML.includes('<iframe') && !quill.root.innerHTML.includes('<video')) { contentText.value = ''; } else { contentText.value = quill.root.innerHTML; }
             });
         </script>
         
         <style>
+            /* Custom Scrollbar untuk Modal Panduan */
+            .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+            .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 4px; }
+            .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+            .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
             /* TOOLTIP UI */
             .quill-tooltip { position: relative; }
-            .quill-tooltip:hover::after {
-                content: attr(data-tooltip); position: absolute; bottom: -32px; left: 50%; transform: translateX(-50%);
-                background-color: #1e293b; color: #ffffff; padding: 6px 12px; border-radius: 6px; font-size: 11px; font-weight: bold; white-space: nowrap; z-index: 1000; pointer-events: none; opacity: 0; animation: fadeInTooltip 0.2s forwards; animation-delay: 0.3s;
-            }
-            .quill-tooltip:hover::before {
-                content: ''; position: absolute; bottom: -8px; left: 50%; transform: translateX(-50%); border-width: 5px; border-style: solid; border-color: transparent transparent #1e293b transparent; opacity: 0; animation: fadeInTooltip 0.2s forwards; animation-delay: 0.3s;
-            }
+            .quill-tooltip:hover::after { content: attr(data-tooltip); position: absolute; bottom: -32px; left: 50%; transform: translateX(-50%); background-color: #1e293b; color: #ffffff; padding: 6px 12px; border-radius: 6px; font-size: 11px; font-weight: bold; white-space: nowrap; z-index: 1000; pointer-events: none; opacity: 0; animation: fadeInTooltip 0.2s forwards; animation-delay: 0.3s; }
+            .quill-tooltip:hover::before { content: ''; position: absolute; bottom: -8px; left: 50%; transform: translateX(-50%); border-width: 5px; border-style: solid; border-color: transparent transparent #1e293b transparent; opacity: 0; animation: fadeInTooltip 0.2s forwards; animation-delay: 0.3s; }
             @keyframes fadeInTooltip { to { opacity: 1; } }
 
-            /* LABEL DINAMIS: FONT SIZE */
-            .ql-picker.ql-size { width: 70px !important; }
+            /* ========================================================
+               DESAIN UI TOOLBAR (Sesuai Panduan Border Kotak Rounded)
+               ======================================================== */
+            .ql-toolbar.ql-snow {
+                border-radius: 0.75rem 0.75rem 0 0; border-color: #cbd5e1; background-color: #ffffff;
+                padding: 12px 16px; display: flex; flex-wrap: wrap; gap: 8px 14px; border-bottom: 1px solid #cbd5e1;
+            }
+            .ql-toolbar.ql-snow .ql-formats { display: flex; align-items: center; gap: 6px; margin-right: 0 !important; }
+            .ql-toolbar.ql-snow .ql-formats::after { content: ''; display: inline-block; width: 1px; height: 20px; background-color: #e2e8f0; margin-left: 8px; }
+            .ql-toolbar.ql-snow .ql-formats:last-child::after { display: none; }
+            .ql-toolbar.ql-snow button {
+                border: 1px solid #cbd5e1 !important; border-radius: 6px !important; background-color: #ffffff !important;
+                width: 28px !important; height: 28px !important; display: inline-flex !important; align-items: center !important;
+                justify-content: center !important; color: #475569 !important; transition: all 0.2s ease; padding: 0 !important;
+            }
+            .ql-toolbar.ql-snow button svg { display: none !important; }
+            .ql-toolbar.ql-snow button:hover { background-color: #f8fafc !important; border-color: #94a3b8 !important; color: #1e293b !important; }
+            .ql-toolbar.ql-snow button:hover .ql-icon-custom { color: #1e293b !important; }
+            .ql-toolbar.ql-snow button.ql-active { background-color: #eff6ff !important; border-color: #93c5fd !important; color: #1e3a8a !important; }
+            .ql-toolbar.ql-snow button.ql-active .ql-icon-custom { color: #1e3a8a !important; }
+
+            .ql-toolbar.ql-snow .ql-picker {
+                border: 1px solid #cbd5e1 !important; border-radius: 6px !important; background-color: #ffffff !important;
+                height: 28px !important; color: #475569 !important;
+            }
+            .ql-toolbar.ql-snow .ql-picker-label { padding: 0 8px !important; border: none !important; line-height: 26px !important; display: flex; align-items: center; justify-content: space-between; }
+            .ql-toolbar.ql-snow .ql-picker-label::before { line-height: 26px !important; }
+            .ql-toolbar.ql-snow .ql-picker:hover { border-color: #94a3b8 !important; }
+            
+            .ql-toolbar.ql-snow .ql-color, .ql-toolbar.ql-snow .ql-background { width: 36px !important; }
+            .ql-toolbar.ql-snow .ql-color .ql-picker-label, .ql-toolbar.ql-snow .ql-background .ql-picker-label { padding: 0 2px 0 6px !important; }
+            .ql-toolbar.ql-snow .ql-color .ql-picker-label svg, .ql-toolbar.ql-snow .ql-background .ql-picker-label svg { width: 16px !important; height: 16px !important; display: block !important; margin-right: 2px; }
+
+            /* LABEL DINAMIS: FONT SIZE & FAMILY */
+            .ql-picker.ql-size { width: 60px !important; }
             .ql-picker.ql-size .ql-picker-item[data-value="10px"]::before { content: '10'; font-size: 10px !important;}
             .ql-picker.ql-size .ql-picker-item[data-value="12px"]::before { content: '12'; font-size: 12px !important;}
             .ql-picker.ql-size .ql-picker-item[data-value="14px"]::before { content: '14'; font-size: 14px !important;}
@@ -441,7 +496,6 @@
             .ql-picker.ql-size .ql-picker-item[data-value="24px"]::before { content: '24'; font-size: 24px !important;}
             .ql-picker.ql-size .ql-picker-item[data-value="32px"]::before { content: '32'; font-size: 32px !important;}
             .ql-picker.ql-size .ql-picker-item:not([data-value])::before { content: 'Bawaan'; }
-            
             .ql-picker.ql-size .ql-picker-label[data-value="10px"]::before { content: '10'; }
             .ql-picker.ql-size .ql-picker-label[data-value="12px"]::before { content: '12'; }
             .ql-picker.ql-size .ql-picker-label[data-value="14px"]::before { content: '14'; }
@@ -451,55 +505,83 @@
             .ql-picker.ql-size .ql-picker-label[data-value="32px"]::before { content: '32'; }
             .ql-picker.ql-size .ql-picker-label:not([data-value])::before { content: '14'; }
 
-            /* LABEL DINAMIS: FONT FAMILY */
-            .ql-picker.ql-font { width: 140px !important; }
+            .ql-picker.ql-font { width: 130px !important; }
             .ql-picker.ql-font .ql-picker-item[data-value="arial"]::before { content: 'Arial'; font-family: 'Arial'; }
             .ql-picker.ql-font .ql-picker-item[data-value="times-new-roman"]::before { content: 'Times New Roman'; font-family: 'Times New Roman'; }
             .ql-picker.ql-font .ql-picker-item[data-value="calibri"]::before { content: 'Calibri'; font-family: 'Calibri', sans-serif; }
             .ql-picker.ql-font .ql-picker-item[data-value="verdana"]::before { content: 'Verdana'; font-family: 'Verdana'; }
             .ql-picker.ql-font .ql-picker-item[data-value="courier"]::before { content: 'Courier New'; font-family: 'Courier New', monospace; }
             .ql-picker.ql-font .ql-picker-item:not([data-value])::before { content: 'System Font'; }
-
             .ql-picker.ql-font .ql-picker-label[data-value="arial"]::before { content: 'Arial'; font-family: 'Arial'; }
             .ql-picker.ql-font .ql-picker-label[data-value="times-new-roman"]::before { content: 'Times New Roman'; font-family: 'Times New Roman'; }
             .ql-picker.ql-font .ql-picker-label[data-value="calibri"]::before { content: 'Calibri'; font-family: 'Calibri', sans-serif; }
             .ql-picker.ql-font .ql-picker-label[data-value="verdana"]::before { content: 'Verdana'; font-family: 'Verdana'; }
             .ql-picker.ql-font .ql-picker-label[data-value="courier"]::before { content: 'Courier New'; font-family: 'Courier New', monospace; }
-            .ql-picker.ql-font .ql-picker-label:not([data-value])::before { content: 'Arial (Utama)'; }
+            .ql-picker.ql-font .ql-picker-label:not([data-value])::before { content: 'Arial'; }
 
-            /* LABEL DINAMIS: JARAK BARIS & HURUF */
-            .ql-picker.ql-lineHeight, .ql-picker.ql-letterSpacing { width: 170px !important; }
-            .ql-picker.ql-lineHeight .ql-picker-item[data-value="1"]::before { content: 'Jarak Baris (1.0)'; }
-            .ql-picker.ql-lineHeight .ql-picker-item[data-value="1.2"]::before { content: 'Jarak Baris (1.2)'; }
-            .ql-picker.ql-lineHeight .ql-picker-item[data-value="1.5"]::before { content: 'Jarak Baris (1.5)'; }
-            .ql-picker.ql-lineHeight .ql-picker-item[data-value="2.0"]::before { content: 'Jarak Baris (2.0)'; }
-            .ql-picker.ql-lineHeight .ql-picker-item[data-value="2.5"]::before { content: 'Jarak Baris (2.5)'; }
-            .ql-picker.ql-lineHeight .ql-picker-item:not([data-value])::before { content: 'Jarak Baris (Normal)'; }
-
-            .ql-picker.ql-lineHeight .ql-picker-label[data-value="1"]::before { content: 'Jarak Baris (1.0)'; }
-            .ql-picker.ql-lineHeight .ql-picker-label[data-value="1.2"]::before { content: 'Jarak Baris (1.2)'; }
-            .ql-picker.ql-lineHeight .ql-picker-label[data-value="1.5"]::before { content: 'Jarak Baris (1.5)'; }
-            .ql-picker.ql-lineHeight .ql-picker-label[data-value="2.0"]::before { content: 'Jarak Baris (2.0)'; }
-            .ql-picker.ql-lineHeight .ql-picker-label[data-value="2.5"]::before { content: 'Jarak Baris (2.5)'; }
+            /* LABEL DINAMIS: JARAK BARIS & HURUF (TEKS/NORMAL) */
+            .ql-picker.ql-lineHeight, .ql-picker.ql-letterSpacing { width: 175px !important; }
+            .ql-picker.ql-lineHeight .ql-picker-item[data-value="1"]::before { content: 'Jarak Baris (Rapat)'; }
+            .ql-picker.ql-lineHeight .ql-picker-item[data-value="1.2"]::before { content: 'Jarak Baris (Normal)'; }
+            .ql-picker.ql-lineHeight .ql-picker-item[data-value="1.5"]::before { content: 'Jarak Baris (Sedang)'; }
+            .ql-picker.ql-lineHeight .ql-picker-item[data-value="2.0"]::before { content: 'Jarak Baris (Lebar)'; }
+            .ql-picker.ql-lineHeight .ql-picker-item[data-value="2.5"]::before { content: 'Jarak Baris (Sangat Lebar)'; }
+            .ql-picker.ql-lineHeight .ql-picker-item:not([data-value])::before { content: 'Jarak Baris (Bawaan)'; }
+            
+            .ql-picker.ql-lineHeight .ql-picker-label[data-value="1"]::before { content: 'Jarak Baris (Rapat)'; }
+            .ql-picker.ql-lineHeight .ql-picker-label[data-value="1.2"]::before { content: 'Jarak Baris (Normal)'; }
+            .ql-picker.ql-lineHeight .ql-picker-label[data-value="1.5"]::before { content: 'Jarak Baris (Sedang)'; }
+            .ql-picker.ql-lineHeight .ql-picker-label[data-value="2.0"]::before { content: 'Jarak Baris (Lebar)'; }
+            .ql-picker.ql-lineHeight .ql-picker-label[data-value="2.5"]::before { content: 'Jarak Baris (Sangat Lebar)'; }
             .ql-picker.ql-lineHeight .ql-picker-label:not([data-value])::before { content: 'Jarak Baris (Normal)'; }
 
-            .ql-picker.ql-letterSpacing .ql-picker-item[data-value="1px"]::before { content: 'Jarak Huruf (+1)'; }
-            .ql-picker.ql-letterSpacing .ql-picker-item[data-value="2px"]::before { content: 'Jarak Huruf (+2)'; }
-            .ql-picker.ql-letterSpacing .ql-picker-item[data-value="3px"]::before { content: 'Jarak Huruf (+3)'; }
-            .ql-picker.ql-letterSpacing .ql-picker-item[data-value="4px"]::before { content: 'Jarak Huruf (+4)'; }
+            .ql-picker.ql-letterSpacing .ql-picker-item[data-value="1px"]::before { content: 'Jarak Huruf (Renggang)'; }
+            .ql-picker.ql-letterSpacing .ql-picker-item[data-value="2px"]::before { content: 'Jarak Huruf (Lebih Renggang)'; }
+            .ql-picker.ql-letterSpacing .ql-picker-item[data-value="3px"]::before { content: 'Jarak Huruf (Sangat Renggang)'; }
+            .ql-picker.ql-letterSpacing .ql-picker-item[data-value="4px"]::before { content: 'Jarak Huruf (Ekstra Renggang)'; }
             .ql-picker.ql-letterSpacing .ql-picker-item:not([data-value])::before { content: 'Jarak Huruf (Normal)'; }
 
-            .ql-picker.ql-letterSpacing .ql-picker-label[data-value="1px"]::before { content: 'Jarak Huruf (+1)'; }
-            .ql-picker.ql-letterSpacing .ql-picker-label[data-value="2px"]::before { content: 'Jarak Huruf (+2)'; }
-            .ql-picker.ql-letterSpacing .ql-picker-label[data-value="3px"]::before { content: 'Jarak Huruf (+3)'; }
-            .ql-picker.ql-letterSpacing .ql-picker-label[data-value="4px"]::before { content: 'Jarak Huruf (+4)'; }
+            .ql-picker.ql-letterSpacing .ql-picker-label[data-value="1px"]::before { content: 'Jarak Huruf (Renggang)'; }
+            .ql-picker.ql-letterSpacing .ql-picker-label[data-value="2px"]::before { content: 'Jarak Huruf (Lebih Renggang)'; }
+            .ql-picker.ql-letterSpacing .ql-picker-label[data-value="3px"]::before { content: 'Jarak Huruf (Sangat Renggang)'; }
+            .ql-picker.ql-letterSpacing .ql-picker-label[data-value="4px"]::before { content: 'Jarak Huruf (Ekstra Renggang)'; }
             .ql-picker.ql-letterSpacing .ql-picker-label:not([data-value])::before { content: 'Jarak Huruf (Normal)'; }
 
-            /* STYLE EDITOR BAWAAN */
-            .ql-toolbar.ql-snow { border-radius: 0.75rem 0.75rem 0 0; border-color: #cbd5e1; background-color: #f8fafc; padding: 12px; }
+            /* STYLE EDITOR CONTAINER BAWAAN */
             .ql-container.ql-snow { border-radius: 0 0 0.75rem 0.75rem; border-color: #cbd5e1; min-height: 500px; font-family: inherit; font-size: 0.95rem; line-height: 1.7; }
-            .ql-editor { min-height: 500px; padding: 20px; }
+            .ql-editor { min-height: 500px; padding: 24px; }
             .ql-editor pre.ql-syntax { background-color: #0f172a; color: #e2e8f0; padding: 1.25rem; border-radius: 0.5rem; }
+
+            /* ========================================================
+               DESAIN KHUSUS BLOCKQUOTE AGAR TERLIHAT SEPERTI QUOTE
+               ======================================================== */
+            .ql-editor blockquote {
+                border-left: 4px solid #13416B !important;
+                background-color: #f8fafc !important;
+                padding: 16px 20px !important;
+                margin: 12px 0 !important;
+                font-style: italic !important;
+                color: #334155 !important;
+                border-radius: 0 10px 10px 0 !important;
+                position: relative;
+                overflow: hidden;
+            }
+            .ql-editor blockquote::after {
+                content: "\f10d";
+                font-family: "Font Awesome 5 Free";
+                font-weight: 900;
+                position: absolute;
+                top: -4px;
+                right: 12px;
+                font-size: 40px;
+                color: #e2e8f0;
+                opacity: 0.5;
+                z-index: 0;
+            }
+            .ql-editor blockquote * {
+                position: relative;
+                z-index: 1;
+            }
         </style>
     @endpush
 </x-dashboard::layouts.dashboard>
