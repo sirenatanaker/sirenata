@@ -258,7 +258,7 @@
     <!-- ========================================== -->
     <!-- HERO SECTION (Split Layout & Kalem)        -->
     <!-- ========================================== -->
-    <section class="pt-28 pb-12 md:pt-28 md:pb-12 lg:min-h-screen lg:pt-28 lg:pb-16 flex items-center relative overflow-hidden bg-slate-50/50" id="home">
+    <section class="pt-24 pb-10 md:pt-28 md:pb-12 lg:pt-32 lg:pb-16 flex items-center relative overflow-hidden bg-slate-50/50" id="home">
 
 
         <div
@@ -347,7 +347,7 @@
 
                 <!-- ILUSTRASI ORANG DI TENGAH (z-20) -->
                 <div
-                    class="absolute bottom-0 left-1/2 transform -translate-x-1/2 z-20 w-full max-w-[280px] pointer-events-none drop-shadow-2xl sm:max-w-[300px] md:max-w-[320px] lg:max-w-[360px]">
+                    class="absolute bottom-0 left-1/2 transform -translate-x-1/2 z-20 w-full max-w-[280px] pointer-events-none drop-shadow-2xl sm:max-w-[300px] md:max-w-[320px] lg:max-w-[380px]">
                     <div class="relative">
                         <img src="{{ asset('images/Header.webp') }}" alt="Ilustrasi Perencana"
                             class="relative z-10 w-full h-auto object-contain"
@@ -372,16 +372,16 @@
                 <!-- CARD 1: Kanan Atas (Warna 1: Dark Navy Blue - #103F6E) -->
                 <div
                     class="hidden lg:block absolute top-8 -right-4 w-[260px] bg-white rounded-xl shadow-lg border border-slate-100 animate-card-float-1 z-10 overflow-hidden">
-                    <div class="h-24 bg-[#81A9CA] flex items-center justify-center relative">
+                    <div class="h-18 bg-[#81A9CA] flex items-center justify-center relative">
 
-                        <h2 class="text-[54px] font-medium text-white/95 leading-none"
+                        <h2 class="text-4xl font-medium text-white/95 leading-none"
                             style="font-family: Arial, sans-serif; letter-spacing: -2px;">
                             PM
                         </h2>
                     </div>
                     <div class="p-4">
-                        <h3 class="font-bold text-slate-800 text-sm mb-1.5">Perencanaan Tenaga Kerja Makro</h3>
-                        <p class="text-[10px] text-slate-500 mb-0 line-clamp-2">
+                        <h3 class="font-bold text-slate-800 text-xs mb-1.5">Perencanaan Tenaga Kerja Makro</h3>
+                        <p class="text-[9px] text-slate-500 mb-0 line-clamp-2">
                             Penyusunan Rencana Tenaga Kerja dengan pendekatan makro ekonomi dan ketenagakerjaan.
                         </p>
                     </div>
@@ -389,7 +389,7 @@
 
                 <!-- CARD 3: Kiri Atas (Warna 2: Medium Slate Blue - #507A9E) -->
                 <div
-                    class="hidden lg:block absolute top-40 -left-14 w-[240px] bg-white rounded-xl shadow-md border border-slate-100 animate-card-float-3 z-10 overflow-hidden">
+                    class="hidden lg:block absolute top-40 -left-14 w-[230px] bg-white rounded-xl shadow-md border border-slate-100 animate-card-float-3 z-10 overflow-hidden">
                     <div class="h-16 bg-[#507A9E] flex items-center justify-center relative">
 
                         <h2 class="text-3xl font-medium text-white/95 leading-none"
@@ -408,7 +408,7 @@
                 <!-- CARD 2: Kiri Bawah (Warna 3: Soft Blue - #81A9CA) -->
                 <div
                     class="hidden lg:block absolute bottom-12 -left-10 w-[250px] bg-white rounded-xl shadow-xl border border-slate-100 animate-card-float-2 z-30 overflow-hidden">
-                    <div class="h-20 bg-[#103F6E] flex items-center justify-center relative">
+                    <div class="h-18 bg-[#103F6E] flex items-center justify-center relative">
 
                         <h2 class="text-4xl font-medium text-white/95 leading-none"
                             style="font-family: Arial, sans-serif; letter-spacing: -1px;">
@@ -788,7 +788,7 @@
                         </p>
                     </div>
 
-                    <div class="relative hidden h-[320px] items-center justify-center sm:flex sm:h-[380px] lg:h-[460px] reveal-right">
+                    <div class="relative hidden h-[320px] items-center justify-center sm:flex sm:h-[380px] lg:h-[500px] reveal-right">
                         <div class="absolute left-1/2 top-1/2 h-[190px] w-[190px] -translate-x-1/2 -translate-y-1/2 bg-gradient-to-br from-[#E8F2F8] via-[#D5E8F3] to-amber-100 opacity-90 animate-blob lg:h-[330px] lg:w-[330px]"
                             style="border-radius: 42% 58% 63% 37% / 48% 40% 60% 52%;">
                         </div>
@@ -896,7 +896,7 @@
             }
         @endphp
 
-        <section class="relative overflow-hidden border-t border-slate-800 bg-slate-900 py-12 sm:py-18 lg:py-16">
+        <section class="relative overflow-hidden border-t border-slate-800 bg-slate-900 py-10 sm:py-14 lg:py-12">
 
             <!-- Dekorasi Halftone 1/4 Elips -->
             <div class="pointer-events-none absolute bottom-0 right-0 h-[130px] w-[320px] opacity-40 sm:h-[260px] sm:w-[640px]"
@@ -1083,7 +1083,7 @@
                         </svg>
                     </div>
                     <img src="{{ asset('images/FAQ.webp') }}" alt="Pusat Bantuan Kemnaker"
-                        class="relative z-10 w-full max-w-[300px] md:max-w-[360px] lg:max-w-[520px] h-auto object-contain drop-shadow-2xl animate-float mt-4 lg:mt-8"
+                        class="relative z-10 w-full max-w-[280px] md:max-w-[340px] lg:max-w-[480px] h-auto object-contain drop-shadow-2xl animate-float mt-4 lg:mt-8"
                         style="-webkit-mask-image: linear-gradient(to bottom, black 87%, transparent 100%); mask-image: linear-gradient(to bottom, black 87%, transparent 100%);">
                 </div>
 
@@ -1094,7 +1094,7 @@
     <!-- ========================================== -->
     <!-- CTA SECTION                                -->
     <!-- ========================================== -->
-    <section id="cta" class="py-20 sm:py-16 md:py-28 lg:py-36 px-4 md:px-16 relative overflow-hidden"
+    <section id="cta" class="py-20 sm:py-16 md:py-28 lg:py-42 px-4 md:px-16 relative overflow-hidden"
         style="background-color: #13416B;">
         <!-- Efek Glow Latar Belakang -->
         <div
