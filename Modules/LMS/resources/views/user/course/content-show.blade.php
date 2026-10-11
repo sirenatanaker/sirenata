@@ -1,5 +1,4 @@
 <x-dashboard::layouts.dashboard title="{{ data_get($content, 'name', 'Detail Topik') }} | SIRENATA">
-    {{-- PERBAIKAN RESPONSIVE: Hilangkan padding luar di HP (p-0) agar mepet pojok, munculkan di layar sm ke atas --}}
     <div class="p-0 sm:p-4 md:p-6 max-w-full mx-auto min-h-screen" x-data="{
         reachedEnd: {{ data_get($content, 'is_completed') ? 'true' : 'false' }},
         videoCompleted: {{ data_get($content, 'is_completed') ? 'true' : 'false' }},
@@ -56,14 +55,12 @@
     }">
 
         {{-- Main Content Container --}}
-        {{-- Di HP tidak ada border-radius, di Desktop membulat (sm:rounded-2xl) --}}
         <div
             class="bg-white sm:rounded-md sm:shadow-sm border-b sm:border border-slate-200 overflow-hidden min-h-screen sm:min-h-0">
 
             {{-- Body Content --}}
             <div class="p-5 sm:p-10 lg:p-12">
 
-                {{-- PERBAIKAN TAUTAN KEMBALI: Tahan ikon panah agar tidak menyusut, dan rapikan teks yang panjang --}}
                 <div class="mb-8">
                     <a href="{{ route('user.course.my-course.detail', $slug) }}"
                         class="group flex items-center gap-3 text-sm font-medium text-slate-500 hover:text-[#13416B] transition-colors">
@@ -166,7 +163,7 @@
                     </div>
                 @endif
 
-                {{-- Penanda akhir konten: saat terlihat di layar, tombol "Tandai Selesai" dimunculkan --}}
+                {{-- Penanda akhir konten --}}
                 <div x-ref="endSentinel" class="h-px w-full" aria-hidden="true"></div>
             </div>
 
@@ -179,7 +176,6 @@
                 </a>
 
                 @if (!data_get($content, 'is_completed'))
-                    {{-- Petunjuk dinamis: Memberitahu user syarat apa yang belum terpenuhi --}}
                     <button type="button" x-show="!canComplete" @click="scrollToEnd()"
                         class="w-full sm:w-auto px-6 py-3 sm:py-3.5 text-sm font-bold text-slate-500 bg-slate-100 border border-slate-200 rounded-xl flex items-center justify-center gap-2 hover:bg-slate-200 transition-colors">
                         <i class="fas fa-info-circle text-xs"></i>
@@ -187,7 +183,6 @@
                             x-text="(!reachedEnd ? 'Baca materi hingga akhir' : '') + (!reachedEnd && !videoCompleted ? ' & ' : '') + (!videoCompleted ? 'Tonton video materi minimal 90%' : '') + ' untuk lanjut'"></span>
                     </button>
 
-                    {{-- Tombol tandai selesai: muncul ketika syarat tercapai (canComplete = true) --}}
                     <form action="{{ route('user.course.content.complete', ['content' => data_get($content, 'id')]) }}"
                         method="POST" class="w-full sm:w-auto m-0" style="display: none;" x-show="canComplete"
                         x-transition:enter="transition ease-out duration-300"
@@ -213,50 +208,42 @@
     </div>
 
     @push('styles')
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css" />
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" />
         <style>
             @keyframes completedPop {
-                0% {
-                    transform: scale(0.94);
-                    opacity: 0.6;
-                }
-
-                60% {
-                    transform: scale(1.03);
-                    opacity: 1;
-                }
-
-                100% {
-                    transform: scale(1);
-                }
+                0% { transform: scale(0.94); opacity: 0.6; }
+                60% { transform: scale(1.03); opacity: 1; }
+                100% { transform: scale(1); }
             }
 
             .completed-pop {
                 animation: completedPop 0.45s ease-out;
             }
 
-            .quill-content-render .ql-align-center {
-                text-align: center !important;
-            }
-
-            .quill-content-render .ql-align-right {
-                text-align: right !important;
-            }
-
-            .quill-content-render .ql-align-justify {
-                text-align: justify !important;
-            }
+            /* --- STYLE RENDER MATERI (Menyamakan dengan Preview/Editor Admin) --- */
+            
+            .quill-content-render .ql-align-center { text-align: center !important; }
+            .quill-content-render .ql-align-right { text-align: right !important; }
+            .quill-content-render .ql-align-justify { text-align: justify !important; }
 
             .quill-content-render img,
-            .quill-content-render iframe.ql-video {
+            .quill-content-render video,
+            .quill-content-render iframe.ql-video,
+            .quill-content-render iframe {
                 display: inline-block !important;
                 max-width: 100%;
+                height: auto;
                 margin-top: 1.5rem;
                 margin-bottom: 1.5rem;
-                border-radius: 0.375rem;
+                border-radius: 0.5rem;
+                box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
             }
 
             .quill-content-render img[style*="margin: auto"],
             .quill-content-render img[style*="display: block"],
+            .quill-content-render video[style*="margin: auto"],
+            .quill-content-render video[style*="display: block"],
             .quill-content-render iframe[style*="margin: auto"],
             .quill-content-render iframe[style*="display: block"] {
                 display: block !important;
@@ -265,44 +252,67 @@
             }
 
             .quill-content-render img[style*="float: left"],
+            .quill-content-render video[style*="float: left"],
             .quill-content-render iframe[style*="float: left"] {
                 float: left !important;
                 margin-right: 1.5rem !important;
                 margin-bottom: 1rem !important;
+                margin-top: 0.5rem !important;
             }
 
             .quill-content-render img[style*="float: right"],
+            .quill-content-render video[style*="float: right"],
             .quill-content-render iframe[style*="float: right"] {
                 float: right !important;
                 margin-left: 1.5rem !important;
                 margin-bottom: 1rem !important;
+                margin-top: 0.5rem !important;
             }
 
-            .quill-content-render .ql-indent-1 {
-                padding-left: 3em !important;
-            }
-
-            .quill-content-render .ql-indent-2 {
-                padding-left: 6em !important;
-            }
-
-            .quill-content-render .ql-indent-3 {
-                padding-left: 9em !important;
-            }
-
-            .quill-content-render .ql-indent-4 {
-                padding-left: 12em !important;
-            }
+            .quill-content-render .ql-indent-1 { padding-left: 3em !important; }
+            .quill-content-render .ql-indent-2 { padding-left: 6em !important; }
+            .quill-content-render .ql-indent-3 { padding-left: 9em !important; }
+            .quill-content-render .ql-indent-4 { padding-left: 12em !important; }
 
             .quill-content-render pre.ql-syntax {
                 background-color: #0f172a !important;
-                color: #e2e8f0 !important;
+                color: #f8fafc !important;
                 padding: 1rem sm:1.25rem !important;
                 border-radius: 0.5rem sm:0.75rem !important;
                 overflow-x: auto !important;
                 text-align: left !important;
                 font-size: 0.75rem sm:0.875rem !important;
-                line-height: 1.5 !important;
+                line-height: 1.6 !important;
+                border: 1px solid #1e293b;
+            }
+
+            /* Style Khusus Blockquote */
+            .quill-content-render blockquote {
+                border-left: 4px solid #13416B !important;
+                background-color: #f8fafc !important;
+                padding: 16px 20px !important;
+                margin: 12px 0 !important;
+                font-style: italic !important;
+                color: #334155 !important;
+                border-radius: 0 10px 10px 0 !important;
+                position: relative;
+                overflow: hidden;
+            }
+            .quill-content-render blockquote::after {
+                content: "\f10d";
+                font-family: "Font Awesome 5 Free";
+                font-weight: 900;
+                position: absolute;
+                top: -4px;
+                right: 12px;
+                font-size: 40px;
+                color: #e2e8f0;
+                opacity: 0.5;
+                z-index: 0;
+            }
+            .quill-content-render blockquote * {
+                position: relative;
+                z-index: 1;
             }
         </style>
     @endpush

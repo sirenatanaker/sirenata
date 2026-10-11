@@ -324,14 +324,14 @@
             </div>
 
             <!-- Kanan: Floating Cards & Orang -->
-            <div class="relative hidden h-[340px] sm:block sm:h-[360px] md:h-[380px] lg:h-[550px] reveal-right" style="transition-delay: 0.2s;">
+            <div class="relative hidden h-[340px] sm:block sm:h-[360px] md:h-[380px] lg:h-[500px] reveal-right" style="transition-delay: 0.2s;">
                 <!-- Lingkaran Garis Putar Dasar -->
                 <div
-                    class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[250px] h-[250px] sm:w-[290px] sm:h-[290px] lg:w-[420px] lg:h-[420px] rounded-full border border-slate-200/60 animate-[spin_60s_linear_infinite] z-0">
+                    class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[250px] h-[250px] sm:w-[290px] sm:h-[290px] lg:w-[380px] lg:h-[380px] rounded-full border border-slate-200/60 animate-[spin_60s_linear_infinite] z-0">
                 </div>
 
                 <!-- BULAT ABSTRAK (KUNING STATIC) + GARIS GELOMBANG SESUAI GAMBAR -->
-                <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-[45%] w-[230px] h-[190px] sm:w-[260px] sm:h-[220px] lg:w-[380px] lg:h-[320px] bg-gradient-to-tr from-amber-400 to-amber-300 z-0 opacity-90 overflow-hidden"
+                <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-[45%] w-[230px] h-[190px] sm:w-[260px] sm:h-[220px] lg:w-[340px] lg:h-[290px] bg-gradient-to-tr from-amber-400 to-amber-300 z-0 opacity-90 overflow-hidden"
                     style="border-radius: 60% 40% 30% 70% / 60% 40% 30% 40%;">
 
                     <!-- Gelombang Garis / Pita Organik (Soft Overlay) -->
@@ -347,7 +347,7 @@
 
                 <!-- ILUSTRASI ORANG DI TENGAH (z-20) -->
                 <div
-                    class="absolute bottom-0 left-1/2 transform -translate-x-1/2 z-20 w-full max-w-[280px] pointer-events-none drop-shadow-2xl sm:max-w-[300px] md:max-w-[320px] lg:max-w-[420px]">
+                    class="absolute bottom-0 left-1/2 transform -translate-x-1/2 z-20 w-full max-w-[280px] pointer-events-none drop-shadow-2xl sm:max-w-[300px] md:max-w-[320px] lg:max-w-[360px]">
                     <div class="relative">
                         <img src="{{ asset('images/Header.webp') }}" alt="Ilustrasi Perencana"
                             class="relative z-10 w-full h-auto object-contain"
@@ -479,7 +479,7 @@
         }
     @endphp
 
-    <section class="py-12 sm:py-18 lg:py-16 bg-slate-900 relative overflow-hidden">
+    <section class="py-10 sm:py-14 lg:py-12 bg-slate-900 relative overflow-hidden">
 
         <!-- Dekorasi Halftone 1/4 Elips -->
         <div class="absolute bottom-0 right-0 w-[380px] h-[210px] sm:w-[760px] sm:h-[420px] pointer-events-none opacity-40"
@@ -604,7 +604,7 @@
 
                         <!-- Card 1: Penghitungan RTK (Full Width di atas) -->
                         <div
-                            class="md:col-span-2 bg-[#13416B] rounded-xl p-4 md:p-6 lg:p-8 relative overflow-hidden group hover:shadow-xl transition-all duration-500">
+                            class="md:col-span-2 bg-[#13416B] rounded-xl p-4 md:p-6 lg:p-8 relative overflow-hidden group border border-[#0e3356] hover:shadow-xl transition-all duration-500">
                             <!-- Decorative Glow -->
                             <div
                                 class="absolute top-0 right-0 w-40 h-40 bg-white/10 rounded-full blur-2xl -mr-10 -mt-10 transition-transform duration-700 group-hover:scale-150">
@@ -629,7 +629,7 @@
 
                         <!-- Card 2: LMS Terintegrasi (Sejajar di kiri bawah, tanpa badge & dekorasi) -->
                         <div
-                            class="bg-slate-50 rounded-xl p-5 md:p-3 lg:p-6 border border-slate-200 hover:border-[#13416B]/40 hover:shadow-lg hover:bg-white transition-all duration-300 group flex flex-col justify-between">
+                            class="bg-slate-50 rounded-xl p-5 md:p-3 lg:p-6 border border-slate-300/90 shadow-[0_1px_2px_rgba(15,23,42,0.06)] hover:border-[#13416B]/40 hover:shadow-lg hover:bg-white transition-all duration-300 group flex flex-col justify-between">
                             <div>
                                 <div
                                     class="w-11 h-11 md:w-9 md:h-9 lg:w-12 lg:h-12 rounded-xl bg-white text-[#13416B] flex items-center justify-center shadow-sm border border-slate-200 mb-3 lg:mb-4 group-hover:bg-[#13416B] group-hover:text-white transition-colors duration-300">
@@ -645,7 +645,7 @@
 
                         <!-- Card 3: Pelaporan & Arsip (Sejajar di kanan bawah) -->
                         <div
-                            class="bg-slate-50 rounded-xl p-5 md:p-3 lg:p-6 border border-slate-200 hover:border-[#13416B]/40 hover:shadow-lg hover:bg-white transition-all duration-300 group flex flex-col justify-between">
+                            class="bg-slate-50 rounded-xl p-5 md:p-3 lg:p-6 border border-slate-300/90 shadow-[0_1px_2px_rgba(15,23,42,0.06)] hover:border-[#13416B]/40 hover:shadow-lg hover:bg-white transition-all duration-300 group flex flex-col justify-between">
                             <div>
                                 <div
                                     class="w-11 h-11 md:w-9 md:h-9 lg:w-12 lg:h-12 rounded-xl bg-white text-[#13416B] flex items-center justify-center shadow-sm border border-slate-200 mb-3 lg:mb-4 group-hover:bg-[#13416B] group-hover:text-white transition-colors duration-300">

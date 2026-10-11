@@ -50,7 +50,7 @@
                     </div>
                 @endif
 
-                <!-- Bagian Dokumen (Jika nanti berupa array, Anda bisa foreach disini) -->
+                <!-- Bagian Dokumen -->
                 @if ($content->document_url)
                     <div class="w-full {{ !empty($content->content_text) ? 'pt-8 border-t border-slate-100' : '' }}">
                         <h3 class="text-sm font-bold text-slate-800 mb-4 flex items-center gap-2">
@@ -89,6 +89,8 @@
     </div>
 
     @push('styles')
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" />
     <style>
         .quill-content-render img, 
         .quill-content-render video, 
@@ -139,6 +141,7 @@
         .quill-content-render .ql-indent-3 { padding-left: 9em !important; }
         .quill-content-render .ql-indent-4 { padding-left: 12em !important; }
 
+        /* Style Code Block */
         .quill-content-render pre.ql-syntax {
             background-color: #0f172a !important; 
             color: #f8fafc !important;
@@ -148,6 +151,35 @@
             font-size: 0.875rem !important;
             line-height: 1.6 !important;
             border: 1px solid #1e293b;
+        }
+
+        /* Style Khusus Blockquote */
+        .quill-content-render blockquote {
+            border-left: 4px solid #13416B !important;
+            background-color: #f8fafc !important;
+            padding: 16px 20px !important;
+            margin: 12px 0 !important;
+            font-style: italic !important;
+            color: #334155 !important;
+            border-radius: 0 10px 10px 0 !important;
+            position: relative;
+            overflow: hidden;
+        }
+        .quill-content-render blockquote::after {
+            content: "\f10d";
+            font-family: "Font Awesome 5 Free";
+            font-weight: 900;
+            position: absolute;
+            top: -4px;
+            right: 12px;
+            font-size: 40px;
+            color: #e2e8f0;
+            opacity: 0.5;
+            z-index: 0;
+        }
+        .quill-content-render blockquote * {
+            position: relative;
+            z-index: 1;
         }
     </style>
     @endpush
