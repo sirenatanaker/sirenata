@@ -1,14 +1,14 @@
 <x-dashboard::layouts.dashboard title="Edit Materi: {{ $content->name }}">
     <div class="p-2 sm:p-6 max-w-full mx-auto">
         
-        <!-- Breadcrumb Navigation (Maksimal 2 Teks) -->
-        <nav class="flex mb-6 sm:mb-8" aria-label="Breadcrumb">
+        <!-- Breadcrumb Navigation (Tanpa Icon) -->
+        <nav class="flex mb-4 sm:mb-6" aria-label="Breadcrumb">
             <ol class="inline-flex items-center space-x-1 sm:space-x-3 flex-wrap">
                 <li>
                     <div class="flex items-center">
                         <a href="{{ route('admin-pusat.management-course.courses.show', $course->slug) }}"
-                            class="ml-1 text-sm font-medium text-slate-500 hover:text-[#13416B] transition-colors md:ml-2">
-                             {{ Str::limit($course->name, 40) }}
+                            class="text-sm font-medium text-slate-500 hover:text-[#13416B] transition-colors">
+                            {{ Str::limit($course->name, 40) }}
                         </a>
                     </div>
                 </li>
@@ -63,13 +63,13 @@
                     <div class="mt-4 p-4 bg-[#13416B]/5 border border-[#13416B]/10 rounded-xl flex items-start gap-3">
                         <i class="fas fa-lightbulb text-[#13416B] mt-0.5 text-lg"></i>
                         <div class="text-sm text-slate-600 leading-relaxed">
-                            <p class="font-bold text-[#13416B] mb-1">Tips Memasukkan & Mengatur Video:</p>
-                            <p>Gunakan ikon <i class="fas fa-video mx-1 text-slate-400"></i> pada toolbar di atas untuk menyisipkan video ke dalam teks materi. Anda dapat mengklik video yang sudah disisipkan di dalam editor untuk <b>mengubah ukuran (resize)</b> atau menggeser posisinya.</p>
+                            <p class="font-bold text-[#13416B] mb-1">Tips Menggunakan Teks Editor:</p>
+                            <p>Arahkan mouse Anda ke atas setiap ikon di menu bar untuk melihat fungsinya. Gunakan pengaturan jarak baris dan spasi huruf agar tulisan nyaman dibaca. Untuk mengubah ukuran (resize) gambar/video, cukup klik pada media tersebut lalu geser sudutnya.</p>
                         </div>
                     </div>
                 </div>
 
-                <!-- Dokumen Lampiran (DIPINDAH KE BAWAH EDITOR & BISA MULTIPLE) -->
+                <!-- Dokumen Lampiran -->
                 <div>
                     <label class="block text-sm font-bold text-slate-700 mb-2">
                         Dokumen Lampiran <span class="text-slate-400 font-normal">(Opsional - Bisa pilih banyak file)</span>
@@ -85,7 +85,6 @@
                         </div>
                     @endif
 
-                    <!-- Tambah atribut multiple dan ganti name menjadi array documents[] -->
                     <input type="file" name="documents[]" multiple accept=".pdf,.doc,.docx"
                         class="w-full text-sm text-slate-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-bold file:bg-[#13416B]/10 file:text-[#13416B] hover:file:bg-[#13416B]/20 transition-all border border-slate-200 rounded-xl" />
                     <p class="text-[11px] font-medium text-slate-400 mt-1.5"><i class="fas fa-info-circle mr-1"></i>Format: PDF, DOC, DOCX. Abaikan jika tidak ingin mengganti file. (Max: 10MB/file).</p>
@@ -110,7 +109,7 @@
     <div id="custom-link-modal" class="fixed inset-0 z-[9999] hidden items-center justify-center bg-slate-900/50 backdrop-blur-sm transition-opacity">
         <div class="bg-white rounded-2xl shadow-xl w-full max-w-md p-6 border border-slate-200">
             <div class="flex justify-between items-center mb-5">
-                <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2"><i class="fas fa-link text-[#13416B]"></i> Tambahkan Tautan</h3>
+                <h3 class="text-base font-bold text-slate-700 flex items-center gap-2"><i class="fas fa-link text-[#13416B]"></i> Tambahkan Tautan</h3>
                 <button type="button" id="btn-close-link" class="text-slate-400 hover:text-slate-600 transition-colors"><i class="fas fa-times text-lg"></i></button>
             </div>
             <div class="space-y-4">
@@ -130,11 +129,11 @@
         </div>
     </div>
 
-    <!-- MODAL VIDEO BARU (RADIO BUTTON & PROGRESS BAR) -->
+    <!-- MODAL VIDEO -->
     <div id="custom-video-modal" class="fixed inset-0 z-[9999] hidden items-center justify-center bg-slate-900/50 backdrop-blur-sm transition-opacity">
         <div class="bg-white rounded-2xl shadow-xl w-full max-w-md p-6 border border-slate-200">
             <div class="flex justify-between items-center mb-5">
-                <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2"><i class="fas fa-video text-[#13416B]"></i> Sisipkan Video</h3>
+                <h3 class="text-base font-bold text-slate-700 flex items-center gap-2"><i class="fas fa-video text-[#13416B]"></i> Sisipkan Video</h3>
                 <button type="button" id="btn-close-video" class="text-slate-400 hover:text-slate-600 transition-colors"><i class="fas fa-times text-lg"></i></button>
             </div>
             
@@ -198,29 +197,34 @@
         <script>
             Quill.register('modules/blotFormatter', QuillBlotFormatter.default);
 
-            // CUSTOM SPEC UNTUK MENGIZINKAN RESIZE PADA TAG <VIDEO> INTERNAL
+            // CUSTOM SPACING & LINE HEIGHT
+            const Parchment = Quill.import('parchment');
+            
+            const LineHeightStyle = new Parchment.Attributor.Style('lineHeight', 'line-height', {
+                scope: Parchment.Scope.BLOCK,
+                whitelist: ['1', '1.2', '1.5', '2.0', '2.5']
+            });
+            Quill.register(LineHeightStyle, true);
+
+            const LetterSpacingStyle = new Parchment.Attributor.Style('letterSpacing', 'letter-spacing', {
+                scope: Parchment.Scope.INLINE,
+                whitelist: ['1px', '2px', '3px', '4px']
+            });
+            Quill.register(LetterSpacingStyle, true);
+
+            // CUSTOM SPEC VIDEO RESIZE
             class VideoElementSpec extends QuillBlotFormatter.BlotSpec {
-                constructor(formatter) {
-                    super(formatter);
-                    this.targetElement = null;
-                }
+                constructor(formatter) { super(formatter); this.targetElement = null; }
                 init() {
                     this.formatter.quill.root.addEventListener('click', (event) => {
                         const el = event.target;
-                        if (el.tagName === 'VIDEO') {
-                            this.targetElement = el;
-                            this.formatter.show(this);
-                        }
+                        if (el.tagName === 'VIDEO') { this.targetElement = el; this.formatter.show(this); }
                     });
                     this.formatter.quill.on('text-change', () => {
-                        if (this.targetElement && !this.formatter.quill.root.contains(this.targetElement)) {
-                            this.formatter.hide();
-                        }
+                        if (this.targetElement && !this.formatter.quill.root.contains(this.targetElement)) this.formatter.hide();
                     });
                 }
-                getTargetElement() {
-                    return this.targetElement;
-                }
+                getTargetElement() { return this.targetElement; }
             }
 
             // CUSTOM IMAGE FORMAT
@@ -241,7 +245,7 @@
             }
             Quill.register(CustomImage, true);
 
-            // CUSTOM VIDEO (HTML5 VIDEO SUPPORT & YOUTUBE IFRAME)
+            // CUSTOM VIDEO FORMAT
             const BlockEmbed = Quill.import('blots/block/embed');
             class CustomVideo extends BlockEmbed {
                 static create(value) {
@@ -287,11 +291,7 @@
                 modules: {
                     syntax: true,
                     blotFormatter: {
-                        specs: [
-                            QuillBlotFormatter.ImageSpec,
-                            QuillBlotFormatter.IframeVideoSpec,
-                            VideoElementSpec
-                        ]
+                        specs: [ QuillBlotFormatter.ImageSpec, QuillBlotFormatter.IframeVideoSpec, VideoElementSpec ]
                     },
                     toolbar: {
                         container: [
@@ -299,6 +299,7 @@
                             [{ 'header': [1, 2, 3, false] }],
                             ['bold', 'italic', 'underline', 'strike'],
                             [{ 'color': [] }, { 'background': [] }],
+                            [{ 'lineHeight': ['1', '1.2', '1.5', '2.0', '2.5'] }, { 'letterSpacing': ['1px', '2px', '3px', '4px'] }],
                             [{ 'list': 'ordered' }, { 'list': 'bullet' }],
                             [{ 'indent': '-1' }, { 'indent': '+1' }, { 'align': [] }],
                             ['blockquote', 'code-block', 'formula'],
@@ -319,7 +320,6 @@
                             'video': function() {
                                 var range = quill.getSelection(true);
                                 window.quillVideoRange = range;
-                                
                                 document.getElementById('video-url-input').value = '';
                                 document.getElementById('video-file-input').value = '';
                                 document.getElementById('upload-progress-container').classList.add('hidden');
@@ -335,11 +335,40 @@
                 theme: 'snow'
             });
 
-            // LOGIKA LINK
-            function closeLinkModal() {
-                document.getElementById('custom-link-modal').classList.add('hidden');
-                document.getElementById('custom-link-modal').classList.remove('flex');
-            }
+            // MENAMBAHKAN TOOLTIP KE ICON EDITOR
+            setTimeout(() => {
+                document.querySelectorAll('.ql-toolbar button, .ql-toolbar .ql-picker').forEach(el => {
+                    let title = '';
+                    if(el.classList.contains('ql-bold')) title = 'Tebal (Bold)';
+                    else if(el.classList.contains('ql-italic')) title = 'Miring (Italic)';
+                    else if(el.classList.contains('ql-underline')) title = 'Garis Bawah (Underline)';
+                    else if(el.classList.contains('ql-strike')) title = 'Coret Teks (Strikethrough)';
+                    else if(el.classList.contains('ql-link')) title = 'Sisipkan Tautan (Link)';
+                    else if(el.classList.contains('ql-image')) title = 'Sisipkan Gambar';
+                    else if(el.classList.contains('ql-video')) title = 'Sisipkan Video';
+                    else if(el.classList.contains('ql-clean')) title = 'Hapus Semua Format (Clean)';
+                    else if(el.classList.contains('ql-blockquote')) title = 'Kutipan (Quote)';
+                    else if(el.classList.contains('ql-code-block')) title = 'Blok Kode (Code)';
+                    else if(el.classList.contains('ql-formula')) title = 'Rumus Matematika';
+                    else if(el.classList.contains('ql-list')) title = el.value === 'ordered' ? 'Daftar Angka' : 'Daftar Titik';
+                    else if(el.classList.contains('ql-indent')) title = el.value === '-1' ? 'Geser ke Kiri (Outdent)' : 'Geser ke Kanan (Indent)';
+                    else if(el.classList.contains('ql-size')) title = 'Ukuran Teks';
+                    else if(el.classList.contains('ql-header')) title = 'Judul / Heading';
+                    else if(el.classList.contains('ql-color')) title = 'Warna Teks';
+                    else if(el.classList.contains('ql-background')) title = 'Warna Latar Belakang';
+                    else if(el.classList.contains('ql-align')) title = 'Posisi / Rata Teks';
+                    else if(el.classList.contains('ql-lineHeight')) title = 'Jarak Antar Baris (Line Spacing)';
+                    else if(el.classList.contains('ql-letterSpacing')) title = 'Jarak Antar Huruf (Letter Spacing)';
+
+                    if(title) {
+                        el.setAttribute('data-tooltip', title);
+                        el.classList.add('quill-tooltip');
+                    }
+                });
+            }, 500);
+
+            // LOGIKA LINK MODAL
+            function closeLinkModal() { document.getElementById('custom-link-modal').classList.add('hidden'); document.getElementById('custom-link-modal').classList.remove('flex'); }
             document.getElementById('btn-close-link').addEventListener('click', closeLinkModal);
             document.getElementById('btn-cancel-link').addEventListener('click', closeLinkModal);
             document.getElementById('btn-save-link').addEventListener('click', function() {
@@ -366,24 +395,17 @@
             document.querySelectorAll('input[name="video_source"]').forEach(radio => {
                 radio.addEventListener('change', function() {
                     if (this.value === 'upload') {
-                        document.getElementById('panel-upload').classList.remove('hidden');
-                        document.getElementById('panel-upload').classList.add('block');
-                        document.getElementById('panel-link').classList.remove('block');
-                        document.getElementById('panel-link').classList.add('hidden');
+                        document.getElementById('panel-upload').classList.remove('hidden'); document.getElementById('panel-upload').classList.add('block');
+                        document.getElementById('panel-link').classList.remove('block'); document.getElementById('panel-link').classList.add('hidden');
                     } else {
-                        document.getElementById('panel-link').classList.remove('hidden');
-                        document.getElementById('panel-link').classList.add('block');
-                        document.getElementById('panel-upload').classList.remove('block');
-                        document.getElementById('panel-upload').classList.add('hidden');
+                        document.getElementById('panel-link').classList.remove('hidden'); document.getElementById('panel-link').classList.add('block');
+                        document.getElementById('panel-upload').classList.remove('block'); document.getElementById('panel-upload').classList.add('hidden');
                     }
                 });
             });
 
             // LOGIKA UPLOAD VIDEO DENGAN PROGRESS BAR (XHR)
-            function closeVideoModal() {
-                document.getElementById('custom-video-modal').classList.add('hidden');
-                document.getElementById('custom-video-modal').classList.remove('flex');
-            }
+            function closeVideoModal() { document.getElementById('custom-video-modal').classList.add('hidden'); document.getElementById('custom-video-modal').classList.remove('flex'); }
             document.getElementById('btn-close-video').addEventListener('click', closeVideoModal);
             document.getElementById('btn-cancel-video').addEventListener('click', closeVideoModal);
             
@@ -398,7 +420,6 @@
 
                     btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1.5"></i> Mengunggah...';
                     btn.disabled = true;
-                    
                     document.getElementById('upload-progress-container').classList.remove('hidden');
 
                     const formData = new FormData();
@@ -407,14 +428,13 @@
 
                     const xhr = new XMLHttpRequest();
                     xhr.open('POST', "{{ route('admin-pusat.management-course.upload-video-editor') }}", true);
-                    xhr.setRequestHeader('Accept', 'application/json');
+                    xhr.setRequestHeader('Accept', 'application/json'); 
 
                     xhr.upload.onprogress = function(e) {
                         if (e.lengthComputable) {
                             const percentComplete = (e.loaded / e.total) * 100;
                             const loadedMB = (e.loaded / (1024 * 1024)).toFixed(2);
                             const totalMB = (e.total / (1024 * 1024)).toFixed(2);
-
                             document.getElementById('upload-progress-text').innerText = `${loadedMB} MB / ${totalMB} MB`;
                             document.getElementById('upload-progress-percent').innerText = `${Math.round(percentComplete)}%`;
                             document.getElementById('upload-progress-bar').style.width = percentComplete + '%';
@@ -429,20 +449,14 @@
                                     quill.insertEmbed(range ? range.index : quill.getLength(), 'video', data.url);
                                     quill.setSelection((range ? range.index : quill.getLength()) + 1);
                                     closeVideoModal();
-                                } else {
-                                    alert('Gagal mengunggah video: ' + (data.message || 'Error'));
-                                }
-                            } catch (error) {
-                                alert('Respon server tidak valid. Pastikan endpoint controller mengembalikan JSON.');
-                            }
+                                } else alert('Gagal mengunggah video: ' + (data.message || 'Error'));
+                            } catch (error) { alert('Respon server tidak valid.'); }
                         } else if (xhr.status === 422) {
                             const errorData = JSON.parse(xhr.responseText);
                             alert('Validasi Gagal: ' + (errorData.message || 'File tidak sesuai.'));
                         } else if (xhr.status === 413) {
-                            alert('Gagal: Ukuran video terlalu besar melebihi kapasitas server (post_max_size).');
-                        } else {
-                            alert('Terjadi kesalahan server (Error ' + xhr.status + ').');
-                        }
+                            alert('Gagal: Ukuran video terlalu besar (melebihi kapasitas server).');
+                        } else alert('Terjadi kesalahan server (Error ' + xhr.status + ').');
                         
                         btn.innerHTML = '<i class="fas fa-check mr-1.5"></i> Sisipkan';
                         btn.disabled = false;
@@ -461,7 +475,6 @@
                 else {
                     var urlInput = document.getElementById('video-url-input').value.trim();
                     if (!urlInput) return alert('Masukkan Link URL YouTube!');
-                    
                     quill.insertEmbed(range ? range.index : quill.getLength(), 'video', urlInput);
                     quill.setSelection((range ? range.index : quill.getLength()) + 1);
                     closeVideoModal();
@@ -473,12 +486,67 @@
                 var contentText = document.getElementById('content_text');
                 if (quill.getText().trim().length === 0 && !quill.root.innerHTML.includes('<img') && !quill.root.innerHTML.includes('<iframe') && !quill.root.innerHTML.includes('<video')) {
                     contentText.value = '';
-                } else {
-                    contentText.value = quill.root.innerHTML;
-                }
+                } else contentText.value = quill.root.innerHTML;
             });
         </script>
+        
         <style>
+            /* CSS UNTUK TOOLTIP ICON (LABEL KECIL) */
+            .quill-tooltip { position: relative; }
+            .quill-tooltip:hover::after {
+                content: attr(data-tooltip);
+                position: absolute;
+                bottom: -32px;
+                left: 50%;
+                transform: translateX(-50%);
+                background-color: #1e293b;
+                color: #ffffff;
+                padding: 5px 10px;
+                border-radius: 6px;
+                font-size: 11px;
+                font-weight: 500;
+                white-space: nowrap;
+                z-index: 1000;
+                pointer-events: none;
+                opacity: 0;
+                animation: fadeInTooltip 0.2s forwards;
+                animation-delay: 0.4s;
+                box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+            }
+            .quill-tooltip:hover::before {
+                content: '';
+                position: absolute;
+                bottom: -8px;
+                left: 50%;
+                transform: translateX(-50%);
+                border-width: 5px;
+                border-style: solid;
+                border-color: transparent transparent #1e293b transparent;
+                opacity: 0;
+                animation: fadeInTooltip 0.2s forwards;
+                animation-delay: 0.4s;
+            }
+            @keyframes fadeInTooltip { to { opacity: 1; } }
+
+            /* MENGATUR DROPDOWN JARAK BARIS & HURUF */
+            .ql-picker.ql-lineHeight, .ql-picker.ql-letterSpacing { width: 110px !important; }
+            
+            .ql-picker.ql-lineHeight .ql-picker-label::before { content: 'Jarak Baris'; }
+            .ql-picker.ql-lineHeight .ql-picker-item[data-value="1"]::before { content: 'Rapat (1.0)'; }
+            .ql-picker.ql-lineHeight .ql-picker-item[data-value="1.2"]::before { content: 'Biasa (1.2)'; }
+            .ql-picker.ql-lineHeight .ql-picker-item[data-value="1.5"]::before { content: 'Longgar (1.5)'; }
+            .ql-picker.ql-lineHeight .ql-picker-item[data-value="2.0"]::before { content: 'Ganda (2.0)'; }
+            .ql-picker.ql-lineHeight .ql-picker-item[data-value="2.5"]::before { content: 'Ekstra (2.5)'; }
+            .ql-picker.ql-lineHeight .ql-picker-item:not([data-value])::before { content: 'Bawaan'; }
+
+            .ql-picker.ql-letterSpacing .ql-picker-label::before { content: 'Spasi Huruf'; }
+            .ql-picker.ql-letterSpacing .ql-picker-item[data-value="1px"]::before { content: 'Lebar (+1)'; }
+            .ql-picker.ql-letterSpacing .ql-picker-item[data-value="2px"]::before { content: 'Lebar (+2)'; }
+            .ql-picker.ql-letterSpacing .ql-picker-item[data-value="3px"]::before { content: 'Ekstra (+3)'; }
+            .ql-picker.ql-letterSpacing .ql-picker-item[data-value="4px"]::before { content: 'Ekstra (+4)'; }
+            .ql-picker.ql-letterSpacing .ql-picker-item:not([data-value])::before { content: 'Bawaan'; }
+
+            /* STYLE EDITOR BAWAAN */
             .ql-toolbar.ql-snow { border-radius: 0.75rem 0.75rem 0 0; border-color: #cbd5e1; background-color: #f8fafc; padding: 12px; }
             .ql-container.ql-snow { border-radius: 0 0 0.75rem 0.75rem; border-color: #cbd5e1; min-height: 500px; font-family: inherit; font-size: 0.95rem; line-height: 1.7; }
             .ql-editor { min-height: 500px; padding: 20px; }
