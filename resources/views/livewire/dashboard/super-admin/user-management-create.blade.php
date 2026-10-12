@@ -3,75 +3,40 @@
         <x-validation-errors />
     </div>
     <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 md:p-6 mb-6 card-hover">
+        @php
+            $scope = $this->scopeLevel();
+            $regionReady = $scope === 'pusat'
+                || ($scope === 'provinsi' && ! empty($province))
+                || ($scope === 'kabkota' && ! empty($regency));
+        @endphp
         <form wire:submit="store">
-            <!-- Informasi Pribadi -->
-            <div class="mb-8">
-                <div class="flex items-center gap-3 mb-6">
-                    <div class="p-2 rounded-lg bg-indigo-100 text-indigo-600">
-                        <i class="fas fa-user"></i>
-                    </div>
-                    <div>
-                        <h3 class="text-xl font-bold text-gray-900">Informasi Pribadi</h3>
-                        <p class="text-sm text-slate-500">Data identitas pengguna</p>
-                    </div>
-                </div>
-
-                @if ($isSsoMode)
-                    <div class="mb-4 flex items-start gap-3 rounded-xl border border-blue-200 bg-blue-50 p-4 text-sm text-blue-800">
-                        <i class="fas fa-circle-info mt-0.5"></i>
-                        <p>Mode SSO aktif: nama dan nomor telepon diisi otomatis dari akun Siapkerja saat pengguna pertama kali login.</p>
-                    </div>
-                @endif
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 form-grid">
-                    @if (! $isSsoMode)
-                        <x-form.input name="name" label="Name" wire:model.lazy="name" required placeholder="Masukkan name" />
-
-                        <x-form.input name="full_name" label="Nama Lengkap" wire:model.lazy="full_name" required placeholder="Masukkan nama lengkap" helper="Contoh: Sarah Putri" />
-                    @endif
-
-                    <x-form.input type="email" name="email" label="Email" wire:model.lazy="email" required placeholder="contoh@kemnaker.go.id" helper="Email SSO Siapkerja pengguna" />
-
-                    @if (! $isSsoMode)
-                        <x-form.input type="tel" name="phone" label="Nomor Telepon" wire:model.lazy="phone" required placeholder="081234567890" helper="Format: 081234567890" inputmode="numeric" />
-                    @endif
-
-                    <x-form.input name="instansi" label="Instansi" wire:model.lazy="instansi" required placeholder="Contoh: Dinas Tenaga Kerja Prov. Jawa Barat" />
-
-                    <x-form.select name="province" label="Provinsi" wire:model.live="province" helper="Pilih provinsi untuk memfilter kabupaten/kota">
-                        <option value="">Pilih provinsi</option>
-                        @foreach ($this->provinces as $province)
-                            <option value="{{ $province->code }}">{{ $province->name }}</option>
-                        @endforeach
-                    </x-form.select>
-
-                    <div>
-                        @if (empty($province))
-                            <x-form.select name="regency" label="Kabupaten/Kota" wire:model.lazy="regency" disabled class="disabled:bg-slate-100 disabled:text-slate-400 disabled:cursor-not-allowed" helper="Pilih provinsi terlebih dahulu">
-                                <option value="">Pilih provinsi terlebih dahulu</option>
-                            </x-form.select>
+            <!-- Stepper -->
+            <div class="mb-8 flex items-center gap-2 sm:gap-3">
+                <div class="flex items-center gap-2">
+                    <div class="flex h-8 w-8 items-center justify-center rounded-full text-sm font-bold {{ $currentStep === 1 ? 'bg-indigo-600 text-white' : 'bg-emerald-500 text-white' }}">
+                        @if ($currentStep === 1)
+                            1
                         @else
-                            <x-form.select name="regency" label="Kabupaten/Kota" wire:model.lazy="regency" helper="Pilih kabupaten/kota">
-                                <option value="">Pilih kabupaten/kota</option>
-                                @foreach ($this->regencies as $regency)
-                                    <option value="{{ $regency->code }}">{{ $regency->name }}</option>
-                                @endforeach
-                            </x-form.select>
+                            <i class="fas fa-check text-xs"></i>
                         @endif
-                        <p wire:loading wire:target="province" class="mt-1 text-xs text-indigo-600">
-                            <i class="fas fa-spinner fa-spin mr-1"></i> Memuat kabupaten/kota...
-                        </p>
                     </div>
+                    <span class="text-sm font-semibold {{ $currentStep === 1 ? 'text-slate-900' : 'text-slate-500' }}">Role & Akses</span>
+                </div>
+                <div class="h-0.5 flex-1 rounded-full {{ $currentStep === 2 ? 'bg-emerald-500' : 'bg-slate-200' }}"></div>
+                <div class="flex items-center gap-2">
+                    <div class="flex h-8 w-8 items-center justify-center rounded-full text-sm font-bold {{ $currentStep === 2 ? 'bg-indigo-600 text-white' : 'bg-slate-200 text-slate-500' }}">2</div>
+                    <span class="text-sm font-semibold {{ $currentStep === 2 ? 'text-slate-900' : 'text-slate-500' }}">Informasi Pribadi</span>
                 </div>
             </div>
 
-            <!-- Pengaturan Role -->
+            @if ($currentStep === 1)
+            <!-- Langkah 1: Role dan Izin Akses -->
             <div class="mb-8">
-                <div class="flex items-center gap-3 mb-6">
-                    <div class="p-2 rounded-lg bg-purple-100 text-purple-600">
-                        <i class="fas fa-user-tag"></i>
+                <div class="mb-6">
+                    <div>
+                        <h3 class="text-xl font-bold text-gray-900">Role dan Izin Akses</h3>
+                        <p class="text-sm text-slate-500">Langkah 1 — pilih satu role untuk menentukan alur form berikutnya</p>
                     </div>
-                    <h3 class="text-xl font-bold text-gray-900">Role dan Izin Akses</h3>
                 </div>
 
                 <div class="space-y-4">
@@ -83,20 +48,17 @@
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                             @forelse ($roles as $role)
                                 <div class="relative">
-                                    <input type="checkbox" id="role_{{ $role->uuid }}" wire:model="roleIds"
-                                        value="{{ $role->uuid }}" class="hidden peer"
-                                        :disabled="$wire.roleIds.length >= 2 && !$wire.roleIds.includes('{{ $role->uuid }}')">
+                                    <input type="radio" id="role_{{ $role->uuid }}" wire:model.live="roleId"
+                                        value="{{ $role->uuid }}" class="hidden peer">
 
                                     <label for="role_{{ $role->uuid }}"
                                         class="flex flex-col h-full p-4 border-2 border-slate-200 rounded-xl cursor-pointer
                                         hover:border-indigo-300
                                         peer-checked:border-indigo-500
                                         peer-checked:bg-indigo-50
-                                        peer-disabled:opacity-50
-                                        peer-disabled:cursor-not-allowed
                                         transition">
                                         <div class="flex items-center mb-2">
-                                            <div class="p-2 rounded-lg bg-indigo-100 text-indigo-600 mr-3">
+                                            <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-indigo-100 text-indigo-600 mr-3">
                                                 <i class="fas fa-user-shield"></i>
                                             </div>
 
@@ -122,14 +84,119 @@
                         @enderror
                     </div>
                 </div>
+
+                <div class="flex justify-end">
+                    <x-button type="button" size="lg" rounded="md" wire:click="goToStep2">
+                        Lanjutkan
+                    </x-button>
+                </div>
+            </div>
+            @else
+
+            <!-- Langkah 2: Informasi Pribadi -->
+            <div class="mb-8">
+                <div class="mb-6">
+                    <div>
+                        <h3 class="text-xl font-bold text-gray-900">Informasi Pribadi</h3>
+                        <p class="text-sm text-slate-500">Langkah 2 — data identitas pengguna</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 form-grid">
+                    @if (! $isSsoMode)
+                        <x-form.input name="name" label="Name" wire:model.lazy="name" required placeholder="Masukkan name" />
+
+                        <x-form.input name="full_name" label="Nama Lengkap" wire:model.lazy="full_name" required placeholder="Masukkan nama lengkap" helper="Contoh: Sarah Putri" />
+                    @endif
+
+                    <x-form.input type="email" name="email" label="Email" wire:model.lazy="email" required placeholder="contoh@kemnaker.go.id" helper="Email SSO Siapkerja pengguna" />
+
+                    @if (! $isSsoMode)
+                        <x-form.input type="tel" name="phone" label="Nomor Telepon" wire:model.lazy="phone" required placeholder="081234567890" helper="Format: 081234567890" inputmode="numeric" />
+                    @endif
+
+                    @if (empty($roleId))
+                        <div class="md:col-span-2 flex items-start gap-3 rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
+                            <i class="fas fa-arrow-up mt-0.5"></i>
+                            <p>Pilih role terlebih dahulu untuk menampilkan form wilayah dan instansi.</p>
+                        </div>
+                    @elseif ($scope === null)
+                        <div class="md:col-span-2 flex items-start gap-3 rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
+                            <i class="fas fa-circle-info mt-0.5"></i>
+                            <p>Role user: wilayah dan instansi diisi mandiri oleh pengguna saat pertama kali membuka dashboard.</p>
+                        </div>
+                    @else
+                        @if ($scope === 'kabkota' || $scope === 'provinsi')
+                            <x-form.select name="province" label="Provinsi" wire:model.live="province" helper="Pilih provinsi untuk memfilter data di bawahnya">
+                                <option value="">Pilih provinsi</option>
+                                @foreach ($this->provinces as $prov)
+                                    <option value="{{ $prov->code }}">{{ $prov->name }}</option>
+                                @endforeach
+                            </x-form.select>
+                        @endif
+
+                        @if ($scope === 'kabkota')
+                            <div>
+                                @if (empty($province))
+                                    <x-form.select name="regency" label="Kabupaten/Kota" wire:model.lazy="regency" disabled class="disabled:bg-slate-100 disabled:text-slate-400 disabled:cursor-not-allowed" helper="Pilih provinsi terlebih dahulu">
+                                        <option value="">Pilih provinsi terlebih dahulu</option>
+                                    </x-form.select>
+                                @else
+                                    <x-form.select name="regency" label="Kabupaten/Kota" wire:model.lazy="regency" helper="Pilih kabupaten/kota">
+                                        <option value="">Pilih kabupaten/kota</option>
+                                        @foreach ($this->regencies as $reg)
+                                            <option value="{{ $reg->code }}">{{ $reg->name }}</option>
+                                        @endforeach
+                                    </x-form.select>
+                                @endif
+                                <p wire:loading wire:target="province" class="mt-1 text-xs text-indigo-600">
+                                    <i class="fas fa-spinner fa-spin mr-1"></i> Memuat kabupaten/kota...
+                                </p>
+                            </div>
+                        @endif
+
+                        @if ($regionReady)
+                            <div>
+                                @if ($scope === 'pusat')
+                                    <x-form.select name="instansiOption" label="Kementerian/Lembaga" wire:model.lazy="instansiOption" helper="Pilih lembaga atau tambah manual bila belum terdaftar">
+                                        <option value="">Pilih kementerian/lembaga</option>
+                                        @foreach ($this->institutions as $inst)
+                                            <option value="{{ $inst->name }}">{{ $inst->name }}</option>
+                                        @endforeach
+                                        <option value="__custom">Lainnya — tulis manual</option>
+                                    </x-form.select>
+                                @else
+                                    <x-form.select name="instansiOption" label="Instansi" wire:model.lazy="instansiOption" helper="Pilih instansi sesuai wilayah atau tambah manual bila belum terdaftar">
+                                        <option value="">Pilih instansi</option>
+                                        @foreach ($this->institutions as $inst)
+                                            <option value="{{ $inst->name }}">{{ $inst->name }}</option>
+                                        @endforeach
+                                        <option value="__custom">Lainnya — tulis manual</option>
+                                    </x-form.select>
+                                @endif
+                                <p wire:loading wire:target="province,regency" class="mt-1 text-xs text-indigo-600">
+                                    <i class="fas fa-spinner fa-spin mr-1"></i> Memuat daftar instansi...
+                                </p>
+                            </div>
+
+                            @if ($instansiOption === '__custom')
+                                <x-form.input name="instansiCustom" label="Nama Instansi Baru" wire:model.lazy="instansiCustom" required placeholder="Tulis nama instansi" helper="Akan dicatat ke data master instansi" />
+                            @endif
+                        @endif
+                    @endif
+                </div>
             </div>
 
             <!-- Action Buttons -->
-            <div class="flex flex-wrap gap-3 action-buttons form-section">
-                <x-button type="submit" id="btn-submit" icon="fas fa-save">
+            <div class="flex flex-wrap items-center justify-between gap-3 action-buttons form-section">
+                <x-button type="button" variant="secondary" size="lg" rounded="md" wire:click="goToStep1" icon="fas fa-arrow-left">
+                    Kembali
+                </x-button>
+                <x-button type="submit" id="btn-submit" size="lg" rounded="md" icon="fas fa-save">
                     Simpan User
                 </x-button>
             </div>
+            @endif
         </form>
     </div>
 </div>

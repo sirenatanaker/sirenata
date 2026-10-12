@@ -7,22 +7,12 @@
         <form wire:submit="save">
             <!-- Informasi Pribadi -->
             <div class="mb-8">
-                <div class="flex items-center gap-3 mb-6">
-                    <div class="p-2 rounded-lg bg-indigo-100 text-indigo-600">
-                        <i class="fas fa-user"></i>
-                    </div>
+                <div class="mb-6">
                     <div>
                         <h3 class="text-xl font-bold text-gray-900">Informasi Pribadi</h3>
                         <p class="text-sm text-slate-500">Data identitas pengguna</p>
                     </div>
                 </div>
-
-                @if ($isSsoMode)
-                    <div class="mb-4 flex items-start gap-3 rounded-xl border border-blue-200 bg-blue-50 p-4 text-sm text-blue-800">
-                        <i class="fas fa-circle-info mt-0.5"></i>
-                        <p>Mode SSO aktif: nama dan nomor telepon mengikuti data akun Siapkerja pengguna.</p>
-                    </div>
-                @endif
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 form-grid">
                     @if (! $isSsoMode)
@@ -41,8 +31,8 @@
 
                     <x-form.select name="province" label="Provinsi" wire:model.live="province" helper="Pilih provinsi untuk memfilter kabupaten/kota">
                         <option value="">Pilih provinsi</option>
-                        @foreach ($this->provinces as $province)
-                            <option value="{{ $province->code }}">{{ $province->name }}</option>
+                        @foreach ($this->provinces as $prov)
+                            <option value="{{ $prov->code }}">{{ $prov->name }}</option>
                         @endforeach
                     </x-form.select>
 
@@ -54,8 +44,8 @@
                         @else
                             <x-form.select name="regency" label="Kabupaten/Kota" wire:model.lazy="regency" helper="Pilih kabupaten/kota">
                                 <option value="">Pilih kabupaten/kota</option>
-                                @foreach ($this->regencies as $regency)
-                                    <option value="{{ $regency->code }}">{{ $regency->name }}</option>
+                                @foreach ($this->regencies as $reg)
+                                    <option value="{{ $reg->code }}">{{ $reg->name }}</option>
                                 @endforeach
                             </x-form.select>
                         @endif
@@ -93,10 +83,7 @@
 
             <!-- Pengaturan Role -->
             <div class="mb-8">
-                <div class="flex items-center gap-3 mb-6">
-                    <div class="p-2 rounded-lg bg-purple-100 text-purple-600">
-                        <i class="fas fa-user-tag"></i>
-                    </div>
+                <div class="mb-6">
                     <h3 class="text-xl font-bold text-gray-900">Role dan Izin Akses</h3>
                 </div>
 
@@ -115,7 +102,7 @@
                                     <label for="role_{{ $role->uuid }}"
                                         class="flex flex-col h-full p-4 border-2 border-slate-200 rounded-xl cursor-pointer hover:border-indigo-300 peer-checked:border-indigo-500 peer-checked:bg-indigo-50 peer-disabled:opacity-50 peer-disabled:cursor-not-allowed transition">
                                         <div class="flex items-center mb-2">
-                                            <div class="p-2 rounded-lg bg-indigo-100 text-indigo-600 mr-3">
+                                            <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-indigo-100 text-indigo-600 mr-3">
                                                 <i class="fas fa-user-cog"></i>
                                             </div>
 
@@ -146,10 +133,7 @@
 
             <!-- Pengaturan Notifikasi -->
             <div class="mb-8">
-                <div class="flex items-center gap-3 mb-6">
-                    <div class="p-2 rounded-lg bg-emerald-100 text-emerald-600">
-                        <i class="fas fa-bell"></i>
-                    </div>
+                <div class="mb-6">
                     <h3 class="text-xl font-bold text-gray-900">Pengaturan Notifikasi</h3>
                 </div>
 

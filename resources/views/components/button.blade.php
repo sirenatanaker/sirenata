@@ -1,6 +1,7 @@
 @props([
     'variant' => 'primary',
     'size' => 'md',
+    'rounded' => null,
     'icon' => null,
     'type' => 'button',
     'href' => null
@@ -10,10 +11,18 @@
     $baseClass = 'inline-flex items-center justify-center font-semibold transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed';
 
     $sizeClasses = [
-        'sm' => 'px-3 py-1.5 text-xs rounded-md gap-1.5',
-        'md' => 'px-4 py-2.5 text-sm rounded-lg gap-2',
-        'lg' => 'px-6 py-3 text-base rounded-xl gap-2.5',
-    ][$size] ?? 'px-4 py-2.5 text-sm rounded-lg gap-2';
+        'sm' => 'px-3 py-1.5 text-xs gap-1.5',
+        'md' => 'px-4 py-2.5 text-sm gap-2',
+        'lg' => 'px-6 py-3 text-base gap-2.5',
+    ][$size] ?? 'px-4 py-2.5 text-sm gap-2';
+
+    $defaultRadius = [
+        'sm' => 'rounded-md',
+        'md' => 'rounded-lg',
+        'lg' => 'rounded-xl',
+    ][$size] ?? 'rounded-lg';
+
+    $radiusClass = $rounded ? "rounded-{$rounded}" : $defaultRadius;
 
     $variantClasses = [
         'primary' => 'bg-indigo-600 text-white hover:bg-indigo-700 focus:ring-indigo-500 shadow-sm shadow-indigo-100 border border-transparent',
@@ -24,7 +33,7 @@
         'white' => 'bg-white text-slate-700 hover:bg-slate-50 border border-slate-200 focus:ring-slate-100 shadow-sm shadow-slate-50',
     ][$variant] ?? 'bg-indigo-600 text-white hover:bg-indigo-700 focus:ring-indigo-500 shadow-sm shadow-indigo-100 border border-transparent';
 
-    $classes = "{$baseClass} {$sizeClasses} {$variantClasses}";
+    $classes = "{$baseClass} {$sizeClasses} {$radiusClass} {$variantClasses}";
 @endphp
 
 @if ($href)

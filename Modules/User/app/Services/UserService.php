@@ -90,6 +90,7 @@ class UserService
 
             $user->profile()->create([
                 'full_name' => $data['full_name'] ?? null,
+                'institution_type' => $data['institution_type'] ?? null,
                 'instansi'   => $data['instansi'] ?? null,
                 'phone'     => $data['phone'] ?? null,
             ]);
