@@ -9,9 +9,9 @@ use Modules\Permission\Models\Permission;
 use Modules\Roles\Models\Role;
 use Modules\User\Services\UserService;
 use Devrabiul\ToastMagic\Facades\ToastMagic;
-use Illuminate\Validation\Rules\Password;
 use Modules\MasterData\Models\Province;
 use Modules\MasterData\Models\Regency;
+use Illuminate\Support\Str;
 
 class UserManagementCreate extends Component
 {
@@ -24,8 +24,7 @@ class UserManagementCreate extends Component
     public $province;
     public $regency;
     public array $roleIds = [];
-    public ?string $password = null;
-    public ?string $password_confirmation = null;
+    public bool $isSsoMode = false;
 
     protected UserService $userService;
 
@@ -34,18 +33,22 @@ class UserManagementCreate extends Component
         $this->userService = $userService;
     }
 
+    public function mount()
+    {
+        // Mode SSO (production): nama & telepon diisi otomatis dari
+        // Siapkerja, password tidak dikelola manual.
+        $this->isSsoMode = app()->isProduction();
+    }
+
     protected function rules(): array
     {
+        $personal = $this->isSsoMode ? 'nullable' : 'required';
+
         return [
-            'name' => 'required|string|max:255',
-            'full_name' => 'required|string|max:255',
+            'name' => $personal.'|string|max:255',
+            'full_name' => $personal.'|string|max:255',
             'email' => 'required|email|unique:users,email',
-            'password' => [
-                'required',
-                'confirmed',
-                Password::defaults(),
-            ],
-            'phone' => 'required|string|max:20',
+            'phone' => $personal.'|string|max:20',
             'roleIds' => 'required|array|min:1|max:2',
             'roleIds.*' => 'exists:roles,uuid',
             'instansi' => 'required|string|max:255',
@@ -74,8 +77,9 @@ class UserManagementCreate extends Component
                 'roles'        => $this->roleIds, 
                 'province'    => $this->province,
                 'regency'     => $this->regency,
-                'password'    => $this->password,
-                'password_confirmation' => $this->password_confirmation,
+                // Mode SSO: password acak tak terpakai (login via Siapkerja).
+                // Lokal: default 'password' agar bisa login form.
+                'password'    => $this->isSsoMode ? Str::random(32) : 'password',
             ];
 
             $this->userService->createUser($data);

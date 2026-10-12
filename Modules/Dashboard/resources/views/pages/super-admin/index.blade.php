@@ -1,308 +1,317 @@
 <x-dashboard::layouts.dashboard title="Super Admin Dashboard">
-    <div class="p-2 sm:p-6">
-        <style>
-            /* Custom thin scrollbar for modern dashboard */
-            .custom-scrollbar::-webkit-scrollbar {
-                width: 5px;
-            }
-            .custom-scrollbar::-webkit-scrollbar-track {
-                background: transparent;
-            }
-            .custom-scrollbar::-webkit-scrollbar-thumb {
-                background-color: #cbd5e1;
-                border-radius: 10px;
-            }
-            .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-                background-color: #94a3b8;
-            }
-        </style>
-        <!-- Breadcrumb Navigation -->
-        <x-breadcrumb :items="[['label' => 'Dashboard']]" />
+    @php
+        // ---- Ringkasan akun ----
+        $totalAkun = (int) $totalAdminPusat + (int) $totalAdminProvinsi + (int) $totalAdminKabKota + (int) $totalUser;
+        $percentOf = fn ($value) => $totalAkun > 0 ? (float) ($value / $totalAkun * 100) : 0;
+        $formatPct = fn ($value) => number_format($percentOf($value), 1, ',', '.');
 
+        // Warna kelompok akun (dipakai bersama oleh kartu, tile legenda, dan grafik)
+        // Kelas ditulis lengkap agar terdeteksi Tailwind.
+        $groups = [
+            [
+                'label' => 'Admin Pusat',
+                'value' => (int) $totalAdminPusat,
+                'icon'  => 'fa-user-shield',
+                'hint'  => 'Pengelola tingkat pusat',
+                'hex'   => '#13416B',
+                'chip'  => 'bg-[#13416B]/10 text-[#13416B] border-[#13416B]/20',
+                'bar'   => 'bg-[#13416B]',
+                'text'  => 'text-[#13416B]',
+                'tile'  => 'bg-[#13416B]',
+            ],
+            [
+                'label' => 'Admin Provinsi',
+                'value' => (int) $totalAdminProvinsi,
+                'icon'  => 'fa-map-marked-alt',
+                'hint'  => 'Pengelola tingkat provinsi',
+                'hex'   => '#547996',
+                'chip'  => 'bg-[#547996]/10 text-[#547996] border-[#547996]/20',
+                'bar'   => 'bg-[#547996]',
+                'text'  => 'text-[#547996]',
+                'tile'  => 'bg-[#547996]',
+            ],
+            [
+                'label' => 'Admin Kab/Kota',
+                'value' => (int) $totalAdminKabKota,
+                'icon'  => 'fa-building',
+                'hint'  => 'Pengelola tingkat kab/kota',
+                'hex'   => '#8BB1CC',
+                'chip'  => 'bg-[#8BB1CC]/20 text-[#3F7BA6] border-[#8BB1CC]/40',
+                'bar'   => 'bg-[#8BB1CC]',
+                'text'  => 'text-[#3F7BA6]',
+                'tile'  => 'bg-[#8BB1CC]',
+            ],
+            [
+                'label' => 'Peserta E-Learning',
+                'value' => (int) $totalUser,
+                'icon'  => 'fa-user-graduate',
+                'hint'  => 'Pengguna pembelajaran',
+                'hex'   => '#059669',
+                'chip'  => 'bg-emerald-50 text-emerald-600 border-emerald-100',
+                'bar'   => 'bg-emerald-500',
+                'text'  => 'text-emerald-600',
+                'tile'  => 'bg-emerald-600',
+            ],
+        ];
 
-        <!-- Quick Stats Cards -->
-        <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-5 mb-4 sm:mb-5 stats-grid">
-            <!-- Total Admin Pusat -->
-            <x-dashboard::superadmin.stats-card title="Total Admin Pusat" count="{{ $totalAdminPusat }}" growth="Aktif"
-                period="Sistem">
-                <div class="p-2 md:p-3 rounded-full gradient-indigo">
-                    <i class="fas fa-users text-white text-base md:text-lg"></i>
+        // Aksi cepat
+        $actions = [
+            ['label' => 'Tambah User', 'hint' => 'Buat akun baru', 'icon' => 'fa-user-plus', 'url' => route('super-admin.user-management.create'), 'chip' => 'bg-[#13416B]/10 text-[#13416B] border-[#13416B]/20'],
+            ['label' => 'Kelola Lembaga', 'hint' => 'Kementerian/Pusat', 'icon' => 'fa-building', 'url' => route('super-admin.lembaga.index'), 'chip' => 'bg-[#547996]/10 text-[#547996] border-[#547996]/20'],
+            ['label' => 'Kelola Instansi', 'hint' => 'Dinas Daerah', 'icon' => 'fa-map-marked-alt', 'url' => route('super-admin.instansi.index'), 'chip' => 'bg-[#8BB1CC]/20 text-[#3F7BA6] border-[#8BB1CC]/40'],
+            ['label' => 'Role & Permission', 'hint' => 'Hak akses', 'icon' => 'fa-user-lock', 'url' => route('super-admin.roles.index'), 'chip' => 'bg-emerald-50 text-emerald-600 border-emerald-100'],
+        ];
+
+        // Ringkasan sistem
+        $summary = [
+            ['label' => 'Lembaga Pusat', 'name' => 'Kementerian / Lembaga', 'value' => $totalLembaga, 'icon' => 'fa-landmark', 'chip' => 'bg-[#13416B]/10 text-[#13416B] border-[#13416B]/20'],
+            ['label' => 'Instansi Daerah', 'name' => 'Dinas Provinsi / Kab / Kota', 'value' => $totalInstansi, 'icon' => 'fa-map-marked-alt', 'chip' => 'bg-[#547996]/10 text-[#547996] border-[#547996]/20'],
+            ['label' => 'Total Kursus', 'name' => 'Program Pembelajaran LMS', 'value' => $totalCourses, 'icon' => 'fa-graduation-cap', 'chip' => 'bg-emerald-50 text-emerald-600 border-emerald-100'],
+        ];
+    @endphp
+
+    <div class="p-4 sm:p-6 lg:p-8 max-w-[1600px] mx-auto space-y-6 bg-slate-50 min-h-screen">
+
+        {{-- ===================================== --}}
+        {{-- 1. KPI                                --}}
+        {{-- ===================================== --}}
+        <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-5">
+            @foreach ($groups as $group)
+                <div
+                    class="flex flex-col bg-white rounded-md border border-slate-200 shadow-sm p-5 transition-all duration-200 hover:shadow-md hover:-translate-y-0.5">
+                    <div class="flex items-start justify-between gap-3">
+                        <div class="min-w-0">
+                            <p class="text-xs font-semibold uppercase tracking-wider text-slate-500">
+                                {{ $group['label'] }}</p>
+                            <p class="mt-2 text-3xl font-extrabold text-slate-900 tabular-nums">
+                                {{ number_format($group['value'], 0, ',', '.') }}</p>
+                        </div>
+                        <div
+                            class="w-11 h-11 rounded-md border flex items-center justify-center shrink-0 {{ $group['chip'] }}">
+                            <i class="fas {{ $group['icon'] }}"></i>
+                        </div>
+                    </div>
+                    <p class="mt-1 text-xs text-slate-500">{{ $group['hint'] }}</p>
                 </div>
-            </x-dashboard::superadmin.stats-card>
-
-            <!-- Total Admin Provinsi -->
-            <x-dashboard::superadmin.stats-card title="Total Admin Provinsi" count="{{ $totalAdminProvinsi }}" growth="Aktif"
-                period="Sistem">
-                <div class="p-2 md:p-3 rounded-full gradient-emerald">
-                    <i class="fas fa-user-check text-white text-base md:text-lg"></i>
-                </div>
-            </x-dashboard::superadmin.stats-card>
-
-            <!-- Total Admin Kab/Kota -->
-            <x-dashboard::superadmin.stats-card title="Total Admin Kab/Kota" count="{{ $totalAdminKabKota }}" growth="Aktif"
-                period="Sistem">
-                <div class="p-2 md:p-3 rounded-full gradient-amber">
-                    <i class="fas fa-user-slash text-white text-base md:text-lg"></i>
-                </div>
-            </x-dashboard::superadmin.stats-card>
-
-            <!-- Total Peserta E-Learning -->
-            <x-dashboard::superadmin.stats-card title="Total Peserta" count="{{ $totalUser }}" growth="Aktif"
-                period="Sistem">
-                <div class="p-2 md:p-3 rounded-full gradient-rose">
-                    <i class="fas fa-chart-line text-white text-base md:text-lg"></i>
-                </div>
-            </x-dashboard::superadmin.stats-card>
+            @endforeach
         </div>
 
-        <!-- Main Dashboard Content -->
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-5 mb-4">
-            <!-- Left Column: Chart & Activities -->
-            <div class="lg:col-span-2 flex flex-col space-y-4 sm:space-y-6 h-full">
-                <!-- User Distribution Chart -->
-                <div class="bg-white rounded-xl shadow-sm border border-slate-100 p-4 md:p-6 transition-all hover:shadow-md">
-                    <div class="flex items-center justify-between mb-4">
-                        <div>
-                            <h2 class="text-lg md:text-xl font-bold text-gray-900 card-title">Distribusi Akun Pengguna</h2>
-                            <p class="text-xs text-gray-500 mt-1">Perbandingan jumlah peran administrator dan peserta</p>
+        {{-- ========================================================= --}}
+        {{-- 2. DISTRIBUSI AKUN & EVENT  |  AKSI CEPAT & RINGKASAN      --}}
+        {{-- ========================================================= --}}
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+            {{-- KIRI --}}
+            <div class="lg:col-span-7 xl:col-span-8 flex flex-col gap-6">
+
+                {{-- Distribusi Akun Pengguna --}}
+                <section class="bg-white rounded-md border border-slate-200 shadow-sm overflow-hidden">
+                    <header
+                        class="px-5 sm:px-6 py-4 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                        <div class="flex items-start gap-3">
+                            <div class="w-10 h-10 rounded-md bg-[#13416B] text-white flex items-center justify-center shrink-0">
+                                <i class="fas fa-chart-pie"></i>
+                            </div>
+                            <div>
+                                <h2 class="text-base sm:text-lg font-semibold text-slate-900">Distribusi Akun Pengguna</h2>
+                                <p class="text-sm text-slate-500">Perbandingan jumlah peran administrator dan peserta</p>
+                            </div>
                         </div>
-                        <span class="text-xs font-semibold text-indigo-700 bg-indigo-50 border border-indigo-100 px-3 py-1 rounded-full">
-                            Total: {{ $totalAdminPusat + $totalAdminProvinsi + $totalAdminKabKota + $totalUser }} Akun
+                        <span
+                            class="inline-flex items-center self-start sm:self-auto px-3 h-8 rounded-full bg-[#13416B] text-white text-xs font-semibold tabular-nums shrink-0">
+                            Total: {{ number_format($totalAkun, 0, ',', '.') }} Akun
                         </span>
-                    </div>
-                    
-                    <div class="grid grid-cols-1 md:grid-cols-5 gap-6 items-center">
-                        <!-- Canvas Chart -->
-                        <div class="md:col-span-2 relative h-48 flex justify-center items-center">
-                            <canvas id="userDistributionChart" class="max-h-48"></canvas>
-                        </div>
-                        
-                        <!-- Legend & Stats Detail -->
-                        <div class="md:col-span-3 space-y-2">
-                            <!-- Admin Pusat -->
-                            <div class="flex items-center justify-between p-2 rounded-lg bg-slate-50 border border-slate-100 hover:bg-indigo-50/30 hover:border-indigo-100 transition-all">
-                                <div class="flex items-center gap-2">
-                                    <span class="w-3 h-3 rounded-full bg-indigo-500"></span>
-                                    <span class="text-xs sm:text-sm font-semibold text-slate-700">Admin Pusat</span>
-                                </div>
-                                <div class="text-right">
-                                    <span class="text-xs sm:text-sm font-bold text-slate-900">{{ $totalAdminPusat }}</span>
-                                    <span class="text-[10px] sm:text-xs text-slate-500 bg-white border border-slate-200 px-1.5 py-0.5 rounded ml-1 font-medium">
-                                        {{ $totalAdminPusat + $totalAdminProvinsi + $totalAdminKabKota + $totalUser > 0 ? round(($totalAdminPusat / ($totalAdminPusat + $totalAdminProvinsi + $totalAdminKabKota + $totalUser)) * 100, 1) : 0 }}%
-                                    </span>
-                                </div>
-                            </div>
-                            
-                            <!-- Admin Provinsi -->
-                            <div class="flex items-center justify-between p-2 rounded-lg bg-slate-50 border border-slate-100 hover:bg-emerald-50/30 hover:border-emerald-100 transition-all">
-                                <div class="flex items-center gap-2">
-                                    <span class="w-3 h-3 rounded-full bg-emerald-500"></span>
-                                    <span class="text-xs sm:text-sm font-semibold text-slate-700">Admin Provinsi</span>
-                                </div>
-                                <div class="text-right">
-                                    <span class="text-xs sm:text-sm font-bold text-slate-900">{{ $totalAdminProvinsi }}</span>
-                                    <span class="text-[10px] sm:text-xs text-slate-500 bg-white border border-slate-200 px-1.5 py-0.5 rounded ml-1 font-medium">
-                                        {{ $totalAdminPusat + $totalAdminProvinsi + $totalAdminKabKota + $totalUser > 0 ? round(($totalAdminProvinsi / ($totalAdminPusat + $totalAdminProvinsi + $totalAdminKabKota + $totalUser)) * 100, 1) : 0 }}%
-                                    </span>
-                                </div>
-                            </div>
-                            
-                            <!-- Admin Kab/Kota -->
-                            <div class="flex items-center justify-between p-2 rounded-lg bg-slate-50 border border-slate-100 hover:bg-amber-50/30 hover:border-amber-100 transition-all">
-                                <div class="flex items-center gap-2">
-                                    <span class="w-3 h-3 rounded-full bg-amber-500"></span>
-                                    <span class="text-xs sm:text-sm font-semibold text-slate-700">Admin Kab/Kota</span>
-                                </div>
-                                <div class="text-right">
-                                    <span class="text-xs sm:text-sm font-bold text-slate-900">{{ $totalAdminKabKota }}</span>
-                                    <span class="text-[10px] sm:text-xs text-slate-500 bg-white border border-slate-200 px-1.5 py-0.5 rounded ml-1 font-medium">
-                                        {{ $totalAdminPusat + $totalAdminProvinsi + $totalAdminKabKota + $totalUser > 0 ? round(($totalAdminKabKota / ($totalAdminPusat + $totalAdminProvinsi + $totalAdminKabKota + $totalUser)) * 100, 1) : 0 }}%
-                                    </span>
-                                </div>
-                            </div>
-                            
-                            <!-- Peserta -->
-                            <div class="flex items-center justify-between p-2 rounded-lg bg-slate-50 border border-slate-100 hover:bg-rose-50/30 hover:border-rose-100 transition-all">
-                                <div class="flex items-center gap-2">
-                                    <span class="w-3 h-3 rounded-full bg-rose-500"></span>
-                                    <span class="text-xs sm:text-sm font-semibold text-slate-700">Peserta E-Learning</span>
-                                </div>
-                                <div class="text-right">
-                                    <span class="text-xs sm:text-sm font-bold text-slate-900">{{ $totalUser }}</span>
-                                    <span class="text-[10px] sm:text-xs text-slate-500 bg-white border border-slate-200 px-1.5 py-0.5 rounded ml-1 font-medium">
-                                        {{ $totalAdminPusat + $totalAdminProvinsi + $totalAdminKabKota + $totalUser > 0 ? round(($totalUser / ($totalAdminPusat + $totalAdminProvinsi + $totalAdminKabKota + $totalUser)) * 100, 1) : 0 }}%
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                    </header>
 
-                <!-- Event Penting -->
-                <div class="bg-white rounded-xl shadow-sm border border-slate-100 p-4 md:p-6 transition-all hover:shadow-md flex-1 flex flex-col">
-                    <div class="flex items-center justify-between mb-4 md:mb-6">
+                    <div class="p-5 sm:p-6 grid grid-cols-1 md:grid-cols-5 gap-6 items-center">
+                        {{-- Donat --}}
+                        <div class="md:col-span-2 relative h-56 flex justify-center items-center">
+                            <canvas id="userDistributionChart"></canvas>
+                        </div>
+
+                        {{-- Tile legenda: latar sesuai warna segmen --}}
+                        <div class="md:col-span-3 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            @foreach ($groups as $group)
+                                <div class="rounded-md px-4 py-3 {{ $group['tile'] }}">
+                                    <p class="text-xs font-semibold uppercase tracking-wider text-white/90">{{ $group['label'] }}</p>
+                                    <p class="mt-1 flex items-baseline gap-2">
+                                        <span class="text-2xl font-extrabold text-white tabular-nums">{{ number_format($group['value'], 0, ',', '.') }}</span>
+                                        <span class="text-xs font-semibold text-white/90 tabular-nums">({{ $formatPct($group['value']) }}%)</span>
+                                    </p>
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
+                </section>
+
+                {{-- Event Penting Terkini --}}
+                <section class="bg-white rounded-md border border-slate-200 shadow-sm overflow-hidden flex flex-col flex-1">
+                    <header class="px-5 sm:px-6 py-4 border-b border-slate-100 flex items-start gap-3">
+                        <div class="w-10 h-10 rounded-md bg-[#547996] text-white flex items-center justify-center shrink-0">
+                            <i class="fas fa-history"></i>
+                        </div>
                         <div>
-                            <h2 class="text-lg md:text-xl font-bold text-gray-900 card-title">Event Penting Terkini</h2>
+                            <h2 class="text-base sm:text-lg font-semibold text-slate-900">Event Penting Terkini</h2>
+                            <p class="text-sm text-slate-500">Aktivitas administrator terbaru pada sistem</p>
                         </div>
-                    </div>
+                    </header>
 
-                    <div class="flex-1 min-h-0 overflow-y-auto pr-1 space-y-3 md:space-y-4 max-h-[300px] lg:max-h-[245px] custom-scrollbar">
-                        @forelse($recentActivities as $activity)
+                    <div class="p-4 flex-1 max-h-[360px] overflow-y-auto custom-scrollbar space-y-3">
+                        @forelse ($recentActivities as $activity)
                             @php
                                 $subjectName = $activity->subject_type ? class_basename($activity->subject_type) : 'Sistem';
-                                $title = ucfirst($activity->description) . ' ' . $subjectName;
+                                $title       = ucfirst($activity->description) . ' ' . $subjectName;
                                 $description = $subjectName . ' (' . ($activity->subject?->name ?? $activity->subject_id) . ') telah ' . $activity->description;
-                                $time = $activity->created_at ? $activity->created_at->diffForHumans(null, true) : '-';
-                                $userName = $activity->causer?->name ?? 'System';
+                                $time        = $activity->created_at ? $activity->created_at->diffForHumans(null, true) : '-';
+                                $userName    = $activity->causer?->name ?? 'System';
                             @endphp
-                            <x-dashboard::superadmin.activity-log-item 
-                                :title="$title"
-                                :description="$description" 
-                                :time="$time"
-                                :user="$userName" />
+                            <article
+                                class="flex items-start gap-3 p-3 rounded-md border border-slate-200 bg-white transition-colors hover:bg-slate-50">
+                                <div
+                                    class="w-9 h-9 rounded-md border bg-[#13416B]/10 text-[#13416B] border-[#13416B]/20 flex items-center justify-center shrink-0">
+                                    <i class="fas fa-bolt text-sm"></i>
+                                </div>
+                                <div class="min-w-0 flex-1">
+                                    <div class="flex items-start justify-between gap-3">
+                                        <p class="text-sm font-semibold text-slate-900 line-clamp-1">{{ $title }}</p>
+                                        <span class="text-xs text-slate-500 shrink-0"><i class="far fa-clock mr-1"></i>{{ $time }}</span>
+                                    </div>
+                                    <p class="mt-0.5 text-xs text-slate-500 line-clamp-2">{{ $description }}</p>
+                                    <p class="mt-1.5 text-[11px] text-slate-400"><i class="far fa-user mr-1"></i>{{ $userName }}</p>
+                                </div>
+                            </article>
                         @empty
-                            <div class="p-6 text-center border border-dashed border-slate-300 rounded-lg text-slate-400 bg-slate-50/50">
-                                <i class="fas fa-history text-xl mb-2 text-slate-300"></i>
-                                <p class="text-sm">Belum ada log aktivitas admin saat ini.</p>
+                            <div class="bg-slate-50 rounded-md p-10 text-center border border-dashed border-slate-200">
+                                <div
+                                    class="w-12 h-12 bg-white border border-slate-200 rounded-md flex items-center justify-center mx-auto mb-3 text-slate-400">
+                                    <i class="fas fa-history text-lg"></i>
+                                </div>
+                                <p class="text-sm font-semibold text-slate-700">Belum ada log aktivitas</p>
+                                <p class="text-xs text-slate-500 mt-1">Belum ada log aktivitas admin saat ini.</p>
                             </div>
                         @endforelse
                     </div>
 
-                    @if(count($recentActivities) > 0)
-                    <div class="mt-6 pt-6 border-t border-slate-200">
-                        <div class="flex flex-col sm:flex-row items-center justify-between gap-3">
-                            <p class="text-sm text-gray-500">Menampilkan {{ count($recentActivities) }} event log terbaru</p>
-                        </div>
-                    </div>
+                    @if (count($recentActivities) > 0)
+                        <footer class="px-5 sm:px-6 py-3 border-t border-slate-100 text-xs text-slate-500">
+                            Menampilkan {{ count($recentActivities) }} event log terbaru
+                        </footer>
                     @endif
-                </div>
+                </section>
             </div>
 
-            <!-- Sidebar / Right Column -->
-            <div class="space-y-4 sm:space-y-6 flex flex-col justify-between h-full">
-                <!-- Quick Actions -->
-                <div class="bg-white rounded-xl shadow-sm border border-slate-100 p-4 md:p-6">
-                    <h2 class="text-lg md:text-xl font-bold text-gray-900 mb-4 md:mb-6 card-title">Aksi Cepat</h2>
+            {{-- KANAN --}}
+            <div class="lg:col-span-5 xl:col-span-4 flex flex-col gap-6">
 
-                    <div class="grid grid-cols-2 gap-3 md:gap-4 quick-actions">
-                        <a href="{{ route('super-admin.user-management.create') }}"
-                            class="bg-indigo-50 border border-indigo-100 rounded-xl p-3 md:p-4 flex flex-col items-center justify-center text-center hover:bg-indigo-100 transition-colors card-hover">
-                            <div class="p-2 md:p-3 rounded-full bg-indigo-100 text-indigo-600 mb-2 md:mb-3">
-                                <i class="fas fa-user-plus text-base md:text-lg"></i>
-                            </div>
-                            <p class="font-medium text-gray-900 text-sm md:text-base">Tambah User</p>
-                            <p class="text-xs text-gray-500 mt-1">Buat akun baru</p>
-                        </a>
+                {{-- Aksi Cepat --}}
+                <section class="bg-white rounded-md border border-slate-200 shadow-sm overflow-hidden">
+                    <header class="px-5 sm:px-6 py-4 border-b border-slate-100 flex items-start gap-3">
+                        <div class="w-10 h-10 rounded-md bg-[#13416B] text-white flex items-center justify-center shrink-0">
+                            <i class="fas fa-bolt"></i>
+                        </div>
+                        <div>
+                            <h2 class="text-base sm:text-lg font-semibold text-slate-900">Aksi Cepat</h2>
+                            <p class="text-sm text-slate-500">Pintasan pengelolaan sistem</p>
+                        </div>
+                    </header>
 
-                        <a href="{{ route('super-admin.lembaga.index') }}"
-                            class="bg-emerald-50 border border-emerald-100 rounded-xl p-3 md:p-4 flex flex-col items-center justify-center text-center hover:bg-emerald-100 transition-colors card-hover">
-                            <div class="p-2 md:p-3 rounded-full bg-emerald-100 text-emerald-600 mb-2 md:mb-3">
-                                <i class="fas fa-building text-base md:text-lg"></i>
-                            </div>
-                            <p class="font-medium text-gray-900 text-sm md:text-base">Kelola Lembaga</p>
-                            <p class="text-xs text-gray-500 mt-1">Kementerian/Pusat</p>
-                        </a>
-
-                        <a href="{{ route('super-admin.instansi.index') }}"
-                            class="bg-amber-50 border border-amber-100 rounded-xl p-3 md:p-4 flex flex-col items-center justify-center text-center hover:bg-amber-100 transition-colors card-hover">
-                            <div class="p-2 md:p-3 rounded-full bg-amber-100 text-amber-600 mb-2 md:mb-3">
-                                <i class="fas fa-map-marked-alt text-base md:text-lg"></i>
-                            </div>
-                            <p class="font-medium text-gray-900 text-sm md:text-base">Kelola Instansi</p>
-                            <p class="text-xs text-gray-500 mt-1">Dinas Daerah</p>
-                        </a>
-
-                        <a href="{{ route('super-admin.roles.index') }}"
-                            class="bg-purple-50 border border-purple-100 rounded-xl p-3 md:p-4 flex flex-col items-center justify-center text-center hover:bg-purple-100 transition-colors card-hover">
-                            <div class="p-2 md:p-3 rounded-full bg-purple-100 text-purple-600 mb-2 md:mb-3">
-                                <i class="fas fa-user-shield text-base md:text-lg"></i>
-                            </div>
-                            <p class="font-medium text-gray-900 text-sm md:text-base">Role & Permission</p>
-                            <p class="text-xs text-gray-500 mt-1">Hak Akses</p>
-                        </a>
+                    <div class="p-4 grid grid-cols-2 gap-3">
+                        @foreach ($actions as $action)
+                            <a href="{{ $action['url'] }}"
+                                class="group flex flex-col items-center justify-center text-center p-4 rounded-md border border-slate-200 bg-white transition-all duration-200 hover:border-[#13416B]/40 hover:shadow-sm hover:-translate-y-0.5">
+                                <div
+                                    class="w-11 h-11 rounded-md border flex items-center justify-center mb-3 {{ $action['chip'] }}">
+                                    <i class="fas {{ $action['icon'] }}"></i>
+                                </div>
+                                <p class="text-sm font-semibold text-slate-900 group-hover:text-[#13416B] transition-colors">{{ $action['label'] }}</p>
+                                <p class="text-xs text-slate-500 mt-0.5">{{ $action['hint'] }}</p>
+                            </a>
+                        @endforeach
                     </div>
-                </div>
+                </section>
 
-                <!-- Ringkasan Sistem -->
-                <div class="bg-white rounded-xl shadow-sm border border-slate-100 p-4 md:p-6">
-                    <h2 class="text-lg md:text-xl font-bold text-gray-900 mb-4 md:mb-6 card-title">Ringkasan Sistem</h2>
-                    
-                    <div class="space-y-4">
-                        <!-- Total Lembaga -->
-                        <div class="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-100/80">
-                            <div class="flex items-center gap-3">
-                                <div class="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center">
-                                    <i class="fas fa-building text-sm"></i>
-                                </div>
-                                <div>
-                                    <p class="text-xs text-gray-400 font-medium">Lembaga Pusat</p>
-                                    <p class="text-sm font-semibold text-gray-900">Kementerian / Lembaga</p>
-                                </div>
-                            </div>
-                            <span class="text-base font-bold text-gray-900 bg-white border border-slate-200 px-3 py-1 rounded-lg shadow-sm">
-                                {{ $totalLembaga }}
-                            </span>
+                {{-- Ringkasan Sistem --}}
+                <section class="bg-white rounded-md border border-slate-200 shadow-sm overflow-hidden flex-1">
+                    <header class="px-5 sm:px-6 py-4 border-b border-slate-100 flex items-start gap-3">
+                        <div class="w-10 h-10 rounded-md bg-[#547996] text-white flex items-center justify-center shrink-0">
+                            <i class="fas fa-server"></i>
                         </div>
+                        <div>
+                            <h2 class="text-base sm:text-lg font-semibold text-slate-900">Ringkasan Sistem</h2>
+                            <p class="text-sm text-slate-500">Data master dan pembelajaran</p>
+                        </div>
+                    </header>
 
-                        <!-- Total Instansi -->
-                        <div class="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-100/80">
-                            <div class="flex items-center gap-3">
-                                <div class="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
-                                    <i class="fas fa-map-marked-alt text-sm"></i>
+                    <div class="p-4 space-y-3">
+                        @foreach ($summary as $row)
+                            <div class="flex items-center justify-between gap-3 p-3 rounded-md border border-slate-200 bg-white">
+                                <div class="flex items-center gap-3 min-w-0">
+                                    <div
+                                        class="w-10 h-10 rounded-md border flex items-center justify-center shrink-0 {{ $row['chip'] }}">
+                                        <i class="fas {{ $row['icon'] }} text-sm"></i>
+                                    </div>
+                                    <div class="min-w-0">
+                                        <p class="text-xs font-medium text-slate-500">{{ $row['label'] }}</p>
+                                        <p class="text-sm font-semibold text-slate-900 truncate">{{ $row['name'] }}</p>
+                                    </div>
                                 </div>
-                                <div>
-                                    <p class="text-xs text-gray-400 font-medium">Instansi Daerah</p>
-                                    <p class="text-sm font-semibold text-gray-900">Dinas Provinsi / Kab / Kota</p>
-                                </div>
+                                <span
+                                    class="shrink-0 min-w-10 text-center px-3 py-1 rounded-md bg-slate-50 border border-slate-200 text-base font-bold text-slate-900 tabular-nums">
+                                    {{ number_format((int) $row['value'], 0, ',', '.') }}
+                                </span>
                             </div>
-                            <span class="text-base font-bold text-gray-900 bg-white border border-slate-200 px-3 py-1 rounded-lg shadow-sm">
-                                {{ $totalInstansi }}
-                            </span>
-                        </div>
-
-                        <!-- Total Kursus -->
-                        <div class="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-100/80">
-                            <div class="flex items-center gap-3">
-                                <div class="w-8 h-8 rounded-lg bg-rose-50 text-rose-600 flex items-center justify-center">
-                                    <i class="fas fa-graduation-cap text-sm"></i>
-                                </div>
-                                <div>
-                                    <p class="text-xs text-gray-400 font-medium">Total Kursus</p>
-                                    <p class="text-sm font-semibold text-gray-900">Program Pembelajaran LMS</p>
-                                </div>
-                            </div>
-                            <span class="text-base font-bold text-gray-900 bg-white border border-slate-200 px-3 py-1 rounded-lg shadow-sm">
-                                {{ $totalCourses }}
-                            </span>
-                        </div>
+                        @endforeach
                     </div>
-                </div>
+                </section>
             </div>
         </div>
     </div>
 
     @push('scripts')
+        <style>
+            /* Scrollbar tipis untuk area daftar */
+            .custom-scrollbar::-webkit-scrollbar { width: 5px; }
+            .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+            .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 10px; }
+            .custom-scrollbar::-webkit-scrollbar-thumb:hover { background-color: #94a3b8; }
+        </style>
+
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
         <script>
             document.addEventListener('DOMContentLoaded', function() {
-                const ctx = document.getElementById('userDistributionChart').getContext('2d');
-                new Chart(ctx, {
+                const GROUPS = @json(collect($groups)->map(fn ($g) => ['label' => $g['label'], 'value' => $g['value'], 'hex' => $g['hex']])->values());
+                const TOTAL = GROUPS.reduce((sum, g) => sum + Number(g.value || 0), 0);
+                const hasData = TOTAL > 0;
+
+                // Teks total di tengah donat
+                const centerText = {
+                    id: 'centerText',
+                    afterDraw(chart) {
+                        const {ctx, chartArea} = chart;
+                        const cx = (chartArea.left + chartArea.right) / 2;
+                        const cy = (chartArea.top + chartArea.bottom) / 2;
+
+                        ctx.save();
+                        ctx.textAlign = 'center';
+                        ctx.textBaseline = 'middle';
+                        ctx.fillStyle = '#64748b';
+                        ctx.font = '600 11px sans-serif';
+                        ctx.fillText('TOTAL AKUN', cx, cy - 14);
+                        ctx.fillStyle = '#0f172a';
+                        ctx.font = '800 26px sans-serif';
+                        ctx.fillText(TOTAL.toLocaleString('id-ID'), cx, cy + 10);
+                        ctx.restore();
+                    }
+                };
+
+                new Chart(document.getElementById('userDistributionChart').getContext('2d'), {
                     type: 'doughnut',
                     data: {
-                        labels: ['Admin Pusat', 'Admin Provinsi', 'Admin Kab/Kota', 'Peserta E-Learning'],
+                        labels: GROUPS.map(g => g.label),
                         datasets: [{
-                            data: [
-                                {{ $totalAdminPusat }},
-                                {{ $totalAdminProvinsi }},
-                                {{ $totalAdminKabKota }},
-                                {{ $totalUser }}
-                            ],
-                            backgroundColor: [
-                                '#6366f1', // Indigo
-                                '#10b981', // Emerald
-                                '#f59e0b', // Amber
-                                '#f43f5e'  // Rose
-                            ],
+                            // Jika belum ada akun, tampilkan cincin abu-abu
+                            data: hasData ? GROUPS.map(g => Number(g.value || 0)) : [1],
+                            backgroundColor: hasData ? GROUPS.map(g => g.hex) : ['#e2e8f0'],
                             borderWidth: 2,
                             borderColor: '#ffffff',
                             hoverOffset: 4
@@ -311,30 +320,25 @@
                     options: {
                         responsive: true,
                         maintainAspectRatio: false,
+                        cutout: '72%',
                         plugins: {
-                            legend: {
-                                display: false
-                            },
+                            legend: { display: false },
                             tooltip: {
-                                backgroundColor: 'rgba(31, 41, 55, 0.95)',
+                                enabled: hasData,
+                                backgroundColor: 'rgba(19, 65, 107, 0.95)',
                                 padding: 12,
-                                cornerRadius: 8,
+                                cornerRadius: 6,
                                 callbacks: {
                                     label: function(context) {
-                                        let label = context.label || '';
-                                        if (label) {
-                                            label += ': ';
-                                        }
-                                        if (context.raw !== undefined) {
-                                            label += context.raw + ' akun';
-                                        }
-                                        return label;
+                                        const value = Number(context.raw || 0);
+                                        const pct = TOTAL > 0 ? (value / TOTAL * 100).toFixed(1).replace('.', ',') : '0';
+                                        return ` ${context.label}: ${value.toLocaleString('id-ID')} akun (${pct}%)`;
                                     }
                                 }
                             }
-                        },
-                        cutout: '70%'
-                    }
+                        }
+                    },
+                    plugins: [centerText]
                 });
             });
         </script>

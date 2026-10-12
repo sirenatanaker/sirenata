@@ -25,6 +25,7 @@ class UserManagementEdit extends Component
     public ?string $regency  = null;
 
     public array $roleIds = [];
+    public bool $isSsoMode = false;
 
     protected UserService $userService;
 
@@ -36,6 +37,7 @@ class UserManagementEdit extends Component
 
     public function mount(User $user)
     {
+        $this->isSsoMode = app()->isProduction();
         $user->load(['roles', 'profile', 'scopeArea']);
 
         $this->user = $user;
@@ -55,10 +57,12 @@ class UserManagementEdit extends Component
 
     protected function rules(): array
     {
+        $personal = $this->isSsoMode ? 'nullable' : 'required';
+
         return [
-            'full_name' => 'required|string|max:255',
+            'full_name' => $personal.'|string|max:255',
             'email' => 'required|email|unique:users,email,'.$this->user->id,
-            'phone' => 'required|string|max:20',
+            'phone' => $personal.'|string|max:20',
             'roleIds' => 'required|array',
             'roleIds.*' => 'required|exists:roles,uuid',
             'instansi' => 'required|string|max:255',
@@ -80,13 +84,16 @@ class UserManagementEdit extends Component
             $this->validate();
             $data = [
                 'email'       => $this->email,
-                'full_name'   => $this->full_name,
-                'phone'       => $this->phone,
                 'instansi'     => $this->instansi,
                 'roles'       => $this->roleIds,
                 'province'    => $this->province,
                 'regency'     => $this->regency,
             ];
+
+            if (! $this->isSsoMode) {
+                $data['full_name'] = $this->full_name;
+                $data['phone']     = $this->phone;
+            }
             
             $this->userService->updateUser($this->user, $data);
             return redirect()->route('super-admin.user-management.index');
@@ -99,9 +106,9 @@ class UserManagementEdit extends Component
 
     public function updatedProvince($value)             
     {
-        if (empty($value)) {
-            $this->regency = null;
-        }
+        // Ganti/clear provinsi selalu mereset kab/kota agar tidak
+        // tersisa pilihan dari provinsi sebelumnya.
+        $this->regency = null;
     }
 
     #[Computed()]

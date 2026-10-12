@@ -11,33 +11,58 @@
                     <div class="p-2 rounded-lg bg-indigo-100 text-indigo-600">
                         <i class="fas fa-user"></i>
                     </div>
-                    <h3 class="text-xl font-bold text-gray-900">Informasi Pribadi</h3>
+                    <div>
+                        <h3 class="text-xl font-bold text-gray-900">Informasi Pribadi</h3>
+                        <p class="text-sm text-slate-500">Data identitas pengguna</p>
+                    </div>
                 </div>
 
+                @if ($isSsoMode)
+                    <div class="mb-4 flex items-start gap-3 rounded-xl border border-blue-200 bg-blue-50 p-4 text-sm text-blue-800">
+                        <i class="fas fa-circle-info mt-0.5"></i>
+                        <p>Mode SSO aktif: nama dan nomor telepon mengikuti data akun Siapkerja pengguna.</p>
+                    </div>
+                @endif
+
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 form-grid">
-                    <x-form.input name="full_name" label="Nama Lengkap" wire:model.lazy="full_name" required placeholder="Masukkan nama lengkap" />
+                    @if (! $isSsoMode)
+                        <x-form.input name="full_name" label="Nama Lengkap" wire:model.lazy="full_name" required placeholder="Masukkan nama lengkap" />
+                    @endif
 
                     <x-form.input type="email" name="email" label="Email" wire:model.lazy="email" disabled placeholder="contoh@kemnaker.go.id" />
 
-                    <x-form.input type="tel" name="phone" label="Nomor Telepon" wire:model.lazy="phone" required placeholder="+62 812-3456-7890" inputmode="numeric" />
+                    @if (! $isSsoMode)
+                        <x-form.input type="tel" name="phone" label="Nomor Telepon" wire:model.lazy="phone" required placeholder="+62 812-3456-7890" inputmode="numeric" />
+                    @endif
 
-                    <x-form.input name="instansi" label="Instansi" wire:model.lazy="instansi" required placeholder="Contoh: Staff Administrasi" />
+                    <x-form.input name="instansi" label="Instansi" wire:model.lazy="instansi" required placeholder="Contoh: Dinas Tenaga Kerja Prov. Jawa Barat" />
 
                     <x-form.input type="date" name="join_date" label="Tanggal Bergabung" wire:model.lazy="join_date" disabled />
 
-                    <x-form.select name="province" label="Province" wire:model.lazy="province">
-                        <option value="">Pilih Provinsi</option>
+                    <x-form.select name="province" label="Provinsi" wire:model.live="province" helper="Pilih provinsi untuk memfilter kabupaten/kota">
+                        <option value="">Pilih provinsi</option>
                         @foreach ($this->provinces as $province)
                             <option value="{{ $province->code }}">{{ $province->name }}</option>
                         @endforeach
                     </x-form.select>
 
-                    <x-form.select name="regency" label="Regency" wire:model.lazy="regency">
-                        <option value="">Pilih Kabupaten/Kota</option>
-                        @foreach ($this->regencies as $regency)
-                            <option value="{{ $regency->code }}">{{ $regency->name }}</option>
-                        @endforeach
-                    </x-form.select>
+                    <div>
+                        @if (empty($province))
+                            <x-form.select name="regency" label="Kabupaten/Kota" wire:model.lazy="regency" disabled class="disabled:bg-slate-100 disabled:text-slate-400 disabled:cursor-not-allowed" helper="Pilih provinsi terlebih dahulu">
+                                <option value="">Pilih provinsi terlebih dahulu</option>
+                            </x-form.select>
+                        @else
+                            <x-form.select name="regency" label="Kabupaten/Kota" wire:model.lazy="regency" helper="Pilih kabupaten/kota">
+                                <option value="">Pilih kabupaten/kota</option>
+                                @foreach ($this->regencies as $regency)
+                                    <option value="{{ $regency->code }}">{{ $regency->name }}</option>
+                                @endforeach
+                            </x-form.select>
+                        @endif
+                        <p wire:loading wire:target="province" class="mt-1 text-xs text-indigo-600">
+                            <i class="fas fa-spinner fa-spin mr-1"></i> Memuat kabupaten/kota...
+                        </p>
+                    </div>
 
                     {{-- <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">

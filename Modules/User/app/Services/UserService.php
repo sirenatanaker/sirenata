@@ -7,6 +7,7 @@ use Devrabiul\ToastMagic\Facades\ToastMagic;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 use Modules\Permission\Models\Permission;
 use Modules\Roles\Models\Role;
 use Spatie\Activitylog\Models\Activity;
@@ -40,9 +41,9 @@ class UserService
             $user->profile()->updateOrCreate(
                 ['user_id' => $user->id],
                 [
-                    'full_name' => $data['full_name'],
-                    'instansi'   => $data['instansi'],
-                    'phone'     => $data['phone'],
+                    'full_name' => $data['full_name'] ?? $user->profile?->full_name,
+                    'instansi'   => $data['instansi'] ?? $user->profile?->instansi,
+                    'phone'     => $data['phone'] ?? $user->profile?->phone,
                 ]
             );
 
@@ -82,15 +83,15 @@ class UserService
     {
         return DB::transaction(function () use ($data) {
             $user = User::create([
-                'name'     => $data['name'],
+                'name'     => $data['name'] ?? Str::before($data['email'], '@'),
                 'email'    => $data['email'],
                 'password' => Hash::make($data['password']),
             ]);
 
             $user->profile()->create([
-                'full_name' => $data['full_name'],
-                'instansi'   => $data['instansi'],
-                'phone'     => $data['phone'],
+                'full_name' => $data['full_name'] ?? null,
+                'instansi'   => $data['instansi'] ?? null,
+                'phone'     => $data['phone'] ?? null,
             ]);
 
             $user->scopeArea()->updateOrCreate(
