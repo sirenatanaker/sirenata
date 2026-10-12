@@ -45,17 +45,17 @@ class Notification extends Model
         ],
         'rtkd.approved' => [
             'label' => 'Persetujuan RTKD',
-            'icon'  => 'far fa-circle-check',
+            'icon'  => 'fas fa-circle-check',
             'tile'  => 'bg-emerald-50 text-emerald-600 ring-emerald-100',
         ],
         'rtkd.rejected' => [
             'label' => 'RTKD Ditolak',
-            'icon'  => 'far fa-circle-xmark',
+            'icon'  => 'fas fa-circle-xmark',
             'tile'  => 'bg-rose-50 text-rose-600 ring-rose-100',
         ],
         'system.general' => [
             'label' => 'Sistem',
-            'icon'  => 'far fa-bell',
+            'icon'  => 'fas fa-bell',
             'tile'  => 'bg-slate-100 text-slate-600 ring-slate-200',
         ],
     ];

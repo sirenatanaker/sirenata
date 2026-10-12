@@ -8,7 +8,7 @@
             class="flex flex-col gap-4 rounded-xl border border-slate-200/80 bg-white p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between sm:p-5">
             <div class="flex min-w-0 items-start gap-3">
                 <span class="grid h-11 w-11 shrink-0 place-items-center text-[#13416B]">
-                    <i class="far fa-bell text-xl" aria-hidden="true"></i>
+                    <i class="fas fa-bell text-xl" aria-hidden="true"></i>
                 </span>
                 <div class="min-w-0">
                     <h1 class="text-lg font-extrabold tracking-tight text-slate-800 sm:text-xl">Notifikasi</h1>
@@ -70,10 +70,10 @@
             <!-- Keterangan ikon (layar sedang ke atas) -->
             <div class="ml-auto hidden shrink-0 items-center gap-3 rounded-lg border border-slate-200 bg-white px-3 py-2 text-[11px] font-semibold text-slate-500 lg:flex">
                 <span class="inline-flex items-center gap-1.5"><i
-                        class="far fa-circle-check text-emerald-500"></i> Disetujui</span>
+                        class="fas fa-circle-check text-emerald-500"></i> Disetujui</span>
                 <span class="inline-flex items-center gap-1.5"><i class="fas fa-check-double text-blue-500"></i>
                     Diverifikasi</span>
-                <span class="inline-flex items-center gap-1.5"><i class="far fa-circle-xmark text-rose-500"></i>
+                <span class="inline-flex items-center gap-1.5"><i class="fas fa-circle-xmark text-rose-500"></i>
                     Ditolak</span>
                 <span class="inline-flex items-center gap-1.5"><i class="fas fa-project-diagram text-indigo-500"></i>
                     Proyek</span>
@@ -87,7 +87,7 @@
             @empty
                 <div class="px-6 py-14 text-center sm:py-20">
                     <span class="mx-auto grid h-14 w-14 place-items-center text-slate-300">
-                        <i class="far fa-bell-slash text-2xl"></i>
+                        <i class="fas fa-bell-slash text-2xl"></i>
                     </span>
                     <p class="mt-4 text-sm font-bold text-slate-700">
                         {{ ($filter ?? '') === 'unread' ? 'Tidak ada notifikasi yang belum dibaca' : 'Belum ada notifikasi' }}

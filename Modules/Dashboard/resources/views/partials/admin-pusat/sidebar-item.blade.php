@@ -59,7 +59,7 @@
                 ? 'text-[#13416B] bg-slate-100 font-bold'
                 : 'text-slate-500 hover:bg-slate-50 hover:text-[#13416B]' }}">
             <span class="w-7 shrink-0 flex items-center justify-center">
-                <i class="far fa-file-alt text-base" aria-hidden="true"></i>
+                <i class="fas fa-file-alt text-base" aria-hidden="true"></i>
             </span>
             <span class="flex-1 ms-3 text-left text-[15px]">Pelaporan RTK</span>
             <i class="fas fa-chevron-down w-4 shrink-0 text-xs text-slate-400 transition-transform duration-200" :class="{ 'rotate-180': open }" aria-hidden="true"></i>
@@ -95,7 +95,7 @@
                 ? 'text-[#13416B] bg-slate-100 font-bold'
                 : 'text-slate-500 hover:bg-slate-50 hover:text-[#13416B]' }}">
             <span class="w-6 shrink-0 flex items-center justify-center">
-                <i class="far fa-user text-base" aria-hidden="true"></i>
+                <i class="fas fa-user text-base" aria-hidden="true"></i>
             </span>
 
             <span class="flex-1 text-left text-[15px]">Rekapitulasi SDM</span>
@@ -183,14 +183,14 @@
                 ? 'text-[#13416B] bg-slate-100 font-bold'
                 : 'text-slate-500 hover:bg-slate-50 hover:text-[#13416B]' }}">
             <span class="w-6 shrink-0 flex items-center justify-center">
-                <i class="far fa-bookmark text-base" aria-hidden="true"></i>
+                <i class="fas fa-bookmark text-base" aria-hidden="true"></i>
             </span>
 
             <span class="flex-1 text-left text-[15px]">Manajemen Perpustakaan</span>
         </a>
     </li>
 
-    <!-- Sertifikat -->
+    <!-- Manajemen Sertifikat -->
     <li>
         <a href="{{ route('admin-pusat.certificates.index') }}"
             class="flex items-center px-4 py-3 rounded-xl transition-all duration-200
@@ -200,7 +200,7 @@
             <span class="w-7 shrink-0 flex items-center justify-center">
                 <i class="fas fa-award text-base" aria-hidden="true"></i>
             </span>
-            <span class="ms-3 text-[15px]">Sertifikat</span>
+            <span class="ms-3 text-[15px]">Manajemen Sertifikat</span>
         </a>
     </li>
 </ul>

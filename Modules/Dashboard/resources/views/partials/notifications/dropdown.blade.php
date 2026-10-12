@@ -57,7 +57,7 @@
     <button type="button" @click="toggle()" :aria-expanded="open" aria-haspopup="true" aria-label="Notifikasi"
         class="relative inline-flex h-10 w-10 items-center justify-center rounded-xl text-slate-500 transition-colors duration-150 hover:bg-slate-100 hover:text-[#13416B] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#13416B]/30">
 
-        <i class="far fa-bell text-[17px]" aria-hidden="true"></i>
+        <i class="fas fa-bell text-[17px]" aria-hidden="true"></i>
 
         <!-- Angka notifikasi (kanan atas) -->
         <span x-show="unreadCount > 0" x-cloak
@@ -100,7 +100,7 @@
 
             <!-- Kosong -->
             <div x-show="items.length === 0" x-cloak class="px-6 py-9 text-center">
-                <i class="far fa-bell text-2xl text-slate-300" aria-hidden="true"></i>
+                <i class="fas fa-bell text-2xl text-slate-300" aria-hidden="true"></i>
                 <p class="mt-2 text-[13px] font-medium text-slate-500">Belum ada notifikasi</p>
                 <p class="mx-auto mt-1 max-w-[14rem] text-[11px] leading-relaxed text-slate-400">
                     Pemberitahuan persetujuan proyek dan status RTKD akan muncul di sini.
@@ -111,9 +111,9 @@
             <template x-for="item in items" :key="item.id">
                 <div class="notif-fade group relative flex items-start gap-3 border-b border-slate-100 px-4 py-3 last:border-b-0 hover:bg-slate-50/80">
 
-                    <!-- Ikon kecil warna kalem -->
-                    <span class="mt-0.5 grid h-8 w-8 shrink-0 place-items-center">
-                        <i :class="item.icon" class="text-[13px]" aria-hidden="true"></i>
+                    <!-- Ikon jenis kejadian dalam tile warna -->
+                    <span class="mt-0.5 grid h-9 w-9 shrink-0 place-items-center rounded-xl ring-1 ring-inset" :class="item.tile">
+                        <i :class="item.icon" class="text-sm" aria-hidden="true"></i>
                     </span>
 
                     <!-- Teks -->

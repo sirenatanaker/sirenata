@@ -10,13 +10,12 @@
 --}}
 @php($notifMeta = \Modules\Dashboard\Models\Notification::typeMeta($notification->type))
 @php($notifGroup = $notification->meta['group'] ?? $notifMeta['label'])
-@php($notifIconColor = collect(explode(' ', $notification->meta['tile'] ?? $notifMeta['tile']))->first(fn ($class) => str_starts_with($class, 'text-'), 'text-slate-600'))
 
 <div data-notif-id="{{ $notification->id }}"
     class="group relative flex items-start gap-3 border-b border-slate-100 px-3 py-3.5 transition-colors last:border-b-0 sm:gap-4 sm:px-5 sm:py-4 {{ $notification->read_at ? 'bg-white hover:bg-slate-50/70' : 'bg-slate-50/60 hover:bg-slate-100/60' }}">
 
-    <!-- Ikon kejadian (hijau=centang, merah=silang, dst.) -->
-    <span class="mt-0.5 grid h-10 w-10 shrink-0 place-items-center {{ $notifIconColor }}">
+    <!-- Ikon kejadian dalam tile warna (hijau=disetujui, merah=ditolak, dst.) -->
+    <span class="mt-0.5 grid h-10 w-10 shrink-0 place-items-center rounded-xl ring-1 ring-inset {{ $notification->meta['tile'] ?? $notifMeta['tile'] }}">
         <i class="{{ $notification->meta['icon'] ?? $notifMeta['icon'] }} text-[15px]" aria-hidden="true"></i>
     </span>
 
@@ -46,7 +45,7 @@
         <div class="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1.5">
             <span class="inline-flex items-center gap-1 text-[11px] font-medium text-slate-400"
                 title="{{ $notification->created_at?->format('d M Y, H:i') }}">
-                <i class="far fa-clock" aria-hidden="true"></i>{{ $notification->time_ago }}
+                <i class="fas fa-clock" aria-hidden="true"></i>{{ $notification->time_ago }}
             </span>
 
             @if (!$notification->read_at)

@@ -242,17 +242,17 @@
                             <!-- Akses Cepat Profil & Dashboard -->
                             @if (auth()->user()->hasRole('super-admin'))
                                 <li><a href="{{ route('super-admin.profile') }}"
-                                        class="flex items-center gap-3 p-2.5 rounded-xl hover:bg-[#13416B]/10 hover:text-[#13416B] font-medium transition-colors"><i class="far fa-user w-4 shrink-0 text-center" aria-hidden="true"></i> Profil</a></li>
+                                        class="flex items-center gap-3 p-2.5 rounded-xl hover:bg-[#13416B]/10 hover:text-[#13416B] font-medium transition-colors"><i class="fas fa-user w-4 shrink-0 text-center" aria-hidden="true"></i> Profil</a></li>
                                
                             @elseif(auth()->user()->hasRole('admin-pusat'))
                                 <li><a href="{{ route('admin-pusat.profile') }}"
-                                        class="flex items-center gap-3 p-2.5 rounded-xl hover:bg-[#13416B]/10 hover:text-[#13416B] font-medium transition-colors"><i class="far fa-user w-4 shrink-0 text-center" aria-hidden="true"></i> Profil</a></li>
+                                        class="flex items-center gap-3 p-2.5 rounded-xl hover:bg-[#13416B]/10 hover:text-[#13416B] font-medium transition-colors"><i class="fas fa-user w-4 shrink-0 text-center" aria-hidden="true"></i> Profil</a></li>
                                 
                             @elseif(auth()->user()->hasRole('admin-province'))
                                
                             @elseif(auth()->user()->hasRole('user'))
                                 <li><a href="{{ route('user.profile') }}"
-                                        class="flex items-center gap-3 p-2.5 rounded-xl hover:bg-[#13416B]/10 hover:text-[#13416B] font-medium transition-colors"><i class="far fa-user w-4 shrink-0 text-center" aria-hidden="true"></i> Profil Saya</a></li>
+                                        class="flex items-center gap-3 p-2.5 rounded-xl hover:bg-[#13416B]/10 hover:text-[#13416B] font-medium transition-colors"><i class="fas fa-user w-4 shrink-0 text-center" aria-hidden="true"></i> Profil Saya</a></li>
                             @endif
 
                             <li class="my-1 border-t border-slate-100"></li>
