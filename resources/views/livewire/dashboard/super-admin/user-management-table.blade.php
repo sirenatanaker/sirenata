@@ -77,7 +77,7 @@ x-on:submit.prevent="">
             :resetUrl="route('super-admin.user-management.index')">
 
             <x-slot name="actions">
-                <x-button href="{{ route('super-admin.user-management.create', ['role' => $selectedRole]) }}" icon="fas fa-plus" size="sm">
+                <x-button href="{{ route('super-admin.user-management.create', ['role' => $selectedRole]) }}" icon="fas fa-plus" size="md" rounded="md">
                     Tambah {{ $roleLabel($selectedRole) }}
                 </x-button>
             </x-slot>
