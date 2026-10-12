@@ -84,6 +84,9 @@ class RolesDatabaseSeeder extends Seeder
             Permission::firstOrCreate(['name' => $permission]);
         }
 
+        // --- Data referensi esensial: aman dijalankan di semua environment ---
+        // (firstOrCreate + givePermissionTo idempoten, boleh di-re-run)
+
         // Super Admin - Full Access
         $superAdmin = Role::firstOrCreate(['name' => 'super-admin']);
         $superAdmin->givePermissionTo(Permission::all());
@@ -103,6 +106,12 @@ class RolesDatabaseSeeder extends Seeder
         // User - Basic Access
         $user = Role::firstOrCreate(['name' => 'user']);
         $user->givePermissionTo(Permission::all());
+
+        // --- Akun awal & dummy: HANYA untuk local/testing ---
+        // Jangan pernah membuat akun berpassword tebakan di production.
+        if (! app()->environment('local', 'testing')) {
+            return;
+        }
 
         // Create Users dengan Role
         $superAdminUser = \App\Models\User::firstOrCreate([
