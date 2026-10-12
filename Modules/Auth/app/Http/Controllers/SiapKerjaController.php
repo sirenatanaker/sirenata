@@ -20,13 +20,28 @@ class SiapKerjaController extends Controller
     public function callback()
     {
         $socialUser = Socialite::driver('siapkerja')->user();
-        $isNewUser = !User::firstWhere('siapkerja_id', $socialUser->getId());
+        $email = mb_strtolower(trim((string) $socialUser->getEmail()));
+
+        $user = User::firstWhere('siapkerja_id', $socialUser->getId());
+
+        if (! $user && $email !== '') {
+            // Tautkan ke akun lokal yang emailnya sama (mis. hasil seeder)
+            // supaya tidak duplikat (kolom email unique) dan role yang
+            // sudah ada tetap terjaga.
+            $user = User::whereRaw('LOWER(email) = ?', [$email])->first();
+
+            if ($user && ! $user->siapkerja_id) {
+                $user->forceFill(['siapkerja_id' => $socialUser->getId()])->save();
+            }
+        }
+
+        $isNewUser = $user === null;
 
         $user = User::updateOrCreate(
             ['siapkerja_id' => $socialUser->getId()],
             [
                 'name'                    => $socialUser->getName(),
-                'email'                   => $socialUser->getEmail(),
+                'email'                   => $email,
                 'siapkerja_token'         => $socialUser->token,
                 'siapkerja_refresh_token' => $socialUser->refreshToken,
             ]
@@ -36,8 +51,8 @@ class SiapKerjaController extends Controller
             static fn (string $email): string => mb_strtolower(trim($email)),
             config('services.siapkerja.super_admin_emails', [])
         );
-        $isSuperAdmin = in_array(
-            mb_strtolower(trim((string) $socialUser->getEmail())),
+        $isSuperAdmin = $email !== '' && in_array(
+            $email,
             $superAdminEmails,
             true
         );

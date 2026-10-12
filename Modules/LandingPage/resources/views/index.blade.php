@@ -258,7 +258,7 @@
     <!-- ========================================== -->
     <!-- HERO SECTION (Split Layout & Kalem)        -->
     <!-- ========================================== -->
-    <section class="pt-24 pb-10 md:pt-28 md:pb-12 lg:pt-32 lg:pb-16 flex items-center relative overflow-hidden bg-slate-50/50" id="home">
+    <section class="pt-24 pb-10 md:pt-28 md:pb-12 lg:pt-32 lg:pb-16 lg:min-h-screen flex items-center relative overflow-hidden bg-slate-50/50" id="home">
 
 
         <div
@@ -309,15 +309,17 @@
                 <!-- Avatar Social Proof -->
                 <div class="flex flex-row items-center gap-2 sm:gap-4">
                     <div class="flex shrink-0 -space-x-2.5 sm:-space-x-3">
-                        <img src="https://ui-avatars.com/api/?name=JD&background=random"
-                            class="h-8 w-8 rounded-full border-2 border-white shadow-sm sm:h-10 sm:w-10" alt="User">
-                        <img src="https://ui-avatars.com/api/?name=FW&background=random"
-                            class="h-8 w-8 rounded-full border-2 border-white shadow-sm sm:h-10 sm:w-10" alt="User">
-                        <img src="https://ui-avatars.com/api/?name=RM&background=random"
-                            class="h-8 w-8 rounded-full border-2 border-white shadow-sm sm:h-10 sm:w-10" alt="User">
+                        <div class="flex h-8 w-8 items-center justify-center rounded-full border-2 border-white text-[10px] font-extrabold text-white shadow-sm sm:h-10 sm:w-10 sm:text-xs"
+                            style="background-color: #103F6E;">JD</div>
+                        <div class="flex h-8 w-8 items-center justify-center rounded-full border-2 border-white text-[10px] font-extrabold text-white shadow-sm sm:h-10 sm:w-10 sm:text-xs"
+                            style="background-color: #507A9E;">FW</div>
+                        <div class="flex h-8 w-8 items-center justify-center rounded-full border-2 border-white text-[10px] font-extrabold text-white shadow-sm sm:h-10 sm:w-10 sm:text-xs"
+                            style="background-color: #81A9CA;">RM</div>
                         <div
                             class="flex h-8 w-8 items-center justify-center rounded-full border-2 border-white bg-slate-50 text-[10px] font-bold text-slate-600 shadow-sm sm:h-10 sm:w-10 sm:text-xs">
-                            +1.2K</div>
+                            +<span class="stat-counter"
+                                data-target="{{ round(($stats['participants'] ?? 1200) / 1000, 1) }}"
+                                data-suffix="K">0</span></div>
                     </div>
                     <p class="min-w-0 max-w-[190px] text-xs font-medium leading-relaxed text-slate-600 sm:max-w-xs sm:text-sm">Bergabung dengan pengguna lainnya.</p>
                 </div>
@@ -347,7 +349,7 @@
 
                 <!-- ILUSTRASI ORANG DI TENGAH (z-20) -->
                 <div
-                    class="absolute bottom-0 left-1/2 transform -translate-x-1/2 z-20 w-full max-w-[280px] pointer-events-none drop-shadow-2xl sm:max-w-[300px] md:max-w-[320px] lg:max-w-[380px]">
+                    class="absolute bottom-0 left-1/2 transform -translate-x-1/2 z-20 w-full max-w-[280px] pointer-events-none drop-shadow-2xl sm:max-w-[300px] md:max-w-[320px] lg:max-w-[400px]">
                     <div class="relative">
                         <img src="{{ asset('images/Header.webp') }}" alt="Ilustrasi Perencana"
                             class="relative z-10 w-full h-auto object-contain"
@@ -371,7 +373,7 @@
 
                 <!-- CARD 1: Kanan Atas (Warna 1: Dark Navy Blue - #103F6E) -->
                 <div
-                    class="hidden lg:block absolute top-8 -right-4 w-[260px] bg-white rounded-xl shadow-lg border border-slate-100 animate-card-float-1 z-10 overflow-hidden">
+                    class="hidden lg:block absolute top-8 -right-4 w-[260px] bg-white rounded-xl shadow-lg border border-slate-100 z-10 overflow-hidden">
                     <div class="h-18 bg-[#81A9CA] flex items-center justify-center relative">
 
                         <h2 class="text-4xl font-medium text-white/95 leading-none"
@@ -389,7 +391,7 @@
 
                 <!-- CARD 3: Kiri Atas (Warna 2: Medium Slate Blue - #507A9E) -->
                 <div
-                    class="hidden lg:block absolute top-40 -left-14 w-[230px] bg-white rounded-xl shadow-md border border-slate-100 animate-card-float-3 z-10 overflow-hidden">
+                    class="hidden lg:block absolute top-40 -left-14 w-[230px] bg-white rounded-xl shadow-md border border-slate-100 z-10 overflow-hidden">
                     <div class="h-16 bg-[#507A9E] flex items-center justify-center relative">
 
                         <h2 class="text-3xl font-medium text-white/95 leading-none"
@@ -407,7 +409,7 @@
 
                 <!-- CARD 2: Kiri Bawah (Warna 3: Soft Blue - #81A9CA) -->
                 <div
-                    class="hidden lg:block absolute bottom-12 -left-10 w-[250px] bg-white rounded-xl shadow-xl border border-slate-100 animate-card-float-2 z-30 overflow-hidden">
+                    class="hidden lg:block absolute bottom-12 -left-10 w-[250px] bg-white rounded-xl shadow-xl border border-slate-100 z-30 overflow-hidden">
                     <div class="h-18 bg-[#103F6E] flex items-center justify-center relative">
 
                         <h2 class="text-4xl font-medium text-white/95 leading-none"

@@ -43,3 +43,48 @@ test('allowlisted SIAPKerja accounts receive the super-admin role when they firs
     expect(User::where('siapkerja_id', 'siapkerja-super-admin-id')->first()->hasRole('super-admin'))
         ->toBeTrue();
 });
+
+test('SSO login links to an existing local account with the same email instead of creating a duplicate', function () {
+    Role::create([
+        'name' => 'super-admin',
+        'guard_name' => 'web',
+    ]);
+    Role::create([
+        'name' => 'user',
+        'guard_name' => 'web',
+    ]);
+
+    $existing = User::create([
+        'name' => 'Super Admin Lokal',
+        'email' => 'pusat.ptk@gmail.com',
+        'password' => 'password',
+    ]);
+    $existing->assignRole('user');
+
+    $socialUser = (new SocialiteUser())
+        ->setRaw([])
+        ->map([
+            'id' => 'siapkerja-linked-id',
+            'name' => 'Super Admin',
+            'email' => 'PUSAT.PTK@gmail.com',
+        ])
+        ->setToken('access-token')
+        ->setRefreshToken('refresh-token');
+
+    $provider = Mockery::mock();
+    $provider->shouldReceive('user')->once()->andReturn($socialUser);
+
+    Socialite::shouldReceive('driver')
+        ->once()
+        ->with('siapkerja')
+        ->andReturn($provider);
+
+    $this->get(route('siapkerja.callback'))
+        ->assertRedirect(route('user.dashboard'));
+
+    expect(User::where('email', 'pusat.ptk@gmail.com')->count())->toBe(1);
+
+    $linked = User::where('email', 'pusat.ptk@gmail.com')->first();
+    expect($linked->siapkerja_id)->toBe('siapkerja-linked-id')
+        ->and($linked->hasRole('user'))->toBeTrue();
+});
