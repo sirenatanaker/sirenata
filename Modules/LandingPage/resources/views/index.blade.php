@@ -675,7 +675,7 @@
         <section id="courses"
             class="py-12 sm:py-18 lg:py-16 px-4 sm:px-6 lg:px-8 bg-slate-50/60 border-t border-slate-200 relative overflow-hidden">
             <div
-                class="mx-auto grid max-w-7xl grid-cols-1 items-start gap-8 sm:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] sm:gap-6 lg:grid-cols-[minmax(0,1.15fr)_minmax(360px,0.85fr)] lg:gap-16">
+                class="mx-auto grid max-w-7xl grid-cols-1 items-stretch gap-8 sm:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] sm:gap-6 lg:grid-cols-[minmax(0,1.15fr)_minmax(360px,0.85fr)] lg:gap-16">
 
                 <div class="order-2 min-w-0 sm:order-1">
                     @if (isset($courses) && $courses->count() > 0)
