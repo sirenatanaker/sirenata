@@ -7,6 +7,7 @@ use Modules\MasterData\Models\Province;
 use Modules\MasterData\Models\Regency;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
+use Livewire\WithFileUploads;
 use Modules\Permission\Models\Permission;
 use Modules\Roles\Models\Role;
 use Modules\User\Services\UserService;
@@ -14,6 +15,8 @@ use Devrabiul\ToastMagic\Facades\ToastMagic;
 
 class UserManagementEdit extends Component
 {
+    use WithFileUploads;
+
     public User $user;
 
     public $join_date;
@@ -23,6 +26,7 @@ class UserManagementEdit extends Component
     public $instansi;
     public ?string $province = null;
     public ?string $regency  = null;
+    public $suratTugas = null;
 
     public array $roleIds = [];
     public bool $isSsoMode = false;
@@ -68,6 +72,7 @@ class UserManagementEdit extends Component
             'instansi' => 'required|string|max:255',
             'province' => 'nullable|string|size:2',
             'regency'  => 'nullable|string|max:5',
+            'suratTugas' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
         ];
     }
 
@@ -75,7 +80,23 @@ class UserManagementEdit extends Component
     {
         return [
             'roleIds' => 'role',
+            'suratTugas' => 'surat tugas',
         ];
+    }
+
+    /**
+     * true bila salah satu role yang dipilih adalah role admin
+     * (butuh kelengkapan dokumen surat tugas).
+     */
+    public function isAdminScope(): bool
+    {
+        if (empty($this->roleIds)) {
+            return false;
+        }
+
+        return Role::whereIn('uuid', $this->roleIds)
+            ->whereIn('name', ['super-admin', 'admin-pusat', 'admin-province', 'admin-kab-kota'])
+            ->exists();
     }
 
     public function save()
@@ -89,6 +110,10 @@ class UserManagementEdit extends Component
                 'province'    => $this->province,
                 'regency'     => $this->regency,
             ];
+
+            if ($this->suratTugas) {
+                $data['surat_tugas'] = $this->suratTugas->store('surat-tugas', 'public');
+            }
 
             if (! $this->isSsoMode) {
                 $data['full_name'] = $this->full_name;

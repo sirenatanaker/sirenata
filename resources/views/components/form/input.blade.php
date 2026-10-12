@@ -25,7 +25,7 @@
         name="{{ $name }}" 
         value="{{ old($errorKey, $value) }}"
         {{ $attributes->merge([
-            'class' => 'w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 transition-all duration-200 placeholder:text-slate-400 placeholder:font-normal ' . 
+            'class' => 'w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 transition-all duration-200 placeholder:text-slate-400 placeholder:font-normal disabled:bg-slate-100 disabled:text-slate-500 disabled:cursor-not-allowed ' . 
             ($errors->has($errorKey) 
                 ? 'border-red-300 text-red-900 placeholder-red-300 focus:ring-red-500 focus:border-red-500 bg-red-50' 
                 : 'border-slate-300 focus:ring-indigo-500 focus:border-indigo-500 text-slate-800')

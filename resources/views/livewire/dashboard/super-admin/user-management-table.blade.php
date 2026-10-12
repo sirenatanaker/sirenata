@@ -263,6 +263,7 @@ x-on:submit.prevent="">
                         <x-table.th>Email</x-table.th>
                         <x-table.th>Instansi</x-table.th>
                         <x-table.th>Status</x-table.th>
+                        <x-table.th>Surat Tugas</x-table.th>
                         @if ($showRegionColumns)
                             <x-table.th>Provinsi</x-table.th>
                             <x-table.th>Kabupaten/Kota</x-table.th>
@@ -308,6 +309,16 @@ x-on:submit.prevent="">
                                     <x-badge color="amber" text="Nonaktif" />
                                 @endif
                             </x-table.td>
+                            <x-table.td class="lg:table-cell">
+                                @if ($user->profile?->surat_tugas)
+                                    <a href="{{ Storage::url($user->profile->surat_tugas) }}" target="_blank"
+                                        class="inline-flex items-center gap-1.5 text-sm font-medium text-indigo-600 hover:underline">
+                                        <i class="fas fa-file-pdf"></i> Lihat
+                                    </a>
+                                @else
+                                    <p class="text-slate-400">-</p>
+                                @endif
+                            </x-table.td>
                             @if ($showRegionColumns)
                                 <x-table.td class="lg:table-cell">
                                     <p class="text-slate-600">{{ $user->scopeArea?->province?->name }}</p>
@@ -338,7 +349,7 @@ x-on:submit.prevent="">
                         </tr>
                     @empty
                         <tr>
-                            <x-table.td colspan="8" align="center" class="py-12">
+                            <x-table.td colspan="{{ $showRegionColumns ? 9 : 7 }}" align="center" class="py-12">
                                 <p class="text-sm text-slate-500">Belum ada user dengan role ini</p>
                             </x-table.td>
                         </tr>

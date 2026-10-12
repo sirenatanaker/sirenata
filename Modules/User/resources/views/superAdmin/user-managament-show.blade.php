@@ -84,6 +84,17 @@
                                 <p id="last-device" class="font-medium text-gray-900">
                                     {{ $user->scopeArea->regency_name ?? '-' }}</p>
                             </div>
+
+                            <div>
+                                <p class="text-xs text-gray-500 mb-1">Surat Tugas</p>
+                                @if ($user->profile?->surat_tugas)
+                                    <a href="{{ Storage::url($user->profile->surat_tugas) }}" target="_blank" class="font-medium text-indigo-600 hover:underline">
+                                        <i class="fas fa-file-pdf mr-1"></i> Lihat Dokumen
+                                    </a>
+                                @else
+                                    <p class="font-medium text-gray-900">-</p>
+                                @endif
+                            </div>
                         </div>
                     </div>
                 </div>

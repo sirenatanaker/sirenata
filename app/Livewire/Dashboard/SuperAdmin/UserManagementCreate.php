@@ -5,6 +5,7 @@ namespace App\Livewire\Dashboard\SuperAdmin;
 
 use Livewire\Attributes\Computed;
 use Livewire\Component;
+use Livewire\WithFileUploads;
 use Modules\Permission\Models\Permission;
 use Modules\Roles\Models\Role;
 use Modules\User\Services\UserService;
@@ -17,7 +18,10 @@ use Illuminate\Support\Str;
 
 class UserManagementCreate extends Component
 {
+    use WithFileUploads;
+
     public const CUSTOM_INSTITUTION = '__custom';
+    public const PUSAT_INSTITUTION = 'Kementerian Ketenagakerjaan';
 
     public $name;
     public $full_name;
@@ -28,6 +32,8 @@ class UserManagementCreate extends Component
     public $regency;
     public $instansiOption;
     public $instansiCustom;
+    public $unitKerja;
+    public $suratTugas = null;
     public ?string $roleId = null;
     public bool $isSsoMode = false;
     public int $currentStep = 1;
@@ -75,6 +81,8 @@ class UserManagementCreate extends Component
             'regency'  => ($scope === 'kabkota' ? 'required' : 'nullable').'|string|max:5',
             'instansiOption' => ($needsInstansi ? 'required' : 'nullable').'|string|max:255',
             'instansiCustom' => 'required_if:instansiOption,'.self::CUSTOM_INSTITUTION.'|nullable|string|max:255',
+            'unitKerja' => ($scope ? 'required' : 'nullable').'|string|max:255',
+            'suratTugas' => ($scope ? 'required' : 'nullable').'|file|mimes:pdf,jpg,jpeg,png|max:5120',
         ];
     }
 
@@ -84,6 +92,8 @@ class UserManagementCreate extends Component
             'roleId' => 'role',
             'instansiOption' => 'instansi',
             'instansiCustom' => 'nama instansi',
+            'unitKerja' => 'unit kerja',
+            'suratTugas' => 'surat tugas',
         ];
     }
 
@@ -128,9 +138,24 @@ class UserManagementCreate extends Component
 
             $scope = $this->scopeLevel();
             $needsInstansi = $scope === 'kabkota' || $scope === 'provinsi';
+            $needsDokumen = $scope !== null;
+
+            $suratTugasPath = null;
+            if ($needsDokumen && $this->suratTugas) {
+                $suratTugasPath = $this->suratTugas->store('surat-tugas', 'public');
+            }
+
+            if ($scope === 'pusat') {
+                // Akun pusat otomatis terafiliasi Kementerian Ketenagakerjaan.
+                Institution::firstOrCreate(
+                    ['name' => self::PUSAT_INSTITUTION, 'type' => 'pusat'],
+                    ['is_active' => true]
+                );
+            }
+
             $instansi = $needsInstansi && $this->instansiOption === self::CUSTOM_INSTITUTION
                 ? trim((string) $this->instansiCustom)
-                : ($needsInstansi ? $this->instansiOption : null);
+                : ($needsInstansi ? $this->instansiOption : ($scope === 'pusat' ? self::PUSAT_INSTITUTION : null));
 
             if ($needsInstansi && $this->instansiOption === self::CUSTOM_INSTITUTION && $instansi !== '') {
                 // Samakan dengan onboarding: instansi baru dicatat ke master.
@@ -151,6 +176,8 @@ class UserManagementCreate extends Component
                 'full_name'   => $this->full_name,
                 'phone'       => $this->phone,
                 'instansi'     => $instansi,
+                'unit_kerja'   => $this->unitKerja,
+                'surat_tugas'  => $suratTugasPath,
                 'institution_type' => match ($scope) {
                     'pusat' => InstitutionType::PUSAT->value,
                     'provinsi' => InstitutionType::PROVINSI->value,
@@ -232,6 +259,7 @@ class UserManagementCreate extends Component
         $this->regency = null;
         $this->instansiOption = null;
         $this->instansiCustom = null;
+        $this->suratTugas = null;
     }
 
     public function render()

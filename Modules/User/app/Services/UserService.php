@@ -7,6 +7,7 @@ use Devrabiul\ToastMagic\Facades\ToastMagic;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Modules\Permission\Models\Permission;
 use Modules\Roles\Models\Role;
@@ -41,14 +42,21 @@ class UserService
                 'email' => $data['email'] ?? $user->email,
             ]);
 
+            $oldSuratTugas = $user->profile?->surat_tugas;
+
             $user->profile()->updateOrCreate(
                 ['user_id' => $user->id],
                 [
                     'full_name' => $data['full_name'] ?? $user->profile?->full_name,
                     'instansi'   => $data['instansi'] ?? $user->profile?->instansi,
                     'phone'     => $data['phone'] ?? $user->profile?->phone,
+                    'surat_tugas' => $data['surat_tugas'] ?? $user->profile?->surat_tugas,
                 ]
             );
+
+            if (! empty($data['surat_tugas']) && $oldSuratTugas && $data['surat_tugas'] !== $oldSuratTugas) {
+                Storage::disk('public')->delete($oldSuratTugas);
+            }
 
             $user->scopeArea()->updateOrCreate(
                 ['user_id' => $user->id],
@@ -95,6 +103,8 @@ class UserService
                 'full_name' => $data['full_name'] ?? null,
                 'institution_type' => $data['institution_type'] ?? null,
                 'instansi'   => $data['instansi'] ?? null,
+                'unit_kerja' => $data['unit_kerja'] ?? null,
+                'surat_tugas' => $data['surat_tugas'] ?? null,
                 'phone'     => $data['phone'] ?? null,
             ]);
 

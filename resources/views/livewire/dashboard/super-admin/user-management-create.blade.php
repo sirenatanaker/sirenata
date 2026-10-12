@@ -7,6 +7,7 @@
             $scope = $this->scopeLevel();
             $needsInstansiForm = ($scope === 'provinsi' && ! empty($province))
                 || ($scope === 'kabkota' && ! empty($regency));
+            $pusatInstitution = \App\Livewire\Dashboard\SuperAdmin\UserManagementCreate::PUSAT_INSTITUTION;
         @endphp
         <form wire:submit="store">
             <!-- Stepper -->
@@ -120,9 +121,23 @@
                             <p>Pilih role terlebih dahulu untuk menampilkan form wilayah dan instansi.</p>
                         </div>
                     @elseif ($scope === 'pusat')
-                        <div class="md:col-span-2 flex items-start gap-3 rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
-                            <i class="fas fa-circle-info mt-0.5"></i>
-                            <p>Akun pusat tidak terikat wilayah — lembaga diisi mandiri oleh pengguna.</p>
+                        <x-form.input name="lembaga" label="Kementerian/Lembaga" :value="$pusatInstitution" disabled helper="Akun pusat otomatis terafiliasi Kementerian Ketenagakerjaan" />
+
+                        <x-form.input name="unitKerja" label="Unit Kerja" wire:model.lazy="unitKerja" required placeholder="Contoh: Direktorat Bina Perencanaan" helper="Diisi manual sesuai unit kerja pengguna" />
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                Surat Tugas <span class="text-red-500">*</span>
+                            </label>
+                            <input type="file" wire:model="suratTugas" accept=".pdf,.jpg,.jpeg,.png"
+                                class="w-full px-4 py-2.5 border border-slate-300 rounded-lg bg-white text-sm text-slate-600 file:mr-3 file:px-3 file:py-1.5 file:rounded-md file:border-0 file:bg-indigo-600 file:text-white file:text-sm file:font-semibold hover:file:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+                            <p class="mt-1 text-xs text-slate-500">PDF/JPG/PNG, maks 5 MB</p>
+                            <p wire:loading wire:target="suratTugas" class="mt-1 text-xs text-indigo-600">
+                                <i class="fas fa-spinner fa-spin mr-1"></i> Mengunggah...
+                            </p>
+                            @error('suratTugas')
+                                <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
+                            @enderror
                         </div>
                     @elseif ($scope === null)
                         <div class="md:col-span-2 flex items-start gap-3 rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
@@ -177,6 +192,23 @@
                                 <x-form.input name="instansiCustom" label="Nama Instansi Baru" wire:model.lazy="instansiCustom" required placeholder="Tulis nama instansi" helper="Akan dicatat ke data master instansi" />
                             @endif
                         @endif
+
+                        <x-form.input name="unitKerja" label="Unit Kerja" wire:model.lazy="unitKerja" required placeholder="Contoh: Bidang Pelatihan" helper="Diisi manual sesuai unit kerja pengguna" />
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                Surat Tugas <span class="text-red-500">*</span>
+                            </label>
+                            <input type="file" wire:model="suratTugas" accept=".pdf,.jpg,.jpeg,.png"
+                                class="w-full px-4 py-2.5 border border-slate-300 rounded-lg bg-white text-sm text-slate-600 file:mr-3 file:px-3 file:py-1.5 file:rounded-md file:border-0 file:bg-indigo-600 file:text-white file:text-sm file:font-semibold hover:file:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+                            <p class="mt-1 text-xs text-slate-500">PDF/JPG/PNG, maks 5 MB</p>
+                            <p wire:loading wire:target="suratTugas" class="mt-1 text-xs text-indigo-600">
+                                <i class="fas fa-spinner fa-spin mr-1"></i> Mengunggah...
+                            </p>
+                            @error('suratTugas')
+                                <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
+                            @enderror
+                        </div>
                     @endif
                 </div>
             </div>

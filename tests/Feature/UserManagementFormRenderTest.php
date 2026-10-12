@@ -4,6 +4,8 @@ use App\Livewire\Dashboard\SuperAdmin\UserManagementCreate;
 use App\Livewire\Dashboard\SuperAdmin\UserManagementEdit;
 use App\Livewire\Dashboard\SuperAdmin\UserManagementTable;
 use App\Models\User;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
 use Modules\MasterData\Models\Institution;
 use Modules\Roles\Models\Role;
@@ -108,6 +110,7 @@ test('user table lists only users of the chosen role', function () {
 
     $pusat = User::create(['name' => 'Pusat', 'email' => 'pusat.x@kemnaker.go.id', 'password' => 'password']);
     $pusat->assignRole('admin-pusat');
+    $pusat->profile()->create(['surat_tugas' => 'surat-tugas/contoh.pdf']);
 
     $biasa = User::create(['name' => 'Biasa', 'email' => 'biasa@kemnaker.go.id', 'password' => 'password']);
     $biasa->assignRole('user');
@@ -116,6 +119,7 @@ test('user table lists only users of the chosen role', function () {
         ->call('selectRole', 'admin-pusat')
         ->assertOk()
         ->assertSee('pusat.x@kemnaker.go.id', false)
+        ->assertSee('surat-tugas/contoh.pdf', false)
         ->assertDontSee('biasa@kemnaker.go.id', false);
 });
 
@@ -139,6 +143,7 @@ test('province filter narrows the admin-province table', function () {
 });
 
 test('super-admin can create a pusat user without picking lembaga', function () {
+    Storage::fake('public');
     Role::create(['name' => 'admin-pusat', 'guard_name' => 'web']);
 
     $roleUuid = Role::where('name', 'admin-pusat')->first()->uuid;
@@ -150,7 +155,9 @@ test('super-admin can create a pusat user without picking lembaga', function () 
         ->set('phone', '081234567890')
         ->set('roleId', $roleUuid)
         ->call('goToStep2')
-        ->assertDontSee('Kementerian/Lembaga', false)
+        ->assertSee('Kementerian Ketenagakerjaan', false)
+        ->set('unitKerja', 'Direktorat Bina Perencanaan')
+        ->set('suratTugas', UploadedFile::fake()->create('tugas.pdf', 200))
         ->call('store')
         ->assertHasNoErrors()
         ->assertRedirect(route('super-admin.user-management.index'));
@@ -158,12 +165,16 @@ test('super-admin can create a pusat user without picking lembaga', function () 
     $user = User::where('email', 'pusat.baru@kemnaker.go.id')->first();
 
     expect($user)->not->toBeNull()
-        ->and($user->profile->instansi)->toBeNull()
+        ->and($user->profile->instansi)->toBe('Kementerian Ketenagakerjaan')
+        ->and($user->profile->unit_kerja)->toBe('Direktorat Bina Perencanaan')
+        ->and($user->profile->surat_tugas)->not->toBeNull()
+        ->and(Storage::disk('public')->exists($user->profile->surat_tugas))->toBeTrue()
         ->and($user->profile->institution_type)->toBe('pusat')
         ->and($user->hasRole('admin-pusat'))->toBeTrue();
 });
 
 test('super-admin can create a user with a manually added institution', function () {
+    Storage::fake('public');
     Role::create(['name' => 'admin-province', 'guard_name' => 'web']);
 
     $roleUuid = Role::where('name', 'admin-province')->first()->uuid;
@@ -177,6 +188,8 @@ test('super-admin can create a user with a manually added institution', function
         ->set('province', '11')
         ->set('instansiOption', '__custom')
         ->set('instansiCustom', 'Dinas Baru')
+        ->set('unitKerja', 'Bidang Pelatihan')
+        ->set('suratTugas', UploadedFile::fake()->create('tugas.pdf', 200))
         ->call('store')
         ->assertHasNoErrors()
         ->assertRedirect(route('super-admin.user-management.index'));

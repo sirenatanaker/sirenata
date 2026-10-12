@@ -27,6 +27,30 @@
 
                     <x-form.input name="instansi" label="Instansi" wire:model.lazy="instansi" required placeholder="Contoh: Dinas Tenaga Kerja Prov. Jawa Barat" />
 
+                    @if ($this->isAdminScope())
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                Surat Tugas
+                            </label>
+                            @if ($user->profile?->surat_tugas)
+                                <p class="mb-2 text-sm">
+                                    <a href="{{ Storage::url($user->profile->surat_tugas) }}" target="_blank" class="text-indigo-600 hover:underline">
+                                        <i class="fas fa-file-pdf mr-1"></i> Lihat file saat ini
+                                    </a>
+                                </p>
+                            @endif
+                            <input type="file" wire:model="suratTugas" accept=".pdf,.jpg,.jpeg,.png"
+                                class="w-full px-4 py-2.5 border border-slate-300 rounded-lg bg-white text-sm text-slate-600 file:mr-3 file:px-3 file:py-1.5 file:rounded-md file:border-0 file:bg-indigo-600 file:text-white file:text-sm file:font-semibold hover:file:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+                            <p class="mt-1 text-xs text-slate-500">PDF/JPG/PNG, maks 5 MB — kosongkan bila tidak diganti</p>
+                            <p wire:loading wire:target="suratTugas" class="mt-1 text-xs text-indigo-600">
+                                <i class="fas fa-spinner fa-spin mr-1"></i> Mengunggah...
+                            </p>
+                            @error('suratTugas')
+                                <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
+                            @enderror
+                        </div>
+                    @endif
+
                     <x-form.input type="date" name="join_date" label="Tanggal Bergabung" wire:model.lazy="join_date" disabled />
 
                     <x-form.select name="province" label="Provinsi" wire:model.live="province" helper="Pilih provinsi untuk memfilter kabupaten/kota">
