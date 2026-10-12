@@ -670,14 +670,15 @@
 
     <!-- ========================================== -->
     <!-- COURSES SECTION (LMS) - MASONRY CATALOG    -->
+    <!-- Selalu tampil; saat katalog kosong tampilkan empty state -->
     <!-- ========================================== -->
-    @if (isset($courses) && $courses->count() > 0)
         <section id="courses"
             class="py-12 sm:py-18 lg:py-16 px-4 sm:px-6 lg:px-8 bg-slate-50/60 border-t border-slate-200 relative overflow-hidden">
             <div
                 class="mx-auto grid max-w-7xl grid-cols-1 items-start gap-8 sm:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] sm:gap-6 lg:grid-cols-[minmax(0,1.15fr)_minmax(360px,0.85fr)] lg:gap-16">
 
                 <div class="order-2 min-w-0 sm:order-1">
+                    @if (isset($courses) && $courses->count() > 0)
                     <!-- Grid Kursus Satu Kolom -->
                     <div
                         class="custom-scrollbar h-[520px] max-h-[520px] scroll-smooth overflow-y-auto overscroll-contain pr-2 sm:h-[500px] sm:max-h-[500px] md:h-[620px] md:max-h-[620px] lg:mt-2 lg:h-[780px] lg:max-h-[780px]">
@@ -767,6 +768,16 @@
                             @endforeach
                         </div>
                     </div>
+                    @else
+                    <!-- Empty state: katalog kursus belum ada -->
+                    <div class="flex h-full min-h-[320px] flex-col items-center justify-center rounded-2xl border border-dashed border-slate-300 bg-white p-8 text-center lg:mt-2 lg:min-h-[420px]">
+                        <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-[#13416B]/10 text-[#13416B] mb-4">
+                            <i class="fas fa-graduation-cap text-2xl"></i>
+                        </div>
+                        <h3 class="font-bold text-slate-800 lg:text-lg mb-2">Katalog kursus segera hadir</h3>
+                        <p class="text-sm text-slate-500 max-w-sm leading-relaxed">Tim kami sedang menyiapkan modul pelatihan untuk aparatur daerah. Silakan kembali lagi nanti.</p>
+                    </div>
+                    @endif
 
                 </div>
 
@@ -850,12 +861,11 @@
 
             </div>
         </section>
-    @endif
 
     <!-- ========================================== -->
     <!-- LMS STATS BANNER                           -->
+    <!-- Selalu tampil; angka nol saat katalog kosong -->
     <!-- ========================================== -->
-    @if (isset($courses) && $courses->count() > 0)
         @php
             $lmsCourseCount = $courses->count();
             $lmsModuleCount = $courses->sum(
@@ -941,7 +951,6 @@
                 </div>
             </div>
         </section>
-    @endif
 
     <!-- ========================================== -->
     <!-- FAQ SECTION                                -->

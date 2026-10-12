@@ -119,7 +119,14 @@ class CourseSeeder extends Seeder
             );
         }
 
-        // 2. Logika Pendaftaran (Enrollment) User
+        // 2. Logika Pendaftaran (Enrollment) User — HANYA local/testing.
+        // Berisi progres acak & mentor dummy, jangan pernah jalan di production.
+        if (! app()->environment('local', 'testing')) {
+            $this->command->info('CourseSeeder: katalog diperbarui, enrollment dilewati (production).');
+
+            return;
+        }
+
         $courses = Course::with(['sections.contents'])->get();
 
         $users = User::role('user')->get();

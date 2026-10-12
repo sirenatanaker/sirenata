@@ -123,7 +123,7 @@
                     @elseif ($scope === 'pusat')
                         <x-form.input name="lembaga" label="Kementerian/Lembaga" :value="$pusatInstitution" disabled helper="Akun pusat otomatis terafiliasi Kementerian Ketenagakerjaan" />
 
-                        <x-form.input name="unitKerja" label="Unit Kerja" wire:model.lazy="unitKerja" required placeholder="Contoh: Direktorat Bina Perencanaan" helper="Diisi manual sesuai unit kerja pengguna" />
+                        <x-form.input name="unitKerja" label="Unit Kerja" wire:model.lazy="unitKerja" required placeholder="Contoh: Direktorat Bina Perencanaan" />
 
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">
@@ -193,7 +193,7 @@
                             @endif
                         @endif
 
-                        <x-form.input name="unitKerja" label="Unit Kerja" wire:model.lazy="unitKerja" required placeholder="Contoh: Bidang Pelatihan" helper="Diisi manual sesuai unit kerja pengguna" />
+                        <x-form.input name="unitKerja" label="Unit Kerja" wire:model.lazy="unitKerja" required placeholder="Contoh: Bidang Pelatihan" />
 
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">

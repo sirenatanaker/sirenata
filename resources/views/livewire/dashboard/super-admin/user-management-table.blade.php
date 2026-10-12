@@ -262,6 +262,7 @@ x-on:submit.prevent="">
                         <x-table.th>Name</x-table.th>
                         <x-table.th>Email</x-table.th>
                         <x-table.th>Instansi</x-table.th>
+                        <x-table.th>Unit Kerja</x-table.th>
                         <x-table.th>Status</x-table.th>
                         <x-table.th>Surat Tugas</x-table.th>
                         @if ($showRegionColumns)
@@ -301,6 +302,9 @@ x-on:submit.prevent="">
 
                             <x-table.td>
                                 <p class="text-slate-600">{{ $user->profile?->instansi ?? '-' }}</p>
+                            </x-table.td>
+                            <x-table.td>
+                                <p class="text-slate-600">{{ $user->profile?->unit_kerja ?? '-' }}</p>
                             </x-table.td>
                             <x-table.td class="lg:table-cell">
                                 @if ($user->is_active)
@@ -349,7 +353,7 @@ x-on:submit.prevent="">
                         </tr>
                     @empty
                         <tr>
-                            <x-table.td colspan="{{ $showRegionColumns ? 9 : 7 }}" align="center" class="py-12">
+                            <x-table.td colspan="{{ $showRegionColumns ? 10 : 8 }}" align="center" class="py-12">
                                 <p class="text-sm text-slate-500">Belum ada user dengan role ini</p>
                             </x-table.td>
                         </tr>

@@ -110,7 +110,7 @@ test('user table lists only users of the chosen role', function () {
 
     $pusat = User::create(['name' => 'Pusat', 'email' => 'pusat.x@kemnaker.go.id', 'password' => 'password']);
     $pusat->assignRole('admin-pusat');
-    $pusat->profile()->create(['surat_tugas' => 'surat-tugas/contoh.pdf']);
+    $pusat->profile()->create(['surat_tugas' => 'surat-tugas/contoh.pdf', 'unit_kerja' => 'Direktorat Bina Perencanaan']);
 
     $biasa = User::create(['name' => 'Biasa', 'email' => 'biasa@kemnaker.go.id', 'password' => 'password']);
     $biasa->assignRole('user');
@@ -120,6 +120,7 @@ test('user table lists only users of the chosen role', function () {
         ->assertOk()
         ->assertSee('pusat.x@kemnaker.go.id', false)
         ->assertSee('surat-tugas/contoh.pdf', false)
+        ->assertSee('Direktorat Bina Perencanaan', false)
         ->assertDontSee('biasa@kemnaker.go.id', false);
 });
 
