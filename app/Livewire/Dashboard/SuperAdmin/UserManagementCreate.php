@@ -51,6 +51,8 @@ class UserManagementCreate extends Component
         $personal = $this->isSsoMode ? 'nullable' : 'required';
         $scope = $this->scopeLevel();
         $needsRegion = $scope === 'kabkota' || $scope === 'provinsi';
+        // Akun pusat tidak memilih lembaga — instansi diisi mandiri.
+        $needsInstansi = $needsRegion;
 
         return [
             'name' => $personal.'|string|max:255',
@@ -60,7 +62,7 @@ class UserManagementCreate extends Component
             'roleId' => 'required|string|exists:roles,uuid',
             'province' => ($needsRegion ? 'required' : 'nullable').'|string|size:2',
             'regency'  => ($scope === 'kabkota' ? 'required' : 'nullable').'|string|max:5',
-            'instansiOption' => ($scope ? 'required' : 'nullable').'|string|max:255',
+            'instansiOption' => ($needsInstansi ? 'required' : 'nullable').'|string|max:255',
             'instansiCustom' => 'required_if:instansiOption,'.self::CUSTOM_INSTITUTION.'|nullable|string|max:255',
         ];
     }
@@ -114,11 +116,12 @@ class UserManagementCreate extends Component
             $this->validate();
 
             $scope = $this->scopeLevel();
-            $instansi = $this->instansiOption === self::CUSTOM_INSTITUTION
+            $needsInstansi = $scope === 'kabkota' || $scope === 'provinsi';
+            $instansi = $needsInstansi && $this->instansiOption === self::CUSTOM_INSTITUTION
                 ? trim((string) $this->instansiCustom)
-                : $this->instansiOption;
+                : ($needsInstansi ? $this->instansiOption : null);
 
-            if ($this->instansiOption === self::CUSTOM_INSTITUTION && $instansi !== '') {
+            if ($needsInstansi && $this->instansiOption === self::CUSTOM_INSTITUTION && $instansi !== '') {
                 // Samakan dengan onboarding: instansi baru dicatat ke master.
                 Institution::firstOrCreate(
                     [
@@ -177,10 +180,6 @@ class UserManagementCreate extends Component
     {
         $scope = $this->scopeLevel();
         $query = Institution::where('is_active', true)->orderBy('name', 'asc');
-
-        if ($scope === 'pusat') {
-            return $query->where('type', 'pusat')->select('id', 'name')->get();
-        }
 
         if ($scope === 'provinsi' && ! empty($this->province)) {
             return $query->where('type', 'daerah')

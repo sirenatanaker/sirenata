@@ -5,8 +5,7 @@
     <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 md:p-6 mb-6 card-hover">
         @php
             $scope = $this->scopeLevel();
-            $regionReady = $scope === 'pusat'
-                || ($scope === 'provinsi' && ! empty($province))
+            $needsInstansiForm = ($scope === 'provinsi' && ! empty($province))
                 || ($scope === 'kabkota' && ! empty($regency));
         @endphp
         <form wire:submit="store">
@@ -120,6 +119,11 @@
                             <i class="fas fa-arrow-up mt-0.5"></i>
                             <p>Pilih role terlebih dahulu untuk menampilkan form wilayah dan instansi.</p>
                         </div>
+                    @elseif ($scope === 'pusat')
+                        <div class="md:col-span-2 flex items-start gap-3 rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
+                            <i class="fas fa-circle-info mt-0.5"></i>
+                            <p>Akun pusat tidak terikat wilayah — lembaga diisi mandiri oleh pengguna.</p>
+                        </div>
                     @elseif ($scope === null)
                         <div class="md:col-span-2 flex items-start gap-3 rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
                             <i class="fas fa-circle-info mt-0.5"></i>
@@ -155,25 +159,15 @@
                             </div>
                         @endif
 
-                        @if ($regionReady)
+                        @if ($needsInstansiForm)
                             <div>
-                                @if ($scope === 'pusat')
-                                    <x-form.select name="instansiOption" label="Kementerian/Lembaga" wire:model.lazy="instansiOption" helper="Pilih lembaga atau tambah manual bila belum terdaftar">
-                                        <option value="">Pilih kementerian/lembaga</option>
-                                        @foreach ($this->institutions as $inst)
-                                            <option value="{{ $inst->name }}">{{ $inst->name }}</option>
-                                        @endforeach
-                                        <option value="__custom">Lainnya — tulis manual</option>
-                                    </x-form.select>
-                                @else
-                                    <x-form.select name="instansiOption" label="Instansi" wire:model.lazy="instansiOption" helper="Pilih instansi sesuai wilayah atau tambah manual bila belum terdaftar">
-                                        <option value="">Pilih instansi</option>
-                                        @foreach ($this->institutions as $inst)
-                                            <option value="{{ $inst->name }}">{{ $inst->name }}</option>
-                                        @endforeach
-                                        <option value="__custom">Lainnya — tulis manual</option>
-                                    </x-form.select>
-                                @endif
+                                <x-form.select name="instansiOption" label="Instansi" wire:model.lazy="instansiOption" helper="Pilih instansi sesuai wilayah atau tambah manual bila belum terdaftar">
+                                    <option value="">Pilih instansi</option>
+                                    @foreach ($this->institutions as $inst)
+                                        <option value="{{ $inst->name }}">{{ $inst->name }}</option>
+                                    @endforeach
+                                    <option value="__custom">Lainnya — tulis manual</option>
+                                </x-form.select>
                                 <p wire:loading wire:target="province,regency" class="mt-1 text-xs text-indigo-600">
                                     <i class="fas fa-spinner fa-spin mr-1"></i> Memuat daftar instansi...
                                 </p>

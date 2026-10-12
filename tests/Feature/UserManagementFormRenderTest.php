@@ -2,10 +2,12 @@
 
 use App\Livewire\Dashboard\SuperAdmin\UserManagementCreate;
 use App\Livewire\Dashboard\SuperAdmin\UserManagementEdit;
+use App\Livewire\Dashboard\SuperAdmin\UserManagementTable;
 use App\Models\User;
 use Livewire\Livewire;
 use Modules\MasterData\Models\Institution;
 use Modules\Roles\Models\Role;
+use Modules\User\Models\UserScope;
 
 beforeEach(function () {
     Role::create(['name' => 'super-admin', 'guard_name' => 'web']);
@@ -74,13 +76,51 @@ test('user role is not offered on the creation form', function () {
         ->and($names)->not->toBeEmpty();
 });
 
-test('super-admin can create a pusat user with scoped lembaga', function () {
+test('user table shows a role picker before any role is chosen', function () {
+    Livewire::test(UserManagementTable::class)
+        ->assertOk()
+        ->assertSee('Pilih Role', false)
+        ->assertSee('Super Admin', false)
+        ->assertDontSee('Daftar Super Admin', false);
+});
+
+test('user table lists only users of the chosen role', function () {
     Role::create(['name' => 'admin-pusat', 'guard_name' => 'web']);
-    Institution::create([
-        'name' => 'Kementerian Ketenagakerjaan',
-        'type' => 'pusat',
-        'is_active' => true,
-    ]);
+
+    $pusat = User::create(['name' => 'Pusat', 'email' => 'pusat.x@kemnaker.go.id', 'password' => 'password']);
+    $pusat->assignRole('admin-pusat');
+
+    $biasa = User::create(['name' => 'Biasa', 'email' => 'biasa@kemnaker.go.id', 'password' => 'password']);
+    $biasa->assignRole('user');
+
+    Livewire::test(UserManagementTable::class)
+        ->call('selectRole', 'admin-pusat')
+        ->assertOk()
+        ->assertSee('pusat.x@kemnaker.go.id', false)
+        ->assertDontSee('biasa@kemnaker.go.id', false);
+});
+
+test('province filter narrows the admin-province table', function () {
+    Role::create(['name' => 'admin-province', 'guard_name' => 'web']);
+
+    $aceh = User::create(['name' => 'Aceh', 'email' => 'aceh@kemnaker.go.id', 'password' => 'password']);
+    $aceh->assignRole('admin-province');
+    UserScope::create(['user_id' => $aceh->id, 'province_code' => '11']);
+
+    $jabar = User::create(['name' => 'Jabar', 'email' => 'jabar@kemnaker.go.id', 'password' => 'password']);
+    $jabar->assignRole('admin-province');
+    UserScope::create(['user_id' => $jabar->id, 'province_code' => '32']);
+
+    Livewire::test(UserManagementTable::class)
+        ->call('selectRole', 'admin-province')
+        ->set('provinceCode', '11')
+        ->assertOk()
+        ->assertSee('aceh@kemnaker.go.id', false)
+        ->assertDontSee('jabar@kemnaker.go.id', false);
+});
+
+test('super-admin can create a pusat user without picking lembaga', function () {
+    Role::create(['name' => 'admin-pusat', 'guard_name' => 'web']);
 
     $roleUuid = Role::where('name', 'admin-pusat')->first()->uuid;
 
@@ -90,7 +130,8 @@ test('super-admin can create a pusat user with scoped lembaga', function () {
         ->set('email', 'pusat.baru@kemnaker.go.id')
         ->set('phone', '081234567890')
         ->set('roleId', $roleUuid)
-        ->set('instansiOption', 'Kementerian Ketenagakerjaan')
+        ->call('goToStep2')
+        ->assertDontSee('Kementerian/Lembaga', false)
         ->call('store')
         ->assertHasNoErrors()
         ->assertRedirect(route('super-admin.user-management.index'));
@@ -98,27 +139,29 @@ test('super-admin can create a pusat user with scoped lembaga', function () {
     $user = User::where('email', 'pusat.baru@kemnaker.go.id')->first();
 
     expect($user)->not->toBeNull()
-        ->and($user->profile->instansi)->toBe('Kementerian Ketenagakerjaan')
+        ->and($user->profile->instansi)->toBeNull()
         ->and($user->profile->institution_type)->toBe('pusat')
         ->and($user->hasRole('admin-pusat'))->toBeTrue();
 });
 
 test('super-admin can create a user with a manually added institution', function () {
-    Role::create(['name' => 'admin-pusat', 'guard_name' => 'web']);
+    Role::create(['name' => 'admin-province', 'guard_name' => 'web']);
 
-    $roleUuid = Role::where('name', 'admin-pusat')->first()->uuid;
+    $roleUuid = Role::where('name', 'admin-province')->first()->uuid;
 
     Livewire::test(UserManagementCreate::class)
-        ->set('name', 'Lembaga Baru')
-        ->set('full_name', 'Lembaga Baru Lengkap')
-        ->set('email', 'lembaga.baru@kemnaker.go.id')
+        ->set('name', 'Prov Baru')
+        ->set('full_name', 'Prov Baru Lengkap')
+        ->set('email', 'prov.baru@kemnaker.go.id')
         ->set('phone', '081234567891')
         ->set('roleId', $roleUuid)
+        ->set('province', '11')
         ->set('instansiOption', '__custom')
-        ->set('instansiCustom', 'Badan Baru')
+        ->set('instansiCustom', 'Dinas Baru')
         ->call('store')
+        ->assertHasNoErrors()
         ->assertRedirect(route('super-admin.user-management.index'));
 
-    expect(Institution::where('name', 'Badan Baru')->where('type', 'pusat')->exists())->toBeTrue()
-        ->and(User::where('email', 'lembaga.baru@kemnaker.go.id')->first()->profile->instansi)->toBe('Badan Baru');
+    expect(Institution::where('name', 'Dinas Baru')->where('type', 'daerah')->where('province_code', '11')->exists())->toBeTrue()
+        ->and(User::where('email', 'prov.baru@kemnaker.go.id')->first()->profile->instansi)->toBe('Dinas Baru');
 });

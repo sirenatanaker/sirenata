@@ -14,18 +14,21 @@ use Spatie\Activitylog\Models\Activity;
 
 class UserService
 {
-    public function getFilteredQueryUsers(?string $search = null, string $sortBy = 'desc')
+    public function getFilteredQueryUsers(?string $search = null, string $sortBy = 'desc', ?string $role = null, ?string $provinceCode = null, ?string $regencyCode = null)
     {
-        return User::query()->with(['roles', 'permissions','scopeArea.province','scopeArea.regency'])
+        return User::query()->with(['roles', 'permissions', 'profile', 'scopeArea.province', 'scopeArea.regency'])
             ->when($search, function ($q) use ($search) {
                 $q->search($search);
             })
+            ->when($role, fn ($q) => $q->whereHas('roles', fn ($r) => $r->where('name', $role)))
+            ->when($provinceCode, fn ($q) => $q->whereHas('scopeArea', fn ($s) => $s->where('province_code', $provinceCode)))
+            ->when($regencyCode, fn ($q) => $q->whereHas('scopeArea', fn ($s) => $s->where('regency_code', $regencyCode)))
             ->orderBy('created_at', $sortBy);
     }
 
-    public function paginateFilteredUsers(?string $search = null, string $sortBy = 'desc', $limit = 10)
+    public function paginateFilteredUsers(?string $search = null, string $sortBy = 'desc', $limit = 10, ?string $role = null, ?string $provinceCode = null, ?string $regencyCode = null)
     {
-        return $this->getFilteredQueryUsers($search, $sortBy)->paginate($limit)->withQueryString();
+        return $this->getFilteredQueryUsers($search, $sortBy, $role, $provinceCode, $regencyCode)->paginate($limit)->withQueryString();
     }
 
     public function updateUser(User $user, array $data): User
