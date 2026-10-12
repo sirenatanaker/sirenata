@@ -59,6 +59,25 @@ test('create form reveals region fields step by step for kabkota role', function
         ->assertSee('Lainnya', false);
 });
 
+test('create form can start at step two with a preset role', function () {
+    Role::create(['name' => 'admin-pusat', 'guard_name' => 'web']);
+
+    Livewire::withQueryParams(['role' => 'admin-pusat'])
+        ->test(UserManagementCreate::class)
+        ->assertOk()
+        ->assertSee('Informasi Pribadi', false)
+        ->assertSee('Simpan User', false)
+        ->assertDontSee('Role dan Izin Akses', false);
+});
+
+test('create form ignores an invalid preset role', function () {
+    Livewire::withQueryParams(['role' => 'tidak-ada'])
+        ->test(UserManagementCreate::class)
+        ->assertOk()
+        ->assertSee('Role dan Izin Akses', false)
+        ->assertDontSee('Simpan User', false);
+});
+
 test('creation wizard blocks moving to step two without a role', function () {
     Livewire::test(UserManagementCreate::class)
         ->call('goToStep2')

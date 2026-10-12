@@ -44,6 +44,17 @@ class UserManagementCreate extends Component
         // Mode SSO (production): nama & telepon diisi otomatis dari
         // Siapkerja, password tidak dikelola manual.
         $this->isSsoMode = app()->isProduction();
+
+        // Preset dari tombol kontekstual ("Tambah <Role>" di tabel role):
+        // role langsung terpilih dan form dibuka di tahap 2.
+        $preset = strtolower(trim((string) request()->query('role', '')));
+        if ($preset !== '' && $preset !== 'user') {
+            $role = Role::where('name', $preset)->first();
+            if ($role) {
+                $this->roleId = $role->uuid;
+                $this->currentStep = 2;
+            }
+        }
     }
 
     protected function rules(): array
