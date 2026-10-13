@@ -19,6 +19,16 @@ x-on:submit.prevent="">
             'user' => ['label' => 'User', 'desc' => 'Peserta pembelajaran', 'icon' => 'fas fa-user'],
         ];
         $roleLabel = fn ($name) => $roleMeta[$name]['label'] ?? ucfirst(str_replace('-', ' ', $name));
+        $sectorLabels = [
+            'swasta' => 'Swasta',
+            'instansi-provinsi' => 'Instansi Provinsi',
+            'instansi-kabkota' => 'Instansi Kab/Kota',
+            'lembaga-pusat' => 'Lembaga Pusat',
+        ];
+        $tableTitle = 'Daftar '.$roleLabel($selectedRole ?? '');
+        if (! empty($selectedSector) && isset($sectorLabels[$selectedSector])) {
+            $tableTitle .= ' — '.$sectorLabels[$selectedSector];
+        }
     @endphp
 
     @if (!$selectedRole)
@@ -37,11 +47,30 @@ x-on:submit.prevent="">
                         <svg class="w-6 h-6 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
                             <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
                         </svg>
-                        <span class="ml-1 text-sm font-medium text-gray-500 md:ml-2">
-                            {{ $roleLabel($selectedRole) }}
-                        </span>
+                        @if (! empty($selectedSector))
+                            <button type="button" wire:click="selectSector('')"
+                                class="ml-1 text-sm font-medium text-gray-700 hover:text-indigo-600 md:ml-2 transition-colors cursor-pointer">
+                                {{ $roleLabel($selectedRole) }}
+                            </button>
+                        @else
+                            <span class="ml-1 text-sm font-medium text-gray-500 md:ml-2">
+                                {{ $roleLabel($selectedRole) }}
+                            </span>
+                        @endif
                     </div>
                 </li>
+                @if (! empty($selectedSector))
+                    <li>
+                        <div class="flex items-center">
+                            <svg class="w-6 h-6 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
+                            </svg>
+                            <span class="ml-1 text-sm font-medium text-gray-500 md:ml-2">
+                                {{ $sectorLabels[$selectedSector] }}
+                            </span>
+                        </div>
+                    </li>
+                @endif
             </ol>
         </nav>
     @endif
@@ -71,15 +100,40 @@ x-on:submit.prevent="">
             </div>
         </div>
     @else
+        @if ($selectedRole === 'user' && empty($selectedSector))
+        <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 md:p-6 mb-6">
+            <h3 class="text-xl font-bold text-gray-900">Pilih Sektor</h3>
+            <p class="text-sm text-slate-500 mb-6">User dari kalangan mana yang ingin dilihat</p>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                @foreach ($sectorOptions as $option)
+                    <button type="button" wire:click="selectSector('{{ $option['key'] }}')"
+                        class="flex items-center gap-4 p-4 border-2 border-slate-200 rounded-xl text-left cursor-pointer hover:border-indigo-300 hover:bg-indigo-50/50 transition">
+                        <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-indigo-100 text-indigo-600">
+                            <i class="{{ $option['icon'] }}"></i>
+                        </div>
+                        <div class="min-w-0">
+                            <p class="font-bold text-slate-900">{{ $option['label'] }}</p>
+                            <p class="text-sm text-slate-500 leading-relaxed">{{ $option['desc'] }}</p>
+                            <p class="text-xs font-semibold text-indigo-600 mt-1">{{ $option['count'] }} user</p>
+                        </div>
+                        <i class="fas fa-chevron-right ml-auto shrink-0 text-slate-300"></i>
+                    </button>
+                @endforeach
+            </div>
+        </div>
+        @else
         <x-dashboard::filter-card
-            title="Daftar {{ $roleLabel($selectedRole) }}"
+            title="{{ $tableTitle }}"
             :total="$users->total() . ' user'"
             :resetUrl="route('super-admin.user-management.index')">
 
             <x-slot name="actions">
-                <x-button href="{{ route('super-admin.user-management.create', ['role' => $selectedRole]) }}" icon="fas fa-plus" size="md" rounded="md">
-                    Tambah {{ $roleLabel($selectedRole) }}
-                </x-button>
+                @if ($selectedRole !== 'user')
+                    <x-button href="{{ route('super-admin.user-management.create', ['role' => $selectedRole]) }}" icon="fas fa-plus" size="md" rounded="md">
+                        Tambah {{ $roleLabel($selectedRole) }}
+                    </x-button>
+                @endif
             </x-slot>
 
             <x-slot name="filter_inputs">
@@ -264,9 +318,16 @@ x-on:submit.prevent="">
                         <x-table.th>Instansi</x-table.th>
                         <x-table.th>Unit Kerja</x-table.th>
                         <x-table.th>Status</x-table.th>
-                        <x-table.th>Surat Tugas</x-table.th>
-                        @if ($showRegionColumns)
+                        @if ($showSektor)
+                            <x-table.th>Sektor</x-table.th>
+                        @endif
+                        @if ($showSuratTugas)
+                            <x-table.th>Surat Tugas</x-table.th>
+                        @endif
+                        @if ($showProvinceColumn)
                             <x-table.th>Provinsi</x-table.th>
+                        @endif
+                        @if ($showRegencyColumn)
                             <x-table.th>Kabupaten/Kota</x-table.th>
                         @endif
                         <x-table.th align="center">Aksi</x-table.th>
@@ -313,22 +374,37 @@ x-on:submit.prevent="">
                                     <x-badge color="amber" text="Nonaktif" />
                                 @endif
                             </x-table.td>
-                            <x-table.td class="lg:table-cell">
-                                @if ($user->profile?->surat_tugas)
-                                    <a href="{{ Storage::url($user->profile->surat_tugas) }}" target="_blank"
-                                        class="inline-flex items-center gap-1.5 text-sm font-medium text-indigo-600 hover:underline">
-                                        <i class="fas fa-file-pdf"></i> Lihat
-                                    </a>
-                                @else
-                                    <p class="text-slate-400">-</p>
-                                @endif
-                            </x-table.td>
-                            @if ($showRegionColumns)
+                            @if ($showSektor)
                                 <x-table.td class="lg:table-cell">
-                                    <p class="text-slate-600">{{ $user->scopeArea?->province?->name }}</p>
+                                    @if (($user->profile?->institution_type) === 'swasta')
+                                        <x-badge color="amber" text="Swasta" />
+                                    @elseif ($user->profile?->institution_type)
+                                        <x-badge color="blue" text="Instansi" />
+                                    @else
+                                        <p class="text-slate-400">-</p>
+                                    @endif
                                 </x-table.td>
+                            @endif
+                            @if ($showSuratTugas)
                                 <x-table.td class="lg:table-cell">
-                                    <p class="text-slate-600">{{ $user->scopeArea?->regency?->name }}</p>
+                                    @if ($user->profile?->surat_tugas)
+                                        <a href="{{ Storage::url($user->profile->surat_tugas) }}" target="_blank"
+                                            class="inline-flex items-center gap-1.5 text-sm font-medium text-indigo-600 hover:underline">
+                                            <i class="fas fa-file-pdf"></i> Lihat
+                                        </a>
+                                    @else
+                                        <p class="text-slate-400">-</p>
+                                    @endif
+                                </x-table.td>
+                            @endif
+                            @if ($showProvinceColumn)
+                                <x-table.td class="lg:table-cell">
+                                    <p class="text-slate-600">{{ $user->scopeArea?->province?->name ?? '-' }}</p>
+                                </x-table.td>
+                            @endif
+                            @if ($showRegencyColumn)
+                                <x-table.td class="lg:table-cell">
+                                    <p class="text-slate-600">{{ $user->scopeArea?->regency?->name ?? '-' }}</p>
                                 </x-table.td>
                             @endif
 
@@ -353,8 +429,8 @@ x-on:submit.prevent="">
                         </tr>
                     @empty
                         <tr>
-                            <x-table.td colspan="{{ $showRegionColumns ? 10 : 8 }}" align="center" class="py-12">
-                                <p class="text-sm text-slate-500">Belum ada user dengan role ini</p>
+                            <x-table.td colspan="12" align="center" class="py-12">
+                                <p class="text-sm text-slate-500">Belum ada user pada tampilan ini</p>
                             </x-table.td>
                         </tr>
                     @endforelse
@@ -365,5 +441,6 @@ x-on:submit.prevent="">
                 {{ $users->links() }}
             </div>
         </x-dashboard::filter-card>
+        @endif
     @endif
 </div>

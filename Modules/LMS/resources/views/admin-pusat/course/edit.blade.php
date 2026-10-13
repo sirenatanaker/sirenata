@@ -26,6 +26,36 @@
                         'selectedCategoryId' => old('category_id', $course->category->id ?? ''),
                     ])
 
+                    <!-- Peruntukan Course -->
+                    <div class="col-span-1 md:col-span-2">
+                        <span class="block text-sm font-semibold text-slate-800 mb-2">Peruntukan Course <span class="text-red-500">*</span></span>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <label
+                                class="relative flex items-center gap-3 p-4 rounded-xl border-2 border-slate-200 cursor-pointer transition-all bg-white hover:border-[#13416B]/40 has-[:checked]:border-[#13416B] has-[:checked]:bg-[#13416B]/5">
+                                <input type="radio" name="audience" value="instansi"
+                                    class="w-4 h-4 shrink-0 text-[#13416B] focus:ring-[#13416B]"
+                                    @checked(old('audience', $course->audience ?? 'instansi') === 'instansi')>
+                                <span>
+                                    <span class="block text-sm font-bold text-slate-800">Instansi / Lembaga</span>
+                                    <span class="block text-xs text-slate-500">Untuk aparatur pemerintah</span>
+                                </span>
+                            </label>
+                            <label
+                                class="relative flex items-center gap-3 p-4 rounded-xl border-2 border-slate-200 cursor-pointer transition-all bg-white hover:border-[#13416B]/40 has-[:checked]:border-[#13416B] has-[:checked]:bg-[#13416B]/5">
+                                <input type="radio" name="audience" value="swasta"
+                                    class="w-4 h-4 shrink-0 text-[#13416B] focus:ring-[#13416B]"
+                                    @checked(old('audience', $course->audience ?? '') === 'swasta')>
+                                <span>
+                                    <span class="block text-sm font-bold text-slate-800">Swasta</span>
+                                    <span class="block text-xs text-slate-500">Untuk karyawan perusahaan</span>
+                                </span>
+                            </label>
+                        </div>
+                        @error('audience')
+                            <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
+                        @enderror
+                    </div>
+
                     <!-- Nama Course -->
                     <div class="col-span-1 md:col-span-2">
                         <x-form.input name="name" label="Nama Course" :value="$course->name"

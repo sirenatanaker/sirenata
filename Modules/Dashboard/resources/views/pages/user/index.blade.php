@@ -514,6 +514,24 @@
                             </div>
                         @endif
                         <div>
+                            <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">Anda
+                                berasal dari <span class="text-red-500">*</span></label>
+                            <div class="grid grid-cols-2 gap-1.5 sm:gap-3">
+                                <label
+                                    class="flex items-center justify-center min-w-0 px-1.5 py-2 sm:px-3 sm:py-2.5 border border-slate-200 rounded-lg cursor-pointer hover:border-[#13416B] hover:bg-[#13416B]/5 transition-all font-semibold text-xs sm:text-sm text-slate-700">
+                                    <input type="radio" name="sector" value="instansi" checked
+                                        class="mr-1.5 shrink-0 text-[#13416B] focus:ring-[#13416B]"> <span class="whitespace-nowrap">Instansi / Lembaga</span>
+                                </label>
+                                <label
+                                    class="flex items-center justify-center min-w-0 px-1.5 py-2 sm:px-3 sm:py-2.5 border border-slate-200 rounded-lg cursor-pointer hover:border-[#13416B] hover:bg-[#13416B]/5 transition-all font-semibold text-xs sm:text-sm text-slate-700">
+                                    <input type="radio" name="sector" value="swasta"
+                                        class="mr-1.5 shrink-0 text-[#13416B] focus:ring-[#13416B]"> <span class="whitespace-nowrap">Swasta</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div id="asalInstansiSection">
+                        <div>
                             <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">Asal
                                 Instansi <span class="text-red-500">*</span></label>
                             <div class="grid grid-cols-3 gap-1.5 sm:gap-3">
@@ -533,6 +551,17 @@
                                         class="mr-1.5 shrink-0 text-[#13416B] focus:ring-[#13416B]"> <span class="whitespace-nowrap">Kab/Kota</span>
                                 </label>
                             </div>
+                        </div>
+                        </div>
+
+                        <div id="swastaSection" class="hidden">
+                            <label for="companyName"
+                                class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">Nama
+                                Perusahaan <span class="text-red-500">*</span></label>
+                            <input type="text" name="instansi" id="companyName" maxlength="255"
+                                placeholder="Contoh: PT Maju Bersama"
+                                class="w-full min-h-11 px-3 py-2 border border-slate-200 rounded-lg text-sm placeholder:text-slate-400 placeholder:font-normal focus:ring-2 focus:ring-[#13416B] focus:border-[#13416B]" />
+                            <p class="mt-1.5 text-xs text-slate-500">Nama perusahaan tempat Anda bekerja.</p>
                         </div>
 
                         <div id="kementerianSection" class="hidden">
@@ -856,6 +885,29 @@
                     }
                     $('#instansiForm').on('change input', clearFormError);
 
+                    // 0. Handler pilihan sektor (Instansi/Lembaga vs Swasta)
+                    $('input[name="sector"]').on('change', function() {
+                        const sector = $(this).val();
+                        if (sector === 'swasta') {
+                            $('#asalInstansiSection').addClass('hidden');
+                            $('#kementerianSection, #provinsiSection, #kabkotaSection, #instansiSection, #customInstansiSection')
+                                .addClass('hidden');
+                            $('input[name="asalInstansi"]').prop('checked', false);
+                            $('#swastaSection').removeClass('hidden');
+                            $('#unitKerjaSection').removeClass('hidden');
+                            $('#companyName').prop('required', true);
+                            $('#unitKerja').prop('required', true);
+                            $('#customInstansi').prop('required', false);
+                        } else {
+                            $('#swastaSection').addClass('hidden');
+                            $('#companyName').val('').prop('required', false);
+                            $('#asalInstansiSection').removeClass('hidden');
+                            $('#unitKerjaSection').addClass('hidden');
+                            $('#unitKerja').prop('required', false);
+                        }
+                        clearFormError();
+                    });
+
                     // 1. Muat data pusat saat pertama kali modal muncul
                     $.ajax({
                         url: '{{ route('api.masterdata.institutions.index') }}?type=pusat',
@@ -1046,6 +1098,30 @@
 
                     // 9. Validasi sebelum form disubmit
                     $('#instansiForm').on('submit', function(e) {
+                        const sector = $('input[name="sector"]:checked').val();
+                        if (!sector) {
+                            e.preventDefault();
+                            showFormError('Pilih asal pengguna terlebih dahulu!');
+                            return;
+                        }
+
+                        if (sector === 'swasta') {
+                            if (!$('#companyName').val().trim()) {
+                                e.preventDefault();
+                                showFormError('Masukkan nama perusahaan!');
+                                return;
+                            }
+                            if (!$('#unitKerja').val().trim()) {
+                                e.preventDefault();
+                                showFormError('Masukkan unit kerja!');
+                                return;
+                            }
+                            // Nonaktifkan input alur instansi agar tidak ikut terkirim
+                            $('#asalInstansiSection input, #kementerian, #provinsi, #kabkota, #instansi, #customInstansi, #finalInstansiPusat')
+                                .prop('disabled', true);
+                            return;
+                        }
+
                         const asalInstansi = $('input[name="asalInstansi"]:checked').val();
                         if (!asalInstansi) {
                             e.preventDefault();

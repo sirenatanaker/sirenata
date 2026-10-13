@@ -28,6 +28,7 @@ class Course extends Model
         'slug',
         'thumbnail',
         'description',
+        'audience',
     ];
 
     protected static function newFactory(): CourseFactory

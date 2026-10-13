@@ -143,6 +143,43 @@ test('province filter narrows the admin-province table', function () {
         ->assertDontSee('jabar@kemnaker.go.id', false);
 });
 
+test('user role shows a sector picker before the table', function () {
+    Livewire::test(UserManagementTable::class)
+        ->call('selectRole', 'user')
+        ->assertOk()
+        ->assertSee('Pilih Sektor', false)
+        ->assertSee('Lembaga Pusat', false)
+        ->assertDontSee('Daftar User', false);
+});
+
+test('swasta sector isolates company users and hides the document column', function () {
+    $swasta = User::create(['name' => 'Swasta', 'email' => 'swasta2@contoh.id', 'password' => 'password']);
+    $swasta->assignRole('user');
+    $swasta->profile()->create(['institution_type' => 'swasta', 'instansi' => 'PT Maju']);
+
+    $daerah = User::create(['name' => 'Daerah', 'email' => 'daerah@kemnaker.go.id', 'password' => 'password']);
+    $daerah->assignRole('user');
+    $daerah->profile()->create(['institution_type' => 'provinsi', 'instansi' => 'Dinas X']);
+
+    Livewire::test(UserManagementTable::class)
+        ->call('selectRole', 'user')
+        ->call('selectSector', 'swasta')
+        ->assertOk()
+        ->assertSee('swasta2@contoh.id', false)
+        ->assertDontSee('daerah@kemnaker.go.id', false)
+        ->assertDontSee('Surat Tugas', false);
+});
+
+test('instansi-provinsi sector shows only the province column', function () {
+    Livewire::test(UserManagementTable::class)
+        ->call('selectRole', 'user')
+        ->call('selectSector', 'instansi-provinsi')
+        ->assertOk()
+        ->assertSee('Provinsi', false)
+        ->assertDontSee('Kabupaten/Kota', false)
+        ->assertDontSee('Surat Tugas', false);
+});
+
 test('super-admin can create a pusat user without picking lembaga', function () {
     Storage::fake('public');
     Role::create(['name' => 'admin-pusat', 'guard_name' => 'web']);

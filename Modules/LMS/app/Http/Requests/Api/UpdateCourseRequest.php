@@ -14,6 +14,7 @@ class UpdateCourseRequest extends FormRequest
         return [
             'category_id' => ['sometimes', 'exists:categories,id'],
             'name'        => ['sometimes', 'string', 'max:255'],
+            'audience'    => ['sometimes', 'in:instansi,swasta'],
         
             'thumbnail'   => ['nullable', 'image', 'mimes:png,jpg', 'max:2048'],
             'description' => ['sometimes', 'string'],
@@ -36,6 +37,7 @@ class UpdateCourseRequest extends FormRequest
         return [
             'category_id' => 'Kategori Course',
             'name' => 'Nama Course',
+            'audience' => 'Peruntukan Course',
             'thumbnail' => 'Thumbnail Course',
             'description' => 'Deskripsi Course',
         ];

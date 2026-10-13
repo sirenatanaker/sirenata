@@ -61,6 +61,7 @@ class CourseController extends Controller
           $payload = [
                 'category_id' => $request->input('category_id'),
                 'name'        => $request->input('name'),
+                'audience'    => $request->input('audience', 'instansi'),
                 'description' => $request->input('description'),
                 'bg_color'    => $request->input('bg_color'), 
             ];
@@ -127,6 +128,7 @@ class CourseController extends Controller
             'slug'        => $slug,
             'category_id' => $request->input('category_id'),
             'name'        => $request->input('name'),
+            'audience'    => $request->input('audience'),
             'description' => $request->input('description'),
         ];
 

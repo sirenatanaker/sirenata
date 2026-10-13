@@ -26,6 +26,8 @@ class UserManagementTable extends Component
     #[Url]
     public ?string $role = null;
     #[Url]
+    public ?string $sector = null;
+    #[Url]
     public ?string $provinceCode = null;
     #[Url]
     public ?string $regencyCode = null;
@@ -49,6 +51,16 @@ class UserManagementTable extends Component
     public function selectRole(?string $role): void
     {
         $this->role = $role ?: null;
+        $this->sector = null;
+        $this->provinceCode = null;
+        $this->regencyCode = null;
+        $this->reset(['search']);
+        $this->resetPage();
+    }
+
+    public function selectSector(?string $sector): void
+    {
+        $this->sector = $sector ?: null;
         $this->provinceCode = null;
         $this->regencyCode = null;
         $this->reset(['search']);
@@ -134,18 +146,59 @@ class UserManagementTable extends Component
             ->values();
 
         $validRole = $roleOptions->pluck('name')->contains($this->role) ? $this->role : null;
-        $needsRegion = in_array($validRole, ['admin-province', 'admin-kab-kota'], true);
-        $needsRegency = $validRole === 'admin-kab-kota';
-        $showRegionColumns = in_array($validRole, ['admin-province', 'admin-kab-kota', 'user'], true);
 
-        $users = $validRole
+        // Drill-down khusus role user: Swasta / Instansi Provinsi /
+        // Instansi Kab-Kota / Lembaga Pusat (seperti rekapitulasi).
+        $sectorTypes = [
+            'swasta' => 'swasta',
+            'instansi-provinsi' => 'provinsi',
+            'instansi-kabkota' => 'kab_kota',
+            'lembaga-pusat' => 'pusat',
+        ];
+        $validSector = ($validRole === 'user' && isset($sectorTypes[$this->sector ?? '']))
+            ? $this->sector
+            : null;
+        $institutionType = $validSector ? $sectorTypes[$validSector] : null;
+
+        if ($validRole === 'user') {
+            $needsRegion = in_array($validSector, ['instansi-provinsi', 'instansi-kabkota'], true);
+            $needsRegency = $validSector === 'instansi-kabkota';
+            $showSuratTugas = false;
+            $showSektor = false;
+            $showProvinceColumn = $needsRegion;
+            $showRegencyColumn = $needsRegency;
+            $tableReady = (bool) $validSector;
+        } else {
+            $needsRegion = in_array($validRole, ['admin-province', 'admin-kab-kota'], true);
+            $needsRegency = $validRole === 'admin-kab-kota';
+            $showSuratTugas = (bool) $validRole;
+            $showSektor = (bool) $validRole;
+            $showProvinceColumn = $showRegencyColumn = $needsRegion;
+            $tableReady = (bool) $validRole;
+        }
+
+        $sectorOptions = [];
+        if ($validRole === 'user') {
+            $countFor = fn (string $type) => User::whereHas('roles', fn ($q) => $q->where('name', 'user'))
+                ->whereHas('profile', fn ($q) => $q->where('institution_type', $type))
+                ->count();
+            $sectorOptions = [
+                ['key' => 'swasta', 'label' => 'Swasta', 'desc' => 'Pengguna dari perusahaan', 'icon' => 'fas fa-briefcase', 'count' => $countFor('swasta')],
+                ['key' => 'instansi-provinsi', 'label' => 'Instansi Provinsi', 'desc' => 'Hanya kolom provinsi', 'icon' => 'fas fa-map-location-dot', 'count' => $countFor('provinsi')],
+                ['key' => 'instansi-kabkota', 'label' => 'Instansi Kab/Kota', 'desc' => 'Kolom provinsi + kab/kota', 'icon' => 'fas fa-location-dot', 'count' => $countFor('kab_kota')],
+                ['key' => 'lembaga-pusat', 'label' => 'Lembaga Pusat', 'desc' => 'Lembaga + unit kerja saja', 'icon' => 'fas fa-building-columns', 'count' => $countFor('pusat')],
+            ];
+        }
+
+        $users = $tableReady
             ? $this->userService->paginateFilteredUsers(
                 $this->search,
                 $this->orderBy,
                 $this->limit,
                 $validRole,
                 $needsRegion ? $this->provinceCode : null,
-                $needsRegency ? $this->regencyCode : null
+                $needsRegency ? $this->regencyCode : null,
+                $institutionType
             )
             : null;
 
@@ -153,9 +206,14 @@ class UserManagementTable extends Component
             'users' => $users,
             'roleOptions' => $roleOptions,
             'selectedRole' => $validRole,
+            'sectorOptions' => $sectorOptions,
+            'selectedSector' => $validSector,
             'needsRegion' => $needsRegion,
             'needsRegency' => $needsRegency,
-            'showRegionColumns' => $showRegionColumns,
+            'showSuratTugas' => $showSuratTugas,
+            'showSektor' => $showSektor,
+            'showProvinceColumn' => $showProvinceColumn,
+            'showRegencyColumn' => $showRegencyColumn,
             'provinces' => $needsRegion
                 ? Province::select('code', 'name')->orderBy('name', 'asc')->get()
                 : collect(),

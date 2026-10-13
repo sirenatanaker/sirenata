@@ -477,6 +477,7 @@ class CourseService
             $course = Course::create([
                 'category_id' => $data['category_id'],
                 'name'        => $data['name'],
+                'audience'    => $data['audience'] ?? 'instansi',
                 'description' => $data['description'],
                 'thumbnail'   => $thumbnailPath,
             ]);
@@ -533,6 +534,7 @@ class CourseService
             $course->update([
                 'category_id' => $data['category_id'],
                 'name'        => $data['name'],
+                'audience'    => $data['audience'] ?? $course->audience,
                 'description' => $data['description'],
                 'thumbnail'   => $thumbnailPath,
             ]);

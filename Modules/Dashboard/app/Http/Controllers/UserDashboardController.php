@@ -138,17 +138,36 @@ class UserDashboardController extends Controller
     public function updateInstansi(Request $request)
     {
         $request->validate([
-            'asalInstansi' => 'required|in:pusat,provinsi,kabkota',
+            'sector' => 'required|in:instansi,swasta',
+            'asalInstansi' => 'required_if:sector,instansi|in:pusat,provinsi,kabkota',
             'instansi' => 'required|string|max:255',
             'instansi_lainnya' => 'required_if:instansi,lainnya|nullable|string|max:255',
             'unit_kerja' => 'required|string|max:255',
-            'province_code' => 'required_if:asalInstansi,provinsi,kabkota|nullable|string',
-            'regency_code' => 'required_if:asalInstansi,kabkota|nullable|string',
+            'province_code' => 'nullable|required_if:asalInstansi,provinsi,kabkota',
+            'regency_code' => 'nullable|required_if:asalInstansi,kabkota',
         ]);
 
         /** @var \App\Models\User $user */
         $user = Auth::user();
         $profile = UserProfile::firstOrNew(['user_id' => $user->id]);
+
+        if ($request->sector === 'swasta') {
+            $profile->institution_type = InstitutionType::SWASTA->value;
+            $profile->instansi = trim($request->instansi);
+            $profile->unit_kerja = $request->unit_kerja;
+            $profile->save();
+
+            UserScope::updateOrCreate(
+                ['user_id' => $user->id],
+                [
+                    'province_code' => null,
+                    'regency_code' => null,
+                ]
+            );
+
+            ToastMagic::success("Data instansi berhasil disimpan!");
+            return redirect()->route('user.dashboard')->with('success', 'Data instansi berhasil disimpan.');
+        }
 
         $institutionType = match ($request->asalInstansi) {
             'pusat' => InstitutionType::PUSAT,
