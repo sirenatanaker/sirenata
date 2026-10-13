@@ -5,6 +5,7 @@
     'resetUrl' => null,
     'hasRequest' => count(request()->except(['page', '_token'])) > 0,
     'defaultOpen' => false,
+    'density' => 'normal',
 ])
 
 <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden" x-data="{ showFilter: {{ ($hasRequest || $defaultOpen) ? 'true' : 'false' }} }">
@@ -42,10 +43,10 @@
 
             <!-- Buttons -->
             <div class="flex gap-2 w-full sm:w-auto justify-end mt-4 sm:mt-0 shrink-0">
-                <button type="submit" title="Cari" class="w-[42px] h-[42px] inline-flex justify-center items-center rounded-lg bg-indigo-600 text-white text-sm font-medium hover:bg-indigo-700 transition">
+                <button type="submit" title="Cari" class="{{ $density === 'compact' ? 'w-9 h-9 rounded-md' : 'w-[42px] h-[42px] rounded-lg' }} inline-flex justify-center items-center bg-indigo-600 text-white text-sm font-medium hover:bg-indigo-700 transition">
                     <i class="fas fa-search"></i>
                 </button>
-                <a href="{{ $resetUrl ?? url()->current() }}" title="Reset" class="w-[42px] h-[42px] inline-flex justify-center items-center rounded-lg border border-slate-300 text-slate-600 text-sm font-medium hover:bg-slate-100 transition">
+                <a href="{{ $resetUrl ?? url()->current() }}" title="Reset" class="{{ $density === 'compact' ? 'w-9 h-9 rounded-md' : 'w-[42px] h-[42px] rounded-lg' }} inline-flex justify-center items-center border border-slate-300 text-slate-600 text-sm font-medium hover:bg-slate-100 transition">
                     <i class="fas fa-rotate-left"></i>
                 </a>
             </div>

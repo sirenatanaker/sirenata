@@ -125,12 +125,13 @@ x-on:submit.prevent="">
         @else
         <x-dashboard::filter-card
             title="{{ $tableTitle }}"
+            density="compact"
             :total="$users->total() . ' user'"
             :resetUrl="route('super-admin.user-management.index')">
 
             <x-slot name="actions">
                 @if ($selectedRole !== 'user')
-                    <x-button href="{{ route('super-admin.user-management.create', ['role' => $selectedRole]) }}" icon="fas fa-plus" size="md" rounded="md">
+                    <x-button href="{{ route('super-admin.user-management.create', ['role' => $selectedRole]) }}" icon="fas fa-plus" size="sm" rounded="md">
                         Tambah {{ $roleLabel($selectedRole) }}
                     </x-button>
                 @endif
@@ -143,7 +144,7 @@ x-on:submit.prevent="">
                         Data per Halaman
                     </label>
                     <select wire:model.live="limit"
-                        class="w-full px-3 py-2.5 rounded-lg border border-slate-300 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                        class="w-full px-3 py-2 rounded-lg border border-slate-300 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
                         <option value="10">10 / per Halaman</option>
                         <option value="20">20 / per Halaman</option>
                         <option value="50">50 / per Halaman</option>
@@ -159,7 +160,7 @@ x-on:submit.prevent="">
                     <div class="relative">
                         <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
                         <input type="text" wire:model.live.debounce.300ms="search" placeholder="Cari nama, email..."
-                            class="w-full pl-10 pr-4 py-2.5 rounded-lg border border-slate-300 text-sm placeholder:text-slate-400 placeholder:font-normal focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                            class="w-full pl-10 pr-4 py-2 rounded-lg border border-slate-300 text-sm placeholder:text-slate-400 placeholder:font-normal focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
                     </div>
                 </div>
 
@@ -170,7 +171,7 @@ x-on:submit.prevent="">
                             Provinsi
                         </label>
                         <select wire:model.live="provinceCode"
-                            class="w-full px-3 py-2.5 rounded-lg border border-slate-300 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                            class="w-full px-3 py-2 rounded-lg border border-slate-300 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
                             <option value="">Semua provinsi</option>
                             @foreach ($provinces as $prov)
                                 <option value="{{ $prov->code }}">{{ $prov->name }}</option>
@@ -191,7 +192,7 @@ x-on:submit.prevent="">
                                 </select>
                             @else
                                 <select wire:model.live="regencyCode"
-                                    class="w-full px-3 py-2.5 rounded-lg border border-slate-300 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                                    class="w-full px-3 py-2 rounded-lg border border-slate-300 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
                                     <option value="">Semua kab/kota</option>
                                     @foreach ($regencies as $reg)
                                         <option value="{{ $reg->code }}">{{ $reg->name }}</option>
