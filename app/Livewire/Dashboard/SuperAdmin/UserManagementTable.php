@@ -184,9 +184,9 @@ class UserManagementTable extends Component
                 ->count();
             $sectorOptions = [
                 ['key' => 'swasta', 'label' => 'Swasta', 'desc' => 'Pengguna dari perusahaan', 'icon' => 'fas fa-briefcase', 'count' => $countFor('swasta')],
-                ['key' => 'instansi-provinsi', 'label' => 'Instansi Provinsi', 'desc' => 'Hanya kolom provinsi', 'icon' => 'fas fa-map-location-dot', 'count' => $countFor('provinsi')],
-                ['key' => 'instansi-kabkota', 'label' => 'Instansi Kab/Kota', 'desc' => 'Kolom provinsi + kab/kota', 'icon' => 'fas fa-location-dot', 'count' => $countFor('kab_kota')],
-                ['key' => 'lembaga-pusat', 'label' => 'Lembaga Pusat', 'desc' => 'Lembaga + unit kerja saja', 'icon' => 'fas fa-building-columns', 'count' => $countFor('pusat')],
+                ['key' => 'instansi-provinsi', 'label' => 'Instansi Provinsi', 'desc' => 'Pengguna instansi tingkat provinsi', 'icon' => 'fas fa-map-location-dot', 'count' => $countFor('provinsi')],
+                ['key' => 'instansi-kabkota', 'label' => 'Instansi Kab/Kota', 'desc' => 'Pengguna instansi tingkat kab/kota', 'icon' => 'fas fa-location-dot', 'count' => $countFor('kab_kota')],
+                ['key' => 'lembaga-pusat', 'label' => 'Lembaga Pusat', 'desc' => 'Pengguna kementerian/lembaga', 'icon' => 'fas fa-building-columns', 'count' => $countFor('pusat')],
             ];
         }
 
