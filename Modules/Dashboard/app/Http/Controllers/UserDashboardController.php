@@ -216,7 +216,21 @@ class UserDashboardController extends Controller
         /** @var \App\Models\User $user */
         $user = Auth::user();
         $provinces = Province::all();
-        return view('dashboard::pages.user.profile', compact('user', 'provinces'));
+
+        $certificates = $user->enrolledCourses()
+            ->wherePivot('status', 'completed')
+            ->orderByDesc('course_student.certificate_issued_at')
+            ->get()
+            ->filter(fn ($course) => ! empty($course->pivot->certificate_code))
+            ->values();
+
+        $stats = [
+            'enrolled' => $user->enrolledCourses()->count(),
+            'completed' => $user->enrolledCourses()->wherePivot('status', 'completed')->count(),
+            'certificates' => $certificates->count(),
+        ];
+
+        return view('dashboard::pages.user.profile', compact('user', 'provinces', 'certificates', 'stats'));
     }
 
     public function storeOrUpdateProfile(UpdateProfileRequest $request): RedirectResponse
