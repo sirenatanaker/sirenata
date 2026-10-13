@@ -600,10 +600,6 @@
                                                     class="flex flex-col sm:flex-row sm:items-center justify-between p-3.5 sm:p-5 rounded-xl border {{ $isPostTestBabLocked ? 'bg-slate-100 border-slate-200' : 'bg-[#13416B] border-[#13416B] hover:shadow-sm' }} transition-all gap-4">
                                                     <div
                                                         class="flex items-start sm:items-center gap-3 sm:gap-4 flex-1 min-w-0">
-                                                        <span
-                                                            class="flex items-center justify-center w-10 h-10 sm:w-11 sm:h-11 rounded-full {{ $isPostTestBabLocked ? 'bg-slate-400 text-white border border-slate-400' : 'bg-white/20 text-white border border-white/30' }} shrink-0 mt-0.5 sm:mt-0">
-                                                            <i class="fas fa-file-signature text-lg"></i>
-                                                        </span>
                                                         <div class="flex-1 min-w-0">
                                                             <p
                                                                 class="font-bold text-sm leading-tight break-words {{ $isPostTestBabLocked ? 'text-slate-600' : 'text-white' }}">

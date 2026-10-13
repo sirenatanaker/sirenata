@@ -68,8 +68,8 @@
                 </div>
 
                 <!-- Gambar Ilustrasi Orang -->
-                <img src="{{ asset('images/perpustakaan_ilustrasi.png') }}" alt="Ilustrasi Menunjuk"
-                    class="w-52 sm:w-64 lg:w-72 -mb-8 sm:-mb-10 lg:-mb-12 lg:mr-2 relative z-20 drop-shadow-[0_15px_25px_rgba(0,0,0,0.4)] pointer-events-none object-contain transition-transform duration-500 hover:scale-105"
+                <img src="{{ asset('images/Library.webp') }}" alt="Ilustrasi Menunjuk"
+                    class="w-52 sm:w-64 lg:w-72 -mb-8 sm:-mb-10 lg:-mb-10 lg:mr-2 relative z-20 drop-shadow-[0_15px_25px_rgba(0,0,0,0.4)] pointer-events-none object-contain transition-transform duration-500 hover:scale-105"
                     onerror="this.style.display='none'">
 
                 <!-- Papan "Card" Total Koleksi -->
@@ -78,7 +78,7 @@
 
                     <!-- Pita Label di atas -->
                     <div
-                        class="absolute -top-3.5 left-1/2 transform -translate-x-1/2 bg-slate-800 text-white text-[9px] sm:text-[10px] font-bold uppercase tracking-widest px-4 py-1.5 rounded-full shadow-md whitespace-nowrap">
+                        class="absolute -top-3.5 left-1/2 transform -translate-x-1/2 bg-slate-800 text-white text-[9px] sm:text-[10px] font-bold uppercase tracking-widest px-6 py-1.5 rounded-full shadow-md whitespace-nowrap">
                         Statistik Update
                     </div>
 
