@@ -315,8 +315,10 @@ x-on:submit.prevent="">
                         </x-table.th>
                         <x-table.th>Name</x-table.th>
                         <x-table.th>Email</x-table.th>
-                        <x-table.th>Instansi</x-table.th>
-                        <x-table.th>Unit Kerja</x-table.th>
+                        <x-table.th>{{ $instansiLabel }}</x-table.th>
+                        @if ($showUnitKerja)
+                            <x-table.th>Unit Kerja</x-table.th>
+                        @endif
                         <x-table.th>Status</x-table.th>
                         @if ($showSektor)
                             <x-table.th>Sektor</x-table.th>
@@ -348,7 +350,7 @@ x-on:submit.prevent="">
                             <x-table.td>
                                 <div class="flex items-center gap-3">
                                     <div
-                                        class="w-9 h-9 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-sm font-semibold">
+                                        class="w-9 h-9 shrink-0 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-sm font-semibold">
                                         {{ $user->name[0] }}
                                     </div>
                                     <div>
@@ -364,9 +366,11 @@ x-on:submit.prevent="">
                             <x-table.td>
                                 <p class="text-slate-600">{{ $user->profile?->instansi ?? '-' }}</p>
                             </x-table.td>
-                            <x-table.td>
-                                <p class="text-slate-600">{{ $user->profile?->unit_kerja ?? '-' }}</p>
-                            </x-table.td>
+                            @if ($showUnitKerja)
+                                <x-table.td>
+                                    <p class="text-slate-600">{{ $user->profile?->unit_kerja ?? '-' }}</p>
+                                </x-table.td>
+                            @endif
                             <x-table.td class="lg:table-cell">
                                 @if ($user->is_active)
                                     <x-badge color="emerald" text="Aktif" />

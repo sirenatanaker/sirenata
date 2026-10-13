@@ -166,7 +166,10 @@ test('swasta sector isolates company users and hides the document column', funct
         ->call('selectSector', 'swasta')
         ->assertOk()
         ->assertSee('swasta2@contoh.id', false)
+        ->assertSee('Perusahaan', false)
+        ->assertSee('Provinsi', false)
         ->assertDontSee('daerah@kemnaker.go.id', false)
+        ->assertDontSee('Unit Kerja', false)
         ->assertDontSee('Surat Tugas', false);
 });
 

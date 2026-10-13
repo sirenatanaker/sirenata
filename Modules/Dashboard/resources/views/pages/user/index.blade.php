@@ -893,7 +893,10 @@
                             $('#kementerianSection, #provinsiSection, #kabkotaSection, #instansiSection, #customInstansiSection')
                                 .addClass('hidden');
                             $('input[name="asalInstansi"]').prop('checked', false);
+                            $('#provinsi').val('').trigger('change');
+                            $('#kabkota').empty().append(new Option('Pilih Kabupaten/Kota', ''));
                             $('#swastaSection').removeClass('hidden');
+                            $('#provinsiSection').removeClass('hidden');
                             $('#unitKerjaSection').removeClass('hidden');
                             $('#companyName').prop('required', true);
                             $('#unitKerja').prop('required', true);
@@ -902,7 +905,10 @@
                             $('#swastaSection').addClass('hidden');
                             $('#companyName').val('').prop('required', false);
                             $('#asalInstansiSection').removeClass('hidden');
-                            $('#unitKerjaSection').addClass('hidden');
+                            $('#provinsi').val('').trigger('change');
+                            $('#kabkota').empty().append(new Option('Pilih Kabupaten/Kota', ''));
+                            $('#kabkotaSection, #instansiSection, #customInstansiSection, #unitKerjaSection')
+                                .addClass('hidden');
                             $('#unitKerja').prop('required', false);
                         }
                         clearFormError();
@@ -1016,10 +1022,32 @@
                     // 5. Handler saat Provinsi dipilih
                     $('#provinsi').on('change', function() {
                         const provinsiCode = $(this).val();
+                        const sector = $('input[name="sector"]:checked').val();
                         const asalInstansi = $('input[name="asalInstansi"]:checked').val();
 
                         if (provinsiCode) {
-                            if (asalInstansi === 'kabkota') {
+                            if (sector === 'swasta') {
+                                // Swasta: hanya muat kab/kota domisili, tanpa daftar instansi
+                                $.ajax({
+                                    url: '{{ route('user.get-regencies') }}',
+                                    type: 'GET',
+                                    data: {
+                                        province_code: provinsiCode
+                                    },
+                                    success: function(response) {
+                                        if (response.success) {
+                                            $('#kabkota').empty().append(new Option(
+                                                'Pilih Kabupaten/Kota', ''));
+                                            response.data.forEach(regency => {
+                                                $('#kabkota').append(new Option(regency
+                                                    .name, regency.code));
+                                            });
+                                            $('#kabkota').trigger('change');
+                                            $('#kabkotaSection').removeClass('hidden');
+                                        }
+                                    }
+                                });
+                            } else if (asalInstansi === 'kabkota') {
                                 $.ajax({
                                     url: '{{ route('user.get-regencies') }}',
                                     type: 'GET',
@@ -1054,6 +1082,10 @@
 
                     // 6. Handler saat Kabupaten/Kota dipilih
                     $('#kabkota').on('change', function() {
+                        const sector = $('input[name="sector"]:checked').val();
+                        if (sector === 'swasta') {
+                            return;
+                        }
                         if ($(this).val()) {
                             populateInstansi();
                             $('#instansiSection').removeClass('hidden');
@@ -1111,13 +1143,24 @@
                                 showFormError('Masukkan nama perusahaan!');
                                 return;
                             }
+                            if (!$('#provinsi').val()) {
+                                e.preventDefault();
+                                showFormError('Pilih provinsi domisili!');
+                                return;
+                            }
+                            if (!$('#kabkota').val()) {
+                                e.preventDefault();
+                                showFormError('Pilih kabupaten/kota domisili!');
+                                return;
+                            }
                             if (!$('#unitKerja').val().trim()) {
                                 e.preventDefault();
                                 showFormError('Masukkan unit kerja!');
                                 return;
                             }
                             // Nonaktifkan input alur instansi agar tidak ikut terkirim
-                            $('#asalInstansiSection input, #kementerian, #provinsi, #kabkota, #instansi, #customInstansi, #finalInstansiPusat')
+                            // (provinsi & kab/kota tetap aktif sebagai domisili)
+                            $('#asalInstansiSection input, #kementerian, #instansi, #customInstansi, #finalInstansiPusat')
                                 .prop('disabled', true);
                             return;
                         }

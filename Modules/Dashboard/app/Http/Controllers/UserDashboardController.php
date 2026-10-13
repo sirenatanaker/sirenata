@@ -143,8 +143,8 @@ class UserDashboardController extends Controller
             'instansi' => 'required|string|max:255',
             'instansi_lainnya' => 'required_if:instansi,lainnya|nullable|string|max:255',
             'unit_kerja' => 'required|string|max:255',
-            'province_code' => 'nullable|required_if:asalInstansi,provinsi,kabkota',
-            'regency_code' => 'nullable|required_if:asalInstansi,kabkota',
+            'province_code' => 'nullable|required_if:asalInstansi,provinsi,kabkota|required_if:sector,swasta',
+            'regency_code' => 'nullable|required_if:asalInstansi,kabkota|required_if:sector,swasta',
         ]);
 
         /** @var \App\Models\User $user */
@@ -160,8 +160,8 @@ class UserDashboardController extends Controller
             UserScope::updateOrCreate(
                 ['user_id' => $user->id],
                 [
-                    'province_code' => null,
-                    'regency_code' => null,
+                    'province_code' => $request->province_code,
+                    'regency_code' => $request->regency_code,
                 ]
             );
 

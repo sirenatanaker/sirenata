@@ -45,12 +45,16 @@ test('new users can register as swasta with a company name', function () {
         'sector' => 'swasta',
         'instansi' => 'PT Maju Bersama',
         'unit_kerja' => 'HRD',
+        'province_code' => '11',
+        'regency_code' => '1101',
     ])->assertRedirect(route('user.dashboard'));
 
     $profile = $user->fresh()->profile;
 
     expect($profile->institution_type)->toBe('swasta')
-        ->and($profile->instansi)->toBe('PT Maju Bersama');
+        ->and($profile->instansi)->toBe('PT Maju Bersama')
+        ->and($user->fresh()->scopeArea->province_code)->toBe('11')
+        ->and($user->fresh()->scopeArea->regency_code)->toBe('1101');
 });
 
 test('user table shows sector badges', function () {

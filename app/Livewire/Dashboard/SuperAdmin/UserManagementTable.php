@@ -161,10 +161,12 @@ class UserManagementTable extends Component
         $institutionType = $validSector ? $sectorTypes[$validSector] : null;
 
         if ($validRole === 'user') {
-            $needsRegion = in_array($validSector, ['instansi-provinsi', 'instansi-kabkota'], true);
-            $needsRegency = $validSector === 'instansi-kabkota';
+            $needsRegion = in_array($validSector, ['swasta', 'instansi-provinsi', 'instansi-kabkota'], true);
+            $needsRegency = in_array($validSector, ['swasta', 'instansi-kabkota'], true);
             $showSuratTugas = false;
             $showSektor = false;
+            $showUnitKerja = $validSector !== 'swasta';
+            $instansiLabel = $validSector === 'swasta' ? 'Perusahaan' : 'Instansi';
             $showProvinceColumn = $needsRegion;
             $showRegencyColumn = $needsRegency;
             $tableReady = (bool) $validSector;
@@ -173,6 +175,8 @@ class UserManagementTable extends Component
             $needsRegency = $validRole === 'admin-kab-kota';
             $showSuratTugas = (bool) $validRole;
             $showSektor = (bool) $validRole;
+            $showUnitKerja = (bool) $validRole;
+            $instansiLabel = 'Instansi';
             $showProvinceColumn = $showRegencyColumn = $needsRegion;
             $tableReady = (bool) $validRole;
         }
@@ -212,6 +216,8 @@ class UserManagementTable extends Component
             'needsRegency' => $needsRegency,
             'showSuratTugas' => $showSuratTugas,
             'showSektor' => $showSektor,
+            'showUnitKerja' => $showUnitKerja,
+            'instansiLabel' => $instansiLabel,
             'showProvinceColumn' => $showProvinceColumn,
             'showRegencyColumn' => $showRegencyColumn,
             'provinces' => $needsRegion
