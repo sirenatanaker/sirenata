@@ -225,8 +225,7 @@
                 {{-- Grid Cards Responsif --}}
                 <div class="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6 px-0 sm:px-4 md:px-0">
                     @forelse ($courses as $course)
-                        @php $totalTopik = $course->sections->sum(fn($s) => $s->contents->count()); @endphp
-                        <div class="group flex flex-col bg-white rounded-xl border border-slate-200 shadow-sm hover:shadow-xl hover:border-[#13416B]/30 hover:-translate-y-1 transition-all duration-300 overflow-hidden">
+                        <div class="group flex flex-col bg-white rounded-md border border-slate-200 shadow-sm hover:shadow-xl hover:border-[#13416B]/30 hover:-translate-y-1 transition-all duration-300 overflow-hidden">
 
                             {{-- Thumbnail & Badge --}}
                             <div class="relative h-24 sm:h-48 overflow-hidden bg-slate-100">
@@ -253,13 +252,10 @@
                                     {{ $course->name }}
                                 </h3>
 
-                                {{-- Statistik: modul, topik, peserta (ringkas di mobile) --}}
+                                {{-- Statistik: modul & peserta (ringkas di mobile) --}}
                                 <div class="flex flex-wrap items-center gap-1 sm:gap-2 mb-2.5 sm:mb-3 text-[9px] sm:text-xs font-medium text-slate-500">
                                     <span class="flex items-center gap-1 sm:gap-1.5 bg-slate-50 px-1.5 py-0.5 sm:px-2 sm:py-1 rounded border border-slate-100">
                                         <i class="fas fa-layer-group text-slate-400"></i> {{ $course->sections_count }} Modul
-                                    </span>
-                                    <span class="flex items-center gap-1 sm:gap-1.5 bg-slate-50 px-1.5 py-0.5 sm:px-2 sm:py-1 rounded border border-slate-100">
-                                        <i class="fas fa-list-ul text-slate-400"></i> {{ $totalTopik }} Topik
                                     </span>
                                     <span class="flex items-center gap-1 sm:gap-1.5 bg-[#13416B]/5 text-[#13416B] px-1.5 py-0.5 sm:px-2 sm:py-1 rounded border border-[#13416B]/10">
                                         <i class="fas fa-users"></i>
@@ -286,7 +282,7 @@
                                     <button type="button" @click="askEnroll('{{ $course->id }}')"
                                         class="order-1 sm:order-2 flex-1 py-1.5 sm:py-2.5 text-[11px] sm:text-sm inline-flex items-center justify-center gap-1.5 font-bold text-center rounded-lg sm:rounded-xl transition-colors bg-amber-500 text-white border border-amber-500 hover:bg-amber-600 shadow-sm">
                                         Daftar
-                                        <i class="fas fa-arrow-up transform rotate-45 text-[9px] sm:text-xs"></i>
+                                        <i class="fas fa-arrow-up-right-from-square text-[11px] sm:text-sm"></i>
                                     </button>
                                 </div>
                             </div>

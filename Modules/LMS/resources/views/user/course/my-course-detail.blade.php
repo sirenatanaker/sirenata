@@ -126,6 +126,10 @@
                         <i class="fas {{ $isFullyCompleted ? 'fa-check-circle' : 'fa-clock' }}"></i>
                         {{ $isFullyCompleted ? 'Selesai' : 'Sedang Berjalan' }}
                     </span>
+                    <button type="button" onclick="window.startCoursePlayerTour && window.startCoursePlayerTour()"
+                        class="ml-auto inline-flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-bold text-[#13416B] bg-[#13416B]/10 border border-[#13416B]/20 rounded-lg hover:bg-[#13416B]/20 transition-colors">
+                        <i class="fas fa-route"></i> Panduan
+                    </button>
                 </div>
 
                 {{-- Judul --}}
@@ -141,7 +145,7 @@
                 </div>
 
                 {{-- Progress Bar --}}
-                <div class="mt-auto pt-5 border-t border-slate-100 max-w-md w-full">
+                <div class="mt-auto pt-5 border-t border-slate-100 max-w-md w-full" data-tour="progres">
                     <div class="flex justify-between items-center mb-2.5">
                         <span class="text-xs font-semibold text-slate-500">Progress Pembelajaran</span>
                         <span
@@ -231,7 +235,7 @@
             {{-- Left column: List Modul & Evaluasi Akhir --}}
             <div class="lg:col-span-2 space-y-6">
                 <!-- PERBAIKAN: rounded-none border-x-0 di mobile -->
-                <div
+                <div data-tour="modul"
                     class="bg-white rounded-none sm:rounded-md shadow-sm border-y border-x-0 sm:border sm:border-x border-slate-200 p-4 sm:p-6">
 
                     <div
@@ -662,7 +666,7 @@
 
                 @if ($evaluasiAkhir)
                     <!-- PERBAIKAN: rounded-none border-x-0 di mobile -->
-                    <div
+                    <div data-tour="evaluasi"
                         class="bg-white rounded-none sm:rounded-md shadow-sm border-y border-x-0 sm:border sm:border-x border-slate-200 overflow-hidden transition-all relative">
                         <div
                             class="px-4 py-4 sm:px-6 sm:py-5 {{ $isEvaluasiAkhirLocked ? 'bg-slate-50 border-b border-slate-200' : 'bg-gradient-to-r from-[#13416B] to-[#0f3354] text-white' }} flex flex-col sm:flex-row sm:items-center justify-between gap-4 sm:gap-6">
@@ -734,7 +738,7 @@
             {{-- Right Column: Side Widget (Sertifikat & Info) --}}
             <div class="space-y-0 lg:sticky lg:top-24 lg:self-start">
                 <!-- PERBAIKAN: rounded-none border-x-0 di mobile -->
-                <div
+                <div data-tour="sertifikat"
                     class="bg-white rounded-none sm:rounded-md shadow-sm border-y border-x-0 sm:border sm:border-x border-slate-200 p-4 sm:p-6 mb-0 md:mb-4">
 
                     {{-- Header Widget --}}
@@ -908,4 +912,57 @@
             </div>
         </div>
     </div>
+
+    @push('scripts')
+        @include('lms::user.course.partials.guide-assets')
+        <script>
+            (function () {
+                const PAGE = 'course_player';
+                const STEPS = [
+                    {
+                        element: '[data-tour="progres"]',
+                        popover: {
+                            title: 'Pantau progres belajar',
+                            description: 'Persentase ini gabungan topik selesai dan evaluasi yang lulus. Sertifikat terbuka saat progres mencapai 100%.',
+                        },
+                    },
+                    {
+                        element: '[data-tour="modul"]',
+                        popover: {
+                            title: 'Daftar modul',
+                            description: 'Pelajari topik secara berurutan. Selesaikan semua topik untuk membuka evaluasi tiap modul.',
+                        },
+                    },
+                    {
+                        element: '[data-tour="evaluasi"]',
+                        popover: {
+                            title: 'Evaluasi akhir',
+                            description: 'Terkunci sampai semua modul selesai. Lulus nilai KKM untuk menuntaskan kursus.',
+                        },
+                    },
+                    {
+                        element: '[data-tour="sertifikat"]',
+                        popover: {
+                            title: 'Sertifikat kelulusan',
+                            description: 'Terbitkan dan unduh sertifikat setelah progres 100% dan evaluasi akhir lulus.',
+                        },
+                    },
+                    {
+                        popover: {
+                            title: 'Siap belajar?',
+                            description: 'Ikuti alur modul → evaluasi → sertifikat. Tur ini bisa dibuka lagi lewat tombol Panduan.',
+                        },
+                    },
+                ];
+
+                window.startCoursePlayerTour = function () {
+                    window.SirenataTour.start(PAGE, STEPS);
+                };
+
+                document.addEventListener('DOMContentLoaded', function () {
+                    window.SirenataTour.autoStart(PAGE, STEPS);
+                });
+            })();
+        </script>
+    @endpush
 </x-dashboard::layouts.dashboard>

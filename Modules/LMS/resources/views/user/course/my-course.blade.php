@@ -77,7 +77,7 @@
             <div class="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6 px-0 sm:px-4 md:px-0">
                 @forelse ($courses as $course)
                     <a href="{{ route('user.course.my-course.detail', $course->slug) }}"
-                        class="group flex flex-col bg-white rounded-xl border border-slate-200 shadow-sm hover:shadow-xl hover:border-[#13416B]/30 hover:-translate-y-1 transition-all duration-300 overflow-hidden">
+                        class="group flex flex-col bg-white rounded-md border border-slate-200 shadow-sm hover:shadow-xl hover:border-[#13416B]/30 hover:-translate-y-1 transition-all duration-300 overflow-hidden">
 
                         {{-- Thumbnail & Badge --}}
                         <div class="relative h-24 sm:h-48 overflow-hidden bg-slate-100">
@@ -121,9 +121,6 @@
                             <div class="flex flex-wrap items-center gap-1 sm:gap-2 mb-2.5 sm:mb-3 text-[9px] sm:text-xs font-medium text-slate-500">
                                 <span class="flex items-center gap-1 sm:gap-1.5 bg-slate-50 px-1.5 py-0.5 sm:px-2 sm:py-1 rounded border border-slate-100">
                                     <i class="fas fa-layer-group text-slate-400"></i> {{ $course->total_modul ?? 0 }} Modul
-                                </span>
-                                <span class="flex items-center gap-1 sm:gap-1.5 bg-slate-50 px-1.5 py-0.5 sm:px-2 sm:py-1 rounded border border-slate-100">
-                                    <i class="fas fa-list-ul text-slate-400"></i> {{ $course->total_materi ?? 0 }} Topik
                                 </span>
                                 <span class="flex items-center gap-1 sm:gap-1.5 bg-[#13416B]/5 text-[#13416B] px-1.5 py-0.5 sm:px-2 sm:py-1 rounded border border-[#13416B]/10">
                                     <i class="fas fa-users"></i> {{ number_format($course->students_count ?? 0, 0, ',', '.') }} Peserta

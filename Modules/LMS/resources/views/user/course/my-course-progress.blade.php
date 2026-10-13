@@ -115,9 +115,6 @@
                                 <span class="flex items-center gap-1 sm:gap-1.5 bg-slate-50 px-1.5 py-0.5 sm:px-2 sm:py-1 rounded border border-slate-100">
                                     <i class="fas fa-layer-group text-slate-400"></i> {{ $course->total_modul ?? 0 }} Modul
                                 </span>
-                                <span class="flex items-center gap-1 sm:gap-1.5 bg-slate-50 px-1.5 py-0.5 sm:px-2 sm:py-1 rounded border border-slate-100">
-                                    <i class="fas fa-list-ul text-slate-400"></i> {{ $course->total_materi ?? 0 }} Topik
-                                </span>
                                 <span class="flex items-center gap-1 sm:gap-1.5 bg-[#13416B]/5 text-[#13416B] px-1.5 py-0.5 sm:px-2 sm:py-1 rounded border border-[#13416B]/10">
                                     <i class="fas fa-users"></i> {{ number_format($course->students_count ?? 0, 0, ',', '.') }} Peserta
                                 </span>

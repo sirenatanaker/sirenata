@@ -717,7 +717,7 @@
                                 @endphp
 
                                 <a href="{{ route('user.course.my-course.detail', $course->slug) }}"
-                                    class="flex h-full w-full flex-col overflow-hidden rounded-xl border border-slate-200/80 bg-white transition-all duration-300 group hover:-translate-y-1 hover:border-[#13416B]/30 hover:shadow-xl">
+                                    class="flex h-full w-full flex-col overflow-hidden rounded-md border border-slate-200/80 bg-white transition-all duration-300 group hover:-translate-y-1 hover:border-[#13416B]/30 hover:shadow-xl">
 
                                     <!-- Thumbnail Kursus -->
                                     <div

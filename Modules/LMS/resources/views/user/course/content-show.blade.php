@@ -61,9 +61,9 @@
             {{-- Body Content --}}
             <div class="p-5 sm:p-10 lg:p-12">
 
-                <div class="mb-8">
+                <div class="mb-8 flex items-center justify-between gap-3">
                     <a href="{{ route('user.course.my-course.detail', $slug) }}"
-                        class="group flex items-center gap-3 text-sm font-medium text-slate-500 hover:text-[#13416B] transition-colors">
+                        class="group flex flex-1 min-w-0 items-center gap-3 text-sm font-medium text-slate-500 hover:text-[#13416B] transition-colors">
 
                         {{-- Lingkaran Ikon Panah --}}
                         <div
@@ -80,6 +80,10 @@
                             </span>
                         </div>
                     </a>
+                    <button type="button" onclick="window.startContentReaderTour && window.startContentReaderTour()"
+                        class="inline-flex shrink-0 items-center gap-1.5 px-3 py-1.5 text-[11px] font-bold text-[#13416B] bg-[#13416B]/10 border border-[#13416B]/20 rounded-lg hover:bg-[#13416B]/20 transition-colors">
+                        <i class="fas fa-route"></i> Panduan
+                    </button>
                 </div>
 
                 {{-- Header & Title Materi --}}
@@ -106,7 +110,7 @@
                 @endphp
 
                 @if (!empty($contentText))
-                    <div
+                    <div data-tour="materi"
                         class="prose prose-slate prose-sm sm:prose-base lg:prose-lg max-w-none mb-10 text-slate-700 quill-content-render">
                         {!! $contentText !!}
                     </div>
@@ -168,7 +172,7 @@
             </div>
 
             {{-- Action Footer --}}
-            <div
+            <div data-tour="aksi"
                 class="px-5 py-5 sm:px-10 sm:py-6 border-t border-slate-100 bg-slate-50 flex flex-col-reverse sm:flex-row justify-between items-center gap-3 sm:gap-4">
                 <a href="{{ route('user.course.my-course.detail', $slug) }}"
                     class="w-full sm:w-auto text-sm font-bold text-slate-500 hover:text-slate-800 transition-colors text-center py-2.5 sm:py-2 border border-slate-200 sm:border-transparent rounded-xl sm:rounded-none bg-white sm:bg-transparent">
@@ -315,5 +319,44 @@
                 z-index: 1;
             }
         </style>
+    @endpush
+
+    @push('scripts')
+        @include('lms::user.course.partials.guide-assets')
+        <script>
+            (function () {
+                const PAGE = 'content_reader';
+                const STEPS = [
+                    {
+                        element: '[data-tour="materi"]',
+                        popover: {
+                            title: 'Fokus pada materi',
+                            description: 'Baca materi hingga akhir. Jika ada video, tonton minimal 90% agar syarat terpenuhi.',
+                        },
+                    },
+                    {
+                        element: '[data-tour="aksi"]',
+                        popover: {
+                            title: 'Tandai selesai',
+                            description: 'Tombol aktif setelah semua syarat terpenuhi. Tekan untuk membuka topik berikutnya.',
+                        },
+                    },
+                    {
+                        popover: {
+                            title: 'Selamat belajar!',
+                            description: 'Selesaikan setiap topik untuk membuka modul dan evaluasi selanjutnya. Tur ini bisa dibuka lagi lewat tombol Panduan.',
+                        },
+                    },
+                ];
+
+                window.startContentReaderTour = function () {
+                    window.SirenataTour.start(PAGE, STEPS);
+                };
+
+                document.addEventListener('DOMContentLoaded', function () {
+                    window.SirenataTour.autoStart(PAGE, STEPS);
+                });
+            })();
+        </script>
     @endpush
 </x-dashboard::layouts.dashboard>
