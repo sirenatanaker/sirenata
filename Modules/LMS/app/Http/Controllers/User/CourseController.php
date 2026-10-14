@@ -284,6 +284,12 @@ class CourseController extends Controller
                     ->exists();
             } while ($codeExists);
             $issuedAt = now();
+        } else {
+            // Sertifikat hanya diterbitkan sekali. Nama peserta berasal dari
+            // identitas terverifikasi (SSO), sehingga penerbitan ulang
+            // tidak diperlukan dan selalu ditolak.
+            ToastMagic::error('Sertifikat sudah diterbitkan dan tidak dapat dibuat ulang. Unduh dokumen yang sudah ada.');
+            return redirect()->back();
         }
 
         // Menggunakan Storage::url() alih-alih konversi base64
@@ -296,7 +302,11 @@ class CourseController extends Controller
             : null;
 
         $completedDate = Carbon::parse($issuedAt)->translatedFormat('d F Y');
-        $fullName = $user->profile?->full_name ?? $user->name;
+        // Nama peserta memakai identitas terverifikasi: nama SSO untuk akun
+        // Siapkerja (disinkron tiap login), nama profil untuk akun lokal.
+        $fullName = $user->siapkerja_id
+            ? $user->name
+            : ($user->profile?->full_name ?? $user->name);
 
         $pdf = Pdf::loadView('lms::admin-pusat.certificates.certificate-template', [
             'nama_peserta' => $fullName,

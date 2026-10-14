@@ -778,41 +778,11 @@
                                     </div>
                                 </div>
 
-                                <div class="bg-amber-50 border border-amber-200 rounded-xl p-4 flex items-start gap-3">
-                                    <i class="fas fa-info-circle text-amber-500 mt-0.5 text-lg shrink-0"></i>
-                                    <div>
-                                        <p class="text-[11px] text-amber-800 leading-relaxed font-medium">
-                                            Penulisan nama dan gelar tidak sesuai? Anda bisa mengubahnya di profil.
-                                        </p>
-                                        <a href="http://localhost:8000/user/profile" target="_blank"
-                                            class="inline-flex items-center gap-1 mt-2 text-[11px] font-bold text-amber-700 hover:text-amber-900 border-b border-amber-300 hover:border-amber-700 transition-colors pb-0.5">
-                                            <i class="fas fa-user-edit"></i> Ubah Nama di Profil
-                                        </a>
-                                    </div>
-                                </div>
-
                                 <div class="flex flex-col gap-2.5">
                                     <a href="{{ data_get($course, 'certificate_file') }}" target="_blank" download
                                         class="w-full bg-[#13416B] hover:bg-[#0f3354] text-white py-3 rounded-xl font-bold transition-all shadow-sm flex items-center justify-center gap-2 text-sm">
                                         <i class="fas fa-download"></i> Unduh PDF
                                     </a>
-
-                                    <form
-                                        action="{{ route('user.course.my-course.generate-certificate', ['slug' => request()->route('slug')]) }}"
-                                        method="POST" x-data="{ loading: false }" @submit="loading = true">
-                                        @csrf
-                                        <button type="submit" :disabled="loading"
-                                            class="w-full bg-white hover:bg-slate-50 text-[#13416B] border border-[#13416B]/30 py-2.5 rounded-xl font-bold transition-all flex items-center justify-center gap-2 text-xs shadow-sm">
-                                            <template x-if="!loading">
-                                                <span class="flex items-center gap-2"><i class="fas fa-sync-alt"></i>
-                                                    Terapkan Nama Baru</span>
-                                            </template>
-                                            <template x-if="loading">
-                                                <span class="flex items-center gap-2"><i
-                                                        class="fas fa-spinner fa-spin"></i> Memperbarui...</span>
-                                            </template>
-                                        </button>
-                                    </form>
                                 </div>
                             </div>
                         @else
@@ -830,16 +800,15 @@
                                     </p>
                                 </div>
 
-                                <div class="bg-amber-50 border border-amber-200 rounded-xl p-4 flex items-start gap-3">
-                                    <i class="fas fa-info-circle text-amber-500 mt-0.5 text-lg shrink-0"></i>
+                                <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 flex items-start gap-3">
+                                    <i class="fas fa-id-card text-[#13416B]/60 mt-0.5 text-lg shrink-0"></i>
                                     <div>
-                                        <p class="text-[11px] text-amber-800 leading-relaxed font-medium">
-                                            Nama pada sertifikat akan menyesuaikan dengan data profil Anda saat ini.
+                                        <p class="text-[11px] text-slate-600 leading-relaxed">
+                                            Sertifikat akan diterbitkan atas nama terverifikasi berikut:
                                         </p>
-                                        <a href="http://localhost:8000/user/profile" target="_blank"
-                                            class="inline-flex items-center gap-1 mt-2 text-[11px] font-bold text-amber-700 hover:text-amber-900 border-b border-amber-300 hover:border-amber-700 transition-colors pb-0.5">
-                                            <i class="fas fa-user-edit"></i> Periksa / Ubah Nama
-                                        </a>
+                                        <p class="text-sm font-bold text-slate-800 mt-0.5">
+                                            {{ auth()->user()->siapkerja_id ? auth()->user()->name : (auth()->user()->profile?->full_name ?? auth()->user()->name) }}
+                                        </p>
                                     </div>
                                 </div>
 
