@@ -1,19 +1,19 @@
 <?php
 
-namespace Modules\Faq\Http\Controllers\AdminPusat;
+namespace Modules\Faq\Http\Controllers\SuperAdmin;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
+use Modules\Faq\Exports\FaqExport;
 use Modules\Faq\Models\Faq;
-use Modules\Faq\Enums\FaqLevel;
 use Devrabiul\ToastMagic\Facades\ToastMagic;
 use Maatwebsite\Excel\Facades\Excel;
-use Modules\Faq\Exports\FaqExport;
 
 class FaqController extends Controller
 {
-    protected string $routePrefix = 'admin-pusat.faq.';
+    protected string $routePrefix = 'super-admin.faq.';
 
     public function export(Request $request)
     {
@@ -21,7 +21,7 @@ class FaqController extends Controller
         return Excel::download(
             new FaqExport(
                 search: $request->string('search')->toString() ?: null,
-                level: $request->string('level')->toString() ?: null,
+                role: $request->string('role')->toString() ?: null,
             ),
             $filename
         );
@@ -29,7 +29,7 @@ class FaqController extends Controller
 
     public function index(Request $request)
     {
-        $query = Faq::with('creator')->latest();
+        $query = Faq::with(['creator', 'roles'])->latest();
 
         if ($request->filled('search')) {
             $searchTerm = '%' . $request->search . '%';
@@ -39,30 +39,33 @@ class FaqController extends Controller
             });
         }
 
-        if ($request->filled('level')) {
-            $query->where('level', $request->level);
+        $targetRoles = Faq::targetableRoles();
+
+        if ($request->filled('role') && in_array($request->role, $targetRoles, true)) {
+            $query->whereHas('roles', fn ($q) => $q->where('name', $request->role));
         }
 
         $faqs = $query->paginate($request->get('per_page', 10))->withQueryString();
         $routePrefix = $this->routePrefix;
 
-        return view('faq::index', compact('faqs', 'routePrefix'));
+        return view('faq::index', compact('faqs', 'routePrefix', 'targetRoles'));
     }
 
     public function store(Request $request)
     {
-        $request->validate([
+        $validated = $request->validate([
             'question' => 'required|string|max:255',
             'answer' => 'required|string',
-            'level' => 'required|in:' . FaqLevel::NASIONAL->value . ',' . FaqLevel::PROVINSI->value . ',' . FaqLevel::KAB_KOTA->value,
+            'roles' => 'required|array|min:1',
+            'roles.*' => ['required', 'string', 'exists:roles,name', Rule::notIn(['super-admin', 'admin-pusat'])],
         ]);
 
-        Faq::create([
-            'question' => $request->question,
-            'answer' => $request->answer,
-            'level' => $request->level,
+        $faq = Faq::create([
+            'question' => $validated['question'],
+            'answer' => $validated['answer'],
             'created_by' => Auth::id(),
         ]);
+        $faq->roles()->sync(Faq::resolveRoleIds($validated['roles']));
 
         ToastMagic::success('FAQ berhasil dibuat!');
         return redirect()->route($this->routePrefix . 'index');
@@ -70,7 +73,7 @@ class FaqController extends Controller
 
     public function show($id)
     {
-        $faq = Faq::with('creator')->findOrFail($id);
+        $faq = Faq::with(['creator', 'roles'])->findOrFail($id);
         $routePrefix = $this->routePrefix;
         return view('faq::show', compact('faq', 'routePrefix'));
     }
@@ -79,17 +82,18 @@ class FaqController extends Controller
     {
         $faq = Faq::findOrFail($id);
 
-        $request->validate([
+        $validated = $request->validate([
             'question' => 'required|string|max:255',
             'answer' => 'required|string',
-            'level' => 'required|in:' . FaqLevel::NASIONAL->value . ',' . FaqLevel::PROVINSI->value . ',' . FaqLevel::KAB_KOTA->value,
+            'roles' => 'required|array|min:1',
+            'roles.*' => ['required', 'string', 'exists:roles,name', Rule::notIn(['super-admin', 'admin-pusat'])],
         ]);
 
         $faq->update([
-            'question' => $request->question,
-            'answer' => $request->answer,
-            'level' => $request->level,
+            'question' => $validated['question'],
+            'answer' => $validated['answer'],
         ]);
+        $faq->roles()->sync(Faq::resolveRoleIds($validated['roles']));
 
         ToastMagic::success('FAQ berhasil diperbarui!');
         return redirect()->route($this->routePrefix . 'index');

@@ -90,4 +90,19 @@
             </li>
         </ul>
     </li>
+
+    <!-- Manajemen FAQ -->
+    <li>
+        <a href="{{ route('super-admin.faq.index') }}"
+            class="flex items-center gap-4 w-full px-4 py-3.5 rounded-2xl transition-all duration-200
+            {{ request()->routeIs('super-admin.faq.*')
+                ? 'text-[#13416B] bg-slate-100 font-bold'
+                : 'text-slate-500 hover:bg-slate-50 hover:text-[#13416B]' }}">
+            <span class="w-6 shrink-0 flex items-center justify-center">
+                <i class="fas fa-question-circle text-base" aria-hidden="true"></i>
+            </span>
+
+            <span class="flex-1 text-left text-[15px]">Manajemen FAQ</span>
+        </a>
+    </li>
 </ul>

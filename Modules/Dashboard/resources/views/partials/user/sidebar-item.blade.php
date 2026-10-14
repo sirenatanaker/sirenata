@@ -15,6 +15,20 @@
         </a>
     </li>
 
+    <!-- Katalog -->
+    @php $isKatalog = request()->routeIs('user.catalog.*'); @endphp
+    <li class="flex-1 lg:flex-none">
+        <a href="{{ route('user.catalog.index') }}"
+            class="relative flex flex-col lg:flex-row items-center justify-center lg:justify-start px-1 sm:px-2 lg:px-4 py-2 sm:py-2.5 lg:py-3 rounded-xl transition-all duration-300 group {{ $isKatalog ? 'text-[#13416B] font-bold lg:bg-[#13416B]/5' : 'text-slate-400 lg:text-slate-500 hover:text-[#13416B] lg:hover:bg-slate-50' }}">
+
+            <span class="w-6 h-6 shrink-0 flex items-center justify-center">
+                <i class="fas fa-book-open text-base transition duration-200" aria-hidden="true"></i>
+            </span>
+            <span
+                class="text-[8px] sm:text-xs lg:text-[15px] mt-1 sm:mt-1.5 lg:mt-0 lg:ms-3 text-center lg:text-left line-clamp-1">Katalog</span>
+        </a>
+    </li>
+
     <!-- Kursus Saya -->
     @php $isKursus = request()->routeIs('user.course.my-course*'); @endphp
     <li class="flex-1 lg:flex-none">
@@ -27,20 +41,6 @@
             <span
                 class="text-[8px] sm:text-xs lg:text-[15px] mt-1 sm:mt-1.5 lg:mt-0 lg:ms-3 text-center lg:text-left line-clamp-1">Kursus
                 Saya</span>
-        </a>
-    </li>
-
-     <!-- Katalog -->
-    @php $isKatalog = request()->routeIs('user.catalog.*'); @endphp
-    <li class="flex-1 lg:flex-none">
-        <a href="{{ route('user.catalog.index') }}"
-            class="relative flex flex-col lg:flex-row items-center justify-center lg:justify-start px-1 sm:px-2 lg:px-4 py-2 sm:py-2.5 lg:py-3 rounded-xl transition-all duration-300 group {{ $isKatalog ? 'text-[#13416B] font-bold lg:bg-[#13416B]/5' : 'text-slate-400 lg:text-slate-500 hover:text-[#13416B] lg:hover:bg-slate-50' }}">
-
-            <span class="w-6 h-6 shrink-0 flex items-center justify-center">
-                <i class="fas fa-book-open text-base transition duration-200" aria-hidden="true"></i>
-            </span>
-            <span
-                class="text-[8px] sm:text-xs lg:text-[15px] mt-1 sm:mt-1.5 lg:mt-0 lg:ms-3 text-center lg:text-left line-clamp-1">Katalog</span>
         </a>
     </li>
 

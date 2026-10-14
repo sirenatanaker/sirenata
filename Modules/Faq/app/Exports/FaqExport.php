@@ -27,12 +27,12 @@ class FaqExport implements
 
     public function __construct(
         private ?string $search = null,
-        private ?string $level = null,
+        private ?string $role = null,
     ) {}
 
     public function query()
     {
-        $query = Faq::with('creator')->latest();
+        $query = Faq::with(['creator', 'roles'])->latest();
 
         if ($this->search) {
             $searchTerm = '%' . $this->search . '%';
@@ -42,8 +42,8 @@ class FaqExport implements
             });
         }
 
-        if ($this->level) {
-            $query->where('level', $this->level);
+        if ($this->role) {
+            $query->whereHas('roles', fn ($q) => $q->where('name', $this->role));
         }
 
         return $query;
@@ -65,7 +65,7 @@ class FaqExport implements
             'No',
             'Pertanyaan',
             'Jawaban',
-            'Level',
+            'Ditujukan Untuk',
             'Pembuat',
         ];
     }
@@ -78,7 +78,7 @@ class FaqExport implements
             $this->no,
             $row->question,
             strip_tags($row->answer),
-            $row->level,
+            $row->roles->pluck('name')->implode(', '),
             $row->creator?->profile?->full_name ?? $row->creator?->name ?? '-',
         ];
     }

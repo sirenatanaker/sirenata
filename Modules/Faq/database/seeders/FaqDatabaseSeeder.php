@@ -4,7 +4,7 @@ namespace Modules\Faq\Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use Modules\Faq\Models\Faq;
-use Modules\Faq\Enums\FaqLevel;
+use Modules\Roles\Models\Role;
 use App\Models\User;
 
 class FaqDatabaseSeeder extends Seeder
@@ -22,55 +22,36 @@ class FaqDatabaseSeeder extends Seeder
 
         $this->command->info('Seeding structured FAQ data...');
 
-        $pusatFaqs = [
-            ['question' => '[Pusat] Bagaimana cara login ke sistem?', 'answer' => 'Gunakan email dan password yang telah didaftarkan oleh Admin.'],
-            ['question' => '[Pusat] Bagaimana cara reset password?', 'answer' => 'Klik "Lupa Password" di halaman login, lalu ikuti instruksi yang dikirim ke email Anda.'],
-            ['question' => '[Pusat] Apa itu E-Learning SIRENATA?', 'answer' => 'SIRENATA adalah platform e-learning untuk pelatihan kerja di seluruh Indonesia.'],
+        // [pertanyaan, jawaban, target roles]
+        $faqs = [
+            ['Bagaimana cara login ke sistem?', 'Gunakan email dan password yang telah didaftarkan oleh Admin.', ['admin-province', 'admin-kab-kota']],
+            ['Bagaimana cara reset password?', 'Klik "Lupa Password" di halaman login, lalu ikuti instruksi yang dikirim ke email Anda.', ['admin-province', 'admin-kab-kota']],
+            ['Apa itu E-Learning SIRENATA?', 'SIRENATA adalah platform e-learning untuk pelatihan kerja di seluruh Indonesia.', ['admin-province', 'admin-kab-kota']],
+            ['Bagaimana cara mendaftarkan instansi baru di provinsi saya?', 'Silakan hubungi admin provinsi masing-class melalui menu Bantuan.', ['admin-province']],
+            ['Kapan jadwal rekapitulasi data tingkat provinsi?', 'Rekapitulasi data tingkat provinsi dilakukan setiap akhir bulan.', ['admin-province']],
+            ['Apakah ada pelatihan khusus Admin Provinsi?', 'Ya, pelatihan khusus Admin Provinsi diadakan setiap kuartal oleh pusat.', ['admin-province']],
+            ['Dimana saya bisa melihat daftar peserta di daerah saya?', 'Anda bisa melihatnya di menu Peserta pada Dashboard Kab/Kota.', ['admin-kab-kota']],
+            ['Bagaimana cara reset wilayah penugasan peserta?', 'Fitur ini hanya bisa dilakukan oleh Admin Provinsi atau Pusat.', ['admin-kab-kota']],
+            ['Kapan pendaftaran pelatihan tingkat Kabupaten/Kota dibuka?', 'Pendaftaran dibuka secara serentak setiap awal bulan melaui website resmi.', ['admin-kab-kota']],
+            ['Bagaimana cara masuk ke aplikasi?', 'Masuk menggunakan akun SIAPKerja Anda melalui tombol Masuk di halaman utama.', ['user']],
+            ['Bagaimana cara mengikuti kursus?', 'Buka menu Katalog, pilih kursus yang tersedia, lalu tekan tombol Daftar.', ['user']],
+            ['Bagaimana cara mendapatkan sertifikat?', 'Selesaikan seluruh materi dan lulus evaluasi akhir, sertifikat otomatis tersedia di halaman Profil pada tab Sertifikat Saya.', ['user']],
+            ['Saya lupa password, bagaimana cara reset?', 'Karena login memakai SSO SIAPKerja, reset password dilakukan melalui akun SIAPKerja Anda.', ['user']],
         ];
 
-        foreach ($pusatFaqs as $data) {
-            Faq::create([
-                'question' => $data['question'],
-                'answer' => $data['answer'],
-                'level' => FaqLevel::NASIONAL->value,
-                'created_by' => $admin->id,
-            ]);
+        $roleIds = Role::whereIn('name', Faq::targetableRoles())->pluck('uuid', 'name');
+
+        foreach ($faqs as [$question, $answer, $roles]) {
+            $faq = Faq::updateOrCreate(
+                ['question' => $question],
+                [
+                    'answer' => $answer,
+                    'created_by' => $admin->id,
+                ]
+            );
+            $faq->roles()->sync($roleIds->only($roles)->values()->all());
         }
 
-        $provFaqs = [
-            ['question' => '[Provinsi] Bagaimana cara mendaftarkan instansi baru di provinsi saya?', 'answer' => 'Silakan hubungi admin provinsi masing-class melalui menu Bantuan.'],
-            ['question' => '[Provinsi] Kapan jadwal rekapitulasi data tingkat provinsi?', 'answer' => 'Rekapitulasi data tingkat provinsi dilakukan setiap akhir bulan.'],
-            ['question' => '[Provinsi] Apakah ada pelatihan khusus Admin Provinsi?', 'answer' => 'Ya, pelatihan khusus Admin Provinsi diadakan setiap kuartal oleh pusat.'],
-        ];
-
-        foreach ($provFaqs as $data) {
-            Faq::create([
-                'question' => $data['question'],
-                'answer' => $data['answer'],
-                'level' => FaqLevel::PROVINSI->value,
-                'created_by' => $admin->id,
-            ]);
-        }
-
-        $kabKotaFaqs = [
-            ['question' => '[Kab/Kota] Dimana saya bisa melihat daftar peserta di daerah saya?', 'answer' => 'Anda bisa melihatnya di menu Peserta pada Dashboard Kab/Kota.'],
-            ['question' => '[Kab/Kota] Bagaimana cara reset wilayah penugasan peserta?', 'answer' => 'Fitur ini hanya bisa dilakukan oleh Admin Provinsi atau Pusat.'],
-            ['question' => '[Kab/Kota] Kapan pendaftaran pelatihan tingkat Kabupaten/Kota dibuka?', 'answer' => 'Pendaftaran dibuka secara serentak setiap awal bulan melaui website resmi.'],
-        ];
-
-        foreach ($kabKotaFaqs as $data) {
-            Faq::create([
-                'question' => $data['question'],
-                'answer' => $data['answer'],
-                'level' => FaqLevel::KAB_KOTA->value,
-                'created_by' => $admin->id,
-            ]);
-        }
-
-        $this->command->info('Seeded Level-based FAQ data:');
-        $this->command->info('  - 3 Pusat');
-        $this->command->info('  - 3 Provinsi');
-        $this->command->info('  - 3 Kab/Kota');
-        $this->command->info('Total: 9 FAQs');
+        $this->command->info('Seeded FAQ data with role targets (idempotent).');
     }
 }

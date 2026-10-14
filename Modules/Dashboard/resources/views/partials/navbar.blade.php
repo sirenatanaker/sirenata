@@ -240,17 +240,8 @@
                         </div>
                         <ul class="p-2 text-sm text-slate-700 space-y-1">
                             <!-- Akses Cepat Profil & Dashboard -->
-                            @if (auth()->user()->hasRole('super-admin'))
-                                <li><a href="{{ route('super-admin.profile') }}"
-                                        class="flex items-center gap-3 p-2.5 rounded-xl hover:bg-[#13416B]/10 hover:text-[#13416B] font-medium transition-colors"><i class="fas fa-user w-4 shrink-0 text-center" aria-hidden="true"></i> Profil</a></li>
-                               
-                            @elseif(auth()->user()->hasRole('admin-pusat'))
-                                <li><a href="{{ route('admin-pusat.profile') }}"
-                                        class="flex items-center gap-3 p-2.5 rounded-xl hover:bg-[#13416B]/10 hover:text-[#13416B] font-medium transition-colors"><i class="fas fa-user w-4 shrink-0 text-center" aria-hidden="true"></i> Profil</a></li>
-                                
-                            @elseif(auth()->user()->hasRole('admin-province'))
-                               
-                            @elseif(auth()->user()->hasRole('user'))
+                            {{-- Menu profil hanya untuk role user; admin tidak membutuhkan halaman profil. --}}
+                            @if (auth()->user()->hasRole('user'))
                                 <li><a href="{{ route('user.profile') }}"
                                         class="flex items-center gap-3 p-2.5 rounded-xl hover:bg-[#13416B]/10 hover:text-[#13416B] font-medium transition-colors"><i class="fas fa-user w-4 shrink-0 text-center" aria-hidden="true"></i> Profil Saya</a></li>
                             @endif
@@ -259,27 +250,10 @@
 
                             <!-- MENU BANTUAN DINAMIS -->
                             <li>
-                                @if (auth()->user()->hasRole(['super-admin', 'admin-pusat']))
-                                    <a href="{{ route('admin-pusat.help') }}"
-                                        class="flex items-center gap-3 p-2.5 rounded-xl text-slate-700 hover:bg-[#13416B]/10 hover:text-[#13416B] font-medium transition-colors">
-                                        <i class="fas fa-question-circle w-4 shrink-0 text-center text-slate-400" aria-hidden="true"></i> Pusat Bantuan
-                                    </a>
-                                @elseif(auth()->user()->hasRole('admin-province'))
-                                    <a href="{{ route('admin-province.help') }}"
-                                        class="flex items-center gap-3 p-2.5 rounded-xl text-slate-700 hover:bg-[#13416B]/10 hover:text-[#13416B] font-medium transition-colors">
-                                        <i class="fas fa-question-circle w-4 shrink-0 text-center text-slate-400" aria-hidden="true"></i> Pusat Bantuan
-                                    </a>
-                                @elseif(auth()->user()->hasRole('admin-kab-kota'))
-                                    <a href="{{ route('admin-kab-kota.help') }}"
-                                        class="flex items-center gap-3 p-2.5 rounded-xl text-slate-700 hover:bg-[#13416B]/10 hover:text-[#13416B] font-medium transition-colors">
-                                        <i class="fas fa-question-circle w-4 shrink-0 text-center text-slate-400" aria-hidden="true"></i> Pusat Bantuan
-                                    </a>
-                                @else
-                                    <a href="{{ route('user.help') }}"
-                                        class="flex items-center gap-3 p-2.5 rounded-xl text-slate-700 hover:bg-[#13416B]/10 hover:text-[#13416B] font-medium transition-colors">
-                                        <i class="fas fa-question-circle w-4 shrink-0 text-center text-slate-400" aria-hidden="true"></i> Pusat Bantuan
-                                    </a>
-                                @endif
+                                <button type="button" @click="open = false; $dispatch('open-help-modal')"
+                                    class="flex w-full cursor-pointer items-center gap-3 p-2.5 rounded-xl text-slate-700 hover:bg-[#13416B]/10 hover:text-[#13416B] font-medium transition-colors text-left">
+                                    <i class="fas fa-question-circle w-4 shrink-0 text-center text-slate-400" aria-hidden="true"></i> Pusat Bantuan
+                                </button>
                             </li>
 
                             <li>

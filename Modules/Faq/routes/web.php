@@ -3,23 +3,12 @@
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::prefix('admin-pusat')->middleware(['role:admin-pusat|super-admin'])->name('admin-pusat.')->group(function () {
-        Route::get('faqs/export', [\Modules\Faq\Http\Controllers\AdminPusat\FaqController::class, 'export'])->name('faq.export');
-        Route::resource('faqs', \Modules\Faq\Http\Controllers\AdminPusat\FaqController::class)->names('faq');
-        Route::get('/help', [\Modules\Faq\Http\Controllers\AdminPusat\HelpController::class, 'index'])->name('help');
-    });
+    // JSON untuk modal Pusat Bantuan (pengganti halaman bantuan per role).
+    Route::get('/help/faqs', [\Modules\Faq\Http\Controllers\HelpFaqController::class, 'index'])->name('help.faqs');
 
-    Route::prefix('admin-province')->middleware(['role:admin-province'])->name('admin-province.')->group(function () {
-        Route::resource('faqs', \Modules\Faq\Http\Controllers\AdminProvince\FaqController::class)->only(['index'])->names('faq');
-        Route::get('/help', [\Modules\Faq\Http\Controllers\AdminProvince\HelpController::class, 'index'])->name('help');
-    });
-
-    Route::prefix('admin-kab-kota')->middleware(['role:admin-kab-kota'])->name('admin-kab-kota.')->group(function () {
-        Route::resource('faqs', \Modules\Faq\Http\Controllers\AdminKabKota\FaqController::class)->only(['index'])->names('faq');
-        Route::get('/help', [\Modules\Faq\Http\Controllers\AdminKabKota\HelpController::class, 'index'])->name('help');
-    });
-
-    Route::prefix('user')->middleware(['role:user'])->name('user.')->group(function () {
-        Route::get('/help', [\Modules\Faq\Http\Controllers\User\HelpController::class, 'index'])->name('help');
+    // Manajemen FAQ hanya di super-admin (satu pintu untuk semua target role).
+    Route::prefix('super-admin')->middleware(['role:super-admin'])->name('super-admin.')->group(function () {
+        Route::get('faqs/export', [\Modules\Faq\Http\Controllers\SuperAdmin\FaqController::class, 'export'])->name('faq.export');
+        Route::resource('faqs', \Modules\Faq\Http\Controllers\SuperAdmin\FaqController::class)->names('faq');
     });
 });

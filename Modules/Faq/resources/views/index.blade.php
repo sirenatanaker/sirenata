@@ -1,38 +1,44 @@
 <x-dashboard::layouts.dashboard title="FAQ - E-Learning">
     <div class="p-2 sm:p-6">
-        <x-breadcrumb :home="route('admin-pusat.dashboard')" :items="[
+        <x-breadcrumb :home="route('super-admin.dashboard')" :items="[
             ['label' => 'FAQ']
         ]" />
 
-        <x-dashboard::filter-card 
-            title="Daftar FAQ" 
+        @php
+            $roleLabels = [];
+            foreach ($targetRoles as $targetRole) {
+                $roleLabels[$targetRole] = ucwords(str_replace(['-', '_'], ' ', $targetRole));
+            }
+            $roleBadgeColors = ['slate', 'indigo', 'amber', 'emerald', 'blue', 'red'];
+        @endphp
+
+        <x-dashboard::filter-card
+            title="Daftar FAQ"
             :total="$faqs->total() . ' FAQ'"
             :resetUrl="route($routePrefix . 'index')">
-            
+
             <x-slot name="actions">
-                <x-button :href="route('admin-pusat.faq.export') . '?' . http_build_query(request()->only(['search', 'level']))" variant="success" icon="fas fa-download" title="Ekspor Data">
+                <x-button :href="route($routePrefix . 'export') . '?' . http_build_query(request()->only(['search', 'role']))" variant="success" icon="fas fa-download" title="Ekspor Data">
                     <span class="hidden sm:inline">Ekspor</span>
                 </x-button>
-                @role('admin-pusat')
                 <x-button x-data x-on:click="$dispatch('open-modal', 'create-faq')" variant="primary" icon="fas fa-plus">
                     Tambah FAQ
                 </x-button>
-                @endrole
             </x-slot>
 
             <x-slot name="filter_inputs">
-                <!-- Level -->
+                <!-- Role target -->
                 <div class="w-full sm:w-48">
                     <label class="block text-xs font-medium text-slate-500 mb-1">
-                        Filter Level
+                        Filter Role
                     </label>
                     <div class="relative">
-                        <i class="fas fa-filter absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
-                        <select name="level" class="pl-9 pr-3 py-2.5 w-full rounded-lg border border-slate-300 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
-                            <option value="">Semua Level</option>
-                            <option value="Nasional" @selected(request('level') === 'Nasional')>Nasional</option>
-                            <option value="Provinsi" @selected(request('level') === 'Provinsi')>Provinsi</option>
-                            <option value="Kab/Kota" @selected(request('level') === 'Kab/Kota')>Kab/Kota</option>
+                        <i class="fas fa-users absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+                        <select name="role" class="pl-9 pr-3 py-2.5 w-full rounded-lg border border-slate-300 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                            <option value="">Semua Role</option>
+                            @foreach ($targetRoles as $targetRole)
+                                <option value="{{ $targetRole }}" @selected(request('role') === $targetRole)>{{ $roleLabels[$targetRole] }}</option>
+                            @endforeach
                         </select>
                     </div>
                 </div>
@@ -69,7 +75,7 @@
                     <tr>
                         <x-table.th align="left">No.</x-table.th>
                         <x-table.th>Pertanyaan</x-table.th>
-                        <x-table.th>Level</x-table.th>
+                        <x-table.th>Ditujukan Untuk</x-table.th>
                         <x-table.th>Dibuat Oleh</x-table.th>
                         <x-table.th align="center">Aksi</x-table.th>
                     </tr>
@@ -85,13 +91,13 @@
                                 {{ Str::limit($faq->question, 60) }}
                             </x-table.td>
                             <x-table.td>
-                                @if($faq->level === 'Nasional')
-                                    <x-badge color="emerald" text="Nasional" />
-                                @elseif($faq->level === 'Provinsi')
-                                    <x-badge color="indigo" text="Provinsi" />
-                                @elseif($faq->level === 'Kab/Kota')
-                                    <x-badge color="amber" text="Kab/Kota" />
-                                @endif
+                                <div class="flex flex-wrap gap-1">
+                                    @forelse ($faq->roles as $index => $faqRole)
+                                        <x-badge :color="$roleBadgeColors[$index % count($roleBadgeColors)]" :text="$roleLabels[$faqRole->name] ?? $faqRole->name" />
+                                    @empty
+                                        <span class="text-xs text-slate-400">-</span>
+                                    @endforelse
+                                </div>
                             </x-table.td>
                             <x-table.td>
                                 {{ $faq->creator->name ?? 'Sistem' }}
@@ -102,7 +108,6 @@
                                         <button x-data x-on:click="$dispatch('open-modal', 'show-faq-{{ $faq->id }}')"
                                             class="inline-flex items-center w-full p-2 hover:bg-slate-100 rounded text-slate-700 text-xs">Detail</button>
                                     </li>
-                                    @role('admin-pusat')
                                     <li>
                                         <button x-data x-on:click="$dispatch('open-modal', 'edit-faq-{{ $faq->id }}')"
                                             class="inline-flex items-center w-full p-2 hover:bg-slate-100 rounded text-slate-700 text-xs">Ubah</button>
@@ -113,7 +118,6 @@
                                                 :item-name="Str::limit($faq->question, 40)" buttonText="Hapus" buttonClass="w-full text-left text-red-600 outline-none cursor-pointer" :route="route($routePrefix . 'destroy', $faq->id)" />
                                         </div>
                                     </li>
-                                    @endrole
                                 </x-table.action>
                             </x-table.td>
                         </tr>
@@ -139,16 +143,28 @@
     </div>
 
     <x-modal name="create-faq" title="Tambah FAQ Baru">
-        <form action="{{ route($routePrefix . 'store') }}" method="POST"
-            x-data="{ level: '{{ old('level', 'Nasional') }}' }" class="space-y-4">
+        <form action="{{ route($routePrefix . 'store') }}" method="POST" class="space-y-4">
             @csrf
             <x-form.input name="question" label="Pertanyaan" :required="true" />
-            
-            <x-form.select name="level" label="Level" :required="true" x-model="level">
-                <option value="Nasional">Nasional (Tingkat Pusat)</option>
-                <option value="Provinsi">Provinsi</option>
-                <option value="Kab/Kota">Kabupaten/Kota</option>
-            </x-form.select>
+
+            <div>
+                <span class="block text-sm font-medium text-gray-700 mb-2 after:ml-0.5 after:text-red-500 after:content-['*']">
+                    Ditujukan Untuk (boleh lebih dari satu)
+                </span>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                    @foreach ($targetRoles as $targetRole)
+                        <label class="flex items-center gap-2.5 px-3.5 py-2.5 rounded-lg border border-slate-300 cursor-pointer transition-all hover:border-indigo-300 has-[:checked]:border-indigo-500 has-[:checked]:bg-indigo-50/50 text-sm font-medium text-slate-700">
+                            <input type="checkbox" name="roles[]" value="{{ $targetRole }}"
+                                class="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 w-4 h-4"
+                                @checked(in_array($targetRole, old('roles', [$targetRoles[0] ?? 'user'])))>
+                            {{ $roleLabels[$targetRole] }}
+                        </label>
+                    @endforeach
+                </div>
+                @error('roles')
+                    <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
+                @enderror
+            </div>
 
             <x-form.textarea name="answer" label="Jawaban" :rows="5" :required="true" />
 
@@ -171,14 +187,14 @@
                     <p class="text-gray-900 font-semibold">{{ $faq->question }}</p>
                 </div>
                 <div>
-                    <h4 class="text-sm font-medium text-gray-500 mb-1">Level</h4>
-                    @if($faq->level === 'Nasional')
-                        <x-badge color="emerald" text="Nasional" />
-                    @elseif($faq->level === 'Provinsi')
-                        <x-badge color="indigo" text="Provinsi" />
-                    @elseif($faq->level === 'Kab/Kota')
-                        <x-badge color="amber" text="Kab/Kota" />
-                    @endif
+                    <h4 class="text-sm font-medium text-gray-500 mb-1">Ditujukan Untuk</h4>
+                    <div class="flex flex-wrap gap-1">
+                        @forelse ($faq->roles as $index => $faqRole)
+                            <x-badge :color="$roleBadgeColors[$index % count($roleBadgeColors)]" :text="$roleLabels[$faqRole->name] ?? $faqRole->name" />
+                        @empty
+                            <span class="text-xs text-slate-400">-</span>
+                        @endforelse
+                    </div>
                 </div>
                 <div>
                     <h4 class="text-sm font-medium text-gray-500 mb-1">Jawaban</h4>
@@ -195,17 +211,29 @@
 
     @foreach($faqs as $faq)
         <x-modal name="edit-faq-{{ $faq->id }}" title="Edit FAQ">
-            <form action="{{ route($routePrefix . 'update', $faq->id) }}" method="POST"
-                x-data="{ level: '{{ old('level', $faq->level) }}' }" class="space-y-4">
+            <form action="{{ route($routePrefix . 'update', $faq->id) }}" method="POST" class="space-y-4">
                 @csrf
                 @method('PUT')
                 <x-form.input name="question" label="Pertanyaan" :required="true" :value="old('question', $faq->question)" />
-                
-                <x-form.select name="level" label="Level" :required="true" x-model="level">
-                    <option value="Nasional">Nasional (Tingkat Pusat)</option>
-                    <option value="Provinsi">Provinsi</option>
-                    <option value="Kab/Kota">Kabupaten/Kota</option>
-                </x-form.select>
+
+                <div>
+                    <span class="block text-sm font-medium text-gray-700 mb-2 after:ml-0.5 after:text-red-500 after:content-['*']">
+                        Ditujukan Untuk (boleh lebih dari satu)
+                    </span>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                        @foreach ($targetRoles as $targetRole)
+                            <label class="flex items-center gap-2.5 px-3.5 py-2.5 rounded-lg border border-slate-300 cursor-pointer transition-all hover:border-indigo-300 has-[:checked]:border-indigo-500 has-[:checked]:bg-indigo-50/50 text-sm font-medium text-slate-700">
+                                <input type="checkbox" name="roles[]" value="{{ $targetRole }}"
+                                    class="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 w-4 h-4"
+                                    @checked(in_array($targetRole, old('roles', $faq->roles->pluck('name')->all())))>
+                                {{ $roleLabels[$targetRole] }}
+                            </label>
+                        @endforeach
+                    </div>
+                    @error('roles')
+                        <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
+                    @enderror
+                </div>
 
                 <x-form.textarea name="answer" label="Jawaban" :rows="5" :required="true" :value="old('answer', $faq->answer)" />
 
