@@ -15,7 +15,6 @@
                     <div class="relative">
                         <img src="https://ui-avatars.com/api/?name={{ urlencode($user->profile?->full_name ?? $user->name) }}&background=6366f1&color=fff&size=160"
                             alt="Profile" class="w-40 h-40 rounded-full border-4 border-white">
-                        <div class="absolute bottom-3 right-3 w-7 h-7 bg-green-500 border-2 border-white rounded-full"></div>
                     </div>
                 </div>
             </div>
@@ -74,15 +73,20 @@
                             <p class="text-sm text-slate-500">Kelola data diri akun Anda.</p>
                         </div>
 
+                        @php $ssoUser = ! empty($user->siapkerja_id); @endphp
                         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-                            <x-form.input name="full_name" label="Nama Lengkap" :required="true" value="{{ $user->profile?->full_name }}" />
+                            @if ($ssoUser)
+                                <x-form.input name="full_name" label="Nama Lengkap" value="{{ $user->profile?->full_name ?? $user->name }}" disabled helper="Mengikuti nama akun SIAPKerja" />
+                            @else
+                                <x-form.input name="full_name" label="Nama Lengkap" :required="true" value="{{ $user->profile?->full_name }}" />
+                            @endif
                             <x-form.input name="nik" label="NIK" value="{{ $user->profile?->nik }}" readonly class="bg-gray-100 border border-gray-200 rounded-xl cursor-not-allowed" />
                         </div>
 
                         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-                            <x-form.input name="email" label="Email" value="{{ $user->email }}" readonly class="bg-gray-100 border border-gray-200 rounded-xl cursor-not-allowed" />
-                            <x-form.input name="phone" label="Nomor Handphone" :required="true" type="tel" inputmode="numeric" pattern="[0-9+]*" placeholder="08xxxx atau +628xxxx" value="{{ $user->profile?->phone }}" />
-                            <x-form.select name="gender" label="Gender" :required="true">
+                            <x-form.input name="email" label="Email" value="{{ $user->email }}" readonly helper="Mengikuti akun login" class="bg-gray-100 border border-gray-200 rounded-xl cursor-not-allowed" />
+                            <x-form.input name="phone" label="Nomor Handphone" type="tel" inputmode="numeric" pattern="[0-9+]*" placeholder="08xxxx atau +628xxxx" value="{{ $user->profile?->phone }}" helper="Boleh dikosongkan" />
+                            <x-form.select name="gender" label="Gender">
                                 <option value="" disabled selected>Pilih Gender</option>
                                 <option value="male"
                                     {{ old('gender', $user->profile?->gender) == 'male' ? 'selected' : '' }}>Laki-laki
@@ -92,10 +96,10 @@
                                     Perempuan
                                 </option>
                             </x-form.select>
-                            <x-form.input name="instansi" label="Kementerian/Lembaga" :required="true" value="{{ $user->profile?->instansi }}" placeholder="Kementerian Ketenagakerjaan RI" />
-                            <x-form.input name="unit_kerja" label="Unit Kerja" :required="true" value="{{ $user->profile?->unit_kerja }}" placeholder="SDM" />
-                            <x-form.input name="province_name" label="Provinsi" value="{{ $user->scopeArea?->province?->name }}" readonly class="bg-gray-100 border border-gray-200 rounded-xl cursor-not-allowed" />
-                            <x-form.input name="regency_name" label="Kab/Kota" value="{{ $user->scopeArea?->regency?->name }}" readonly class="bg-gray-100 border border-gray-200 rounded-xl cursor-not-allowed" />
+                            <x-form.input name="instansi" label="Kementerian/Lembaga" value="{{ $user->profile?->instansi }}" placeholder="Kementerian Ketenagakerjaan RI" />
+                            <x-form.input name="unit_kerja" label="Unit Kerja" value="{{ $user->profile?->unit_kerja }}" placeholder="SDM" />
+                            <x-form.input name="province_name" label="Provinsi" value="{{ $user->scopeArea?->province?->name }}" readonly helper="Mengikuti data wilayah" class="bg-gray-100 border border-gray-200 rounded-xl cursor-not-allowed" />
+                            <x-form.input name="regency_name" label="Kab/Kota" value="{{ $user->scopeArea?->regency?->name }}" readonly helper="Mengikuti data wilayah" class="bg-gray-100 border border-gray-200 rounded-xl cursor-not-allowed" />
                         </div>
 
                         <div class="flex justify-end">

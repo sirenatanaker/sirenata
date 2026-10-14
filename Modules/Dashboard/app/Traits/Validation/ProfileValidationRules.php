@@ -28,7 +28,8 @@ trait ProfileValidationRules {
      */
     protected function fullNameRules(): array
     {
-        return ['required', 'string', 'max:255'];
+        // Nullable agar partial update lolos; service fallback ke data lama.
+        return ['nullable', 'string', 'max:255'];
     }
 
     /**
@@ -36,7 +37,7 @@ trait ProfileValidationRules {
      */
     protected function phoneRules(): array
     {
-        return ['required', 'string', 'regex:/^(\+62|08)[0-9]{8,13}$/'];
+        return ['nullable', 'string', 'regex:/^(\+62|08)[0-9]{8,13}$/'];
     }
 
     /**
@@ -44,7 +45,7 @@ trait ProfileValidationRules {
      */
     protected function genderRules(): array
     {
-        return ['required', Rule::in(['male', 'female'])];
+        return ['nullable', Rule::in(['male', 'female'])];
     }
 
     /**
@@ -52,12 +53,12 @@ trait ProfileValidationRules {
      */
     protected function instansiRules(): array
     {
-        return ['required', 'string', 'max:255'];
+        return ['nullable', 'string', 'max:255'];
     }
 
     protected function unitKerjaRules(): array
     {
-        return ['required', 'string', 'max:255'];
+        return ['nullable', 'string', 'max:255'];
     }
 
 
