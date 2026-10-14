@@ -306,22 +306,12 @@
                     </a>
                 </div>
 
-                <!-- Avatar Social Proof -->
-                <div class="flex flex-row items-center gap-2 sm:gap-4">
-                    <div class="flex shrink-0 -space-x-2.5 sm:-space-x-3">
-                        <div class="flex h-8 w-8 items-center justify-center rounded-full border-2 border-white text-[10px] font-extrabold text-white shadow-sm sm:h-10 sm:w-10 sm:text-xs"
-                            style="background-color: #103F6E;">JD</div>
-                        <div class="flex h-8 w-8 items-center justify-center rounded-full border-2 border-white text-[10px] font-extrabold text-white shadow-sm sm:h-10 sm:w-10 sm:text-xs"
-                            style="background-color: #507A9E;">FW</div>
-                        <div class="flex h-8 w-8 items-center justify-center rounded-full border-2 border-white text-[10px] font-extrabold text-white shadow-sm sm:h-10 sm:w-10 sm:text-xs"
-                            style="background-color: #81A9CA;">RM</div>
-                        <div
-                            class="flex h-8 w-8 items-center justify-center rounded-full border-2 border-white bg-slate-50 text-[10px] font-bold text-slate-600 shadow-sm sm:h-10 sm:w-10 sm:text-xs">
-                            +<span class="stat-counter"
-                                data-target="{{ round(($stats['participants'] ?? 1200) / 1000, 1) }}"
-                                data-suffix="K">0</span></div>
-                    </div>
-                    <p class="min-w-0 max-w-[190px] text-xs font-medium leading-relaxed text-slate-600 sm:max-w-xs sm:text-sm">Bergabung dengan pengguna lainnya.</p>
+                <!-- Integrasi SIAPKerja -->
+                <div class="flex flex-row items-center gap-2 sm:gap-3">
+                    <p class="min-w-0 text-sm font-medium leading-relaxed text-slate-600 sm:text-base flex items-center gap-2.5">
+                        <img src="{{ asset('images/siapkerja.webp') }}" alt="SIAPKerja" class="h-6 sm:h-8 w-auto shrink-0">
+                        <span>Terintegrasi dengan <span class="font-bold text-slate-800">SIAPKerja</span></span>
+                    </p>
                 </div>
             </div>
 
