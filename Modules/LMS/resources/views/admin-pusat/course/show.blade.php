@@ -99,7 +99,7 @@
                     </div>
 
                     <!-- Modal Tambah Bagian (Section) -->
-                    <x-modal name="course_sections-{{ $course->slug }}" title="Tambah Bagian Baru" maxWidth="sm:max-w-xl">
+                    <x-modal name="course_sections-{{ $course->slug }}" title="" maxWidth="sm:max-w-xl">
                         <x-validation-errors class="mb-4" />
                         <form action="{{ route('admin-pusat.management-course.course-sections.store') }}" method="POST">
                             @csrf

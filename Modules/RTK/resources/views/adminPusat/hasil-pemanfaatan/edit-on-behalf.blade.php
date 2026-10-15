@@ -18,7 +18,7 @@
         <form x-ref="mainForm" @submit.prevent="validateAndSubmit" action="{{ route('admin-pusat.hasil-pemanfaatan-rtkd.store-on-behalf', $submission->id) }}" method="POST" enctype="multipart/form-data" class="space-y-6">
             @csrf
 
-            <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden border-l-4 border-l-indigo-600">
+            <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
                 <div class="px-4 py-3 border-b border-slate-200 bg-slate-50 flex justify-between items-center">
                     <div class="flex items-center gap-2">
                         <span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-indigo-600 text-white text-xs font-bold">1</span>
@@ -112,7 +112,7 @@
             <template x-if="hasRtkd">
                 <div class="space-y-4">
                     
-                    <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden border-l-4 border-l-indigo-600">
+                    <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
                         <div class="px-4 py-3 border-b border-slate-200 bg-slate-50 flex justify-between items-center">
                             <div class="flex items-center gap-2">
                                 <span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-indigo-600 text-white text-xs font-bold">2</span>
@@ -193,10 +193,10 @@
                     </template>
 
                     <template x-if="jadiAcuan === 'ya'">
-                        <div class="space-y-4 border-l-4 border-indigo-500 pl-4 py-2">
+                        <div class="space-y-4 py-2">
                             <p class="text-sm text-slate-600 mb-2 font-medium">Pilih dokumen perencanaan yang menjadikan RTKD sebagai acuan, unggah buktinya, lalu pilih komponennya. <span class="text-red-500">* (Pilih minimal satu dokumen)</span></p>
                             
-                            <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden border-l-4 border-l-slate-400">
+                            <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
                                 <label class="flex items-center gap-3 px-4 py-3 bg-slate-50 border-b border-slate-200 cursor-pointer hover:bg-slate-100 transition">
                                     <input type="checkbox" name="dokumen_acuan[]" value="rpjmd" class="w-5 h-5 rounded border-gray-300 text-indigo-600 focus:ring-indigo-600" x-model="dokumenAcuan">
                                     <span class="font-semibold text-slate-800">RPJMD <span class="font-normal text-slate-500 text-sm">(Rencana Pembangunan Jangka Menengah Daerah)</span></span>
@@ -254,7 +254,7 @@
                                 </div>
                             </div>
 
-                            <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden border-l-4 border-l-slate-400">
+                            <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
                                 <label class="flex items-center gap-3 px-4 py-3 bg-slate-50 border-b border-slate-200 cursor-pointer hover:bg-slate-100 transition">
                                     <input type="checkbox" name="dokumen_acuan[]" value="renstra" class="w-5 h-5 rounded border-gray-300 text-indigo-600 focus:ring-indigo-600" x-model="dokumenAcuan">
                                     <span class="font-semibold text-slate-800">RENSTRA Disnaker <span class="font-normal text-slate-500 text-sm">(Rencana Strategis Perangkat Daerah)</span></span>
@@ -312,7 +312,7 @@
                                 </div>
                             </div>
 
-                            <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden border-l-4 border-l-slate-400">
+                            <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
                                 <label class="flex items-center gap-3 px-4 py-3 bg-slate-50 border-b border-slate-200 cursor-pointer hover:bg-slate-100 transition">
                                     <input type="checkbox" name="dokumen_acuan[]" value="lainnya" class="w-5 h-5 rounded border-gray-300 text-indigo-600 focus:ring-indigo-600" x-model="dokumenAcuan">
                                     <span class="font-semibold text-slate-800">Dokumen Lainnya</span>

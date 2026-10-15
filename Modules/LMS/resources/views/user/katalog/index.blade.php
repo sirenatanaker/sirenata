@@ -179,6 +179,10 @@
                         'students'     => $c->students_count,
                         'modules'      => $c->sections_count,
                         'topics'       => $sections->sum(fn($s) => count($s['contents'])),
+                        'thumbnail'    => ! empty($c->thumbnail)
+                            ? (str_starts_with($c->thumbnail, 'http') ? $c->thumbnail : asset('storage/' . $c->thumbnail))
+                            : null,
+                        'audienceLabel' => ($c->audience ?? 'instansi') === 'swasta' ? 'Swasta' : 'Instansi',
                         'sections'     => $sections,
                         'enrollUrl'    => route('user.catalog.enroll', $c->slug),
                     ]];
@@ -325,31 +329,46 @@
                         <template x-if="selected">
                             <div class="flex flex-col min-h-0 flex-1">
 
-                                {{-- Header --}}
-                                <div class="px-5 pt-5 pb-4 border-b border-slate-100">
-                                    <div class="flex items-start justify-between gap-3">
-                                        <div class="min-w-0">
-                                            <span class="inline-block px-2 py-0.5 mb-2 text-[10px] font-bold uppercase tracking-wider text-[#13416B] bg-[#13416B]/5 rounded"
-                                                  x-text="selected.category"></span>
-                                            <h3 id="enroll-title" class="text-lg font-bold text-slate-800 leading-snug" x-text="selected.name"></h3>
+                                {{-- Hero thumbnail --}}
+                                <div class="relative h-36 sm:h-44 shrink-0 bg-gradient-to-r from-[#13416B] to-[#0f3354] overflow-hidden">
+                                    <template x-if="selected.thumbnail">
+                                        <img :src="selected.thumbnail" alt="" class="w-full h-full object-cover" />
+                                    </template>
+                                    <template x-if="!selected.thumbnail">
+                                        <div class="w-full h-full flex items-center justify-center">
+                                            <i class="fas fa-graduation-cap text-4xl text-white/30"></i>
                                         </div>
-                                        <button type="button" @click="close()" aria-label="Tutup"
-                                                class="shrink-0 w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors">
-                                            <i class="fas fa-times"></i>
-                                        </button>
+                                    </template>
+                                    <div class="absolute inset-0 bg-gradient-to-t from-slate-900/70 via-slate-900/10 to-transparent pointer-events-none"></div>
+                                    <button type="button" @click="close()" aria-label="Tutup"
+                                        class="absolute top-3 right-3 w-8 h-8 flex items-center justify-center rounded-full bg-white/90 text-slate-600 hover:text-slate-900 hover:bg-white shadow-md transition-colors">
+                                        <i class="fas fa-times text-sm"></i>
+                                    </button>
+                                    <div class="absolute bottom-3 left-5 flex flex-wrap gap-1.5">
+                                        <span class="px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white bg-white/20 border border-white/30 rounded backdrop-blur-sm"
+                                            x-text="selected.category"></span>
+                                        <span class="px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white bg-amber-500/90 border border-amber-400/50 rounded backdrop-blur-sm"
+                                            x-text="selected.audienceLabel"></span>
                                     </div>
+                                </div>
 
-                                    <div class="grid grid-cols-3 gap-2 mt-4 text-center">
-                                        <div class="bg-slate-50 rounded-lg py-2">
-                                            <div class="text-base font-extrabold text-[#13416B]" x-text="selected.modules"></div>
+                                {{-- Judul --}}
+                                <div class="px-5 pt-4 pb-3 border-b border-slate-100">
+                                    <h3 id="enroll-title" class="text-lg font-bold text-slate-800 leading-snug" x-text="selected.name"></h3>
+
+                                    <div class="grid grid-cols-2 gap-2 mt-3 text-center">
+                                        <div class="bg-slate-50 rounded-lg py-2 border border-slate-100">
+                                            <div class="text-base font-extrabold text-[#13416B] flex items-center justify-center gap-1.5">
+                                                <i class="fas fa-layer-group text-xs text-slate-400"></i>
+                                                <span x-text="selected.modules"></span>
+                                            </div>
                                             <div class="text-[10px] font-semibold text-slate-500 uppercase tracking-wide">Modul</div>
                                         </div>
-                                        <div class="bg-slate-50 rounded-lg py-2">
-                                            <div class="text-base font-extrabold text-[#13416B]" x-text="selected.topics"></div>
-                                            <div class="text-[10px] font-semibold text-slate-500 uppercase tracking-wide">Topik</div>
-                                        </div>
-                                        <div class="bg-slate-50 rounded-lg py-2">
-                                            <div class="text-base font-extrabold text-[#13416B]" x-text="selected.students.toLocaleString('id-ID')"></div>
+                                        <div class="bg-slate-50 rounded-lg py-2 border border-slate-100">
+                                            <div class="text-base font-extrabold text-[#13416B] flex items-center justify-center gap-1.5">
+                                                <i class="fas fa-users text-xs text-slate-400"></i>
+                                                <span x-text="selected.students.toLocaleString('id-ID')"></span>
+                                            </div>
                                             <div class="text-[10px] font-semibold text-slate-500 uppercase tracking-wide">Peserta</div>
                                         </div>
                                     </div>
