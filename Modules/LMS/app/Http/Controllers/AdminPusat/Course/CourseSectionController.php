@@ -42,7 +42,7 @@ class CourseSectionController extends Controller
             $payload = [
                 'slug'        => $validated['course_slug'],
                 'name'        => $validated['name'],
-                'description' => $validated['description'],
+                'description' => $validated['description'] ?? null,
             ];
 
             // Panggil service tanpa menggunakan token API sama sekali

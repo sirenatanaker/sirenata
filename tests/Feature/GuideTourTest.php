@@ -32,3 +32,13 @@ test('tour assets partial loads driver.js with shared helpers', function () {
         expect($source)->toContain($needle);
     }
 });
+
+test('admin course detail exposes guided tour hooks', function () {
+    $source = file_get_contents(
+        base_path('Modules/LMS/resources/views/admin-pusat/course/show.blade.php')
+    );
+
+    foreach (['data-tour="kurikulum"', 'data-tour="evaluasi"', 'startCourseDetailTour', 'guide-tour-detail'] as $needle) {
+        expect($source)->toContain($needle);
+    }
+});

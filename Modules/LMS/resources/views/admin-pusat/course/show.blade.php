@@ -42,6 +42,10 @@
                     <span class="px-3 py-1 text-[10px] sm:text-xs font-bold uppercase tracking-wider text-[#13416B] bg-[#13416B]/10 border border-[#13416B]/20 rounded-md">
                         {{ $course->category->name ?? 'Tanpa Kategori' }}
                     </span>
+                    <button type="button" onclick="window.startCourseDetailTour && window.startCourseDetailTour()"
+                        class="ml-auto inline-flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-bold text-[#13416B] bg-[#13416B]/10 border border-[#13416B]/20 rounded-lg hover:bg-[#13416B]/20 transition-colors">
+                        <i class="fas fa-route"></i> Panduan
+                    </button>
                 </div>
 
                 <!-- Judul -->
@@ -79,7 +83,7 @@
             
             <!-- KOLOM KIRI (Kurikulum) -->
             <div class="order-2 lg:order-1 lg:col-span-2 space-y-6">
-                <div class="bg-white rounded-md shadow-sm border border-slate-200 overflow-hidden">
+                <div class="bg-white rounded-md shadow-sm border border-slate-200 overflow-hidden" data-tour="kurikulum">
                     <!-- Header Kurikulum -->
                     <div class="px-5 sm:px-6 py-4 sm:py-5 border-b border-slate-100 bg-slate-50 flex flex-col sm:flex-row justify-between sm:items-center gap-4">
                         <div class="flex items-center gap-3">
@@ -112,13 +116,6 @@
                                     </label>
                                     <input type="text" name="name" required placeholder="Contoh: Bab 1: Pengenalan Dasar"
                                         class="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm focus:border-[#13416B] focus:ring-1 focus:ring-[#13416B] shadow-sm" />
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-semibold text-slate-700 mb-1.5">
-                                        Deskripsi <span class="text-slate-400 font-normal">(Opsional)</span>
-                                    </label>
-                                    <textarea name="description" rows="3" placeholder="Tuliskan gambaran singkat mengenai bagian ini..."
-                                        class="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm focus:border-[#13416B] focus:ring-1 focus:ring-[#13416B] shadow-sm"></textarea>
                                 </div>
                             </div>
                             <div class="flex justify-end gap-3 mt-8 pt-4 border-t border-slate-100">
@@ -294,7 +291,7 @@
                                         ->whereNull('course_section_id')
                                         ->first();
                                 @endphp
-                                <div class="bg-gradient-to-r from-[#13416B] to-[#0f3354] rounded-md overflow-hidden shadow-md mt-8 relative">
+                                <div class="bg-gradient-to-r from-[#13416B] to-[#0f3354] rounded-md overflow-hidden shadow-md mt-8 relative" data-tour="evaluasi">
                                     <div class="p-5 sm:p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5">
                                         <div class="flex items-start sm:items-center gap-4 flex-1">
                                             <div class="w-12 h-12 rounded-full bg-white/20 text-white flex items-center justify-center shrink-0 border border-white/30 mt-1 sm:mt-0">
@@ -431,4 +428,6 @@
             </div>
         </div>
     </div>
+
+    @include('lms::admin-pusat.course.partials.guide-tour-detail')
 </x-dashboard::layouts.dashboard>

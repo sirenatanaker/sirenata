@@ -78,7 +78,6 @@
                         type="text"
                         x-model="newCategoryName"
                         maxlength="255"
-                        required
                         placeholder="Nama kategori baru"
                         class="min-w-0 flex-1 rounded-lg border border-slate-300 px-3 py-2.5 text-sm focus:border-[#13416B] focus:outline-none focus:ring-2 focus:ring-[#13416B]/20">
                     <button
@@ -183,6 +182,11 @@
                     },
 
                     async createCategory() {
+                        if (!this.newCategoryName.trim()) {
+                            this.error = 'Nama kategori wajib diisi.';
+                            return;
+                        }
+
                         this.busy = true;
                         this.error = '';
                         this.notice = '';
