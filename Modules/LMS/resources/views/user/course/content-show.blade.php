@@ -225,104 +225,26 @@
                 animation: completedPop 0.45s ease-out;
             }
 
-            /* --- STYLE RENDER MATERI (Menyamakan dengan Preview/Editor Admin) --- */
-            
-            .quill-content-render .ql-align-center { text-align: center !important; }
-            .quill-content-render .ql-align-right { text-align: right !important; }
-            .quill-content-render .ql-align-justify { text-align: justify !important; }
-
-            .quill-content-render img,
-            .quill-content-render video,
-            .quill-content-render iframe.ql-video,
-            .quill-content-render iframe {
-                display: inline-block !important;
-                max-width: 100%;
-                height: auto;
-                margin-top: 1.5rem;
-                margin-bottom: 1.5rem;
-                border-radius: 0.5rem;
-                box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-            }
-
-            .quill-content-render img[style*="margin: auto"],
-            .quill-content-render img[style*="display: block"],
-            .quill-content-render video[style*="margin: auto"],
-            .quill-content-render video[style*="display: block"],
-            .quill-content-render iframe[style*="margin: auto"],
-            .quill-content-render iframe[style*="display: block"] {
-                display: block !important;
-                margin-left: auto !important;
-                margin-right: auto !important;
-            }
-
-            .quill-content-render img[style*="float: left"],
-            .quill-content-render video[style*="float: left"],
-            .quill-content-render iframe[style*="float: left"] {
-                float: left !important;
-                margin-right: 1.5rem !important;
-                margin-bottom: 1rem !important;
-                margin-top: 0.5rem !important;
-            }
-
-            .quill-content-render img[style*="float: right"],
-            .quill-content-render video[style*="float: right"],
-            .quill-content-render iframe[style*="float: right"] {
-                float: right !important;
-                margin-left: 1.5rem !important;
-                margin-bottom: 1rem !important;
-                margin-top: 0.5rem !important;
-            }
-
-            .quill-content-render .ql-indent-1 { padding-left: 3em !important; }
-            .quill-content-render .ql-indent-2 { padding-left: 6em !important; }
-            .quill-content-render .ql-indent-3 { padding-left: 9em !important; }
-            .quill-content-render .ql-indent-4 { padding-left: 12em !important; }
-
-            .quill-content-render pre.ql-syntax {
-                background-color: #0f172a !important;
-                color: #f8fafc !important;
-                padding: 1rem sm:1.25rem !important;
-                border-radius: 0.5rem sm:0.75rem !important;
-                overflow-x: auto !important;
-                text-align: left !important;
-                font-size: 0.75rem sm:0.875rem !important;
-                line-height: 1.6 !important;
-                border: 1px solid #1e293b;
-            }
-
-            /* Style Khusus Blockquote */
-            .quill-content-render blockquote {
-                border-left: 4px solid #13416B !important;
-                background-color: #f8fafc !important;
-                padding: 16px 20px !important;
-                margin: 12px 0 !important;
-                font-style: italic !important;
-                color: #334155 !important;
-                border-radius: 0 10px 10px 0 !important;
-                position: relative;
-                overflow: hidden;
-            }
-            .quill-content-render blockquote::after {
-                content: "\f10d";
-                font-family: "Font Awesome 5 Free";
-                font-weight: 900;
-                position: absolute;
-                top: -4px;
-                right: 12px;
-                font-size: 40px;
-                color: #e2e8f0;
-                opacity: 0.5;
-                z-index: 0;
-            }
-            .quill-content-render blockquote * {
-                position: relative;
-                z-index: 1;
-            }
+            @include('lms::partials.quill-content-style')
         </style>
     @endpush
 
     @push('scripts')
         @include('lms::user.course.partials.guide-assets')
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                if (window.hljs) {
+                    try { hljs.highlightAll(); } catch (e) {}
+                }
+                if (window.katex) {
+                    document.querySelectorAll('.quill-content-render .ql-formula[data-value]').forEach(function (el) {
+                        try { katex.render(el.getAttribute('data-value'), el, { throwOnError: false }); } catch (e) {}
+                    });
+                }
+            });
+        </script>
         <script>
             (function () {
                 const PAGE = 'content_reader';

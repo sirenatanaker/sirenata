@@ -570,6 +570,13 @@
                 position: relative;
                 z-index: 1;
             }
+
+            /* FONT PILIHAN TOOLBAR: tampilkan sesuai pilihan di dalam editor */
+            .ql-editor .ql-font-arial, .ql-editor .ql-font-arial * { font-family: Arial, sans-serif; }
+            .ql-editor .ql-font-times-new-roman, .ql-editor .ql-font-times-new-roman * { font-family: 'Times New Roman', serif; }
+            .ql-editor .ql-font-calibri, .ql-editor .ql-font-calibri * { font-family: Calibri, sans-serif; }
+            .ql-editor .ql-font-verdana, .ql-editor .ql-font-verdana * { font-family: Verdana, sans-serif; }
+            .ql-editor .ql-font-courier, .ql-editor .ql-font-courier * { font-family: 'Courier New', monospace; }
         </style>
     @endpush
 </x-dashboard::layouts.dashboard>
