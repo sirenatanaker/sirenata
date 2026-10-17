@@ -49,15 +49,15 @@
             @endif
         </div>
 
-        <p class="mt-1 text-[12.5px] leading-relaxed text-slate-500 break-words">
-            {{ $notification->message }}
+        <p class="mt-1 text-[12.5px] leading-relaxed text-slate-500 break-words line-clamp-2">
+            {{ $notification->description ?? $notification->message }}
         </p>
 
         <!-- Aksi: menumpuk di bawah pada layar sempit -->
         <div class="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1.5">
-            <span class="inline-flex items-center gap-1 text-[11px] font-medium text-slate-400"
+            <span class="inline-flex items-center gap-1.5 text-[11px] font-medium text-slate-400"
                 title="{{ $notification->created_at?->format('d M Y, H:i') }}">
-                <i class="fas fa-clock" aria-hidden="true"></i>{{ $notification->time_ago }}
+                <i class="far fa-clock text-[10px]" aria-hidden="true"></i> {{ $notification->time_ago }}
             </span>
 
             @if (!$notification->read_at)

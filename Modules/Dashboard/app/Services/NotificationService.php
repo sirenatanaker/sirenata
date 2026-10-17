@@ -193,6 +193,7 @@ class NotificationService
             $metaJson = json_encode([
                 'course_id'   => (string) ($course->id ?? ''),
                 'course_name' => $courseName,
+                'description' => !empty($course->description) ? trim(strip_tags($course->description)) : null,
                 'thumbnail'   => $thumbnailUrl,
                 'group'       => 'Katalog Baru',
                 'icon'        => 'fa-regular fa-graduation-cap',
@@ -256,6 +257,7 @@ class NotificationService
             $metaJson = json_encode([
                 'library_id'    => (string) ($library->id ?? ''),
                 'library_title' => $libraryTitle,
+                'description'   => !empty($library->description) ? trim(strip_tags($library->description)) : null,
                 'thumbnail'     => $thumbnailUrl,
                 'group'         => 'Perpustakaan',
                 'section'       => 'perpustakaan',

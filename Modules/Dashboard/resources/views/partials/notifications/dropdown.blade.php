@@ -185,14 +185,21 @@
                             </div>
                         </template>
 
-                        <!-- Isi: Judul & Waktu -->
+                        <!-- Isi: Judul, Deskripsi & Waktu -->
                         <div class="min-w-0 flex-1 pr-1">
                             <p class="text-xs sm:text-[13px] leading-snug line-clamp-2 text-slate-800 group-hover:text-[#13416B] transition-colors"
                                :class="!item.read ? 'font-bold' : 'font-medium'"
                                x-text="item.title"></p>
+
+                            <template x-if="item.description || item.message">
+                                <p class="mt-1 text-[11px] sm:text-xs leading-relaxed text-slate-500 line-clamp-2 break-words"
+                                   x-text="item.description || item.message"></p>
+                            </template>
                             
-                            <p class="mt-1.5 text-[11px] font-medium text-slate-400 flex items-center gap-1.5"
-                               x-text="item.time"></p>
+                            <p class="mt-1.5 text-[11px] font-medium text-slate-400 flex items-center gap-1.5">
+                                <i class="far fa-clock text-[10px]" aria-hidden="true"></i>
+                                <span x-text="item.time"></span>
+                            </p>
                         </div>
 
                         <!-- Tombol Hapus (X) -->

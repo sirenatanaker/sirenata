@@ -368,7 +368,7 @@
                                 <!-- Tambahan "shrink-0" memastikan card kursus tidak memipih/gepeng meskipun meluber -->
                                 <a href="{{ route('user.course.my-course.detail', $course->slug) }}"
                                     @if ($loop->index === 3) aria-hidden="true" tabindex="-1" @endif
-                                    class="shrink-0 flex flex-row gap-3 sm:gap-4 bg-white border border-slate-200 rounded-xl p-3 sm:p-4 transition-all duration-200 hover:border-[#13416B]/40 hover:shadow-sm group items-center sm:items-start {{ $loop->index === 3 ? 'max-h-[64px] overflow-hidden pointer-events-none select-none' : '' }}">
+                                    class="shrink-0 flex flex-row gap-3 sm:gap-4 bg-white border border-slate-200 rounded-xl p-3 sm:p-4 transition-all duration-200 hover:border-[#13416B]/40 hover:shadow-sm group items-center sm:items-start {{ $loop->index === 3 ? 'max-h-[76px] overflow-hidden pointer-events-none select-none' : '' }}">
 
                                     <div
                                         class="w-24 h-16 sm:w-32 sm:h-20 shrink-0 rounded-md overflow-hidden bg-slate-100 border border-slate-200 relative shadow-sm">
@@ -434,17 +434,17 @@
 
                         {{-- Kursus ke-4 dst. hanya mengintip (terpotong + blur); selengkapnya lewat "Lihat semua" --}}
                         @if ($recentCourses->count() > 3)
-                            <div class="pointer-events-none absolute inset-x-0 bottom-0 h-24">
+                            <div class="pointer-events-none absolute inset-x-0 bottom-0 h-20">
                                 <div
-                                    class="absolute inset-0 backdrop-blur-[3px] [mask-image:linear-gradient(to_top,black,transparent)] [-webkit-mask-image:linear-gradient(to_top,black,transparent)]">
+                                    class="absolute inset-0 backdrop-blur-[1px] [mask-image:linear-gradient(to_top,black,transparent)] [-webkit-mask-image:linear-gradient(to_top,black,transparent)]">
                                 </div>
                                 <div
-                                    class="absolute inset-0 bg-gradient-to-t from-white via-white/85 to-transparent">
+                                    class="absolute inset-0 bg-gradient-to-t from-white/95 via-white/40 to-transparent">
                                 </div>
                             </div>
-                            <div class="absolute inset-x-0 bottom-2 flex justify-center">
+                            <div class="absolute inset-x-0 bottom-1.5 flex justify-center">
                                 <a href="{{ route('user.course.my-course') }}"
-                                    class="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-slate-800 hover:underline underline-offset-4 transition-colors">
+                                    class="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-600 hover:text-slate-900 hover:underline underline-offset-4 transition-colors bg-white/70 backdrop-blur-xs px-3 py-0.5 rounded-full border border-slate-200/60 shadow-2xs">
                                     <span>Lihat semua kursus</span>
                                     <i class="fas fa-chevron-right text-[9px]"></i>
                                 </a>

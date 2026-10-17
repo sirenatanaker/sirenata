@@ -199,6 +199,42 @@ class Notification extends Model
     }
 
     /**
+     * Deskripsi ringkas notifikasi (mengutamakan deskripsi kursus/perpustakaan bila ada).
+     */
+    public function getDescriptionAttribute(): string
+    {
+        if (!empty($this->meta['description'])) {
+            return $this->meta['description'];
+        }
+
+        if ($this->type === 'course.published') {
+            $courseId = $this->meta['course_id'] ?? null;
+            if ($courseId) {
+                try {
+                    $desc = \Modules\LMS\Models\Course::where('id', $courseId)->value('description');
+                    if ($desc) {
+                        return strip_tags($desc);
+                    }
+                } catch (\Throwable $e) {
+                }
+            }
+        } elseif ($this->type === 'library.published') {
+            $libraryId = $this->meta['library_id'] ?? null;
+            if ($libraryId) {
+                try {
+                    $desc = \Modules\LMS\Models\Library::where('id', $libraryId)->value('description');
+                    if ($desc) {
+                        return strip_tags($desc);
+                    }
+                } catch (\Throwable $e) {
+                }
+            }
+        }
+
+        return $this->message ?? '';
+    }
+
+    /**
      * Bentuk data siap kirim (dipakai render awal server maupun
      * endpoint refresh `notifications.latest`).
      *
@@ -222,19 +258,20 @@ class Notification extends Model
         };
 
         return [
-            'id'        => $this->id,
-            'type'      => $this->type,
-            'section'   => $section,
-            'group'     => $this->meta['group'] ?? $meta['label'],
-            'icon'      => $this->meta['icon'] ?? $meta['icon'],
-            'tile'      => $this->meta['tile'] ?? $meta['tile'],
-            'title'     => $title,
-            'message'   => $this->message,
-            'thumbnail' => $this->thumbnail_url,
-            'link'      => $this->link,
-            'time'      => $this->time_ago,
-            'read'      => $this->read_at !== null,
-            'created'   => $this->created_at?->toIso8601String(),
+            'id'          => $this->id,
+            'type'        => $this->type,
+            'section'     => $section,
+            'group'       => $this->meta['group'] ?? $meta['label'],
+            'icon'        => $this->meta['icon'] ?? $meta['icon'],
+            'tile'        => $this->meta['tile'] ?? $meta['tile'],
+            'title'       => $title,
+            'description' => $this->description,
+            'message'     => $this->message,
+            'thumbnail'   => $this->thumbnail_url,
+            'link'        => $this->link,
+            'time'        => $this->time_ago,
+            'read'        => $this->read_at !== null,
+            'created'     => $this->created_at?->toIso8601String(),
         ];
     }
 
