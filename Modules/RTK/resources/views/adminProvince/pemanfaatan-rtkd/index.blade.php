@@ -144,8 +144,11 @@
                     <h2 class="text-lg font-bold text-slate-800">Detail Kuesioner yang Diisi</h2>
                     
                     <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-                        <div class="px-4 py-3 border-b border-slate-200 bg-slate-50 flex justify-between items-center">
-                            <h3 class="text-base font-semibold text-slate-800">1. Kepemilikan Dokumen RTK Provinsi</h3>
+                        <div class="px-4 sm:px-5 py-3.5 border-b border-slate-200 bg-white flex justify-between items-center">
+                            <div class="flex items-center gap-2.5">
+                                <span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-[#13416B] text-white text-xs font-bold shrink-0">1</span>
+                                <h3 class="text-base font-semibold text-slate-800">Kepemilikan Dokumen RTK Provinsi</h3>
+                            </div>
                             @if(isset($submission->field_verifications['q1_punya_rtkd']) && $submission->field_verifications['q1_punya_rtkd']['status'] === 'rejected')
                                 <x-badge color="danger">Revisi Diminta</x-badge>
                             @elseif(isset($submission->field_verifications['q1_punya_rtkd']) && $submission->field_verifications['q1_punya_rtkd']['status'] === 'verified')
@@ -169,8 +172,9 @@
                                 </div>
                                 <div class="flex-1">
                                     <p class="text-sm text-slate-500 font-medium">Apakah Memiliki RTKD?</p>
-                                    <p class="text-lg font-bold {{ $submission->rtk_document_id ? 'text-emerald-700' : 'text-red-700' }}">
-                                        {{ $submission->rtk_document_id ? 'YA, MEMILIKI' : 'TIDAK MEMILIKI' }}
+                                    <p class="text-lg font-bold {{ $submission->rtk_document_id ? 'text-emerald-700' : 'text-red-700' }} flex items-center gap-2">
+                                        <i class="fas {{ $submission->rtk_document_id ? 'fa-check-circle' : 'fa-times-circle' }}"></i>
+                                        {{ $submission->rtk_document_id ? 'Ya, memiliki' : 'Tidak memiliki' }}
                                     </p>
                                     
                                     @if($submission->rtk_document_id)
@@ -188,7 +192,7 @@
 
                     @if(!$submission->rtk_document_id)
                         <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-                            <div class="px-4 py-3 border-b border-slate-200 bg-slate-50 flex justify-between items-center">
+                            <div class="px-4 sm:px-5 py-3.5 border-b border-slate-200 bg-white flex justify-between items-center">
                                 <h3 class="text-base font-semibold text-slate-800">Alasan Tidak Memiliki RTKD</h3>
                                 @if(isset($submission->field_verifications['alasan_tidak_punya']) && $submission->field_verifications['alasan_tidak_punya']['status'] === 'rejected')
                                     <x-badge color="danger">Revisi Diminta</x-badge>
@@ -223,8 +227,11 @@
 
                     @if($submission->rtk_document_id)
                         <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-                            <div class="px-4 py-3 border-b border-slate-200 bg-slate-50 flex justify-between items-center">
-                                <h3 class="text-base font-semibold text-slate-800">2. Menjadi Acuan Perencanaan Pembangunan</h3>
+                            <div class="px-4 sm:px-5 py-3.5 border-b border-slate-200 bg-white flex justify-between items-center">
+                                <div class="flex items-center gap-2.5">
+                                    <span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-[#13416B] text-white text-xs font-bold shrink-0">2</span>
+                                    <h3 class="text-base font-semibold text-slate-800">Menjadi Acuan Perencanaan Pembangunan</h3>
+                                </div>
                                 @if(isset($submission->field_verifications['q2_jadi_acuan']) && $submission->field_verifications['q2_jadi_acuan']['status'] === 'rejected')
                                     <x-badge color="danger">Revisi Diminta</x-badge>
                                 @elseif(isset($submission->field_verifications['q2_jadi_acuan']) && $submission->field_verifications['q2_jadi_acuan']['status'] === 'verified')
@@ -248,8 +255,9 @@
                                     </div>
                                     <div>
                                         <p class="text-sm text-slate-500 font-medium">Apakah telah dijadikan acuan?</p>
-                                        <p class="text-lg font-bold {{ $submission->q2_jadi_acuan === 'ya' ? 'text-indigo-700' : 'text-amber-700' }}">
-                                            {{ $submission->q2_jadi_acuan === 'ya' ? 'YA, MENJADI ACUAN' : 'BELUM MENJADI ACUAN' }}
+                                        <p class="text-lg font-bold {{ $submission->q2_jadi_acuan === 'ya' ? 'text-indigo-700' : 'text-amber-700' }} flex items-center gap-2">
+                                            <i class="fas {{ $submission->q2_jadi_acuan === 'ya' ? 'fa-check-circle' : 'fa-minus-circle' }}"></i>
+                                            {{ $submission->q2_jadi_acuan === 'ya' ? 'Ya, menjadi acuan' : 'Belum menjadi acuan' }}
                                         </p>
                                     </div>
                                 </div>
@@ -285,7 +293,7 @@
                                     $uploadEntry = $uploadsByDoc[$docType] ?? null;
                                 @endphp
                                 <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-                                    <div class="px-4 py-3 border-b border-slate-200 bg-slate-50 flex justify-between items-center">
+                                    <div class="px-4 sm:px-5 py-3.5 border-b border-slate-200 bg-white flex justify-between items-center">
                                         <div>
                                             <h3 class="text-base font-semibold text-slate-800">
                                                 {{ $docLabel }}
@@ -358,7 +366,7 @@
 
                         @else
                             <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-                                <div class="px-4 py-3 border-b border-slate-200 bg-slate-50 flex justify-between items-center">
+                                <div class="px-4 sm:px-5 py-3.5 border-b border-slate-200 bg-white flex justify-between items-center">
                                     <h3 class="text-base font-semibold text-slate-800">Alasan Belum Menjadi Acuan</h3>
                                     @if(isset($submission->field_verifications['alasan_belum_acuan']) && $submission->field_verifications['alasan_belum_acuan']['status'] === 'rejected')
                                         <x-badge color="danger">Revisi Diminta</x-badge>

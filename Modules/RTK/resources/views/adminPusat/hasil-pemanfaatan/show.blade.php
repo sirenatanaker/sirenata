@@ -59,22 +59,27 @@
             @method('PATCH')
 
             <!-- 1. Kepemilikan RTKD -->
-            <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-                <div class="bg-gray-50 px-4 py-3 border-b border-gray-200 flex justify-between items-center">
-                    <h3 class="font-semibold text-gray-800 text-sm">1. Kepemilikan Dokumen RTK Provinsi</h3>
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                <div class="bg-white px-4 sm:px-5 py-3.5 border-b border-slate-200 flex justify-between items-center">
+                    <div class="flex items-center gap-2.5">
+                        <span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-[#13416B] text-white text-xs font-bold shrink-0">1</span>
+                        <h3 class="font-semibold text-slate-800 text-sm">Kepemilikan Dokumen RTK Provinsi</h3>
+                    </div>
                     <span
-                        class="px-2 py-0.5 text-[10px] font-bold rounded bg-gray-200 text-gray-600 uppercase tracking-wider">Auto-Verified</span>
+                        class="px-2.5 py-1 text-[11px] font-bold rounded-full bg-slate-100 text-slate-600 tracking-wide">Otomatis</span>
                 </div>
                 <div class="p-4 flex flex-col sm:flex-row gap-4 items-center justify-between">
                     <div>
                         <p
-                            class="font-medium text-base {{ $submission->rtk_document_id ? 'text-green-600' : 'text-red-600' }}">
-                            {{ $submission->rtk_document_id ? 'YA, MEMILIKI' : 'TIDAK MEMILIKI' }}
+                            class="flex items-center gap-2 font-semibold text-base {{ $submission->rtk_document_id ? 'text-emerald-700' : 'text-red-600' }}">
+                            <i
+                                class="fas {{ $submission->rtk_document_id ? 'fa-check-circle' : 'fa-times-circle' }}"></i>
+                            {{ $submission->rtk_document_id ? 'Ya, memiliki' : 'Tidak memiliki' }}
                         </p>
                     </div>
 
                     @if ($submission->rtk_document_id && $submission->rtkDocument)
-                        <div class="p-3 bg-gray-50 rounded border border-gray-200 text-sm flex items-center gap-4">
+                        <div class="p-3 bg-slate-50 rounded-lg border border-slate-200 text-sm flex items-center gap-4">
                             <div>
                                 <span class="text-gray-500">Masa Berlaku:</span>
                                 <span
@@ -97,14 +102,14 @@
                     $fieldKey = 'alasan_tidak_punya';
                     $oldData = $submission->field_verifications[$fieldKey] ?? [];
                 @endphp
-                <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden"
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden"
                     x-data="{ status: '{{ $oldData['status'] ?? 'verified' }}' }">
-                    <div class="bg-gray-50 px-4 py-3 border-b border-gray-200 flex justify-between items-center">
+                    <div class="bg-white px-4 sm:px-5 py-3.5 border-b border-slate-200 flex justify-between items-center">
                         <h3 class="font-semibold text-gray-800 text-sm">Alasan Tidak Memiliki RTKD</h3>
                         <span x-show="status === 'verified'"
-                            class="px-2 py-0.5 text-[10px] font-bold rounded-full bg-green-100 text-green-700 uppercase">Disetujui</span>
+                            class="px-2.5 py-1 text-[11px] font-bold rounded-full bg-green-100 text-green-700">Disetujui</span>
                         <span x-show="status === 'rejected'"
-                            class="px-2 py-0.5 text-[10px] font-bold rounded-full bg-red-100 text-red-700 uppercase">Revisi</span>
+                            class="px-2.5 py-1 text-[11px] font-bold rounded-full bg-red-100 text-red-700">Revisi</span>
                     </div>
                     <div class="p-4">
                         <ul class="list-disc pl-5 space-y-1 text-gray-700 text-sm mb-4">
@@ -119,7 +124,7 @@
                         </ul>
 
                         <div class="mt-4 pt-4 border-t border-gray-100 bg-gray-50/50 -mx-4 -mb-4 p-4">
-                            <p class="text-xs font-semibold mb-2 text-gray-600 uppercase tracking-wide">Status
+                            <p class="text-xs font-semibold mb-2 text-slate-500 tracking-wide">Status
                                 Verifikasi</p>
                             @if ($isReadOnly)
                                 @if (($oldData['status'] ?? 'verified') === 'verified')
@@ -181,23 +186,28 @@
                     $fieldKey = 'q2_jadi_acuan';
                     $oldData = $submission->field_verifications[$fieldKey] ?? [];
                 @endphp
-                <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden"
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden"
                     x-data="{ status: '{{ $oldData['status'] ?? 'verified' }}' }">
-                    <div class="bg-gray-50 px-4 py-3 border-b border-gray-200 flex justify-between items-center">
-                        <h3 class="font-semibold text-gray-800 text-sm">2. Menjadi Acuan Perencanaan Pembangunan</h3>
+                    <div class="bg-white px-4 sm:px-5 py-3.5 border-b border-slate-200 flex justify-between items-center">
+                    <div class="flex items-center gap-2.5">
+                        <span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-[#13416B] text-white text-xs font-bold shrink-0">2</span>
+                        <h3 class="font-semibold text-slate-800 text-sm">Menjadi Acuan Perencanaan Pembangunan</h3>
+                    </div>
                         <span x-show="status === 'verified'"
-                            class="px-2 py-0.5 text-[10px] font-bold rounded-full bg-green-100 text-green-700 uppercase">Disetujui</span>
+                            class="px-2.5 py-1 text-[11px] font-bold rounded-full bg-green-100 text-green-700">Disetujui</span>
                         <span x-show="status === 'rejected'"
-                            class="px-2 py-0.5 text-[10px] font-bold rounded-full bg-red-100 text-red-700 uppercase">Revisi</span>
+                            class="px-2.5 py-1 text-[11px] font-bold rounded-full bg-red-100 text-red-700">Revisi</span>
                     </div>
                     <div class="p-4">
                         <p
-                            class="font-medium text-base mb-4 {{ $submission->q2_jadi_acuan === 'ya' ? 'text-blue-600' : 'text-orange-600' }}">
-                            {{ $submission->q2_jadi_acuan === 'ya' ? 'YA, MENJADI ACUAN' : 'BELUM MENJADI ACUAN' }}
+                            class="flex items-center gap-2 font-semibold text-base {{ $submission->q2_jadi_acuan === 'ya' ? 'text-blue-700' : 'text-orange-600' }}">
+                            <i
+                                class="fas {{ $submission->q2_jadi_acuan === 'ya' ? 'fa-check-circle' : 'fa-minus-circle' }}"></i>
+                            {{ $submission->q2_jadi_acuan === 'ya' ? 'Ya, menjadi acuan' : 'Belum menjadi acuan' }}
                         </p>
 
                         <div class="mt-4 pt-4 border-t border-gray-100 bg-gray-50/50 -mx-4 -mb-4 p-4">
-                            <p class="text-xs font-semibold mb-2 text-gray-600 uppercase tracking-wide">Status
+                            <p class="text-xs font-semibold mb-2 text-slate-500 tracking-wide">Status
                                 Verifikasi</p>
                             @if ($isReadOnly)
                                 @if (($oldData['status'] ?? 'verified') === 'verified')
@@ -270,10 +280,10 @@
                                 $upload = $uploadsByDoc[$docType] ?? null;
                                 $kompList = $komponenByDoc[$docType] ?? [];
                             @endphp
-                            <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden flex flex-col"
+                            <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex flex-col"
                                 x-data="{ status: '{{ $oldData['status'] ?? 'verified' }}' }">
                                 <div
-                                    class="bg-indigo-50 px-4 py-3 border-b border-indigo-100 flex justify-between items-center">
+                                    class="bg-white px-4 sm:px-5 py-3.5 border-b border-slate-200 flex justify-between items-center">
                                     <h3 class="font-semibold text-indigo-900 text-sm">
                                         Dokumen: {{ strtoupper($docType) }}
                                         @if ($docType === 'lainnya')
@@ -282,14 +292,14 @@
                                         @endif
                                     </h3>
                                     <span x-show="status === 'verified'"
-                                        class="px-2 py-0.5 text-[10px] font-bold rounded-full bg-green-100 text-green-700 uppercase">Disetujui</span>
+                                        class="px-2.5 py-1 text-[11px] font-bold rounded-full bg-green-100 text-green-700">Disetujui</span>
                                     <span x-show="status === 'rejected'"
-                                        class="px-2 py-0.5 text-[10px] font-bold rounded-full bg-red-100 text-red-700 uppercase">Revisi</span>
+                                        class="px-2.5 py-1 text-[11px] font-bold rounded-full bg-red-100 text-red-700">Revisi</span>
                                 </div>
                                 <div class="p-4 flex-1 flex flex-col">
                                     <!-- File -->
                                     <div class="mb-4">
-                                        <p class="text-xs text-gray-500 mb-1 uppercase font-semibold">Bukti Dokumen</p>
+                                        <p class="text-xs text-slate-500 mb-1 font-semibold">Bukti dokumen</p>
                                         @if ($upload)
                                             <a href="{{ Storage::url($upload['file_path']) }}" target="_blank"
                                                 class="inline-flex items-center gap-2 p-2 bg-blue-50 border border-blue-100 rounded text-blue-700 hover:bg-blue-100 transition text-sm max-w-full truncate">
@@ -311,7 +321,7 @@
                                     </div>
                                     <!-- Komponen -->
                                     <div class="mb-4 flex-1">
-                                        <p class="text-xs text-gray-500 mb-1 uppercase font-semibold">Komponen Diacu
+                                        <p class="text-xs text-slate-500 mb-1 font-semibold">Komponen diacu
                                         </p>
                                         <div class="border border-gray-100 rounded overflow-hidden">
                                             <table class="w-full text-xs text-left">
@@ -346,9 +356,9 @@
                                     </div>
 
                                     <!-- Verifikasi -->
-                                    <div class="mt-auto pt-4 border-t border-gray-100 bg-gray-50/50 -mx-4 -mb-4 p-4">
-                                        <p class="text-xs font-semibold mb-2 text-gray-600 uppercase tracking-wide">
-                                            Status Verifikasi</p>
+                                    <div class="mt-auto pt-4 border-t border-slate-100 bg-slate-50/50 -mx-4 -mb-4 p-4">
+                                        <p class="text-xs font-semibold mb-2 text-slate-500 tracking-wide">
+                                            Status verifikasi</p>
                                         @if ($isReadOnly)
                                             @if (($oldData['status'] ?? 'verified') === 'verified')
                                                 <div
@@ -416,14 +426,14 @@
                         $fieldKey = 'alasan_belum_acuan';
                         $oldData = $submission->field_verifications[$fieldKey] ?? [];
                     @endphp
-                    <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden"
+                    <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden"
                         x-data="{ status: '{{ $oldData['status'] ?? 'verified' }}' }">
-                        <div class="bg-gray-50 px-4 py-3 border-b border-gray-200 flex justify-between items-center">
+                        <div class="bg-white px-4 sm:px-5 py-3.5 border-b border-slate-200 flex justify-between items-center">
                             <h3 class="font-semibold text-gray-800 text-sm">Alasan Belum Menjadi Acuan</h3>
                             <span x-show="status === 'verified'"
-                                class="px-2 py-0.5 text-[10px] font-bold rounded-full bg-green-100 text-green-700 uppercase">Disetujui</span>
+                                class="px-2.5 py-1 text-[11px] font-bold rounded-full bg-green-100 text-green-700">Disetujui</span>
                             <span x-show="status === 'rejected'"
-                                class="px-2 py-0.5 text-[10px] font-bold rounded-full bg-red-100 text-red-700 uppercase">Revisi</span>
+                                class="px-2.5 py-1 text-[11px] font-bold rounded-full bg-red-100 text-red-700">Revisi</span>
                         </div>
                         <div class="p-4">
                             <ul class="list-disc pl-5 space-y-1 text-gray-700 text-sm mb-4">
@@ -437,9 +447,9 @@
                                 @endforelse
                             </ul>
 
-                            <div class="mt-4 pt-4 border-t border-gray-100 bg-gray-50/50 -mx-4 -mb-4 p-4">
-                                <p class="text-xs font-semibold mb-2 text-gray-600 uppercase tracking-wide">Status
-                                    Verifikasi</p>
+                            <div class="mt-4 pt-4 border-t border-slate-100 bg-slate-50/50 -mx-4 -mb-4 p-4">
+                                <p class="text-xs font-semibold mb-2 text-slate-500 tracking-wide">Status
+                                    verifikasi</p>
                                 @if ($isReadOnly)
                                     @if (($oldData['status'] ?? 'verified') === 'verified')
                                         <div
