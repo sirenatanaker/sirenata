@@ -3,37 +3,32 @@
 namespace Modules\LMS\Http\Controllers\AdminPusat\Course;
 
 use App\Http\Controllers\Controller;
+use Devrabiul\ToastMagic\Facades\ToastMagic;
 use Illuminate\Http\Request;
 use Modules\LMS\Http\Requests\Api\StoreCourseRequest;
 use Modules\LMS\Http\Requests\Api\UpdateCourseRequest;
-use Modules\LMS\Models\Category;
-use Devrabiul\ToastMagic\Facades\ToastMagic;
-use Illuminate\Support\Facades\Log;
-use Modules\LMS\Models\Course;
+use Modules\LMS\Services\CategoryService;
 use Modules\LMS\Services\CourseService;
 
 class CourseController extends Controller
 {
-    public function __construct(private CourseService $courseService) {}
+    public function __construct(
+        private CourseService $courseService,
+        private CategoryService $categoryService,
+    ) {}
 
-    /**
-     * Display a listing of the resource.
-     */
     public function index(Request $request)
     {
-        $page       = $request->get('page', 1);
-        $perPage    = $request->integer('row_per_page', 12);
-        $categoryId = $request->get('category_id');
-        $search     = $request->get('search');
+        $result = $this->courseService->allCourses(
+            page: (int) $request->get('page', 1),
+            perPage: $request->integer('row_per_page', 12),
+            search: $request->get('search'),
+            categoryId: $request->get('category_id'),
+        );
 
-        // Panggil service tanpa token
-        $result = $this->courseService->allCourses(page: $page, perPage: $perPage, search: $search, categoryId: $categoryId);
-        $courses = collect(json_decode(json_encode($result['data'])));
-
-        $categories = Category::select('id', 'name')->orderBy('name', 'asc')->get();
         return view('lms::admin-pusat.course.index', [
-            'courses'    => $courses,
-            'categories' => $categories,
+            'courses'    => collect(json_decode(json_encode($result['data']))),
+            'categories' => $this->categoryService->getAllOrdered(),
             'meta'       => $result['meta'],
             'links'      => $result['links'],
             'success'    => $result['success'],
@@ -41,57 +36,40 @@ class CourseController extends Controller
         ]);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
-        $categories = Category::select('id', 'name')->orderBy('name', 'asc')->get();
+        $categories = $this->categoryService->getAllOrdered();
+
         return view('lms::admin-pusat.course.create', compact('categories'));
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(StoreCourseRequest $request)
     {
         try {
-            $validated = $request->validated();
-
-          $payload = [
-                'category_id' => $request->input('category_id'),
-                'name'        => $request->input('name'),
-                'audience'    => $request->input('audience', 'instansi'),
-                'description' => $request->input('description'),
-                'bg_color'    => $request->input('bg_color'), 
-            ];
-
-            $thumbnailFile = $request->file('thumbnail');
-
-            // Panggil service tanpa token
-            $result = $this->courseService->storeCourse(data: $payload, thumbnailFile: $thumbnailFile);
+            $result = $this->courseService->storeCourse(
+                data: $request->validated(),
+                thumbnailFile: $request->file('thumbnail'),
+            );
 
             if ($result['success']) {
                 ToastMagic::success('Course berhasil ditambahkan!');
+
                 return redirect()->route('admin-pusat.management-course.courses.index');
             }
 
             return back()->withInput()->with('error', $result['message']);
         } catch (\Exception $e) {
             ToastMagic::error($e->getMessage());
+
             return back()->withInput();
         }
     }
 
-    /**
-     * Show the specified resource.
-     */
     public function show(string $slug)
     {
-        // Panggil service tanpa token
         $courseResponse = $this->courseService->getCourseBySlug($slug);
         $course = json_decode(json_encode($courseResponse['data']));
-        
+
         if (!$course) {
             abort(404, 'Course tidak ditemukan');
         }
@@ -99,12 +77,8 @@ class CourseController extends Controller
         return view('lms::admin-pusat.course.show', compact('course'));
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
     public function edit(string $slug)
     {
-        // Panggil service tanpa token
         $courseResponse = $this->courseService->getCourseBySlug($slug);
 
         if (!$courseResponse['success'] || empty($courseResponse['data'])) {
@@ -112,30 +86,18 @@ class CourseController extends Controller
         }
 
         $course = json_decode(json_encode($courseResponse['data']));
-        $categories = Category::select('id', 'name')->orderBy('name', 'asc')->get();
+        $categories = $this->categoryService->getAllOrdered();
 
         return view('lms::admin-pusat.course.edit', compact('course', 'categories'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(UpdateCourseRequest $request, string $slug)
     {
-        $validated = $request->validated();
-
-        $payload = [
-            'slug'        => $slug,
-            'category_id' => $request->input('category_id'),
-            'name'        => $request->input('name'),
-            'audience'    => $request->input('audience'),
-            'description' => $request->input('description'),
-        ];
-
-        $thumbnailFile = $request->file('thumbnail');
-
-        // Panggil service tanpa token
-        $result = $this->courseService->updateCourse(data: $payload, thumbnailFile: $thumbnailFile);
+        $payload = array_merge($request->validated(), ['slug' => $slug]);
+        $result = $this->courseService->updateCourse(
+            data: $payload,
+            thumbnailFile: $request->file('thumbnail'),
+        );
 
         if ($result['success']) {
             return redirect()->route('admin-pusat.management-course.courses.index')
@@ -145,12 +107,8 @@ class CourseController extends Controller
         return back()->withInput()->with('error', $result['message']);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(string $slug)
     {
-        // Panggil service tanpa token
         $result = $this->courseService->deleteCourse($slug);
 
         if ($result['success']) {

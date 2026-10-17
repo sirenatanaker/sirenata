@@ -10,68 +10,48 @@ use Illuminate\Support\Facades\Auth;
 use Maatwebsite\Excel\Facades\Excel;
 use Modules\LMS\Services\CourseService;
 use Modules\LMS\Services\RekapitulasiService;
-use Modules\MasterData\Models\Province;
-use Modules\MasterData\Models\Regency;
 
 class RekapitulasiController extends Controller
 {
-
     public function __construct(
         private RekapitulasiService $rekapitulasiService,
-        private CourseService $courseService
+        private CourseService $courseService,
     ) {}
 
-    /**
-     * Display a listing of the resource.
-     */
     public function index(Request $request)
     {
         $user = Auth::user();
         if (!$user->hasCompleteScope()) {
             abort(403, 'Admin provinsi belum memiliki wilayah.');
         }
-        $limit   = $request->per_page ?? 10;
-        $search  = $request->search;
-        $data = $this->rekapitulasiService
-            ->paginateFilteredRekapitulasiRegency(
-                provinceCode: $user->scopeArea->province_code,
-                search: $search,
-                limit: $limit,
-            );
+
+        $data = $this->rekapitulasiService->paginateFilteredRekapitulasiRegency(
+            provinceCode: $user->scopeArea->province_code,
+            search: $request->search,
+            limit: $request->per_page ?? 10,
+        );
 
         return view('lms::admin-province.sdm.rekapitulasi-kab-kota', compact('data', 'user'));
     }
 
     public function rekapUserKabKota(Request $request, string $regencyCode)
     {
-        $regency = Regency::find($regencyCode);
-        $limit   = $request->integer('per_page', 10);
-        $search  = $request->string('search')->toString();
-        $courseId = $request->string('course_id')->toString();
-
+        $regency = $this->rekapitulasiService->getRegencyByCode($regencyCode);
         $courses = $this->courseService->getCoursesForFilter();
         $data = $this->courseService->paginateCourseEnrollmentsByRegency(
             regencyCode: $regencyCode,
-            search: $search,
-            limit: $limit,
-            courseId: $courseId,
+            search: $request->string('search')->toString(),
+            limit: $request->integer('per_page', 10),
+            courseId: $request->string('course_id')->toString(),
         );
 
-        return view('lms::admin-province.sdm.rekapitulasi-user-kab-kota', [
-            'data' => $data,
-            'regencyCode' => $regencyCode,
-            'regency' => $regency,
-            'courses' => $courses,
-        ]);
+        return view('lms::admin-province.sdm.rekapitulasi-user-kab-kota', compact('data', 'regencyCode', 'regency', 'courses'));
     }
 
-    /**
-     * Export rekap user course per provinsi
-     */
     public function exportRekapUserRegency(Request $request, string $regencyCode)
     {
-        $regencyName = Regency::find($regencyCode)->name;
-        $filename     = 'rekapitulasi-' . str($regencyName)->slug() . '-' . now()->format('Y-m-d') . '.xlsx';
+        $regencyName = $this->rekapitulasiService->getRegencyByCode($regencyCode)?->name ?? '';
+        $filename = 'rekapitulasi-' . str($regencyName)->slug() . '-' . now()->format('Y-m-d') . '.xlsx';
 
         return Excel::download(
             new RekapUserCourseRegencyExport(
@@ -91,41 +71,30 @@ class RekapitulasiController extends Controller
         if (!$user->hasCompleteScope()) {
             abort(403, 'Admin provinsi belum memiliki wilayah.');
         }
-        $provinceCode = $user->scopeArea?->province_code;
-        $provinceName = Province::find($provinceCode)->name;
-        $limit   = $request->integer('per_page', 10);
-        $search  = $request->string('search')->toString();
-        $courseId = $request->string('course_id')->toString();
 
+        $provinceCode = $user->scopeArea?->province_code;
+        $provinceName = $this->rekapitulasiService->getProvinceByCode($provinceCode)?->name ?? '';
         $courses = $this->courseService->getCoursesForFilter();
         $data = $this->courseService->paginateCourseEnrollmentsByProvince(
-            provinceCode: $user->scopeArea->province_code,
-            search: $search,
-            limit: $limit,
-            courseId: $courseId,
+            provinceCode: $provinceCode,
+            search: $request->string('search')->toString(),
+            limit: $request->integer('per_page', 10),
+            courseId: $request->string('course_id')->toString(),
         );
 
-        return view('lms::admin-province.sdm.rekapitulasi-user-province', [
-            'data' => $data,
-            'provinceCode' => $provinceCode,
-            'provinceName' => $provinceName,
-            'courses' => $courses,
-        ]);
+        return view('lms::admin-province.sdm.rekapitulasi-user-province', compact('data', 'provinceCode', 'provinceName', 'courses'));
     }
 
-
-    /**
-     * Export rekap user course per provinsi
-     */
     public function exportRekapUserProvince(Request $request)
     {
         $user = Auth::user();
         if (!$user->hasCompleteScope()) {
             abort(403, 'Admin provinsi belum memiliki wilayah.');
         }
+
         $provinceCode = $user->scopeArea?->province_code;
-        $provinceName = Province::find($provinceCode)->name;
-        $filename     = 'rekapitulasi-provinsi-' . str($provinceName)->slug() . '-' . now()->format('Y-m-d') . '.xlsx';
+        $provinceName = $this->rekapitulasiService->getProvinceByCode($provinceCode)?->name ?? '';
+        $filename = 'rekapitulasi-provinsi-' . str($provinceName)->slug() . '-' . now()->format('Y-m-d') . '.xlsx';
 
         return Excel::download(
             new RekapUserCourseProvinceExport(

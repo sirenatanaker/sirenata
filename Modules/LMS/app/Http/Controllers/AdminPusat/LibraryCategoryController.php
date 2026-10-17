@@ -3,101 +3,74 @@
 namespace Modules\LMS\Http\Controllers\AdminPusat;
 
 use App\Http\Controllers\Controller;
+use Devrabiul\ToastMagic\Facades\ToastMagic;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
+use Modules\LMS\Http\Requests\LibraryCategoryStoreRequest;
+use Modules\LMS\Http\Requests\LibraryCategoryUpdateRequest;
 use Modules\LMS\Models\LibraryCategory;
-use Devrabiul\ToastMagic\Facades\ToastMagic;
+use Modules\LMS\Services\LibraryCategoryService;
 
 class LibraryCategoryController extends Controller
 {
+    public function __construct(
+        private LibraryCategoryService $libraryCategoryService
+    ) {}
+
     public function index(Request $request)
     {
         $search = $request->input('search');
-        $query = LibraryCategory::query();
+        $libraryCategories = $this->libraryCategoryService->paginateFiltered($search, 10);
 
-        if ($search) {
-            $query->where('name', 'like', "%{$search}%");
-        }
-
-        $libraryCategories = $query->latest()->paginate(10);
         return view('lms::admin-pusat.library-categories.index', compact('libraryCategories', 'search'));
     }
 
-    public function store(Request $request) 
+    public function store(LibraryCategoryStoreRequest $request)
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255|unique:library_categories,name',
-            'description' => 'nullable|string',
-        ]);
-
-        LibraryCategory::create($validated);
-        
+        $this->libraryCategoryService->createCategory($request->validated());
         ToastMagic::success('Kategori Perpustakaan berhasil ditambahkan!');
 
         return redirect()->route('admin-pusat.library-categories.index');
     }
 
-    public function storeInline(Request $request): JsonResponse
+    public function storeInline(LibraryCategoryStoreRequest $request): JsonResponse
     {
-        $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255', Rule::unique('library_categories', 'name')],
-        ]);
-
-        $category = LibraryCategory::create($validated);
+        $category = $this->libraryCategoryService->createCategory($request->validated());
 
         return response()->json([
-            'message' => 'Kategori berhasil ditambahkan.',
+            'message'  => 'Kategori berhasil ditambahkan.',
             'category' => $category->only(['id', 'name']),
         ], 201);
     }
 
-    public function update(Request $request, string $id) 
+    public function update(LibraryCategoryUpdateRequest $request, string $id)
     {
-        $libraryCategory = LibraryCategory::findOrFail($id);
-
-        $validated = $request->validate([
-            'name' => 'required|string|max:255|unique:library_categories,name,' . $libraryCategory->id,
-            'description' => 'nullable|string',
-        ]);
-
-        $libraryCategory->update($validated);
-        
+        $libraryCategory = $this->libraryCategoryService->findOrFail($id);
+        $this->libraryCategoryService->updateCategory($libraryCategory, $request->validated());
         ToastMagic::success('Kategori Perpustakaan berhasil diperbarui!');
 
         return redirect()->route('admin-pusat.library-categories.index');
     }
 
-    public function updateInline(Request $request, LibraryCategory $libraryCategory): JsonResponse
+    public function updateInline(LibraryCategoryUpdateRequest $request, LibraryCategory $libraryCategory): JsonResponse
     {
-        $validated = $request->validate([
-            'name' => [
-                'required',
-                'string',
-                'max:255',
-                Rule::unique('library_categories', 'name')->ignore($libraryCategory->id),
-            ],
-        ]);
-
-        $libraryCategory->update($validated);
+        $this->libraryCategoryService->updateCategory($libraryCategory, $request->validated());
 
         return response()->json([
-            'message' => 'Kategori berhasil diperbarui.',
+            'message'  => 'Kategori berhasil diperbarui.',
             'category' => $libraryCategory->only(['id', 'name']),
         ]);
     }
 
-    public function destroy(string $id) 
+    public function destroy(string $id)
     {
-        $libraryCategory = LibraryCategory::findOrFail($id);
+        $libraryCategory = $this->libraryCategoryService->findOrFail($id);
 
-        if ($libraryCategory->libraries()->exists()) {
+        if (!$this->libraryCategoryService->deleteCategory($libraryCategory)) {
             return redirect()->route('admin-pusat.library-categories.index')
                 ->with('error', 'Kategori tidak dapat dihapus karena masih digunakan oleh koleksi.');
         }
 
-        $libraryCategory->delete();
-        
         ToastMagic::success('Kategori Perpustakaan berhasil dihapus!');
 
         return redirect()->route('admin-pusat.library-categories.index');
@@ -105,13 +78,11 @@ class LibraryCategoryController extends Controller
 
     public function destroyInline(LibraryCategory $libraryCategory): JsonResponse
     {
-        if ($libraryCategory->libraries()->exists()) {
+        if (!$this->libraryCategoryService->deleteCategory($libraryCategory)) {
             return response()->json([
                 'message' => 'Kategori tidak dapat dihapus karena masih digunakan oleh koleksi.',
             ], 422);
         }
-
-        $libraryCategory->delete();
 
         return response()->json([
             'message' => 'Kategori berhasil dihapus.',

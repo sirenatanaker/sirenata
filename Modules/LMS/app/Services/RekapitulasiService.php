@@ -220,4 +220,14 @@ class RekapitulasiService
             ->paginate($limit)
             ->withQueryString();
     }
+
+    public function getProvinceByCode(?string $provinceCode): ?Province
+    {
+        return $provinceCode ? Province::find($provinceCode) : null;
+    }
+
+    public function getRegencyByCode(?string $regencyCode): ?Regency
+    {
+        return $regencyCode ? Regency::find($regencyCode) : null;
+    }
 }

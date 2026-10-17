@@ -112,22 +112,16 @@
                     class="px-4 py-2 rounded-full text-[10px] md:text-xs font-bold transition-all duration-200 border flex items-center gap-2 {{ !$type ? 'bg-[#13416B] text-white border-[#13416B] shadow-md' : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50 hover:border-slate-300' }}">
                     <span>Semua Koleksi</span>
                     <span
-                        class="{{ !$type ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-500' }} px-1.5 py-0.5 rounded-md text-[10px]">{{ \Modules\LMS\Models\Library::count() }}</span>
+                        class="{{ !$type ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-500' }} px-1.5 py-0.5 rounded-md text-[10px]">{{ $totalKoleksi ?? 0 }}</span>
                 </a>
 
                 {{-- Loop Kategori --}}
                 @foreach ($libraryCategories as $libraryCategory)
-                    @php
-                        $countPerCategory = \Modules\LMS\Models\Library::where(
-                            'library_category_id',
-                            $libraryCategory->id,
-                        )->count();
-                    @endphp
                     <a href="{{ route('user.library.index', ['type' => $libraryCategory->name, 'search' => $search]) }}"
                         class="px-4 py-2 rounded-full text-[10px] md:text-xs font-bold transition-all duration-200 border flex items-center gap-2 {{ $type == $libraryCategory->name ? 'bg-[#13416B] text-white border-[#13416B] shadow-md' : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50 hover:border-slate-300' }}">
                         <span>{{ $libraryCategory->name }}</span>
                         <span
-                            class="{{ $type == $libraryCategory->name ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-500' }} px-1.5 py-0.5 rounded-md text-[10px]">{{ $countPerCategory }}</span>
+                            class="{{ $type == $libraryCategory->name ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-500' }} px-1.5 py-0.5 rounded-md text-[10px]">{{ $libraryCategory->libraries_count ?? 0 }}</span>
                     </a>
                 @endforeach
             </nav>

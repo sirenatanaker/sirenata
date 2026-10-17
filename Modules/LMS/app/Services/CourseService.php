@@ -8,6 +8,10 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Modules\LMS\Models\Course;
+use Modules\LMS\Models\CourseSection;
+use Modules\LMS\Models\PostTest;
+use Modules\LMS\Models\SectionContent;
+use Modules\LMS\Models\StudentContentProgress;
 use Modules\User\Enums\InstitutionType;
 
 class CourseService
@@ -247,7 +251,58 @@ class CourseService
     }
 
     /**
-     * Ambil course yang diikuti user (Pengganti myCourses API)
+     * Helper untuk kalkulasi progress dinamis secara real-time
+     */
+    public function calculateDynamicProgress(Course $dbCourse, int|string|null $userId = null): int
+    {
+        $userId = $userId ?? Auth::id();
+        $totalContents = 0;
+        $completedContents = 0;
+        $totalTests = 0;
+        $passedTests = 0;
+
+        foreach ($dbCourse->sections as $section) {
+            $totalContents += $section->contents->count();
+
+            $completedContents += StudentContentProgress::where('user_id', $userId)
+                ->whereIn('section_content_id', $section->contents->pluck('id'))
+                ->count();
+
+            $postTestBab = PostTest::where('course_section_id', $section->id)->first();
+            if ($postTestBab) {
+                $totalTests++;
+                $isPassed = DB::table('post_test_results')
+                    ->where('user_id', $userId)
+                    ->where('post_test_id', $postTestBab->id)
+                    ->where('is_passed', 1)
+                    ->exists();
+                if ($isPassed) {
+                    $passedTests++;
+                }
+            }
+        }
+
+        $evaluasiAkhir = PostTest::where('course_id', $dbCourse->id)->whereNull('course_section_id')->first();
+        if ($evaluasiAkhir) {
+            $totalTests++;
+            $isEvaluasiAkhirCompleted = DB::table('post_test_results')
+                ->where('user_id', $userId)
+                ->where('post_test_id', $evaluasiAkhir->id)
+                ->where('is_passed', 1)
+                ->exists();
+            if ($isEvaluasiAkhirCompleted) {
+                $passedTests++;
+            }
+        }
+
+        $totalItems = $totalContents + $totalTests;
+        $completedItems = $completedContents + $passedTests;
+
+        return $totalItems > 0 ? (int) round(($completedItems / $totalItems) * 100) : 0;
+    }
+
+    /**
+     * Ambil course yang diikuti user lengkap dengan progress dinamis & metadata kartu
      */
     public function myCourses(int $page = 1, int $perPage = 12, ?string $status = null): array
     {
@@ -255,7 +310,7 @@ class CourseService
             /** @var User $user */
             $user = Auth::user();
 
-            $query = $user->enrolledCourses()->with('category');
+            $query = $user->enrolledCourses()->with(['category', 'sections.contents']);
 
             if ($status) {
                 $query->wherePivot('status', $status);
@@ -265,21 +320,32 @@ class CourseService
 
             $resultData = [];
             foreach ($courses as $course) {
-                $resultData[] = [
+                $progress = $this->calculateDynamicProgress($course, $user->id);
+                $computedStatus = $progress >= 100 ? 'completed' : 'in_progress';
+                $thumbnailUrl = $course->thumbnail
+                    ? (str_starts_with($course->thumbnail, 'http') ? $course->thumbnail : Storage::url($course->thumbnail))
+                    : null;
+
+                $resultData[] = (object) [
                     'slug'           => $course->slug,
                     'name'           => $course->name,
-                    'category'       => ['name' => $course->category ? $course->category->name : '-'],
-
+                    'course_name'    => $course->name,
+                    'category'       => $course->category ? (object) $course->category->toArray() : (object) ['name' => '-'],
                     'thumbnail'      => $course->thumbnail,
+                    'thumbnail_url'  => $thumbnailUrl,
                     'description'    => $course->description,
                     'students_count' => method_exists($course, 'students') ? $course->students()->count() : 0,
+                    'total_modul'    => $course->sections->count(),
+                    'total_materi'   => $course->sections->sum(fn($s) => $s->contents->count()),
+                    'progress'       => $progress,
+                    'status'         => $computedStatus,
                 ];
             }
 
             return [
                 'success' => true,
                 'message' => 'Success',
-                'data'    => $resultData,
+                'data'    => collect($resultData),
                 'meta'    => [
                     'current_page' => $courses->currentPage(),
                     'last_page'    => $courses->lastPage(),
@@ -297,7 +363,7 @@ class CourseService
             return [
                 'success' => false,
                 'message' => 'Terjadi kesalahan',
-                'data'    => [],
+                'data'    => collect(),
                 'meta'    => [],
                 'links'   => [],
             ];
@@ -305,7 +371,7 @@ class CourseService
     }
 
     /**
-     * Ambil detail course siswa beserta relasi sections dan contents lokal
+     * Ambil detail course siswa beserta relasi sections, contents, post-test, sertifikat, dan status kuncian
      */
     public function getCourseDetailSlug(string $slug): array
     {
@@ -313,7 +379,6 @@ class CourseService
             $user = Auth::user();
             $course = Course::with([
                 'category',
-                // Urutan topik harus konsisten karena dipakai untuk penguncian berurutan
                 'sections.contents' => fn($q) => $q->orderBy('position'),
             ])->where('slug', $slug)->first();
 
@@ -325,34 +390,54 @@ class CourseService
                 ];
             }
 
-            // Ambil ID konten yang sudah diselesaikan oleh user ini
-            $completedIds = \Modules\LMS\Models\StudentContentProgress::where('user_id', $user?->id)
+            $completedIds = StudentContentProgress::where('user_id', $user?->id)
                 ->whereHas('content.section', function ($q) use ($course) {
                     $q->where('course_id', $course->id);
                 })
                 ->pluck('section_content_id')
                 ->toArray();
 
+            $passedTestIds = DB::table('post_test_results')
+                ->where('user_id', $user?->id)
+                ->where('is_passed', 1)
+                ->pluck('post_test_id')
+                ->toArray();
+
             $totalCompletedCount = count($completedIds);
 
-            // Sematkan alias properti pendukung untuk Blade siswa
             $course->course_name = $course->name;
-            $course->course_sections = $course->sections;
+            $course->thumbnail_url = $course->thumbnail ? Storage::url($course->thumbnail) : null;
             $course->completed_count = $totalCompletedCount;
 
-            // Sediakan alias 'section_contents' di setiap section beserta status is_completed untuk setiap materinya
+            $enrollment = $user ? $course->students()->wherePivot('user_id', $user->id)->first() : null;
+            if ($enrollment) {
+                $course->certificate_code = $enrollment->pivot->certificate_code;
+                $course->certificate_issued_at = $enrollment->pivot->certificate_issued_at;
+                $course->certificate_file = $enrollment->pivot->certificate_file
+                    ? Storage::url($enrollment->pivot->certificate_file)
+                    : null;
+            }
+
+            $totalContents = 0;
+            $totalTests = 0;
+            $passedTests = 0;
+            $isPreviousSectionDone = true;
             $mappedSections = [];
+
             foreach ($course->sections as $section) {
                 $sectionArray = $section->toArray();
                 $sectionContents = [];
                 $sectionCompletedCount = 0;
+                $isPreviousContentDone = true;
 
                 if ($section->contents) {
                     foreach ($section->contents as $content) {
+                        $totalContents++;
                         $isCompleted = in_array($content->id, $completedIds);
                         if ($isCompleted) {
                             $sectionCompletedCount++;
                         }
+                        $isContentLocked = !$isPreviousContentDone && !$isCompleted;
 
                         $sectionContents[] = [
                             'id'           => $content->id,
@@ -360,18 +445,70 @@ class CourseService
                             'video_url'    => $content->video,
                             'document_url' => $content->document_url,
                             'is_completed' => $isCompleted,
+                            'is_locked'    => $isContentLocked,
                         ];
+
+                        $isPreviousContentDone = $isCompleted;
                     }
                 }
+
+                $totalSectionCount = count($sectionContents);
+                $isContentCompleted = $totalSectionCount === 0 || $sectionCompletedCount === $totalSectionCount;
+
+                $postTestBab = PostTest::where('course_section_id', $section->id)->first();
+                $isPostTestBabCompleted = true;
+                if ($postTestBab) {
+                    $totalTests++;
+                    $isPostTestBabCompleted = in_array($postTestBab->id, $passedTestIds);
+                    if ($isPostTestBabCompleted) {
+                        $passedTests++;
+                    }
+                }
+
+                $isSectionCompleted = $isContentCompleted && $isPostTestBabCompleted;
+                $isLocked = !$isPreviousSectionDone;
 
                 $sectionArray['section_contents'] = $sectionContents;
                 $sectionArray['contents'] = $sectionContents;
                 $sectionArray['completed_count'] = $sectionCompletedCount;
+                $sectionArray['post_test_bab'] = $postTestBab;
+                $sectionArray['is_post_test_bab_completed'] = $isPostTestBabCompleted;
+                $sectionArray['is_content_completed'] = $isContentCompleted;
+                $sectionArray['is_section_completed'] = $isSectionCompleted;
+                $sectionArray['is_locked'] = $isLocked;
+                $sectionArray['is_post_test_bab_locked'] = !$isContentCompleted && !$isPostTestBabCompleted;
+
                 $mappedSections[] = (object) $sectionArray;
+                $isPreviousSectionDone = $isSectionCompleted;
             }
+
+            $evaluasiAkhir = PostTest::with('questions')->where('course_id', $course->id)->whereNull('course_section_id')->first();
+            $isEvaluasiAkhirCompleted = false;
+            if ($evaluasiAkhir) {
+                $totalTests++;
+                $isEvaluasiAkhirCompleted = in_array($evaluasiAkhir->id, $passedTestIds);
+                if ($isEvaluasiAkhirCompleted) {
+                    $passedTests++;
+                }
+            }
+
+            $totalItems = $totalContents + $totalTests;
+            $completedItems = $totalCompletedCount + $passedTests;
+            $currentProgress = $totalItems > 0 ? (int) round(($completedItems / $totalItems) * 100) : 0;
+            $isFullyCompleted = $currentProgress >= 100 && (!$evaluasiAkhir || $isEvaluasiAkhirCompleted);
 
             $course->sections = collect($mappedSections);
             $course->course_sections = collect($mappedSections);
+            $course->evaluasi_akhir = $evaluasiAkhir;
+            $course->is_evaluasi_akhir_completed = $isEvaluasiAkhirCompleted;
+            $course->is_evaluasi_akhir_locked = !$isPreviousSectionDone;
+            $course->total_contents = $totalContents;
+            $course->total_tests = $totalTests;
+            $course->passed_tests = $passedTests;
+            $course->total_items = $totalItems;
+            $course->completed_items = $completedItems;
+            $course->current_progress = $currentProgress;
+            $course->is_fully_completed = $isFullyCompleted;
 
             return [
                 'success' => true,
@@ -388,6 +525,7 @@ class CourseService
             ];
         }
     }
+
     /**
      * Ambil semua course untuk Admin Pusat (Database Lokal)
      */
@@ -412,7 +550,6 @@ class CourseService
                     'slug'           => $course->slug,
                     'name'           => $course->name,
                     'category'       => ['name' => $course->category ? $course->category->name : '-'],
-
                     'thumbnail'      => $course->thumbnail,
                     'description'    => $course->description,
                     'students_count' => method_exists($course, 'students') ? $course->students()->count() : 0,
@@ -455,15 +592,13 @@ class CourseService
             if ($thumbnailFile) {
                 $thumbnailPath = $thumbnailFile->store('courses/thumbnails', 'public');
             } else {
-                // 4 Warna pilihan utama sesuai palet chart
                 $colors = [
-                    '13416B', // Navy
-                    '547996', // Slate Blue
-                    '8BB1CC', // Light Blue
-                    '79A736', // Muted Green
+                    '13416B',
+                    '547996',
+                    '8BB1CC',
+                    '79A736',
                 ];
 
-                // Gunakan warna pilihan dari user jika ada, jika tidak pilih secara acak
                 $selectedColor = $data['bg_color'] ?? $colors[array_rand($colors)];
 
                 $rawName = $data['name'] ?? 'Course';
@@ -522,7 +657,6 @@ class CourseService
                 }
                 $thumbnailPath = $thumbnailFile->store('courses/thumbnails', 'public');
             } elseif (!empty($data['bg_color']) && str_starts_with($thumbnailPath ?? '', 'http')) {
-                // Jika tidak upload file baru tapi mengubah warna thumbnail otomatisnya
                 $rawName = $data['name'] ?? $course->name;
                 $words = explode(' ', trim($rawName));
                 $initials = strtoupper(substr($words[0], 0, 1) . (isset($words[1]) ? substr($words[1], 0, 1) : ''));
@@ -532,10 +666,10 @@ class CourseService
             }
 
             $course->update([
-                'category_id' => $data['category_id'],
-                'name'        => $data['name'],
+                'category_id' => $data['category_id'] ?? $course->category_id,
+                'name'        => $data['name'] ?? $course->name,
                 'audience'    => $data['audience'] ?? $course->audience,
-                'description' => $data['description'],
+                'description' => $data['description'] ?? $course->description,
                 'thumbnail'   => $thumbnailPath,
             ]);
 
@@ -554,8 +688,6 @@ class CourseService
             ];
         }
     }
-
-
 
     /**
      * Hapus course (Database Lokal)
@@ -593,7 +725,7 @@ class CourseService
     }
 
     /**
-     * Ambil detail course berdasarkan slug (Database Lokal)
+     * Ambil detail course berdasarkan slug (Database Lokal) beserta data PostTest
      */
     public function getCourseBySlug(string $slug): array
     {
@@ -610,7 +742,21 @@ class CourseService
 
             $courseData = $course->toArray();
             $courseData['thumbnail_url'] = $course->thumbnail ? Storage::url($course->thumbnail) : null;
-            $courseData['course_sections'] = $courseData['sections'] ?? [];
+
+            $sectionsWithPostTests = [];
+            foreach ($courseData['sections'] ?? [] as $sec) {
+                $existingPostTest = PostTest::where('course_section_id', $sec['id'])->first();
+                $sec['existing_post_test'] = $existingPostTest ? $existingPostTest->toArray() : null;
+                $sectionsWithPostTests[] = $sec;
+            }
+
+            $existingFinalTest = PostTest::where('course_id', $course->id)
+                ->whereNull('course_section_id')
+                ->first();
+
+            $courseData['sections'] = $sectionsWithPostTests;
+            $courseData['course_sections'] = $sectionsWithPostTests;
+            $courseData['existing_final_test'] = $existingFinalTest ? $existingFinalTest->toArray() : null;
 
             return [
                 'success' => true,
@@ -660,22 +806,27 @@ class CourseService
         }
     }
 
+    public function getEnrolledCourseIds(): array
+    {
+        /** @var User|null $user */
+        $user = Auth::user();
+
+        return $user ? $user->enrolledCourses()->pluck('courses.id')->toArray() : [];
+    }
+
     /**
      * Ambil semua kursus untuk halaman Katalog (Mengecualikan yang sudah diikuti user)
      */
     public function getCatalogCourses(int $perPage = 12, ?string $search = null, ?array $categoryIds = null)
     {
-        /** @var \App\Models\User $user */
-        $user = \Illuminate\Support\Facades\Auth::user();
-        $enrolledCourseIds = $user ? $user->enrolledCourses()->pluck('courses.id')->toArray() : [];
+        $enrolledCourseIds = $this->getEnrolledCourseIds();
 
         return Course::with([
-                'category',
-                // Kurikulum ringkas untuk modal "ringkasan sebelum daftar" (hanya kolom yang dibutuhkan)
-                'sections.contents' => fn($q) => $q
-                    ->select('id', 'course_section_id', 'name', 'position', 'video', 'document')
-                    ->orderBy('position'),
-            ])
+            'category',
+            'sections.contents' => fn($q) => $q
+                ->select('id', 'course_section_id', 'name', 'position', 'video', 'document')
+                ->orderBy('position'),
+        ])
             ->withCount(['sections', 'students'])
             ->when($search, fn($query) => $query->where('name', 'like', "%{$search}%"))
             ->when(!empty($categoryIds), fn($query) => $query->whereIn('category_id', $categoryIds))
@@ -697,17 +848,13 @@ class CourseService
                 return ['success' => false, 'message' => 'Kursus tidak ditemukan.'];
             }
 
-            // PERBAIKAN 1: Tambahkan PHPDoc agar Intelephense mengenali relasi enrolledCourses
-            // PERBAIKAN 2: Sederhanakan pemanggilan namespace menjadi Auth::user()
-            /** @var \App\Models\User $user */
+            /** @var User $user */
             $user = Auth::user();
 
-            // Cek apakah user sudah terdaftar
             if ($user->enrolledCourses()->where('course_id', $course->id)->exists()) {
                 return ['success' => false, 'message' => 'Anda sudah terdaftar di kursus ini.'];
             }
 
-            // Daftarkan ke tabel pivot
             $user->enrolledCourses()->attach($course->id, [
                 'status'     => 'enrolled',
                 'progress'   => 0,
@@ -717,9 +864,121 @@ class CourseService
 
             return ['success' => true, 'message' => 'Berhasil mendaftar kursus! Selamat belajar.'];
         } catch (\Exception $e) {
-            // PERBAIKAN 3: Sederhanakan pemanggilan namespace menjadi Log::error
             Log::error('Enrollment error: ' . $e->getMessage());
+
             return ['success' => false, 'message' => 'Terjadi kesalahan sistem saat mendaftar.'];
         }
+    }
+
+    public function getStudentContentForShow(string $contentId): SectionContent
+    {
+        $content = SectionContent::findOrFail($contentId);
+        $content->is_completed = $content->isCompletedByUser((string) Auth::id());
+
+        return $content;
+    }
+
+    private function userProgressIds(): array
+    {
+        $completedContentIds = StudentContentProgress::where('user_id', Auth::id())
+            ->pluck('section_content_id')->all();
+
+        $passedTestIds = DB::table('post_test_results')
+            ->where('user_id', Auth::id())
+            ->where('is_passed', 1)
+            ->pluck('post_test_id')->all();
+
+        return [$completedContentIds, $passedTestIds];
+    }
+
+    private function isSectionDone($section, array $completedContentIds, array $passedTestIds): bool
+    {
+        foreach ($section->contents as $c) {
+            if (!in_array($c->id, $completedContentIds)) {
+                return false;
+            }
+        }
+
+        $test = PostTest::where('course_section_id', $section->id)->first();
+
+        return !$test || in_array($test->id, $passedTestIds);
+    }
+
+    private function loadCourseOrdered(string $courseId): ?Course
+    {
+        return Course::with(['sections.contents' => fn($q) => $q->orderBy('position')])->find($courseId);
+    }
+
+    public function canAccessContent(SectionContent $content): bool
+    {
+        [$completed, $passed] = $this->userProgressIds();
+
+        if (in_array($content->id, $completed)) {
+            return true;
+        }
+
+        $targetSection = $content->section;
+        $course = $targetSection ? $this->loadCourseOrdered($targetSection->course_id) : null;
+        if (!$course) {
+            return false;
+        }
+
+        foreach ($course->sections as $section) {
+            if ($section->id === $targetSection->id) {
+                foreach ($section->contents as $c) {
+                    if ($c->id === $content->id) {
+                        return true;
+                    }
+                    if (!in_array($c->id, $completed)) {
+                        return false;
+                    }
+                }
+
+                return true;
+            }
+
+            if (!$this->isSectionDone($section, $completed, $passed)) {
+                return false;
+            }
+        }
+
+        return false;
+    }
+
+    public function canAccessTest(PostTest $test): bool
+    {
+        [$completed, $passed] = $this->userProgressIds();
+
+        if (in_array($test->id, $passed)) {
+            return true;
+        }
+
+        $courseId = $test->course_id;
+        if ($test->course_section_id) {
+            $courseId = CourseSection::whereKey($test->course_section_id)->value('course_id');
+        }
+
+        $course = $courseId ? $this->loadCourseOrdered($courseId) : null;
+        if (!$course) {
+            return false;
+        }
+
+        foreach ($course->sections as $section) {
+            if ($test->course_section_id && $section->id === $test->course_section_id) {
+                foreach ($section->contents as $c) {
+                    if (!in_array($c->id, $completed)) {
+                        return false;
+                    }
+                }
+
+                return true;
+            }
+
+            if (!$this->isSectionDone($section, $completed, $passed)) {
+                return false;
+            }
+        }
+
+        return is_null($test->course_section_id);
     }
 }

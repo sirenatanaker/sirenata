@@ -24,66 +24,23 @@
             </ol>
         </nav>
 
-        {{-- KALKULASI PROGRESS REAL (Materi + Evaluasi Bab + Evaluasi Akhir) --}}
+        {{-- KALKULASI PROGRESS REAL (Disiapkan dari CourseService) --}}
         @php
             $thumbnailUrl = data_get($course, 'thumbnail_url');
             $courseName = data_get($course, 'course_name') ?? data_get($course, 'name', 'Course');
             $courseSlug = data_get($course, 'slug') ?? request()->route('slug');
             $courseId = data_get($course, 'id') ?? data_get($course, 'course_id');
 
-            // 1. Hitung Total Topik (Teks/Video/Dokumen)
-            $totalContents = collect(data_get($course, 'sections', []))->sum(
-                fn($s) => count(data_get($s, 'section_contents', [])),
-            );
+            $totalContents = data_get($course, 'total_contents', 0);
             $completedContents = data_get($course, 'completed_count', 0);
-
-            // 2. Hitung Total Post Test & Kelulusannya
-            $totalTests = 0;
-            $passedTests = 0;
-
-            foreach (data_get($course, 'sections', []) as $section) {
-                $postTestBab = \Modules\LMS\Models\PostTest::where(
-                    'course_section_id',
-                    data_get($section, 'id', data_get($section, 'section_id')),
-                )->first();
-                if ($postTestBab) {
-                    $totalTests++;
-                    $isPassed = \Illuminate\Support\Facades\DB::table('post_test_results')
-                        ->where('user_id', auth()->id())
-                        ->where('post_test_id', $postTestBab->id)
-                        ->where('is_passed', 1)
-                        ->exists();
-                    if ($isPassed) {
-                        $passedTests++;
-                    }
-                }
-            }
-
-            // 3. Hitung Evaluasi Akhir
-            $evaluasiAkhir = $courseId
-                ? \Modules\LMS\Models\PostTest::where('course_id', $courseId)->whereNull('course_section_id')->first()
-                : null;
-            $isEvaluasiAkhirCompleted = false;
-
-            if ($evaluasiAkhir) {
-                $totalTests++;
-                $isEvaluasiAkhirCompleted = \Illuminate\Support\Facades\DB::table('post_test_results')
-                    ->where('user_id', auth()->id())
-                    ->where('post_test_id', $evaluasiAkhir->id)
-                    ->where('is_passed', 1)
-                    ->exists();
-                if ($isEvaluasiAkhirCompleted) {
-                    $passedTests++;
-                }
-            }
-
-            // 4. Kalkulasi Persentase Aktual
-            $totalItems = $totalContents + $totalTests;
-            $completedItems = $completedContents + $passedTests;
-            $currentProgress = $totalItems > 0 ? round(($completedItems / $totalItems) * 100) : 0;
-
-            // Kunci Sertifikat & Kelulusan (Wajib 100% DAN lulus evaluasi akhir jika evaluasinya ada)
-            $isFullyCompleted = $currentProgress >= 100 && (!$evaluasiAkhir || $isEvaluasiAkhirCompleted);
+            $totalTests = data_get($course, 'total_tests', 0);
+            $passedTests = data_get($course, 'passed_tests', 0);
+            $evaluasiAkhir = data_get($course, 'evaluasi_akhir');
+            $isEvaluasiAkhirCompleted = data_get($course, 'is_evaluasi_akhir_completed', false);
+            $totalItems = data_get($course, 'total_items', 0);
+            $completedItems = data_get($course, 'completed_items', 0);
+            $currentProgress = data_get($course, 'current_progress', 0);
+            $isFullyCompleted = data_get($course, 'is_fully_completed', false);
 
             // Warna progress: <50% kuning, 50-99% biru, 100% hijau
             if ($currentProgress >= 100) {
@@ -398,32 +355,13 @@
                                 $sectionId = data_get($section, 'id') ?? data_get($section, 'section_id');
                                 $sectionName = data_get($section, 'name', 'Bagian ' . ($index + 1));
                                 $sectionContentsRaw = data_get($section, 'section_contents', []);
-
                                 $totalCount = count($sectionContentsRaw);
-                                $completedCount = 0;
-                                foreach ($sectionContentsRaw as $content) {
-                                    if (data_get($content, 'is_completed')) {
-                                        $completedCount++;
-                                    }
-                                }
-
-                                $isContentCompleted = $totalCount === 0 || $completedCount === $totalCount;
-
-                                $postTestBab = $sectionId
-                                    ? \Modules\LMS\Models\PostTest::where('course_section_id', $sectionId)->first()
-                                    : null;
-
-                                $isPostTestBabCompleted = true;
-                                if ($postTestBab) {
-                                    $isPostTestBabCompleted = \Illuminate\Support\Facades\DB::table('post_test_results')
-                                        ->where('user_id', auth()->id())
-                                        ->where('post_test_id', $postTestBab->id)
-                                        ->where('is_passed', 1)
-                                        ->exists();
-                                }
-
-                                $isSectionCompleted = $isContentCompleted && $isPostTestBabCompleted;
-                                $isLocked = !$isPreviousSectionDone;
+                                $completedCount = data_get($section, 'completed_count', 0);
+                                $isContentCompleted = data_get($section, 'is_content_completed', $totalCount === 0 || $completedCount === $totalCount);
+                                $postTestBab = data_get($section, 'post_test_bab');
+                                $isPostTestBabCompleted = data_get($section, 'is_post_test_bab_completed', true);
+                                $isSectionCompleted = data_get($section, 'is_section_completed', $isContentCompleted && $isPostTestBabCompleted);
+                                $isLocked = data_get($section, 'is_locked', !$isPreviousSectionDone);
                             @endphp
 
                             <div x-data="{ id: 'section-{{ $index }}', locked: {{ $isLocked ? 'true' : 'false' }} }" id="section-{{ $index }}"

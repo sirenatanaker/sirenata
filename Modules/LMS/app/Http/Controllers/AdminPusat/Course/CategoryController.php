@@ -4,49 +4,44 @@ namespace Modules\LMS\Http\Controllers\AdminPusat\Course;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
+use Modules\LMS\Http\Requests\CategoryStoreRequest;
+use Modules\LMS\Http\Requests\CategoryUpdateRequest;
 use Modules\LMS\Models\Category;
+use Modules\LMS\Services\CategoryService;
 
 class CategoryController extends Controller
 {
-    public function store(Request $request): JsonResponse
-    {
-        $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255', Rule::unique('categories', 'name')],
-        ]);
+    public function __construct(
+        private CategoryService $categoryService
+    ) {}
 
-        $category = Category::create($validated);
+    public function store(CategoryStoreRequest $request): JsonResponse
+    {
+        $category = $this->categoryService->createCategory($request->validated());
 
         return response()->json([
-            'message' => 'Kategori berhasil ditambahkan.',
+            'message'  => 'Kategori berhasil ditambahkan.',
             'category' => $category->only(['id', 'name']),
         ], 201);
     }
 
-    public function update(Request $request, Category $category): JsonResponse
+    public function update(CategoryUpdateRequest $request, Category $category): JsonResponse
     {
-        $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255', Rule::unique('categories', 'name')->ignore($category->id)],
-        ]);
-
-        $category->update($validated);
+        $this->categoryService->updateCategory($category, $request->validated());
 
         return response()->json([
-            'message' => 'Kategori berhasil diperbarui.',
+            'message'  => 'Kategori berhasil diperbarui.',
             'category' => $category->only(['id', 'name']),
         ]);
     }
 
     public function destroy(Category $category): JsonResponse
     {
-        if ($category->courses()->exists()) {
+        if (!$this->categoryService->deleteCategory($category)) {
             return response()->json([
                 'message' => 'Kategori tidak dapat dihapus karena masih digunakan oleh kursus.',
             ], 422);
         }
-
-        $category->delete();
 
         return response()->json([
             'message' => 'Kategori berhasil dihapus.',

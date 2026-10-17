@@ -3,11 +3,12 @@
 namespace Modules\LMS\Http\Controllers\AdminPusat\Course;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use Modules\LMS\Services\PostTestService;
 use Devrabiul\ToastMagic\Facades\ToastMagic;
-use Modules\LMS\Models\Course;
-use Modules\LMS\Models\CourseSection;
+use Illuminate\Http\Request;
+use Modules\LMS\Http\Requests\StorePostTestRequest;
+use Modules\LMS\Http\Requests\UpdatePostTestRequest;
+use Modules\LMS\Http\Requests\UploadPostTestImageRequest;
+use Modules\LMS\Services\PostTestService;
 
 class PostTestController extends Controller
 {
@@ -15,115 +16,64 @@ class PostTestController extends Controller
 
     public function create(Request $request)
     {
-        $courseSlug = $request->query('course_slug');
-        $sectionId = $request->query('section_id');
+        $data = $this->postTestService->getCreateData(
+            (string) $request->query('course_slug'),
+            $request->query('section_id'),
+        );
 
-        $course = Course::where('slug', $courseSlug)->firstOrFail();
-        $section = $sectionId ? CourseSection::findOrFail($sectionId) : null;
-
-        return view('lms::admin-pusat.post-test.create', compact('course', 'section'));
+        return view('lms::admin-pusat.post-test.create', $data);
     }
 
-    public function store(Request $request)
+    public function store(StorePostTestRequest $request)
     {
-        $validated = $request->validate([
-            'course_slug'                 => 'required|string',
-            'course_section_id'           => 'nullable|uuid',
-            'course_id'                   => 'nullable|uuid',
-            'title'                       => 'required|string|max:255',
-            'passing_score'               => 'required|integer|min:0|max:100',
-            'duration'                    => 'required|integer|min:1',
-            'description'                 => 'nullable|string',
-            'questions'                   => 'required|array|min:1',
-            'questions.*.question'        => 'required|string',
-            'questions.*.choices'         => 'required|array|min:2',
-            'questions.*.choices.*'       => 'required|string',
-            'questions.*.correct_choice'  => 'required|integer',
-        ]);
-
-        // Langsung panggil service internal tanpa token API
+        $validated = $request->validated();
         $result = $this->postTestService->storePostTestWithQuestions($validated);
 
         if (!$result['success']) {
             ToastMagic::error($result['message']);
+
             return redirect()->back()->withInput();
         }
 
         ToastMagic::success($result['message']);
+
         return redirect()->route('admin-pusat.management-course.courses.show', $validated['course_slug']);
     }
 
-   public function edit(Request $request, $id)
+    public function edit(Request $request, $id)
     {
-        $courseSlug = $request->query('course_slug');
-        $course = Course::where('slug', $courseSlug)->firstOrFail();
-        
-        $postTest = \Modules\LMS\Models\PostTest::with('questions.choices')->findOrFail($id);
-        
-        // Ambil data section jika post test ini adalah post test per bagian
-        $section = $postTest->course_section_id ? CourseSection::findOrFail($postTest->course_section_id) : null;
+        $data = $this->postTestService->getEditData(
+            (string) $id,
+            (string) $request->query('course_slug'),
+        );
 
-        $formattedQuestions = $postTest->questions->map(function($q) {
-            $correctIndex = 0;
-            $choices = $q->choices->values()->map(function($c, $index) use (&$correctIndex) {
-                if ($c->is_correct) {
-                    $correctIndex = $index;
-                }
-                return $c->choice;
-            });
-            return [
-                'question' => $q->question,
-                'choices' => $choices,
-                'correct_choice' => $correctIndex
-            ];
-        });
-
-        return view('lms::admin-pusat.post-test.edit', compact('course', 'section', 'postTest', 'formattedQuestions'));
+        return view('lms::admin-pusat.post-test.edit', $data);
     }
 
-    public function update(Request $request, $id)
+    public function update(UpdatePostTestRequest $request, $id)
     {
-        $validated = $request->validate([
-            'course_slug'                 => 'required|string',
-            'title'                       => 'required|string|max:255',
-            'passing_score'               => 'required|integer|min:0|max:100',
-            'duration'                    => 'required|integer|min:1',
-            'description'                 => 'nullable|string',
-            'questions'                   => 'required|array|min:1',
-            'questions.*.question'        => 'required|string',
-            'questions.*.choices'         => 'required|array|min:2',
-            'questions.*.choices.*'       => 'required|string',
-            'questions.*.correct_choice'  => 'required|integer',
-        ]);
-
-        $postTest = \Modules\LMS\Models\PostTest::findOrFail($id);
-
-        // Panggil service internal untuk update
+        $validated = $request->validated();
+        $postTest = $this->postTestService->findOrFail((string) $id);
         $result = $this->postTestService->updatePostTestWithQuestions($postTest, $validated);
 
         if (!$result['success']) {
             ToastMagic::error($result['message']);
+
             return redirect()->back()->withInput();
         }
 
         ToastMagic::success($result['message']);
+
         return redirect()->route('admin-pusat.management-course.courses.show', $validated['course_slug']);
     }
 
-    public function uploadImage(Request $request)
+    public function uploadImage(UploadPostTestImageRequest $request)
     {
-        $request->validate([
-            'image' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+        $url = $this->postTestService->uploadEditorImage($request->file('image'));
+
+        return response()->json([
+            'success' => true,
+            'url'     => $url,
         ]);
-
-        if ($request->hasFile('image')) {
-            $path = $request->file('image')->store('post-test-images', 'public');
-            return response()->json([
-                'success' => true,
-                'url' => asset('storage/' . $path) 
-            ]);
-        }
-
-        return response()->json(['success' => false], 400);
     }
 }

@@ -142,18 +142,13 @@ class CourseSectionController extends Controller
      * @authenticated
      * @role:admin-pusat
      */
-    public function reorder(Request $request, string $slug): JsonResponse
+    public function reorder(\Modules\LMS\Http\Requests\Api\ReorderCourseSectionRequest $request, string $slug): JsonResponse
     {
-        $request->validate([
-            'sections'              => ['required', 'array'],
-            'sections.*.id'         => ['required', 'uuid', 'exists:course_sections,id'],
-            'sections.*.position'   => ['required', 'integer', 'min:1'],
-        ]);
-
         try {
+            $validated = $request->validated();
             $this->courseSectionService->reorderSections(
                 slug: $slug,
-                sections: $request->sections
+                sections: $validated['sections']
             );
 
             return ResponseHelper::success(

@@ -4,10 +4,8 @@ namespace Modules\LMS\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use Modules\LMS\Models\LibraryCategory;
-use Modules\LMS\Models\Library;
+use Illuminate\Support\Facades\Auth;
 use Modules\LMS\Services\LibraryService;
-use Illuminate\Support\Facades\Auth; // Tambahkan ini
 
 class LibraryController extends Controller
 {
@@ -15,9 +13,6 @@ class LibraryController extends Controller
         private LibraryService $libraryService
     ) {}
 
-    /**
-     * Display a listing of the resource.
-     */
     public function index(Request $request)
     {
         $search = $request->input('search');
@@ -26,62 +21,36 @@ class LibraryController extends Controller
         $libraries = $this->libraryService->paginateFiltered(
             search: $search,
             libraryCategoryName: $type,
-            limit: 12
+            limit: 12,
         );
+        $libraryCategories = $this->libraryService->getAllCategoriesWithCounts();
+        $stats = $this->libraryService->getLibraryStats($libraryCategories);
 
-        $libraryCategories = LibraryCategory::orderBy('name')->get();
-
-        // Statistik Nyata untuk Header
-        $totalKoleksi = Library::count();
-        $totalKategori = $libraryCategories->count();
-        $totalDokumen = Library::whereNotNull('file_path')->count();
-        $totalVideo = Library::where(function($q) {
-            $q->whereNotNull('video_path')
-              ->orWhere('external_link', 'like', '%youtube%')
-              ->orWhere('external_link', 'like', '%youtu.be%');
-        })->count();
-
-        return view('lms::user.library.index', compact(
-            'libraries', 
-            'libraryCategories', 
-            'type', 
-            'search',
-            'totalKoleksi',
-            'totalKategori',
-            'totalDokumen',
-            'totalVideo'
+        return view('lms::user.library.index', array_merge(
+            compact('libraries', 'libraryCategories', 'type', 'search'),
+            $stats
         ));
     }
 
-    /**
-     * Display the specified resource and track access history.
-     */
     public function show($id)
     {
-        $library = Library::findOrFail($id);
+        $library = $this->libraryService->findOrFail((string) $id);
         $userId = Auth::id();
 
-        // Rekam jejak user jika sudah login
         if ($userId) {
             $this->libraryService->recordUserAccess($library, $userId);
         }
 
-        // Tampilkan halaman detail atau langsung response file/video
-        // Sesuaikan nama view ini dengan struktur folder Anda
         return view('lms::user.library.show', compact('library'));
     }
 
-    /**
-     * Mencatat riwayat akses melalui AJAX saat modal dibuka
-     */
     public function track($id)
     {
         $userId = Auth::id();
 
         if ($userId) {
-            $library = Library::findOrFail($id);
-            // Menggunakan service yang sudah Anda buat sebelumnya
-            $this->libraryService->recordUserAccess($library, $userId); 
+            $library = $this->libraryService->findOrFail((string) $id);
+            $this->libraryService->recordUserAccess($library, $userId);
         }
 
         return response()->json(['success' => true]);

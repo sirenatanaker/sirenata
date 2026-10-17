@@ -88,17 +88,14 @@ class CourseStudentController extends Controller
      * @authenticated
      * @role:admin-pusat
      */
-    public function updateStatus(Request $request, string $slug, string $userId): JsonResponse
+    public function updateStatus(\Modules\LMS\Http\Requests\Api\UpdateCourseStudentStatusRequest $request, string $slug, string $userId): JsonResponse
     {
-        $request->validate([
-            'status' => ['required', 'in:enrolled,in_progress,completed'],
-        ]);
-
         try {
+            $validated = $request->validated();
             $result = $this->courseStudentService->updateStatus(
                 slug: $slug,
                 userId: $userId,
-                status: $request->status
+                status: $validated['status']
             );
 
             if (! $result['success']) {

@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Modules\LMS\Http\Requests\Api\Category\CategoryStoreRequest;
 use Modules\LMS\Http\Requests\Api\Category\CategoryUpdateStoreRequest;
 use Modules\LMS\Models\Category;
+use Modules\LMS\Services\CategoryService;
 use Modules\LMS\Transformers\Api\CategoryResource;
 use Symfony\Component\HttpFoundation\JsonResponse;
 
@@ -18,23 +19,22 @@ use Symfony\Component\HttpFoundation\JsonResponse;
  */
 class CategoryController extends Controller
 {
+    public function __construct(
+        private readonly CategoryService $categoryService
+    ) {}
+
     /**
      * List semua kategori
-     *
-     * Menampilkan daftar kategori course yang tersedia.
-     * Bisa difilter berdasarkan nama dan mengatur jumlah data per halaman.
      *
      * @unauthenticated
      */
     public function index(Request $request): JsonResponse
     {
         try {
-            $row_per_page = $request->input('row_per_page', 10);
-            $search       = $request->input('search');
-
-            $categories = Category::when($search, fn($q) => $q->where('name', 'like', "%{$search}%"))
-                ->latest()
-                ->paginate($row_per_page);
+            $categories = $this->categoryService->paginateFiltered(
+                search: $request->input('search'),
+                perPage: (int) $request->input('row_per_page', 10),
+            );
 
             return ResponseHelper::success(
                 status: true,
@@ -43,17 +43,12 @@ class CategoryController extends Controller
                 statusCode: 200
             );
         } catch (\Exception $e) {
-            return ResponseHelper::error(
-                message: $e->getMessage(),
-                statusCode: 500
-            );
+            return ResponseHelper::error(message: $e->getMessage(), statusCode: 500);
         }
     }
 
     /**
      * Detail kategori
-     *
-     * Menampilkan detail satu kategori berdasarkan Slug.
      *
      * @unauthenticated
      */
@@ -67,25 +62,18 @@ class CategoryController extends Controller
                 statusCode: 200
             );
         } catch (\Exception $e) {
-            return ResponseHelper::error(
-                message: $e->getMessage(),
-                statusCode: 500
-            );
+            return ResponseHelper::error(message: $e->getMessage(), statusCode: 500);
         }
     }
 
     /**
      * Buat kategori baru
-     *
-     * Hanya bisa diakses oleh User dengan role admin-pusat.
-     *
      */
-
     #[BodyParameter(name: 'name', description: 'Nama kategori course', type: 'string', required: true, example: 'example')]
     public function store(CategoryStoreRequest $request): JsonResponse
     {
         try {
-            $category = Category::create($request->validated());
+            $category = $this->categoryService->createCategory($request->validated());
 
             return ResponseHelper::success(
                 status: true,
@@ -94,24 +82,18 @@ class CategoryController extends Controller
                 statusCode: 201
             );
         } catch (\Exception $e) {
-            return ResponseHelper::error(
-                message: $e->getMessage(),
-                statusCode: 500
-            );
+            return ResponseHelper::error(message: $e->getMessage(), statusCode: 500);
         }
     }
 
     /**
      * Update kategori
-     *
-     * Hanya bisa diakses oleh admin-pusat.
-     *
      */
     #[BodyParameter(name: 'name', description: 'Nama kategori course', type: 'string', required: true, example: 'example')]
     public function update(CategoryUpdateStoreRequest $request, Category $category): JsonResponse
     {
         try {
-            $category->update($request->validated());
+            $this->categoryService->updateCategory($category, $request->validated());
 
             return ResponseHelper::success(
                 status: true,
@@ -120,32 +102,17 @@ class CategoryController extends Controller
                 statusCode: 200
             );
         } catch (\Exception $e) {
-            return ResponseHelper::error(
-                message: $e->getMessage(),
-                statusCode: 500
-            );
+            return ResponseHelper::error(message: $e->getMessage(), statusCode: 500);
         }
     }
 
     /**
      * Hapus kategori
-     *
-     * Hanya bisa diakses oleh admin-pusat.
-     * Kategori yang masih memiliki course tidak bisa dihapus.
-     *
      */
     public function destroy(Category $category): JsonResponse
     {
         try {
-            // Cek apakah kategori masih punya course
-            // if ($category->courses()->exists()) {
-            //     return ResponseHelper::error(
-            //         message: 'Kategori tidak bisa dihapus karena masih memiliki course',
-            //         statusCode: 422
-            //     );
-            // }
-
-            $category->delete();
+            $this->categoryService->deleteCategory($category, checkCourses: false);
 
             return ResponseHelper::success(
                 status: true,
@@ -154,10 +121,7 @@ class CategoryController extends Controller
                 statusCode: 200
             );
         } catch (\Exception $e) {
-            return ResponseHelper::error(
-                message: $e->getMessage(),
-                statusCode: 500
-            );
+            return ResponseHelper::error(message: $e->getMessage(), statusCode: 500);
         }
     }
 }

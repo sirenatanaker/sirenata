@@ -2,13 +2,13 @@
 
 namespace Modules\LMS\Services;
 
+use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Modules\LMS\Models\Library;
 use Modules\LMS\Models\LibraryCategory;
-use Devrabiul\ToastMagic\Facades\ToastMagic;
-use Carbon\Carbon; // Tambahkan ini
 
 class LibraryService
 {
@@ -37,10 +37,35 @@ class LibraryService
             ->withQueryString();
     }
 
+    public function findOrFail(string $id): Library
+    {
+        return Library::findOrFail($id);
+    }
+
+    public function getAllCategoriesWithCounts(): Collection
+    {
+        return LibraryCategory::withCount('libraries')->orderBy('name')->get();
+    }
+
+    public function getLibraryStats(?Collection $categories = null): array
+    {
+        $categoriesCount = $categories ? $categories->count() : LibraryCategory::count();
+
+        return [
+            'totalKoleksi'  => Library::count(),
+            'totalKategori' => $categoriesCount,
+            'totalDokumen'  => Library::whereNotNull('file_path')->count(),
+            'totalVideo'    => Library::where(function ($q) {
+                $q->whereNotNull('video_path')
+                    ->orWhere('external_link', 'like', '%youtube%')
+                    ->orWhere('external_link', 'like', '%youtu.be%');
+            })->count(),
+        ];
+    }
+
     public function createLibrary(array $data): Library
     {
         return DB::transaction(function () use ($data) {
-
             $coverImage = null;
             if (!empty($data['thumb_mode']) && $data['thumb_mode'] === 'auto') {
                 $colors = ['13416B', '547996', '8BB1CC', '79A736'];
@@ -66,27 +91,22 @@ class LibraryService
                 $videoPath = $data['video_path']->store('libraries/videos', 'public');
             }
 
-            $library = Library::create([
+            return Library::create([
                 'library_category_id' => $data['library_category_id'],
-                'title'           => $data['title'],
-                'description'     => $data['description'] ?? null,
-                'cover_image'     => $coverImage,
-                'file_path'       => $filePath,
-                'video_path'      => $videoPath,
-                'external_link'   => $data['external_link'] ?? null,
-                'created_by'      => Auth::id(),
+                'title'               => $data['title'],
+                'description'         => $data['description'] ?? null,
+                'cover_image'         => $coverImage,
+                'file_path'           => $filePath,
+                'video_path'          => $videoPath,
+                'external_link'       => $data['external_link'] ?? null,
+                'created_by'          => Auth::id(),
             ]);
-
-            ToastMagic::success('Materi Perpustakaan berhasil ditambahkan!');
-
-            return $library;
         });
     }
 
     public function updateLibrary(Library $library, array $data): Library
     {
         return DB::transaction(function () use ($library, $data) {
-
             $coverImage = $library->cover_image;
 
             if (!empty($data['thumb_mode']) && $data['thumb_mode'] === 'auto') {
@@ -127,15 +147,13 @@ class LibraryService
 
             $library->update([
                 'library_category_id' => $data['library_category_id'],
-                'title'           => $data['title'],
-                'description'     => $data['description'] ?? null,
-                'cover_image'     => $coverImage,
-                'file_path'       => $filePath,
-                'video_path'      => $videoPath,
-                'external_link'   => $data['external_link'] ?? null,
+                'title'               => $data['title'],
+                'description'         => $data['description'] ?? null,
+                'cover_image'         => $coverImage,
+                'file_path'           => $filePath,
+                'video_path'          => $videoPath,
+                'external_link'       => $data['external_link'] ?? null,
             ]);
-
-            ToastMagic::success('Materi Perpustakaan berhasil diperbarui!');
 
             return $library;
         });
@@ -156,23 +174,18 @@ class LibraryService
         }
 
         $library->delete();
-
-        ToastMagic::success('Materi Perpustakaan berhasil dihapus!');
     }
 
-    /**
-     * Mencatat riwayat akses user ke materi perpustakaan
-     */
     public function recordUserAccess(Library $library, $userId): void
     {
         DB::table('user_library_history')->updateOrInsert(
             [
-                'user_id' => $userId,
-                'library_id' => $library->id
+                'user_id'    => $userId,
+                'library_id' => $library->id,
             ],
             [
                 'last_accessed_at' => Carbon::now(),
-                'updated_at' => Carbon::now()
+                'updated_at'       => Carbon::now(),
             ]
         );
     }

@@ -104,23 +104,7 @@
                             </x-table.td>
 
                             <x-table.td>
-                                @php
-                                    $status = $row->status ?? 'enrolled';
-                                    $statusConfig = match($status) {
-                                        'completed' => ['color' => 'green', 'label' => 'Selesai'],
-                                        'in_progress' => ['color' => 'amber', 'label' => 'Berjalan'],
-                                        default => ['color' => 'slate', 'label' => 'Terdaftar'],
-                                    };
-                                @endphp
-                                <div class="space-y-1">
-                                    <x-badge :color="$statusConfig['color']" :text="$statusConfig['label']" />
-                                    <div class="flex items-center gap-2">
-                                        <div class="flex-1 bg-slate-200 rounded-full h-1.5">
-                                            <div class="bg-indigo-600 h-1.5 rounded-full" style="width: {{ $row->progress ?? 0 }}%"></div>
-                                        </div>
-                                        <span class="text-xs text-slate-500 font-medium">{{ $row->progress ?? 0 }}%</span>
-                                    </div>
-                                </div>
+                                <x-lms::enrollment.progress-status :status="$row->status ?? 'enrolled'" :progress="$row->progress ?? 0" />
                             </x-table.td>
 
                             <x-table.td align="center">

@@ -127,7 +127,7 @@ class CourseController extends Controller
     public function update(UpdateCourseRequest $request, string $slug): JsonResponse
     {
         try {
-            $course = Course::where('slug', $slug)->firstOrFail();
+            $course = $this->courseService->findBySlugOrFail($slug);
             $data   = $request->validated();
             $this->courseService->CourseUpdate(course: $course, data: $data);
 
@@ -157,7 +157,7 @@ class CourseController extends Controller
     public function destroy(string $slug): JsonResponse
     {
         try {
-            $course = Course::where('slug', $slug)->first();
+            $course = $this->courseService->findBySlug($slug);
 
             if (!$course) {
                 return ResponseHelper::error(

@@ -4,9 +4,7 @@ namespace Modules\LMS\Http\Controllers\Api\Course;
 
 use App\Helpers\ResponseHelper;
 use App\Http\Controllers\Controller;
-use App\Models\User;
-use Illuminate\Http\Request;
-use Modules\LMS\Models\Course;
+use Modules\LMS\Http\Requests\Api\StoreCourseMentorRequest;
 use Modules\LMS\Services\Api\CourseMentorService;
 use Modules\LMS\Transformers\Api\CourseMentorResource;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -55,14 +53,11 @@ class CourseMentorController extends Controller
      * @authenticated
      * @role:admin-pusat
      */
-    public function store(Request $request, string $slug): JsonResponse
+    public function store(StoreCourseMentorRequest $request, string $slug): JsonResponse
     {
-        $request->validate([
-            'user_id' => ['required', 'exists:users,id'],
-        ]);
- 
         try {
-            $this->courseMentorService->addMentor(slug: $slug, userId: $request->user_id );
+            $validated = $request->validated();
+            $this->courseMentorService->addMentor(slug: $slug, userId: $validated['user_id']);
     
             return ResponseHelper::success(
                 status: true,

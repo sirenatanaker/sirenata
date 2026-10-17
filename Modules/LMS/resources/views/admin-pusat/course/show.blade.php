@@ -257,7 +257,7 @@
 
                                                 <!-- Footer Section: Tambah Materi & Post Test -->
                                                 @php
-                                                    $existingPostTest = \Modules\LMS\Models\PostTest::where('course_section_id', $section->id)->first();
+                                                    $existingPostTest = $section->existing_post_test ?? null;
                                                 @endphp
                                                 <div class="mt-4 pt-4 border-t border-slate-200/80 flex flex-col sm:flex-row gap-3">
                                                     
@@ -287,9 +287,7 @@
                                 <!-- FINAL POST TEST (EVALUASI AKHIR MODUL) CARD    -->
                                 <!-- ============================================== -->
                                 @php
-                                    $existingFinalTest = \Modules\LMS\Models\PostTest::where('course_id', $course->id)
-                                        ->whereNull('course_section_id')
-                                        ->first();
+                                    $existingFinalTest = $course->existing_final_test ?? null;
                                 @endphp
                                 <div class="bg-gradient-to-r from-[#13416B] to-[#0f3354] rounded-md overflow-hidden shadow-md mt-8 relative" data-tour="evaluasi">
                                     <div class="p-5 sm:p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5">

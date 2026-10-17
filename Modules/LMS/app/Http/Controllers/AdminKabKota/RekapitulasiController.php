@@ -9,56 +9,44 @@ use Illuminate\Support\Facades\Auth;
 use Maatwebsite\Excel\Facades\Excel;
 use Modules\LMS\Services\CourseService;
 use Modules\LMS\Services\RekapitulasiService;
-use Modules\MasterData\Models\Regency;
 
 class RekapitulasiController extends Controller
 {
     public function __construct(
         private RekapitulasiService $rekapitulasiService,
-        private CourseService $courseService
+        private CourseService $courseService,
     ) {}
 
-    /**
-     * Display a listing of the resource.
-     */
     public function index(Request $request)
     {
         $user = Auth::user();
         if (!$user->hasCompleteScope()) {
             abort(403, 'Admin provinsi belum memiliki wilayah.');
         }
-        $regency = Regency::find($user->scopeArea?->regency_code);
-        $limit   = $request->integer('per_page', 10);
-        $search  = $request->string('search')->toString();
-        $courseId = $request->string('course_id')->toString();
 
+        $regencyCode = $user->scopeArea?->regency_code;
+        $regency = $this->rekapitulasiService->getRegencyByCode($regencyCode);
         $courses = $this->courseService->getCoursesForFilter();
         $data = $this->courseService->paginateCourseEnrollmentsByRegency(
-            regencyCode: $user->scopeArea->regency_code,
-            search: $search,
-            limit: $limit,
-            courseId: $courseId,
+            regencyCode: $regencyCode,
+            search: $request->string('search')->toString(),
+            limit: $request->integer('per_page', 10),
+            courseId: $request->string('course_id')->toString(),
         );
-        return view('lms::admin-kab-kota.sdm.rekapitulasi-index', [
-            'data' => $data,
-            'regencyCode' => $user->scopeArea?->regency_code,
-            'regency' => $regency,
-            'courses' => $courses,
-        ]);
+
+        return view('lms::admin-kab-kota.sdm.rekapitulasi-index', compact('data', 'regencyCode', 'regency', 'courses'));
     }
 
-    /**
-     * Export rekap user course per provinsi
-     */
     public function exportRekapUserRegency(Request $request)
     {
         $user = Auth::user();
         if (!$user->hasCompleteScope()) {
             abort(403, 'Admin provinsi belum memiliki wilayah.');
         }
+
         $regencyCode = $user->scopeArea?->regency_code;
-        $regencyName = Regency::find($regencyCode)->name;
-        $filename     = 'rekapitulasi-' . str($regencyName)->slug() . '-' . now()->format('Y-m-d') . '.xlsx';
+        $regencyName = $this->rekapitulasiService->getRegencyByCode($regencyCode)?->name ?? '';
+        $filename = 'rekapitulasi-' . str($regencyName)->slug() . '-' . now()->format('Y-m-d') . '.xlsx';
 
         return Excel::download(
             new RekapUserCourseRegencyExport(

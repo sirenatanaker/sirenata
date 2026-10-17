@@ -18,6 +18,7 @@ class UpdateCourseRequest extends FormRequest
         
             'thumbnail'   => ['nullable', 'image', 'mimes:png,jpg', 'max:2048'],
             'description' => ['sometimes', 'string'],
+            'bg_color'    => ['nullable', 'string', 'max:20'],
         ];
     }
 

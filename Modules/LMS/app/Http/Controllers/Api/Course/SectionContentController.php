@@ -172,15 +172,10 @@ class SectionContentController extends Controller
      * @authenticated
      * @role:admin-pusat
      */
-    public function reorder(Request $request, CourseSection $courseSection): JsonResponse
+    public function reorder(\Modules\LMS\Http\Requests\Api\ReorderSectionContentRequest $request, CourseSection $courseSection): JsonResponse
     {
-        $request->validate([
-            'contents'             => ['required', 'array'],
-            'contents.*.id'        => ['required', 'uuid', 'exists:section_contents,id'],
-            'contents.*.position'  => ['required', 'integer', 'min:0'],
-        ]);
-
-        $result = $this->service->reorder($request->contents, $courseSection);
+        $validated = $request->validated();
+        $result = $this->service->reorder($validated['contents'], $courseSection);
 
         return ResponseHelper::success(
             status: true,

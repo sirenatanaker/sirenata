@@ -3,94 +3,41 @@
 namespace Modules\LMS\Http\Controllers\AdminPusat;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
-use Modules\LMS\Models\CertificateSetting;
 use Devrabiul\ToastMagic\Facades\ToastMagic;
+use Illuminate\Http\Request;
+use Modules\LMS\Http\Requests\CertificateStoreRequest;
+use Modules\LMS\Http\Requests\CertificateUpdateRequest;
+use Modules\LMS\Models\CertificateSetting;
+use Modules\LMS\Services\CertificateService;
 
 class CertificateController extends Controller
 {
+    public function __construct(
+        private CertificateService $certificateService
+    ) {}
+
     public function index(Request $request)
     {
-        $query = CertificateSetting::query();
-
-        if ($request->filled('search')) {
-            $query->where(function ($q) use ($request) {
-                $q->where('signer_name', 'like', '%' . $request->search . '%')
-                  ->orWhere('signer_title', 'like', '%' . $request->search . '%');
-            });
-        }
-
-        if ($request->filled('status')) {
-            $query->where('is_active', $request->status === 'active');
-        }
-
-        $settings = $query->latest()->paginate($request->input('per_page', 10));
+        $settings = $this->certificateService->paginateSettings(
+            search: $request->input('search'),
+            status: $request->input('status'),
+            perPage: (int) $request->input('per_page', 10),
+        );
 
         return view('lms::admin-pusat.certificates.index', compact('settings'));
     }
 
-    public function store(Request $request)
+    public function store(CertificateStoreRequest $request)
     {
-        $validated = $request->validate([
-            'signer_name' => 'required|string|max:255',
-            'signer_title' => 'required|string|max:255',
-            'signature_image' => 'required|image|mimes:png,jpg,jpeg|max:2048',
-            'background_image' => 'required|image|mimes:png,jpg,jpeg|max:5120',
-        ]);
-
-        $setting = new CertificateSetting();
-        $setting->signer_name = $validated['signer_name'];
-        $setting->signer_title = $validated['signer_title'];
-        $setting->is_active = false;
-
-        if ($request->hasFile('signature_image')) {
-            $setting->signature_image = $request->file('signature_image')
-                ->store('certificates/signatures', 'public');
-        }
-
-        if ($request->hasFile('background_image')) {
-            $setting->background_image = $request->file('background_image')
-                ->store('certificates/templates', 'public');
-        }
-
-        $setting->save();
-
+        $this->certificateService->createSetting($request->validated());
         ToastMagic::success('Tanda tangan sertifikat berhasil ditambahkan.');
 
         return redirect()->route('admin-pusat.certificates.index');
     }
 
-    public function update(Request $request, CertificateSetting $certificate)
+    public function update(CertificateUpdateRequest $request, CertificateSetting $certificate)
     {
-        $validated = $request->validate([
-            'signer_name' => 'required|string|max:255',
-            'signer_title' => 'required|string|max:255',
-            'signature_image' => 'nullable|image|mimes:png,jpg,jpeg|max:2048',
-            'background_image' => 'nullable|image|mimes:png,jpg,jpeg|max:5120',
-        ]);
-
-        $certificate->signer_name = $validated['signer_name'];
-        $certificate->signer_title = $validated['signer_title'];
-
-        if ($request->hasFile('signature_image')) {
-            if ($certificate->signature_image) {
-                Storage::disk('public')->delete($certificate->signature_image);
-            }
-            $certificate->signature_image = $request->file('signature_image')
-                ->store('certificates/signatures', 'public');
-        }
-
-        if ($request->hasFile('background_image')) {
-            if ($certificate->background_image) {
-                Storage::disk('public')->delete($certificate->background_image);
-            }
-            $certificate->background_image = $request->file('background_image')
-                ->store('certificates/templates', 'public');
-        }
-
-        $certificate->save();
-
+        $this->certificateService->updateSetting($certificate, $request->validated());
         ToastMagic::success('Tanda tangan sertifikat berhasil diperbarui.');
 
         return redirect()->route('admin-pusat.certificates.index');
@@ -98,11 +45,7 @@ class CertificateController extends Controller
 
     public function activate(CertificateSetting $certificate)
     {
-        CertificateSetting::where('is_active', true)->update(['is_active' => false]);
-
-        $certificate->is_active = true;
-        $certificate->save();
-
+        $this->certificateService->activateSetting($certificate);
         ToastMagic::success('Tanda tangan berhasil diaktifkan.');
 
         return redirect()->route('admin-pusat.certificates.index');
@@ -110,16 +53,7 @@ class CertificateController extends Controller
 
     public function destroy(CertificateSetting $certificate)
     {
-        if ($certificate->signature_image) {
-            Storage::disk('public')->delete($certificate->signature_image);
-        }
-
-        if ($certificate->background_image) {
-            Storage::disk('public')->delete($certificate->background_image);
-        }
-
-        $certificate->delete();
-
+        $this->certificateService->deleteSetting($certificate);
         ToastMagic::success('Tanda tangan sertifikat berhasil dihapus.');
 
         return redirect()->route('admin-pusat.certificates.index');

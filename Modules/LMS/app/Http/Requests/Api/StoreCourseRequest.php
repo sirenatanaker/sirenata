@@ -19,6 +19,7 @@ class StoreCourseRequest extends FormRequest
         
             'thumbnail'   => ['nullable', 'image',  'mimes:png,jpg', 'max:2048'], 
             'description' => ['required', 'string'],
+            'bg_color'    => ['nullable', 'string', 'max:20'],
         ];
     }
 
