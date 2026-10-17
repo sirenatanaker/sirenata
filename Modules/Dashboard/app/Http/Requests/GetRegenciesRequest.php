@@ -12,7 +12,7 @@ class GetRegenciesRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'province_code' => 'required|string',
+            'province_code' => ['required', 'string'],
         ];
     }
 

@@ -4,7 +4,9 @@ namespace Modules\LMS\Http\Controllers\AdminPusat\Course;
 
 use App\Http\Controllers\Controller;
 use Devrabiul\ToastMagic\Facades\ToastMagic;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\View\View;
 use Modules\LMS\Http\Requests\StoreCourseSectionWebRequest;
 use Modules\LMS\Services\CourseSectionService;
 
@@ -12,17 +14,17 @@ class CourseSectionController extends Controller
 {
     public function __construct(private CourseSectionService $courseSectionService) {}
 
-    public function index()
+    public function index(): View
     {
         return view('lms::index');
     }
 
-    public function create()
+    public function create(): View
     {
         return view('lms::create');
     }
 
-    public function store(StoreCourseSectionWebRequest $request)
+    public function store(StoreCourseSectionWebRequest $request): RedirectResponse
     {
         try {
             $validated = $request->validated();
@@ -48,19 +50,22 @@ class CourseSectionController extends Controller
         }
     }
 
-    public function show($id)
+    public function show($id): View
     {
         return view('lms::show');
     }
 
-    public function edit($id)
+    public function edit($id): View
     {
         return view('lms::edit');
     }
 
-    public function update(Request $request, $id) {}
+    public function update(Request $request, $id): RedirectResponse
+    {
+        return redirect()->back();
+    }
 
-    public function destroy(Request $request, $id)
+    public function destroy(Request $request, $id): RedirectResponse
     {
         try {
             $courseSlug = $request->input('course_slug');

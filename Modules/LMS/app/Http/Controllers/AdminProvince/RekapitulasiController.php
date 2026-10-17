@@ -6,10 +6,11 @@ use App\Exports\RekapUserCourseProvinceExport;
 use App\Exports\RekapUserCourseRegencyExport;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\View\View;
 use Maatwebsite\Excel\Facades\Excel;
 use Modules\LMS\Services\CourseService;
 use Modules\LMS\Services\RekapitulasiService;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class RekapitulasiController extends Controller
 {
@@ -18,9 +19,9 @@ class RekapitulasiController extends Controller
         private CourseService $courseService,
     ) {}
 
-    public function index(Request $request)
+    public function index(Request $request): View
     {
-        $user = Auth::user();
+        $user = $request->user();
         if (!$user->hasCompleteScope()) {
             abort(403, 'Admin provinsi belum memiliki wilayah.');
         }
@@ -34,7 +35,7 @@ class RekapitulasiController extends Controller
         return view('lms::admin-province.sdm.rekapitulasi-kab-kota', compact('data', 'user'));
     }
 
-    public function rekapUserKabKota(Request $request, string $regencyCode)
+    public function rekapUserKabKota(Request $request, string $regencyCode): View
     {
         $regency = $this->rekapitulasiService->getRegencyByCode($regencyCode);
         $courses = $this->courseService->getCoursesForFilter();
@@ -48,7 +49,7 @@ class RekapitulasiController extends Controller
         return view('lms::admin-province.sdm.rekapitulasi-user-kab-kota', compact('data', 'regencyCode', 'regency', 'courses'));
     }
 
-    public function exportRekapUserRegency(Request $request, string $regencyCode)
+    public function exportRekapUserRegency(Request $request, string $regencyCode): BinaryFileResponse
     {
         $regencyName = $this->rekapitulasiService->getRegencyByCode($regencyCode)?->name ?? '';
         $filename = 'rekapitulasi-' . str($regencyName)->slug() . '-' . now()->format('Y-m-d') . '.xlsx';
@@ -65,9 +66,9 @@ class RekapitulasiController extends Controller
         );
     }
 
-    public function rekapUserProvince(Request $request)
+    public function rekapUserProvince(Request $request): View
     {
-        $user = Auth::user();
+        $user = $request->user();
         if (!$user->hasCompleteScope()) {
             abort(403, 'Admin provinsi belum memiliki wilayah.');
         }
@@ -85,9 +86,9 @@ class RekapitulasiController extends Controller
         return view('lms::admin-province.sdm.rekapitulasi-user-province', compact('data', 'provinceCode', 'provinceName', 'courses'));
     }
 
-    public function exportRekapUserProvince(Request $request)
+    public function exportRekapUserProvince(Request $request): BinaryFileResponse
     {
-        $user = Auth::user();
+        $user = $request->user();
         if (!$user->hasCompleteScope()) {
             abort(403, 'Admin provinsi belum memiliki wilayah.');
         }

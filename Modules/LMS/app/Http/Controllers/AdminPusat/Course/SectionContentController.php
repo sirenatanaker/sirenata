@@ -4,7 +4,10 @@ namespace Modules\LMS\Http\Controllers\AdminPusat\Course;
 
 use App\Http\Controllers\Controller;
 use Devrabiul\ToastMagic\Facades\ToastMagic;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\View\View;
 use Modules\LMS\Http\Requests\DeleteSectionContentWebRequest;
 use Modules\LMS\Http\Requests\StoreSectionContentWebRequest;
 use Modules\LMS\Http\Requests\UpdateSectionContentWebRequest;
@@ -15,12 +18,12 @@ class SectionContentController extends Controller
 {
     public function __construct(private SectionContentService $sectionContentService) {}
 
-    public function index()
+    public function index(): View
     {
         return view('lms::index');
     }
 
-    public function create(Request $request)
+    public function create(Request $request): View
     {
         $data = $this->sectionContentService->getCreateData(
             (string) $request->query('course_slug'),
@@ -30,7 +33,7 @@ class SectionContentController extends Controller
         return view('lms::admin-pusat.section-content.create', $data);
     }
 
-    public function store(StoreSectionContentWebRequest $request)
+    public function store(StoreSectionContentWebRequest $request): RedirectResponse
     {
         try {
             $validated = $request->validated();
@@ -51,7 +54,7 @@ class SectionContentController extends Controller
         }
     }
 
-    public function show(Request $request, string $id)
+    public function show(Request $request, string $id): View
     {
         $courseSlug = $request->query('course_slug');
         if (!$courseSlug) {
@@ -61,7 +64,7 @@ class SectionContentController extends Controller
         return view('lms::admin-pusat.section-content.show', $this->sectionContentService->getCourseAndContent($courseSlug, $id));
     }
 
-    public function edit(Request $request, string $id)
+    public function edit(Request $request, string $id): View
     {
         $courseSlug = $request->query('course_slug');
         if (!$courseSlug) {
@@ -71,7 +74,7 @@ class SectionContentController extends Controller
         return view('lms::admin-pusat.section-content.edit', $this->sectionContentService->getCourseAndContent($courseSlug, $id));
     }
 
-    public function update(UpdateSectionContentWebRequest $request, string $id)
+    public function update(UpdateSectionContentWebRequest $request, string $id): RedirectResponse
     {
         try {
             $validated = $request->validated();
@@ -93,7 +96,7 @@ class SectionContentController extends Controller
         }
     }
 
-    public function uploadVideoEditor(UploadSectionVideoRequest $request)
+    public function uploadVideoEditor(UploadSectionVideoRequest $request): JsonResponse
     {
         $url = $this->sectionContentService->uploadEditorVideo($request->file('video'));
 
@@ -103,7 +106,7 @@ class SectionContentController extends Controller
         ]);
     }
 
-    public function destroy(DeleteSectionContentWebRequest $request, string $id)
+    public function destroy(DeleteSectionContentWebRequest $request, string $id): RedirectResponse
     {
         try {
             $validated = $request->validated();

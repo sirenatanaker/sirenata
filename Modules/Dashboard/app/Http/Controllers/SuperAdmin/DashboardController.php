@@ -4,9 +4,9 @@ namespace Modules\Dashboard\Http\Controllers\SuperAdmin;
 
 use App\Http\Controllers\Controller;
 use Devrabiul\ToastMagic\Facades\ToastMagic;
+use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Modules\Dashboard\Http\Requests\UpdateProfileRequest;
 use Modules\Dashboard\Services\DashboardService;
 use Modules\Dashboard\Services\SuperAdminDashboardService;
@@ -15,17 +15,15 @@ class DashboardController extends Controller
 {
     public function __construct(
         private SuperAdminDashboardService $superAdminDashboardService,
-        private DashboardService $dashboardService
+        private DashboardService $dashboardService,
     ) {}
 
     /**
      * Display Super Admin Dashboard.
      */
-    public function index()
+    public function index(Request $request): View
     {
-        /** @var \App\Models\User $user */
-        $user = Auth::user();
-        $data = $this->superAdminDashboardService->getDashboardData($user);
+        $data = $this->superAdminDashboardService->getDashboardData($request->user());
 
         return view('dashboard::pages.super-admin.index', $data);
     }
@@ -33,10 +31,10 @@ class DashboardController extends Controller
     /**
      * Super Admin Profile Page.
      */
-    public function profile(Request $request)
+    public function profile(Request $request): View
     {
         return view('dashboard::pages.super-admin.profile', [
-            'user' => Auth::user(),
+            'user' => $request->user(),
         ]);
     }
 
@@ -45,11 +43,9 @@ class DashboardController extends Controller
      */
     public function storeOrUpdateProfile(UpdateProfileRequest $request): RedirectResponse
     {
-        /** @var \App\Models\User $user */
-        $user = Auth::user();
-        $this->dashboardService->updateProfile($user, $request->validated());
+        $this->dashboardService->updateProfile($request->user(), $request->validated());
 
-        ToastMagic::success("Profile berhasil diupdate!");
+        ToastMagic::success('Profile berhasil diupdate!');
         return to_route('super-admin.profile');
     }
 }

@@ -3,8 +3,9 @@
 namespace Modules\LMS\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\View\View;
 use Modules\LMS\Services\LibraryService;
 
 class LibraryController extends Controller
@@ -13,7 +14,7 @@ class LibraryController extends Controller
         private LibraryService $libraryService
     ) {}
 
-    public function index(Request $request)
+    public function index(Request $request): View
     {
         $search = $request->input('search');
         $type = $request->input('type');
@@ -32,10 +33,10 @@ class LibraryController extends Controller
         ));
     }
 
-    public function show($id)
+    public function show(Request $request, string $id): View
     {
-        $library = $this->libraryService->findOrFail((string) $id);
-        $userId = Auth::id();
+        $library = $this->libraryService->findOrFail($id);
+        $userId = $request->user()?->id;
 
         if ($userId) {
             $this->libraryService->recordUserAccess($library, $userId);
@@ -44,12 +45,12 @@ class LibraryController extends Controller
         return view('lms::user.library.show', compact('library'));
     }
 
-    public function track($id)
+    public function track(Request $request, string $id): JsonResponse
     {
-        $userId = Auth::id();
+        $userId = $request->user()?->id;
 
         if ($userId) {
-            $library = $this->libraryService->findOrFail((string) $id);
+            $library = $this->libraryService->findOrFail($id);
             $this->libraryService->recordUserAccess($library, $userId);
         }
 

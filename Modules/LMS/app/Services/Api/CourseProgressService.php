@@ -12,9 +12,9 @@ class CourseProgressService
      * Tandai konten sebagai selesai ditonton
      * dan hitung ulang progress course otomatis
      */
-    public function completeContent(SectionContent $content): array
+    public function completeContent(SectionContent $content, ?int $userId = null): array
     {
-        $userId   = auth()->id();
+        $userId   = $userId ?? auth()->id();
         $courseId = $content->section->course_id;
         $course   = Course::findOrFail($courseId);
 

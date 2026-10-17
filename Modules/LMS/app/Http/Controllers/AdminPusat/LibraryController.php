@@ -4,9 +4,11 @@ namespace Modules\LMS\Http\Controllers\AdminPusat;
 
 use App\Http\Controllers\Controller;
 use Devrabiul\ToastMagic\Facades\ToastMagic;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
+use Illuminate\View\View;
 use Modules\LMS\Http\Requests\LibraryStoreRequest;
 use Modules\LMS\Http\Requests\LibraryUpdateRequest;
 use Modules\LMS\Services\LibraryCategoryService;
@@ -30,7 +32,7 @@ class LibraryController extends Controller implements HasMiddleware
         ];
     }
 
-    public function index(Request $request)
+    public function index(Request $request): View
     {
         $search = $request->input('search');
         $libraryCategoryId = $request->input('library_category_id');
@@ -44,7 +46,7 @@ class LibraryController extends Controller implements HasMiddleware
         return view('lms::admin-pusat.libraries.index', compact('libraries', 'search', 'libraryCategoryId', 'libraryCategories'));
     }
 
-    public function store(LibraryStoreRequest $request)
+    public function store(LibraryStoreRequest $request): RedirectResponse
     {
         $this->libraryService->createLibrary($request->validated());
         ToastMagic::success('Materi Perpustakaan berhasil ditambahkan.');
@@ -52,7 +54,7 @@ class LibraryController extends Controller implements HasMiddleware
         return redirect()->route('admin-pusat.libraries.index');
     }
 
-    public function update(LibraryUpdateRequest $request, string $id)
+    public function update(LibraryUpdateRequest $request, string $id): RedirectResponse
     {
         $library = $this->libraryService->findOrFail($id);
         $this->libraryService->updateLibrary($library, $request->validated());
@@ -61,7 +63,7 @@ class LibraryController extends Controller implements HasMiddleware
         return redirect()->route('admin-pusat.libraries.index');
     }
 
-    public function destroy(string $id)
+    public function destroy(string $id): RedirectResponse
     {
         $library = $this->libraryService->findOrFail($id);
         $this->libraryService->deleteLibrary($library);

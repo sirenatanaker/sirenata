@@ -5,6 +5,7 @@ namespace Modules\Dashboard\Http\Controllers;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\View\View;
 use Modules\Dashboard\Models\Notification;
 use Modules\Dashboard\Services\NotificationService;
 
@@ -20,7 +21,7 @@ class NotificationController extends Controller
     /**
      * Halaman "Lihat Semua Notifikasi".
      */
-    public function index(Request $request)
+    public function index(Request $request): View
     {
         $userId = $request->user()->id;
         $filter = $request->string('filter')->toString();

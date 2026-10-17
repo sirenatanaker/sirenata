@@ -14,7 +14,7 @@ class LibraryTypeUpdateRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => 'required|string|max:255|unique:library_types,name,' . $this->route('library_type'),
+            'name' => ['required', 'string', 'max:255', 'unique:library_types,name,' . $this->route('library_type')],
         ];
     }
 

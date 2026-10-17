@@ -4,7 +4,9 @@ namespace Modules\LMS\Http\Controllers\AdminPusat\Course;
 
 use App\Http\Controllers\Controller;
 use Devrabiul\ToastMagic\Facades\ToastMagic;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\View\View;
 use Modules\LMS\Http\Requests\Api\StoreCourseRequest;
 use Modules\LMS\Http\Requests\Api\UpdateCourseRequest;
 use Modules\LMS\Services\CategoryService;
@@ -17,7 +19,7 @@ class CourseController extends Controller
         private CategoryService $categoryService,
     ) {}
 
-    public function index(Request $request)
+    public function index(Request $request): View
     {
         $result = $this->courseService->allCourses(
             page: (int) $request->get('page', 1),
@@ -36,14 +38,14 @@ class CourseController extends Controller
         ]);
     }
 
-    public function create()
+    public function create(): View
     {
         $categories = $this->categoryService->getAllOrdered();
 
         return view('lms::admin-pusat.course.create', compact('categories'));
     }
 
-    public function store(StoreCourseRequest $request)
+    public function store(StoreCourseRequest $request): RedirectResponse
     {
         try {
             $result = $this->courseService->storeCourse(
@@ -65,7 +67,7 @@ class CourseController extends Controller
         }
     }
 
-    public function show(string $slug)
+    public function show(string $slug): View
     {
         $courseResponse = $this->courseService->getCourseBySlug($slug);
         $course = json_decode(json_encode($courseResponse['data']));
@@ -77,7 +79,7 @@ class CourseController extends Controller
         return view('lms::admin-pusat.course.show', compact('course'));
     }
 
-    public function edit(string $slug)
+    public function edit(string $slug): View
     {
         $courseResponse = $this->courseService->getCourseBySlug($slug);
 
@@ -91,7 +93,7 @@ class CourseController extends Controller
         return view('lms::admin-pusat.course.edit', compact('course', 'categories'));
     }
 
-    public function update(UpdateCourseRequest $request, string $slug)
+    public function update(UpdateCourseRequest $request, string $slug): RedirectResponse
     {
         $payload = array_merge($request->validated(), ['slug' => $slug]);
         $result = $this->courseService->updateCourse(
@@ -107,7 +109,7 @@ class CourseController extends Controller
         return back()->withInput()->with('error', $result['message']);
     }
 
-    public function destroy(string $slug)
+    public function destroy(string $slug): RedirectResponse
     {
         $result = $this->courseService->deleteCourse($slug);
 

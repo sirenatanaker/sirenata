@@ -6,7 +6,6 @@ use App\Helpers\ResponseHelper;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\PaginateResource;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Modules\LMS\Models\Course;
 use Modules\LMS\Services\Api\CourseStudentService;
 use Modules\LMS\Transformers\Api\CourseStudentResource;
@@ -143,9 +142,9 @@ class CourseStudentController extends Controller
                 message: 'My courses retrieved successfully',
                 result: PaginateResource::make($studentCourses, MyCourseResource::class),
                 auth: [
-                    'id' => Auth::user()->id,
-                    'name' => Auth::user()->name,
-                    'email' => Auth::user()->email,
+                    'id' => $request->user()->id,
+                    'name' => $request->user()->name,
+                    'email' => $request->user()->email,
                 ],
                 statusCode: 200
             );

@@ -5,10 +5,11 @@ namespace Modules\LMS\Http\Controllers\AdminKabKota;
 use App\Exports\RekapUserCourseRegencyExport;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\View\View;
 use Maatwebsite\Excel\Facades\Excel;
 use Modules\LMS\Services\CourseService;
 use Modules\LMS\Services\RekapitulasiService;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class RekapitulasiController extends Controller
 {
@@ -17,11 +18,11 @@ class RekapitulasiController extends Controller
         private CourseService $courseService,
     ) {}
 
-    public function index(Request $request)
+    public function index(Request $request): View
     {
-        $user = Auth::user();
+        $user = $request->user();
         if (!$user->hasCompleteScope()) {
-            abort(403, 'Admin provinsi belum memiliki wilayah.');
+            abort(403, 'Admin kab/kota belum memiliki wilayah.');
         }
 
         $regencyCode = $user->scopeArea?->regency_code;
@@ -37,11 +38,11 @@ class RekapitulasiController extends Controller
         return view('lms::admin-kab-kota.sdm.rekapitulasi-index', compact('data', 'regencyCode', 'regency', 'courses'));
     }
 
-    public function exportRekapUserRegency(Request $request)
+    public function exportRekapUserRegency(Request $request): BinaryFileResponse
     {
-        $user = Auth::user();
+        $user = $request->user();
         if (!$user->hasCompleteScope()) {
-            abort(403, 'Admin provinsi belum memiliki wilayah.');
+            abort(403, 'Admin kab/kota belum memiliki wilayah.');
         }
 
         $regencyCode = $user->scopeArea?->regency_code;

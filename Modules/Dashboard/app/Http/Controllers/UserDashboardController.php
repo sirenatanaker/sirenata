@@ -4,10 +4,10 @@ namespace Modules\Dashboard\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use Devrabiul\ToastMagic\Facades\ToastMagic;
+use Illuminate\Contracts\View\View;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Modules\Dashboard\Http\Requests\GetRegenciesRequest;
 use Modules\Dashboard\Http\Requests\UpdateProfileRequest;
 use Modules\Dashboard\Http\Requests\UpdateWebInstansiRequest;
@@ -18,17 +18,15 @@ class UserDashboardController extends Controller
 {
     public function __construct(
         private UserDashboardService $userDashboardService,
-        private DashboardService $dashboardService
+        private DashboardService $dashboardService,
     ) {}
 
     /**
      * User learning dashboard index.
      */
-    public function index()
+    public function index(Request $request): View
     {
-        /** @var \App\Models\User $user */
-        $user = Auth::user();
-        $data = $this->userDashboardService->getDashboardData($user);
+        $data = $this->userDashboardService->getDashboardData($request->user());
 
         return view('dashboard::pages.user.index', $data);
     }
@@ -51,22 +49,18 @@ class UserDashboardController extends Controller
      */
     public function updateInstansi(UpdateWebInstansiRequest $request): RedirectResponse
     {
-        /** @var \App\Models\User $user */
-        $user = Auth::user();
-        $this->userDashboardService->updateInstansiWeb($user, $request->validated());
+        $this->userDashboardService->updateInstansiWeb($request->user(), $request->validated());
 
-        ToastMagic::success("Data instansi berhasil disimpan!");
+        ToastMagic::success('Data instansi berhasil disimpan!');
         return redirect()->route('user.dashboard')->with('success', 'Data instansi berhasil disimpan.');
     }
 
     /**
      * User profile page with certificates and enrollment stats.
      */
-    public function profile(Request $request)
+    public function profile(Request $request): View
     {
-        /** @var \App\Models\User $user */
-        $user = Auth::user();
-        $data = $this->userDashboardService->getProfileData($user);
+        $data = $this->userDashboardService->getProfileData($request->user());
 
         return view('dashboard::pages.user.profile', $data);
     }
@@ -76,11 +70,9 @@ class UserDashboardController extends Controller
      */
     public function storeOrUpdateProfile(UpdateProfileRequest $request): RedirectResponse
     {
-        /** @var \App\Models\User $user */
-        $user = Auth::user();
-        $this->dashboardService->updateProfile($user, $request->validated());
+        $this->dashboardService->updateProfile($request->user(), $request->validated());
 
-        ToastMagic::success("Profile berhasil diupdate!");
+        ToastMagic::success('Profile berhasil diupdate!');
         return to_route('user.profile');
     }
 
@@ -89,9 +81,7 @@ class UserDashboardController extends Controller
      */
     public function searchSuggest(Request $request): JsonResponse
     {
-        /** @var \App\Models\User $user */
-        $user = Auth::user();
-        $suggestions = $this->userDashboardService->getSearchSuggestions($user, $request->input('q'));
+        $suggestions = $this->userDashboardService->getSearchSuggestions($request->user(), $request->input('q'));
 
         return response()->json($suggestions);
     }

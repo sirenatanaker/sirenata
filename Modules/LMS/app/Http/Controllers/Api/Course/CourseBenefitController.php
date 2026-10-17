@@ -27,7 +27,7 @@ class CourseBenefitController extends Controller
      * 
      * @unauthenticated
      */
-    public function index(string $slug)
+    public function index(string $slug): JsonResponse
     {
         try {
             $benefits = $this->courseBenefitsService->queryBenefits($slug);

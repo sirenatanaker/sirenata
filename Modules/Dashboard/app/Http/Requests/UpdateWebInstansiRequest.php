@@ -3,6 +3,7 @@
 namespace Modules\Dashboard\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class UpdateWebInstansiRequest extends FormRequest
 {
@@ -12,13 +13,13 @@ class UpdateWebInstansiRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'sector' => 'required|in:instansi,swasta',
-            'asalInstansi' => 'required_if:sector,instansi|in:pusat,provinsi,kabkota',
-            'instansi' => 'required|string|max:255',
-            'instansi_lainnya' => 'required_if:instansi,lainnya|nullable|string|max:255',
-            'unit_kerja' => 'required|string|max:255',
-            'province_code' => 'nullable|required_if:asalInstansi,provinsi,kabkota|required_if:sector,swasta',
-            'regency_code' => 'nullable|required_if:asalInstansi,kabkota|required_if:sector,swasta',
+            'sector' => ['required', Rule::in(['instansi', 'swasta'])],
+            'asalInstansi' => ['required_if:sector,instansi', Rule::in(['pusat', 'provinsi', 'kabkota'])],
+            'instansi' => ['required', 'string', 'max:255'],
+            'instansi_lainnya' => ['required_if:instansi,lainnya', 'nullable', 'string', 'max:255'],
+            'unit_kerja' => ['required', 'string', 'max:255'],
+            'province_code' => ['nullable', 'required_if:asalInstansi,provinsi,kabkota', 'required_if:sector,swasta'],
+            'regency_code' => ['nullable', 'required_if:asalInstansi,kabkota', 'required_if:sector,swasta'],
         ];
     }
 

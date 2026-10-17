@@ -5,7 +5,9 @@ namespace Modules\LMS\Http\Controllers\AdminPusat;
 use App\Http\Controllers\Controller;
 use Devrabiul\ToastMagic\Facades\ToastMagic;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\View\View;
 use Modules\LMS\Http\Requests\LibraryCategoryStoreRequest;
 use Modules\LMS\Http\Requests\LibraryCategoryUpdateRequest;
 use Modules\LMS\Models\LibraryCategory;
@@ -17,7 +19,7 @@ class LibraryCategoryController extends Controller
         private LibraryCategoryService $libraryCategoryService
     ) {}
 
-    public function index(Request $request)
+    public function index(Request $request): View
     {
         $search = $request->input('search');
         $libraryCategories = $this->libraryCategoryService->paginateFiltered($search, 10);
@@ -25,7 +27,7 @@ class LibraryCategoryController extends Controller
         return view('lms::admin-pusat.library-categories.index', compact('libraryCategories', 'search'));
     }
 
-    public function store(LibraryCategoryStoreRequest $request)
+    public function store(LibraryCategoryStoreRequest $request): RedirectResponse
     {
         $this->libraryCategoryService->createCategory($request->validated());
         ToastMagic::success('Kategori Perpustakaan berhasil ditambahkan!');
@@ -43,7 +45,7 @@ class LibraryCategoryController extends Controller
         ], 201);
     }
 
-    public function update(LibraryCategoryUpdateRequest $request, string $id)
+    public function update(LibraryCategoryUpdateRequest $request, string $id): RedirectResponse
     {
         $libraryCategory = $this->libraryCategoryService->findOrFail($id);
         $this->libraryCategoryService->updateCategory($libraryCategory, $request->validated());
@@ -62,7 +64,7 @@ class LibraryCategoryController extends Controller
         ]);
     }
 
-    public function destroy(string $id)
+    public function destroy(string $id): RedirectResponse
     {
         $libraryCategory = $this->libraryCategoryService->findOrFail($id);
 

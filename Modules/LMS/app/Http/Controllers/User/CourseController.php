@@ -4,8 +4,9 @@ namespace Modules\LMS\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
 use Devrabiul\ToastMagic\Facades\ToastMagic;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\View\View;
 use Modules\LMS\Models\SectionContent;
 use Modules\LMS\Services\Api\CourseProgressService;
 use Modules\LMS\Services\CertificateService;
@@ -24,7 +25,7 @@ class CourseController extends Controller
         private PostTestService $postTestService,
     ) {}
 
-    public function allMyCourse(Request $request)
+    public function allMyCourse(Request $request): View
     {
         $result = $this->courseService->myCourses(
             page: (int) $request->get('page', 1),
@@ -40,7 +41,7 @@ class CourseController extends Controller
         ]);
     }
 
-    public function myCourseProgress(Request $request)
+    public function myCourseProgress(Request $request): View
     {
         $result = $this->courseService->myCourses(
             page: (int) $request->get('page', 1),
@@ -57,7 +58,7 @@ class CourseController extends Controller
         ]);
     }
 
-    public function myCourseFinish(Request $request)
+    public function myCourseFinish(Request $request): View
     {
         $result = $this->courseService->myCourses(
             page: (int) $request->get('page', 1),
@@ -74,7 +75,7 @@ class CourseController extends Controller
         ]);
     }
 
-    public function myCourseDetail(string $slug)
+    public function myCourseDetail(string $slug): View
     {
         $result = $this->courseService->getCourseDetailSlug($slug);
         $course = $result['data'] ?? null;
@@ -90,9 +91,9 @@ class CourseController extends Controller
         ]);
     }
 
-    public function generateCertificate(string $slug)
+    public function generateCertificate(Request $request, string $slug): RedirectResponse
     {
-        $result = $this->certificateService->generateStudentCertificate(Auth::user(), $slug);
+        $result = $this->certificateService->generateStudentCertificate($request->user(), $slug);
 
         if ($result['success']) {
             ToastMagic::success($result['message']);
@@ -103,7 +104,7 @@ class CourseController extends Controller
         return redirect()->back();
     }
 
-    public function completeContent(SectionContent $content)
+    public function completeContent(Request $request, SectionContent $content): RedirectResponse
     {
         if (!$this->courseService->canAccessContent($content)) {
             ToastMagic::error('Selesaikan topik sebelumnya terlebih dahulu.');
@@ -111,7 +112,7 @@ class CourseController extends Controller
             return redirect()->back();
         }
 
-        $result = $this->courseProgressService->completeContent($content);
+        $result = $this->courseProgressService->completeContent($content, $request->user()->id);
 
         if (!$result['success']) {
             ToastMagic::error($result['message']);
@@ -128,7 +129,7 @@ class CourseController extends Controller
         return redirect()->back();
     }
 
-    public function showContent(string $slug, string $contentId)
+    public function showContent(string $slug, string $contentId): View|RedirectResponse
     {
         $result = $this->courseService->getCourseDetailSlug($slug);
         $content = $this->courseService->getStudentContentForShow($contentId);
@@ -146,7 +147,7 @@ class CourseController extends Controller
         ]);
     }
 
-    public function submitTest(Request $request, string $slug, string $postTestId)
+    public function submitTest(Request $request, string $slug, string $postTestId): RedirectResponse
     {
         $postTest = $this->postTestService->findWithQuestionsOrFail($postTestId);
 
@@ -156,7 +157,7 @@ class CourseController extends Controller
             return redirect()->route('user.course.my-course.detail', $slug);
         }
 
-        $result = $this->postTestService->submitStudentTest($postTest, $slug, Auth::id(), $request->input('answers', []));
+        $result = $this->postTestService->submitStudentTest($postTest, $slug, $request->user()->id, $request->input('answers', []));
 
         if (!$result['has_questions']) {
             ToastMagic::error($result['message']);
@@ -169,7 +170,7 @@ class CourseController extends Controller
         return redirect()->route('user.course.test.show', ['slug' => $slug, 'postTestId' => $postTest->id]);
     }
 
-    public function showTest(Request $request, string $slug, string $postTestId)
+    public function showTest(Request $request, string $slug, string $postTestId): View|RedirectResponse
     {
         $resultData = $this->courseService->getCourseDetailSlug($slug);
         $postTest = $this->postTestService->findWithQuestionsOrFail($postTestId);
@@ -184,7 +185,7 @@ class CourseController extends Controller
             'course'   => $resultData['data'] ?? null,
             'slug'     => $slug,
             'postTest' => $postTest,
-            'result'   => $this->postTestService->getStudentTestResult(Auth::id(), $postTestId, (bool) $request->query('retake')),
+            'result'   => $this->postTestService->getStudentTestResult($request->user()->id, $postTestId, (bool) $request->query('retake')),
         ]);
     }
 }

@@ -4,7 +4,9 @@ namespace Modules\LMS\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
 use Devrabiul\ToastMagic\Facades\ToastMagic;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\View\View;
 use Modules\LMS\Services\CategoryService;
 use Modules\LMS\Services\CourseService;
 
@@ -15,7 +17,7 @@ class CatalogController extends Controller
         private CategoryService $categoryService,
     ) {}
 
-    public function index(Request $request)
+    public function index(Request $request): View
     {
         $search = $request->get('search');
         $selectedCategories = $request->get('categories', []);
@@ -33,7 +35,7 @@ class CatalogController extends Controller
         ));
     }
 
-    public function enroll(string $slug)
+    public function enroll(string $slug): RedirectResponse
     {
         $result = $this->courseService->enrollUser($slug);
 

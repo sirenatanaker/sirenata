@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use Devrabiul\ToastMagic\Facades\ToastMagic;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\View\View;
 use Modules\Dashboard\Http\Requests\UpdateProfileRequest;
 use Modules\Dashboard\Services\AdminKabKotaDashboardService;
 use Modules\Dashboard\Services\DashboardService;
@@ -21,10 +21,10 @@ class DashboardController extends Controller
     /**
      * Display listing / index for Admin Kab/Kota Dashboard.
      */
-    public function index(Request $request)
+    public function index(Request $request): View
     {
         /** @var \App\Models\User $user */
-        $user = Auth::user();
+        $user = $request->user();
         $selectedYear = (int) $request->input('year', (int) date('Y'));
 
         $data = $this->adminKabKotaDashboardService->getDashboardData($user, $selectedYear);
@@ -35,10 +35,10 @@ class DashboardController extends Controller
     /**
      * Profile page.
      */
-    public function profile(Request $request)
+    public function profile(Request $request): View
     {
         return view('dashboard::pages.admin-kab-kota.profile', [
-            'user' => Auth::user(),
+            'user' => $request->user(),
         ]);
     }
 
@@ -48,7 +48,7 @@ class DashboardController extends Controller
     public function storeOrUpdateProfile(UpdateProfileRequest $request): RedirectResponse
     {
         /** @var \App\Models\User $user */
-        $user = Auth::user();
+        $user = $request->user();
         $this->dashboardService->updateProfile($user, $request->validated());
 
         ToastMagic::success("Profile berhasil diupdate!");

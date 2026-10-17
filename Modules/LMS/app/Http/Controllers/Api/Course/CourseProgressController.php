@@ -49,10 +49,10 @@ class CourseProgressController extends Controller
      *   "message": "Kamu belum terdaftar di course ini"
      * }
      */
-    public function complete(SectionContent $content): JsonResponse
+    public function complete(Request $request, SectionContent $content): JsonResponse
     {
         try {
-            $result = $this->progressService->completeContent($content);
+            $result = $this->progressService->completeContent($content, $request->user()->id);
 
             if (! $result['success']) {
                 return ResponseHelper::error(
@@ -89,10 +89,10 @@ class CourseProgressController extends Controller
      * @authenticated
      * @urlParam slug string required Slug course. Example: laravel-dasar
      */
-    public function show(string $slug): JsonResponse
+    public function show(Request $request, string $slug): JsonResponse
     {
         try {
-            $result = $this->progressService->getCourseProgress(auth()->id(), $slug);
+            $result = $this->progressService->getCourseProgress($request->user()->id, $slug);
 
             if (! $result['success']) {
                 return ResponseHelper::error(

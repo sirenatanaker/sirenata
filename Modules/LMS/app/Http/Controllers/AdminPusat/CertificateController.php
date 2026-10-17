@@ -4,7 +4,9 @@ namespace Modules\LMS\Http\Controllers\AdminPusat;
 
 use App\Http\Controllers\Controller;
 use Devrabiul\ToastMagic\Facades\ToastMagic;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\View\View;
 use Modules\LMS\Http\Requests\CertificateStoreRequest;
 use Modules\LMS\Http\Requests\CertificateUpdateRequest;
 use Modules\LMS\Models\CertificateSetting;
@@ -16,7 +18,7 @@ class CertificateController extends Controller
         private CertificateService $certificateService
     ) {}
 
-    public function index(Request $request)
+    public function index(Request $request): View
     {
         $settings = $this->certificateService->paginateSettings(
             search: $request->input('search'),
@@ -27,7 +29,7 @@ class CertificateController extends Controller
         return view('lms::admin-pusat.certificates.index', compact('settings'));
     }
 
-    public function store(CertificateStoreRequest $request)
+    public function store(CertificateStoreRequest $request): RedirectResponse
     {
         $this->certificateService->createSetting($request->validated());
         ToastMagic::success('Tanda tangan sertifikat berhasil ditambahkan.');
@@ -35,7 +37,7 @@ class CertificateController extends Controller
         return redirect()->route('admin-pusat.certificates.index');
     }
 
-    public function update(CertificateUpdateRequest $request, CertificateSetting $certificate)
+    public function update(CertificateUpdateRequest $request, CertificateSetting $certificate): RedirectResponse
     {
         $this->certificateService->updateSetting($certificate, $request->validated());
         ToastMagic::success('Tanda tangan sertifikat berhasil diperbarui.');
@@ -43,7 +45,7 @@ class CertificateController extends Controller
         return redirect()->route('admin-pusat.certificates.index');
     }
 
-    public function activate(CertificateSetting $certificate)
+    public function activate(CertificateSetting $certificate): RedirectResponse
     {
         $this->certificateService->activateSetting($certificate);
         ToastMagic::success('Tanda tangan berhasil diaktifkan.');
@@ -51,7 +53,7 @@ class CertificateController extends Controller
         return redirect()->route('admin-pusat.certificates.index');
     }
 
-    public function destroy(CertificateSetting $certificate)
+    public function destroy(CertificateSetting $certificate): RedirectResponse
     {
         $this->certificateService->deleteSetting($certificate);
         ToastMagic::success('Tanda tangan sertifikat berhasil dihapus.');
