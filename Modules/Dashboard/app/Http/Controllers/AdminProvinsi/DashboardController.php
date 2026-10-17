@@ -3,324 +3,98 @@
 namespace Modules\Dashboard\Http\Controllers\AdminProvinsi;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Auth;
-use Modules\Faq\Models\Faq;
-use Illuminate\Http\RedirectResponse;
-use Modules\Dashboard\Http\Requests\UpdateProfileRequest;
-use Modules\Dashboard\Services\DashboardService;
 use Devrabiul\ToastMagic\Facades\ToastMagic;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Modules\RTK\Models\RencanaTenagaKerja;
-use Modules\RTK\Enums\TypeRtk;
-use Modules\RTK\Enums\RTKStatusVerification;
+use Illuminate\Support\Facades\Auth;
+use Modules\Dashboard\Http\Requests\UpdateProfileRequest;
+use Modules\Dashboard\Services\AdminProvinsiDashboardService;
+use Modules\Dashboard\Services\DashboardService;
+use Modules\User\Models\UserScope;
 
 class DashboardController extends Controller
 {
     public function __construct(
-        private DashboardService $dashbordService
+        private AdminProvinsiDashboardService $adminProvinsiDashboardService,
+        private DashboardService $dashboardService
     ) {}
 
     /**
-     * Display a listing of the resource.
+     * Display listing / index for Admin Provinsi Dashboard.
      */
     public function index(Request $request)
     {
+        /** @var \App\Models\User $user */
         $user = Auth::user();
-        $userScope = \Modules\User\Models\UserScope::where('user_id', $user->id)->first();
+        $userScope = UserScope::where('user_id', $user->id)->first();
         $provinceCode = $userScope ? $userScope->province_code : null;
 
-        // Base query for users taking courses in this province
-        $baseUserQuery = \Illuminate\Support\Facades\DB::table('user_scopes')
-            ->join('users', 'user_scopes.user_id', '=', 'users.id')
-            ->join('model_has_roles', function ($join) {
-                $join->on('users.id', '=', 'model_has_roles.model_uuid')
-                    ->where('model_has_roles.model_type', '=', 'App\\Models\\User');
-            })
-            ->join('roles', 'model_has_roles.role_id', '=', 'roles.uuid')
-            ->where('roles.name', 'user')
-            ->where('user_scopes.province_code', $provinceCode);
-
-        // Filter by Year for SDM
-        $currentYear = (int) date('Y');
-        $selectedSdmYear = (int) $request->input('sdm_year', $currentYear);
-
-        $sdmYears = [];
-        for ($y = $currentYear; $y >= $currentYear - 15; $y--) {
-            $sdmYears[] = $y;
-        }
-
-        // SDM per Kab/Kota
-        $userCountsByRegency = (clone $baseUserQuery)
-            ->join('user_profiles', 'users.id', '=', 'user_profiles.user_id')
-            ->whereYear('users.created_at', $selectedSdmYear)
-            ->whereNotNull('user_scopes.regency_code')
-            ->select(
-                'user_scopes.regency_code',
-                'user_profiles.gender',
-                \Illuminate\Support\Facades\DB::raw('count(*) as total')
-            )
-            ->groupBy('user_scopes.regency_code', 'user_profiles.gender')
-            ->get();
-
-        $regencyCodes = $userCountsByRegency->pluck('regency_code')->unique()->toArray();
-        $regencies = \Creasi\Nusa\Models\Regency::whereIn('code', $regencyCodes)->pluck('name', 'code');
-
-        $sdmPerKabKota = collect($regencyCodes)->map(function ($code) use ($userCountsByRegency, $regencies) {
-            $regencyData = $userCountsByRegency->where('regency_code', $code);
-            $maleCount = $regencyData->where('gender', 'male')->first()->total ?? 0;
-            $femaleCount = $regencyData->where('gender', 'female')->first()->total ?? 0;
-
-            return (object) [
-                'regency_code' => $code,
-                'regency_name' => collect(explode(' ', $regencies[$code] ?? 'Unknown (' . $code . ')'))->map(fn($w) => ucfirst(strtolower($w)))->join(' '),
-                'male' => $maleCount,
-                'female' => $femaleCount,
-                'total' => $maleCount + $femaleCount
-            ];
-        })->sortByDesc('total')->values();
-
-        // Gender stats
-        $genders = (clone $baseUserQuery)
-            ->join('user_profiles', 'users.id', '=', 'user_profiles.user_id')
-            ->select('user_profiles.gender', \Illuminate\Support\Facades\DB::raw('count(*) as total'))
-            ->groupBy('user_profiles.gender')
-            ->pluck('total', 'gender');
-
-        $genderMale = $genders->get('male', 0);
-        $genderFemale = $genders->get('female', 0);
-
-        // Masa Aktif RTK per Kab/Kota (active RTK per regency with remaining years)
-        $availableRtkYears = RencanaTenagaKerja::where('type', TypeRtk::KAB_KOTA->value)
-            ->where('province_code', $provinceCode)
-            ->berlaku()
-            ->pluck('start_date')
-            ->unique()
-            ->sortDesc()
-            ->values()
-            ->toArray();
-
-        $selectedRtkYear = $request->input('rtk_year', 'all');
-
-        $queryRtk = RencanaTenagaKerja::where('type', TypeRtk::KAB_KOTA->value)
-            ->where('province_code', $provinceCode)
-            ->berlaku();
-
-        if ($selectedRtkYear !== 'all') {
-            $queryRtk->where('end_date', '>=', (int) $selectedRtkYear);
-        }
-
-        $rtkKabKota = $queryRtk->get();
-
-        $rtkRegencyCodes = $rtkKabKota->pluck('regency_code')->toArray();
-        $rtkRegencyNames = \Creasi\Nusa\Models\Regency::whereIn('code', $rtkRegencyCodes)->pluck('name', 'code');
-
-        $rtkMasaAktifPerKabKota = $rtkKabKota->map(function ($rtk) use ($rtkRegencyNames) {
-            $rawName = $rtkRegencyNames[$rtk->regency_code] ?? 'Unknown';
-            return (object) [
-                'regency_name' => collect(explode(' ', $rawName))->map(fn($w) => ucfirst(strtolower($w)))->join(' '),
-                'sisa_tahun' => max(0, (int) $rtk->end_date - (int) date('Y')),
-                'start_date' => $rtk->start_date,
-                'end_date' => $rtk->end_date,
-            ];
-        })->sortBy('regency_name')->values();
-
-        // Data for second chart: RTK filtered by end_date
-        $availableRtkEndYears = RencanaTenagaKerja::where('type', TypeRtk::KAB_KOTA->value)
-            ->where('province_code', $provinceCode)
-            ->berlaku()
-            ->pluck('end_date')
-            ->unique()
-            ->sortDesc()
-            ->values()
-            ->toArray();
-
-        $selectedRtkEndYear = $request->input('rtk_end_year', 'all');
-
-        $queryRtkEnd = RencanaTenagaKerja::where('type', TypeRtk::KAB_KOTA->value)
-            ->where('province_code', $provinceCode)
-            ->berlaku();
-
-        if ($selectedRtkEndYear !== 'all') {
-            $queryRtkEnd->where('end_date', (int) $selectedRtkEndYear);
-        }
-
-        $rtkKabKotaEnd = $queryRtkEnd->get();
-        $rtkEndRegencyCodes = $rtkKabKotaEnd->pluck('regency_code')->toArray();
-        $rtkEndRegencyNames = \Creasi\Nusa\Models\Regency::whereIn('code', $rtkEndRegencyCodes)->pluck('name', 'code');
-
-        $rtkMasaBerakhirPerKabKota = $rtkKabKotaEnd->map(function ($rtk) use ($rtkEndRegencyNames) {
-            $rawName = $rtkEndRegencyNames[$rtk->regency_code] ?? 'Unknown';
-            return (object) [
-                'regency_name' => collect(explode(' ', $rawName))->map(fn($w) => ucfirst(strtolower($w)))->join(' '),
-                'sisa_tahun' => max(0, (int) $rtk->end_date - (int) date('Y')),
-                'start_date' => $rtk->start_date,
-                'end_date' => $rtk->end_date,
-            ];
-        })->sortBy('regency_name')->values();
-
-        // Status Distribusi RTK di provinsi ini
-        $rtkStatusDistribution = \Illuminate\Support\Facades\DB::table('rencana_tenaga_kerjas')
-            ->where('province_code', $provinceCode)
-            ->where('type', TypeRtk::KAB_KOTA->value)
-            ->where(function ($query) {
-                // Tetap hitung semua untuk status yang BUKAN pending
-                $query->where('status_verification', '!=', 'pending')
-                    ->orWhere(function ($q) {
-                        // Khusus status pending, HANYA hitung jika RTK tersebut adalah Acuan (is_active = 1)
-                        $q->where('status_verification', 'pending')
-                            ->where('is_active', 1);
-                    });
-            })
-            ->select('status_verification as status', \Illuminate\Support\Facades\DB::raw('count(*) as total'))
-            ->groupBy('status_verification')
-            ->pluck('total', 'status');
-
-        $maxOptionYear = !empty($availableRtkEndYears) ? max($availableRtkEndYears) : $currentYear;
-        $minOptionYear = $currentYear;
-
-        $rtkYearsOptions = [];
-        for ($y = $maxOptionYear; $y >= $minOptionYear; $y--) {
-            $rtkYearsOptions[] = $y;
-        }
-
-        $minAvailableEndYear = !empty($availableRtkEndYears) ? min($availableRtkEndYears) : $currentYear;
-        $maxAvailableEndYear = !empty($availableRtkEndYears) ? max($availableRtkEndYears) : $currentYear;
-        $rtkEndYearsOptions = [];
-        for ($y = $maxAvailableEndYear; $y >= $minAvailableEndYear; $y--) {
-            $rtkEndYearsOptions[] = $y;
-        }
-
-        // ================================================================
-        // DATA PERLU TINDAKAN — RTK Kab/Kota
-        //
-        // Tetap tampil selama is_active = true dan belum selesai sepenuhnya.
-        // - pending verification -> perlu verifikasi
-        // - approved + document belum valid -> perlu proses dokumen
-        // - approved + valid -> tidak ditampilkan lagi
-        // ================================================================
-        $pendingRtk = RencanaTenagaKerja::query()
-            ->where('province_code', $provinceCode)
-            ->where('type', TypeRtk::KAB_KOTA->value)
-            ->where('is_active', true)
-            ->where(function ($query) {
-                $query->where('status_verification', RTKStatusVerification::PENDING->value)
-                    ->orWhere(function ($q) {
-                        $q->where('status_verification', RTKStatusVerification::APPROVED->value)
-                            ->where('status_document', '!=', 'valid');
-                    });
-            })
-            ->with(['regency'])
-            ->latest()
-            ->get()
-            ->map(function ($item) {
-                $regencyName = $item->regency?->name ?? 'Kabupaten/Kota';
-                $isVerificationPending = $item->status_verification === RTKStatusVerification::PENDING;
-
-                return [
-                    'id'                 => $item->id,
-                    'category'           => 'RTK Kab/Kota',
-                    'title'              => $item->name,
-                    'subtitle'           => $regencyName,
-                    'created_at'         => $item->created_at?->toISOString(),
-                    'date_formatted'     => $item->created_at ? $item->created_at->diffForHumans() : '-',
-                    'type'               => 'rtk',
-                    'verification_label' => $isVerificationPending ? 'Belum diverifikasi' : 'Sudah diverifikasi',
-                    'verification_color' => $isVerificationPending
-                        ? 'bg-amber-50 text-amber-700 border border-amber-200'
-                        : 'bg-emerald-50 text-emerald-700 border border-emerald-200',
-                    'document_label'     => $item->status_document === 'valid' ? 'Valid' : 'Menunggu persetujuan',
-                    'document_color'    => $item->status_document === 'valid'
-                        ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                        : 'bg-amber-50 text-amber-700 border border-amber-200',
-                    'badge_color'        => 'bg-[#13416B] text-white border-transparent',
-                    'action_label'       => $isVerificationPending ? 'Tinjau Verifikasi' : 'Tinjau Dokumen',
-                    'url'                => $item->regency_code
-                        ? route('admin-province.laporan.show-regency', $item->regency_code)
-                        : route('admin-province.laporan.index'),
-                ];
-            })
-            ->values();
-
-        $allPendingApprovals = $pendingRtk;
-
-        // ================================================================
-        // AJAX HANDLER
-        // ================================================================
-
-        // Pagination Card Persetujuan
-        if ($request->ajax() && $request->has('pending_page')) {
-            $page = (int) $request->input('pending_page', 1);
-            $perPage = 10;
-
-            $pagedItems = $allPendingApprovals
-                ->slice(($page - 1) * $perPage, $perPage)
-                ->values();
-
-            $hasMore = $allPendingApprovals->count() > ($page * $perPage);
-
-            return response()->json([
-                'data'      => $pagedItems,
-                'has_more'  => $hasMore,
-                'page'      => $page,
-                'total'     => $allPendingApprovals->count(),
-            ]);
-        }
-
+        // 1. AJAX Handlers
         if ($request->ajax()) {
+            if ($request->has('pending_page')) {
+                $page = (int) $request->input('pending_page', 1);
+                return response()->json($this->adminProvinsiDashboardService->getPendingApprovalsPage($provinceCode, $page));
+            }
+
             if ($request->has('rtk_end_year')) {
                 return response()->json([
-                    'rtkMasaBerakhirPerKabKota' => $rtkMasaBerakhirPerKabKota,
+                    'rtkMasaBerakhirPerKabKota' => $this->adminProvinsiDashboardService->getRtkMasaBerakhirPerKabKota($provinceCode, $request->input('rtk_end_year')),
                 ]);
             }
+
             if ($request->has('rtk_year')) {
                 return response()->json([
-                    'rtkMasaAktifPerKabKota' => $rtkMasaAktifPerKabKota,
+                    'rtkMasaAktifPerKabKota' => $this->adminProvinsiDashboardService->getRtkMasaAktifPerKabKota($provinceCode, $request->input('rtk_year')),
                 ]);
             }
+
             if ($request->has('sdm_year')) {
                 return response()->json([
-                    'sdmPerKabKota' => $sdmPerKabKota,
+                    'sdmPerKabKota' => $this->adminProvinsiDashboardService->getSdmPerKabKota($provinceCode, (int) $request->input('sdm_year')),
                 ]);
             }
+
             return response()->json([
-                'sdmPerKabKota' => $sdmPerKabKota,
-                'rtkMasaAktifPerKabKota' => $rtkMasaAktifPerKabKota,
-                'rtkMasaBerakhirPerKabKota' => $rtkMasaBerakhirPerKabKota,
+                'sdmPerKabKota' => $this->adminProvinsiDashboardService->getSdmPerKabKota($provinceCode, (int) $request->input('sdm_year', (int) date('Y'))),
+                'rtkMasaAktifPerKabKota' => $this->adminProvinsiDashboardService->getRtkMasaAktifPerKabKota($provinceCode, $request->input('rtk_year', 'all')),
+                'rtkMasaBerakhirPerKabKota' => $this->adminProvinsiDashboardService->getRtkMasaBerakhirPerKabKota($provinceCode, $request->input('rtk_end_year', 'all')),
             ]);
         }
 
-        return view('dashboard::pages.admin-provinsi.index', [
-            'user' => $user,
-            'sdmPerKabKota' => $sdmPerKabKota,
-            'genderMale' => $genderMale,
-            'genderFemale' => $genderFemale,
-            'rtkMasaAktifPerKabKota' => $rtkMasaAktifPerKabKota,
-            'rtkMasaBerakhirPerKabKota' => $rtkMasaBerakhirPerKabKota,
-            'rtkStatusDistribution' => $rtkStatusDistribution,
-            'sdmYears' => $sdmYears,
-            'selectedSdmYear' => $selectedSdmYear,
-            'selectedRtkYear' => $selectedRtkYear,
-            'selectedRtkEndYear' => $selectedRtkEndYear,
-            'rtkYearsOptions' => $rtkYearsOptions,
-            'rtkEndYearsOptions' => $rtkEndYearsOptions,
-            'initialPendingApprovals' => $allPendingApprovals->slice(0, 10)->values(),
-            'hasMorePendingApprovals' => $allPendingApprovals->count() > 10,
-            'totalPendingApprovals' => $allPendingApprovals->count(),
-        ]);
+        // 2. Full Page View
+        $selectedSdmYear = (int) $request->input('sdm_year', (int) date('Y'));
+        $selectedRtkYear = $request->input('rtk_year', 'all');
+        $selectedRtkEndYear = $request->input('rtk_end_year', 'all');
+
+        $data = $this->adminProvinsiDashboardService->getDashboardData(
+            $user,
+            $selectedSdmYear,
+            $selectedRtkYear,
+            $selectedRtkEndYear
+        );
+
+        return view('dashboard::pages.admin-provinsi.index', $data);
     }
 
+    /**
+     * Profile page.
+     */
     public function profile(Request $request)
     {
-        $user = Auth::user();
         return view('dashboard::pages.admin-provinsi.profile', [
-            'user' => $user,
+            'user' => Auth::user(),
         ]);
     }
 
+    /**
+     * Store or update profile.
+     */
     public function storeOrUpdateProfile(UpdateProfileRequest $request): RedirectResponse
     {
+        /** @var \App\Models\User $user */
         $user = Auth::user();
-        $this->dashbordService->updateProfile($user, $request->validated());
+        $this->dashboardService->updateProfile($user, $request->validated());
+
         ToastMagic::success("Profile berhasil diupdate!");
         return to_route('admin-province.profile');
     }

@@ -3,80 +3,52 @@
 namespace Modules\Dashboard\Http\Controllers\SuperAdmin;
 
 use App\Http\Controllers\Controller;
+use Devrabiul\ToastMagic\Facades\ToastMagic;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Http\RedirectResponse;
 use Modules\Dashboard\Http\Requests\UpdateProfileRequest;
 use Modules\Dashboard\Services\DashboardService;
-use Devrabiul\ToastMagic\Facades\ToastMagic;
-
-use App\Models\User;
-use Modules\MasterData\Models\Institution;
+use Modules\Dashboard\Services\SuperAdminDashboardService;
 
 class DashboardController extends Controller
 {
-
     public function __construct(
-        private DashboardService $dashbordService
+        private SuperAdminDashboardService $superAdminDashboardService,
+        private DashboardService $dashboardService
     ) {}
 
     /**
-     * Display a listing of the resource.
+     * Display Super Admin Dashboard.
      */
     public function index()
     {
+        /** @var \App\Models\User $user */
         $user = Auth::user();
+        $data = $this->superAdminDashboardService->getDashboardData($user);
 
-        // 1. Stats Data
-        $totalUser = User::role('user')->count();
-        $totalAdminPusat = User::role('admin-pusat')->count();
-        $totalAdminProvinsi = User::role('admin-province')->count();
-        $totalAdminKabKota = User::role('admin-kab-kota')->count();
-
-        $totalLembaga = Institution::where('type', 'pusat')->count();
-        $totalInstansi = Institution::where('type', 'daerah')->count();
-
-        // 2. LMS Courses Count
-        $totalCourses = 0;
-        if (class_exists(\Modules\LMS\Models\Course::class)) {
-            $totalCourses = \Modules\LMS\Models\Course::count();
-        }
-
-        // 3. Activity Logs
-        $recentActivities = collect();
-        if (class_exists(\Spatie\Activitylog\Models\Activity::class)) {
-            try {
-                $recentActivities = \Spatie\Activitylog\Models\Activity::with('causer')->latest()->take(5)->get();
-            } catch (\Exception $e) {
-                // Keep empty collection
-            }
-        }
-
-        return view('dashboard::pages.super-admin.index', [
-            'user' => $user,
-            'totalUser' => $totalUser,
-            'totalAdminPusat' => $totalAdminPusat,
-            'totalAdminProvinsi' => $totalAdminProvinsi,
-            'totalAdminKabKota' => $totalAdminKabKota,
-            'totalLembaga' => $totalLembaga,
-            'totalInstansi' => $totalInstansi,
-            'totalCourses' => $totalCourses,
-            'recentActivities' => $recentActivities,
-        ]);
+        return view('dashboard::pages.super-admin.index', $data);
     }
 
+    /**
+     * Super Admin Profile Page.
+     */
     public function profile(Request $request)
     {
-        $user = Auth::user();
         return view('dashboard::pages.super-admin.profile', [
-            'user' => $user,
+            'user' => Auth::user(),
         ]);
     }
 
-    public function storeOrUpdateProfile(UpdateProfileRequest $request) :RedirectResponse
+    /**
+     * Update Super Admin Profile.
+     */
+    public function storeOrUpdateProfile(UpdateProfileRequest $request): RedirectResponse
     {
+        /** @var \App\Models\User $user */
         $user = Auth::user();
-        $this->dashbordService->updateProfile($user, $request->validated());
+        $this->dashboardService->updateProfile($user, $request->validated());
+
         ToastMagic::success("Profile berhasil diupdate!");
         return to_route('super-admin.profile');
     }

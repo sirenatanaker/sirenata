@@ -6,35 +6,28 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Modules\Dashboard\Models\Notification;
+use Modules\Dashboard\Services\NotificationService;
 
 /**
- * Notifikasi berbasis kejadian (event-driven push).
- *
- * Baris notifikasi sudah dibuat oleh listener ketika kejadian
- * (persetujuan / verifikasi) terjadi; controller ini hanya
- * menyajikan, menandai dibaca, dan membuang notifikasi.
+ * Controller notifikasi tipis berbasis service (Clean Architecture).
  */
 class NotificationController extends Controller
 {
+    public function __construct(
+        private NotificationService $notificationService
+    ) {}
+
     /**
      * Halaman "Lihat Semua Notifikasi".
      */
     public function index(Request $request)
     {
-        $user = $request->user();
+        $userId = $request->user()->id;
         $filter = $request->string('filter')->toString();
+        $perPage = max(5, (int) config('dashboard.notifications.per_page', 15));
 
-        $query = Notification::query()
-            ->forUser($user->id)
-            ->orderByDesc('created_at')
-            ->orderByDesc('id');
-
-        if ($filter === 'unread') {
-            $query->unread();
-        }
-
-        $notifications = $query->paginate($this->perPage())->withQueryString();
-        $unreadCount = Notification::forUser($user->id)->unread()->count();
+        $notifications = $this->notificationService->getPaginatedNotifications($userId, $filter, $perPage);
+        $unreadCount = $this->notificationService->getUnreadCount($userId);
 
         return view('dashboard::pages.notifications.index', [
             'notifications' => $notifications,
@@ -44,12 +37,14 @@ class NotificationController extends Controller
     }
 
     /**
-     * Snapshot notifikasi terbaru — dipakai navbar untuk menyegarkan
-     * tampilan setelah ada kejadian baru di database.
+     * Snapshot notifikasi terbaru untuk dropdown navbar.
      */
     public function latest(Request $request): JsonResponse
     {
-        return response()->json($this->payload($request->user()->id));
+        $perPage = max(5, (int) config('dashboard.notifications.per_page', 15));
+        $payload = $this->notificationService->getLatestPayload($request->user()->id, $perPage);
+
+        return response()->json($payload);
     }
 
     /**
@@ -57,13 +52,11 @@ class NotificationController extends Controller
      */
     public function read(Request $request, Notification $notification): JsonResponse
     {
-        abort_if($notification->user_id !== $request->user()->id, 404);
-
-        $notification->markAsRead();
+        $unreadCount = $this->notificationService->markAsRead($notification, $request->user()->id);
 
         return response()->json([
             'success'      => true,
-            'unread_count' => $this->unreadCount($request->user()->id),
+            'unread_count' => $unreadCount,
         ]);
     }
 
@@ -72,9 +65,7 @@ class NotificationController extends Controller
      */
     public function readAll(Request $request): JsonResponse
     {
-        Notification::forUser($request->user()->id)
-            ->unread()
-            ->update(['read_at' => now()]);
+        $this->notificationService->markAllAsRead($request->user()->id);
 
         return response()->json([
             'success'      => true,
@@ -83,51 +74,15 @@ class NotificationController extends Controller
     }
 
     /**
-     * Buang satu notifikasi melalui tombol "X".
+     * Buang satu notifikasi.
      */
     public function destroy(Request $request, Notification $notification): JsonResponse
     {
-        abort_if($notification->user_id !== $request->user()->id, 404);
-
-        $notification->delete();
+        $unreadCount = $this->notificationService->destroyNotification($notification, $request->user()->id);
 
         return response()->json([
             'success'      => true,
-            'unread_count' => $this->unreadCount($request->user()->id),
+            'unread_count' => $unreadCount,
         ]);
-    }
-
-    /* ------------------------------------------------------------------ */
-    /* Internal                                                            */
-    /* ------------------------------------------------------------------ */
-
-    /**
-     * Snapshot notifikasi terbaru untuk dropdown navbar.
-     *
-     * @return array{items: array<int, array<string, mixed>>, unread_count: int, server_time: string}
-     */
-    private function payload(string $userId): array
-    {
-        $items = Notification::forUser($userId)
-            ->orderByDesc('created_at')
-            ->orderByDesc('id')
-            ->limit($this->perPage())
-            ->get();
-
-        return [
-            'items'        => $items->map(fn (Notification $n) => $n->toPayload())->values()->all(),
-            'unread_count' => $this->unreadCount($userId),
-            'server_time'  => now()->toIso8601String(),
-        ];
-    }
-
-    private function unreadCount(string $userId): int
-    {
-        return Notification::forUser($userId)->unread()->count();
-    }
-
-    private function perPage(): int
-    {
-        return max(5, (int) config('dashboard.notifications.per_page', 15));
     }
 }

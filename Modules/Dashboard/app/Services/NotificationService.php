@@ -327,4 +327,86 @@ class NotificationService
             'read_at' => null,
         ]);
     }
+
+    /* ------------------------------------------------------------------ */
+    /* Query & Pengelolaan                                                */
+    /* ------------------------------------------------------------------ */
+
+    /**
+     * Get paginated notifications for index view.
+     */
+    public function getPaginatedNotifications(string $userId, ?string $filter = null, int $perPage = 15)
+    {
+        $query = Notification::query()
+            ->forUser($userId)
+            ->orderByDesc('created_at')
+            ->orderByDesc('id');
+
+        if ($filter === 'unread') {
+            $query->unread();
+        }
+
+        return $query->paginate($perPage)->withQueryString();
+    }
+
+    /**
+     * Get unread notification count.
+     */
+    public function getUnreadCount(string $userId): int
+    {
+        return Notification::forUser($userId)->unread()->count();
+    }
+
+    /**
+     * Snapshot notifikasi terbaru untuk dropdown navbar.
+     */
+    public function getLatestPayload(string $userId, int $perPage = 15): array
+    {
+        $items = Notification::forUser($userId)
+            ->orderByDesc('created_at')
+            ->orderByDesc('id')
+            ->limit($perPage)
+            ->get();
+
+        return [
+            'items'        => $items->map(fn (Notification $n) => $n->toPayload())->values()->all(),
+            'unread_count' => $this->getUnreadCount($userId),
+            'server_time'  => now()->toIso8601String(),
+        ];
+    }
+
+    /**
+     * Mark a single notification as read.
+     */
+    public function markAsRead(Notification $notification, string $userId): int
+    {
+        abort_if($notification->user_id !== $userId, 404);
+
+        $notification->markAsRead();
+
+        return $this->getUnreadCount($userId);
+    }
+
+    /**
+     * Mark all unread notifications as read.
+     */
+    public function markAllAsRead(string $userId): void
+    {
+        Notification::forUser($userId)
+            ->unread()
+            ->update(['read_at' => now()]);
+    }
+
+    /**
+     * Delete a notification.
+     */
+    public function destroyNotification(Notification $notification, string $userId): int
+    {
+        abort_if($notification->user_id !== $userId, 404);
+
+        $notification->delete();
+
+        return $this->getUnreadCount($userId);
+    }
 }
+
