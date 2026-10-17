@@ -1,120 +1,75 @@
-<nav class="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm shadow-md">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-4">
-        <div class="flex items-center justify-between">
-            <!-- Logo -->
-            <a href="{{ route('landingpage.index') }}" class="flex items-center gap-3">
-                <img src="{{ asset('images/logo.png') }}" alt="SIRENATA Logo" class="h-10 w-auto">
-                <span class="text-xl font-bold" style="color: #13416B;">SIRENATA</span>
-            </a>
+<nav x-data="{ isScrolled: false, mobileMenuOpen: false }" @scroll.window="isScrolled = (window.pageYOffset > 20)"
+    :class="isScrolled ? 'bg-white/95 shadow-sm backdrop-blur-md' : 'bg-white/80 backdrop-blur-sm'"
+    class="fixed top-0 left-0 right-0 z-[100] transition-all duration-300 border-b border-slate-200/70">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 sm:h-20 flex items-center justify-between">
 
-            <!-- Auth Buttons -->
-            <div class="flex items-center gap-3">
-                @guest
+        <a href="{{ route('landingpage.index') }}" class="flex items-center gap-3">
+            <img src="{{ asset('images/logo.png') }}" alt="SIRENATA Logo" class="h-8 sm:h-10 w-auto">
+            <span class="text-lg sm:text-xl font-extrabold tracking-tight" style="color: #13416B;">SIRENATA</span>
+        </a>
+
+        <!-- Menu Desktop -->
+        <div class="hidden md:flex items-center gap-2">
+            <a href="#features"
+                class="text-slate-600 font-medium px-4 py-2 rounded-full hover:text-[#13416B] hover:bg-[#13416B]/10 transition-colors">Fitur</a>
+            <a href="#courses"
+                class="text-slate-600 font-medium px-4 py-2 rounded-full hover:text-[#13416B] hover:bg-[#13416B]/10 transition-colors">LMS</a>
+            <a href="#faq"
+                class="text-slate-600 font-medium px-4 py-2 rounded-full hover:text-[#13416B] hover:bg-[#13416B]/10 transition-colors">FAQ</a>
+            <a href="#cta"
+                class="text-slate-600 font-medium px-4 py-2 rounded-full hover:text-[#13416B] hover:bg-[#13416B]/10 transition-colors">CTA</a>
+        </div>
+
+        <!-- Auth Buttons (Normal Landing Page) -->
+        <div class="hidden md:flex items-center gap-3">
+            @guest
+                <a href="{{ route('login') }}"
+                    class="px-5 py-2 font-bold text-slate-700 hover:bg-slate-100 rounded-full transition-colors">Masuk</a>
+                @unless (session('logged_out'))
+                    <a href="{{ config('services.siapkerja.register_url') }}"
+                        class="px-6 py-2.5 font-bold text-white rounded-full shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all"
+                        style="background-color: #13416B;">Daftar Gratis</a>
+                @endunless
+            @else
+                <a href="{{ route(auth()->user()->getRedirectRoute()) }}"
+                    class="px-6 py-2.5 font-bold text-white rounded-full shadow-md hover:shadow-lg transition-all"
+                    style="background-color: #13416B;">Masuk</a>
+            @endguest
+        </div>
+
+        <!-- Mobile Toggle -->
+        <button @click="mobileMenuOpen = !mobileMenuOpen" class="md:hidden p-2 text-slate-600 focus:outline-none">
+            <i class="fas fa-bars text-xl" x-show="!mobileMenuOpen"></i>
+            <i class="fas fa-times text-xl" x-show="mobileMenuOpen" x-cloak></i>
+        </button>
+    </div>
+
+    <!-- Mobile Menu -->
+    <div x-show="mobileMenuOpen" x-collapse
+        class="md:hidden bg-white border-t border-slate-100 shadow-xl absolute w-full">
+        <div class="p-4 space-y-2">
+            <a href="#features" @click="mobileMenuOpen = false"
+                class="block px-4 py-3 rounded-xl font-bold text-slate-700 hover:bg-slate-50 hover:text-[#13416B]">Fitur</a>
+            <a href="#courses" @click="mobileMenuOpen = false"
+                class="block px-4 py-3 rounded-xl font-bold text-slate-700 hover:bg-slate-50 hover:text-[#13416B]">LMS</a>
+            <a href="#faq" @click="mobileMenuOpen = false"
+                class="block px-4 py-3 rounded-xl font-bold text-slate-700 hover:bg-slate-50 hover:text-[#13416B]">FAQ</a>
+            <a href="#cta" @click="mobileMenuOpen = false"
+                class="block px-4 py-3 rounded-xl font-bold text-slate-700 hover:bg-slate-50 hover:text-[#13416B]">CTA</a>
+            @guest
+                <div class="pt-4 mt-2 border-t border-slate-100 flex gap-3">
                     <a href="{{ route('login') }}"
-                        class="px-5 py-2.5 text-gray-700 hover:text-gray-900 font-semibold rounded-lg hover:bg-gray-100 transition-all">
-                        Masuk
-                    </a>
+                        class="flex-1 text-center py-3 rounded-xl font-bold bg-slate-100 text-slate-700">Masuk</a>
                     @unless (session('logged_out'))
-                        <a href="{{ config('services.siapkerja.register_url') }}"
-                            class="px-5 py-2.5 text-white font-semibold rounded-lg shadow-md transition-all hover:opacity-90"
-                            style="background-color: #13416B;">
-                            Daftar
-                        </a>
+                        <a href="{{ config('services.siapkerja.register_url') }}" class="flex-1 text-center py-3 rounded-xl font-bold text-white"
+                            style="background-color: #13416B;">Daftar</a>
                     @endunless
-                @endguest
-
-                @auth
-                    <div class="relative" x-data="{ open: false }">
-                        <div class="flex items-center gap-x-5">
-                            <h1>{{ auth()->user()->name }}</h1>
-                            <button @click="open = !open"
-                                class="rounded-full overflow-hidden focus:outline-none cursor-pointer">
-                                <img class="w-8 h-8 rounded-full"
-                                    src="https://ui-avatars.com/api/?name={{ auth()->user()->name }}&background=13416b&color=fff"
-                                    alt="user">
-                            </button>
-                        </div>
-
-                        <!-- Dropdown -->
-                        <div x-show="open" @click.outside="open = false" x-transition x-cloak
-                            class="absolute right-0 top-full mt-2 bg-gray-50 border border-slate-200 rounded-lg shadow-lg w-60 z-50">
-                            <div class="px-4 py-3 border-2 border-b border-slate-200">
-                                <p class="text-sm font-medium">{{ auth()->user()->name }}</p>
-                            </div>
-                            <ul class="p-2 text-sm">
-                                @role('super-admin')
-                                    <li>
-                                        <a href="{{ route('super-admin.profile') }}"
-                                            class="block p-2 rounded hover:bg-[#13416B]/30">Profil</a>
-                                    </li>
-                                    <li>
-                                        <a href="{{ route('super-admin.dashboard') }}"
-                                            class="block p-2 rounded hover:bg-[#13416B]/30">
-                                            Dashboard Superadmin
-                                        </a>
-                                    </li>
-                                @endrole
-                                @role('admin-pusat')
-                                    <li>
-                                        <a href="{{ route('admin-pusat.profile') }}"
-                                            class="block p-2 rounded hover:bg-[#13416B]/30">Profil</a>
-                                    </li>
-                                    <li>
-                                        <a href="{{ route('admin-pusat.dashboard') }}"
-                                            class="block p-2 rounded hover:bg-[#13416B]/30">
-                                            Dashboard Admin Pusat
-                                        </a>
-                                    </li>
-                                @endrole
-                                @role('admin-province')
-                                    <li>
-                                        <a href="{{ route('admin-province.profile') }}"
-                                            class="block p-2 rounded hover:bg-[#13416B]/30">Profil</a>
-                                    </li>
-                                    <li>
-                                        <a href="{{ route('admin-province.dashboard') }}"
-                                            class="block p-2 rounded hover:bg-[#13416B]/30">
-                                            Dashboard Admin Provinsi
-                                        </a>
-                                    </li>
-                                @endrole
-                                @role('admin-kab-kota')
-                                    <li>
-                                        <a href="{{ route('admin-kab-kota.profile') }}"
-                                            class="block p-2 rounded hover:bg-[#13416B]/30">Profil</a>
-                                    </li>
-                                    <li>
-                                        <a href="{{ route('admin-kab-kota.dashboard') }}"
-                                            class="block p-2 rounded hover:bg-[#13416B]/30">
-                                            Dashboard Admin Kab/Kota
-                                        </a>
-                                    </li>
-                                @endrole
-                                @role('user')
-                                    <li>
-                                        <a href="{{ route('user.profile') }}"
-                                            class="block p-2 rounded hover:bg-[#13416B]/30">Profil</a>
-                                    </li>
-                                    <li>
-                                        <a href="{{ route('user.dashboard') }}" class="block p-2 rounded hover:bg-[#13416B]/30">Dashboard
-                                            User/Peserta</a>
-                                    </li>
-                                @endrole
-
-                                <li>
-                                    <form action="{{ route('logout') }}" method="POST" class="w-full">
-                                        @csrf
-                                        <button type="submit"
-                                            class="flex w-full cursor-pointer items-center gap-2 rounded px-3 py-2 text-sm font-medium text-gray-700 hover:bg-[#13416B]/30 hover:text-[#13416B] transition text-left">
-                                            Keluar
-                                        </button>
-                                    </form>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                @endauth
-            </div>
+                </div>
+            @else
+                <a href="{{ route(auth()->user()->getRedirectRoute()) }}"
+                    class="block border-t border-slate-100 pt-4 mt-2 text-center py-3 rounded-xl font-bold text-white"
+                    style="background-color: #13416B;">Masuk</a>
+            @endguest
         </div>
     </div>
 </nav>
