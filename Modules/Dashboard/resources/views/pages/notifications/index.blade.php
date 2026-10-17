@@ -93,7 +93,7 @@
                         {{ ($filter ?? '') === 'unread' ? 'Tidak ada notifikasi yang belum dibaca' : 'Belum ada notifikasi' }}
                     </p>
                     <p class="mx-auto mt-1 max-w-sm text-xs leading-relaxed text-slate-400">
-                        Pemberitahuan persetujuan proyek dan status RTKD akan muncul di sini.
+                        {{ auth()->user()->hasRole('user') ? 'Pemberitahuan katalog kursus baru dan pembelajaran akan muncul di sini.' : 'Pemberitahuan persetujuan proyek dan status RTKD akan muncul di sini.' }}
                     </p>
                 </div>
             @endforelse

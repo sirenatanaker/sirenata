@@ -322,8 +322,8 @@
                     <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-100 shrink-0">
                         <div class="flex items-center gap-3">
                             <div
-                                class="w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center bg-[#13416B] text-white rounded-md shrink-0 shadow-md">
-                                <i class="fas fa-graduation-cap text-base"></i>
+                                class="w-10 h-10 sm:w-11 sm:h-11 flex items-center justify-center bg-[#13416B] text-white rounded-md shrink-0 shadow-md">
+                                <i class="fas fa-graduation-cap text-lg sm:text-xl"></i>
                             </div>
                             <div>
                                 <h2 class="text-base font-extrabold text-slate-800">Kursus Saya</h2>

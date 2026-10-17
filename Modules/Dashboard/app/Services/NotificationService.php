@@ -28,6 +28,8 @@ class NotificationService
     public const RTKD_VERIFIED = 'rtkd.verified';
     public const RTKD_APPROVED = 'rtkd.approved';
     public const RTKD_REJECTED = 'rtkd.rejected';
+    public const COURSE_PUBLISHED = 'course.published';
+    public const LIBRARY_PUBLISHED = 'library.published';
 
     private const RECIPIENT_ROLES = ['admin-province', 'admin-kab-kota'];
 
@@ -152,6 +154,135 @@ class NotificationService
             }
         } catch (Throwable $e) {
             Log::warning('Notifikasi RTKD gagal dibuat: ' . $e->getMessage());
+        }
+    }
+
+    /* ------------------------------------------------------------------ */
+    /* KATALOG KURSUS                                                      */
+    /* ------------------------------------------------------------------ */
+
+    /**
+     * Beritahu semua user saat ada katalog kursus baru ditambahkan oleh admin.
+     *
+     * @param  mixed  $course
+     */
+    public function coursePublished($course): void
+    {
+        try {
+            $users = User::role('user')->select('id')->get();
+            if ($users->isEmpty()) {
+                return;
+            }
+
+            $courseName = $course->name ?? 'Kursus Baru';
+            $title = $courseName;
+            $message = "Kursus baru \"{$courseName}\" telah ditambahkan ke katalog pembelajaran.";
+            $link = route('user.catalog.index');
+
+            $thumbnailUrl = null;
+            if (!empty($course->thumbnail)) {
+                $thumbnailUrl = str_starts_with($course->thumbnail, 'http')
+                    ? $course->thumbnail
+                    : asset('storage/' . $course->thumbnail);
+            } else {
+                $thumbnailUrl = 'https://ui-avatars.com/api/?name=' . urlencode(substr($courseName, 0, 2)) . '&background=13416B&color=fff&size=200';
+            }
+
+            $notifications = [];
+            $now = now();
+            $metaJson = json_encode([
+                'course_id'   => (string) ($course->id ?? ''),
+                'course_name' => $courseName,
+                'thumbnail'   => $thumbnailUrl,
+                'group'       => 'Katalog Baru',
+                'icon'        => 'fa-regular fa-graduation-cap',
+                'tile'        => 'bg-emerald-50 text-emerald-600 ring-emerald-100',
+            ]);
+
+            foreach ($users as $user) {
+                $notifications[] = [
+                    'id'         => (string) \Illuminate\Support\Str::uuid(),
+                    'user_id'    => $user->id,
+                    'type'       => self::COURSE_PUBLISHED,
+                    'title'      => $title,
+                    'message'    => $message,
+                    'link'       => $link,
+                    'meta'       => $metaJson,
+                    'read_at'    => null,
+                    'created_at' => $now,
+                    'updated_at' => $now,
+                ];
+            }
+
+            foreach (array_chunk($notifications, 250) as $chunk) {
+                Notification::insert($chunk);
+            }
+        } catch (Throwable $e) {
+            Log::warning('Notifikasi kursus baru gagal dibuat: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Beritahu semua user saat ada koleksi perpustakaan baru ditambahkan oleh admin.
+     *
+     * @param  mixed  $library
+     */
+    public function libraryPublished($library): void
+    {
+        try {
+            $users = User::role('user')->select('id')->get();
+            if ($users->isEmpty()) {
+                return;
+            }
+
+            $libraryTitle = $library->title ?? 'Koleksi Baru';
+            $title = $libraryTitle;
+            $message = "Koleksi perpustakaan \"{$libraryTitle}\" baru saja ditambahkan.";
+            $link = route('user.library.index') . '?open=' . ($library->id ?? '');
+
+            $thumbnailUrl = null;
+            if (!empty($library->cover_image_url)) {
+                $thumbnailUrl = $library->cover_image_url;
+            } elseif (!empty($library->cover_image)) {
+                $thumbnailUrl = filter_var($library->cover_image, FILTER_VALIDATE_URL)
+                    ? $library->cover_image
+                    : asset('storage/' . $library->cover_image);
+            } else {
+                $thumbnailUrl = 'https://ui-avatars.com/api/?name=' . urlencode(substr($libraryTitle, 0, 2)) . '&background=547996&color=fff&size=512&bold=true&length=2';
+            }
+
+            $notifications = [];
+            $now = now();
+            $metaJson = json_encode([
+                'library_id'    => (string) ($library->id ?? ''),
+                'library_title' => $libraryTitle,
+                'thumbnail'     => $thumbnailUrl,
+                'group'         => 'Perpustakaan',
+                'section'       => 'perpustakaan',
+                'icon'          => 'fa-regular fa-bookmark',
+                'tile'          => 'bg-sky-50 text-sky-600 ring-sky-100',
+            ]);
+
+            foreach ($users as $user) {
+                $notifications[] = [
+                    'id'         => (string) \Illuminate\Support\Str::uuid(),
+                    'user_id'    => $user->id,
+                    'type'       => self::LIBRARY_PUBLISHED,
+                    'title'      => $title,
+                    'message'    => $message,
+                    'link'       => $link,
+                    'meta'       => $metaJson,
+                    'read_at'    => null,
+                    'created_at' => $now,
+                    'updated_at' => $now,
+                ];
+            }
+
+            foreach (array_chunk($notifications, 250) as $chunk) {
+                Notification::insert($chunk);
+            }
+        } catch (Throwable $e) {
+            Log::warning('Notifikasi koleksi perpustakaan gagal dibuat: ' . $e->getMessage());
         }
     }
 

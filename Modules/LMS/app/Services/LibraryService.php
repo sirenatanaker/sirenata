@@ -91,7 +91,7 @@ class LibraryService
                 $videoPath = $data['video_path']->store('libraries/videos', 'public');
             }
 
-            return Library::create([
+            $library = Library::create([
                 'library_category_id' => $data['library_category_id'],
                 'title'               => $data['title'],
                 'description'         => $data['description'] ?? null,
@@ -101,6 +101,15 @@ class LibraryService
                 'external_link'       => $data['external_link'] ?? null,
                 'created_by'          => Auth::id(),
             ]);
+
+            // Kirim notifikasi koleksi perpustakaan baru ke seluruh user
+            try {
+                app(\Modules\Dashboard\Services\NotificationService::class)->libraryPublished($library);
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::warning('Gagal memicu notifikasi perpustakaan baru: ' . $e->getMessage());
+            }
+
+            return $library;
         });
     }
 

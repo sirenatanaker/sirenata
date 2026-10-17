@@ -1,6 +1,6 @@
 <!-- Navbar berada di lapisan bawah Sidebar (z-40). -->
 <nav class="fixed top-0 z-40 w-full bg-white border-b border-slate-200 transition-all duration-300"
-    :class="sidebarOpen ? 'lg:pl-64' : 'pl-0'">
+    :class="sidebarOpen ? 'md:pl-64 pl-0' : 'md:pl-20 pl-0'">
 
     <div
         class="px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between w-full gap-3 sm:gap-6 min-h-[72px] sm:min-h-[80px]">
@@ -9,11 +9,13 @@
         <div class="flex items-center flex-1 gap-3 sm:gap-5">
 
             @if (auth()->check() && auth()->user()->hasRole('user'))
-                <!-- Toggle Sidebar KHUSUS USER (Hanya di Desktop karena mobile pakai Bottom Nav) -->
-                <button @click="sidebarOpen = !sidebarOpen"
-                    class="hidden lg:inline-flex p-2.5 items-center justify-center rounded-xl cursor-pointer text-slate-500 transition-colors hover:bg-slate-100 hover:text-[#13416B] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#13416B]/30 shrink-0">
-                    <i class="fas fa-bars text-lg" aria-hidden="true"></i>
-                </button>
+                <!-- Logo di Navbar: Muncul ketika sidebar di-toggle closed (mini) di desktop/tablet, atau di mobile -->
+                <div class="flex items-center gap-2.5 shrink-0" :class="sidebarOpen ? 'md:hidden' : 'flex'">
+                    <a href="{{ route('landingpage.index') }}" class="flex items-center gap-2.5 group">
+                        <img src="{{ asset('images/logo.png') }}" class="h-8 w-auto shrink-0 group-hover:scale-105 transition-transform" alt="logo">
+                        <span class="text-lg sm:text-xl font-extrabold tracking-tight text-[#13416B]">SIRENATA</span>
+                    </a>
+                </div>
 
                 <!-- Searchbar AUTO-SUGGEST KHUSUS USER -->
                 <div class="flex-1 w-full max-w-full relative" x-data="searchSuggest()" @click.outside="isOpen = false">
@@ -203,9 +205,9 @@
                 </script>
             @else
                 <!-- Toggle Sidebar SEMUA ROLE LAIN (Muncul di Mobile & Desktop) -->
-                <button @click="sidebarOpen = !sidebarOpen"
+                <button @click="typeof toggleSidebar === 'function' ? toggleSidebar() : (sidebarOpen = !sidebarOpen)"
                     class="inline-flex p-2.5 items-center justify-center rounded-xl cursor-pointer text-slate-500 transition-colors hover:bg-slate-100 hover:text-[#13416B] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#13416B]/30 shrink-0">
-                    <i class="fas fa-bars text-lg" aria-hidden="true"></i>
+                    <i class="fa-solid fa-bars-staggered text-lg" aria-hidden="true"></i>
                 </button>
             @endif
 
@@ -215,8 +217,8 @@
         @auth
             <div class="flex items-center gap-2 sm:gap-4 shrink-0">
                 
-                <!-- Notifikasi LIVE (SSE) — Khusus Admin Provinsi & Admin Kab/Kota -->
-                @if (auth()->user()->hasRole(['admin-province', 'admin-kab-kota']))
+                <!-- Notifikasi In-App (User, Admin Provinsi, & Admin Kab/Kota) -->
+                @if (auth()->user()->hasRole(['user', 'admin-province', 'admin-kab-kota']))
                     @include('dashboard::partials.notifications.dropdown')
                 @endif
 

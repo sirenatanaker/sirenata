@@ -6,14 +6,21 @@
 </head>
 
 <body x-data="{ 
-          sidebarOpen: window.innerWidth >= 1024,
-          wasDesktop: window.innerWidth >= 1024,
+          sidebarOpen: localStorage.getItem('sidebar_collapsed') !== null 
+              ? localStorage.getItem('sidebar_collapsed') === 'false' 
+              : window.innerWidth >= 1024,
+          isTabletOrDesktop: window.innerWidth >= 768,
+          toggleSidebar() {
+              this.sidebarOpen = !this.sidebarOpen;
+              localStorage.setItem('sidebar_collapsed', (!this.sidebarOpen).toString());
+              setTimeout(() => {
+                  window.dispatchEvent(new Event('resize'));
+              }, 310);
+          },
           checkResize() {
-              let isDesktop = window.innerWidth >= 1024;
-            
-              if (this.wasDesktop !== isDesktop) {
-                  this.sidebarOpen = isDesktop;
-                  this.wasDesktop = isDesktop;
+              this.isTabletOrDesktop = window.innerWidth >= 768;
+              if (window.innerWidth < 768) {
+                  this.sidebarOpen = false;
               }
           }
       }" 
@@ -30,7 +37,7 @@
     @include('dashboard::partials.sidebar')
 
     <!-- Main Content -->
-    <main class="p-2 sm:p-0 mt-20 md:mt-18 transition-all duration-300" :class="sidebarOpen ? 'lg:ml-64' : 'ml-0'">
+    <main class="p-2 sm:p-0 mt-20 md:mt-18 transition-all duration-300" :class="sidebarOpen ? 'md:ml-64 ml-0' : 'md:ml-20 ml-0'">
         {{ $slot }}
     </main>
 

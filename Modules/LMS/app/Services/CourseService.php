@@ -617,6 +617,13 @@ class CourseService
                 'thumbnail'   => $thumbnailPath,
             ]);
 
+            // Kirim notifikasi katalog baru ke seluruh user
+            try {
+                app(\Modules\Dashboard\Services\NotificationService::class)->coursePublished($course);
+            } catch (\Throwable $e) {
+                Log::warning('Gagal memicu notifikasi kursus baru: ' . $e->getMessage());
+            }
+
             return [
                 'success' => true,
                 'message' => 'Course berhasil ditambahkan',

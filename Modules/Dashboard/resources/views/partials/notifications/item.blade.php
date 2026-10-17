@@ -14,26 +14,38 @@
 <div data-notif-id="{{ $notification->id }}"
     class="group relative flex items-start gap-3 border-b border-slate-100 px-3 py-3.5 transition-colors last:border-b-0 sm:gap-4 sm:px-5 sm:py-4 {{ $notification->read_at ? 'bg-white hover:bg-slate-50/70' : 'bg-slate-50/60 hover:bg-slate-100/60' }}">
 
-    <!-- Ikon kejadian dalam tile warna (hijau=disetujui, merah=ditolak, dst.) -->
-    <span class="mt-0.5 grid h-10 w-10 shrink-0 place-items-center rounded-xl ring-1 ring-inset {{ $notification->meta['tile'] ?? $notifMeta['tile'] }}">
-        <i class="{{ $notification->meta['icon'] ?? $notifMeta['icon'] }} text-[15px]" aria-hidden="true"></i>
-    </span>
+    @if ($notification->thumbnail_url)
+        @if ($notification->type === 'library.published')
+            <!-- Thumbnail Persegi Panjang Vertikal 3:4 (Koleksi Perpustakaan) -->
+            <div class="relative w-14 sm:w-16 aspect-[3/4] rounded-md overflow-hidden bg-slate-100 border border-slate-200/80 shrink-0 shadow-xs">
+                <img src="{{ $notification->thumbnail_url }}" alt="{{ $notification->title }}" class="w-full h-full object-cover">
+            </div>
+        @else
+            <!-- Thumbnail Persegi Panjang Horizontal 16:9 (Katalog Kursus) -->
+            <div class="relative w-24 sm:w-28 aspect-video rounded-md overflow-hidden bg-slate-100 border border-slate-200/80 shrink-0 shadow-xs">
+                <img src="{{ $notification->thumbnail_url }}" alt="{{ $notification->title }}" class="w-full h-full object-cover">
+            </div>
+        @endif
+    @else
+        <!-- Ikon kejadian -->
+        <span class="mt-0.5 grid h-10 w-10 shrink-0 place-items-center rounded-xl ring-1 ring-inset {{ $notification->meta['tile'] ?? $notifMeta['tile'] }}">
+            <i class="{{ $notification->meta['icon'] ?? $notifMeta['icon'] }} text-[15px]" aria-hidden="true"></i>
+        </span>
+    @endif
 
     <!-- Konten -->
     <div class="min-w-0 flex-1">
         <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
             <h3 class="max-w-full break-words text-[13.5px] font-semibold leading-snug text-slate-700 sm:text-sm">
-                {{ $notification->title }}
+                {{ preg_replace('/^(Katalog|Koleksi) (Baru|Kursus Baru|Perpustakaan Baru):\s*/i', '', $notification->title) }}
             </h3>
 
-            {{-- Chip jenis kejadian --}}
-            <span
-                class="shrink-0 rounded-md bg-slate-100 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-slate-500">
-                {{ $notifGroup }}
-            </span>
-
-            @if (!$notification->read_at)
-                <span class="h-1.5 w-1.5 shrink-0 rounded-full bg-[#13416B]" title="Belum dibaca"></span>
+            @if (!in_array($notification->type, ['course.published', 'library.published']))
+                {{-- Chip jenis kejadian (hanya untuk notifikasi sistem/proyek/RTKD) --}}
+                <span
+                    class="shrink-0 rounded-md bg-slate-100 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-slate-500">
+                    {{ $notifGroup }}
+                </span>
             @endif
         </div>
 

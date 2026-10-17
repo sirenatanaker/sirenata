@@ -53,6 +53,16 @@ class Notification extends Model
             'icon'  => 'fas fa-circle-xmark',
             'tile'  => 'bg-rose-50 text-rose-600 ring-rose-100',
         ],
+        'course.published' => [
+            'label' => 'Katalog Baru',
+            'icon'  => 'fa-regular fa-graduation-cap',
+            'tile'  => 'bg-emerald-50 text-emerald-600 ring-emerald-100',
+        ],
+        'library.published' => [
+            'label' => 'Perpustakaan',
+            'icon'  => 'fa-regular fa-bookmark',
+            'tile'  => 'bg-sky-50 text-sky-600 ring-sky-100',
+        ],
         'system.general' => [
             'label' => 'Sistem',
             'icon'  => 'fas fa-bell',
@@ -145,6 +155,50 @@ class Notification extends Model
     }
 
     /**
+     * URL Thumbnail untuk notifikasi (misal thumbnail kursus katalog baru).
+     */
+    public function getThumbnailUrlAttribute(): ?string
+    {
+        if (!empty($this->meta['thumbnail'])) {
+            return $this->meta['thumbnail'];
+        }
+
+        if ($this->type === 'course.published') {
+            $courseId = $this->meta['course_id'] ?? null;
+            if ($courseId) {
+                try {
+                    $course = \Modules\LMS\Models\Course::find($courseId);
+                    if ($course && $course->thumbnail) {
+                        return str_starts_with($course->thumbnail, 'http')
+                            ? $course->thumbnail
+                            : asset('storage/' . $course->thumbnail);
+                    }
+                } catch (\Throwable $e) {
+                }
+            }
+            $name = $this->meta['course_name'] ?? $this->title ?? 'Kursus';
+            return 'https://ui-avatars.com/api/?name=' . urlencode(substr($name, 0, 2)) . '&background=13416B&color=fff&size=512&bold=true&length=2';
+        }
+
+        if ($this->type === 'library.published') {
+            $libraryId = $this->meta['library_id'] ?? null;
+            if ($libraryId) {
+                try {
+                    $library = \Modules\LMS\Models\Library::find($libraryId);
+                    if ($library && $library->cover_image_url) {
+                        return $library->cover_image_url;
+                    }
+                } catch (\Throwable $e) {
+                }
+            }
+            $name = $this->meta['library_title'] ?? $this->title ?? 'Perpustakaan';
+            return 'https://ui-avatars.com/api/?name=' . urlencode(substr($name, 0, 2)) . '&background=547996&color=fff&size=512&bold=true&length=2';
+        }
+
+        return null;
+    }
+
+    /**
      * Bentuk data siap kirim (dipakai render awal server maupun
      * endpoint refresh `notifications.latest`).
      *
@@ -154,18 +208,33 @@ class Notification extends Model
     {
         $meta = self::typeMeta($this->type);
 
+        $title = $this->title;
+        if ($this->type === 'course.published') {
+            $title = $this->meta['course_name'] ?? preg_replace('/^Katalog (Baru|Kursus Baru):\s*/i', '', $this->title);
+        } elseif ($this->type === 'library.published') {
+            $title = $this->meta['library_title'] ?? preg_replace('/^Koleksi (Baru|Perpustakaan Baru):\s*/i', '', $this->title);
+        }
+
+        $section = match ($this->type) {
+            'course.published'  => 'katalog',
+            'library.published' => 'perpustakaan',
+            default             => 'lainnya',
+        };
+
         return [
-            'id'      => $this->id,
-            'type'    => $this->type,
-            'group'   => $this->meta['group'] ?? $meta['label'],
-            'icon'    => $this->meta['icon'] ?? $meta['icon'],
-            'tile'    => $this->meta['tile'] ?? $meta['tile'],
-            'title'   => $this->title,
-            'message' => $this->message,
-            'link'    => $this->link,
-            'time'    => $this->time_ago,
-            'read'    => $this->read_at !== null,
-            'created' => $this->created_at?->toIso8601String(),
+            'id'        => $this->id,
+            'type'      => $this->type,
+            'section'   => $section,
+            'group'     => $this->meta['group'] ?? $meta['label'],
+            'icon'      => $this->meta['icon'] ?? $meta['icon'],
+            'tile'      => $this->meta['tile'] ?? $meta['tile'],
+            'title'     => $title,
+            'message'   => $this->message,
+            'thumbnail' => $this->thumbnail_url,
+            'link'      => $this->link,
+            'time'      => $this->time_ago,
+            'read'      => $this->read_at !== null,
+            'created'   => $this->created_at?->toIso8601String(),
         ];
     }
 

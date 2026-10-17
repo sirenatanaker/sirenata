@@ -57,7 +57,7 @@ Route::prefix('admin-kab-kota')->middleware(['auth', 'role:admin-kab-kota'])->na
 */
 Route::prefix('notifications')
     ->name('notifications.')
-    ->middleware(['auth', 'role:admin-province|admin-kab-kota'])
+    ->middleware(['auth', 'role:user|admin-province|admin-kab-kota'])
     ->group(function () {
         Route::get('/', [NotificationController::class, 'index'])->name('index');
         Route::get('/latest', [NotificationController::class, 'latest'])->name('latest');
