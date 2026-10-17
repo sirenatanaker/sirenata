@@ -19,10 +19,25 @@
                 height: 42px;
                 right: 8px;
             }
+
+            #chartScrollContainer::-webkit-scrollbar {
+                width: 6px;
+            }
+            #chartScrollContainer::-webkit-scrollbar-track {
+                background: #f8fafc;
+                border-radius: 4px;
+            }
+            #chartScrollContainer::-webkit-scrollbar-thumb {
+                background: #cbd5e1;
+                border-radius: 4px;
+            }
+            #chartScrollContainer::-webkit-scrollbar-thumb:hover {
+                background: #94a3b8;
+            }
         </style>
     @endpush
 
-    <div class="p-0 sm:p-6 lg:p-8 max-w-full mx-auto space-y-6">
+    <div class="p-3 sm:p-5 lg:p-6 max-w-full mx-auto space-y-5 sm:space-y-6">
 
         <!-- ===================================== -->
         <!-- 1. STATS GRID (Solid Colored Cards)   -->
@@ -114,180 +129,333 @@
             </div>
         </div>
 
-        <!-- ===================================== -->
-        <!-- 2. ANALITIK EVALUASI FULL WIDTH       -->
-        <!-- ===================================== -->
-        <div class="bg-white rounded-md p-5 sm:p-6 shadow-sm border border-slate-200">
-            <div
-                class="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-6 pb-4 border-b border-slate-100">
-                <div class="flex items-center gap-3">
+        <!-- ======================================================= -->
+        <!-- 2. BALANCED 2-COLUMN GRID (PREVIOUS CARDS, BALANCED)    -->
+        <!-- ======================================================= -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-6">
 
-                    <div>
-                        <h2 class="text-base lg:text-lg font-extrabold text-slate-800">Evaluasi Anda per Kursus</h2>
-                        <p class="text-[11px] sm:text-xs text-slate-500">Nilai akhir dari post-test yang telah Anda
-                            kerjakan</p>
-                    </div>
-                </div>
-
-                @if (isset($chartDataByCourse) && count($chartDataByCourse) > 0)
-                    <div class="w-full sm:w-auto sm:max-w-xs shrink-0">
-                        <select id="courseChartFilter"
-                            class="w-full text-sm border-slate-200 rounded-lg focus:ring-[#13416B] focus:border-[#13416B] text-ellipsis overflow-hidden pr-8 cursor-pointer shadow-sm">
-                            @foreach ($chartDataByCourse as $cId => $cData)
-                                <option value="{{ $cId }}">{{ $cData['course_name'] }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                @endif
-            </div>
-
-            @if (isset($chartDataByCourse) && count($chartDataByCourse) > 0)
-                <div class="relative w-full overflow-hidden" style="min-height: 280px;">
-                    <canvas id="postTestChart"></canvas>
-                </div>
-                <div class="flex flex-wrap items-center gap-x-5 gap-y-1.5 mt-4 pt-3 border-t border-slate-100 text-[11px] text-slate-500">
-                    <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-sm bg-emerald-500"></span> Lulus (≥ KKM)</span>
-                    <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-sm bg-amber-500"></span> Di bawah KKM</span>
-                    <span class="flex items-center gap-1.5"><span class="inline-block h-3 border-l-2 border-slate-500"></span> Penanda KKM tiap evaluasi</span>
-                </div>
-            @else
-                <div class="bg-slate-50 rounded-xl p-10 text-center border border-dashed border-slate-200 my-4">
-                    <div
-                        class="w-14 h-14 bg-white rounded-full flex items-center justify-center mx-auto mb-3 shadow-sm text-slate-400">
-                        <i class="fas fa-chart-area text-xl"></i>
-                    </div>
-                    <p class="text-sm font-semibold text-slate-700">Belum ada data evaluasi</p>
-                    <p class="text-xs text-slate-500 mt-1">Daftar dan selesaikan modul kursus untuk memunculkan laporan
-                        analitik evaluasi.</p>
-                </div>
-            @endif
-        </div>
-
-        <!-- ===================================== -->
-        <!-- 3. GRID BAWAH (LANJUTKAN & RECENT)    -->
-        <!-- ===================================== -->
-        <!-- Hapus "items-start" agar tinggi Grid kembali menyelaraskan (stretch) kiri dan kanan -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-
-            <!-- KOLOM KIRI: Sebagai Penentu Utama Tinggi Baris -->
-            <div class="flex flex-col gap-6">
+            <!-- ===================================== -->
+            <!-- KOLOM KIRI (7 COLS): RESUME & CHART   -->
+            <!-- ===================================== -->
+            <div class="lg:col-span-7 flex flex-col gap-5 sm:gap-6 lg:h-full min-h-0">
 
                 <!-- CARD 1: Lanjutkan Belajar -->
-                <div
-                    class="bg-white rounded-md p-4 sm:p-5 shadow-sm border border-slate-200 flex flex-col justify-between">
-                    <div>
-                        <!-- Header Card -->
-                        <div class="flex items-center gap-3 mb-4 pb-3 border-b border-slate-100 shrink-0">
-                            <div
-                                class="w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center bg-[#13416B] text-white rounded-md shrink-0 shadow-md">
-                                <i class="fas fa-play-circle text-base"></i>
+                <div class="bg-white rounded-md p-4 sm:p-5 shadow-sm border border-slate-200 shrink-0">
+                    <!-- Header Card -->
+                    <div class="mb-3.5 pb-2.5 sm:pb-3 border-b border-slate-100 shrink-0">
+                        <h2 class="text-base lg:text-lg font-extrabold text-slate-800">Lanjutkan Belajar</h2>
+                        <p class="text-[11px] sm:text-xs text-slate-500">Aktivitas pembelajaran terakhir Anda</p>
+                    </div>
+
+                    @if ($lastCourse)
+                        @php
+                            $lThumb = $lastCourse->thumbnail
+                                ? (str_starts_with($lastCourse->thumbnail, 'http')
+                                    ? $lastCourse->thumbnail
+                                    : asset('storage/' . $lastCourse->thumbnail))
+                                : 'https://ui-avatars.com/api/?name=' .
+                                    urlencode(substr($lastCourse->name, 0, 2)) .
+                                    '&background=13416B&color=fff';
+                            if (str_contains($lThumb, 'ui-avatars.com') && !str_contains($lThumb, 'font-size')) {
+                                $lThumb .= '&font-size=0.33';
+                            }
+
+                            // Warna progress: <50% kuning, 50-99% biru, 100% hijau
+                            $lPct = (int) ($lastCourse->progress ?? 0);
+                            if ($lPct >= 100) {
+                                $lBar = 'bg-emerald-500';
+                                $lText = 'text-emerald-600';
+                            } elseif ($lPct >= 50) {
+                                $lBar = 'bg-[#13416B]';
+                                $lText = 'text-[#13416B]';
+                            } else {
+                                $lBar = 'bg-amber-500';
+                                $lText = 'text-amber-600';
+                            }
+                        @endphp
+
+                        <div
+                            class="bg-white rounded-md border border-slate-200 shadow-sm flex flex-row overflow-hidden transition-all hover:border-[#13416B]/40 hover:shadow-md mb-1 group">
+                            <!-- Thumbnail Kiri (Persegi Panjang Landscape Ringkas) -->
+                            <div class="w-32 sm:w-40 md:w-48 lg:w-52 xl:w-56 shrink-0 bg-slate-100 relative border-r border-slate-100 overflow-hidden">
+                                <img src="{{ $lThumb }}" alt="{{ $lastCourse->name }}"
+                                    class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
                             </div>
+
+                            <!-- Konten Teks & Progress Kanan -->
+                            <div class="min-w-0 flex-1 flex flex-col justify-between p-3 sm:p-4">
+                                <div class="mb-2">
+                                    <span
+                                        class="text-[9px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Aktivitas
+                                        Terakhir</span>
+                                    <h3 class="font-bold text-slate-800 text-sm sm:text-base line-clamp-2 mb-1">
+                                        {{ $lastCourse->name }}
+                                    </h3>
+                                    <p class="text-[10px] sm:text-[11px] text-slate-500 hidden md:line-clamp-2">
+                                        {{ $lastCourse->description ?? 'Lanjutkan pembelajaran Anda pada kursus ini.' }}
+                                    </p>
+                                </div>
+
+                                <div class="mt-auto">
+                                    <div
+                                        class="flex items-center justify-between text-[9px] sm:text-[10px] text-slate-500 mb-1 font-medium">
+                                        <span>Progress</span>
+                                        <span class="font-bold {{ $lText }}">{{ $lastCourse->progress }}%</span>
+                                    </div>
+
+                                    <div
+                                        class="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden shadow-inner mb-3">
+                                        <div class="{{ $lBar }} h-full rounded-full transition-all duration-300"
+                                            style="width: {{ $lastCourse->progress }}%"></div>
+                                    </div>
+
+                                    @if ($lPct >= 100)
+                                        <a href="{{ route('user.course.my-course.detail', $lastCourse->slug) }}"
+                                            class="flex items-center justify-center gap-2 w-full bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-600 hover:text-white hover:border-emerald-600 px-5 py-2.5 sm:py-3 rounded-lg font-bold transition-all shadow-sm text-sm sm:text-base group">
+                                            <i class="fas fa-award text-sm sm:text-base"></i>
+                                            <span>Lihat Sertifikat</span>
+                                        </a>
+                                    @elseif ($lPct <= 0)
+                                        <a href="{{ route('user.course.my-course.detail', $lastCourse->slug) }}?target=auto"
+                                            class="flex items-center justify-center gap-2 w-full bg-emerald-600 text-white hover:bg-emerald-700 px-5 py-2.5 sm:py-3 rounded-lg font-bold transition-all shadow-sm text-sm sm:text-base group">
+                                            <i class="fas fa-play text-xs sm:text-sm group-hover:scale-110 transition-transform"></i>
+                                            <span>Mulai Belajar</span>
+                                        </a>
+                                    @else
+                                        <a href="{{ route('user.course.my-course.detail', $lastCourse->slug) }}?target=auto"
+                                            class="flex items-center justify-center gap-2 w-full bg-[#13416B] text-white hover:bg-[#0f3354] px-5 py-2.5 sm:py-3 rounded-lg font-bold transition-all shadow-sm text-sm sm:text-base group">
+                                            <i class="fas fa-play text-xs sm:text-sm group-hover:scale-110 transition-transform"></i>
+                                            <span>Lanjutkan Belajar</span>
+                                        </a>
+                                    @endif
+                                </div>
+                            </div>
+                        </div>
+                    @else
+                        <div
+                            class="bg-slate-50 rounded-xl p-6 text-center border border-dashed border-slate-200 my-2 flex flex-col justify-center items-center">
+                            <div
+                                class="w-12 h-12 bg-white rounded-full flex items-center justify-center mb-2 shadow-sm text-slate-400 border border-slate-100">
+                                <i class="fas fa-book-open text-lg"></i>
+                            </div>
+                            <p class="text-xs font-semibold text-slate-700 mb-3">Belum ada aktivitas belajar</p>
+                            <a href="{{ route('user.catalog.index') }}"
+                                class="inline-flex items-center justify-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-lg text-[#13416B] text-xs font-bold hover:bg-slate-50 shadow-sm transition-all">
+                                <span>Lihat Katalog Kursus</span>
+                                <i class="fas fa-arrow-right text-[10px]"></i>
+                            </a>
+                        </div>
+                    @endif
+                </div>
+
+                <!-- CARD 2: Evaluasi Anda per Kursus (Analitik) -->
+                <div class="bg-white rounded-md p-5 sm:p-6 shadow-sm border border-slate-200 flex flex-col lg:flex-1 min-h-0">
+                    <div
+                        class="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-4 pb-4 border-b border-slate-100 shrink-0">
+                        <div class="flex items-center gap-3">
                             <div>
-                                <h2 class="text-base font-extrabold text-slate-800">Lanjutkan Belajar</h2>
-                                <p class="text-[11px] sm:text-xs text-slate-500">Aktivitas pembelajaran terakhir Anda
-                                </p>
+                                <h2 class="text-base lg:text-lg font-extrabold text-slate-800">Evaluasi Anda per Kursus</h2>
+                                <p class="text-[11px] sm:text-xs text-slate-500">Nilai akhir dari post-test yang telah Anda
+                                    kerjakan</p>
                             </div>
                         </div>
 
-                        @if ($lastCourse)
-                            @php
-                                $lThumb = $lastCourse->thumbnail
-                                    ? (str_starts_with($lastCourse->thumbnail, 'http')
-                                        ? $lastCourse->thumbnail
-                                        : asset('storage/' . $lastCourse->thumbnail))
-                                    : 'https://ui-avatars.com/api/?name=' .
-                                        urlencode(substr($lastCourse->name, 0, 2)) .
-                                        '&background=13416B&color=fff';
-                                if (str_contains($lThumb, 'ui-avatars.com') && !str_contains($lThumb, 'font-size')) {
-                                    $lThumb .= '&font-size=0.33';
-                                }
+                        @if (isset($chartDataByCourse) && count($chartDataByCourse) > 0)
+                            <div class="w-full sm:w-auto sm:max-w-xs shrink-0">
+                                <select id="courseChartFilter"
+                                    class="w-full text-sm border-slate-200 rounded-lg focus:ring-[#13416B] focus:border-[#13416B] text-ellipsis overflow-hidden pr-8 cursor-pointer shadow-sm">
+                                    @foreach ($chartDataByCourse as $cId => $cData)
+                                        <option value="{{ $cId }}">{{ $cData['course_name'] }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        @endif
+                    </div>
 
-                                // Warna progress: <50% kuning, 50-99% biru, 100% hijau
-                                $lPct = (int) ($lastCourse->progress ?? 0);
-                                if ($lPct >= 100) { $lBar = 'bg-emerald-500'; $lText = 'text-emerald-600'; }
-                                elseif ($lPct >= 50) { $lBar = 'bg-[#13416B]'; $lText = 'text-[#13416B]'; }
-                                else { $lBar = 'bg-amber-500'; $lText = 'text-amber-600'; }
-                            @endphp
-
-                            <div
-                                class="bg-white rounded-md border border-slate-200 shadow-sm flex flex-row overflow-hidden transition-all hover:border-[#13416B]/40 hover:shadow-md mb-2">
-                                <!-- Thumbnail Kiri -->
-                                <div class="w-28 sm:w-36 shrink-0 bg-slate-100 relative border-r border-slate-100">
-                                    <img src="{{ $lThumb }}" alt="{{ $lastCourse->name }}"
-                                        class="absolute inset-0 w-full h-full object-cover">
-                                </div>
-
-                                <!-- Konten Teks & Progress Kanan -->
-                                <div class="min-w-0 flex-1 flex flex-col justify-between p-3 sm:p-4">
-                                    <div class="mb-2">
-                                        <span
-                                            class="text-[9px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Aktivitas
-                                            Terakhir</span>
-<h3 class="font-bold text-slate-800 text-sm sm:text-base line-clamp-2 mb-1">
-                                            {{ $lastCourse->name }}
-                                        </h3>
-                                        <p
-                                            class="text-[10px] sm:text-[11px] text-slate-500 hidden md:line-clamp-2">
-                                            {{ $lastCourse->description ?? 'Lanjutkan pembelajaran Anda pada kursus ini.' }}
-                                        </p>
-                                    </div>
-
-                                    <div class="mt-auto">
-                                        <div
-                                            class="flex items-center justify-between text-[9px] sm:text-[10px] text-slate-500 mb-1 font-medium">
-                                            <span>Progress</span>
-                                            <span class="font-bold {{ $lText }}">{{ $lastCourse->progress }}%</span>
-                                        </div>
-
-                                        <div
-                                            class="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden shadow-inner mb-3">
-                                            <div class="{{ $lBar }} h-full rounded-full transition-all duration-300"
-                                                style="width: {{ $lastCourse->progress }}%"></div>
-                                        </div>
-
-                                        @if ($lPct >= 100)
-                                            <a href="{{ route('user.course.my-course.detail', $lastCourse->slug) }}"
-                                                class="flex items-center justify-center gap-1.5 w-full bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-600 hover:text-white hover:border-emerald-600 px-4 py-2 rounded-lg font-bold transition-all shadow-sm text-xs group">
-                                                <i class="fas fa-award text-[11px]"></i>
-                                                <span>Lihat Sertifikat</span>
-                                            </a>
-                                        @elseif ($lPct <= 0)
-                                            <a href="{{ route('user.course.my-course.detail', $lastCourse->slug) }}?target=auto"
-                                                class="flex items-center justify-center gap-1.5 w-full bg-emerald-600 text-white hover:bg-emerald-700 px-4 py-2 rounded-lg font-bold transition-all shadow-sm text-xs group">
-                                                <i class="fas fa-play text-[10px] group-hover:scale-110 transition-transform"></i>
-                                                <span>Mulai Belajar</span>
-                                            </a>
-                                        @else
-                                            <a href="{{ route('user.course.my-course.detail', $lastCourse->slug) }}?target=auto"
-                                                class="flex items-center justify-center gap-1.5 w-full bg-[#13416B] text-white hover:bg-[#0f3354] px-4 py-2 rounded-lg font-bold transition-all shadow-sm text-xs group">
-                                                <i class="fas fa-play text-[10px] group-hover:scale-110 transition-transform"></i>
-                                                <span>Lanjutkan Belajar</span>
-                                            </a>
-                                        @endif
-                                    </div>
+                    @if (isset($chartDataByCourse) && count($chartDataByCourse) > 0)
+                        <div class="flex-1 flex flex-col min-h-0 justify-between">
+                            <!-- Area Scroll Vertikal (Hanya Label Sumbu Y dan Data Batang yang ter-scroll) -->
+                            <div id="chartScrollContainer" class="relative w-full overflow-y-auto overflow-x-hidden flex-1 min-h-[160px] max-h-[300px] lg:max-h-none pr-1">
+                                <div id="chartCanvasWrapper" class="relative w-full">
+                                    <canvas id="postTestChart"></canvas>
                                 </div>
                             </div>
-                        @else
+
+                            <!-- Sumbu X Tetap / Fixed di Bawah (Angka 0, 20, 40, 60, 80, 100 tidak ikut ter-scroll) -->
+                            <div id="chartXAxisWrapper" class="relative w-full h-6 shrink-0 border-t border-slate-200">
+                                <canvas id="postTestXAxis" class="w-full h-full block"></canvas>
+                            </div>
+
+                            <!-- Penanda KKM & Status Kelulusan -->
                             <div
-                                class="bg-slate-50 rounded-xl p-6 text-center border border-dashed border-slate-200 my-2 flex flex-col justify-center items-center">
+                                class="flex flex-wrap items-center gap-x-5 gap-y-1.5 mt-2 pt-2.5 border-t border-slate-100 text-[11px] text-slate-500 shrink-0">
+                                <span class="flex items-center gap-1.5"><span
+                                        class="w-2.5 h-2.5 rounded-sm bg-emerald-500"></span> Lulus (≥ KKM)</span>
+                                <span class="flex items-center gap-1.5"><span
+                                        class="w-2.5 h-2.5 rounded-sm bg-amber-500"></span> Di bawah KKM</span>
+                                <span class="flex items-center gap-1.5"><span
+                                        class="inline-block h-3 border-l-2 border-slate-500"></span> Penanda KKM tiap evaluasi</span>
+                            </div>
+                        </div>
+                    @else
+                        <div class="bg-slate-50 rounded-xl p-10 text-center border border-dashed border-slate-200 my-auto">
+                            <div
+                                class="w-14 h-14 bg-white rounded-full flex items-center justify-center mx-auto mb-3 shadow-sm text-slate-400">
+                                <i class="fas fa-chart-area text-xl"></i>
+                            </div>
+                            <p class="text-sm font-semibold text-slate-700">Belum ada data evaluasi</p>
+                            <p class="text-xs text-slate-500 mt-1">Daftar dan selesaikan modul kursus untuk memunculkan
+                                laporan analitik evaluasi.</p>
+                        </div>
+                    @endif
+                </div>
+
+            </div>
+
+            <!-- ===================================== -->
+            <!-- KOLOM KANAN (5 COLS): KURSUS & LIB    -->
+            <!-- ===================================== -->
+            <div class="lg:col-span-5 flex flex-col gap-5 sm:gap-6 lg:h-full min-h-0">
+
+                <!-- CARD 3: Kursus Saya (Menyesuaikan Tinggi & Card ke-4 Mengintip Blur) -->
+                <div class="bg-white rounded-md p-5 sm:p-6 shadow-sm border border-slate-200 flex flex-col lg:flex-1 w-full min-h-0">
+                    <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-100 shrink-0">
+                        <div class="flex items-center gap-3">
+                            <div
+                                class="w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center bg-[#13416B] text-white rounded-md shrink-0 shadow-md">
+                                <i class="fas fa-graduation-cap text-base"></i>
+                            </div>
+                            <div>
+                                <h2 class="text-base font-extrabold text-slate-800">Kursus Saya</h2>
+                                <p class="text-[11px] sm:text-xs text-slate-500">Daftar kursus yang Anda ikuti</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Area daftar kursus yang di set relatif dan menyembunyikan elemen berlebih -->
+                    <div class="relative flex-1">
+                        <div class="space-y-3 flex flex-col">
+                            @forelse ($recentCourses->take(4) as $course)
+                                @php
+                                    $rThumb = $course->thumbnail
+                                        ? (str_starts_with($course->thumbnail, 'http')
+                                            ? $course->thumbnail
+                                            : asset('storage/' . $course->thumbnail))
+                                        : 'https://ui-avatars.com/api/?name=' .
+                                            urlencode(substr($course->name, 0, 2)) .
+                                            '&background=13416B&color=fff';
+                                    if (
+                                        str_contains($rThumb, 'ui-avatars.com') &&
+                                        !str_contains($rThumb, 'font-size')
+                                    ) {
+                                        $rThumb .= '&font-size=0.33';
+                                    }
+
+                                    // Warna progress: <50% kuning, 50-99% biru, 100% hijau
+                                    $rPct = (int) ($course->pivot->progress ?? 0);
+                                    if ($rPct >= 100) {
+                                        $rBar = 'bg-emerald-500';
+                                        $rText = 'text-emerald-600';
+                                    } elseif ($rPct >= 50) {
+                                        $rBar = 'bg-[#13416B]';
+                                        $rText = 'text-[#13416B]';
+                                    } else {
+                                        $rBar = 'bg-amber-500';
+                                        $rText = 'text-amber-600';
+                                    }
+                                @endphp
+
+                                <!-- Tambahan "shrink-0" memastikan card kursus tidak memipih/gepeng meskipun meluber -->
+                                <a href="{{ route('user.course.my-course.detail', $course->slug) }}"
+                                    @if ($loop->index === 3) aria-hidden="true" tabindex="-1" @endif
+                                    class="shrink-0 flex flex-row gap-3 sm:gap-4 bg-white border border-slate-200 rounded-xl p-3 sm:p-4 transition-all duration-200 hover:border-[#13416B]/40 hover:shadow-sm group items-center sm:items-start {{ $loop->index === 3 ? 'max-h-[64px] overflow-hidden pointer-events-none select-none' : '' }}">
+
+                                    <div
+                                        class="w-24 h-16 sm:w-32 sm:h-20 shrink-0 rounded-md overflow-hidden bg-slate-100 border border-slate-200 relative shadow-sm">
+                                        <img src="{{ $rThumb }}" alt="{{ $course->name }}"
+                                            class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                                    </div>
+
+                                    <div class="min-w-0 flex-1 flex flex-col justify-between h-full w-full py-0.5">
+                                        <div>
+                                            <div class="flex items-start justify-between gap-2 mb-1">
+                                                <!-- Title Desktop / Tablet (sm ke atas) -->
+                                                <h3
+                                                    class="hidden sm:block font-bold text-slate-800 text-sm truncate group-hover:text-[#13416B] transition-colors">
+                                                    {{ $course->name }}
+                                                </h3>
+
+                                                @if ($course->pivot->status === 'completed' || $rPct >= 100)
+                                                    <span
+                                                        class="inline-flex items-center px-1.5 py-0.5 rounded-md text-[9px] font-bold uppercase text-white bg-emerald-600 shrink-0">Selesai</span>
+                                                @elseif ($rPct > 0)
+                                                    <span
+                                                        class="inline-flex items-center px-1.5 py-0.5 rounded-md text-[9px] font-bold uppercase text-white bg-amber-500 shrink-0">Berjalan</span>
+                                                @else
+                                                    <span
+                                                        class="inline-flex items-center px-1.5 py-0.5 rounded-md text-[9px] font-bold uppercase text-white bg-slate-400 shrink-0">Belum Dimulai</span>
+                                                @endif
+                                            </div>
+
+                                            <!-- Deskripsi: hidden di mobile -->
+                                            <p
+                                                class="hidden sm:line-clamp-2 text-[11px] sm:text-xs text-slate-500 mb-2">
+                                                {{ $course->description ?? 'Deskripsi kursus tidak tersedia.' }}
+                                            </p>
+
+                                            <!-- Title Mobile -->
+                                            <h3
+                                                class="block sm:hidden font-bold text-slate-800 text-xs sm:text-sm line-clamp-2 mb-2 group-hover:text-[#13416B] transition-colors leading-snug">
+                                                {{ $course->name }}
+                                            </h3>
+                                        </div>
+
+                                        <div>
+                                            <div
+                                                class="flex items-center justify-between text-[9px] sm:text-[10px] text-slate-500 mb-1 font-medium">
+                                                <span>Progress</span>
+                                                <span class="font-bold {{ $rText }}">{{ $course->pivot->progress }}%</span>
+                                            </div>
+                                            <div
+                                                class="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden shadow-inner">
+                                                <div class="{{ $rBar }} h-full rounded-full transition-all duration-300"
+                                                    style="width: {{ $course->pivot->progress }}%"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </a>
+                            @empty
                                 <div
-                                    class="w-12 h-12 bg-white rounded-full flex items-center justify-center mb-2 shadow-sm text-slate-400 border border-slate-100">
-                                    <i class="fas fa-book-open text-lg"></i>
+                                    class="text-center py-10 bg-slate-50 rounded-xl border border-dashed border-slate-200">
+                                    <p class="text-xs font-semibold text-slate-600">Belum ada kursus yang diikuti.</p>
                                 </div>
-                                <p class="text-xs font-semibold text-slate-700 mb-3">Belum ada aktivitas belajar</p>
-                                <a href="{{ route('user.catalog.index') }}"
-                                    class="inline-flex items-center justify-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-lg text-[#13416B] text-xs font-bold hover:bg-slate-50 shadow-sm transition-all">
-                                    <span>Lihat Katalog Kursus</span>
-                                    <i class="fas fa-arrow-right text-[10px]"></i>
+                            @endforelse
+                        </div>
+
+                        {{-- Kursus ke-4 dst. hanya mengintip (terpotong + blur); selengkapnya lewat "Lihat semua" --}}
+                        @if ($recentCourses->count() > 3)
+                            <div class="pointer-events-none absolute inset-x-0 bottom-0 h-24">
+                                <div
+                                    class="absolute inset-0 backdrop-blur-[3px] [mask-image:linear-gradient(to_top,black,transparent)] [-webkit-mask-image:linear-gradient(to_top,black,transparent)]">
+                                </div>
+                                <div
+                                    class="absolute inset-0 bg-gradient-to-t from-white via-white/85 to-transparent">
+                                </div>
+                            </div>
+                            <div class="absolute inset-x-0 bottom-2 flex justify-center">
+                                <a href="{{ route('user.course.my-course') }}"
+                                    class="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-slate-800 hover:underline underline-offset-4 transition-colors">
+                                    <span>Lihat semua kursus</span>
+                                    <i class="fas fa-chevron-right text-[9px]"></i>
                                 </a>
                             </div>
                         @endif
                     </div>
                 </div>
 
-                <!-- CARD 2: Terakhir Dilihat (Perpustakaan) -->
+                <!-- CARD 4: Terakhir Dilihat (Perpustakaan) -->
                 <div
-                    class="bg-white rounded-md p-4 sm:p-5 shadow-sm border border-slate-200 flex flex-col justify-between flex-1">
+                    class="bg-white rounded-md p-4 sm:p-5 shadow-sm border border-slate-200 flex flex-col justify-between shrink-0">
                     <div>
                         <div class="flex items-center gap-3 mb-3 pb-3 border-b border-slate-100 shrink-0">
                             <div
@@ -302,7 +470,6 @@
                         </div>
 
                         @if (isset($lastLibrary) && $lastLibrary)
-                            <!-- Tautan mengarah ke halaman library dengan membawa parameter '?open=ID' -->
                             <a href="{{ route('user.library.index') }}?open={{ $lastLibrary->id }}"
                                 class="flex items-stretch gap-4 p-4 rounded-xl border border-slate-100 bg-slate-50 hover:bg-slate-100 hover:border-slate-300 transition-all group">
 
@@ -351,138 +518,16 @@
                         @endif
                     </div>
                 </div>
+
             </div>
 
-            <!-- KOLOM KANAN: Kursus Saya (3 kursus penuh + 1 mengintip terpotong/blur) -->
-            <div>
-                <div
-                    class="bg-white rounded-md p-5 sm:p-6 shadow-sm border border-slate-200 flex flex-col h-full w-full">
-
-                    <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-100 shrink-0">
-                        <div class="flex items-center gap-3">
-                            <div
-                                class="w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center bg-[#13416B] text-white rounded-md shrink-0 shadow-md">
-                                <i class="fas fa-graduation-cap text-base"></i>
-                            </div>
-                            <div>
-                                <h2 class="text-base font-extrabold text-slate-800">Kursus Saya</h2>
-                                <p class="text-[11px] sm:text-xs text-slate-500">Daftar kursus yang Anda ikuti</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Area daftar kursus yang di set relatif dan menyembunyikan elemen berlebih -->
-                    <div class="relative flex-1">
-                        <div class="space-y-3 flex flex-col">
-                            @forelse ($recentCourses->take(4) as $course)
-                                @php
-                                    $rThumb = $course->thumbnail
-                                        ? (str_starts_with($course->thumbnail, 'http')
-                                            ? $course->thumbnail
-                                            : asset('storage/' . $course->thumbnail))
-                                        : 'https://ui-avatars.com/api/?name=' .
-                                            urlencode(substr($course->name, 0, 2)) .
-                                            '&background=13416B&color=fff';
-                                    if (
-                                        str_contains($rThumb, 'ui-avatars.com') &&
-                                        !str_contains($rThumb, 'font-size')
-                                    ) {
-                                        $rThumb .= '&font-size=0.33';
-                                    }
-
-                                    // Warna progress: <50% kuning, 50-99% biru, 100% hijau
-                                    $rPct = (int) ($course->pivot->progress ?? 0);
-                                    if ($rPct >= 100) { $rBar = 'bg-emerald-500'; $rText = 'text-emerald-600'; }
-                                    elseif ($rPct >= 50) { $rBar = 'bg-[#13416B]'; $rText = 'text-[#13416B]'; }
-                                    else { $rBar = 'bg-amber-500'; $rText = 'text-amber-600'; }
-                                @endphp
-                                <!-- Tambahan "shrink-0" memastikan card kursus tidak memipih/gepeng meskipun meluber -->
-                                <a href="{{ route('user.course.my-course.detail', $course->slug) }}"
-                                    @if ($loop->index === 3) aria-hidden="true" tabindex="-1" @endif
-                                    class="shrink-0 flex flex-row gap-3 sm:gap-4 bg-white border border-slate-200 rounded-xl p-3 sm:p-4 transition-all duration-200 hover:border-[#13416B]/40 hover:shadow-sm group items-center sm:items-start {{ $loop->index === 3 ? 'max-h-[64px] overflow-hidden pointer-events-none select-none' : '' }}">
-
-                                    <div
-                                        class="w-16 h-16 sm:w-20 sm:h-20 shrink-0 rounded-md overflow-hidden bg-slate-100 border border-slate-200 relative shadow-sm">
-                                        <img src="{{ $rThumb }}" alt="{{ $course->name }}"
-                                            class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
-                                    </div>
-
-                                    <div class="min-w-0 flex-1 flex flex-col justify-between h-full w-full py-0.5">
-                                        <div>
-                                            <div class="flex items-start justify-between gap-2 mb-1">
-                                                <!-- Title untuk Layar Desktop / Tablet (sm ke atas) -->
-                                                <h3
-                                                    class="hidden sm:block font-bold text-slate-800 text-sm truncate group-hover:text-[#13416B] transition-colors">
-                                                    {{ $course->name }}
-                                                </h3>
-
-                                                @if ($course->pivot->status === 'completed' || $rPct >= 100)
-                                                    <span
-                                                        class="inline-flex items-center px-1.5 py-0.5 rounded-md text-[9px] font-bold uppercase text-white bg-emerald-600 shrink-0">Selesai</span>
-                                                @elseif ($rPct > 0)
-                                                    <span
-                                                        class="inline-flex items-center px-1.5 py-0.5 rounded-md text-[9px] font-bold uppercase text-white bg-amber-500 shrink-0">Berjalan</span>
-                                                @else
-                                                    <span
-                                                        class="inline-flex items-center px-1.5 py-0.5 rounded-md text-[9px] font-bold uppercase text-white bg-slate-400 shrink-0">Belum Dimulai</span>
-                                                @endif
-                                            </div>
-
-                                            <!-- Deskripsi Kursus: Di-hidden untuk Resolusi Mobile -->
-                                            <p
-                                                class="hidden sm:line-clamp-2 text-[11px] sm:text-xs text-slate-500 mb-2">
-                                                {{ $course->description ?? 'Deskripsi kursus tidak tersedia.' }}
-                                            </p>
-
-                                            <!-- Title untuk Resolusi Mobile: Ditaruh di posisi tempat Deskripsi berada -->
-                                            <h3
-                                                class="block sm:hidden font-bold text-slate-800 text-xs sm:text-sm line-clamp-2 mb-2 group-hover:text-[#13416B] transition-colors leading-snug">
-                                                {{ $course->name }}
-                                            </h3>
-                                        </div>
-
-                                        <div>
-                                            <div
-                                                class="flex items-center justify-between text-[9px] sm:text-[10px] text-slate-500 mb-1 font-medium">
-                                                <span>Progress</span>
-                                                <span
-                                                    class="font-bold {{ $rText }}">{{ $course->pivot->progress }}%</span>
-                                            </div>
-                                            <div
-                                                class="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden shadow-inner">
-                                                <div class="{{ $rBar }} h-full rounded-full transition-all duration-300"
-                                                    style="width: {{ $course->pivot->progress }}%"></div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </a>
-                            @empty
-                                <div
-                                    class="text-center py-10 bg-slate-50 rounded-xl border border-dashed border-slate-200">
-                                    <p class="text-xs font-semibold text-slate-600">Belum ada kursus yang diikuti.</p>
-                                </div>
-                            @endforelse
-                        </div>
-
-                        {{-- Kursus ke-4 dst. hanya mengintip (terpotong + blur); selengkapnya lewat "Lihat semua" --}}
-                        @if ($recentCourses->count() > 3)
-                            <div class="pointer-events-none absolute inset-x-0 bottom-0 h-24">
-                                <div class="absolute inset-0 backdrop-blur-[3px] [mask-image:linear-gradient(to_top,black,transparent)] [-webkit-mask-image:linear-gradient(to_top,black,transparent)]"></div>
-                                <div class="absolute inset-0 bg-gradient-to-t from-white via-white/85 to-transparent"></div>
-                            </div>
-                            <div class="absolute inset-x-0 bottom-2 flex justify-center">
-                                <a href="{{ route('user.course.my-course') }}"
-                                    class="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-slate-800 hover:underline underline-offset-4 transition-colors">
-                                    Lihat semua kursus
-                                </a>
-                            </div>
-                        @endif
-                    </div>
-                </div>
-            </div>
         </div>
+
     </div>
 
+    <!-- ===================================== -->
+    <!-- 3. MODAL INSTANSI                     -->
+    <!-- ===================================== -->
     @if (!$profile || empty($profile->instansi))
         <div class="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 backdrop-blur-sm"
             style="background-color: rgba(15, 23, 42, 0.6)">
@@ -490,11 +535,6 @@
                 class="bg-white rounded-2xl shadow-xl max-w-2xl w-full max-h-[calc(100dvh-1rem)] sm:max-h-[90vh] overflow-y-auto border border-slate-200 overscroll-contain">
                 <div class="p-4 sm:p-8">
                     <div class="text-center mb-8">
-                        {{-- <div
-                            class="bg-[#13416B]/10 text-[#13416B] w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-3 border border-[#13416B]/20 shadow-sm">
-                            <img src="{{ asset('images/logo.png') }}" alt="Logo Kemnaker"
-                                class="h-9 w-9 object-contain">
-                        </div> --}}
                         <h2 class="text-lg sm:text-xl font-extrabold text-slate-900">Pilih Instansi Anda</h2>
                         <p class="text-xs sm:text-sm text-slate-500 mt-1">Lengkapi informasi institusi untuk melanjutkan akses
                             pembelajaran</p>
@@ -531,27 +571,27 @@
                         </div>
 
                         <div id="asalInstansiSection">
-                        <div>
-                            <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">Asal
-                                Instansi <span class="text-red-500">*</span></label>
-                            <div class="grid grid-cols-3 gap-1.5 sm:gap-3">
-                                <label
-                                    class="flex items-center justify-center min-w-0 px-1.5 py-2 sm:px-3 sm:py-2.5 border border-slate-200 rounded-lg cursor-pointer hover:border-[#13416B] hover:bg-[#13416B]/5 transition-all font-semibold text-xs sm:text-sm text-slate-700">
-                                    <input type="radio" name="asalInstansi" value="pusat"
-                                        class="mr-1.5 shrink-0 text-[#13416B] focus:ring-[#13416B]"> <span class="whitespace-nowrap">Pusat</span>
-                                </label>
-                                <label
-                                    class="flex items-center justify-center min-w-0 px-1.5 py-2 sm:px-3 sm:py-2.5 border border-slate-200 rounded-lg cursor-pointer hover:border-[#13416B] hover:bg-[#13416B]/5 transition-all font-semibold text-xs sm:text-sm text-slate-700">
-                                    <input type="radio" name="asalInstansi" value="provinsi"
-                                        class="mr-1.5 shrink-0 text-[#13416B] focus:ring-[#13416B]"> <span class="whitespace-nowrap">Provinsi</span>
-                                </label>
-                                <label
-                                    class="flex items-center justify-center min-w-0 px-1.5 py-2 sm:px-3 sm:py-2.5 border border-slate-200 rounded-lg cursor-pointer hover:border-[#13416B] hover:bg-[#13416B]/5 transition-all font-semibold text-xs sm:text-sm text-slate-700">
-                                    <input type="radio" name="asalInstansi" value="kabkota"
-                                        class="mr-1.5 shrink-0 text-[#13416B] focus:ring-[#13416B]"> <span class="whitespace-nowrap">Kab/Kota</span>
-                                </label>
+                            <div>
+                                <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">Asal
+                                    Instansi <span class="text-red-500">*</span></label>
+                                <div class="grid grid-cols-3 gap-1.5 sm:gap-3">
+                                    <label
+                                        class="flex items-center justify-center min-w-0 px-1.5 py-2 sm:px-3 sm:py-2.5 border border-slate-200 rounded-lg cursor-pointer hover:border-[#13416B] hover:bg-[#13416B]/5 transition-all font-semibold text-xs sm:text-sm text-slate-700">
+                                        <input type="radio" name="asalInstansi" value="pusat"
+                                            class="mr-1.5 shrink-0 text-[#13416B] focus:ring-[#13416B]"> <span class="whitespace-nowrap">Pusat</span>
+                                    </label>
+                                    <label
+                                        class="flex items-center justify-center min-w-0 px-1.5 py-2 sm:px-3 sm:py-2.5 border border-slate-200 rounded-lg cursor-pointer hover:border-[#13416B] hover:bg-[#13416B]/5 transition-all font-semibold text-xs sm:text-sm text-slate-700">
+                                        <input type="radio" name="asalInstansi" value="provinsi"
+                                            class="mr-1.5 shrink-0 text-[#13416B] focus:ring-[#13416B]"> <span class="whitespace-nowrap">Provinsi</span>
+                                    </label>
+                                    <label
+                                        class="flex items-center justify-center min-w-0 px-1.5 py-2 sm:px-3 sm:py-2.5 border border-slate-200 rounded-lg cursor-pointer hover:border-[#13416B] hover:bg-[#13416B]/5 transition-all font-semibold text-xs sm:text-sm text-slate-700">
+                                        <input type="radio" name="asalInstansi" value="kabkota"
+                                            class="mr-1.5 shrink-0 text-[#13416B] focus:ring-[#13416B]"> <span class="whitespace-nowrap">Kab/Kota</span>
+                                    </label>
+                                </div>
                             </div>
-                        </div>
                         </div>
 
                         <div id="swastaSection" class="hidden">
@@ -571,7 +611,6 @@
                             <select id="kementerian" class="w-full">
                                 <option value="">Pilih Kementerian/Lembaga</option>
                             </select>
-                            <!-- Input tersembunyi untuk menampung nilai akhir pusat -->
                             <input type="hidden" name="instansi" id="finalInstansiPusat" />
                         </div>
 
@@ -579,7 +618,7 @@
                             <label for="provinsi"
                                 class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">Provinsi
                                 <span class="text-red-500">*</span></label>
-                            <select id="provinsi" class="w-full " name="province_code">
+                            <select id="provinsi" class="w-full" name="province_code">
                                 <option value="">Pilih Provinsi</option>
                                 @foreach ($provinces as $prov)
                                     <option value="{{ $prov->code }}" data-name="{{ $prov->name }}">
@@ -602,7 +641,6 @@
                                 class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">Instansi
                                 <span class="text-red-500">*</span></label>
                             <select id="instansi" name="instansi" class="w-full">
-                                <!-- Tambahkan name="instansi" di sini -->
                                 <option value="">Pilih Instansi</option>
                             </select>
                             <p class="mt-1.5 text-xs text-slate-500">Pilih opsi "Lainnya" apabila instansi Anda tidak
@@ -643,6 +681,9 @@
         </div>
     @endif
 
+    <!-- ===================================== -->
+    <!-- 4. SCRIPTS SECTION                    -->
+    <!-- ===================================== -->
     @push('scripts')
         <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
@@ -716,7 +757,7 @@
 
                 function formatMultilineLabel(text) {
                     if (!text) return text;
-                    const maxChars = window.innerWidth >= 640 ? 35 : 20;
+                    const maxChars = window.innerWidth >= 640 ? 30 : 18;
                     const words = text.split(' ');
                     let lines = [];
                     let currentLine = '';
@@ -745,16 +786,25 @@
 
                     const postTestChart = new Chart(ctx.getContext('2d'), {
                         type: 'bar',
-                        plugins: [kkmAndValuePlugin],
+                        plugins: [
+                            kkmAndValuePlugin,
+                            {
+                                id: 'fixedXAxisTrigger',
+                                afterRender() {
+                                    setTimeout(drawFixedXAxis, 15);
+                                }
+                            }
+                        ],
                         data: {
-                            labels: currentData.labels.map(label => formatMultilineLabel(label)),
+                            labels: (currentData.labels || []).map(label => formatMultilineLabel(label)),
                             datasets: [{
                                 label: 'Skor Anda',
                                 data: currentData.user_scores,
                                 backgroundColor: dynamicColors,
-                                borderRadius: 4,
-                                barPercentage: 0.5,
-                                categoryPercentage: 0.8
+                                borderRadius: 6,
+                                maxBarThickness: 32,
+                                barPercentage: 0.6,
+                                categoryPercentage: 0.85
                             }]
                         },
                         options: {
@@ -764,7 +814,8 @@
                             layout: {
                                 padding: {
                                     top: 14,
-                                    right: 30
+                                    bottom: 4,
+                                    right: 32
                                 }
                             },
                             plugins: {
@@ -806,10 +857,10 @@
                                         color: '#f1f5f9'
                                     },
                                     ticks: {
-                                        font: {
-                                            size: 10
-                                        },
-                                        stepSize: 20
+                                        display: false
+                                    },
+                                    border: {
+                                        display: false
                                     }
                                 },
                                 y: {
@@ -827,12 +878,12 @@
                                     },
                                     afterFit: function(scaleInstance) {
                                         if (window.innerWidth >= 640) {
-                                            if (scaleInstance.width < 180) {
-                                                scaleInstance.width = 180;
+                                            if (scaleInstance.width < 160) {
+                                                scaleInstance.width = 160;
                                             }
                                         } else {
-                                            if (scaleInstance.width < 120) {
-                                                scaleInstance.width = 120;
+                                            if (scaleInstance.width < 110) {
+                                                scaleInstance.width = 110;
                                             }
                                         }
                                     }
@@ -846,6 +897,70 @@
                         }
                     });
 
+                    // Fungsi render sumbu X tetap (fixed scale 0, 20, 40, 60, 80, 100)
+                    function drawFixedXAxis() {
+                        const xCanvas = document.getElementById('postTestXAxis');
+                        if (!xCanvas || !postTestChart) return;
+
+                        const rect = xCanvas.getBoundingClientRect();
+                        if (rect.width === 0) return;
+
+                        const dpr = window.devicePixelRatio || 1;
+                        xCanvas.width = rect.width * dpr;
+                        xCanvas.height = rect.height * dpr;
+
+                        const ctxX = xCanvas.getContext('2d');
+                        ctxX.scale(dpr, dpr);
+                        ctxX.clearRect(0, 0, rect.width, rect.height);
+
+                        const xScale = postTestChart.scales.x;
+                        if (!xScale) return;
+
+                        const mainCanvasRect = postTestChart.canvas.getBoundingClientRect();
+                        const xOffset = mainCanvasRect.left - rect.left;
+
+                        ctxX.fillStyle = '#64748b';
+                        ctxX.font = '600 10px sans-serif';
+                        ctxX.textAlign = 'center';
+                        ctxX.textBaseline = 'top';
+
+                        const tickValues = [0, 20, 40, 60, 80, 100];
+                        tickValues.forEach(val => {
+                            const xPos = xScale.getPixelForValue(val) + xOffset;
+                            if (xPos >= 0 && xPos <= rect.width) {
+                                ctxX.strokeStyle = '#cbd5e1';
+                                ctxX.lineWidth = 1;
+                                ctxX.beginPath();
+                                ctxX.moveTo(xPos, 0);
+                                ctxX.lineTo(xPos, 4);
+                                ctxX.stroke();
+
+                                ctxX.fillText(val.toString(), xPos, 6);
+                            }
+                        });
+                    }
+
+                    // Fungsi dinamis untuk menyesuaikan tinggi canvas agar:
+                    // 1. Jika data sedikit (misal 1-3 evaluasi), tinggi canvas memenuhi tinggi container scroll
+                    //    sehingga jarak antar bar pada sumbu Y merenggang dan data terakhir berada dekat dengan sumbu X (mengisi kekosongan).
+                    // 2. Jika data banyak, dialokasikan minimal 70px per bar dan container scroll aktif untuk scroll vertikal.
+                    function updateChartHeight(labelsCount) {
+                        const scrollContainer = document.getElementById('chartScrollContainer');
+                        const canvasWrapper = document.getElementById('chartCanvasWrapper') || (ctx ? ctx.parentElement : null);
+                        if (!canvasWrapper) return;
+
+                        // Reset sementara ke ukuran minimal agar clientHeight scrollContainer tidak terdorong tinggi sebelumnya
+                        canvasWrapper.style.height = '160px';
+                        const containerHeight = scrollContainer ? scrollContainer.clientHeight : 0;
+
+                        const count = typeof labelsCount === 'number'
+                            ? labelsCount
+                            : (postTestChart && postTestChart.data.labels ? postTestChart.data.labels.length : 1);
+
+                        const finalHeight = Math.max(containerHeight, count * 70, 180);
+                        canvasWrapper.style.height = finalHeight + 'px';
+                    }
+
                     const filterSelect = document.getElementById('courseChartFilter');
                     if (filterSelect) {
                         filterSelect.addEventListener('change', function() {
@@ -853,27 +968,46 @@
                             const newData = allChartData[selectedId];
 
                             if (newData) {
-                                const newHeight = Math.max(180, newData.labels.length * 80);
-                                ctx.parentElement.style.height = newHeight + 'px';
+                                currentCourseId = selectedId;
+                                currentData = newData;
+                                updateChartHeight((newData.labels || []).length);
 
-                                postTestChart.data.labels = newData.labels.map(label => formatMultilineLabel(
-                                    label));
+                                postTestChart.data.labels = (newData.labels || []).map(label => formatMultilineLabel(label));
                                 postTestChart.data.datasets[0].data = newData.user_scores;
                                 currentKkms = getKkms(newData);
                                 postTestChart.options.plugins.kkmAndValue.kkms = currentKkms;
                                 postTestChart.data.datasets[0].backgroundColor = scoreColors(newData.user_scores, currentKkms);
                                 postTestChart.update();
+                                setTimeout(drawFixedXAxis, 30);
                             }
                         });
-
-                        const initialHeight = Math.max(180, currentData.labels.length * 80);
-                        ctx.parentElement.style.height = initialHeight + 'px';
                     }
+
+                    // Inisialisasi tinggi chart awal dan sinkronisasi sumbu X
+                    updateChartHeight((currentData.labels || []).length);
+                    setTimeout(() => {
+                        updateChartHeight((currentData.labels || []).length);
+                        if (postTestChart) {
+                            postTestChart.resize();
+                            drawFixedXAxis();
+                        }
+                    }, 60);
+
+                    // Resize listener saat window diubah ukurannya
+                    window.addEventListener('resize', function() {
+                        const count = currentData && currentData.labels ? currentData.labels.length : 1;
+                        updateChartHeight(count);
+                        if (postTestChart && currentData) {
+                            postTestChart.data.labels = (currentData.labels || []).map(label => formatMultilineLabel(label));
+                            postTestChart.resize();
+                        }
+                        setTimeout(drawFixedXAxis, 50);
+                    });
                 }
             });
+
             @if (!$profile || empty($profile->instansi))
                 $(document).ready(function() {
-                    // Pesan error inline (pengganti alert bawaan browser)
                     function showFormError(message) {
                         $('#instansiClientErrorText').text(message);
                         $('#instansiClientError').removeClass('hidden');
@@ -885,7 +1019,6 @@
                     }
                     $('#instansiForm').on('change input', clearFormError);
 
-                    // 0. Handler pilihan sektor (Instansi/Lembaga vs Swasta)
                     $('input[name="sector"]').on('change', function() {
                         const sector = $(this).val();
                         if (sector === 'swasta') {
@@ -914,7 +1047,6 @@
                         clearFormError();
                     });
 
-                    // 1. Muat data pusat saat pertama kali modal muncul
                     $.ajax({
                         url: '{{ route('api.masterdata.institutions.index') }}?type=pusat',
                         type: 'GET',
@@ -940,7 +1072,6 @@
                         }
                     });
 
-                    // 2. Inisialisasi Select2 untuk semua elemen dropdown terkait
                     $('#kementerian, #provinsi, #kabkota, #instansi').select2({
                         placeholder: function() {
                             return $(this).find('option:first').text();
@@ -960,7 +1091,6 @@
                         }
                     });
 
-                    // 3. Handler saat radio Asal Instansi berubah (Pusat / Provinsi / Kab Kota)
                     $('input[name="asalInstansi"]').on('change', function() {
                         const value = $(this).val();
                         $('#kementerianSection, #provinsiSection, #kabkotaSection, #instansiSection, #customInstansiSection, #unitKerjaSection')
@@ -977,14 +1107,12 @@
                         }
                     });
 
-                    // 4. Fungsi helper untuk mengambil data instansi daerah berdasarkan wilayah terpilih
                     function populateInstansi() {
                         $('#instansi').empty().append(new Option('Pilih Instansi', ''));
 
                         const provinceCode = $('#provinsi').val();
                         const regencyCode = $('#kabkota').val();
-                        const asalInstansi = $('input[name="asalInstansi"]:checked')
-                            .val(); // Ambil tipe level (provinsi/kabkota)
+                        const asalInstansi = $('input[name="asalInstansi"]:checked').val();
 
                         $.ajax({
                             url: '{{ route('api.masterdata.institutions.index') }}',
@@ -1019,7 +1147,6 @@
                         });
                     }
 
-                    // 5. Handler saat Provinsi dipilih
                     $('#provinsi').on('change', function() {
                         const provinsiCode = $(this).val();
                         const sector = $('input[name="sector"]:checked').val();
@@ -1027,7 +1154,6 @@
 
                         if (provinsiCode) {
                             if (sector === 'swasta') {
-                                // Swasta: hanya muat kab/kota domisili, tanpa daftar instansi
                                 $.ajax({
                                     url: '{{ route('user.get-regencies') }}',
                                     type: 'GET',
@@ -1039,8 +1165,7 @@
                                             $('#kabkota').empty().append(new Option(
                                                 'Pilih Kabupaten/Kota', ''));
                                             response.data.forEach(regency => {
-                                                $('#kabkota').append(new Option(regency
-                                                    .name, regency.code));
+                                                $('#kabkota').append(new Option(regency.name, regency.code));
                                             });
                                             $('#kabkota').trigger('change');
                                             $('#kabkotaSection').removeClass('hidden');
@@ -1059,8 +1184,7 @@
                                             $('#kabkota').empty().append(new Option(
                                                 'Pilih Kabupaten/Kota', ''));
                                             response.data.forEach(regency => {
-                                                $('#kabkota').append(new Option(regency
-                                                    .name, regency.code));
+                                                $('#kabkota').append(new Option(regency.name, regency.code));
                                             });
                                             $('#kabkota').trigger('change');
                                             $('#kabkotaSection').removeClass('hidden');
@@ -1080,7 +1204,6 @@
                         }
                     });
 
-                    // 6. Handler saat Kabupaten/Kota dipilih
                     $('#kabkota').on('change', function() {
                         const sector = $('input[name="sector"]:checked').val();
                         if (sector === 'swasta') {
@@ -1095,7 +1218,6 @@
                         }
                     });
 
-                    // 7. Handler saat pilihan instansi berubah (menangani opsi "Lainnya")
                     $('#instansi').on('change', function() {
                         const value = $(this).val();
                         if (value === 'lainnya') {
@@ -1114,7 +1236,6 @@
                         }
                     });
 
-                    // 8. Handler input teks kustom instansi
                     $('#customInstansi').on('input', function() {
                         const isValid = Boolean($(this).val().trim());
                         const isOtherSelected = $('#instansi').val() === 'lainnya' ||
@@ -1128,7 +1249,6 @@
                         }
                     });
 
-                    // 9. Validasi sebelum form disubmit
                     $('#instansiForm').on('submit', function(e) {
                         const sector = $('input[name="sector"]:checked').val();
                         if (!sector) {
@@ -1158,8 +1278,6 @@
                                 showFormError('Masukkan unit kerja!');
                                 return;
                             }
-                            // Nonaktifkan input alur instansi agar tidak ikut terkirim
-                            // (provinsi & kab/kota tetap aktif sebagai domisili)
                             $('#asalInstansiSection input, #kementerian, #instansi, #customInstansi, #finalInstansiPusat')
                                 .prop('disabled', true);
                             return;
@@ -1204,7 +1322,6 @@
                                     showFormError('Masukkan nama instansi secara manual!');
                                     return;
                                 }
-
                             } else {
                                 if (!instansiVal) {
                                     e.preventDefault();

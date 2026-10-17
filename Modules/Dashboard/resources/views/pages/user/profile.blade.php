@@ -30,18 +30,18 @@
                 </p>
 
                 <!-- Quick Stats -->
-                <div class="grid grid-cols-3 gap-4 pt-6 max-w-2xl text-left">
-                    <div class="p-4 rounded-xl bg-slate-50 border border-slate-100 flex flex-col items-start">
-                        <p class="text-xs text-slate-500 uppercase tracking-wide font-semibold mb-1 flex items-center gap-1.5"><i class="fas fa-layer-group"></i> Kursus Diikuti</p>
-                        <p class="text-lg md:text-xl font-bold text-slate-800">{{ $stats['enrolled'] }} Kursus</p>
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4 pt-6 max-w-2xl text-left">
+                    <div class="p-3.5 sm:p-4 rounded-xl bg-slate-50 border border-slate-100 flex flex-col items-start">
+                        <p class="text-xs text-slate-500 uppercase tracking-wide font-semibold mb-1 flex items-center gap-1.5"><i class="fas fa-layer-group text-slate-400"></i> Kursus Diikuti</p>
+                        <p class="text-base sm:text-lg md:text-xl font-bold text-slate-800">{{ $stats['enrolled'] }} Kursus</p>
                     </div>
-                    <div class="p-4 rounded-xl bg-slate-50 border border-slate-100 flex flex-col items-start">
-                        <p class="text-xs text-slate-500 uppercase tracking-wide font-semibold mb-1 flex items-center gap-1.5"><i class="fas fa-check-double"></i> Selesai</p>
-                        <p class="text-lg md:text-xl font-bold text-slate-800">{{ $stats['completed'] }} Kursus</p>
+                    <div class="p-3.5 sm:p-4 rounded-xl bg-slate-50 border border-slate-100 flex flex-col items-start">
+                        <p class="text-xs text-slate-500 uppercase tracking-wide font-semibold mb-1 flex items-center gap-1.5"><i class="fas fa-check-double text-slate-400"></i> Selesai</p>
+                        <p class="text-base sm:text-lg md:text-xl font-bold text-slate-800">{{ $stats['completed'] }} Kursus</p>
                     </div>
-                    <div class="p-4 rounded-xl bg-slate-50 border border-slate-100 flex flex-col items-start">
-                        <p class="text-xs text-slate-500 uppercase tracking-wide font-semibold mb-1 flex items-center gap-1.5"><i class="fas fa-award"></i> Sertifikat</p>
-                        <p class="text-lg md:text-xl font-bold text-[#13416B]">{{ $stats['certificates'] }}</p>
+                    <div class="col-span-2 sm:col-span-1 p-3.5 sm:p-4 rounded-xl bg-slate-50 border border-slate-100 flex flex-col items-start">
+                        <p class="text-xs text-slate-500 uppercase tracking-wide font-semibold mb-1 flex items-center gap-1.5"><i class="fas fa-award text-[#13416B]"></i> Sertifikat</p>
+                        <p class="text-base sm:text-lg md:text-xl font-bold text-[#13416B]">{{ $stats['certificates'] }}</p>
                     </div>
                 </div>
             </div>
