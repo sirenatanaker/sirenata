@@ -140,7 +140,7 @@
             <div class="lg:col-span-7 flex flex-col gap-5 sm:gap-6 lg:h-full min-h-0">
 
                 <!-- CARD 1: Lanjutkan Belajar -->
-                <div class="bg-white rounded-md p-4 sm:p-5 shadow-sm border border-slate-200 shrink-0">
+                <div class="bg-white rounded-md p-4 sm:p-5 shadow-sm shrink-0">
                     <!-- Header Card -->
                     <div class="mb-3.5 pb-2.5 sm:pb-3 border-b border-slate-100 shrink-0">
                         <h2 class="text-base lg:text-lg font-extrabold text-slate-800">Lanjutkan Belajar</h2>
@@ -175,9 +175,9 @@
                         @endphp
 
                         <div
-                            class="bg-white rounded-md border border-slate-200 shadow-sm flex flex-row overflow-hidden transition-all hover:border-[#13416B]/40 hover:shadow-md mb-1 group">
+                            class="bg-slate-50/70 rounded-xl shadow-xs flex flex-row overflow-hidden transition-all hover:bg-slate-100/80 hover:shadow-sm mb-1 group">
                             <!-- Thumbnail Kiri (Persegi Panjang Landscape Ringkas) -->
-                            <div class="w-32 sm:w-40 md:w-48 lg:w-52 xl:w-56 shrink-0 bg-slate-100 relative border-r border-slate-100 overflow-hidden">
+                            <div class="w-32 sm:w-40 md:w-48 lg:w-52 xl:w-56 shrink-0 bg-slate-100 relative overflow-hidden">
                                 <img src="{{ $lThumb }}" alt="{{ $lastCourse->name }}"
                                     class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
                             </div>
@@ -233,7 +233,7 @@
                         </div>
                     @else
                         <div
-                            class="bg-slate-50 rounded-xl p-6 text-center border border-dashed border-slate-200 my-2 flex flex-col justify-center items-center">
+                            class="bg-slate-50 rounded-xl p-6 text-center my-2 flex flex-col justify-center items-center">
                             <div
                                 class="w-12 h-12 bg-white rounded-full flex items-center justify-center mb-2 shadow-sm text-slate-400 border border-slate-100">
                                 <i class="fas fa-book-open text-lg"></i>
@@ -318,7 +318,7 @@
             <div class="lg:col-span-5 flex flex-col gap-5 sm:gap-6 lg:h-full min-h-0">
 
                 <!-- CARD 3: Kursus Saya (Menyesuaikan Tinggi & Card ke-4 Mengintip Blur) -->
-                <div class="bg-white rounded-md p-5 sm:p-6 shadow-sm border border-slate-200 flex flex-col lg:flex-1 w-full min-h-0">
+                <div class="bg-white rounded-md p-5 sm:p-6 shadow-sm flex flex-col lg:flex-1 w-full min-h-0">
                     <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-100 shrink-0">
                         <div class="flex items-center gap-3">
                             <div
@@ -368,10 +368,10 @@
                                 <!-- Tambahan "shrink-0" memastikan card kursus tidak memipih/gepeng meskipun meluber -->
                                 <a href="{{ route('user.course.my-course.detail', $course->slug) }}"
                                     @if ($loop->index === 3) aria-hidden="true" tabindex="-1" @endif
-                                    class="shrink-0 flex flex-row gap-3 sm:gap-4 bg-white border border-slate-200 rounded-xl p-3 sm:p-4 transition-all duration-200 hover:border-[#13416B]/40 hover:shadow-sm group items-center sm:items-start {{ $loop->index === 3 ? 'max-h-[76px] overflow-hidden pointer-events-none select-none' : '' }}">
+                                    class="shrink-0 flex flex-row gap-3 sm:gap-4 bg-slate-50/70 rounded-xl p-3 sm:p-4 transition-all duration-200 hover:bg-slate-100/90 hover:shadow-xs group items-center sm:items-start {{ $loop->index === 3 ? 'max-h-[76px] overflow-hidden pointer-events-none select-none' : '' }}">
 
                                     <div
-                                        class="w-24 h-16 sm:w-32 sm:h-20 shrink-0 rounded-md overflow-hidden bg-slate-100 border border-slate-200 relative shadow-sm">
+                                        class="w-24 h-16 sm:w-32 sm:h-20 shrink-0 rounded-md overflow-hidden bg-slate-100 relative shadow-xs">
                                         <img src="{{ $rThumb }}" alt="{{ $course->name }}"
                                             class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
                                     </div>
@@ -426,7 +426,7 @@
                                 </a>
                             @empty
                                 <div
-                                    class="text-center py-10 bg-slate-50 rounded-xl border border-dashed border-slate-200">
+                                    class="text-center py-10 bg-slate-50 rounded-xl">
                                     <p class="text-xs font-semibold text-slate-600">Belum ada kursus yang diikuti.</p>
                                 </div>
                             @endforelse
@@ -444,7 +444,7 @@
                             </div>
                             <div class="absolute inset-x-0 bottom-1.5 flex justify-center">
                                 <a href="{{ route('user.course.my-course') }}"
-                                    class="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-600 hover:text-slate-900 hover:underline underline-offset-4 transition-colors bg-white/70 backdrop-blur-xs px-3 py-0.5 rounded-full border border-slate-200/60 shadow-2xs">
+                                    class="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-600 hover:text-slate-900 hover:underline underline-offset-4 transition-colors bg-white/85 backdrop-blur-xs px-3 py-0.5 rounded-full shadow-xs">
                                     <span>Lihat semua kursus</span>
                                     <i class="fas fa-chevron-right text-[9px]"></i>
                                 </a>
