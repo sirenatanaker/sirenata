@@ -17,12 +17,12 @@
     @if ($notification->thumbnail_url)
         @if ($notification->type === 'library.published')
             <!-- Thumbnail Persegi Panjang Vertikal 3:4 (Koleksi Perpustakaan) -->
-            <div class="relative w-14 sm:w-16 aspect-[3/4] rounded-md overflow-hidden bg-slate-100 border border-slate-200/80 shrink-0 shadow-xs">
+            <div class="relative w-14 sm:w-16 aspect-[3/4] rounded-md overflow-hidden bg-slate-100 shrink-0 shadow-xs">
                 <img src="{{ $notification->thumbnail_url }}" alt="{{ $notification->title }}" class="w-full h-full object-cover">
             </div>
         @else
             <!-- Thumbnail Persegi Panjang Horizontal 16:9 (Katalog Kursus) -->
-            <div class="relative w-24 sm:w-28 aspect-video rounded-md overflow-hidden bg-slate-100 border border-slate-200/80 shrink-0 shadow-xs">
+            <div class="relative w-24 sm:w-28 aspect-video rounded-md overflow-hidden bg-slate-100 shrink-0 shadow-xs">
                 <img src="{{ $notification->thumbnail_url }}" alt="{{ $notification->title }}" class="w-full h-full object-cover">
             </div>
         @endif

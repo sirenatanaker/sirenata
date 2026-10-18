@@ -101,7 +101,7 @@
 
         @if (auth()->user()->hasRole('user'))
             <!-- Section Filter Tabs (YouTube Style: Semua, Katalog, Perpustakaan) -->
-            <div class="flex items-center gap-1.5 px-4 py-2 border-b border-slate-100 bg-slate-50/60">
+            <div class="flex items-center gap-1.5 px-4 py-2 bg-slate-50/60">
                 <button type="button" @click="activeTab = 'semua'"
                     class="px-3 py-1 rounded-full text-[11px] font-semibold transition-all cursor-pointer"
                     :class="activeTab === 'semua' ? 'bg-[#13416B] text-white shadow-xs' : 'bg-slate-100 text-slate-600 hover:bg-slate-200/70'">
@@ -121,7 +121,7 @@
         @endif
 
         <!-- Isi -->
-        <div class="notif-scroll max-h-[24rem] overflow-y-auto divide-y divide-slate-100">
+        <div class="notif-scroll max-h-[24rem] overflow-y-auto">
 
             <!-- Kosong -->
             <div x-show="filteredItems.length === 0" x-cloak class="px-6 py-10 text-center">
@@ -143,9 +143,10 @@
                 <div>
                     <!-- Pemisah Garis Bagian Koleksi Perpustakaan -->
                     <template x-if="isFirstOfSection(item, index)">
-                        <div class="flex items-center gap-2.5 px-3.5 py-1.5 bg-slate-50 border-t border-b border-slate-200/80 text-[11px] font-bold text-slate-700">
+                        <div class="flex items-center gap-2.5 px-3.5 py-1.5 text-[11px] font-bold text-slate-500"
+                             :class="!item.read ? 'bg-slate-50/60' : 'bg-white'">
                             <span>Koleksi Perpustakaan</span>
-                            <div class="flex-1 h-px bg-slate-200"></div>
+                            <div class="flex-1 h-px bg-slate-200/70"></div>
                         </div>
                     </template>
 
@@ -157,12 +158,12 @@
                         <template x-if="item.section !== 'perpustakaan' && item.type !== 'library.published'">
                             <div class="shrink-0">
                                 <template x-if="item.thumbnail">
-                                    <div class="relative w-24 sm:w-28 aspect-video rounded-md overflow-hidden bg-slate-100 border border-slate-200/80 shadow-xs">
+                                    <div class="relative w-24 sm:w-28 aspect-video rounded-md overflow-hidden bg-slate-100 shadow-xs">
                                         <img :src="item.thumbnail" :alt="item.title" class="w-full h-full object-cover">
                                     </div>
                                 </template>
                                 <template x-if="!item.thumbnail">
-                                    <div class="w-12 h-10 shrink-0 rounded-md border border-slate-200 bg-slate-50 text-slate-400 flex items-center justify-center">
+                                    <div class="w-12 h-10 shrink-0 rounded-md bg-slate-50 text-slate-400 flex items-center justify-center">
                                         <i class="fa-regular fa-bell text-base" aria-hidden="true"></i>
                                     </div>
                                 </template>
@@ -173,12 +174,12 @@
                         <template x-if="item.section === 'perpustakaan' || item.type === 'library.published'">
                             <div class="shrink-0">
                                 <template x-if="item.thumbnail">
-                                    <div class="relative w-14 sm:w-16 aspect-[3/4] rounded-md overflow-hidden bg-slate-100 border border-slate-200/80 shadow-xs">
+                                    <div class="relative w-14 sm:w-16 aspect-[3/4] rounded-md overflow-hidden bg-slate-100 shadow-xs">
                                         <img :src="item.thumbnail" :alt="item.title" class="w-full h-full object-cover">
                                     </div>
                                 </template>
                                 <template x-if="!item.thumbnail">
-                                    <div class="w-14 sm:w-16 aspect-[3/4] shrink-0 rounded-md border border-slate-200 bg-sky-50 text-sky-500 flex items-center justify-center">
+                                    <div class="w-14 sm:w-16 aspect-[3/4] shrink-0 rounded-md bg-sky-50 text-sky-500 flex items-center justify-center">
                                         <i class="fa-regular fa-bookmark text-base" aria-hidden="true"></i>
                                     </div>
                                 </template>
