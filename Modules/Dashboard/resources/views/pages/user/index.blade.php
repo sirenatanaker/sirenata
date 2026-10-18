@@ -191,7 +191,7 @@
                                     <h3 class="font-bold text-slate-800 text-sm sm:text-base line-clamp-2 mb-1">
                                         {{ $lastCourse->name }}
                                     </h3>
-                                    <p class="text-[10px] sm:text-[11px] text-slate-500 hidden md:line-clamp-2">
+                                    <p class="text-[10px] sm:text-[11px] text-slate-500 line-clamp-2 leading-relaxed">
                                         {{ $lastCourse->description ?? 'Lanjutkan pembelajaran Anda pada kursus ini.' }}
                                     </p>
                                 </div>
@@ -330,6 +330,10 @@
                                 <p class="text-[11px] sm:text-xs text-slate-500">Daftar kursus yang Anda ikuti</p>
                             </div>
                         </div>
+                        <a href="{{ route('user.course.my-course') }}"
+                            class="text-xs sm:text-sm font-semibold text-[#13416B] hover:text-[#0f3354] hover:underline transition-colors shrink-0">
+                            Lihat semua kursus
+                        </a>
                     </div>
 
                     <!-- Area daftar kursus yang di set relatif dan menyembunyikan elemen berlebih -->
@@ -368,46 +372,38 @@
                                 <!-- Tambahan "shrink-0" memastikan card kursus tidak memipih/gepeng meskipun meluber -->
                                 <a href="{{ route('user.course.my-course.detail', $course->slug) }}"
                                     @if ($loop->index === 3) aria-hidden="true" tabindex="-1" @endif
-                                    class="shrink-0 flex flex-row gap-3 sm:gap-4 bg-slate-50/70 rounded-xl p-3 sm:p-4 transition-all duration-200 hover:bg-slate-100/90 hover:shadow-xs group items-center sm:items-start {{ $loop->index === 3 ? 'max-h-[76px] overflow-hidden pointer-events-none select-none' : '' }}">
+                                    class="shrink-0 flex flex-row gap-3 sm:gap-4 bg-slate-50/70 rounded-xl p-3 sm:p-4 transition-all duration-200 hover:bg-slate-100/90 hover:shadow-xs group items-start {{ $loop->index === 3 ? 'max-h-[76px] overflow-hidden pointer-events-none select-none' : '' }}">
 
                                     <div
-                                        class="w-24 h-16 sm:w-32 sm:h-20 shrink-0 rounded-md overflow-hidden bg-slate-100 relative shadow-xs">
+                                        class="w-24 min-h-[4.5rem] sm:w-32 sm:h-20 shrink-0 rounded-md overflow-hidden bg-slate-100 relative shadow-xs">
                                         <img src="{{ $rThumb }}" alt="{{ $course->name }}"
                                             class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
                                     </div>
 
                                     <div class="min-w-0 flex-1 flex flex-col justify-between h-full w-full py-0.5">
                                         <div>
-                                            <div class="flex items-start justify-between gap-2 mb-1">
-                                                <!-- Title Desktop / Tablet (sm ke atas) -->
+                                            <div class="flex items-start justify-between gap-2 mb-1.5">
                                                 <h3
-                                                    class="hidden sm:block font-bold text-slate-800 text-sm truncate group-hover:text-[#13416B] transition-colors">
+                                                    class="font-bold text-slate-800 text-xs sm:text-sm line-clamp-2 leading-snug group-hover:text-[#13416B] transition-colors flex-1">
                                                     {{ $course->name }}
                                                 </h3>
 
                                                 @if ($course->pivot->status === 'completed' || $rPct >= 100)
                                                     <span
-                                                        class="inline-flex items-center px-1.5 py-0.5 rounded-md text-[9px] font-bold uppercase text-white bg-emerald-600 shrink-0">Selesai</span>
+                                                        class="inline-flex items-center px-1.5 py-0.5 rounded-md text-[9px] font-bold text-white bg-emerald-600 shrink-0">Selesai</span>
                                                 @elseif ($rPct > 0)
                                                     <span
-                                                        class="inline-flex items-center px-1.5 py-0.5 rounded-md text-[9px] font-bold uppercase text-white bg-amber-500 shrink-0">Berjalan</span>
+                                                        class="inline-flex items-center px-1.5 py-0.5 rounded-md text-[9px] font-bold text-white bg-amber-500 shrink-0">Berjalan</span>
                                                 @else
                                                     <span
-                                                        class="inline-flex items-center px-1.5 py-0.5 rounded-md text-[9px] font-bold uppercase text-white bg-slate-400 shrink-0">Belum Dimulai</span>
+                                                        class="inline-flex items-center px-1.5 py-0.5 rounded-md text-[9px] font-bold text-white bg-slate-400 shrink-0">Belum Dimulai</span>
                                                 @endif
                                             </div>
 
-                                            <!-- Deskripsi: hidden di mobile -->
                                             <p
-                                                class="hidden sm:line-clamp-2 text-[11px] sm:text-xs text-slate-500 mb-2">
+                                                class="line-clamp-2 text-[10px] sm:text-xs text-slate-500 mb-2 leading-relaxed">
                                                 {{ $course->description ?? 'Deskripsi kursus tidak tersedia.' }}
                                             </p>
-
-                                            <!-- Title Mobile -->
-                                            <h3
-                                                class="block sm:hidden font-bold text-slate-800 text-xs sm:text-sm line-clamp-2 mb-2 group-hover:text-[#13416B] transition-colors leading-snug">
-                                                {{ $course->name }}
-                                            </h3>
                                         </div>
 
                                         <div>
@@ -432,22 +428,15 @@
                             @endforelse
                         </div>
 
-                        {{-- Kursus ke-4 dst. hanya mengintip (terpotong + blur); selengkapnya lewat "Lihat semua" --}}
+                        {{-- Kursus ke-4 dst. hanya mengintip (terpotong + blur) --}}
                         @if ($recentCourses->count() > 3)
-                            <div class="pointer-events-none absolute inset-x-0 bottom-0 h-20">
+                            <div class="pointer-events-none absolute inset-x-0 bottom-0 h-14">
                                 <div
                                     class="absolute inset-0 backdrop-blur-[1px] [mask-image:linear-gradient(to_top,black,transparent)] [-webkit-mask-image:linear-gradient(to_top,black,transparent)]">
                                 </div>
                                 <div
-                                    class="absolute inset-0 bg-gradient-to-t from-white/95 via-white/40 to-transparent">
+                                    class="absolute inset-0 bg-gradient-to-t from-white/90 via-white/30 to-transparent">
                                 </div>
-                            </div>
-                            <div class="absolute inset-x-0 bottom-1.5 flex justify-center">
-                                <a href="{{ route('user.course.my-course') }}"
-                                    class="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-600 hover:text-slate-900 hover:underline underline-offset-4 transition-colors bg-white/85 backdrop-blur-xs px-3 py-0.5 rounded-full shadow-xs">
-                                    <span>Lihat semua kursus</span>
-                                    <i class="fas fa-chevron-right text-[9px]"></i>
-                                </a>
                             </div>
                         @endif
                     </div>
@@ -488,7 +477,7 @@
                                     @endif
                                 </div>
 
-                                <div class="flex-1 min-w-0 py-0.5 flex flex-col justify-center sm:justify-start">
+                                <div class="flex-1 min-w-0 py-0.5 flex flex-col justify-start">
                                     <div class="flex justify-between items-center sm:items-start mb-1.5">
                                         <span
                                             class="inline-block truncate max-w-[55%] sm:max-w-none px-2 sm:px-2.5 py-0.5 text-[9px] sm:text-[10px] font-extrabold rounded-md bg-[#547996]/10 text-[#547996] border border-[#547996]/20">
@@ -502,7 +491,7 @@
                                         class="text-xs sm:text-base font-bold text-slate-800 leading-snug line-clamp-2 group-hover:text-[#13416B] transition-colors mb-1">
                                         {{ $lastLibrary->title }}
                                     </h3>
-                                    <p class="hidden sm:line-clamp-2 text-xs text-slate-500">
+                                    <p class="line-clamp-2 text-[10px] sm:text-xs text-slate-500 leading-relaxed">
                                         {{ $lastLibrary->description ?? 'Tidak ada deskripsi' }}
                                     </p>
                                 </div>
@@ -802,9 +791,9 @@
                                 data: currentData.user_scores,
                                 backgroundColor: dynamicColors,
                                 borderRadius: 6,
-                                maxBarThickness: 32,
-                                barPercentage: 0.6,
-                                categoryPercentage: 0.85
+                                maxBarThickness: 36,
+                                barPercentage: 0.72,
+                                categoryPercentage: 0.88
                             }]
                         },
                         options: {
@@ -813,8 +802,8 @@
                             maintainAspectRatio: false,
                             layout: {
                                 padding: {
-                                    top: 14,
-                                    bottom: 4,
+                                    top: 12,
+                                    bottom: 6,
                                     right: 32
                                 }
                             },
@@ -940,25 +929,29 @@
                         });
                     }
 
-                    // Fungsi dinamis untuk menyesuaikan tinggi canvas agar:
-                    // 1. Jika data sedikit (misal 1-3 evaluasi), tinggi canvas memenuhi tinggi container scroll
-                    //    sehingga jarak antar bar pada sumbu Y merenggang dan data terakhir berada dekat dengan sumbu X (mengisi kekosongan).
-                    // 2. Jika data banyak, dialokasikan minimal 70px per bar dan container scroll aktif untuk scroll vertikal.
+                    // Fungsi dinamis untuk menyesuaikan tinggi canvas:
+                    // 1. Mengatur jarak antar data evaluasi pada sumbu Y agar proporsional dan tidak ada ruang kosong terhadap sumbu X di bawah.
+                    // 2. Menyesuaikan tinggi canvas secara penuh dengan kontainer scroll yang tersedia agar data mendekati sumbu X.
+                    // 3. Jika data banyak, dialokasikan minimal 70px per bar dan kontainer scroll aktif secara vertikal.
                     function updateChartHeight(labelsCount) {
                         const scrollContainer = document.getElementById('chartScrollContainer');
                         const canvasWrapper = document.getElementById('chartCanvasWrapper') || (ctx ? ctx.parentElement : null);
-                        if (!canvasWrapper) return;
-
-                        // Reset sementara ke ukuran minimal agar clientHeight scrollContainer tidak terdorong tinggi sebelumnya
-                        canvasWrapper.style.height = '160px';
-                        const containerHeight = scrollContainer ? scrollContainer.clientHeight : 0;
+                        if (!scrollContainer || !canvasWrapper) return;
 
                         const count = typeof labelsCount === 'number'
                             ? labelsCount
                             : (postTestChart && postTestChart.data.labels ? postTestChart.data.labels.length : 1);
 
-                        const finalHeight = Math.max(containerHeight, count * 70, 180);
+                        const containerHeight = scrollContainer.clientHeight || 0;
+                        const minHeightByCount = count * 70;
+                        const finalHeight = Math.max(containerHeight, minHeightByCount, 180);
+
                         canvasWrapper.style.height = finalHeight + 'px';
+
+                        if (postTestChart) {
+                            postTestChart.resize();
+                            drawFixedXAxis();
+                        }
                     }
 
                     const filterSelect = document.getElementById('courseChartFilter');
@@ -970,13 +963,14 @@
                             if (newData) {
                                 currentCourseId = selectedId;
                                 currentData = newData;
-                                updateChartHeight((newData.labels || []).length);
 
                                 postTestChart.data.labels = (newData.labels || []).map(label => formatMultilineLabel(label));
                                 postTestChart.data.datasets[0].data = newData.user_scores;
                                 currentKkms = getKkms(newData);
                                 postTestChart.options.plugins.kkmAndValue.kkms = currentKkms;
                                 postTestChart.data.datasets[0].backgroundColor = scoreColors(newData.user_scores, currentKkms);
+
+                                updateChartHeight((newData.labels || []).length);
                                 postTestChart.update();
                                 setTimeout(drawFixedXAxis, 30);
                             }
@@ -991,7 +985,27 @@
                             postTestChart.resize();
                             drawFixedXAxis();
                         }
-                    }, 60);
+                    }, 80);
+
+                    // ResizeObserver untuk memantau perubahan ukuran kontainer (misal: saat card lain selesai memuat gambar/font)
+                    if (window.ResizeObserver) {
+                        let roTimer;
+                        const ro = new ResizeObserver(() => {
+                            clearTimeout(roTimer);
+                            roTimer = setTimeout(() => {
+                                const count = currentData && currentData.labels ? currentData.labels.length : 1;
+                                updateChartHeight(count);
+                            }, 40);
+                        });
+                        const scrollContainer = document.getElementById('chartScrollContainer');
+                        if (scrollContainer) ro.observe(scrollContainer);
+                    }
+
+                    // Saat semua resource (termasuk gambar thumbnail kursus) selesai dimuat
+                    window.addEventListener('load', function() {
+                        const count = currentData && currentData.labels ? currentData.labels.length : 1;
+                        updateChartHeight(count);
+                    });
 
                     // Resize listener saat window diubah ukurannya
                     window.addEventListener('resize', function() {
