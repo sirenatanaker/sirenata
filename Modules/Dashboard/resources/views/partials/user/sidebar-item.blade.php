@@ -31,8 +31,8 @@
                     </svg>
                 @endif
             </span>
-            <span class="text-[9px] sm:text-[10px] md:text-sm text-center md:text-left line-clamp-1 whitespace-nowrap"
-                  :class="sidebarOpen ? 'md:inline' : 'md:hidden'">Dashboard</span>
+            <span class="text-[9px] sm:text-[10px] md:text-[15px] text-center md:text-left leading-snug break-words"
+                  :class="sidebarOpen ? 'md:block' : 'md:hidden'">Dashboard</span>
         </a>
     </li>
 
@@ -64,8 +64,8 @@
                     </svg>
                 @endif
             </span>
-            <span class="text-[9px] sm:text-[10px] md:text-sm text-center md:text-left line-clamp-1 whitespace-nowrap"
-                  :class="sidebarOpen ? 'md:inline' : 'md:hidden'">Katalog</span>
+            <span class="text-[9px] sm:text-[10px] md:text-[15px] text-center md:text-left leading-snug break-words"
+                  :class="sidebarOpen ? 'md:block' : 'md:hidden'">Katalog</span>
         </a>
     </li>
 
@@ -101,8 +101,8 @@
                     </svg>
                 @endif
             </span>
-            <span class="text-[9px] sm:text-[10px] md:text-sm text-center md:text-left line-clamp-1 whitespace-nowrap"
-                  :class="sidebarOpen ? 'md:inline' : 'md:hidden'">Kursus Saya</span>
+            <span class="text-[9px] sm:text-[10px] md:text-[15px] text-center md:text-left leading-snug break-words"
+                  :class="sidebarOpen ? 'md:block' : 'md:hidden'">Kursus Saya</span>
         </a>
     </li>
 
@@ -134,8 +134,8 @@
                     </svg>
                 @endif
             </span>
-            <span class="text-[9px] sm:text-[10px] md:text-sm text-center md:text-left line-clamp-1 whitespace-nowrap"
-                  :class="sidebarOpen ? 'md:inline' : 'md:hidden'">Perpustakaan</span>
+            <span class="text-[9px] sm:text-[10px] md:text-[15px] text-center md:text-left leading-snug break-words"
+                  :class="sidebarOpen ? 'md:block' : 'md:hidden'">Perpustakaan</span>
         </a>
     </li>
 
@@ -167,8 +167,8 @@
                     </svg>
                 @endif
             </span>
-            <span class="text-[9px] sm:text-[10px] md:text-sm text-center md:text-left line-clamp-1 whitespace-nowrap"
-                  :class="sidebarOpen ? 'md:inline' : 'md:hidden'">Penghitung RTK</span>
+            <span class="text-[9px] sm:text-[10px] md:text-[15px] text-center md:text-left leading-snug break-words"
+                  :class="sidebarOpen ? 'md:block' : 'md:hidden'">Penghitung RTK</span>
         </a>
     </li>
 
@@ -206,8 +206,8 @@
                         </svg>
                     @endif
                 </span>
-                <span class="text-[9px] sm:text-[10px] md:text-sm text-center md:text-left line-clamp-1 whitespace-nowrap"
-                      :class="sidebarOpen ? 'md:inline' : 'md:hidden'">Tim Kerja</span>
+                <span class="text-[9px] sm:text-[10px] md:text-[15px] text-center md:text-left leading-snug break-words"
+                      :class="sidebarOpen ? 'md:block' : 'md:hidden'">Tim Kerja</span>
             </a>
         </li>
     @endif

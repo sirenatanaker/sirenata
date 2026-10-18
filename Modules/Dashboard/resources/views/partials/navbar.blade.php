@@ -8,14 +8,25 @@
         <!-- Bagian Kiri & Tengah (Toggle + Searchbar) -->
         <div class="flex items-center flex-1 gap-3 sm:gap-5">
 
+            <!-- Tombol Hamburger Mobile untuk Admin (Di desktop sudah ada di Header Sidebar) -->
+            @if (!auth()->check() || !auth()->user()->hasRole('user'))
+                <button @click="typeof toggleSidebar === 'function' ? toggleSidebar() : (sidebarOpen = !sidebarOpen)"
+                    type="button"
+                    class="md:hidden inline-flex p-2 items-center justify-center rounded-xl cursor-pointer text-slate-600 transition-colors hover:bg-slate-100 hover:text-[#13416B] focus:outline-none shrink-0"
+                    aria-label="Buka menu">
+                    <i class="fa-solid fa-bars-staggered text-lg" aria-hidden="true"></i>
+                </button>
+            @endif
+
+            <!-- Logo di Navbar: Muncul ketika sidebar di-toggle closed (mini) di desktop/tablet, atau di mobile -->
+            <div class="flex items-center gap-2.5 shrink-0" :class="sidebarOpen ? 'md:hidden' : 'flex'">
+                <a href="{{ route('landingpage.index') }}" class="flex items-center gap-2.5 group">
+                    <img src="{{ asset('images/logo.png') }}" class="h-8 w-auto shrink-0 group-hover:scale-105 transition-transform" alt="logo">
+                    <span class="text-lg sm:text-xl font-extrabold tracking-tight text-[#13416B]">SIRENATA</span>
+                </a>
+            </div>
+
             @if (auth()->check() && auth()->user()->hasRole('user'))
-                <!-- Logo di Navbar: Muncul ketika sidebar di-toggle closed (mini) di desktop/tablet, atau di mobile -->
-                <div class="flex items-center gap-2.5 shrink-0" :class="sidebarOpen ? 'md:hidden' : 'flex'">
-                    <a href="{{ route('landingpage.index') }}" class="flex items-center gap-2.5 group">
-                        <img src="{{ asset('images/logo.png') }}" class="h-8 w-auto shrink-0 group-hover:scale-105 transition-transform" alt="logo">
-                        <span class="text-lg sm:text-xl font-extrabold tracking-tight text-[#13416B]">SIRENATA</span>
-                    </a>
-                </div>
 
                 <!-- Searchbar AUTO-SUGGEST KHUSUS USER -->
                 <div class="flex-1 w-full max-w-full relative" x-data="searchSuggest()" @click.outside="isOpen = false">
@@ -203,12 +214,6 @@
                         }
                     }
                 </script>
-            @else
-                <!-- Toggle Sidebar SEMUA ROLE LAIN (Muncul di Mobile & Desktop) -->
-                <button @click="typeof toggleSidebar === 'function' ? toggleSidebar() : (sidebarOpen = !sidebarOpen)"
-                    class="inline-flex p-2.5 items-center justify-center rounded-xl cursor-pointer text-slate-500 transition-colors hover:bg-slate-100 hover:text-[#13416B] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#13416B]/30 shrink-0">
-                    <i class="fa-solid fa-bars-staggered text-lg" aria-hidden="true"></i>
-                </button>
             @endif
 
         </div>

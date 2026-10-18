@@ -51,30 +51,57 @@
 
 @else
     <!-- ========================================================= -->
-    <!-- SIDEBAR NORMAL UNTUK ADMIN DLL (Tetap di Sisi Kiri)       -->
+    <!-- SIDEBAR ADMIN (YouTube Style Desktop/Tablet + Drawer Mobile) -->
     <!-- ========================================================= -->
 
     <aside
-        class="fixed top-0 left-0 z-50 w-64 h-screen bg-white border-r border-slate-200 transition-transform duration-300 shadow-sm"
-        :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'"
+        class="fixed top-0 left-0 z-50 h-full bg-white border-r border-slate-200 transition-all duration-300 shadow-sm
+               /* MOBILE: Drawer Slide-In */
+               w-64 max-w-[80vw]
+               /* TABLET & DESKTOP: YouTube Style (w-64 vs w-20) */
+               md:max-w-none md:shadow-none"
+        :class="[
+            sidebarOpen ? 'translate-x-0 md:w-64' : '-translate-x-full md:translate-x-0 md:w-20'
+        ]"
         @keydown.escape.window="sidebarOpen = false" x-cloak>
         
-        <div class="h-full w-full py-4 flex flex-col overflow-hidden">
+        <div class="h-full w-full flex flex-col overflow-hidden">
 
-            <!-- Logo (MUNCUL DI SEMUA RESOLUSI) -->
-            <div class="flex items-center justify-between px-6 mb-8 mt-2 shrink-0">
-                <a href="{{ route('landingpage.index') }}" class="flex items-center">
-                    <img src="{{ asset('images/logo.png') }}" class="h-8 w-auto" alt="logo">
-                    <span class="ms-2 text-xl font-extrabold tracking-tight" style="color:#13416B;">SIRENATA</span>
+            <!-- Header Sidebar Desktop & Tablet (Hamburger Staggered + Logo) -->
+            <div class="hidden md:flex items-center px-4 h-[72px] sm:h-[80px] border-b border-slate-100 shrink-0 transition-all duration-300"
+                 :class="sidebarOpen ? 'justify-start gap-3' : 'justify-center'">
+                
+                <!-- Hamburger Button (Staggered Icon) -->
+                <button @click="typeof toggleSidebar === 'function' ? toggleSidebar() : (sidebarOpen = !sidebarOpen)"
+                    type="button"
+                    class="w-10 h-10 flex items-center justify-center rounded-xl text-slate-600 hover:text-[#13416B] hover:bg-slate-100 transition-colors cursor-pointer shrink-0 focus:outline-none"
+                    :title="sidebarOpen ? 'Sembunyikan menu' : 'Buka menu'">
+                    <i class="fa-solid fa-bars-staggered text-lg" aria-hidden="true"></i>
+                </button>
+
+                <!-- Logo & Brand Name (Hanya muncul saat sidebar terbuka di desktop/tablet) -->
+                <div x-show="sidebarOpen" x-transition.opacity.duration.200ms class="flex items-center overflow-hidden whitespace-nowrap">
+                    <a href="{{ route('landingpage.index') }}" class="flex items-center gap-2.5 group">
+                        <img src="{{ asset('images/logo.png') }}" class="h-8 w-auto shrink-0 group-hover:scale-105 transition-transform" alt="logo">
+                        <span class="text-lg sm:text-xl font-extrabold tracking-tight text-[#13416B]">SIRENATA</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Header Sidebar Mobile (Drawer Header dengan Tombol Tutup X) -->
+            <div class="flex md:hidden items-center justify-between px-5 h-[72px] border-b border-slate-100 shrink-0">
+                <a href="{{ route('landingpage.index') }}" class="flex items-center gap-2.5 group">
+                    <img src="{{ asset('images/logo.png') }}" class="h-8 w-auto shrink-0" alt="logo">
+                    <span class="text-lg font-extrabold tracking-tight text-[#13416B]">SIRENATA</span>
                 </a>
-                <!-- Tombol tutup opsional untuk layar kecil -->
-                <button @click="sidebarOpen = false" class="lg:hidden text-slate-400 hover:text-slate-600">
-                    <i class="fas fa-times text-xl" aria-hidden="true"></i>
+                <button @click="sidebarOpen = false" type="button" aria-label="Tutup menu"
+                    class="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors">
+                    <i class="fas fa-times text-base" aria-hidden="true"></i>
                 </button>
             </div>
 
             <!-- Menu Wrapper -->
-            <div class="flex-1 w-full overflow-y-auto scrollbar-hide flex flex-col px-3">
+            <div class="flex-1 w-full overflow-y-auto scrollbar-hide flex flex-col py-3">
                 @role('super-admin')
                     @include('dashboard::partials.super-admin.sidebar-item')
                 @endrole
@@ -96,7 +123,7 @@
 
     <!-- Overlay Gelap Mobile untuk menutup Sidebar Admin -->
     <div x-show="sidebarOpen" @click="sidebarOpen = false" 
-         class="fixed inset-0 z-40 bg-slate-900/50 backdrop-blur-sm lg:hidden transition-opacity" 
+         class="fixed inset-0 z-40 bg-slate-900/50 backdrop-blur-sm md:hidden transition-opacity" 
          x-transition.opacity x-cloak>
     </div>
 @endif
