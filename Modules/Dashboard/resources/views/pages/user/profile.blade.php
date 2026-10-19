@@ -15,6 +15,7 @@
         },
         savedFeedback: false,
         feedbackTimer: null,
+        showScrollTop: false,
 
         init() {
             window.addEventListener('hashchange', () => {
@@ -26,6 +27,7 @@
                 } else if (hash === '#personal' || hash === '#informasi') {
                     this.tab = 'personal';
                 }
+                this.$nextTick(() => this.checkPreviewReached());
             });
 
             const saved = localStorage.getItem('sirenata_reading_prefs');
@@ -34,6 +36,49 @@
                     const parsed = JSON.parse(saved);
                     this.readerPrefs = Object.assign(this.readerPrefs, parsed);
                 } catch (e) {}
+            }
+
+            this.$watch('tab', (val) => {
+                if (val !== 'settings') {
+                    this.showScrollTop = false;
+                } else {
+                    this.$nextTick(() => this.checkPreviewReached());
+                }
+            });
+
+            let scrollTicking = false;
+            window.addEventListener('scroll', () => {
+                if (!scrollTicking) {
+                    window.requestAnimationFrame(() => {
+                        this.checkPreviewReached();
+                        scrollTicking = false;
+                    });
+                    scrollTicking = true;
+                }
+            }, { passive: true });
+
+            window.addEventListener('resize', () => {
+                this.checkPreviewReached();
+            }, { passive: true });
+        },
+
+        checkPreviewReached() {
+            if (this.tab !== 'settings') {
+                this.showScrollTop = false;
+                return;
+            }
+            const el = document.getElementById('preview-section');
+            if (!el) {
+                this.showScrollTop = false;
+                return;
+            }
+            const rect = el.getBoundingClientRect();
+            if (window.innerWidth < 1024) {
+                // Pada mobile/tablet, pratinjau berada di bawah controls
+                this.showScrollTop = rect.top <= (window.innerHeight * 0.85) && window.scrollY > 120;
+            } else {
+                // Pada desktop (2 kolom), muncul jika halaman ter-scroll ke bawah
+                this.showScrollTop = window.scrollY > 350;
             }
         },
 
@@ -109,15 +154,15 @@
                 <!-- Quick Stats -->
                 <div class="grid grid-cols-2 sm:grid-cols-3 gap-2.5 sm:gap-3.5 pt-4 sm:pt-5 max-w-2xl text-left">
                     <div class="p-2.5 sm:p-3.5 rounded-md bg-slate-50 dark:bg-slate-700/50 border border-slate-100 dark:border-slate-700 flex flex-col items-start">
-                        <p class="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wide font-semibold mb-0.5 sm:mb-1 flex items-center gap-1.5"><i class="fas fa-layer-group text-slate-400"></i> Kursus Diikuti</p>
+                        <p class="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wide font-semibold mb-0.5 sm:mb-1">Kursus Diikuti</p>
                         <p class="text-sm sm:text-base md:text-lg font-bold text-slate-800 dark:text-white">{{ $stats['enrolled'] }} Kursus</p>
                     </div>
                     <div class="p-2.5 sm:p-3.5 rounded-md bg-slate-50 dark:bg-slate-700/50 border border-slate-100 dark:border-slate-700 flex flex-col items-start">
-                        <p class="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wide font-semibold mb-0.5 sm:mb-1 flex items-center gap-1.5"><i class="fas fa-check-double text-slate-400"></i> Selesai</p>
+                        <p class="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wide font-semibold mb-0.5 sm:mb-1">Selesai</p>
                         <p class="text-sm sm:text-base md:text-lg font-bold text-slate-800 dark:text-white">{{ $stats['completed'] }} Kursus</p>
                     </div>
                     <div class="col-span-2 sm:col-span-1 p-2.5 sm:p-3.5 rounded-md bg-slate-50 dark:bg-slate-700/50 border border-slate-100 dark:border-slate-700 flex flex-col items-start">
-                        <p class="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wide font-semibold mb-0.5 sm:mb-1 flex items-center gap-1.5"><i class="fas fa-award text-[#13416B] dark:text-white"></i> Sertifikat</p>
+                        <p class="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wide font-semibold mb-0.5 sm:mb-1">Sertifikat</p>
                         <p class="text-sm sm:text-base md:text-lg font-bold text-[#13416B] dark:text-white">{{ $stats['certificates'] }}</p>
                     </div>
                 </div>
@@ -249,7 +294,8 @@
                 <!-- Tab: Settings (Pengaturan Akun & Tampilan) -->
                 <div x-show="tab === 'settings'" x-cloak>
                     <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-6 lg:gap-8 items-start">
-                        <!-- Left: Settings Form Controls (7 cols) -->
+                        
+                        <!-- Left: Settings Form Controls (7 cols on desktop, First on mobile) -->
                         <div class="lg:col-span-7 space-y-5 sm:space-y-6">
                             <!-- 1. Mode Tampilan Aplikasi (Dark Mode Seluruh Halaman) -->
                             <div>
@@ -416,8 +462,8 @@
                             </div>
                         </div>
 
-                        <!-- Right: Live Interactive Preview (5 cols) -->
-                        <div class="lg:col-span-5">
+                        <!-- Right: Live Interactive Preview (5 cols on desktop, Below on mobile) -->
+                        <div class="lg:col-span-5" id="preview-section">
                             <div class="sticky top-20">
                                 <div class="flex items-center justify-between mb-2">
                                     <span class="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
@@ -443,33 +489,17 @@
                                         'bg-white border-slate-200 text-slate-800': !isDark
                                     }">
 
-                                    <!-- Top mock bar -->
-                                    <div class="p-3 sm:p-3.5 border-b flex items-center justify-between reader-card-header"
-                                        :class="{
-                                            'border-[#263346] bg-[#131A26]': isDark,
-                                            'border-slate-100 bg-slate-50': !isDark
-                                        }">
-                                        <span class="px-2 py-0.5 text-[9px] sm:text-[10px] font-bold uppercase tracking-wider rounded-md border"
-                                            :class="{
-                                                'bg-white/10 text-white border-white/20': isDark,
-                                                'bg-[#13416B]/10 text-[#13416B] border-[#13416B]/20': !isDark
-                                            }">
-                                            Topik Pembelajaran
-                                        </span>
-                                        <span class="text-[9px] sm:text-[10px] text-slate-400 font-mono">Simulasi Materi</span>
-                                    </div>
-
                                     <!-- Body Mock Content -->
-                                    <div class="p-4 sm:p-5 transition-all duration-300"
+                                    <div class="p-3.5 sm:p-4 lg:p-5 transition-all duration-300"
                                         :class="{
                                             'max-w-md mx-auto': readerPrefs.contentWidth === 'focus'
                                         }">
-                                        <h4 class="font-extrabold leading-tight mb-3"
+                                        <h4 class="font-extrabold leading-tight mb-2 sm:mb-3"
                                             :class="{
-                                                'text-base sm:text-lg': readerPrefs.fontSize === 'sm',
-                                                'text-lg sm:text-xl': readerPrefs.fontSize === 'normal',
-                                                'text-xl sm:text-2xl': readerPrefs.fontSize === 'lg',
-                                                'text-2xl sm:text-3xl': readerPrefs.fontSize === 'xl',
+                                                'text-sm sm:text-base lg:text-lg': readerPrefs.fontSize === 'sm',
+                                                'text-base sm:text-lg lg:text-xl': readerPrefs.fontSize === 'normal',
+                                                'text-lg sm:text-xl lg:text-2xl': readerPrefs.fontSize === 'lg',
+                                                'text-xl sm:text-2xl lg:text-3xl': readerPrefs.fontSize === 'xl',
                                                 'font-serif': readerPrefs.fontFamily === 'serif',
                                                 'font-sans': readerPrefs.fontFamily === 'sans'
                                             }">
@@ -482,11 +512,11 @@
                                                 readerPrefs.fontFamily === 'serif' ? 'reader-font-serif' : 'reader-font-sans',
                                                 readerPrefs.lineHeight === 'loose' ? 'reader-leading-loose' : 'reader-leading-normal'
                                             ]">
-                                            <p class="mb-2.5">
+                                            <p class="mb-2 sm:mb-2.5">
                                                 Penerapan standar ergonomi dan kenyamanan visual di lingkungan belajar digital terbukti dapat menjaga fokus serta mengurangi ketegangan mata secara signifikan saat membaca materi berdurasi panjang.
                                             </p>
 
-                                            <blockquote class="my-2.5">
+                                            <blockquote class="my-2 sm:my-2.5">
                                                 Kenyamanan membaca adalah fondasi utama keberhasilan penyerapan materi pelatihan teknis.
                                             </blockquote>
 
@@ -502,7 +532,7 @@
                                     </div>
 
                                     <!-- Bottom mock bar -->
-                                    <div class="p-2.5 sm:p-3 border-t text-center text-[10px] sm:text-[11px] reader-card-footer"
+                                    <div class="p-2 sm:p-2.5 lg:p-3 border-t text-center text-[10px] sm:text-[11px] reader-card-footer"
                                         :class="{
                                             'border-[#263346] bg-[#131A26] text-slate-400': isDark,
                                             'border-slate-100 bg-slate-50 text-slate-500': !isDark
@@ -516,6 +546,23 @@
                 </div>
             </div>
         </div>
+
+        <!-- Floating Scroll To Top Button (Muncul saat mencapai bagian preview) -->
+        <button type="button"
+            @click="window.scrollTo({ top: 0, behavior: 'smooth' })"
+            x-show="showScrollTop"
+            x-cloak
+            x-transition:enter="transition ease-out duration-300 transform"
+            x-transition:enter-start="opacity-0 translate-y-6 scale-90"
+            x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+            x-transition:leave="transition ease-in duration-200 transform"
+            x-transition:leave-start="opacity-100 translate-y-0 scale-100"
+            x-transition:leave-end="opacity-0 translate-y-6 scale-90"
+            class="fixed bottom-24 right-5 sm:right-6 md:bottom-8 md:right-8 z-40 inline-flex items-center gap-2 px-3.5 py-2.5 rounded-full bg-[#13416B] text-white hover:bg-[#0f3354] dark:bg-white dark:text-slate-900 dark:hover:bg-slate-100 shadow-xl shadow-[#13416B]/20 dark:shadow-black/50 border border-white/20 dark:border-slate-300 transition-all duration-200 cursor-pointer group active:scale-95"
+            title="Kembali ke atas">
+            <i class="fas fa-arrow-up text-xs sm:text-sm group-hover:-translate-y-0.5 transition-transform"></i>
+            <span class="text-xs font-bold tracking-tight">Ke Atas</span>
+        </button>
     </div>
 
     @push('styles')
