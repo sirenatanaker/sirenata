@@ -254,8 +254,8 @@
                             <button type="button" @click="toggleDarkMode()"
                                 class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-[#13416B] dark:hover:text-white transition-colors shrink-0"
                                 :title="isDarkMode ? 'Ganti ke Mode Terang' : 'Ganti ke Mode Gelap'">
-                                <i class="fas fa-moon text-sm sm:text-base text-slate-600 dark:text-slate-300" x-show="!isDarkMode"></i>
-                                <i class="fas fa-sun text-sm sm:text-base text-amber-400" x-show="isDarkMode"></i>
+                                <i class="fas fa-moon text-sm sm:text-base text-slate-500 dark:text-slate-400" x-show="!isDarkMode"></i>
+                                <i class="fas fa-sun text-sm sm:text-base text-slate-400 dark:text-slate-300" x-show="isDarkMode"></i>
                             </button>
                         @endif
 
@@ -299,15 +299,18 @@
                                 <!-- Tombol Ganti Dark Mode di User Dropdown (Role Admin) -->
                                 <li>
                                     <button type="button" @click="toggleDarkMode()"
-                                        class="flex w-full cursor-pointer items-center justify-between p-2.5 rounded-xl text-slate-700 dark:text-slate-200 hover:bg-[#13416B]/10 hover:text-[#13416B] dark:hover:bg-slate-700 dark:hover:text-white font-medium transition-colors text-left">
+                                        class="flex w-full cursor-pointer items-center justify-between p-2.5 rounded-xl text-slate-700 dark:text-slate-200 hover:bg-[#13416B]/10 hover:text-[#13416B] dark:hover:bg-slate-700 dark:hover:text-white font-medium transition-colors text-left group">
                                         <span class="flex items-center gap-3">
-                                            <i class="fas fa-moon w-4 shrink-0 text-center text-slate-400 dark:text-slate-500" x-show="!isDarkMode" aria-hidden="true"></i>
-                                            <i class="fas fa-sun w-4 shrink-0 text-center text-amber-400" x-show="isDarkMode" aria-hidden="true"></i>
+                                            <i class="fas fa-moon w-4 shrink-0 text-center text-slate-400 dark:text-slate-400" x-show="!isDarkMode" aria-hidden="true"></i>
+                                            <i class="fas fa-sun w-4 shrink-0 text-center text-slate-400 dark:text-slate-400" x-show="isDarkMode" aria-hidden="true"></i>
                                             <span>Mode Gelap</span>
                                         </span>
-                                        <span class="text-xs px-2.5 py-0.5 rounded-full font-bold"
-                                            :class="isDarkMode ? 'bg-white/10 text-white border border-white/20' : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300'"
-                                            x-text="isDarkMode ? 'Aktif' : 'Mati'"></span>
+                                        <!-- Saklar Mini Switch Toggle -->
+                                        <div class="relative inline-flex h-5 w-9 shrink-0 items-center rounded-full border border-transparent transition-colors duration-200 ease-in-out"
+                                            :class="isDarkMode ? 'bg-[#13416B] dark:bg-white' : 'bg-slate-200 dark:bg-slate-700'">
+                                            <span class="pointer-events-none inline-block h-3.5 w-3.5 rounded-full bg-white dark:bg-slate-900 shadow-xs transform transition duration-200 ease-in-out"
+                                                :class="isDarkMode ? 'translate-x-4.5' : 'translate-x-0.5'"></span>
+                                        </div>
                                     </button>
                                 </li>
                             @endif

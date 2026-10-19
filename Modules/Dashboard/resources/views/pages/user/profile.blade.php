@@ -145,7 +145,7 @@
                 <h1 class="text-xl sm:text-2xl md:text-3xl font-bold text-slate-900 dark:text-white mb-1">
                     {{ $user->profile?->full_name ?? $user->name }}
                 </h1>
-                <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 flex flex-wrap items-center justify-start gap-1.5 sm:gap-2">
+                <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 flex flex-wrap items-center justify-start gap-4 sm:gap-2">
                     <span class="flex items-center gap-1.5"><i class="fas fa-envelope text-slate-400"></i> {{ $user->email }}</span>
                     <span class="hidden md:inline text-slate-300 dark:text-slate-600">•</span>
                     <span class="flex items-center gap-1.5"><i class="fas fa-calendar text-slate-400"></i> Bergabung sejak {{ $user->created_at->translatedFormat('M Y') }}</span>
@@ -296,49 +296,64 @@
                     <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-6 lg:gap-8 items-start">
                         
                         <!-- Left: Settings Form Controls (7 cols on desktop, First on mobile) -->
-                        <div class="lg:col-span-7 space-y-5 sm:space-y-6">
+                        <div class="lg:col-span-7 space-y-8 sm:space-y-6">
                             <!-- 1. Mode Tampilan Aplikasi (Dark Mode Seluruh Halaman) -->
                             <div>
-                                <label class="block text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-100 mb-0.5">Mode Tampilan (Tema Aplikasi)</label>
+                                <div class="flex items-center justify-between mb-1 mt-4">
+                                    <label class="block text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-100">Mode Tampilan (Tema Aplikasi)</label>
+                                    <span class="text-[10px] sm:text-[11px] font-semibold px-2 py-0.5 rounded-full transition-colors border"
+                                        :class="isDark 
+                                            ? 'bg-slate-700/60 text-slate-200 border-slate-600' 
+                                            : 'bg-slate-100 text-slate-600 border-slate-200 dark:bg-slate-700 dark:text-slate-300 dark:border-slate-600'">
+                                        <span x-text="isDark ? 'Mode Gelap Aktif' : 'Mode Terang Aktif'"></span>
+                                    </span>
+                                </div>
                                 <p class="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 mb-2.5">Atur tampilan tema terang atau gelap untuk seluruh halaman SIRENATA.</p>
-                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3">
-                                    <!-- Light Mode -->
-                                    <button type="button" @click="setDarkMode(false)"
-                                        class="text-left p-3 sm:p-3.5 rounded-md border-2 transition-all flex flex-col justify-between cursor-pointer"
-                                        :class="!isDark ? 'border-[#13416B] bg-[#13416B]/5 ring-1.5 ring-[#13416B]/20 dark:border-white' : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-slate-300 dark:hover:border-slate-600'">
-                                        <div class="flex items-center justify-between mb-2">
-                                            <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-md bg-amber-50 dark:bg-slate-700 border border-amber-200 dark:border-slate-600 flex items-center justify-center">
-                                                <i class="fas fa-sun text-amber-500 text-xs sm:text-sm"></i>
-                                            </div>
-                                            <i class="fas fa-check-circle text-sm sm:text-base text-[#13416B] dark:text-white" x-show="!isDark"></i>
-                                        </div>
-                                        <div>
-                                            <p class="font-bold text-xs sm:text-sm text-slate-800 dark:text-slate-100">Mode Terang</p>
-                                            <p class="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 mt-0.5">Latar putih kontras tinggi untuk penggunaan di siang hari.</p>
-                                        </div>
-                                    </button>
 
-                                    <!-- Dark Mode -->
-                                    <button type="button" @click="setDarkMode(true)"
-                                        class="text-left p-3 sm:p-3.5 rounded-md border-2 transition-all flex flex-col justify-between cursor-pointer"
-                                        :class="isDark ? 'border-[#13416B] bg-[#13416B]/5 ring-1.5 ring-[#13416B]/20 dark:border-white dark:bg-white/10 dark:ring-white/20' : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-slate-300 dark:hover:border-slate-600'">
-                                        <div class="flex items-center justify-between mb-2">
-                                            <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-md bg-slate-900 border border-slate-700 flex items-center justify-center">
-                                                <i class="fas fa-moon text-white text-xs sm:text-sm"></i>
-                                            </div>
-                                            <i class="fas fa-check-circle text-sm sm:text-base text-[#13416B] dark:text-white" x-show="isDark"></i>
+                                <!-- Saklar (Switch Toggle Card) -->
+                                <div @click="setDarkMode(!isDark)"
+                                    class="p-3 sm:p-3.5 rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 flex items-center justify-between gap-3.5 transition-all duration-200 hover:border-slate-300 dark:hover:border-slate-600 shadow-xs cursor-pointer group select-none">
+                                    
+                                    <div class="flex items-center gap-3 min-w-0">
+                                        <!-- Calm Icon Badge -->
+                                        <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-md flex items-center justify-center shrink-0 transition-colors border"
+                                            :class="isDark 
+                                                ? 'bg-slate-700/50 border-slate-600/80 text-slate-200' 
+                                                : 'bg-slate-100 border-slate-200 text-slate-500'">
+                                            <i class="fas text-xs sm:text-sm transition-transform duration-300"
+                                                :class="isDark ? 'fa-moon' : 'fa-sun'"></i>
                                         </div>
-                                        <div>
-                                            <p class="font-bold text-xs sm:text-sm text-slate-800 dark:text-slate-100">Mode Gelap (Dark Mode)</p>
-                                            <p class="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 mt-0.5">Latar gelap redup untuk kenyamanan mata di malam hari.</p>
+                                        <div class="min-w-0">
+                                            <p class="font-bold text-xs sm:text-sm text-slate-800 dark:text-slate-100 leading-snug">
+                                                <span x-text="isDark ? 'Mode Gelap (Dark Mode)' : 'Mode Terang (Light Mode)'"></span>
+                                            </p>
+                                            <p class="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 mt-0.5 truncate">
+                                                <span x-show="!isDark">Latar putih kontras bersih untuk penggunaan di siang hari.</span>
+                                                <span x-show="isDark">Latar redup ramah mata untuk kenyamanan di malam hari.</span>
+                                            </p>
                                         </div>
+                                    </div>
+
+                                    <!-- Switch Toggle (Saklar) -->
+                                    <button type="button"
+                                        role="switch"
+                                        :aria-checked="isDark.toString()"
+                                        @click.stop="setDarkMode(!isDark)"
+                                        class="relative inline-flex h-6 w-11 sm:h-7 sm:w-12 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-[#13416B]/20 dark:focus:ring-white/20"
+                                        :class="isDark ? 'bg-[#13416B] dark:bg-slate-600' : 'bg-slate-200 dark:bg-slate-700'">
+                                        <span class="sr-only">Toggle mode gelap</span>
+                                        <span class="pointer-events-none flex h-5 w-5 sm:h-6 sm:w-6 items-center justify-center rounded-full bg-white shadow-sm transform ring-0 transition duration-200 ease-in-out"
+                                            :class="isDark ? 'translate-x-5' : 'translate-x-0'">
+                                            <i class="fas text-[9px] sm:text-[10px] transition-colors"
+                                                :class="isDark ? 'fa-moon text-[#13416B] dark:text-slate-800' : 'fa-sun text-slate-400'"></i>
+                                        </span>
                                     </button>
                                 </div>
                             </div>
 
                             <!-- 2. Ukuran Huruf (Font Size) -->
                             <div>
-                                <div class="flex items-center justify-between mb-0.5">
+                                <div class="flex items-center justify-between mb-1">
                                     <label class="block text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-100">Ukuran Huruf</label>
                                     <span class="text-[11px] sm:text-xs font-semibold text-[#13416B] dark:text-white" x-text="{ 'sm': 'Kecil (14px)', 'normal': 'Standar (16px)', 'lg': 'Besar (18px)', 'xl': 'Sangat Besar (20px)' }[readerPrefs.fontSize]"></span>
                                 </div>
@@ -380,7 +395,7 @@
 
                             <!-- 3. Jenis Huruf (Font Family) -->
                             <div>
-                                <label class="block text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-100 mb-0.5">Jenis Huruf (Font Family)</label>
+                                <label class="block text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-100 mb-1">Jenis Huruf (Font Family)</label>
                                 <p class="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 mb-2.5">Pilih tipe tipografi yang memudahkan pemahaman Anda.</p>
                                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3">
                                     <!-- Sans -->
@@ -414,50 +429,43 @@
                             </div>
 
                             <!-- 4. Jarak Baris & Mode Lebar -->
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-4">
-                                <!-- Line Height -->
-                                <div>
-                                    <label class="block text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-100 mb-0.5">Jarak Baris Paragraf</label>
-                                    <p class="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 mb-2">Kerapatan teks saat membaca.</p>
-                                    <div class="flex gap-2">
-                                        <button type="button" @click="updatePref('lineHeight', 'normal')"
-                                            class="flex-1 py-2 px-2.5 sm:py-2.5 sm:px-3 rounded-md border-2 text-[11px] sm:text-xs font-bold text-center transition-all flex items-center justify-center gap-1.5 cursor-pointer"
-                                            :class="readerPrefs.lineHeight === 'normal' ? 'border-[#13416B] bg-[#13416B]/5 text-[#13416B] dark:border-white dark:text-white' : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700'">
-                                            <i class="fas fa-align-left text-xs"></i> Standar (1.75x)
-                                        </button>
-                                        <button type="button" @click="updatePref('lineHeight', 'loose')"
-                                            class="flex-1 py-2 px-2.5 sm:py-2.5 sm:px-3 rounded-md border-2 text-[11px] sm:text-xs font-bold text-center transition-all flex items-center justify-center gap-1.5 cursor-pointer"
-                                            :class="readerPrefs.lineHeight === 'loose' ? 'border-[#13416B] bg-[#13416B]/5 text-[#13416B] dark:border-white dark:text-white' : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700'">
-                                            <i class="fas fa-bars-staggered text-xs"></i> Renggang (2.2x)
-                                        </button>
+                            <div>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-4">
+                                    <!-- Line Height -->
+                                    <div>
+                                        <label class="block text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-100 mb-1">Jarak Baris Paragraf</label>
+                                        <p class="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 mb-2">Kerapatan teks saat membaca.</p>
+                                        <div class="flex gap-2">
+                                            <button type="button" @click="updatePref('lineHeight', 'normal')"
+                                                class="flex-1 py-2 px-2.5 sm:py-2.5 sm:px-3 rounded-md border-2 text-[11px] sm:text-xs font-bold text-center transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                                                :class="readerPrefs.lineHeight === 'normal' ? 'border-[#13416B] bg-[#13416B]/5 text-[#13416B] dark:border-white dark:text-white' : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700'">
+                                                <i class="fas fa-align-left text-xs"></i> Standar (1.75x)
+                                            </button>
+                                            <button type="button" @click="updatePref('lineHeight', 'loose')"
+                                                class="flex-1 py-2 px-2.5 sm:py-2.5 sm:px-3 rounded-md border-2 text-[11px] sm:text-xs font-bold text-center transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                                                :class="readerPrefs.lineHeight === 'loose' ? 'border-[#13416B] bg-[#13416B]/5 text-[#13416B] dark:border-white dark:text-white' : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700'">
+                                                <i class="fas fa-bars-staggered text-xs"></i> Renggang (2.2x)
+                                            </button>
+                                        </div>
                                     </div>
-                                </div>
 
-                                <!-- Reading Width / Focus Mode -->
-                                <div>
-                                    <label class="block text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-100 mb-0.5">Mode Lebar Baca</label>
-                                    <p class="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 mb-2">Panjang kolom teks pada layar.</p>
-                                    <div class="flex gap-2">
-                                        <button type="button" @click="updatePref('contentWidth', 'full')"
-                                            class="flex-1 py-2 px-2.5 sm:py-2.5 sm:px-3 rounded-md border-2 text-[11px] sm:text-xs font-bold text-center transition-all flex items-center justify-center gap-1.5 cursor-pointer"
-                                            :class="readerPrefs.contentWidth === 'full' ? 'border-[#13416B] bg-[#13416B]/5 text-[#13416B] dark:border-white dark:text-white' : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700'">
-                                            <i class="fas fa-arrows-left-right text-xs"></i> Penuh
-                                        </button>
-                                        <button type="button" @click="updatePref('contentWidth', 'focus')"
-                                            class="flex-1 py-2 px-2.5 sm:py-2.5 sm:px-3 rounded-md border-2 text-[11px] sm:text-xs font-bold text-center transition-all flex items-center justify-center gap-1.5 cursor-pointer"
-                                            :class="readerPrefs.contentWidth === 'focus' ? 'border-[#13416B] bg-[#13416B]/5 text-[#13416B] dark:border-white dark:text-white' : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700'">
-                                            <i class="fas fa-compress-alt text-xs"></i> Mode Fokus
-                                        </button>
+                                    <!-- Reading Width / Focus Mode -->
+                                    <div>
+                                        <label class="block text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-100 mb-1">Mode Lebar Baca</label>
+                                        <p class="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 mb-2">Panjang kolom teks pada layar.</p>
+                                        <div class="flex gap-2">
+                                            <button type="button" @click="updatePref('contentWidth', 'full')"
+                                                class="flex-1 py-2 px-2.5 sm:py-2.5 sm:px-3 rounded-md border-2 text-[11px] sm:text-xs font-bold text-center transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                                                :class="readerPrefs.contentWidth === 'full' ? 'border-[#13416B] bg-[#13416B]/5 text-[#13416B] dark:border-white dark:text-white' : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700'">
+                                                <i class="fas fa-arrows-left-right text-xs"></i> Penuh
+                                            </button>
+                                            <button type="button" @click="updatePref('contentWidth', 'focus')"
+                                                class="flex-1 py-2 px-2.5 sm:py-2.5 sm:px-3 rounded-md border-2 text-[11px] sm:text-xs font-bold text-center transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                                                :class="readerPrefs.contentWidth === 'focus' ? 'border-[#13416B] bg-[#13416B]/5 text-[#13416B] dark:border-white dark:text-white' : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700'">
+                                                <i class="fas fa-compress-alt text-xs"></i> Mode Fokus
+                                            </button>
+                                        </div>
                                     </div>
-                                </div>
-                            </div>
-
-                            <!-- Info Box -->
-                            <div class="p-3 sm:p-3.5 rounded-md bg-slate-50 dark:bg-slate-700/40 border border-slate-200 dark:border-slate-700 flex items-start gap-2.5">
-                                <i class="fas fa-shield-alt text-[#13416B] dark:text-white text-xs sm:text-sm mt-0.5"></i>
-                                <div class="text-[11px] sm:text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
-                                    <p class="font-bold text-xs sm:text-sm text-slate-800 dark:text-white mb-0.5">Tersimpan di Perangkat Ini</p>
-                                    Pengaturan tampilan ini disimpan langsung di penyimpanan peramban (browser) Anda. Anda juga dapat mengubah tampilan kapan saja saat membaca materi melalui tombol <strong>Tampilan</strong> di pojok kanan atas materi.
                                 </div>
                             </div>
                         </div>
