@@ -22,14 +22,15 @@
         <div class="h-full w-full flex flex-row md:flex-col overflow-hidden">
 
             <!-- Header Sidebar (HANYA MUNCUL DI TABLET & DESKTOP) -->
-            <div class="hidden md:flex items-center px-4 h-[72px] sm:h-[80px] border-b border-slate-100 shrink-0 transition-all duration-300"
-                 :class="sidebarOpen ? 'justify-start gap-3' : 'justify-center'">
+            <div class="hidden md:flex items-center h-[72px] sm:h-[80px] border-b border-slate-100 shrink-0 transition-all duration-300"
+                 :class="sidebarOpen ? 'justify-start px-6' : 'justify-center px-4'">
                 
-                <!-- Hamburger Button (Staggered Icon) -->
-                <button @click="typeof toggleSidebar === 'function' ? toggleSidebar() : (sidebarOpen = !sidebarOpen)"
+                <!-- Hamburger Button (Hanya muncul saat sidebar tertutup di tablet & desktop) -->
+                <button x-show="!sidebarOpen"
+                    @click="typeof toggleSidebar === 'function' ? toggleSidebar() : (sidebarOpen = !sidebarOpen)"
                     type="button"
                     class="w-10 h-10 flex items-center justify-center rounded-xl text-slate-600 hover:text-[#13416B] hover:bg-slate-100 transition-colors cursor-pointer shrink-0 focus:outline-none"
-                    :title="sidebarOpen ? 'Sembunyikan menu' : 'Buka menu'">
+                    title="Buka menu">
                     <i class="fa-solid fa-bars-staggered text-lg" aria-hidden="true"></i>
                 </button>
 
@@ -68,14 +69,15 @@
         <div class="h-full w-full flex flex-col overflow-hidden">
 
             <!-- Header Sidebar Desktop & Tablet (Hamburger Staggered + Logo) -->
-            <div class="hidden md:flex items-center px-4 h-[72px] sm:h-[80px] border-b border-slate-100 shrink-0 transition-all duration-300"
-                 :class="sidebarOpen ? 'justify-start gap-3' : 'justify-center'">
+            <div class="hidden md:flex items-center h-[72px] sm:h-[80px] border-b border-slate-100 shrink-0 transition-all duration-300"
+                 :class="sidebarOpen ? 'justify-start px-6' : 'justify-center px-4'">
                 
-                <!-- Hamburger Button (Staggered Icon) -->
-                <button @click="typeof toggleSidebar === 'function' ? toggleSidebar() : (sidebarOpen = !sidebarOpen)"
+                <!-- Hamburger Button (Hanya muncul saat sidebar tertutup di tablet & desktop) -->
+                <button x-show="!sidebarOpen"
+                    @click="typeof toggleSidebar === 'function' ? toggleSidebar() : (sidebarOpen = !sidebarOpen)"
                     type="button"
                     class="w-10 h-10 flex items-center justify-center rounded-xl text-slate-600 hover:text-[#13416B] hover:bg-slate-100 transition-colors cursor-pointer shrink-0 focus:outline-none"
-                    :title="sidebarOpen ? 'Sembunyikan menu' : 'Buka menu'">
+                    title="Buka menu">
                     <i class="fa-solid fa-bars-staggered text-lg" aria-hidden="true"></i>
                 </button>
 

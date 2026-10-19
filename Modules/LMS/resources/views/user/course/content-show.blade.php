@@ -3,8 +3,25 @@
         reachedEnd: {{ data_get($content, 'is_completed') ? 'true' : 'false' }},
         videoCompleted: {{ data_get($content, 'is_completed') ? 'true' : 'false' }},
         submitting: false,
+        showQuickSettings: false,
+        isDark: window.isDarkMode ? window.isDarkMode() : false,
+        readerPrefs: {
+            fontSize: 'normal',
+            fontFamily: 'sans',
+            lineHeight: 'normal',
+            contentWidth: 'full'
+        },
     
         init() {
+            // Muat preferensi tampilan baca dari localStorage
+            const saved = localStorage.getItem('sirenata_reading_prefs');
+            if (saved) {
+                try {
+                    const parsed = JSON.parse(saved);
+                    this.readerPrefs = Object.assign(this.readerPrefs, parsed);
+                } catch (e) {}
+            }
+
             if (this.reachedEnd && this.videoCompleted) return;
     
             // 1. Observer untuk deteksi baca sampai bawah
@@ -51,51 +68,252 @@
     
         scrollToEnd() {
             this.$refs.endSentinel.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        },
+
+        setPref(key, value) {
+            this.readerPrefs[key] = value;
+            localStorage.setItem('sirenata_reading_prefs', JSON.stringify(this.readerPrefs));
+        },
+
+        toggleDarkMode() {
+            if (window.toggleDarkMode) {
+                this.isDark = window.toggleDarkMode();
+            }
+        },
+
+        resetPrefs() {
+            this.readerPrefs = {
+                fontSize: 'normal',
+                fontFamily: 'sans',
+                lineHeight: 'normal',
+                contentWidth: 'full'
+            };
+            localStorage.setItem('sirenata_reading_prefs', JSON.stringify(this.readerPrefs));
         }
-    }">
+    }" @dark-mode-toggled.window="isDark = $event.detail.isDark">
 
         {{-- Main Content Container --}}
         <div
-            class="bg-white sm:rounded-md sm:shadow-sm border-b sm:border border-slate-200 overflow-hidden min-h-screen sm:min-h-0">
+            class="bg-white sm:rounded-md sm:shadow-sm border-b sm:border border-slate-200 overflow-hidden min-h-screen sm:min-h-0 reader-container transition-colors duration-200"
+            :class="{
+                'reader-theme-dark': isDark
+            }">
 
             {{-- Body Content --}}
-            <div class="p-5 sm:p-10 lg:p-12">
+            <div class="p-5 sm:p-10 lg:p-12 transition-all duration-200"
+                :class="{
+                    'max-w-3xl mx-auto': readerPrefs.contentWidth === 'focus',
+                    'max-w-none': readerPrefs.contentWidth === 'full'
+                }">
 
                 <div class="mb-8 flex items-center justify-between gap-3">
                     <a href="{{ route('user.course.my-course.detail', $slug) }}"
-                        class="group flex flex-1 min-w-0 items-center gap-3 text-sm font-medium text-slate-500 hover:text-[#13416B] transition-colors">
+                        class="group flex flex-1 min-w-0 items-center gap-3 text-sm font-medium text-slate-500 hover:text-[#13416B] transition-colors"
+                        :class="{
+                            '!text-slate-400 hover:!text-sky-400': isDark
+                        }">
 
                         {{-- Lingkaran Ikon Panah --}}
                         <div
-                            class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center shrink-0 group-hover:bg-[#13416B]/10 transition-colors">
-                            <i class="fas fa-arrow-left text-xs text-slate-600 group-hover:text-[#13416B]"></i>
+                            class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center shrink-0 group-hover:bg-[#13416B]/10 transition-colors"
+                            :class="{
+                                '!bg-[#263346] !text-slate-300': isDark
+                            }">
+                            <i class="fas fa-arrow-left text-xs text-slate-600 group-hover:text-[#13416B]"
+                                :class="{
+                                    '!text-slate-300': isDark
+                                }"></i>
                         </div>
 
                         {{-- Teks --}}
                         <div class="flex-1 min-w-0 flex flex-col sm:flex-row sm:items-center sm:gap-1.5 leading-tight">
-                            <span class="text-[11px] sm:text-sm text-slate-400 mb-0.5 sm:mb-0">Kembali ke</span>
+                            <span class="text-[11px] sm:text-sm text-slate-400 mb-0.5 sm:mb-0"
+                                :class="{
+                                    '!text-slate-400': isDark
+                                }">Kembali ke</span>
                             <span
-                                class="font-bold text-slate-700 truncate group-hover:text-[#13416B] transition-colors">
+                                class="font-bold text-slate-700 truncate group-hover:text-[#13416B] transition-colors"
+                                :class="{
+                                    '!text-slate-200 group-hover:!text-sky-400': isDark
+                                }">
                                 {{ data_get($course, 'course_name', 'Kursus') }}
                             </span>
                         </div>
                     </a>
-                    <button type="button" onclick="window.startContentReaderTour && window.startContentReaderTour()"
-                        class="inline-flex shrink-0 items-center gap-1.5 px-3 py-1.5 text-[11px] font-bold text-[#13416B] bg-[#13416B]/10 border border-[#13416B]/20 rounded-lg hover:bg-[#13416B]/20 transition-colors">
-                        <i class="fas fa-route"></i> Panduan
-                    </button>
+
+                    <div class="flex items-center gap-2">
+                        {{-- Tombol Tampilan Baca (Quick Settings) --}}
+                        <div class="relative" @click.away="showQuickSettings = false">
+                            <button type="button" @click="showQuickSettings = !showQuickSettings"
+                                class="inline-flex shrink-0 items-center gap-1.5 px-3 py-1.5 text-[11px] font-bold text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors shadow-2xs"
+                                :class="{
+                                    '!bg-[#263346] !border-[#334155] !text-slate-200': isDark,
+                                    'ring-2 ring-[#13416B]/30 !border-[#13416B]': showQuickSettings
+                                }"
+                                title="Sesuaikan tampilan baca">
+                                <i class="fas fa-font text-xs"
+                                    :class="{
+                                        'text-sky-400': isDark,
+                                        'text-[#13416B]': !isDark
+                                    }"></i>
+                                <span class="hidden sm:inline">Tampilan</span>
+                            </button>
+
+                            {{-- Dropdown Quick Settings --}}
+                            <div x-show="showQuickSettings" x-cloak
+                                x-transition:enter="transition ease-out duration-150"
+                                x-transition:enter-start="opacity-0 translate-y-1 scale-95"
+                                x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+                                x-transition:leave="transition ease-in duration-100"
+                                x-transition:leave-start="opacity-100 translate-y-0 scale-100"
+                                x-transition:leave-end="opacity-0 translate-y-1 scale-95"
+                                class="absolute right-0 mt-2 w-72 sm:w-80 bg-white rounded-2xl shadow-xl border border-slate-200 p-4 z-50 text-slate-800 text-left">
+
+                                <div class="flex items-center justify-between pb-2.5 mb-3 border-b border-slate-100 dark:border-slate-800">
+                                    <h4 class="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-200 flex items-center gap-1.5">
+                                        <i class="fas fa-sliders-h text-[#13416B] dark:text-sky-400"></i> Tampilan Baca
+                                    </h4>
+                                    <button type="button" @click="resetPrefs()" class="text-[11px] font-semibold text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 flex items-center gap-1">
+                                        <i class="fas fa-undo text-[10px]"></i> Reset
+                                    </button>
+                                </div>
+
+                                {{-- 1. Mode Gelap Toggle --}}
+                                <div class="mb-3">
+                                    <div class="flex items-center justify-between p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800">
+                                        <div class="flex items-center gap-2">
+                                            <i class="fas fa-moon text-xs" :class="isDark ? 'text-sky-400' : 'text-slate-400'"></i>
+                                            <span class="text-xs font-bold text-slate-700 dark:text-slate-200">Mode Gelap</span>
+                                        </div>
+                                        <button type="button" @click="toggleDarkMode()"
+                                            class="relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none"
+                                            :class="isDark ? 'bg-sky-500' : 'bg-slate-300 dark:bg-slate-600'"
+                                            role="switch" :aria-checked="isDark">
+                                            <span aria-hidden="true"
+                                                class="pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"
+                                                :class="isDark ? 'translate-x-4' : 'translate-x-0'"></span>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                {{-- 2. Ukuran Font --}}
+                                <div class="mb-3">
+                                    <label class="block text-[11px] font-bold text-slate-600 dark:text-slate-300 mb-1.5">Ukuran Huruf</label>
+                                    <div class="grid grid-cols-4 gap-1 bg-slate-100 dark:bg-slate-800 p-1 rounded-xl">
+                                        <button type="button" @click="setPref('fontSize', 'sm')"
+                                            class="py-1 rounded-lg text-xs font-semibold text-center transition-colors"
+                                            :class="readerPrefs.fontSize === 'sm' ? 'bg-white dark:bg-slate-700 text-[#13416B] dark:text-sky-400 shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'">
+                                            14px
+                                        </button>
+                                        <button type="button" @click="setPref('fontSize', 'normal')"
+                                            class="py-1 rounded-lg text-xs font-semibold text-center transition-colors"
+                                            :class="readerPrefs.fontSize === 'normal' ? 'bg-white dark:bg-slate-700 text-[#13416B] dark:text-sky-400 shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'">
+                                            16px
+                                        </button>
+                                        <button type="button" @click="setPref('fontSize', 'lg')"
+                                            class="py-1 rounded-lg text-xs font-semibold text-center transition-colors"
+                                            :class="readerPrefs.fontSize === 'lg' ? 'bg-white dark:bg-slate-700 text-[#13416B] dark:text-sky-400 shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'">
+                                            18px
+                                        </button>
+                                        <button type="button" @click="setPref('fontSize', 'xl')"
+                                            class="py-1 rounded-lg text-xs font-semibold text-center transition-colors"
+                                            :class="readerPrefs.fontSize === 'xl' ? 'bg-white dark:bg-slate-700 text-[#13416B] dark:text-sky-400 shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'">
+                                            20px
+                                        </button>
+                                    </div>
+                                </div>
+
+                                {{-- 3. Jenis Huruf --}}
+                                <div class="mb-3">
+                                    <label class="block text-[11px] font-bold text-slate-600 mb-1.5">Jenis Huruf</label>
+                                    <div class="grid grid-cols-2 gap-1.5">
+                                        <button type="button" @click="setPref('fontFamily', 'sans')"
+                                            class="py-1.5 px-2 rounded-lg border text-xs font-sans font-semibold text-center transition-all"
+                                            :class="readerPrefs.fontFamily === 'sans' ? 'border-[#13416B] bg-[#13416B]/5 text-[#13416B] ring-1 ring-[#13416B]' : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'">
+                                            Modern Sans
+                                        </button>
+                                        <button type="button" @click="setPref('fontFamily', 'serif')"
+                                            class="py-1.5 px-2 rounded-lg border text-xs font-serif font-semibold text-center transition-all"
+                                            :class="readerPrefs.fontFamily === 'serif' ? 'border-[#13416B] bg-[#13416B]/5 text-[#13416B] ring-1 ring-[#13416B]' : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'">
+                                            Buku Serif
+                                        </button>
+                                    </div>
+                                </div>
+
+                                {{-- 4. Jarak & Lebar --}}
+                                <div class="grid grid-cols-2 gap-2 pt-2 border-t border-slate-100 mb-3">
+                                    <div>
+                                        <label class="block text-[10px] font-semibold text-slate-400 mb-1">Jarak Baris</label>
+                                        <div class="flex gap-1">
+                                            <button type="button" @click="setPref('lineHeight', 'normal')"
+                                                class="flex-1 py-1 rounded text-[11px] font-medium border text-center transition-colors"
+                                                :class="readerPrefs.lineHeight === 'normal' ? 'bg-[#13416B]/10 border-[#13416B] text-[#13416B]' : 'border-slate-200 text-slate-600'">
+                                                Normal
+                                            </button>
+                                            <button type="button" @click="setPref('lineHeight', 'loose')"
+                                                class="flex-1 py-1 rounded text-[11px] font-medium border text-center transition-colors"
+                                                :class="readerPrefs.lineHeight === 'loose' ? 'bg-[#13416B]/10 border-[#13416B] text-[#13416B]' : 'border-slate-200 text-slate-600'">
+                                                Renggang
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label class="block text-[10px] font-semibold text-slate-400 mb-1">Lebar Baca</label>
+                                        <div class="flex gap-1">
+                                            <button type="button" @click="setPref('contentWidth', 'full')"
+                                                class="flex-1 py-1 rounded text-[11px] font-medium border text-center transition-colors"
+                                                :class="readerPrefs.contentWidth === 'full' ? 'bg-[#13416B]/10 border-[#13416B] text-[#13416B]' : 'border-slate-200 text-slate-600'">
+                                                Penuh
+                                            </button>
+                                            <button type="button" @click="setPref('contentWidth', 'focus')"
+                                                class="flex-1 py-1 rounded text-[11px] font-medium border text-center transition-colors"
+                                                :class="readerPrefs.contentWidth === 'focus' ? 'bg-[#13416B]/10 border-[#13416B] text-[#13416B]' : 'border-slate-200 text-slate-600'">
+                                                Fokus
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {{-- Link to full profile settings --}}
+                                <a href="{{ route('user.profile') }}#pengaturan" target="_blank"
+                                    class="pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] font-semibold text-[#13416B] hover:underline">
+                                    <span>Pengaturan Lengkap di Profil</span>
+                                    <i class="fas fa-external-link-alt text-[10px]"></i>
+                                </a>
+                            </div>
+                        </div>
+
+                        <button type="button" onclick="window.startContentReaderTour && window.startContentReaderTour()"
+                            class="inline-flex shrink-0 items-center gap-1.5 px-3 py-1.5 text-[11px] font-bold text-[#13416B] bg-[#13416B]/10 border border-[#13416B]/20 rounded-lg hover:bg-[#13416B]/20 transition-colors"
+                            :class="{
+                                '!bg-[#263346] !border-[#334155] !text-sky-300': isDark
+                            }">
+                            <i class="fas fa-route"></i> Panduan
+                        </button>
+                    </div>
                 </div>
 
                 {{-- Header & Title Materi --}}
-                <div class="border-b border-slate-100 pb-6 sm:pb-8 mb-6 sm:mb-8">
+                <div class="border-b border-slate-100 pb-6 sm:pb-8 mb-6 sm:mb-8"
+                    :class="{
+                        '!border-[#263346]': isDark
+                    }">
                     <div class="flex items-center gap-2 mb-3 sm:mb-4">
                         <span
-                            class="px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-[#13416B] bg-[#13416B]/10 rounded-lg border border-[#13416B]/20">
+                            class="px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-[#13416B] bg-[#13416B]/10 rounded-lg border border-[#13416B]/20"
+                            :class="{
+                                '!bg-sky-500/10 !text-sky-400 !border-sky-500/20': isDark
+                            }">
                             Topik Pembelajaran
                         </span>
                     </div>
                     <h1
-                        class="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-slate-900 leading-tight sm:leading-tight">
+                        class="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-slate-900 leading-tight sm:leading-tight"
+                        :class="{
+                            'font-serif': readerPrefs.fontFamily === 'serif',
+                            'font-sans': readerPrefs.fontFamily === 'sans',
+                            '!text-slate-100': isDark
+                        }">
                         {{ data_get($content, 'name') }}
                     </h1>
                 </div>
@@ -111,7 +329,12 @@
 
                 @if (!empty($contentText))
                     <div data-tour="materi"
-                        class="prose prose-slate prose-sm sm:prose-base lg:prose-lg max-w-none mb-10 text-slate-700 quill-content-render">
+                        class="prose prose-slate max-w-none mb-10 text-slate-700 quill-content-render transition-all duration-150"
+                        :class="[
+                            'reader-font-' + readerPrefs.fontSize,
+                            readerPrefs.fontFamily === 'serif' ? 'reader-font-serif' : 'reader-font-sans',
+                            readerPrefs.lineHeight === 'loose' ? 'reader-leading-loose' : 'reader-leading-normal'
+                        ]">
                         {!! $contentText !!}
                     </div>
                 @endif
@@ -122,31 +345,52 @@
                 @endphp
 
                 @if ($docUrl)
-                    <div class="{{ !empty($contentText) ? 'pt-8 border-t border-slate-100' : '' }}">
+                    <div class="{{ !empty($contentText) ? 'pt-8 border-t border-slate-100' : '' }}"
+                        :class="{
+                            '!border-[#263346]': isDark
+                        }">
                         <h3
-                            class="text-xs sm:text-sm font-bold text-slate-800 mb-4 flex items-center gap-2 uppercase tracking-wider">
+                            class="text-xs sm:text-sm font-bold text-slate-800 mb-4 flex items-center gap-2 uppercase tracking-wider"
+                            :class="{
+                                '!text-slate-400': isDark
+                            }">
                             <i class="fas fa-paperclip text-slate-400"></i> Lampiran Pendukung
                         </h3>
                         <a href="{{ $docUrl }}" target="_blank"
-                            class="group flex flex-col sm:flex-row sm:items-center p-4 sm:p-5 rounded-2xl border border-slate-200 bg-slate-50 hover:bg-[#13416B]/5 hover:border-[#13416B]/30 transition-all duration-300 gap-4">
+                            class="group flex flex-col sm:flex-row sm:items-center p-4 sm:p-5 rounded-2xl border border-slate-200 bg-slate-50 hover:bg-[#13416B]/5 hover:border-[#13416B]/30 transition-all duration-300 gap-4"
+                            :class="{
+                                '!bg-[#1E2837] !border-[#263346]': isDark
+                            }">
 
                             <div class="flex items-center gap-4 flex-1">
                                 <div
-                                    class="w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-white border border-slate-200 flex items-center justify-center shrink-0 group-hover:border-[#13416B]/40 group-hover:shadow-sm transition-all">
+                                    class="w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-white border border-slate-200 flex items-center justify-center shrink-0 group-hover:border-[#13416B]/40 group-hover:shadow-sm transition-all"
+                                    :class="{
+                                        '!bg-[#263346] !border-[#334155]': isDark
+                                    }">
                                     <i class="fas fa-file-pdf text-xl sm:text-2xl text-red-500"></i>
                                 </div>
                                 <div class="flex-1">
                                     <p
-                                        class="text-sm sm:text-base font-bold text-slate-800 group-hover:text-[#13416B] transition-colors leading-tight">
+                                        class="text-sm sm:text-base font-bold text-slate-800 group-hover:text-[#13416B] transition-colors leading-tight"
+                                        :class="{
+                                            '!text-slate-200 group-hover:!text-sky-400': isDark
+                                        }">
                                         Unduh Dokumen Materi
                                     </p>
-                                    <p class="text-[11px] sm:text-xs text-slate-500 mt-1">Format PDF/DOCX tersedia untuk
+                                    <p class="text-[11px] sm:text-xs text-slate-500 mt-1"
+                                        :class="{
+                                            '!text-slate-400': isDark
+                                        }">Format PDF/DOCX tersedia untuk
                                         dipelajari luring.</p>
                                 </div>
                             </div>
 
                             <div
-                                class="w-full sm:w-10 h-10 rounded-xl sm:rounded-full bg-white border border-slate-200 flex items-center justify-center text-slate-500 font-bold text-xs sm:text-sm group-hover:text-white group-hover:bg-[#13416B] group-hover:border-[#13416B] transition-all gap-2">
+                                class="w-full sm:w-10 h-10 rounded-xl sm:rounded-full bg-white border border-slate-200 flex items-center justify-center text-slate-500 font-bold text-xs sm:text-sm group-hover:text-white group-hover:bg-[#13416B] group-hover:border-[#13416B] transition-all gap-2"
+                                :class="{
+                                    '!bg-[#263346] !border-[#334155] !text-slate-300': isDark
+                                }">
                                 <i class="fas fa-download"></i> <span class="sm:hidden">Unduh Sekarang</span>
                             </div>
                         </a>
@@ -156,13 +400,25 @@
                 {{-- Empty State --}}
                 @if (empty($contentText) && !$docUrl)
                     <div
-                        class="text-center py-12 sm:py-16 px-4 bg-slate-50 rounded-2xl border border-dashed border-slate-200">
+                        class="text-center py-12 sm:py-16 px-4 bg-slate-50 rounded-2xl border border-dashed border-slate-200"
+                        :class="{
+                            '!bg-[#1E2837] !border-[#263346]': isDark
+                        }">
                         <div
-                            class="w-16 h-16 sm:w-20 sm:h-20 bg-white border border-slate-200 rounded-full flex items-center justify-center mx-auto mb-4 sm:mb-5 shadow-sm">
+                            class="w-16 h-16 sm:w-20 sm:h-20 bg-white border border-slate-200 rounded-full flex items-center justify-center mx-auto mb-4 sm:mb-5 shadow-sm"
+                            :class="{
+                                '!bg-[#263346] !border-[#334155]': isDark
+                            }">
                             <i class="fas fa-tools text-2xl sm:text-3xl text-slate-300"></i>
                         </div>
-                        <h3 class="text-base sm:text-lg font-bold text-slate-800">Materi Sedang Disiapkan</h3>
-                        <p class="text-xs sm:text-sm text-slate-500 mt-2 max-w-sm mx-auto">Tutor belum mengunggah konten
+                        <h3 class="text-base sm:text-lg font-bold text-slate-800"
+                            :class="{
+                                '!text-slate-100': isDark
+                            }">Materi Sedang Disiapkan</h3>
+                        <p class="text-xs sm:text-sm text-slate-500 mt-2 max-w-sm mx-auto"
+                            :class="{
+                                '!text-slate-400': isDark
+                            }">Tutor belum mengunggah konten
                             bacaan, video, maupun dokumen lampiran untuk modul ini.</p>
                     </div>
                 @endif
@@ -173,15 +429,24 @@
 
             {{-- Action Footer --}}
             <div data-tour="aksi"
-                class="px-5 py-5 sm:px-10 sm:py-6 border-t border-slate-100 bg-slate-50 flex flex-col-reverse sm:flex-row justify-between items-center gap-3 sm:gap-4">
+                class="px-5 py-5 sm:px-10 sm:py-6 border-t border-slate-100 bg-slate-50 flex flex-col-reverse sm:flex-row justify-between items-center gap-3 sm:gap-4 reader-footer transition-colors duration-200"
+                :class="{
+                    '!bg-[#131A26] !border-[#263346]': isDark
+                }">
                 <a href="{{ route('user.course.my-course.detail', $slug) }}"
-                    class="w-full sm:w-auto text-sm font-bold text-slate-500 hover:text-slate-800 transition-colors text-center py-2.5 sm:py-2 border border-slate-200 sm:border-transparent rounded-xl sm:rounded-none bg-white sm:bg-transparent">
+                    class="w-full sm:w-auto text-sm font-bold text-slate-500 hover:text-slate-800 transition-colors text-center py-2.5 sm:py-2 border border-slate-200 sm:border-transparent rounded-xl sm:rounded-none bg-white sm:bg-transparent"
+                    :class="{
+                        '!text-slate-300 sm:!bg-transparent !border-[#263346] !bg-[#1E2837]': isDark
+                    }">
                     <i class="fas fa-list mr-1.5"></i> Daftar Modul
                 </a>
 
                 @if (!data_get($content, 'is_completed'))
                     <button type="button" x-show="!canComplete" @click="scrollToEnd()"
-                        class="w-full sm:w-auto px-6 py-3 sm:py-3.5 text-sm font-bold text-slate-500 bg-slate-100 border border-slate-200 rounded-xl flex items-center justify-center gap-2 hover:bg-slate-200 transition-colors">
+                        class="w-full sm:w-auto px-6 py-3 sm:py-3.5 text-sm font-bold text-slate-500 bg-slate-100 border border-slate-200 rounded-xl flex items-center justify-center gap-2 hover:bg-slate-200 transition-colors"
+                        :class="{
+                            '!bg-[#1E2837] !border-[#263346] !text-slate-300': isDark
+                        }">
                         <i class="fas fa-info-circle text-xs"></i>
                         <span
                             x-text="(!reachedEnd ? 'Baca materi hingga akhir' : '') + (!reachedEnd && !videoCompleted ? ' & ' : '') + (!videoCompleted ? 'Tonton video materi minimal 90%' : '') + ' untuk lanjut'"></span>
@@ -226,6 +491,7 @@
             }
 
             @include('lms::partials.quill-content-style')
+            @include('lms::partials.reader-styles')
         </style>
     @endpush
 

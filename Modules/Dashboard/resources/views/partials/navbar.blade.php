@@ -8,12 +8,23 @@
         <!-- Bagian Kiri & Tengah (Toggle + Searchbar) -->
         <div class="flex items-center flex-1 gap-3 sm:gap-5">
 
-            <!-- Tombol Hamburger Mobile untuk Admin (Di desktop sudah ada di Header Sidebar) -->
-            @if (!auth()->check() || !auth()->user()->hasRole('user'))
+            <!-- Tombol Hamburger: Muncul di Navbar saat Sidebar Terbuka (semua role di desktop/tablet) atau di mobile (admin) -->
+            @if (auth()->check() && auth()->user()->hasRole('user'))
                 <button @click="typeof toggleSidebar === 'function' ? toggleSidebar() : (sidebarOpen = !sidebarOpen)"
                     type="button"
-                    class="md:hidden inline-flex p-2 items-center justify-center rounded-xl cursor-pointer text-slate-600 transition-colors hover:bg-slate-100 hover:text-[#13416B] focus:outline-none shrink-0"
-                    aria-label="Buka menu">
+                    class="w-10 h-10 items-center justify-center rounded-xl cursor-pointer text-slate-600 transition-colors hover:bg-slate-100 hover:text-[#13416B] focus:outline-none shrink-0"
+                    :class="sidebarOpen ? 'hidden md:inline-flex' : 'hidden'"
+                    :title="sidebarOpen ? 'Sembunyikan menu' : 'Buka menu'"
+                    aria-label="Toggle menu">
+                    <i class="fa-solid fa-bars-staggered text-lg" aria-hidden="true"></i>
+                </button>
+            @else
+                <button @click="typeof toggleSidebar === 'function' ? toggleSidebar() : (sidebarOpen = !sidebarOpen)"
+                    type="button"
+                    class="w-10 h-10 items-center justify-center rounded-xl cursor-pointer text-slate-600 transition-colors hover:bg-slate-100 hover:text-[#13416B] focus:outline-none shrink-0"
+                    :class="sidebarOpen ? 'inline-flex' : 'inline-flex md:hidden'"
+                    :title="sidebarOpen ? 'Sembunyikan menu' : 'Buka menu'"
+                    aria-label="Toggle menu">
                     <i class="fa-solid fa-bars-staggered text-lg" aria-hidden="true"></i>
                 </button>
             @endif
@@ -228,8 +239,26 @@
                 @endif
 
                 <!-- Dropdown Profil -->
-                <div class="relative shrink-0" x-data="{ open: false }">
-                    <div class="flex items-center">
+                <div class="relative shrink-0" x-data="{
+                    open: false,
+                    isDarkMode: window.isDarkMode ? window.isDarkMode() : false,
+                    toggleDarkMode() {
+                        if (window.toggleDarkMode) {
+                            this.isDarkMode = window.toggleDarkMode();
+                        }
+                    }
+                }" @dark-mode-toggled.window="isDarkMode = $event.detail.isDark">
+                    <div class="flex items-center gap-2">
+                        <!-- Tombol Cepat Dark Mode Navbar (Role Admin) -->
+                        @if (!auth()->user()->hasRole('user'))
+                            <button type="button" @click="toggleDarkMode()"
+                                class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-[#13416B] dark:hover:text-sky-400 transition-colors shrink-0"
+                                :title="isDarkMode ? 'Ganti ke Mode Terang' : 'Ganti ke Mode Gelap'">
+                                <i class="fas fa-moon text-sm sm:text-base" x-show="!isDarkMode"></i>
+                                <i class="fas fa-sun text-sm sm:text-base text-amber-400" x-show="isDarkMode"></i>
+                            </button>
+                        @endif
+
                         <button @click="open = !open"
                             class="rounded-full overflow-hidden focus:outline-none cursor-pointer border-2 border-transparent hover:border-[#13416B] transition-colors">
                             <img class="w-9 h-9 sm:w-11 sm:h-11 rounded-full object-cover"
@@ -246,11 +275,41 @@
                                 {{ auth()->user()->roles->first()->name ?? 'User' }}</p>
                         </div>
                         <ul class="p-2 text-sm text-slate-700 space-y-1">
-                            <!-- Akses Cepat Profil & Dashboard -->
-                            {{-- Menu profil hanya untuk role user; admin tidak membutuhkan halaman profil. --}}
                             @if (auth()->user()->hasRole('user'))
-                                <li><a href="{{ route('user.profile') }}"
-                                        class="flex items-center gap-3 p-2.5 rounded-xl hover:bg-[#13416B]/10 hover:text-[#13416B] font-medium transition-colors"><i class="fas fa-user w-4 shrink-0 text-center" aria-hidden="true"></i> Profil Saya</a></li>
+                                <!-- Navigasi Khusus User: Informasi Saya, Sertifikat Saya, Pengaturan -->
+                                <li>
+                                    <a href="{{ route('user.profile') }}#personal"
+                                        class="flex items-center gap-3 p-2.5 rounded-xl text-slate-700 dark:text-slate-200 hover:bg-[#13416B]/10 hover:text-[#13416B] dark:hover:bg-slate-700 dark:hover:text-sky-400 font-medium transition-colors">
+                                        <i class="fas fa-user-circle w-4 shrink-0 text-center text-slate-400 dark:text-slate-500" aria-hidden="true"></i> Informasi Saya
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="{{ route('user.profile') }}#certificates"
+                                        class="flex items-center gap-3 p-2.5 rounded-xl text-slate-700 dark:text-slate-200 hover:bg-[#13416B]/10 hover:text-[#13416B] dark:hover:bg-slate-700 dark:hover:text-sky-400 font-medium transition-colors">
+                                        <i class="fas fa-award w-4 shrink-0 text-center text-slate-400 dark:text-slate-500" aria-hidden="true"></i> Sertifikat Saya
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="{{ route('user.profile') }}#pengaturan"
+                                        class="flex items-center gap-3 p-2.5 rounded-xl text-slate-700 dark:text-slate-200 hover:bg-[#13416B]/10 hover:text-[#13416B] dark:hover:bg-slate-700 dark:hover:text-sky-400 font-medium transition-colors">
+                                        <i class="fas fa-sliders-h w-4 shrink-0 text-center text-slate-400 dark:text-slate-500" aria-hidden="true"></i> Pengaturan
+                                    </a>
+                                </li>
+                            @else
+                                <!-- Tombol Ganti Dark Mode di User Dropdown (Role Admin) -->
+                                <li>
+                                    <button type="button" @click="toggleDarkMode()"
+                                        class="flex w-full cursor-pointer items-center justify-between p-2.5 rounded-xl text-slate-700 dark:text-slate-200 hover:bg-[#13416B]/10 hover:text-[#13416B] dark:hover:bg-slate-700 dark:hover:text-sky-400 font-medium transition-colors text-left">
+                                        <span class="flex items-center gap-3">
+                                            <i class="fas fa-moon w-4 shrink-0 text-center text-slate-400 dark:text-slate-500" x-show="!isDarkMode" aria-hidden="true"></i>
+                                            <i class="fas fa-sun w-4 shrink-0 text-center text-amber-400" x-show="isDarkMode" aria-hidden="true"></i>
+                                            <span>Mode Gelap</span>
+                                        </span>
+                                        <span class="text-xs px-2.5 py-0.5 rounded-full font-bold"
+                                            :class="isDarkMode ? 'bg-sky-500/20 text-sky-400' : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300'"
+                                            x-text="isDarkMode ? 'Aktif' : 'Mati'"></span>
+                                    </button>
+                                </li>
                             @endif
 
                             <li class="my-1 border-t border-slate-100"></li>
