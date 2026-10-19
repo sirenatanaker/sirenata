@@ -196,15 +196,16 @@
                     open: false,          // modal lihat kurikulum
                     confirmOpen: false,   // alert konfirmasi daftar
                     submitting: false,
-                    expanded: 0,
+                    expandedSections: [0],
                     show(id) {
                         this.selected = this.courses[id];
-                        this.expanded = 0;
+                        this.expandedSections = [0];
                         this.submitting = false;
                         this.open = true;
                     },
                     askEnroll(id) {
                         this.selected = this.courses[id];
+                        this.expandedSections = [0];
                         this.submitting = false;
                         this.confirmOpen = true;
                     },
@@ -219,8 +220,29 @@
                     onEscape() {
                         this.confirmOpen ? this.cancelConfirm() : this.close();
                     },
+                    isExpanded(i) {
+                        return this.expandedSections.includes(i);
+                    },
+                    toggleSection(i) {
+                        if (this.isExpanded(i)) {
+                            this.expandedSections = this.expandedSections.filter(idx => idx !== i);
+                        } else {
+                            this.expandedSections.push(i);
+                        }
+                    },
+                    allExpanded() {
+                        return this.selected && this.selected.sections && this.selected.sections.length > 0 && this.expandedSections.length === this.selected.sections.length;
+                    },
+                    toggleAll() {
+                        if (!this.selected || !this.selected.sections) return;
+                        if (this.allExpanded()) {
+                            this.expandedSections = [];
+                        } else {
+                            this.expandedSections = this.selected.sections.map((_, i) => i);
+                        }
+                    },
                     icon(type) {
-                        return { video: 'fa-play-circle', document: 'fa-file-alt', text: 'fa-align-left' }[type] ?? 'fa-align-left';
+                        return { video: 'fa-play', document: 'fa-file-alt', text: 'fa-book-open' }[type] ?? 'fa-book-open';
                     }
                 }"
                 x-effect="document.body.classList.toggle('overflow-hidden', open || confirmOpen)"
@@ -307,16 +329,16 @@
 
                 {{-- ========== MODAL: RINGKASAN KURIKULUM + KONFIRMASI ========== --}}
                 <div x-show="open" x-cloak style="display: none;"
-                     class="fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:p-4"
+                     class="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4"
                      role="dialog" aria-modal="true" aria-labelledby="enroll-title">
 
                     {{-- Backdrop --}}
                     <div x-show="open"
                          x-transition.opacity.duration.200ms
                          @click="close()"
-                         class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"></div>
+                         class="absolute inset-0 bg-slate-900/50 backdrop-blur-sm"></div>
 
-                    {{-- Panel (bottom-sheet di mobile, dialog di desktop) --}}
+                    {{-- Panel Modal (bottom-sheet di mobile, dialog di desktop) --}}
                     <div x-show="open"
                          x-transition:enter="transition ease-out duration-200"
                          x-transition:enter-start="opacity-0 translate-y-6 sm:translate-y-2 sm:scale-95"
@@ -324,107 +346,151 @@
                          x-transition:leave="transition ease-in duration-150"
                          x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
                          x-transition:leave-end="opacity-0 translate-y-6 sm:scale-95"
-                         class="relative w-full sm:max-w-lg max-h-[92vh] sm:max-h-[88vh] flex flex-col bg-white rounded-t-2xl sm:rounded-2xl shadow-2xl overflow-hidden">
+                         class="relative w-full sm:max-w-xl md:max-w-2xl max-h-[92vh] sm:max-h-[85vh] flex flex-col bg-white rounded-t-2xl sm:rounded-2xl shadow-2xl border border-slate-100 overflow-hidden">
 
                         <template x-if="selected">
                             <div class="flex flex-col min-h-0 flex-1">
 
-                                {{-- Hero thumbnail --}}
-                                <div class="relative h-36 sm:h-44 shrink-0 bg-gradient-to-r from-[#13416B] to-[#0f3354] overflow-hidden">
-                                    <template x-if="selected.thumbnail">
-                                        <img :src="selected.thumbnail" alt="" class="w-full h-full object-cover" />
-                                    </template>
-                                    <template x-if="!selected.thumbnail">
-                                        <div class="w-full h-full flex items-center justify-center">
-                                            <i class="fas fa-graduation-cap text-4xl text-white/30"></i>
+                                {{-- Drag handle bar untuk mobile --}}
+                                <div class="sm:hidden pt-2.5 pb-1 flex justify-center bg-white shrink-0">
+                                    <div class="w-10 h-1 bg-slate-200 rounded-full"></div>
+                                </div>
+
+                                {{-- Header Modal: Title, Thumbnail, Meta & Close Button --}}
+                                <div class="px-5 sm:px-6 pt-4 sm:pt-5 pb-4 border-b border-slate-100 bg-white shrink-0">
+                                    <div class="flex items-start justify-between gap-3.5 sm:gap-4">
+                                        <div class="flex items-start gap-3.5 sm:gap-4 flex-1 min-w-0">
+                                            <template x-if="selected.thumbnail">
+                                                <div class="shrink-0 w-24 sm:w-36 aspect-video rounded-md overflow-hidden bg-slate-100">
+                                                    <img :src="selected.thumbnail" :alt="selected.name" class="w-full h-full object-cover" />
+                                                </div>
+                                            </template>
+                                            <div class="flex-1 min-w-0">
+                                                <h3 id="enroll-title" class="text-base sm:text-lg font-bold text-slate-900 leading-snug line-clamp-2"
+                                                    :title="selected.name" x-text="selected.name"></h3>
+                                                
+                                                <p class="text-xs text-slate-500 leading-relaxed mt-1 line-clamp-2"
+                                                   x-show="selected.description" x-text="selected.description"></p>
+                                            </div>
                                         </div>
-                                    </template>
-                                    <div class="absolute inset-0 bg-gradient-to-t from-slate-900/70 via-slate-900/10 to-transparent pointer-events-none"></div>
-                                    <button type="button" @click="close()" aria-label="Tutup"
-                                        class="absolute top-3 right-3 w-8 h-8 flex items-center justify-center rounded-full bg-white/90 text-slate-600 hover:text-slate-900 hover:bg-white shadow-md transition-colors">
-                                        <i class="fas fa-times text-sm"></i>
-                                    </button>
-                                    <div class="absolute bottom-3 left-5 flex flex-wrap gap-1.5">
-                                        <span class="px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white bg-white/20 border border-white/30 rounded backdrop-blur-sm"
-                                            x-text="selected.category"></span>
-                                        <span class="px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white bg-amber-500/90 border border-amber-400/50 rounded backdrop-blur-sm"
-                                            x-text="selected.audienceLabel"></span>
+                                        <button type="button" @click="close()" aria-label="Tutup"
+                                                class="shrink-0 w-8 h-8 -mr-1 rounded-lg flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors">
+                                            <i class="fas fa-times text-sm"></i>
+                                        </button>
+                                    </div>
+
+                                    {{-- Meta Stats Ribbon --}}
+                                    <div class="flex flex-wrap items-center gap-3 sm:gap-5 mt-3.5 pt-3 border-t border-slate-100 text-xs text-slate-500">
+                                        <div class="inline-flex items-center gap-1.5 font-medium">
+                                            <i class="far fa-folder-open text-[#13416B]/70 text-xs"></i>
+                                            <span><strong class="font-semibold text-slate-800" x-text="selected.modules"></strong> Modul</span>
+                                        </div>
+                                        <span class="text-slate-200">•</span>
+                                        <div class="inline-flex items-center gap-1.5 font-medium">
+                                            <i class="far fa-file-alt text-[#13416B]/70 text-xs"></i>
+                                            <span><strong class="font-semibold text-slate-800" x-text="selected.topics"></strong> Materi Topik</span>
+                                        </div>
+                                        <span class="text-slate-200">•</span>
+                                        <div class="inline-flex items-center gap-1.5 font-medium">
+                                            <i class="far fa-user text-[#13416B]/70 text-xs"></i>
+                                            <span><strong class="font-semibold text-slate-800" x-text="selected.students.toLocaleString('id-ID')"></strong> Peserta</span>
+                                        </div>
                                     </div>
                                 </div>
 
-                                {{-- Judul --}}
-                                <div class="px-5 pt-4 pb-3 border-b border-slate-100">
-                                    <h3 id="enroll-title" class="text-lg font-bold text-slate-800 leading-snug" x-text="selected.name"></h3>
-
-                                    <div class="grid grid-cols-2 gap-2 mt-3 text-center">
-                                        <div class="bg-slate-50 rounded-lg py-2 border border-slate-100">
-                                            <div class="text-base font-extrabold text-[#13416B] flex items-center justify-center gap-1.5">
-                                                <i class="fas fa-layer-group text-xs text-slate-400"></i>
-                                                <span x-text="selected.modules"></span>
-                                            </div>
-                                            <div class="text-[10px] font-semibold text-slate-500 uppercase tracking-wide">Modul</div>
-                                        </div>
-                                        <div class="bg-slate-50 rounded-lg py-2 border border-slate-100">
-                                            <div class="text-base font-extrabold text-[#13416B] flex items-center justify-center gap-1.5">
-                                                <i class="fas fa-users text-xs text-slate-400"></i>
-                                                <span x-text="selected.students.toLocaleString('id-ID')"></span>
-                                            </div>
-                                            <div class="text-[10px] font-semibold text-slate-500 uppercase tracking-wide">Peserta</div>
-                                        </div>
+                                {{-- Body: Daftar Kurikulum (Scrollable) --}}
+                                <div class="flex-1 overflow-y-auto px-5 sm:px-6 py-4 sm:py-5 custom-scrollbar bg-slate-50/40">
+                                    <div class="mb-3.5">
+                                        <h4 class="text-xs font-bold uppercase tracking-wider text-slate-500">Struktur Kurikulum</h4>
+                                        <p class="text-[11px] text-slate-400 mt-0.5">Daftar modul dan materi pembelajaran</p>
                                     </div>
-                                </div>
 
-                                {{-- Isi: deskripsi + kurikulum (scrollable) --}}
-                                <div class="flex-1 overflow-y-auto px-5 py-4 custom-scrollbar">
-                                    <p class="text-sm text-slate-600 leading-relaxed mb-5"
-                                       x-show="selected.description" x-text="selected.description"></p>
-
-                                    <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">Yang akan kamu pelajari</h4>
-
-                                    <div class="space-y-2">
+                                    <div class="space-y-2.5">
                                         <template x-for="(section, i) in selected.sections" :key="i">
-                                            <div class="border border-slate-200 rounded-xl overflow-hidden">
+                                            <div class="bg-white rounded-xl border transition-all duration-200 overflow-hidden"
+                                                 :class="isExpanded(i) ? 'border-slate-300 shadow-xs' : 'border-slate-200/80 hover:border-slate-300'">
+                                                
                                                 <button type="button"
-                                                        @click="expanded = (expanded === i ? null : i)"
-                                                        class="w-full flex items-center gap-3 px-3.5 py-3 text-left hover:bg-slate-50 transition-colors"
-                                                        :aria-expanded="expanded === i">
-                                                    <span class="shrink-0 w-6 h-6 rounded-full bg-[#13416B] text-white text-[11px] font-bold flex items-center justify-center" x-text="i + 1"></span>
-                                                    <span class="flex-1 min-w-0 text-sm font-semibold text-slate-800 leading-snug line-clamp-2 break-words" :title="section.name" x-text="section.name"></span>
-                                                    <span class="shrink-0 text-[11px] font-medium text-slate-400" x-text="section.contents.length + ' topik'"></span>
-                                                    <i class="fas fa-chevron-down text-[10px] text-slate-400 transition-transform duration-200"
-                                                       :class="{ 'rotate-180': expanded === i }"></i>
+                                                        @click="toggleSection(i)"
+                                                        class="w-full flex items-center gap-3 px-3.5 sm:px-4 py-3 text-left transition-colors cursor-pointer select-none"
+                                                        :class="isExpanded(i) ? 'bg-slate-50/50' : 'hover:bg-slate-50/40'"
+                                                        :aria-expanded="isExpanded(i)">
+                                                    
+                                                    <span class="shrink-0 w-6 h-6 sm:w-7 sm:h-7 rounded-lg text-xs font-semibold flex items-center justify-center transition-colors"
+                                                          :class="isExpanded(i) ? 'bg-[#13416B] text-white shadow-xs' : 'bg-slate-100 text-slate-600'"
+                                                          x-text="i + 1"></span>
+
+                                                    <span class="flex-1 min-w-0 text-xs sm:text-sm font-semibold text-slate-800 leading-snug line-clamp-2 break-words"
+                                                          :title="section.name"
+                                                          x-text="section.name"></span>
+
+                                                    <div class="shrink-0 flex items-center gap-2">
+                                                        <span class="px-2 py-0.5 rounded-md text-[10px] sm:text-[11px] font-medium bg-slate-100 text-slate-500"
+                                                              x-text="section.contents.length + ' materi'"></span>
+                                                        <i class="fas fa-chevron-down text-[10px] text-slate-400 transition-transform duration-200"
+                                                           :class="{ 'rotate-180 text-slate-600': isExpanded(i) }"></i>
+                                                    </div>
                                                 </button>
 
-                                                <ul x-show="expanded === i" x-transition.opacity.duration.150ms
-                                                    class="border-t border-slate-100 bg-slate-50/60 px-3.5 py-2 space-y-1.5">
+                                                <div x-show="isExpanded(i)"
+                                                     x-collapse
+                                                     x-cloak
+                                                     class="border-t border-slate-100 bg-slate-50/30 p-2.5 sm:p-3 space-y-1.5">
+                                                    
                                                     <template x-for="(content, j) in section.contents" :key="j">
-                                                        <li class="flex items-start gap-2.5 text-xs text-slate-600">
-                                                            <i class="fas mt-0.5 w-3.5 text-center text-slate-400" :class="icon(content.type)"></i>
-                                                            <span x-text="content.name"></span>
-                                                        </li>
+                                                        <div class="flex items-center gap-2.5 px-3 py-2 rounded-lg bg-white border border-slate-100 hover:border-slate-200 transition-colors text-xs">
+                                                            <span class="w-6 h-6 rounded-md flex items-center justify-center shrink-0 text-[10px]"
+                                                                  :class="{
+                                                                      'bg-sky-50 text-sky-600': content.type === 'video',
+                                                                      'bg-emerald-50 text-emerald-600': content.type === 'document',
+                                                                      'bg-slate-100 text-slate-600': content.type !== 'video' && content.type !== 'document'
+                                                                  }">
+                                                                <i class="fas" :class="icon(content.type)"></i>
+                                                            </span>
+
+                                                            <span class="flex-1 min-w-0 font-medium text-slate-700 leading-snug truncate"
+                                                                  :title="content.name"
+                                                                  x-text="content.name"></span>
+
+                                                            <span class="shrink-0 text-[10px] font-medium text-slate-400 capitalize"
+                                                                  x-text="content.type === 'video' ? 'Video' : (content.type === 'document' ? 'Dokumen' : 'Teks')"></span>
+                                                        </div>
                                                     </template>
-                                                    <li x-show="section.contents.length === 0" class="text-xs italic text-slate-400">Belum ada topik pada modul ini.</li>
-                                                </ul>
+
+                                                    <div x-show="section.contents.length === 0" class="py-2.5 text-center text-xs italic text-slate-400">
+                                                        Belum ada topik materi pada modul ini.
+                                                    </div>
+                                                </div>
                                             </div>
                                         </template>
 
-                                        <p x-show="selected.sections.length === 0" class="text-sm italic text-slate-400 text-center py-6">
-                                            Kurikulum untuk kursus ini belum tersedia.
-                                        </p>
+                                        <div x-show="selected.sections.length === 0" class="py-12 text-center bg-white rounded-xl border border-dashed border-slate-200">
+                                            <div class="w-12 h-12 mx-auto mb-3 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center">
+                                                <i class="fas fa-book-open text-base"></i>
+                                            </div>
+                                            <p class="text-sm font-semibold text-slate-700">Kurikulum Belum Tersedia</p>
+                                            <p class="text-xs text-slate-400 mt-1">Materi untuk kursus ini sedang dalam tahap penyusunan.</p>
+                                        </div>
                                     </div>
                                 </div>
 
-                                {{-- Footer: aksi --}}
-                                <div class="px-5 py-4 border-t border-slate-100 bg-white">
-                                    <div class="flex flex-col-reverse sm:flex-row gap-2 sm:justify-end">
-                                        <button type="button" @click="close()"
-                                                class="px-5 py-2.5 text-sm font-bold rounded-xl text-slate-600 bg-white border border-slate-300 hover:bg-slate-50 transition-colors">
-                                            Tutup
-                                        </button>
-                                        <button type="button" @click="confirmOpen = true"
-                                                class="px-5 py-2.5 text-sm font-bold rounded-xl text-white bg-amber-500 border border-amber-500 hover:bg-amber-600 shadow-sm transition-colors">
-                                            Daftar Kursus Ini
-                                        </button>
+                                {{-- Footer Modal: Aksi --}}
+                                <div class="px-5 sm:px-6 py-3.5 sm:py-4 border-t border-slate-100 bg-white shrink-0">
+                                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2.5 sm:gap-3">
+                                        <p class="text-xs sm:text-sm text-slate-600 font-medium text-center sm:text-left">
+                                            Apakah Anda ingin mendaftar kursus ini?
+                                        </p>
+                                        <div class="flex items-center gap-2 justify-end w-full sm:w-auto">
+                                            <button type="button" @click="close()"
+                                                    class="flex-1 sm:flex-none px-4 py-2.5 text-xs sm:text-sm font-semibold rounded-xl text-slate-600 bg-white border border-slate-200 hover:bg-slate-50 transition-colors">
+                                                Tutup
+                                            </button>
+                                            <button type="button" @click="confirmOpen = true"
+                                                    class="flex-1 sm:flex-none px-5 py-2.5 text-xs sm:text-sm font-semibold rounded-xl text-white bg-amber-500 hover:bg-amber-600 shadow-sm transition-all inline-flex items-center justify-center gap-1.5 text-center">
+                                                <span>Daftar Kursus Ini</span>
+                                                <i class="fas fa-arrow-up-right-from-square text-[11px] sm:text-xs"></i>
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -440,7 +506,7 @@
                     <div x-show="confirmOpen"
                          x-transition.opacity.duration.200ms
                          @click="cancelConfirm()"
-                         class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"></div>
+                         class="absolute inset-0 bg-slate-900/50 backdrop-blur-sm"></div>
 
                     <div x-show="confirmOpen"
                          x-transition:enter="transition ease-out duration-200"
@@ -451,12 +517,12 @@
                          x-transition:leave-end="opacity-0 scale-95"
                          class="relative w-full max-w-md bg-white rounded-2xl shadow-2xl p-6 sm:p-7 text-center">
 
-                        <div class="w-14 h-14 mx-auto mb-4 rounded-full bg-amber-100 text-amber-500 border border-amber-200 flex items-center justify-center text-2xl">
+                        <div class="w-12 h-12 mx-auto mb-3.5 rounded-full bg-amber-50 text-amber-500 border border-amber-100 flex items-center justify-center text-xl">
                             <i class="fas fa-question"></i>
                         </div>
 
-                        <h3 id="confirm-title" class="text-lg font-bold text-slate-800 mb-2">Daftar ke kursus ini?</h3>
-                        <p class="text-sm text-slate-500 leading-relaxed mb-6">
+                        <h3 id="confirm-title" class="text-base sm:text-lg font-bold text-slate-800 mb-1.5">Daftar ke kursus ini?</h3>
+                        <p class="text-xs sm:text-sm text-slate-500 leading-relaxed mb-6">
                             Kamu akan mendaftar ke
                             <span class="font-semibold text-slate-700" x-text="selected ? selected.name : ''"></span>
                             dan kursus ini akan langsung masuk ke daftar Kursus Saya.
@@ -467,11 +533,11 @@
                                 @csrf
                                 <div class="flex flex-col-reverse sm:flex-row gap-2">
                                     <button type="button" @click="cancelConfirm()" :disabled="submitting"
-                                            class="flex-1 px-4 py-2.5 text-sm font-bold rounded-xl text-slate-600 bg-white border border-slate-300 hover:bg-slate-50 transition-colors disabled:opacity-50">
+                                            class="flex-1 px-4 py-2.5 text-xs sm:text-sm font-semibold rounded-xl text-slate-600 bg-white border border-slate-200 hover:bg-slate-50 transition-colors disabled:opacity-50">
                                         Batal
                                     </button>
                                     <button type="submit" :disabled="submitting"
-                                            class="flex-1 px-4 py-2.5 text-sm font-bold rounded-xl text-white bg-amber-500 border border-amber-500 hover:bg-amber-600 shadow-sm transition-colors inline-flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed">
+                                            class="flex-1 px-4 py-2.5 text-xs sm:text-sm font-semibold rounded-xl text-white bg-amber-500 hover:bg-amber-600 shadow-sm transition-colors inline-flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed">
                                         <svg x-show="submitting" class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
                                             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                                             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
