@@ -255,12 +255,12 @@
                                     <!-- Light Mode -->
                                     <button type="button" @click="setDarkMode(false)"
                                         class="text-left p-4 rounded-xl border-2 transition-all flex flex-col justify-between"
-                                        :class="!isDark ? 'border-[#13416B] bg-[#13416B]/5 ring-2 ring-[#13416B]/20 dark:border-sky-500' : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-slate-300 dark:hover:border-slate-600'">
+                                        :class="!isDark ? 'border-[#13416B] bg-[#13416B]/5 ring-2 ring-[#13416B]/20 dark:border-white' : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-slate-300 dark:hover:border-slate-600'">
                                         <div class="flex items-center justify-between mb-2">
                                             <div class="w-8 h-8 rounded-lg bg-amber-50 border border-amber-200 flex items-center justify-center">
                                                 <i class="fas fa-sun text-amber-500 text-sm"></i>
                                             </div>
-                                            <i class="fas fa-check-circle text-base text-[#13416B] dark:text-sky-400" x-show="!isDark"></i>
+                                            <i class="fas fa-check-circle text-base text-[#13416B] dark:text-white" x-show="!isDark"></i>
                                         </div>
                                         <div>
                                             <p class="font-bold text-sm text-slate-800 dark:text-slate-100">Mode Terang</p>
@@ -271,12 +271,12 @@
                                     <!-- Dark Mode -->
                                     <button type="button" @click="setDarkMode(true)"
                                         class="text-left p-4 rounded-xl border-2 transition-all flex flex-col justify-between"
-                                        :class="isDark ? 'border-[#13416B] bg-[#13416B]/5 ring-2 ring-[#13416B]/20 dark:border-sky-500 dark:bg-slate-800/80' : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-slate-300 dark:hover:border-slate-600'">
+                                        :class="isDark ? 'border-[#13416B] bg-[#13416B]/5 ring-2 ring-[#13416B]/20 dark:border-white dark:bg-white/10 dark:ring-white/20' : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-slate-300 dark:hover:border-slate-600'">
                                         <div class="flex items-center justify-between mb-2">
                                             <div class="w-8 h-8 rounded-lg bg-slate-900 border border-slate-700 flex items-center justify-center">
-                                                <i class="fas fa-moon text-sky-400 text-sm"></i>
+                                                <i class="fas fa-moon text-white text-sm"></i>
                                             </div>
-                                            <i class="fas fa-check-circle text-base text-[#13416B] dark:text-sky-400" x-show="isDark"></i>
+                                            <i class="fas fa-check-circle text-base text-[#13416B] dark:text-white" x-show="isDark"></i>
                                         </div>
                                         <div>
                                             <p class="font-bold text-sm text-slate-800 dark:text-slate-100">Mode Gelap (Dark Mode)</p>
@@ -417,7 +417,7 @@
                             <div class="sticky top-6">
                                 <div class="flex items-center justify-between mb-2.5">
                                     <span class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
-                                        <i class="fas fa-eye text-[#13416B] dark:text-sky-400"></i> Pratinjau Langsung
+                                        <i class="fas fa-eye text-[#13416B] dark:text-white"></i> Pratinjau Langsung
                                     </span>
                                     <div class="flex items-center gap-2">
                                         <span x-show="savedFeedback" x-transition.opacity.duration.300ms
@@ -447,7 +447,7 @@
                                         }">
                                         <span class="px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded-md border"
                                             :class="{
-                                                'bg-sky-500/10 text-sky-400 border-sky-500/20': isDark,
+                                                'bg-white/10 text-white border-white/20': isDark,
                                                 'bg-[#13416B]/10 text-[#13416B] border-[#13416B]/20': !isDark
                                             }">
                                             Topik Pembelajaran

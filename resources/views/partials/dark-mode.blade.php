@@ -131,6 +131,14 @@
         color: #f8fafc !important;
     }
 
+    /* Brand Logo & Text (Reference: Landing Page Footer -> brightness-0 invert & pure white text) */
+    html.dark img[alt="logo"],
+    html.dark img[alt="SIRENATA Logo"],
+    html.dark img[alt="SIRENATA"],
+    html.dark .sirenata-logo {
+        filter: brightness(0) invert(1) !important;
+    }
+
     /* Form Controls & Inputs */
     html.dark input:not([type="submit"]):not([type="button"]):not([type="checkbox"]):not([type="radio"]),
     html.dark select,
@@ -143,8 +151,8 @@
     html.dark input:not([type="submit"]):not([type="button"]):focus,
     html.dark select:focus,
     html.dark textarea:focus {
-        border-color: #38bdf8 !important;
-        box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.2) !important;
+        border-color: #ffffff !important;
+        box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.15) !important;
     }
 
     html.dark input::placeholder,
@@ -174,7 +182,7 @@
     html.dark ul.space-y-1 a:hover,
     html.dark ul.space-y-1 button:hover {
         background-color: #1a243a !important;
-        color: #38bdf8 !important;
+        color: #ffffff !important;
     }
 
     /* Tables */
@@ -202,20 +210,51 @@
     html.dark nav[aria-label="Breadcrumb"] span {
         color: #94a3b8 !important;
     }
+    html.dark nav[aria-label="Breadcrumb"] a:hover {
+        color: #ffffff !important;
+    }
 
-    /* Accent & Brand Colors in Dark */
+    /* Accent & Brand Colors in Dark (Pure White, No Neon Blue) */
     html.dark a.text-\[\#13416B\],
-    html.dark .text-\[\#13416B\] {
-        color: #38bdf8 !important;
+    html.dark .text-\[\#13416B\],
+    html.dark span.text-\[\#13416B\],
+    html.dark h1.text-\[\#13416B\],
+    html.dark h2.text-\[\#13416B\],
+    html.dark h3.text-\[\#13416B\],
+    html.dark h4.text-\[\#13416B\],
+    html.dark p.text-\[\#13416B\],
+    html.dark svg.text-\[\#13416B\],
+    html.dark i.text-\[\#13416B\] {
+        color: #ffffff !important;
     }
 
-    html.dark .bg-\[\#13416B\]\/10 {
-        background-color: rgba(56, 189, 248, 0.15) !important;
+    html.dark .hover\:text-\[\#13416B\]:hover,
+    html.dark a:hover .group-hover\:text-\[\#13416B\],
+    html.dark .group:hover .group-hover\:text-\[\#13416B\] {
+        color: #ffffff !important;
     }
 
+    html.dark .bg-\[\#13416B\]\/5,
+    html.dark .bg-\[\#13416B\]\/10,
+    html.dark .bg-\[\#13416B\]\/20 {
+        background-color: rgba(255, 255, 255, 0.08) !important;
+    }
+
+    html.dark .hover\:bg-\[\#13416B\]\/10:hover,
+    html.dark .hover\:bg-\[\#13416B\]\/20:hover {
+        background-color: rgba(255, 255, 255, 0.12) !important;
+    }
+
+    html.dark .border-\[\#13416B\],
     html.dark .border-\[\#13416B\]\/20,
     html.dark .border-\[\#13416B\]\/30 {
-        border-color: rgba(56, 189, 248, 0.3) !important;
+        border-color: rgba(255, 255, 255, 0.3) !important;
+    }
+
+    html.dark .ring-\[\#13416B\],
+    html.dark .ring-\[\#13416B\]\/20,
+    html.dark .ring-\[\#13416B\]\/30 {
+        --tw-ring-color: rgba(255, 255, 255, 0.25) !important;
     }
 
     /* Modals & Dialogs */

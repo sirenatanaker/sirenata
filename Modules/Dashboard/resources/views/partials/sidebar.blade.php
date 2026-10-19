@@ -37,8 +37,8 @@
                 <!-- Logo & Brand Name (Hanya muncul saat sidebar terbuka di desktop/tablet) -->
                 <div x-show="sidebarOpen" x-transition.opacity.duration.200ms class="flex items-center overflow-hidden whitespace-nowrap">
                     <a href="{{ route('landingpage.index') }}" class="flex items-center gap-2.5 group">
-                        <img src="{{ asset('images/logo.png') }}" class="h-8 w-auto shrink-0 group-hover:scale-105 transition-transform" alt="logo">
-                        <span class="text-lg sm:text-xl font-extrabold tracking-tight text-[#13416B]">SIRENATA</span>
+                        <img src="{{ asset('images/logo.png') }}" class="h-8 w-auto shrink-0 group-hover:scale-105 transition-transform dark:brightness-0 dark:invert" alt="logo">
+                        <span class="text-lg sm:text-xl font-extrabold tracking-tight text-[#13416B] dark:text-white">SIRENATA</span>
                     </a>
                 </div>
             </div>
@@ -84,8 +84,8 @@
                 <!-- Logo & Brand Name (Hanya muncul saat sidebar terbuka di desktop/tablet) -->
                 <div x-show="sidebarOpen" x-transition.opacity.duration.200ms class="flex items-center overflow-hidden whitespace-nowrap">
                     <a href="{{ route('landingpage.index') }}" class="flex items-center gap-2.5 group">
-                        <img src="{{ asset('images/logo.png') }}" class="h-8 w-auto shrink-0 group-hover:scale-105 transition-transform" alt="logo">
-                        <span class="text-lg sm:text-xl font-extrabold tracking-tight text-[#13416B]">SIRENATA</span>
+                        <img src="{{ asset('images/logo.png') }}" class="h-8 w-auto shrink-0 group-hover:scale-105 transition-transform dark:brightness-0 dark:invert" alt="logo">
+                        <span class="text-lg sm:text-xl font-extrabold tracking-tight text-[#13416B] dark:text-white">SIRENATA</span>
                     </a>
                 </div>
             </div>
@@ -93,8 +93,8 @@
             <!-- Header Sidebar Mobile (Drawer Header dengan Tombol Tutup X) -->
             <div class="flex md:hidden items-center justify-between px-5 h-[72px] border-b border-slate-100 shrink-0">
                 <a href="{{ route('landingpage.index') }}" class="flex items-center gap-2.5 group">
-                    <img src="{{ asset('images/logo.png') }}" class="h-8 w-auto shrink-0" alt="logo">
-                    <span class="text-lg font-extrabold tracking-tight text-[#13416B]">SIRENATA</span>
+                    <img src="{{ asset('images/logo.png') }}" class="h-8 w-auto shrink-0 dark:brightness-0 dark:invert" alt="logo">
+                    <span class="text-lg font-extrabold tracking-tight text-[#13416B] dark:text-white">SIRENATA</span>
                 </a>
                 <button @click="sidebarOpen = false" type="button" aria-label="Tutup menu"
                     class="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors">

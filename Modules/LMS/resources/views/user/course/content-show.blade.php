@@ -110,7 +110,7 @@
                     <a href="{{ route('user.course.my-course.detail', $slug) }}"
                         class="group flex flex-1 min-w-0 items-center gap-3 text-sm font-medium text-slate-500 hover:text-[#13416B] transition-colors"
                         :class="{
-                            '!text-slate-400 hover:!text-sky-400': isDark
+                            '!text-slate-400 hover:!text-white': isDark
                         }">
 
                         {{-- Lingkaran Ikon Panah --}}
@@ -134,7 +134,7 @@
                             <span
                                 class="font-bold text-slate-700 truncate group-hover:text-[#13416B] transition-colors"
                                 :class="{
-                                    '!text-slate-200 group-hover:!text-sky-400': isDark
+                                    '!text-slate-200 group-hover:!text-white': isDark
                                 }">
                                 {{ data_get($course, 'course_name', 'Kursus') }}
                             </span>
@@ -153,7 +153,7 @@
                                 title="Sesuaikan tampilan baca">
                                 <i class="fas fa-font text-xs"
                                     :class="{
-                                        'text-sky-400': isDark,
+                                        'text-white': isDark,
                                         'text-[#13416B]': !isDark
                                     }"></i>
                                 <span class="hidden sm:inline">Tampilan</span>
@@ -171,7 +171,7 @@
 
                                 <div class="flex items-center justify-between pb-2.5 mb-3 border-b border-slate-100 dark:border-slate-800">
                                     <h4 class="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-200 flex items-center gap-1.5">
-                                        <i class="fas fa-sliders-h text-[#13416B] dark:text-sky-400"></i> Tampilan Baca
+                                        <i class="fas fa-sliders-h text-[#13416B] dark:text-white"></i> Tampilan Baca
                                     </h4>
                                     <button type="button" @click="resetPrefs()" class="text-[11px] font-semibold text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 flex items-center gap-1">
                                         <i class="fas fa-undo text-[10px]"></i> Reset
@@ -182,16 +182,16 @@
                                 <div class="mb-3">
                                     <div class="flex items-center justify-between p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800">
                                         <div class="flex items-center gap-2">
-                                            <i class="fas fa-moon text-xs" :class="isDark ? 'text-sky-400' : 'text-slate-400'"></i>
+                                            <i class="fas fa-moon text-xs" :class="isDark ? 'text-white' : 'text-slate-400'"></i>
                                             <span class="text-xs font-bold text-slate-700 dark:text-slate-200">Mode Gelap</span>
                                         </div>
                                         <button type="button" @click="toggleDarkMode()"
                                             class="relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none"
-                                            :class="isDark ? 'bg-sky-500' : 'bg-slate-300 dark:bg-slate-600'"
+                                            :class="isDark ? 'bg-white' : 'bg-slate-300 dark:bg-slate-600'"
                                             role="switch" :aria-checked="isDark">
                                             <span aria-hidden="true"
-                                                class="pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"
-                                                :class="isDark ? 'translate-x-4' : 'translate-x-0'"></span>
+                                                class="pointer-events-none inline-block h-4 w-4 transform rounded-full shadow ring-0 transition duration-200 ease-in-out"
+                                                :class="isDark ? 'translate-x-4 bg-slate-900' : 'translate-x-0 bg-white'"></span>
                                         </button>
                                     </div>
                                 </div>
@@ -202,22 +202,22 @@
                                     <div class="grid grid-cols-4 gap-1 bg-slate-100 dark:bg-slate-800 p-1 rounded-xl">
                                         <button type="button" @click="setPref('fontSize', 'sm')"
                                             class="py-1 rounded-lg text-xs font-semibold text-center transition-colors"
-                                            :class="readerPrefs.fontSize === 'sm' ? 'bg-white dark:bg-slate-700 text-[#13416B] dark:text-sky-400 shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'">
+                                            :class="readerPrefs.fontSize === 'sm' ? 'bg-white dark:bg-slate-700 text-[#13416B] dark:text-white shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'">
                                             14px
                                         </button>
                                         <button type="button" @click="setPref('fontSize', 'normal')"
                                             class="py-1 rounded-lg text-xs font-semibold text-center transition-colors"
-                                            :class="readerPrefs.fontSize === 'normal' ? 'bg-white dark:bg-slate-700 text-[#13416B] dark:text-sky-400 shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'">
+                                            :class="readerPrefs.fontSize === 'normal' ? 'bg-white dark:bg-slate-700 text-[#13416B] dark:text-white shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'">
                                             16px
                                         </button>
                                         <button type="button" @click="setPref('fontSize', 'lg')"
                                             class="py-1 rounded-lg text-xs font-semibold text-center transition-colors"
-                                            :class="readerPrefs.fontSize === 'lg' ? 'bg-white dark:bg-slate-700 text-[#13416B] dark:text-sky-400 shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'">
+                                            :class="readerPrefs.fontSize === 'lg' ? 'bg-white dark:bg-slate-700 text-[#13416B] dark:text-white shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'">
                                             18px
                                         </button>
                                         <button type="button" @click="setPref('fontSize', 'xl')"
                                             class="py-1 rounded-lg text-xs font-semibold text-center transition-colors"
-                                            :class="readerPrefs.fontSize === 'xl' ? 'bg-white dark:bg-slate-700 text-[#13416B] dark:text-sky-400 shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'">
+                                            :class="readerPrefs.fontSize === 'xl' ? 'bg-white dark:bg-slate-700 text-[#13416B] dark:text-white shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'">
                                             20px
                                         </button>
                                     </div>
@@ -286,7 +286,7 @@
                         <button type="button" onclick="window.startContentReaderTour && window.startContentReaderTour()"
                             class="inline-flex shrink-0 items-center gap-1.5 px-3 py-1.5 text-[11px] font-bold text-[#13416B] bg-[#13416B]/10 border border-[#13416B]/20 rounded-lg hover:bg-[#13416B]/20 transition-colors"
                             :class="{
-                                '!bg-[#263346] !border-[#334155] !text-sky-300': isDark
+                                '!bg-[#263346] !border-[#334155] !text-white': isDark
                             }">
                             <i class="fas fa-route"></i> Panduan
                         </button>
@@ -302,7 +302,7 @@
                         <span
                             class="px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-[#13416B] bg-[#13416B]/10 rounded-lg border border-[#13416B]/20"
                             :class="{
-                                '!bg-sky-500/10 !text-sky-400 !border-sky-500/20': isDark
+                                '!bg-white/10 !text-white !border-white/20': isDark
                             }">
                             Topik Pembelajaran
                         </span>
@@ -374,7 +374,7 @@
                                     <p
                                         class="text-sm sm:text-base font-bold text-slate-800 group-hover:text-[#13416B] transition-colors leading-tight"
                                         :class="{
-                                            '!text-slate-200 group-hover:!text-sky-400': isDark
+                                            '!text-slate-200 group-hover:!text-white': isDark
                                         }">
                                         Unduh Dokumen Materi
                                     </p>

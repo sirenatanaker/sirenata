@@ -153,11 +153,12 @@
     color: inherit;
 }
 .reader-theme-dark a:not([class*="btn"]):not([class*="bg-"]):not([class*="text-white"]) {
-    color: #60A5FA !important;
+    color: #FFFFFF !important;
+    text-decoration: underline;
 }
 .reader-theme-dark .quill-content-render blockquote {
     background-color: #1E293B !important;
-    border-left-color: #38BDF8 !important;
+    border-left-color: #FFFFFF !important;
     color: #CBD5E1 !important;
 }
 .reader-theme-dark .border-slate-100,
