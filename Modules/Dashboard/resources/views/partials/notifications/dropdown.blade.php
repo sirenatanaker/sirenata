@@ -55,45 +55,50 @@
 
     <!-- ===================== LONCENG ===================== -->
     <button type="button" @click="toggle()" :aria-expanded="open" aria-haspopup="true" aria-label="Notifikasi"
-        class="relative inline-flex h-10 w-10 sm:h-11 sm:w-11 items-center justify-center rounded-full text-slate-600 transition-colors duration-150 hover:bg-slate-100 hover:text-slate-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#13416B]/30 cursor-pointer">
+        class="relative inline-flex h-8 w-8 sm:h-10 sm:w-10 items-center justify-center rounded-full text-slate-600 dark:text-slate-300 transition-colors duration-150 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-[#13416B]/30 cursor-pointer">
 
-        <!-- Outline Bell Icon (YouTube Style - outline, bukan solid & agak besaran) -->
-        <svg class="w-6 h-6 shrink-0 transition-transform duration-150 hover:scale-105" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <!-- Outline Bell Icon (Ukuran diperkecil di mobile) -->
+        <svg class="w-4.5 h-4.5 sm:w-5 sm:h-5 shrink-0 transition-transform duration-150 hover:scale-105" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
             <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
         </svg>
 
         <!-- Angka notifikasi (kanan atas) -->
         <span x-show="unreadCount > 0" x-cloak
-            class="absolute top-0.5 right-0.5 grid h-[18px] min-w-[18px] place-items-center rounded-full bg-rose-600 px-1 text-[10px] font-bold leading-none text-white ring-2 ring-white"
+            class="absolute -top-0.5 -right-0.5 grid h-4 min-w-[16px] sm:h-[18px] sm:min-w-[18px] place-items-center rounded-full bg-rose-600 px-0.5 sm:px-1 text-[8px] sm:text-[10px] font-bold leading-none text-white ring-1.5 sm:ring-2 ring-white dark:ring-slate-800"
             x-text="badgeLabel"></span>
     </button>
 
-    <!-- ===================== DAFTAR ===================== -->
+    <!-- Overlay Transparan di Mobile saat Notifikasi Terbuka (Deteksi Klik Luar Tanpa Efek Blank/Gelap di Layar) -->
+    <div x-show="open" @click="open = false" x-cloak
+        class="fixed inset-0 z-40 bg-transparent sm:hidden" aria-hidden="true">
+    </div>
+
+    <!-- ===================== DAFTAR (RESPONSIF MOBILE & DESKTOP) ===================== -->
     <div x-show="open" x-transition:enter="transition ease-out duration-150"
-        x-transition:enter-start="opacity-0 translate-y-1" x-transition:enter-end="opacity-100 translate-y-0"
-        x-transition:leave="transition ease-in duration-100" x-transition:leave-start="opacity-100"
-        x-transition:leave-end="opacity-0" x-cloak
-        class="absolute right-0 top-full z-50 mt-2 w-[24rem] sm:w-[26rem] md:w-[27rem] max-w-[calc(100vw-1.5rem)] origin-top-right overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl">
+        x-transition:enter-start="opacity-0 translate-y-1 scale-95" x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+        x-transition:leave="transition ease-in duration-100" x-transition:leave-start="opacity-100 scale-100"
+        x-transition:leave-end="opacity-0 scale-95" x-cloak
+        class="fixed sm:absolute inset-x-3 sm:inset-x-auto sm:right-0 top-[68px] sm:top-full z-50 sm:mt-2 w-auto sm:w-[25rem] md:w-[27rem] max-w-full sm:max-w-[calc(100vw-2rem)] origin-top-right overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-2xl">
 
         <!-- Kepala: YouTube Style -->
-        <div class="flex items-center justify-between gap-3 border-b border-slate-100 px-4 py-3 bg-white">
+        <div class="flex items-center justify-between gap-3 border-b border-slate-100 dark:border-slate-700/60 px-4 py-3 bg-white dark:bg-slate-800">
             <div class="flex items-baseline gap-2">
-                <h3 class="text-sm font-bold text-slate-800">Notifikasi</h3>
-                <span class="text-[11px] font-medium text-slate-400">
+                <h3 class="text-sm font-bold text-slate-800 dark:text-white">Notifikasi</h3>
+                <span class="text-[11px] font-medium text-slate-400 dark:text-slate-400">
                     <span x-text="unreadCount"></span> belum dibaca
                 </span>
             </div>
 
             <div class="flex items-center gap-3">
                 <button type="button" @click="markAll" :disabled="unreadCount === 0 || busy"
-                    class="cursor-pointer text-[11px] font-semibold text-slate-500 transition-colors hover:text-[#13416B] disabled:cursor-not-allowed disabled:opacity-40">
+                    class="cursor-pointer text-[11px] font-semibold text-slate-500 dark:text-slate-400 transition-colors hover:text-[#13416B] dark:hover:text-white disabled:cursor-not-allowed disabled:opacity-40">
                     Tandai semua dibaca
                 </button>
 
                 {{-- Tombol buang semua (X) --}}
                 <button type="button" @click="clearAll" :disabled="items.length === 0 || busy" aria-label="Buang semua notifikasi"
-                    class="grid h-6 w-6 cursor-pointer place-items-center rounded-md text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600 disabled:cursor-not-allowed disabled:opacity-40">
+                    class="grid h-6 w-6 cursor-pointer place-items-center rounded-md text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 hover:text-slate-600 dark:hover:text-white transition-colors disabled:cursor-not-allowed disabled:opacity-40">
                     <i class="fas fa-times text-xs" aria-hidden="true"></i>
                 </button>
             </div>
@@ -101,39 +106,39 @@
 
         @if (auth()->user()->hasRole('user'))
             <!-- Section Filter Tabs (YouTube Style: Semua, Katalog, Perpustakaan) -->
-            <div class="flex items-center gap-1.5 px-4 py-2 bg-slate-50/60">
+            <div class="flex items-center gap-1.5 px-4 py-2 bg-slate-50/60 dark:bg-slate-900/40 border-b border-slate-100 dark:border-slate-700/60">
                 <button type="button" @click="activeTab = 'semua'"
                     class="px-3 py-1 rounded-full text-[11px] font-semibold transition-all cursor-pointer"
-                    :class="activeTab === 'semua' ? 'bg-[#13416B] text-white shadow-xs' : 'bg-slate-100 text-slate-600 hover:bg-slate-200/70'">
+                    :class="activeTab === 'semua' ? 'bg-[#13416B] text-white dark:bg-white dark:text-slate-900 shadow-xs' : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200/70 dark:hover:bg-slate-600'">
                     Semua
                 </button>
                 <button type="button" @click="activeTab = 'katalog'"
                     class="px-3 py-1 rounded-full text-[11px] font-semibold transition-all cursor-pointer"
-                    :class="activeTab === 'katalog' ? 'bg-[#13416B] text-white shadow-xs' : 'bg-slate-100 text-slate-600 hover:bg-slate-200/70'">
+                    :class="activeTab === 'katalog' ? 'bg-[#13416B] text-white dark:bg-white dark:text-slate-900 shadow-xs' : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200/70 dark:hover:bg-slate-600'">
                     Katalog
                 </button>
                 <button type="button" @click="activeTab = 'perpustakaan'"
                     class="px-3 py-1 rounded-full text-[11px] font-semibold transition-all cursor-pointer"
-                    :class="activeTab === 'perpustakaan' ? 'bg-[#13416B] text-white shadow-xs' : 'bg-slate-100 text-slate-600 hover:bg-slate-200/70'">
+                    :class="activeTab === 'perpustakaan' ? 'bg-[#13416B] text-white dark:bg-white dark:text-slate-900 shadow-xs' : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200/70 dark:hover:bg-slate-600'">
                     Perpustakaan
                 </button>
             </div>
         @endif
 
         <!-- Isi -->
-        <div class="notif-scroll max-h-[24rem] overflow-y-auto">
+        <div class="notif-scroll max-h-[60vh] sm:max-h-[24rem] overflow-y-auto">
 
             <!-- Kosong -->
             <div x-show="filteredItems.length === 0" x-cloak class="px-6 py-10 text-center">
-                <div class="mx-auto w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 mb-3">
+                <div class="mx-auto w-12 h-12 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center text-slate-400 dark:text-slate-300 mb-3">
                     <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
                         <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
                     </svg>
                 </div>
-                <p class="text-[13px] font-semibold text-slate-700"
+                <p class="text-[13px] font-semibold text-slate-700 dark:text-slate-200"
                    x-text="activeTab === 'semua' ? 'Belum ada notifikasi' : (activeTab === 'katalog' ? 'Belum ada notifikasi katalog' : 'Belum ada notifikasi perpustakaan')"></p>
-                <p class="mx-auto mt-1 max-w-[14rem] text-[11px] leading-relaxed text-slate-400">
+                <p class="mx-auto mt-1 max-w-[14rem] text-[11px] leading-relaxed text-slate-400 dark:text-slate-400">
                     {{ auth()->user()->hasRole('user') ? 'Pemberitahuan katalog kursus baru dan koleksi perpustakaan akan muncul di sini.' : 'Pemberitahuan persetujuan proyek dan status RTKD akan muncul di sini.' }}
                 </p>
             </div>
@@ -143,28 +148,28 @@
                 <div>
                     <!-- Pemisah Garis Bagian Koleksi Perpustakaan -->
                     <template x-if="isFirstOfSection(item, index)">
-                        <div class="flex items-center gap-2.5 px-3.5 py-1.5 text-[11px] font-bold text-slate-500"
-                             :class="!item.read ? 'bg-slate-50/60' : 'bg-white'">
+                        <div class="flex items-center gap-2.5 px-3.5 py-1.5 text-[11px] font-bold text-slate-500 dark:text-slate-400"
+                             :class="!item.read ? 'bg-slate-50/60 dark:bg-slate-900/30' : 'bg-white dark:bg-slate-800'">
                             <span>Koleksi Perpustakaan</span>
-                            <div class="flex-1 h-px bg-slate-200/70"></div>
+                            <div class="flex-1 h-px bg-slate-200/70 dark:bg-slate-700/60"></div>
                         </div>
                     </template>
 
-                    <div class="notif-fade group relative flex items-start gap-3 px-3.5 py-3 hover:bg-slate-50/90 transition-colors cursor-pointer"
-                         :class="!item.read ? 'bg-slate-50/60' : 'bg-white'"
+                    <div class="notif-fade group relative flex items-start gap-3 px-3.5 py-3 hover:bg-slate-50/90 dark:hover:bg-slate-700/50 transition-colors cursor-pointer"
+                         :class="!item.read ? 'bg-slate-50/60 dark:bg-slate-900/40' : 'bg-white dark:bg-slate-800'"
                          @click="openItem(item)">
 
                         <!-- 1. THUMBNAIL KURSUS: Persegi Panjang Horizontal 16:9 (rounded-md) -->
                         <template x-if="item.section !== 'perpustakaan' && item.type !== 'library.published'">
                             <div class="shrink-0">
                                 <template x-if="item.thumbnail">
-                                    <div class="relative w-24 sm:w-28 aspect-video rounded-md overflow-hidden bg-slate-100 shadow-xs">
+                                    <div class="relative w-20 sm:w-28 aspect-video rounded-md overflow-hidden bg-slate-100 dark:bg-slate-700 shadow-xs">
                                         <img :src="item.thumbnail" :alt="item.title" class="w-full h-full object-cover">
                                     </div>
                                 </template>
                                 <template x-if="!item.thumbnail">
-                                    <div class="w-12 h-10 shrink-0 rounded-md bg-slate-50 text-slate-400 flex items-center justify-center">
-                                        <i class="fa-regular fa-bell text-base" aria-hidden="true"></i>
+                                    <div class="w-10 sm:w-12 h-9 sm:h-10 shrink-0 rounded-md bg-slate-50 dark:bg-slate-700 text-slate-400 dark:text-slate-300 flex items-center justify-center">
+                                        <i class="fa-regular fa-bell text-sm sm:text-base" aria-hidden="true"></i>
                                     </div>
                                 </template>
                             </div>
@@ -174,13 +179,13 @@
                         <template x-if="item.section === 'perpustakaan' || item.type === 'library.published'">
                             <div class="shrink-0">
                                 <template x-if="item.thumbnail">
-                                    <div class="relative w-14 sm:w-16 aspect-[3/4] rounded-md overflow-hidden bg-slate-100 shadow-xs">
+                                    <div class="relative w-12 sm:w-16 aspect-[3/4] rounded-md overflow-hidden bg-slate-100 dark:bg-slate-700 shadow-xs">
                                         <img :src="item.thumbnail" :alt="item.title" class="w-full h-full object-cover">
                                     </div>
                                 </template>
                                 <template x-if="!item.thumbnail">
-                                    <div class="w-14 sm:w-16 aspect-[3/4] shrink-0 rounded-md bg-sky-50 text-sky-500 flex items-center justify-center">
-                                        <i class="fa-regular fa-bookmark text-base" aria-hidden="true"></i>
+                                    <div class="w-12 sm:w-16 aspect-[3/4] shrink-0 rounded-md bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-300 flex items-center justify-center">
+                                        <i class="fa-regular fa-bookmark text-sm sm:text-base" aria-hidden="true"></i>
                                     </div>
                                 </template>
                             </div>
@@ -188,16 +193,16 @@
 
                         <!-- Isi: Judul, Deskripsi & Waktu -->
                         <div class="min-w-0 flex-1 pr-1">
-                            <p class="text-xs sm:text-[13px] leading-snug line-clamp-2 text-slate-800 group-hover:text-[#13416B] transition-colors"
+                            <p class="text-xs sm:text-[13px] leading-snug line-clamp-2 text-slate-800 dark:text-white group-hover:text-[#13416B] dark:group-hover:text-slate-200 transition-colors"
                                :class="!item.read ? 'font-bold' : 'font-medium'"
                                x-text="item.title"></p>
 
                             <template x-if="item.description || item.message">
-                                <p class="mt-1 text-[11px] sm:text-xs leading-relaxed text-slate-500 line-clamp-2 break-words"
+                                <p class="mt-1 text-[11px] sm:text-xs leading-relaxed text-slate-500 dark:text-slate-300 line-clamp-2 break-words"
                                    x-text="item.description || item.message"></p>
                             </template>
                             
-                            <p class="mt-1.5 text-[11px] font-medium text-slate-400 flex items-center gap-1.5">
+                            <p class="mt-1.5 text-[11px] font-medium text-slate-400 dark:text-slate-400 flex items-center gap-1.5">
                                 <i class="far fa-clock text-[10px]" aria-hidden="true"></i>
                                 <span x-text="item.time"></span>
                             </p>
@@ -205,7 +210,7 @@
 
                         <!-- Tombol Hapus (X) -->
                         <button type="button" @click.stop="dismiss(item)" :disabled="busy" aria-label="Hapus notifikasi"
-                            class="grid h-6 w-6 shrink-0 cursor-pointer place-items-center rounded-md text-slate-300 opacity-0 transition-all hover:bg-slate-200/60 hover:text-slate-600 group-hover:opacity-100 disabled:cursor-not-allowed">
+                            class="grid h-6 w-6 shrink-0 cursor-pointer place-items-center rounded-md text-slate-300 dark:text-slate-500 opacity-70 sm:opacity-0 transition-all hover:bg-slate-200/60 dark:hover:bg-slate-700 hover:text-slate-600 dark:hover:text-white group-hover:opacity-100 disabled:cursor-not-allowed">
                             <i class="fas fa-times text-xs" aria-hidden="true"></i>
                         </button>
                     </div>
@@ -215,7 +220,7 @@
 
         <!-- Kaki -->
         <a href="{{ route('notifications.index') }}"
-            class="block border-t border-slate-100 px-4 py-2.5 text-center text-[12px] font-semibold text-slate-500 transition-colors hover:bg-slate-50 hover:text-[#13416B]">
+            class="block border-t border-slate-100 dark:border-slate-700/60 px-4 py-2.5 text-center text-[12px] font-semibold text-slate-500 dark:text-slate-400 transition-colors hover:bg-slate-50 dark:hover:bg-slate-700/40 hover:text-[#13416B] dark:hover:text-white">
             Lihat semua notifikasi
         </a>
     </div>
