@@ -193,7 +193,7 @@
 
                         <!-- Isi: Judul, Deskripsi & Waktu -->
                         <div class="min-w-0 flex-1 pr-1">
-                            <p class="text-xs sm:text-[13px] leading-snug line-clamp-2 text-slate-800 dark:text-white group-hover:text-[#13416B] dark:group-hover:text-slate-200 transition-colors"
+                            <p class="text-xs sm:text-[13px] leading-snug line-clamp-2 break-words text-slate-800 dark:text-white group-hover:text-[#13416B] dark:group-hover:text-slate-200 transition-colors"
                                :class="!item.read ? 'font-bold' : 'font-medium'"
                                x-text="item.title"></p>
 

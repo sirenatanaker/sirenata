@@ -36,7 +36,7 @@
     <!-- Konten -->
     <div class="min-w-0 flex-1">
         <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
-            <h3 class="max-w-full break-words text-[13.5px] font-semibold leading-snug text-slate-700 sm:text-sm">
+            <h3 class="w-full sm:w-auto max-w-full break-words text-[13.5px] font-semibold leading-snug text-slate-700 sm:text-sm line-clamp-2 sm:line-clamp-none">
                 {{ preg_replace('/^(Katalog|Koleksi) (Baru|Kursus Baru|Perpustakaan Baru):\s*/i', '', $notification->title) }}
             </h3>
 

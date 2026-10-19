@@ -37,7 +37,7 @@
         </style>
     @endpush
 
-    <div class="p-3 sm:p-5 lg:p-6 max-w-full mx-auto space-y-5 sm:space-y-6">
+    <div class="px-0 py-3 sm:p-5 lg:p-6 max-w-full mx-auto space-y-5 sm:space-y-6">
 
         <!-- ===================================== -->
         <!-- 1. STATS GRID (Solid Colored Cards)   -->
@@ -56,19 +56,13 @@
                     <!-- Badge Putih Solid, Ikon Dark Navy -->
                     <div
                         class="w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-white text-[#13416B] flex items-center justify-center shrink-0 shadow-sm">
-                        <svg class="w-6 h-6 sm:w-7 sm:h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                        </svg>
+                        <i class="fas fa-graduation-cap text-xl sm:text-2xl" aria-hidden="true"></i>
                     </div>
                 </div>
                 <!-- Dekorasi Watermark Background -->
                 <div
-                    class="absolute -right-6 -bottom-6 text-white opacity-[0.05] group-hover:opacity-[0.1] transition-all duration-500 pointer-events-none transform group-hover:scale-110 z-0">
-                    <svg class="w-36 h-36" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                    </svg>
+                    class="absolute -right-4 -bottom-4 text-white opacity-[0.08] group-hover:opacity-[0.14] transition-all duration-500 pointer-events-none transform group-hover:scale-110 z-0">
+                    <i class="fas fa-graduation-cap text-7xl sm:text-8xl" aria-hidden="true"></i>
                 </div>
             </div>
 
@@ -85,18 +79,12 @@
                     <!-- Badge Putih Solid, Ikon Slate Blue -->
                     <div
                         class="w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-white text-[#547996] flex items-center justify-center shrink-0 shadow-sm">
-                        <svg class="w-6 h-6 sm:w-7 sm:h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-                        </svg>
+                        <i class="fas fa-chart-line text-xl sm:text-2xl" aria-hidden="true"></i>
                     </div>
                 </div>
                 <div
-                    class="absolute -right-6 -bottom-6 text-white opacity-[0.05] group-hover:opacity-[0.1] transition-all duration-500 pointer-events-none transform group-hover:scale-110 z-0">
-                    <svg class="w-36 h-36" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-                    </svg>
+                    class="absolute -right-4 -bottom-4 text-white opacity-[0.08] group-hover:opacity-[0.14] transition-all duration-500 pointer-events-none transform group-hover:scale-110 z-0">
+                    <i class="fas fa-chart-line text-7xl sm:text-8xl" aria-hidden="true"></i>
                 </div>
             </div>
 
@@ -112,19 +100,13 @@
                     </div>
                     <!-- Badge Putih Solid, Ikon Light Blue -->
                     <div
-                        class="w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-white text-[#8BB1CC] flex items-center justify-center shrink-0 shadow-sm">
-                        <svg class="w-6 h-6 sm:w-7 sm:h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
-                        </svg>
+                        class="w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-white text-[#2b658d] flex items-center justify-center shrink-0 shadow-sm">
+                        <i class="fas fa-circle-check text-xl sm:text-2xl" aria-hidden="true"></i>
                     </div>
                 </div>
                 <div
-                    class="absolute -right-6 -bottom-6 text-white opacity-[0.1] group-hover:opacity-[0.15] transition-all duration-500 pointer-events-none transform group-hover:scale-110 z-0">
-                    <svg class="w-36 h-36" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
-                    </svg>
+                    class="absolute -right-4 -bottom-4 text-white opacity-[0.12] group-hover:opacity-[0.18] transition-all duration-500 pointer-events-none transform group-hover:scale-110 z-0">
+                    <i class="fas fa-circle-check text-7xl sm:text-8xl" aria-hidden="true"></i>
                 </div>
             </div>
         </div>
@@ -320,15 +302,9 @@
                 <!-- CARD 3: Kursus Saya (Menyesuaikan Tinggi & Card ke-4 Mengintip Blur) -->
                 <div class="bg-white rounded-md p-5 sm:p-6 shadow-sm flex flex-col lg:flex-1 w-full min-h-0">
                     <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-100 shrink-0">
-                        <div class="flex items-center gap-3">
-                            <div
-                                class="w-10 h-10 sm:w-11 sm:h-11 flex items-center justify-center bg-[#13416B] text-white rounded-md shrink-0 shadow-md">
-                                <i class="fas fa-graduation-cap text-lg sm:text-xl"></i>
-                            </div>
-                            <div>
-                                <h2 class="text-base font-extrabold text-slate-800">Kursus Saya</h2>
-                                <p class="text-[11px] sm:text-xs text-slate-500">Daftar kursus yang Anda ikuti</p>
-                            </div>
+                        <div>
+                            <h2 class="text-base md:text-lg font-extrabold text-slate-800">Kursus Saya</h2>
+                            <p class="text-[11px] sm:text-xs text-slate-500">Daftar kursus yang Anda ikuti</p>
                         </div>
                         <a href="{{ route('user.course.my-course') }}"
                             class="text-xs sm:text-sm font-semibold text-[#13416B] hover:text-[#0f3354] hover:underline transition-colors shrink-0">
@@ -446,16 +422,9 @@
                 <div
                     class="bg-white rounded-md p-4 sm:p-5 shadow-sm border border-slate-200 flex flex-col justify-between shrink-0">
                     <div>
-                        <div class="flex items-center gap-3 mb-3 pb-3 border-b border-slate-100 shrink-0">
-                            <div
-                                class="w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center bg-[#547996] text-white rounded-md shrink-0 shadow-md">
-                                <i class="fas fa-history text-base"></i>
-                            </div>
-                            <div>
-                                <h2 class="text-base font-extrabold text-slate-800">Terakhir Dilihat</h2>
-                                <p class="text-[11px] sm:text-xs text-slate-500">Koleksi perpustakaan terakhir diakses
-                                </p>
-                            </div>
+                        <div class="mb-3 pb-3 border-b border-slate-100 shrink-0">
+                            <h2 class="text-base md:text-lg font-extrabold text-slate-800">Terakhir Dilihat</h2>
+                            <p class="text-[11px] sm:text-xs text-slate-500">Koleksi perpustakaan terakhir diakses</p>
                         </div>
 
                         @if (isset($lastLibrary) && $lastLibrary)

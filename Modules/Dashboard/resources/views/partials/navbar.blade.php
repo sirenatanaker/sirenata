@@ -101,7 +101,7 @@
                                                             class="text-white font-bold"></span>
                                                     </div>
                                                     <div class="flex-1 min-w-0">
-                                                        <p class="text-xs md:text-sm font-bold text-slate-800 dark:text-white truncate group-hover:text-[#13416B] dark:group-hover:text-white"
+                                                        <p class="text-xs md:text-sm font-bold text-slate-800 dark:text-white line-clamp-2 sm:truncate leading-snug break-words group-hover:text-[#13416B] dark:group-hover:text-white"
                                                             x-text="item.title"></p>
                                                         <p class="text-[10px] text-slate-500 dark:text-slate-400 truncate mt-0.5"
                                                             x-text="item.subtitle"></p>
@@ -133,7 +133,7 @@
                                                             class="text-white font-bold"></span>
                                                     </div>
                                                     <div class="flex-1 min-w-0">
-                                                        <p class="text-xs md:text-sm font-bold text-slate-800 dark:text-white truncate group-hover:text-[#13416B] dark:group-hover:text-white"
+                                                        <p class="text-xs md:text-sm font-bold text-slate-800 dark:text-white line-clamp-2 sm:truncate leading-snug break-words group-hover:text-[#13416B] dark:group-hover:text-white"
                                                             x-text="item.title"></p>
                                                         <p class="text-[10px] text-slate-500 dark:text-slate-400 truncate mt-0.5"
                                                             x-text="item.subtitle"></p>
@@ -165,7 +165,7 @@
                                                             class="text-white font-bold"></span>
                                                     </div>
                                                     <div class="flex-1 min-w-0">
-                                                        <p class="text-xs md:text-sm font-bold text-slate-800 dark:text-white truncate group-hover:text-[#13416B] dark:group-hover:text-white"
+                                                        <p class="text-xs md:text-sm font-bold text-slate-800 dark:text-white line-clamp-2 sm:truncate leading-snug break-words group-hover:text-[#13416B] dark:group-hover:text-white"
                                                             x-text="item.title"></p>
                                                         <p class="text-[10px] text-slate-500 dark:text-slate-400 truncate mt-0.5"
                                                             x-text="item.subtitle"></p>
