@@ -45,29 +45,29 @@
         color-scheme: dark;
     }
 
-    /* Surfaces & Containers */
+    /* Surfaces & Containers (Slightly lighter slate-gray #1e293b for elevated cards) */
     html.dark .bg-white {
-        background-color: #151e32 !important;
-        border-color: #243048 !important;
-        color: #e2e8f0;
+        background-color: #1e293b !important;
+        border-color: #334155 !important;
+        color: #f1f5f9;
     }
 
     html.dark .bg-slate-50,
     html.dark .bg-gray-50,
     html.dark .bg-slate-50\/80 {
         background-color: #0f172a !important;
-        border-color: #243048 !important;
+        border-color: #1e293b !important;
     }
 
     html.dark .bg-slate-100,
     html.dark .bg-gray-100 {
-        background-color: #1a243a !important;
-        border-color: #243048 !important;
+        background-color: #334155 !important;
+        border-color: #475569 !important;
     }
 
     html.dark .bg-slate-200,
     html.dark .bg-gray-200 {
-        background-color: #26334d !important;
+        background-color: #475569 !important;
     }
 
     /* Borders & Dividers */
@@ -77,14 +77,14 @@
     html.dark .border-gray-100,
     html.dark .border-gray-200,
     html.dark .border-gray-300 {
-        border-color: #243048 !important;
+        border-color: #334155 !important;
     }
 
     html.dark hr {
-        border-color: #243048 !important;
+        border-color: #334155 !important;
     }
 
-    /* Typography in Dark Mode */
+    /* Typography in Dark Mode (High Contrast & Clear Descriptions) */
     html.dark .text-slate-900,
     html.dark .text-slate-800,
     html.dark .text-gray-900,
@@ -96,28 +96,28 @@
     html.dark .text-slate-600,
     html.dark .text-gray-700,
     html.dark .text-gray-600 {
-        color: #cbd5e1 !important;
+        color: #e2e8f0 !important;
     }
 
     html.dark .text-slate-500,
     html.dark .text-gray-500 {
-        color: #94a3b8 !important;
+        color: #cbd5e1 !important;
     }
 
     html.dark .text-slate-400,
     html.dark .text-gray-400 {
-        color: #64748b !important;
+        color: #94a3b8 !important;
     }
 
     /* Navigation Bar & Sidebar */
     html.dark nav.fixed {
-        background-color: #151e32 !important;
-        border-color: #243048 !important;
+        background-color: #1e293b !important;
+        border-color: #334155 !important;
     }
 
     html.dark aside {
-        background-color: #151e32 !important;
-        border-color: #243048 !important;
+        background-color: #1e293b !important;
+        border-color: #334155 !important;
     }
 
     html.dark aside a.text-slate-600,
@@ -257,12 +257,18 @@
         --tw-ring-color: rgba(255, 255, 255, 0.25) !important;
     }
 
+    /* Progress Bar Active in Dark Mode (Pure White, High Contrast) */
+    html.dark .bg-\[\#13416B\].h-full,
+    html.dark [style*="width:"].bg-\[\#13416B\] {
+        background-color: #ffffff !important;
+    }
+
     /* Modals & Dialogs */
     html.dark .modal-content,
     html.dark [role="dialog"] > div {
-        background-color: #151e32 !important;
-        border-color: #243048 !important;
-        color: #e2e8f0 !important;
+        background-color: #1e293b !important;
+        border-color: #334155 !important;
+        color: #f1f5f9 !important;
     }
 
     /* Scrollbars */

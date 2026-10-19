@@ -15,12 +15,12 @@
                 @forelse ($courses as $course)
                     <x-lms::user.course-card :course="$course" />
                 @empty
-                    <div class="col-span-full flex flex-col items-center justify-center py-16 px-4 text-center bg-white rounded-2xl border border-dashed border-slate-200">
-                        <div class="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4 border border-slate-100 text-slate-300">
+                    <div class="col-span-full flex flex-col items-center justify-center py-16 px-4 text-center bg-white dark:bg-slate-800/90 rounded-2xl border border-dashed border-slate-200 dark:border-slate-700">
+                        <div class="w-16 h-16 bg-slate-50 dark:bg-slate-700/60 rounded-full flex items-center justify-center mx-auto mb-4 border border-slate-100 dark:border-slate-600 text-slate-300 dark:text-slate-400">
                             <i class="fas fa-graduation-cap text-2xl"></i>
                         </div>
-                        <h3 class="text-base font-bold text-slate-800 mb-1">Belum Ada Kursus Selesai</h3>
-                        <p class="text-sm text-slate-500 max-w-sm">Anda belum menyelesaikan kursus apapun. Terus tingkatkan progress belajar Anda.</p>
+                        <h3 class="text-base font-bold text-slate-800 dark:text-white mb-1">Belum Ada Kursus Selesai</h3>
+                        <p class="text-sm text-slate-500 dark:text-slate-300 max-w-sm">Anda belum menyelesaikan kursus apapun. Terus tingkatkan progress belajar Anda.</p>
                     </div>
                 @endforelse
             </div>
