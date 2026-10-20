@@ -59,7 +59,7 @@
                     <div class="p-3 sm:p-5">
                         <div class="flex items-start justify-between mb-2 sm:mb-3">
                             <span
-                                class="inline-flex items-center px-1.5 sm:px-2.5 py-0.5 rounded-full text-[10px] sm:text-xs font-semibold bg-emerald-100 text-emerald-600">Selesai</span>
+                                class="inline-flex items-center px-1.5 sm:px-2.5 py-0.5 rounded-full text-[10px] sm:text-xs font-semibold bg-emerald-600 text-white">Selesai</span>
                             <span class="text-xs text-gray-500">100%</span>
                         </div>
                         <h3 class="font-bold text-gray-900 mb-1 sm:mb-2 text-sm sm:text-lg line-clamp-2">Perencanaan
@@ -86,7 +86,7 @@
                     <div class="p-3 sm:p-5">
                         <div class="flex items-start justify-between mb-2 sm:mb-3">
                             <span
-                                class="inline-flex items-center px-1.5 sm:px-2.5 py-0.5 rounded-full text-[10px] sm:text-xs font-semibold bg-emerald-100 text-emerald-600">Selesai</span>
+                                class="inline-flex items-center px-1.5 sm:px-2.5 py-0.5 rounded-full text-[10px] sm:text-xs font-semibold bg-emerald-600 text-white">Selesai</span>
                             <span class="text-xs text-gray-500">100%</span>
                         </div>
                         <h3 class="font-bold text-gray-900 mb-1 sm:mb-2 text-sm sm:text-lg line-clamp-2">Perencanaan
@@ -113,7 +113,7 @@
                     <div class="p-3 sm:p-5">
                         <div class="flex items-start justify-between mb-2 sm:mb-3">
                             <span
-                                class="inline-flex items-center px-1.5 sm:px-2.5 py-0.5 rounded-full text-[10px] sm:text-xs font-semibold bg-purple-100 text-indigo-600">Sedang
+                                class="inline-flex items-center px-1.5 sm:px-2.5 py-0.5 rounded-full text-[10px] sm:text-xs font-semibold bg-amber-500 text-white">Sedang
                                 Berjalan</span>
                             <span class="text-xs text-gray-500">33%</span>
                         </div>
@@ -142,7 +142,7 @@
                     <div class="p-3 sm:p-5">
                         <div class="flex items-start justify-between mb-2 sm:mb-3">
                             <span
-                                class="inline-flex items-center px-1.5 sm:px-2.5 py-0.5 rounded-full text-[10px] sm:text-xs font-semibold bg-purple-100 text-indigo-600">Sedang
+                                class="inline-flex items-center px-1.5 sm:px-2.5 py-0.5 rounded-full text-[10px] sm:text-xs font-semibold bg-amber-500 text-white">Sedang
                                 Berjalan</span>
                             <span class="text-xs text-gray-500">25%</span>
                         </div>
@@ -171,7 +171,7 @@
                     <div class="p-3 sm:p-5">
                         <div class="flex items-start justify-between mb-2 sm:mb-3">
                             <span
-                                class="inline-flex items-center px-1.5 sm:px-2.5 py-0.5 rounded-full text-[10px] sm:text-xs font-semibold bg-purple-100 text-indigo-600">Sedang
+                                class="inline-flex items-center px-1.5 sm:px-2.5 py-0.5 rounded-full text-[10px] sm:text-xs font-semibold bg-amber-500 text-white">Sedang
                                 Berjalan</span>
                             <span class="text-xs text-gray-500">25%</span>
                         </div>
@@ -200,7 +200,7 @@
                     <div class="p-3 sm:p-5">
                         <div class="flex items-start justify-between mb-2 sm:mb-3">
                             <span
-                                class="inline-flex items-center px-1.5 sm:px-2.5 py-0.5 rounded-full text-[10px] sm:text-xs font-semibold bg-purple-100 text-indigo-600">Sedang
+                                class="inline-flex items-center px-1.5 sm:px-2.5 py-0.5 rounded-full text-[10px] sm:text-xs font-semibold bg-amber-500 text-white">Sedang
                                 Berjalan</span>
                             <span class="text-xs text-gray-500">0%</span>
                         </div>

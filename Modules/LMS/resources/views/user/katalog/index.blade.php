@@ -278,19 +278,16 @@
                                     {{ $course->name }}
                                 </h3>
 
-                                {{-- Statistik: modul & peserta (ringkas di mobile) --}}
-                                <div class="flex flex-wrap items-center gap-1 sm:gap-2 mb-2.5 sm:mb-3 text-[9px] sm:text-xs font-medium text-slate-500">
-                                    <span class="flex items-center gap-1 sm:gap-1.5 bg-slate-50 px-1.5 py-0.5 sm:px-2 sm:py-1 rounded border border-slate-100">
-                                        <i class="fas fa-layer-group text-slate-400"></i> {{ $course->sections_count }} Modul
+                                {{-- Statistik: modul & peserta (Kalem & Profesional) --}}
+                                <div class="flex items-center gap-2 sm:gap-2.5 mb-2 sm:mb-2.5 text-[10px] sm:text-xs font-medium text-slate-500">
+                                    <span class="inline-flex items-center gap-1.5">
+                                        <i class="fas fa-layer-group text-slate-400 text-[10px] sm:text-xs"></i>
+                                        <span>{{ $course->sections_count }} Modul</span>
                                     </span>
-                                    <span class="flex items-center gap-1 sm:gap-1.5 bg-[#13416B]/5 text-[#13416B] px-1.5 py-0.5 sm:px-2 sm:py-1 rounded border border-[#13416B]/10">
-                                        <i class="fas fa-users"></i>
-                                        @if ($course->students_count > 0)
-                                            {{ number_format($course->students_count, 0, ',', '.') }} Peserta
-                                        @else
-                                            <span class="sm:hidden">0 Peserta</span>
-                                            <span class="hidden sm:inline">Jadilah peserta pertama</span>
-                                        @endif
+                                    <span class="text-slate-300 select-none">•</span>
+                                    <span class="inline-flex items-center gap-1.5">
+                                        <i class="fas fa-users text-slate-400 text-[10px] sm:text-xs"></i>
+                                        <span>{{ number_format($course->students_count ?? 0, 0, ',', '.') }} Peserta</span>
                                     </span>
                                 </div>
 

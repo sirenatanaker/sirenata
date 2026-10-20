@@ -39,11 +39,17 @@
             </span>
         </div>
 
-        {{-- Badge Status (Selesai) --}}
+        {{-- Badge Status --}}
         @if ($isDone)
             <div class="absolute top-2 right-2 sm:top-3 sm:right-3">
-                <span class="px-1.5 py-0.5 sm:px-2 sm:py-1 text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-emerald-800 dark:text-emerald-300 bg-emerald-100 dark:bg-emerald-950/80 border border-emerald-200 dark:border-emerald-700/80 rounded shadow-sm flex items-center gap-1 backdrop-blur-sm">
+                <span class="px-2 py-0.5 sm:px-2.5 sm:py-1 text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-white bg-emerald-600 rounded shadow-sm flex items-center gap-1">
                     <i class="fas fa-check-circle"></i> <span class="hidden sm:inline">Selesai</span>
+                </span>
+            </div>
+        @elseif ($pct > 0)
+            <div class="absolute top-2 right-2 sm:top-3 sm:right-3">
+                <span class="px-2 py-0.5 sm:px-2.5 sm:py-1 text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-white bg-amber-500 rounded shadow-sm flex items-center gap-1">
+                    <i class="fas fa-clock"></i> <span class="hidden sm:inline">Berjalan</span>
                 </span>
             </div>
         @endif
@@ -56,13 +62,16 @@
             {{ $course->course_name ?? $course->name }}
         </h3>
 
-        {{-- INFO COURSE: Modul & Materi --}}
-        <div class="flex flex-wrap items-center gap-1 sm:gap-2 mb-2.5 sm:mb-3 text-[9px] sm:text-xs font-medium text-slate-500 dark:text-slate-400">
-            <span class="flex items-center gap-1 sm:gap-1.5 bg-slate-50 dark:bg-slate-700/60 dark:text-slate-200 px-1.5 py-0.5 sm:px-2 sm:py-1 rounded border border-slate-100 dark:border-slate-600/80">
-                <i class="fas fa-layer-group text-slate-400 dark:text-slate-400"></i> {{ $course->total_modul ?? 0 }} Modul
+        {{-- INFO COURSE: Modul & Peserta (Kalem & Profesional) --}}
+        <div class="flex items-center gap-2 sm:gap-2.5 mb-2 sm:mb-2.5 text-[10px] sm:text-xs font-medium text-slate-500 dark:text-slate-400">
+            <span class="inline-flex items-center gap-1.5">
+                <i class="fas fa-layer-group text-slate-400 dark:text-slate-500 text-[10px] sm:text-xs"></i>
+                <span>{{ $course->total_modul ?? 0 }} Modul</span>
             </span>
-            <span class="flex items-center gap-1 sm:gap-1.5 bg-[#13416B]/5 text-[#13416B] dark:bg-white/10 dark:text-white px-1.5 py-0.5 sm:px-2 sm:py-1 rounded border border-[#13416B]/10 dark:border-white/20">
-                <i class="fas fa-users text-[#13416B] dark:text-white"></i> {{ number_format($course->students_count ?? 0, 0, ',', '.') }} Peserta
+            <span class="text-slate-300 dark:text-slate-600 select-none">•</span>
+            <span class="inline-flex items-center gap-1.5">
+                <i class="fas fa-users text-slate-400 dark:text-slate-500 text-[10px] sm:text-xs"></i>
+                <span>{{ number_format($course->students_count ?? 0, 0, ',', '.') }} Peserta</span>
             </span>
         </div>
 
@@ -81,16 +90,16 @@
             </div>
 
             @if ($isDone)
-                <div class="w-full py-1.5 sm:py-2.5 text-[10px] sm:text-xs font-bold text-center rounded-lg sm:rounded-xl transition-colors bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800/80 group-hover:bg-emerald-600 group-hover:text-white border border-emerald-200 group-hover:border-emerald-600">
+                <div class="w-full py-1.5 sm:py-2.5 text-[10px] sm:text-xs font-bold text-center rounded-lg sm:rounded-xl transition-colors bg-emerald-600 text-white border border-emerald-600 shadow-xs group-hover:bg-emerald-700 group-hover:border-emerald-700">
                     <i class="fas fa-award mr-1"></i> Lihat Sertifikat
                 </div>
             @elseif ($pct <= 0)
-                <div class="w-full py-1.5 sm:py-2.5 text-[10px] sm:text-xs font-bold text-center rounded-lg sm:rounded-xl transition-colors bg-emerald-600 text-white border border-emerald-600 shadow-sm group-hover:bg-emerald-700 group-hover:border-emerald-700">
+                <div class="w-full py-1.5 sm:py-2.5 text-[10px] sm:text-xs font-bold text-center rounded-lg sm:rounded-xl transition-colors bg-emerald-600 text-white border border-emerald-600 shadow-xs group-hover:bg-emerald-700 group-hover:border-emerald-700">
                     <i class="fas fa-play mr-1"></i> Mulai Belajar
                 </div>
             @else
-                <div class="w-full py-1.5 sm:py-2.5 text-[10px] sm:text-xs font-bold text-center rounded-lg sm:rounded-xl transition-colors bg-slate-50 dark:bg-slate-700/70 text-slate-700 dark:text-white border border-slate-200 dark:border-slate-600 group-hover:bg-[#13416B] dark:group-hover:bg-white dark:group-hover:text-slate-900 group-hover:text-white group-hover:border-[#13416B] dark:group-hover:border-white">
-                    Lanjutkan Belajar
+                <div class="w-full py-1.5 sm:py-2.5 text-[10px] sm:text-xs font-bold text-center rounded-lg sm:rounded-xl transition-colors bg-[#13416B] text-white border border-[#13416B] shadow-xs group-hover:bg-[#0f3354] group-hover:border-[#0f3354] dark:bg-[#13416B] dark:border-[#13416B] dark:text-white dark:group-hover:bg-[#1a558c]">
+                    <i class="fas fa-arrow-right mr-1"></i> Lanjutkan Belajar
                 </div>
             @endif
         </div>
