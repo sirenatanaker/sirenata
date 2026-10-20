@@ -92,7 +92,7 @@
         <ul x-show="sidebarOpen && open" x-collapse x-cloak class="mt-1 space-y-1 pl-4">
             <li>
                 <a href="{{ route('admin-province.rtkdp.index') }}"
-                    class="flex items-center px-3.5 py-2 rounded-lg transition-colors text-[13px] leading-snug break-words font-semibold
+                    class="flex items-center px-3.5 py-2.5 rounded-lg transition-colors text-sm leading-snug break-words font-semibold
                     {{ request()->routeIs('admin-province.rtkdp*')
                         ? 'text-[#13416B] bg-[#13416B]/10 font-bold'
                         : 'text-slate-500 hover:bg-slate-100 hover:text-[#13416B]' }}">
@@ -101,7 +101,7 @@
             </li>
             <li>
                 <a href="{{ route('admin-province.laporan.index') }}"
-                    class="flex items-center px-3.5 py-2 rounded-lg transition-colors text-[13px] leading-snug break-words font-semibold
+                    class="flex items-center px-3.5 py-2.5 rounded-lg transition-colors text-sm leading-snug break-words font-semibold
                     {{ request()->routeIs('admin-province.laporan*')
                         ? 'text-[#13416B] bg-[#13416B]/10 font-bold'
                         : 'text-slate-500 hover:bg-slate-100 hover:text-[#13416B]' }}">
@@ -120,14 +120,14 @@
             <ul class="space-y-0.5 px-1.5">
                 <li>
                     <a href="{{ route('admin-province.rtkdp.index') }}"
-                        class="block px-3 py-2 rounded-lg text-[13px] leading-snug break-words font-semibold transition-colors
+                        class="block px-3.5 py-2.5 rounded-lg text-sm leading-snug break-words font-semibold transition-colors
                         {{ request()->routeIs('admin-province.rtkdp*') ? 'text-[#13416B] bg-[#13416B]/10 font-bold' : 'text-slate-600 hover:bg-slate-100 hover:text-[#13416B]' }}">
                         Rekapitulasi RTK Provinsi
                     </a>
                 </li>
                 <li>
                     <a href="{{ route('admin-province.laporan.index') }}"
-                        class="block px-3 py-2 rounded-lg text-[13px] leading-snug break-words font-semibold transition-colors
+                        class="block px-3.5 py-2.5 rounded-lg text-sm leading-snug break-words font-semibold transition-colors
                         {{ request()->routeIs('admin-province.laporan*') ? 'text-[#13416B] bg-[#13416B]/10 font-bold' : 'text-slate-600 hover:bg-slate-100 hover:text-[#13416B]' }}">
                         Rekapitulasi RTK Keseluruhan
                     </a>
@@ -170,7 +170,7 @@
         <ul x-show="sidebarOpen && open" x-collapse x-cloak class="mt-1 space-y-1 pl-4">
             <li>
                 <a href="{{ route('admin-province.rekapitulasi.rekap-user-province') }}"
-                    class="flex items-center px-3.5 py-2 rounded-lg transition-colors text-[13px] leading-snug break-words font-semibold
+                    class="flex items-center px-3.5 py-2.5 rounded-lg transition-colors text-sm leading-snug break-words font-semibold
                     {{ request()->routeIs('admin-province.rekapitulasi.rekap-user-province*')
                         ? 'text-[#13416B] bg-[#13416B]/10 font-bold'
                         : 'text-slate-500 hover:bg-slate-100 hover:text-[#13416B]' }}">
@@ -179,7 +179,7 @@
             </li>
             <li>
                 <a href="{{ route('admin-province.rekapitulasi.index') }}"
-                    class="flex items-center px-3.5 py-2 rounded-lg transition-colors text-[13px] leading-snug break-words font-semibold
+                    class="flex items-center px-3.5 py-2.5 rounded-lg transition-colors text-sm leading-snug break-words font-semibold
                     {{ request()->routeIs('admin-province.rekapitulasi.index*')
                         ? 'text-[#13416B] bg-[#13416B]/10 font-bold'
                         : 'text-slate-500 hover:bg-slate-100 hover:text-[#13416B]' }}">
@@ -198,14 +198,14 @@
             <ul class="space-y-0.5 px-1.5">
                 <li>
                     <a href="{{ route('admin-province.rekapitulasi.rekap-user-province') }}"
-                        class="block px-3 py-2 rounded-lg text-[13px] leading-snug break-words font-semibold transition-colors
+                        class="block px-3.5 py-2.5 rounded-lg text-sm leading-snug break-words font-semibold transition-colors
                         {{ request()->routeIs('admin-province.rekapitulasi.rekap-user-province*') ? 'text-[#13416B] bg-[#13416B]/10 font-bold' : 'text-slate-600 hover:bg-slate-100 hover:text-[#13416B]' }}">
                         Rekapitulasi SDM Provinsi
                     </a>
                 </li>
                 <li>
                     <a href="{{ route('admin-province.rekapitulasi.index') }}"
-                        class="block px-3 py-2 rounded-lg text-[13px] leading-snug break-words font-semibold transition-colors
+                        class="block px-3.5 py-2.5 rounded-lg text-sm leading-snug break-words font-semibold transition-colors
                         {{ request()->routeIs('admin-province.rekapitulasi.index*') ? 'text-[#13416B] bg-[#13416B]/10 font-bold' : 'text-slate-600 hover:bg-slate-100 hover:text-[#13416B]' }}">
                         Rekapitulasi SDM Kab/Kota
                     </a>

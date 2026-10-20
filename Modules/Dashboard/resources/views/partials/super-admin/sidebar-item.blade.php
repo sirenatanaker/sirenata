@@ -64,7 +64,7 @@
         <ul x-show="sidebarOpen && open" x-collapse x-cloak class="mt-1 space-y-1 pl-4">
             <li>
                 <a href="{{ route('super-admin.user-management.index') }}"
-                    class="flex items-center px-3.5 py-2 rounded-lg transition-colors text-[13px] leading-snug break-words font-semibold
+                    class="flex items-center px-3.5 py-2.5 rounded-lg transition-colors text-sm leading-snug break-words font-semibold
                     {{ request()->routeIs('super-admin.user-management*')
                         ? 'text-[#13416B] bg-[#13416B]/10 font-bold'
                         : 'text-slate-500 hover:bg-slate-100 hover:text-[#13416B]' }}">
@@ -73,7 +73,7 @@
             </li>
             <li>
                 <a href="{{ route('super-admin.roles.index') }}"
-                    class="flex items-center px-3.5 py-2 rounded-lg transition-colors text-[13px] leading-snug break-words font-semibold
+                    class="flex items-center px-3.5 py-2.5 rounded-lg transition-colors text-sm leading-snug break-words font-semibold
                     {{ request()->routeIs('super-admin.roles.*')
                         ? 'text-[#13416B] bg-[#13416B]/10 font-bold'
                         : 'text-slate-500 hover:bg-slate-100 hover:text-[#13416B]' }}">
@@ -82,7 +82,7 @@
             </li>
             <li>
                 <a href="{{ route('super-admin.permissions.index') }}"
-                    class="flex items-center px-3.5 py-2 rounded-lg transition-colors text-[13px] leading-snug break-words font-semibold
+                    class="flex items-center px-3.5 py-2.5 rounded-lg transition-colors text-sm leading-snug break-words font-semibold
                     {{ request()->routeIs('super-admin.permissions.*')
                         ? 'text-[#13416B] bg-[#13416B]/10 font-bold'
                         : 'text-slate-500 hover:bg-slate-100 hover:text-[#13416B]' }}">
@@ -101,21 +101,21 @@
             <ul class="space-y-0.5 px-1.5">
                 <li>
                     <a href="{{ route('super-admin.user-management.index') }}"
-                        class="block px-3 py-2 rounded-lg text-[13px] leading-snug break-words font-semibold transition-colors
+                        class="block px-3.5 py-2.5 rounded-lg text-sm leading-snug break-words font-semibold transition-colors
                         {{ request()->routeIs('super-admin.user-management*') ? 'text-[#13416B] bg-[#13416B]/10 font-bold' : 'text-slate-600 hover:bg-slate-100 hover:text-[#13416B]' }}">
                         Manajemen User
                     </a>
                 </li>
                 <li>
                     <a href="{{ route('super-admin.roles.index') }}"
-                        class="block px-3 py-2 rounded-lg text-[13px] leading-snug break-words font-semibold transition-colors
+                        class="block px-3.5 py-2.5 rounded-lg text-sm leading-snug break-words font-semibold transition-colors
                         {{ request()->routeIs('super-admin.roles.*') ? 'text-[#13416B] bg-[#13416B]/10 font-bold' : 'text-slate-600 hover:bg-slate-100 hover:text-[#13416B]' }}">
                         Roles
                     </a>
                 </li>
                 <li>
                     <a href="{{ route('super-admin.permissions.index') }}"
-                        class="block px-3 py-2 rounded-lg text-[13px] leading-snug break-words font-semibold transition-colors
+                        class="block px-3.5 py-2.5 rounded-lg text-sm leading-snug break-words font-semibold transition-colors
                         {{ request()->routeIs('super-admin.permissions.*') ? 'text-[#13416B] bg-[#13416B]/10 font-bold' : 'text-slate-600 hover:bg-slate-100 hover:text-[#13416B]' }}">
                         Permission
                     </a>
@@ -158,7 +158,7 @@
         <ul x-show="sidebarOpen && open" x-collapse x-cloak class="mt-1 space-y-1 pl-4">
             <li>
                 <a href="{{ route('super-admin.lembaga.index') }}"
-                    class="flex items-center px-3.5 py-2 rounded-lg transition-colors text-[13px] leading-snug break-words font-semibold
+                    class="flex items-center px-3.5 py-2.5 rounded-lg transition-colors text-sm leading-snug break-words font-semibold
                     {{ request()->routeIs('super-admin.lembaga.*')
                         ? 'text-[#13416B] bg-[#13416B]/10 font-bold'
                         : 'text-slate-500 hover:bg-slate-100 hover:text-[#13416B]' }}">
@@ -167,7 +167,7 @@
             </li>
             <li>
                 <a href="{{ route('super-admin.instansi.index') }}"
-                    class="flex items-center px-3.5 py-2 rounded-lg transition-colors text-[13px] leading-snug break-words font-semibold
+                    class="flex items-center px-3.5 py-2.5 rounded-lg transition-colors text-sm leading-snug break-words font-semibold
                     {{ request()->routeIs('super-admin.instansi.*')
                         ? 'text-[#13416B] bg-[#13416B]/10 font-bold'
                         : 'text-slate-500 hover:bg-slate-100 hover:text-[#13416B]' }}">
@@ -186,14 +186,14 @@
             <ul class="space-y-0.5 px-1.5">
                 <li>
                     <a href="{{ route('super-admin.lembaga.index') }}"
-                        class="block px-3 py-2 rounded-lg text-[13px] leading-snug break-words font-semibold transition-colors
+                        class="block px-3.5 py-2.5 rounded-lg text-sm leading-snug break-words font-semibold transition-colors
                         {{ request()->routeIs('super-admin.lembaga.*') ? 'text-[#13416B] bg-[#13416B]/10 font-bold' : 'text-slate-600 hover:bg-slate-100 hover:text-[#13416B]' }}">
                         Pusat
                     </a>
                 </li>
                 <li>
                     <a href="{{ route('super-admin.instansi.index') }}"
-                        class="block px-3 py-2 rounded-lg text-[13px] leading-snug break-words font-semibold transition-colors
+                        class="block px-3.5 py-2.5 rounded-lg text-sm leading-snug break-words font-semibold transition-colors
                         {{ request()->routeIs('super-admin.instansi.*') ? 'text-[#13416B] bg-[#13416B]/10 font-bold' : 'text-slate-600 hover:bg-slate-100 hover:text-[#13416B]' }}">
                         Daerah
                     </a>

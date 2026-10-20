@@ -64,7 +64,7 @@
         <ul x-show="sidebarOpen && open" x-collapse x-cloak class="mt-1 space-y-1 pl-4">
             <li>
                 <a href="{{ route('admin-pusat.project.index', ['type' => 'pusat']) }}"
-                    class="flex items-center px-3.5 py-2 rounded-lg transition-colors text-[13px] leading-snug break-words font-semibold
+                    class="flex items-center px-3.5 py-2.5 rounded-lg transition-colors text-sm leading-snug break-words font-semibold
                     {{ request()->routeIs('admin-pusat.project.index') && request('type', 'pusat') === 'pusat'
                         ? 'text-[#13416B] bg-[#13416B]/10 font-bold'
                         : 'text-slate-500 hover:bg-slate-100 hover:text-[#13416B]' }}">
@@ -73,7 +73,7 @@
             </li>
             <li>
                 <a href="{{ route('admin-pusat.project.index', ['type' => 'daerah']) }}"
-                    class="flex items-center px-3.5 py-2 rounded-lg transition-colors text-[13px] leading-snug break-words font-semibold
+                    class="flex items-center px-3.5 py-2.5 rounded-lg transition-colors text-sm leading-snug break-words font-semibold
                     {{ request()->routeIs('admin-pusat.project.index') && request('type') === 'daerah'
                         ? 'text-[#13416B] bg-[#13416B]/10 font-bold'
                         : 'text-slate-500 hover:bg-slate-100 hover:text-[#13416B]' }}">
@@ -92,14 +92,14 @@
             <ul class="space-y-0.5 px-1.5">
                 <li>
                     <a href="{{ route('admin-pusat.project.index', ['type' => 'pusat']) }}"
-                        class="block px-3 py-2 rounded-lg text-[13px] leading-snug break-words font-semibold transition-colors
+                        class="block px-3.5 py-2.5 rounded-lg text-sm leading-snug break-words font-semibold transition-colors
                         {{ request()->routeIs('admin-pusat.project.index') && request('type', 'pusat') === 'pusat' ? 'text-[#13416B] bg-[#13416B]/10 font-bold' : 'text-slate-600 hover:bg-slate-100 hover:text-[#13416B]' }}">
                         Proyek Pusat
                     </a>
                 </li>
                 <li>
                     <a href="{{ route('admin-pusat.project.index', ['type' => 'daerah']) }}"
-                        class="block px-3 py-2 rounded-lg text-[13px] leading-snug break-words font-semibold transition-colors
+                        class="block px-3.5 py-2.5 rounded-lg text-sm leading-snug break-words font-semibold transition-colors
                         {{ request()->routeIs('admin-pusat.project.index') && request('type') === 'daerah' ? 'text-[#13416B] bg-[#13416B]/10 font-bold' : 'text-slate-600 hover:bg-slate-100 hover:text-[#13416B]' }}">
                         Proyek Daerah
                     </a>
@@ -142,7 +142,7 @@
         <ul x-show="sidebarOpen && open" x-collapse x-cloak class="mt-1 space-y-1 pl-4">
             <li>
                 <a href="{{ route('admin-pusat.rtkn.index') }}"
-                    class="flex items-center px-3.5 py-2 rounded-lg transition-colors text-[13px] leading-snug break-words font-semibold
+                    class="flex items-center px-3.5 py-2.5 rounded-lg transition-colors text-sm leading-snug break-words font-semibold
                     {{ request()->routeIs('admin-pusat.rtkn.index*')
                         ? 'text-[#13416B] bg-[#13416B]/10 font-bold'
                         : 'text-slate-500 hover:bg-slate-100 hover:text-[#13416B]' }}">
@@ -151,7 +151,7 @@
             </li>
             <li>
                 <a href="{{ route('admin-pusat.rtkd.index') }}"
-                    class="flex items-center px-3.5 py-2 rounded-lg transition-colors text-[13px] leading-snug break-words font-semibold
+                    class="flex items-center px-3.5 py-2.5 rounded-lg transition-colors text-sm leading-snug break-words font-semibold
                     {{ request()->routeIs('admin-pusat.rtkd*')
                         ? 'text-[#13416B] bg-[#13416B]/10 font-bold'
                         : 'text-slate-500 hover:bg-slate-100 hover:text-[#13416B]' }}">
@@ -170,14 +170,14 @@
             <ul class="space-y-0.5 px-1.5">
                 <li>
                     <a href="{{ route('admin-pusat.rtkn.index') }}"
-                        class="block px-3 py-2 rounded-lg text-[13px] leading-snug break-words font-semibold transition-colors
+                        class="block px-3.5 py-2.5 rounded-lg text-sm leading-snug break-words font-semibold transition-colors
                         {{ request()->routeIs('admin-pusat.rtkn.index*') ? 'text-[#13416B] bg-[#13416B]/10 font-bold' : 'text-slate-600 hover:bg-slate-100 hover:text-[#13416B]' }}">
                         RTK Nasional
                     </a>
                 </li>
                 <li>
                     <a href="{{ route('admin-pusat.rtkd.index') }}"
-                        class="block px-3 py-2 rounded-lg text-[13px] leading-snug break-words font-semibold transition-colors
+                        class="block px-3.5 py-2.5 rounded-lg text-sm leading-snug break-words font-semibold transition-colors
                         {{ request()->routeIs('admin-pusat.rtkd*') ? 'text-[#13416B] bg-[#13416B]/10 font-bold' : 'text-slate-600 hover:bg-slate-100 hover:text-[#13416B]' }}">
                         RTK Daerah
                     </a>
@@ -220,7 +220,7 @@
         <ul x-show="sidebarOpen && open" x-collapse x-cloak class="mt-1 space-y-1 pl-4">
             <li>
                 <a href="{{ route('admin-pusat.rekapitulasi.pusat') }}"
-                    class="flex items-center px-3.5 py-2 rounded-lg transition-colors text-[13px] leading-snug break-words font-semibold
+                    class="flex items-center px-3.5 py-2.5 rounded-lg transition-colors text-sm leading-snug break-words font-semibold
                     {{ request()->routeIs('admin-pusat.rekapitulasi.pusat*')
                         ? 'text-[#13416B] bg-[#13416B]/10 font-bold'
                         : 'text-slate-500 hover:bg-slate-100 hover:text-[#13416B]' }}">
@@ -229,7 +229,7 @@
             </li>
             <li>
                 <a href="{{ route('admin-pusat.rekapitulasi.index') }}"
-                    class="flex items-center px-3.5 py-2 rounded-lg transition-colors text-[13px] leading-snug break-words font-semibold
+                    class="flex items-center px-3.5 py-2.5 rounded-lg transition-colors text-sm leading-snug break-words font-semibold
                     {{ request()->routeIs('admin-pusat.rekapitulasi.index*') || request()->routeIs('admin-pusat.rekapitulasi.kab-kota*') || request()->routeIs('admin-pusat.rekapitulasi.rekap-user-province*') || request()->routeIs('admin-pusat.rekapitulasi.rekap-user-kab-kota*')
                         ? 'text-[#13416B] bg-[#13416B]/10 font-bold'
                         : 'text-slate-500 hover:bg-slate-100 hover:text-[#13416B]' }}">
@@ -248,14 +248,14 @@
             <ul class="space-y-0.5 px-1.5">
                 <li>
                     <a href="{{ route('admin-pusat.rekapitulasi.pusat') }}"
-                        class="block px-3 py-2 rounded-lg text-[13px] leading-snug break-words font-semibold transition-colors
+                        class="block px-3.5 py-2.5 rounded-lg text-sm leading-snug break-words font-semibold transition-colors
                         {{ request()->routeIs('admin-pusat.rekapitulasi.pusat*') ? 'text-[#13416B] bg-[#13416B]/10 font-bold' : 'text-slate-600 hover:bg-slate-100 hover:text-[#13416B]' }}">
                         Pusat
                     </a>
                 </li>
                 <li>
                     <a href="{{ route('admin-pusat.rekapitulasi.index') }}"
-                        class="block px-3 py-2 rounded-lg text-[13px] leading-snug break-words font-semibold transition-colors
+                        class="block px-3.5 py-2.5 rounded-lg text-sm leading-snug break-words font-semibold transition-colors
                         {{ request()->routeIs('admin-pusat.rekapitulasi.index*') ? 'text-[#13416B] bg-[#13416B]/10 font-bold' : 'text-slate-600 hover:bg-slate-100 hover:text-[#13416B]' }}">
                         Daerah
                     </a>
@@ -300,7 +300,7 @@
         <ul x-show="sidebarOpen && open" x-collapse x-cloak class="mt-1 space-y-1 pl-4">
             <li>
                 <a href="{{ route('admin-pusat.survey-periods.index') }}"
-                    class="flex items-center px-3.5 py-2 rounded-lg transition-colors text-[13px] leading-snug break-words font-semibold
+                    class="flex items-center px-3.5 py-2.5 rounded-lg transition-colors text-sm leading-snug break-words font-semibold
                     {{ request()->routeIs('admin-pusat.survey-periods.*')
                         ? 'text-[#13416B] bg-[#13416B]/10 font-bold'
                         : 'text-slate-500 hover:bg-slate-100 hover:text-[#13416B]' }}">
@@ -309,7 +309,7 @@
             </li>
             <li>
                 <a href="{{ route('admin-pusat.hasil-pemanfaatan-rtkd.index') }}"
-                    class="flex items-center px-3.5 py-2 rounded-lg transition-colors text-[13px] leading-snug break-words font-semibold
+                    class="flex items-center px-3.5 py-2.5 rounded-lg transition-colors text-sm leading-snug break-words font-semibold
                     {{ request()->routeIs('admin-pusat.hasil-pemanfaatan-rtkd.*')
                         ? 'text-[#13416B] bg-[#13416B]/10 font-bold'
                         : 'text-slate-500 hover:bg-slate-100 hover:text-[#13416B]' }}">
@@ -328,14 +328,14 @@
             <ul class="space-y-0.5 px-1.5">
                 <li>
                     <a href="{{ route('admin-pusat.survey-periods.index') }}"
-                        class="block px-3 py-2 rounded-lg text-[13px] leading-snug break-words font-semibold transition-colors
+                        class="block px-3.5 py-2.5 rounded-lg text-sm leading-snug break-words font-semibold transition-colors
                         {{ request()->routeIs('admin-pusat.survey-periods.*') ? 'text-[#13416B] bg-[#13416B]/10 font-bold' : 'text-slate-600 hover:bg-slate-100 hover:text-[#13416B]' }}">
                         Periode Survei
                     </a>
                 </li>
                 <li>
                     <a href="{{ route('admin-pusat.hasil-pemanfaatan-rtkd.index') }}"
-                        class="block px-3 py-2 rounded-lg text-[13px] leading-snug break-words font-semibold transition-colors
+                        class="block px-3.5 py-2.5 rounded-lg text-sm leading-snug break-words font-semibold transition-colors
                         {{ request()->routeIs('admin-pusat.hasil-pemanfaatan-rtkd.*') ? 'text-[#13416B] bg-[#13416B]/10 font-bold' : 'text-slate-600 hover:bg-slate-100 hover:text-[#13416B]' }}">
                         Hasil Kuesioner
                     </a>
