@@ -99,9 +99,9 @@
                                 </x-table.td>
                                 <x-table.td align="center">
                                     @if($sub->rtk_document_id)
-                                        <x-badge color="success" text="Ya" />
+                                        <x-badge color="success-solid" text="Ya" />
                                     @else
-                                        <x-badge color="danger" text="Tidak" />
+                                        <x-badge color="danger-solid" text="Tidak" />
                                     @endif
                                 </x-table.td>
                                 <x-table.td align="center">
@@ -109,9 +109,9 @@
                                 </x-table.td>
                                 <x-table.td align="center">
                                     @if($sub->q2_jadi_acuan === 'ya')
-                                        <x-badge color="indigo" text="Ya" />
+                                        <x-badge color="indigo-solid" text="Ya" />
                                     @elseif($sub->q2_jadi_acuan === 'tidak')
-                                        <x-badge color="amber" text="Belum" />
+                                        <x-badge color="amber-solid" text="Belum" />
                                     @else
                                         <span class="text-slate-400">—</span>
                                     @endif
@@ -130,9 +130,9 @@
                                 <x-table.td align="center">
                                     @php
                                         $verifColor = match($sub->status_verifikasi) {
-                                            'verified' => 'success',
-                                            'rejected' => 'danger',
-                                            default => 'amber'
+                                            'verified' => 'success-solid',
+                                            'rejected' => 'danger-solid',
+                                            default => 'amber-solid'
                                         };
                                         $verifText = match($sub->status_verifikasi) {
                                             'verified' => 'Disetujui',

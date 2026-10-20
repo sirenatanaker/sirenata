@@ -93,12 +93,12 @@
                                             <li>
                                                 <a :href="item.url"
                                                     class="flex items-center gap-3 px-3 sm:px-5 py-2 sm:py-3 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors border-l-2 border-transparent hover:border-[#13416B] dark:hover:border-white group">
-                                                    <div class="relative w-10 h-[50px] rounded-md overflow-hidden flex items-center justify-center shrink-0 border border-slate-200 dark:border-slate-700"
+                                                    <div class="relative w-16 sm:w-20 aspect-video rounded-md overflow-hidden flex items-center justify-center shrink-0 border border-slate-200 dark:border-slate-700"
                                                         :class="!item.cover && item.color">
                                                         <img x-show="item.cover" :src="item.cover" :alt="item.title"
                                                             class="w-full h-full object-cover" loading="lazy">
                                                         <span x-show="!item.cover" x-text="item.initials"
-                                                            class="text-white font-bold"></span>
+                                                            class="text-white font-bold text-xs sm:text-sm"></span>
                                                     </div>
                                                     <div class="flex-1 min-w-0">
                                                         <p class="text-xs md:text-sm font-bold text-slate-800 dark:text-white line-clamp-2 sm:truncate leading-snug break-words group-hover:text-[#13416B] dark:group-hover:text-white"
@@ -125,12 +125,12 @@
                                             <li>
                                                 <a :href="item.url"
                                                     class="flex items-center gap-3 px-3 sm:px-5 py-2 sm:py-3 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors border-l-2 border-transparent hover:border-[#13416B] dark:hover:border-white group">
-                                                    <div class="relative w-10 h-[50px] rounded-md overflow-hidden flex items-center justify-center shrink-0 border border-slate-200 dark:border-slate-700"
+                                                    <div class="relative w-16 sm:w-20 aspect-video rounded-md overflow-hidden flex items-center justify-center shrink-0 border border-slate-200 dark:border-slate-700"
                                                         :class="!item.cover && item.color">
                                                         <img x-show="item.cover" :src="item.cover" :alt="item.title"
                                                             class="w-full h-full object-cover" loading="lazy">
                                                         <span x-show="!item.cover" x-text="item.initials"
-                                                            class="text-white font-bold"></span>
+                                                            class="text-white font-bold text-xs sm:text-sm"></span>
                                                     </div>
                                                     <div class="flex-1 min-w-0">
                                                         <p class="text-xs md:text-sm font-bold text-slate-800 dark:text-white line-clamp-2 sm:truncate leading-snug break-words group-hover:text-[#13416B] dark:group-hover:text-white"
@@ -248,34 +248,12 @@
                         }
                     }
                 }" @dark-mode-toggled.window="isDarkMode = $event.detail.isDark">
-                    <div class="flex items-center gap-2">
-                        <!-- Tombol Cepat Dark Mode Navbar (Role Admin) -->
-                        @if (!auth()->user()->hasRole('user'))
-                            <button type="button" @click="toggleDarkMode()"
-                                class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-[#13416B] dark:hover:text-white transition-colors shrink-0"
-                                :title="isDarkMode ? 'Ganti ke Mode Terang' : 'Ganti ke Mode Gelap'">
-                                <i class="fas fa-moon text-sm sm:text-base text-slate-500 dark:text-slate-400" x-show="!isDarkMode"></i>
-                                <svg x-show="isDarkMode" class="w-4 h-4 sm:w-5 sm:h-5 text-slate-400 dark:text-slate-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                                    <circle cx="12" cy="12" r="4"></circle>
-                                    <path d="M12 2v2"></path>
-                                    <path d="M12 20v2"></path>
-                                    <path d="m4.93 4.93 1.41 1.41"></path>
-                                    <path d="m17.66 17.66 1.41 1.41"></path>
-                                    <path d="M2 12h2"></path>
-                                    <path d="M20 12h2"></path>
-                                    <path d="m6.34 17.66-1.41 1.41"></path>
-                                    <path d="m19.07 4.93-1.41 1.41"></path>
-                                </svg>
-                            </button>
-                        @endif
-
-                        <button @click="open = !open"
-                            class="rounded-full overflow-hidden focus:outline-none cursor-pointer border-2 border-transparent hover:border-[#13416B] transition-colors">
-                            <img class="w-9 h-9 sm:w-11 sm:h-11 rounded-full object-cover"
-                                src="https://ui-avatars.com/api/?name={{ auth()->user()->profile?->full_name ?? auth()->user()->name }}&background=13416b&color=fff"
-                                alt="user">
-                        </button>
-                    </div>
+                    <button @click="open = !open"
+                        class="rounded-full overflow-hidden focus:outline-none cursor-pointer border-2 border-transparent hover:border-[#13416B] transition-colors">
+                        <img class="w-9 h-9 sm:w-11 sm:h-11 rounded-full object-cover"
+                            src="https://ui-avatars.com/api/?name={{ auth()->user()->profile?->full_name ?? auth()->user()->name }}&background=13416b&color=fff"
+                            alt="user">
+                    </button>
 
                     <div x-show="open" @click.outside="open = false" x-transition x-cloak
                         class="absolute right-0 top-full mt-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl shadow-xl w-64 z-50 overflow-hidden">
@@ -305,35 +283,35 @@
                                         <i class="fas fa-gear w-4 shrink-0 text-center text-slate-400 dark:text-slate-500" aria-hidden="true"></i> Pengaturan
                                     </a>
                                 </li>
-                            @else
-                                <!-- Tombol Ganti Dark Mode di User Dropdown (Role Admin) -->
-                                <li>
-                                    <button type="button" @click="toggleDarkMode()"
-                                        class="flex w-full cursor-pointer items-center justify-between p-2.5 rounded-xl text-slate-700 dark:text-slate-200 hover:bg-[#13416B]/10 hover:text-[#13416B] dark:hover:bg-slate-700 dark:hover:text-white font-medium transition-colors text-left group">
-                                        <span class="flex items-center gap-3">
-                                            <i class="fas fa-moon w-4 shrink-0 text-center text-slate-400 dark:text-slate-400" x-show="!isDarkMode" aria-hidden="true"></i>
-                                            <svg x-show="isDarkMode" class="w-4 h-4 shrink-0 text-slate-400 dark:text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                                                <circle cx="12" cy="12" r="4"></circle>
-                                                <path d="M12 2v2"></path>
-                                                <path d="M12 20v2"></path>
-                                                <path d="m4.93 4.93 1.41 1.41"></path>
-                                                <path d="m17.66 17.66 1.41 1.41"></path>
-                                                <path d="M2 12h2"></path>
-                                                <path d="M20 12h2"></path>
-                                                <path d="m6.34 17.66-1.41 1.41"></path>
-                                                <path d="m19.07 4.93-1.41 1.41"></path>
-                                            </svg>
-                                            <span>Mode Gelap</span>
-                                        </span>
-                                        <!-- Saklar Mini Switch Toggle -->
-                                        <div class="relative inline-flex h-5 w-9 shrink-0 items-center rounded-full border border-transparent transition-colors duration-200 ease-in-out"
-                                            :class="isDarkMode ? 'bg-[#13416B] dark:bg-white' : 'bg-slate-200 dark:bg-slate-700'">
-                                            <span class="pointer-events-none inline-block h-3.5 w-3.5 rounded-full bg-white dark:bg-slate-900 shadow-xs transform transition duration-200 ease-in-out"
-                                                :class="isDarkMode ? 'translate-x-4.5' : 'translate-x-0.5'"></span>
-                                        </div>
-                                    </button>
-                                </li>
                             @endif
+
+                            <!-- Tombol Ganti Dark Mode Eksklusif di User Dropdown (Semua Role) -->
+                            <li>
+                                <button type="button" @click="toggleDarkMode()"
+                                    class="flex w-full cursor-pointer items-center justify-between p-2.5 rounded-xl text-slate-700 dark:text-slate-200 hover:bg-[#13416B]/10 hover:text-[#13416B] dark:hover:bg-slate-700 dark:hover:text-white font-medium transition-colors text-left group">
+                                    <span class="flex items-center gap-3">
+                                        <i class="fas fa-moon w-4 shrink-0 text-center text-slate-400 dark:text-slate-400" x-show="!isDarkMode" aria-hidden="true"></i>
+                                        <svg x-show="isDarkMode" class="w-4 h-4 shrink-0 text-slate-400 dark:text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                            <circle cx="12" cy="12" r="4"></circle>
+                                            <path d="M12 2v2"></path>
+                                            <path d="M12 20v2"></path>
+                                            <path d="m4.93 4.93 1.41 1.41"></path>
+                                            <path d="m17.66 17.66 1.41 1.41"></path>
+                                            <path d="M2 12h2"></path>
+                                            <path d="M20 12h2"></path>
+                                            <path d="m6.34 17.66-1.41 1.41"></path>
+                                            <path d="m19.07 4.93-1.41 1.41"></path>
+                                        </svg>
+                                        <span>Mode Gelap</span>
+                                    </span>
+                                    <!-- Saklar Mini Switch Toggle -->
+                                    <div class="relative inline-flex h-5 w-9 shrink-0 items-center rounded-full border border-transparent transition-colors duration-200 ease-in-out"
+                                        :class="isDarkMode ? 'bg-[#13416B] dark:bg-white' : 'bg-slate-200 dark:bg-slate-700'">
+                                        <span class="pointer-events-none inline-block h-3.5 w-3.5 rounded-full bg-white dark:bg-slate-900 shadow-xs transform transition duration-200 ease-in-out"
+                                            :class="isDarkMode ? 'translate-x-4.5' : 'translate-x-0.5'"></span>
+                                    </div>
+                                </button>
+                            </li>
 
                             <li class="my-1 border-t border-slate-100 dark:border-slate-700/60"></li>
 
