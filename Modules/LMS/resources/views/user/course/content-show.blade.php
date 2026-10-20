@@ -8,8 +8,10 @@
         readerPrefs: {
             fontSize: 'normal',
             fontFamily: 'sans',
-            lineHeight: 'normal',
-            contentWidth: 'full'
+            lineHeight: '1.5',
+            textAlign: 'left',
+            paperTheme: 'white',
+            fontWeight: 'normal'
         },
     
         init() {
@@ -85,10 +87,24 @@
             this.readerPrefs = {
                 fontSize: 'normal',
                 fontFamily: 'sans',
-                lineHeight: 'normal',
-                contentWidth: 'full'
+                lineHeight: '1.5',
+                textAlign: 'left',
+                paperTheme: 'white',
+                fontWeight: 'normal'
             };
             localStorage.setItem('sirenata_reading_prefs', JSON.stringify(this.readerPrefs));
+            if (this.isDark && window.toggleDarkMode) {
+                this.isDark = window.toggleDarkMode();
+            }
+        },
+
+        getLineHeightClass() {
+            const lh = this.readerPrefs.lineHeight;
+            if (lh === '1' || lh === '1.0') return 'reader-leading-1-0';
+            if (lh === '1.2') return 'reader-leading-1-2';
+            if (lh === '2' || lh === '2.0' || lh === 'loose') return 'reader-leading-2-0';
+            if (lh === '2.5') return 'reader-leading-2-5';
+            return 'reader-leading-1-5';
         }
     }" @dark-mode-toggled.window="isDark = $event.detail.isDark">
 
@@ -96,15 +112,12 @@
         <div
             class="bg-white sm:rounded-md sm:shadow-sm border-b sm:border border-slate-200 overflow-hidden min-h-screen sm:min-h-0 reader-container transition-colors duration-200"
             :class="{
-                'reader-theme-dark': isDark
+                'reader-theme-dark': isDark,
+                'reader-theme-sepia': !isDark && readerPrefs.paperTheme === 'sepia'
             }">
 
             {{-- Body Content --}}
-            <div class="p-5 sm:p-10 lg:p-12 transition-all duration-200"
-                :class="{
-                    'max-w-3xl mx-auto': readerPrefs.contentWidth === 'focus',
-                    'max-w-none': readerPrefs.contentWidth === 'full'
-                }">
+            <div class="p-5 sm:p-10 lg:p-12 transition-all duration-200">
 
                 <div class="mb-8 flex items-center justify-between gap-3">
                     <a href="{{ route('user.course.my-course.detail', $slug) }}"
@@ -167,30 +180,38 @@
                                 x-transition:leave="transition ease-in duration-100"
                                 x-transition:leave-start="opacity-100 translate-y-0 scale-100"
                                 x-transition:leave-end="opacity-0 translate-y-1 scale-95"
-                                class="absolute right-0 mt-2 w-72 sm:w-80 bg-white rounded-2xl shadow-xl border border-slate-200 p-4 z-50 text-slate-800 text-left">
+                                class="absolute right-0 mt-2 w-64 sm:w-72 bg-white rounded-xl shadow-xl border border-slate-200 p-3.5 z-50 text-slate-800 text-left"
+                                :class="{
+                                    '!bg-[#1a2230] !border-[#263346] !text-slate-200': isDark
+                                }">
 
-                                <div class="flex items-center justify-between pb-2.5 mb-3 border-b border-slate-100 dark:border-slate-800">
-                                    <h4 class="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-200 flex items-center gap-1.5">
-                                        <i class="fas fa-sliders-h text-[#13416B] dark:text-white"></i> Tampilan Baca
+                                <div class="flex items-center justify-between pb-2 mb-3 border-b border-slate-100"
+                                    :class="{ '!border-[#263346]': isDark }">
+                                    <h4 class="text-xs font-bold uppercase tracking-wider text-slate-700 flex items-center gap-1.5"
+                                        :class="{ '!text-slate-200': isDark }">
+                                        <i class="fas fa-sliders-h text-[#13416B]" :class="{ '!text-white': isDark }"></i> Tampilan Baca
                                     </h4>
-                                    <button type="button" @click="resetPrefs()" class="text-[11px] font-semibold text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 flex items-center gap-1">
+                                    <button type="button" @click="resetPrefs()" class="text-[11px] font-semibold text-slate-400 hover:text-slate-700 flex items-center gap-1 cursor-pointer"
+                                        :class="{ 'hover:!text-slate-200': isDark }">
                                         <i class="fas fa-undo text-[10px]"></i> Reset
                                     </button>
                                 </div>
 
                                 {{-- 1. Mode Gelap Toggle --}}
                                 <div class="mb-3">
-                                    <div class="flex items-center justify-between p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800">
+                                    <div class="flex items-center justify-between p-2.5 rounded-xl border border-slate-200 bg-slate-50 transition-colors cursor-pointer select-none"
+                                        :class="{ '!border-[#263346] !bg-[#131A26]': isDark }"
+                                        @click="toggleDarkMode()">
                                         <div class="flex items-center gap-2">
                                             <i class="fas fa-moon text-xs" :class="isDark ? 'text-white' : 'text-slate-400'"></i>
-                                            <span class="text-xs font-bold text-slate-700 dark:text-slate-200">Mode Gelap</span>
+                                            <span class="text-xs font-bold text-slate-700" :class="{ '!text-slate-200': isDark }">Mode Gelap</span>
                                         </div>
-                                        <button type="button" @click="toggleDarkMode()"
+                                        <button type="button" @click.stop="toggleDarkMode()"
                                             class="relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none"
                                             :class="isDark ? 'bg-white' : 'bg-slate-300 dark:bg-slate-600'"
                                             role="switch" :aria-checked="isDark">
                                             <span aria-hidden="true"
-                                                class="pointer-events-none inline-block h-4 w-4 transform rounded-full shadow ring-0 transition duration-200 ease-in-out"
+                                                class="pointer-events-none inline-block h-4 w-4 transform rounded-full shadow-xs ring-0 transition duration-200 ease-in-out"
                                                 :class="isDark ? 'translate-x-4 bg-slate-900' : 'translate-x-0 bg-white'"></span>
                                         </button>
                                     </div>
@@ -198,85 +219,37 @@
 
                                 {{-- 2. Ukuran Font --}}
                                 <div class="mb-3">
-                                    <label class="block text-[11px] font-bold text-slate-600 dark:text-slate-300 mb-1.5">Ukuran Huruf</label>
-                                    <div class="grid grid-cols-4 gap-1 bg-slate-100 dark:bg-slate-800 p-1 rounded-xl">
+                                    <label class="block text-[11px] font-bold text-slate-600 mb-1.5"
+                                        :class="{ '!text-slate-300': isDark }">Ukuran Huruf</label>
+                                    <div class="grid grid-cols-4 gap-1 bg-slate-100 p-1 rounded-xl"
+                                        :class="{ '!bg-[#131A26]': isDark }">
                                         <button type="button" @click="setPref('fontSize', 'sm')"
-                                            class="py-1 rounded-lg text-xs font-semibold text-center transition-colors"
-                                            :class="readerPrefs.fontSize === 'sm' ? 'bg-white dark:bg-slate-700 text-[#13416B] dark:text-white shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'">
+                                            class="py-1 rounded-lg text-xs font-semibold text-center transition-colors cursor-pointer"
+                                            :class="readerPrefs.fontSize === 'sm' ? (isDark ? 'bg-[#263346] text-white shadow-xs' : 'bg-white text-[#13416B] shadow-xs') : (isDark ? 'text-slate-400 hover:text-white' : 'text-slate-600 hover:text-slate-900')">
                                             14px
                                         </button>
                                         <button type="button" @click="setPref('fontSize', 'normal')"
-                                            class="py-1 rounded-lg text-xs font-semibold text-center transition-colors"
-                                            :class="readerPrefs.fontSize === 'normal' ? 'bg-white dark:bg-slate-700 text-[#13416B] dark:text-white shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'">
+                                            class="py-1 rounded-lg text-xs font-semibold text-center transition-colors cursor-pointer"
+                                            :class="readerPrefs.fontSize === 'normal' ? (isDark ? 'bg-[#263346] text-white shadow-xs' : 'bg-white text-[#13416B] shadow-xs') : (isDark ? 'text-slate-400 hover:text-white' : 'text-slate-600 hover:text-slate-900')">
                                             16px
                                         </button>
                                         <button type="button" @click="setPref('fontSize', 'lg')"
-                                            class="py-1 rounded-lg text-xs font-semibold text-center transition-colors"
-                                            :class="readerPrefs.fontSize === 'lg' ? 'bg-white dark:bg-slate-700 text-[#13416B] dark:text-white shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'">
+                                            class="py-1 rounded-lg text-xs font-semibold text-center transition-colors cursor-pointer"
+                                            :class="readerPrefs.fontSize === 'lg' ? (isDark ? 'bg-[#263346] text-white shadow-xs' : 'bg-white text-[#13416B] shadow-xs') : (isDark ? 'text-slate-400 hover:text-white' : 'text-slate-600 hover:text-slate-900')">
                                             18px
                                         </button>
                                         <button type="button" @click="setPref('fontSize', 'xl')"
-                                            class="py-1 rounded-lg text-xs font-semibold text-center transition-colors"
-                                            :class="readerPrefs.fontSize === 'xl' ? 'bg-white dark:bg-slate-700 text-[#13416B] dark:text-white shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'">
+                                            class="py-1 rounded-lg text-xs font-semibold text-center transition-colors cursor-pointer"
+                                            :class="readerPrefs.fontSize === 'xl' ? (isDark ? 'bg-[#263346] text-white shadow-xs' : 'bg-white text-[#13416B] shadow-xs') : (isDark ? 'text-slate-400 hover:text-white' : 'text-slate-600 hover:text-slate-900')">
                                             20px
                                         </button>
                                     </div>
                                 </div>
 
-                                {{-- 3. Jenis Huruf --}}
-                                <div class="mb-3">
-                                    <label class="block text-[11px] font-bold text-slate-600 mb-1.5">Jenis Huruf</label>
-                                    <div class="grid grid-cols-2 gap-1.5">
-                                        <button type="button" @click="setPref('fontFamily', 'sans')"
-                                            class="py-1.5 px-2 rounded-lg border text-xs font-sans font-semibold text-center transition-all"
-                                            :class="readerPrefs.fontFamily === 'sans' ? 'border-[#13416B] bg-[#13416B]/5 text-[#13416B] ring-1 ring-[#13416B]' : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'">
-                                            Modern Sans
-                                        </button>
-                                        <button type="button" @click="setPref('fontFamily', 'serif')"
-                                            class="py-1.5 px-2 rounded-lg border text-xs font-serif font-semibold text-center transition-all"
-                                            :class="readerPrefs.fontFamily === 'serif' ? 'border-[#13416B] bg-[#13416B]/5 text-[#13416B] ring-1 ring-[#13416B]' : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'">
-                                            Buku Serif
-                                        </button>
-                                    </div>
-                                </div>
-
-                                {{-- 4. Jarak & Lebar --}}
-                                <div class="grid grid-cols-2 gap-2 pt-2 border-t border-slate-100 mb-3">
-                                    <div>
-                                        <label class="block text-[10px] font-semibold text-slate-400 mb-1">Jarak Baris</label>
-                                        <div class="flex gap-1">
-                                            <button type="button" @click="setPref('lineHeight', 'normal')"
-                                                class="flex-1 py-1 rounded text-[11px] font-medium border text-center transition-colors"
-                                                :class="readerPrefs.lineHeight === 'normal' ? 'bg-[#13416B]/10 border-[#13416B] text-[#13416B]' : 'border-slate-200 text-slate-600'">
-                                                Normal
-                                            </button>
-                                            <button type="button" @click="setPref('lineHeight', 'loose')"
-                                                class="flex-1 py-1 rounded text-[11px] font-medium border text-center transition-colors"
-                                                :class="readerPrefs.lineHeight === 'loose' ? 'bg-[#13416B]/10 border-[#13416B] text-[#13416B]' : 'border-slate-200 text-slate-600'">
-                                                Renggang
-                                            </button>
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <label class="block text-[10px] font-semibold text-slate-400 mb-1">Lebar Baca</label>
-                                        <div class="flex gap-1">
-                                            <button type="button" @click="setPref('contentWidth', 'full')"
-                                                class="flex-1 py-1 rounded text-[11px] font-medium border text-center transition-colors"
-                                                :class="readerPrefs.contentWidth === 'full' ? 'bg-[#13416B]/10 border-[#13416B] text-[#13416B]' : 'border-slate-200 text-slate-600'">
-                                                Penuh
-                                            </button>
-                                            <button type="button" @click="setPref('contentWidth', 'focus')"
-                                                class="flex-1 py-1 rounded text-[11px] font-medium border text-center transition-colors"
-                                                :class="readerPrefs.contentWidth === 'focus' ? 'bg-[#13416B]/10 border-[#13416B] text-[#13416B]' : 'border-slate-200 text-slate-600'">
-                                                Fokus
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-
                                 {{-- Link to full profile settings --}}
                                 <a href="{{ route('user.profile') }}#pengaturan" target="_blank"
-                                    class="pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] font-semibold text-[#13416B] hover:underline">
+                                    class="pt-2.5 border-t border-slate-100 flex items-center justify-between text-[11px] font-semibold text-[#13416B] hover:underline"
+                                    :class="{ '!border-[#263346] !text-blue-400': isDark }">
                                     <span>Pengaturan Lengkap di Profil</span>
                                     <i class="fas fa-external-link-alt text-[10px]"></i>
                                 </a>
@@ -333,7 +306,9 @@
                         :class="[
                             'reader-font-' + readerPrefs.fontSize,
                             readerPrefs.fontFamily === 'serif' ? 'reader-font-serif' : 'reader-font-sans',
-                            readerPrefs.lineHeight === 'loose' ? 'reader-leading-loose' : 'reader-leading-normal'
+                            getLineHeightClass(),
+                            readerPrefs.textAlign === 'justify' ? 'reader-align-justify' : 'reader-align-left',
+                            readerPrefs.fontWeight === 'medium' ? 'reader-weight-medium' : ''
                         ]">
                         {!! $contentText !!}
                     </div>

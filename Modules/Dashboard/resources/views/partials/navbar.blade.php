@@ -255,7 +255,17 @@
                                 class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-[#13416B] dark:hover:text-white transition-colors shrink-0"
                                 :title="isDarkMode ? 'Ganti ke Mode Terang' : 'Ganti ke Mode Gelap'">
                                 <i class="fas fa-moon text-sm sm:text-base text-slate-500 dark:text-slate-400" x-show="!isDarkMode"></i>
-                                <i class="fas fa-sun text-sm sm:text-base text-slate-400 dark:text-slate-300" x-show="isDarkMode"></i>
+                                <svg x-show="isDarkMode" class="w-4 h-4 sm:w-5 sm:h-5 text-slate-400 dark:text-slate-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                    <circle cx="12" cy="12" r="4"></circle>
+                                    <path d="M12 2v2"></path>
+                                    <path d="M12 20v2"></path>
+                                    <path d="m4.93 4.93 1.41 1.41"></path>
+                                    <path d="m17.66 17.66 1.41 1.41"></path>
+                                    <path d="M2 12h2"></path>
+                                    <path d="M20 12h2"></path>
+                                    <path d="m6.34 17.66-1.41 1.41"></path>
+                                    <path d="m19.07 4.93-1.41 1.41"></path>
+                                </svg>
                             </button>
                         @endif
 
@@ -292,7 +302,7 @@
                                 <li>
                                     <a href="{{ route('user.profile') }}#pengaturan"
                                         class="flex items-center gap-3 p-2.5 rounded-xl text-slate-700 dark:text-slate-200 hover:bg-[#13416B]/10 hover:text-[#13416B] dark:hover:bg-slate-700 dark:hover:text-white font-medium transition-colors">
-                                        <i class="fas fa-sliders-h w-4 shrink-0 text-center text-slate-400 dark:text-slate-500" aria-hidden="true"></i> Pengaturan
+                                        <i class="fas fa-gear w-4 shrink-0 text-center text-slate-400 dark:text-slate-500" aria-hidden="true"></i> Pengaturan
                                     </a>
                                 </li>
                             @else
@@ -302,7 +312,17 @@
                                         class="flex w-full cursor-pointer items-center justify-between p-2.5 rounded-xl text-slate-700 dark:text-slate-200 hover:bg-[#13416B]/10 hover:text-[#13416B] dark:hover:bg-slate-700 dark:hover:text-white font-medium transition-colors text-left group">
                                         <span class="flex items-center gap-3">
                                             <i class="fas fa-moon w-4 shrink-0 text-center text-slate-400 dark:text-slate-400" x-show="!isDarkMode" aria-hidden="true"></i>
-                                            <i class="fas fa-sun w-4 shrink-0 text-center text-slate-400 dark:text-slate-400" x-show="isDarkMode" aria-hidden="true"></i>
+                                            <svg x-show="isDarkMode" class="w-4 h-4 shrink-0 text-slate-400 dark:text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                                <circle cx="12" cy="12" r="4"></circle>
+                                                <path d="M12 2v2"></path>
+                                                <path d="M12 20v2"></path>
+                                                <path d="m4.93 4.93 1.41 1.41"></path>
+                                                <path d="m17.66 17.66 1.41 1.41"></path>
+                                                <path d="M2 12h2"></path>
+                                                <path d="M20 12h2"></path>
+                                                <path d="m6.34 17.66-1.41 1.41"></path>
+                                                <path d="m19.07 4.93-1.41 1.41"></path>
+                                            </svg>
                                             <span>Mode Gelap</span>
                                         </span>
                                         <!-- Saklar Mini Switch Toggle -->

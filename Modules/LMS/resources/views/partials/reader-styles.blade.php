@@ -41,17 +41,56 @@
 .reader-font-xl h2 { font-size: 1.95rem !important; }
 .reader-font-xl h3 { font-size: 1.5rem !important; }
 
-/* --- 2. Line Height Presets --- */
+/* --- 2. Line Height Presets (Sesuai Text Editor: 1.0, 1.2, 1.5, 2.0, 2.5) --- */
+.reader-leading-1,
+.reader-leading-1-0,
+.reader-leading-1 p,
+.reader-leading-1-0 p,
+.reader-leading-1 li,
+.reader-leading-1-0 li,
+.reader-leading-1 blockquote,
+.reader-leading-1-0 blockquote {
+    line-height: 1.25 !important;
+}
+
+.reader-leading-1-2,
+.reader-leading-1-2 p,
+.reader-leading-1-2 li,
+.reader-leading-1-2 blockquote {
+    line-height: 1.45 !important;
+}
+
+.reader-leading-1-5,
 .reader-leading-normal,
+.reader-leading-1-5 p,
 .reader-leading-normal p,
-.reader-leading-normal li {
+.reader-leading-1-5 li,
+.reader-leading-normal li,
+.reader-leading-1-5 blockquote,
+.reader-leading-normal blockquote {
     line-height: 1.75 !important;
 }
 
+.reader-leading-2,
+.reader-leading-2-0,
 .reader-leading-loose,
+.reader-leading-2 p,
+.reader-leading-2-0 p,
 .reader-leading-loose p,
-.reader-leading-loose li {
-    line-height: 2.2 !important;
+.reader-leading-2 li,
+.reader-leading-2-0 li,
+.reader-leading-loose li,
+.reader-leading-2 blockquote,
+.reader-leading-2-0 blockquote,
+.reader-leading-loose blockquote {
+    line-height: 2.1 !important;
+}
+
+.reader-leading-2-5,
+.reader-leading-2-5 p,
+.reader-leading-2-5 li,
+.reader-leading-2-5 blockquote {
+    line-height: 2.5 !important;
 }
 
 /* --- 3. Font Family Presets --- */
@@ -175,3 +214,30 @@
 .reader-theme-dark .text-slate-500 {
     color: #94A3B8 !important;
 }
+
+/* --- 6. Text Alignment Presets --- */
+.reader-align-justify,
+.reader-align-justify p:not([class*="ql-align-"]),
+.reader-align-justify li:not([class*="ql-align-"]),
+.reader-align-justify blockquote:not([class*="ql-align-"]) {
+    text-align: justify !important;
+    text-justify: inter-word;
+}
+
+.reader-align-left,
+.reader-align-left p:not([class*="ql-align-"]),
+.reader-align-left li:not([class*="ql-align-"]),
+.reader-align-left blockquote:not([class*="ql-align-"]) {
+    text-align: left !important;
+}
+
+/* --- 7. Font Weight Presets --- */
+.reader-weight-medium,
+.reader-weight-medium p,
+.reader-weight-medium li,
+.reader-weight-medium span:not([class*="badge"]),
+.reader-weight-medium a:not([class*="btn"]) {
+    font-weight: 500 !important;
+}
+
+

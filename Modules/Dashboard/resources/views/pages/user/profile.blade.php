@@ -10,8 +10,10 @@
         readerPrefs: {
             fontSize: 'normal',
             fontFamily: 'sans',
-            lineHeight: 'normal',
-            contentWidth: 'full'
+            lineHeight: '1.5',
+            textAlign: 'left',
+            paperTheme: 'white',
+            fontWeight: 'normal'
         },
         savedFeedback: false,
         feedbackTimer: null,
@@ -99,11 +101,29 @@
             this.readerPrefs = {
                 fontSize: 'normal',
                 fontFamily: 'sans',
-                lineHeight: 'normal',
-                contentWidth: 'full'
+                lineHeight: '1.5',
+                textAlign: 'left',
+                paperTheme: 'white',
+                fontWeight: 'normal'
             };
             this.persist();
             this.setDarkMode(false);
+        },
+
+        selectPaperTheme(theme) {
+            this.updatePref('paperTheme', theme);
+            if (theme === 'sepia' && this.isDark) {
+                this.setDarkMode(false);
+            }
+        },
+
+        getLineHeightClass() {
+            const lh = this.readerPrefs.lineHeight;
+            if (lh === '1' || lh === '1.0') return 'reader-leading-1-0';
+            if (lh === '1.2') return 'reader-leading-1-2';
+            if (lh === '2' || lh === '2.0' || lh === 'loose') return 'reader-leading-2-0';
+            if (lh === '2.5') return 'reader-leading-2-5';
+            return 'reader-leading-1-5';
         },
 
         persist() {
@@ -186,7 +206,7 @@
                 <button type="button" @click="tab = 'settings'; window.location.hash = 'pengaturan'"
                     :class="tab === 'settings' ? 'text-[#13416B] dark:text-white border-[#13416B] dark:border-white' : 'text-slate-500 dark:text-slate-400 border-transparent hover:text-slate-800 dark:hover:text-white'"
                     class="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-bold border-b-2 -mb-px transition-colors whitespace-nowrap cursor-pointer">
-                    <i class="fas fa-sliders-h text-xs sm:text-sm"></i> Pengaturan
+                    <i class="fas fa-gear text-xs sm:text-sm"></i> Pengaturan
                 </button>
             </div>
 
@@ -320,8 +340,18 @@
                                             :class="isDark 
                                                 ? 'bg-slate-700/50 border-slate-600/80 text-slate-200' 
                                                 : 'bg-slate-100 border-slate-200 text-slate-500'">
-                                            <i class="fas text-xs sm:text-sm transition-transform duration-300"
-                                                :class="isDark ? 'fa-moon' : 'fa-sun'"></i>
+                                            <i class="fas fa-moon text-xs sm:text-sm transition-transform duration-300" x-show="isDark"></i>
+                                            <svg x-show="!isDark" class="w-4 h-4 sm:w-4.5 sm:h-4.5 transition-transform duration-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                                <circle cx="12" cy="12" r="4"></circle>
+                                                <path d="M12 2v2"></path>
+                                                <path d="M12 20v2"></path>
+                                                <path d="m4.93 4.93 1.41 1.41"></path>
+                                                <path d="m17.66 17.66 1.41 1.41"></path>
+                                                <path d="M2 12h2"></path>
+                                                <path d="M20 12h2"></path>
+                                                <path d="m6.34 17.66-1.41 1.41"></path>
+                                                <path d="m19.07 4.93-1.41 1.41"></path>
+                                            </svg>
                                         </div>
                                         <div class="min-w-0">
                                             <p class="font-bold text-xs sm:text-sm text-slate-800 dark:text-slate-100 leading-snug">
@@ -344,8 +374,18 @@
                                         <span class="sr-only">Toggle mode gelap</span>
                                         <span class="pointer-events-none flex h-5 w-5 sm:h-6 sm:w-6 items-center justify-center rounded-full bg-white shadow-sm transform ring-0 transition duration-200 ease-in-out"
                                             :class="isDark ? 'translate-x-5' : 'translate-x-0'">
-                                            <i class="fas text-[9px] sm:text-[10px] transition-colors"
-                                                :class="isDark ? 'fa-moon text-[#13416B] dark:text-slate-800' : 'fa-sun text-slate-400'"></i>
+                                            <i class="fas fa-moon text-[9px] sm:text-[10px] text-[#13416B] dark:text-slate-800" x-show="isDark"></i>
+                                            <svg x-show="!isDark" class="w-3 h-3 sm:w-3.5 sm:h-3.5 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                                <circle cx="12" cy="12" r="4"></circle>
+                                                <path d="M12 2v2"></path>
+                                                <path d="M12 20v2"></path>
+                                                <path d="m4.93 4.93 1.41 1.41"></path>
+                                                <path d="m17.66 17.66 1.41 1.41"></path>
+                                                <path d="M2 12h2"></path>
+                                                <path d="M20 12h2"></path>
+                                                <path d="m6.34 17.66-1.41 1.41"></path>
+                                                <path d="m19.07 4.93-1.41 1.41"></path>
+                                            </svg>
                                         </span>
                                     </button>
                                 </div>
@@ -434,35 +474,103 @@
                                     <!-- Line Height -->
                                     <div>
                                         <label class="block text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-100 mb-1">Jarak Baris Paragraf</label>
-                                        <p class="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 mb-2">Kerapatan teks saat membaca.</p>
-                                        <div class="flex gap-2">
-                                            <button type="button" @click="updatePref('lineHeight', 'normal')"
-                                                class="flex-1 py-2 px-2.5 sm:py-2.5 sm:px-3 rounded-md border-2 text-[11px] sm:text-xs font-bold text-center transition-all flex items-center justify-center gap-1.5 cursor-pointer"
-                                                :class="readerPrefs.lineHeight === 'normal' ? 'border-[#13416B] bg-[#13416B]/5 text-[#13416B] dark:border-white dark:text-white' : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700'">
-                                                <i class="fas fa-align-left text-xs"></i> Standar (1.75x)
+                                        <p class="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 mb-2">Pilihan kerapatan teks antar baris.</p>
+                                        <div class="grid grid-cols-5 gap-1 bg-slate-100 dark:bg-slate-700/50 p-1 sm:p-1.5 rounded-md border border-slate-200 dark:border-slate-700">
+                                            <button type="button" @click="updatePref('lineHeight', '1.0')"
+                                                class="py-1.5 sm:py-2 px-1 rounded-md text-[11px] sm:text-xs font-bold text-center transition-all cursor-pointer flex flex-col items-center justify-center gap-0.5"
+                                                :class="(readerPrefs.lineHeight === '1.0' || readerPrefs.lineHeight === '1') ? 'bg-white dark:bg-slate-800 text-[#13416B] dark:text-white shadow-xs ring-1 ring-slate-200 dark:ring-slate-600' : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'"
+                                                title="Rapat (1.0)">
+                                                <span>1.0</span>
+                                                <span class="text-[9px] font-medium hidden sm:inline opacity-75">Rapat</span>
                                             </button>
-                                            <button type="button" @click="updatePref('lineHeight', 'loose')"
-                                                class="flex-1 py-2 px-2.5 sm:py-2.5 sm:px-3 rounded-md border-2 text-[11px] sm:text-xs font-bold text-center transition-all flex items-center justify-center gap-1.5 cursor-pointer"
-                                                :class="readerPrefs.lineHeight === 'loose' ? 'border-[#13416B] bg-[#13416B]/5 text-[#13416B] dark:border-white dark:text-white' : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700'">
-                                                <i class="fas fa-bars-staggered text-xs"></i> Renggang (2.2x)
+                                            <button type="button" @click="updatePref('lineHeight', '1.2')"
+                                                class="py-1.5 sm:py-2 px-1 rounded-md text-[11px] sm:text-xs font-bold text-center transition-all cursor-pointer flex flex-col items-center justify-center gap-0.5"
+                                                :class="readerPrefs.lineHeight === '1.2' ? 'bg-white dark:bg-slate-800 text-[#13416B] dark:text-white shadow-xs ring-1 ring-slate-200 dark:ring-slate-600' : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'"
+                                                title="Normal (1.2)">
+                                                <span>1.2</span>
+                                                <span class="text-[9px] font-medium hidden sm:inline opacity-75">Normal</span>
+                                            </button>
+                                            <button type="button" @click="updatePref('lineHeight', '1.5')"
+                                                class="py-1.5 sm:py-2 px-1 rounded-md text-[11px] sm:text-xs font-bold text-center transition-all cursor-pointer flex flex-col items-center justify-center gap-0.5"
+                                                :class="(readerPrefs.lineHeight === '1.5' || readerPrefs.lineHeight === 'normal' || !readerPrefs.lineHeight) ? 'bg-white dark:bg-slate-800 text-[#13416B] dark:text-white shadow-xs ring-1 ring-slate-200 dark:ring-slate-600' : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'"
+                                                title="Sedang (1.5)">
+                                                <span>1.5</span>
+                                                <span class="text-[9px] font-medium hidden sm:inline opacity-75">Sedang</span>
+                                            </button>
+                                            <button type="button" @click="updatePref('lineHeight', '2.0')"
+                                                class="py-1.5 sm:py-2 px-1 rounded-md text-[11px] sm:text-xs font-bold text-center transition-all cursor-pointer flex flex-col items-center justify-center gap-0.5"
+                                                :class="(readerPrefs.lineHeight === '2.0' || readerPrefs.lineHeight === '2' || readerPrefs.lineHeight === 'loose') ? 'bg-white dark:bg-slate-800 text-[#13416B] dark:text-white shadow-xs ring-1 ring-slate-200 dark:ring-slate-600' : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'"
+                                                title="Lebar (2.0)">
+                                                <span>2.0</span>
+                                                <span class="text-[9px] font-medium hidden sm:inline opacity-75">Lebar</span>
+                                            </button>
+                                            <button type="button" @click="updatePref('lineHeight', '2.5')"
+                                                class="py-1.5 sm:py-2 px-1 rounded-md text-[11px] sm:text-xs font-bold text-center transition-all cursor-pointer flex flex-col items-center justify-center gap-0.5"
+                                                :class="readerPrefs.lineHeight === '2.5' ? 'bg-white dark:bg-slate-800 text-[#13416B] dark:text-white shadow-xs ring-1 ring-slate-200 dark:ring-slate-600' : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'"
+                                                title="Sangat Lebar (2.5)">
+                                                <span>2.5</span>
+                                                <span class="text-[9px] font-medium hidden sm:inline opacity-75 truncate max-w-full">S.Lebar</span>
                                             </button>
                                         </div>
                                     </div>
 
-                                    <!-- Reading Width / Focus Mode -->
+                                    <!-- Text Alignment -->
                                     <div>
-                                        <label class="block text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-100 mb-1">Mode Lebar Baca</label>
-                                        <p class="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 mb-2">Panjang kolom teks pada layar.</p>
-                                        <div class="flex gap-2">
-                                            <button type="button" @click="updatePref('contentWidth', 'full')"
-                                                class="flex-1 py-2 px-2.5 sm:py-2.5 sm:px-3 rounded-md border-2 text-[11px] sm:text-xs font-bold text-center transition-all flex items-center justify-center gap-1.5 cursor-pointer"
-                                                :class="readerPrefs.contentWidth === 'full' ? 'border-[#13416B] bg-[#13416B]/5 text-[#13416B] dark:border-white dark:text-white' : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700'">
-                                                <i class="fas fa-arrows-left-right text-xs"></i> Penuh
+                                        <label class="block text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-100 mb-1">Perataan Teks Paragraf</label>
+                                        <p class="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 mb-2">Arah susunan tepi teks materi.</p>
+                                        <div class="grid grid-cols-2 gap-2">
+                                            <button type="button" @click="updatePref('textAlign', 'left')"
+                                                class="py-2 px-2.5 sm:py-2.5 sm:px-3 rounded-md border-2 text-[11px] sm:text-xs font-bold text-center transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                                                :class="(readerPrefs.textAlign === 'left' || !readerPrefs.textAlign) ? 'border-[#13416B] bg-[#13416B]/5 text-[#13416B] dark:border-white dark:text-white' : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700'">
+                                                <i class="fas fa-align-left text-xs"></i> Rata Kiri
                                             </button>
-                                            <button type="button" @click="updatePref('contentWidth', 'focus')"
-                                                class="flex-1 py-2 px-2.5 sm:py-2.5 sm:px-3 rounded-md border-2 text-[11px] sm:text-xs font-bold text-center transition-all flex items-center justify-center gap-1.5 cursor-pointer"
-                                                :class="readerPrefs.contentWidth === 'focus' ? 'border-[#13416B] bg-[#13416B]/5 text-[#13416B] dark:border-white dark:text-white' : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700'">
-                                                <i class="fas fa-compress-alt text-xs"></i> Mode Fokus
+                                            <button type="button" @click="updatePref('textAlign', 'justify')"
+                                                class="py-2 px-2.5 sm:py-2.5 sm:px-3 rounded-md border-2 text-[11px] sm:text-xs font-bold text-center transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                                                :class="readerPrefs.textAlign === 'justify' ? 'border-[#13416B] bg-[#13416B]/5 text-[#13416B] dark:border-white dark:text-white' : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700'">
+                                                <i class="fas fa-align-justify text-xs"></i> Rata Kiri-Kanan
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 5. Warna Kertas Baca & Ketebalan Huruf -->
+                            <div>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-4">
+                                    <!-- Paper Theme -->
+                                    <div>
+                                        <label class="block text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-100 mb-1">Warna Kertas Baca</label>
+                                        <p class="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 mb-2">Pilihan latar belakang bacaan.</p>
+                                        <div class="grid grid-cols-2 gap-2">
+                                            <button type="button" @click="selectPaperTheme('white')"
+                                                class="py-2 px-2.5 sm:py-2.5 sm:px-3 rounded-md border-2 text-[11px] sm:text-xs font-bold text-center transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                                                :class="(readerPrefs.paperTheme === 'white' || !readerPrefs.paperTheme) ? 'border-[#13416B] bg-[#13416B]/5 text-[#13416B] dark:border-white dark:text-white' : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700'">
+                                                <span class="w-3.5 h-3.5 rounded-full bg-white border border-slate-300 shadow-2xs shrink-0"></span>
+                                                <span>Putih Bersih</span>
+                                            </button>
+                                            <button type="button" @click="selectPaperTheme('sepia')"
+                                                class="py-2 px-2.5 sm:py-2.5 sm:px-3 rounded-md border-2 text-[11px] sm:text-xs font-bold text-center transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                                                :class="readerPrefs.paperTheme === 'sepia' ? 'border-[#8C531B] bg-[#F8F1E5] text-[#4A3B2C] ring-1 ring-[#8C531B]/30' : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700'">
+                                                <span class="w-3.5 h-3.5 rounded-full bg-[#F8F1E5] border border-[#D5C2A5] shadow-2xs shrink-0"></span>
+                                                <span>Krem Sepia</span>
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <!-- Font Weight -->
+                                    <div>
+                                        <label class="block text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-100 mb-1">Ketebalan Huruf</label>
+                                        <p class="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 mb-2">Tingkat kepekatan teks bacaan.</p>
+                                        <div class="grid grid-cols-2 gap-2">
+                                            <button type="button" @click="updatePref('fontWeight', 'normal')"
+                                                class="py-2 px-2.5 sm:py-2.5 sm:px-3 rounded-md border-2 text-[11px] sm:text-xs font-normal text-center transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                                                :class="(readerPrefs.fontWeight === 'normal' || !readerPrefs.fontWeight) ? 'border-[#13416B] bg-[#13416B]/5 text-[#13416B] font-bold dark:border-white dark:text-white' : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700'">
+                                                <i class="fas fa-font text-xs"></i> Standar (400)
+                                            </button>
+                                            <button type="button" @click="updatePref('fontWeight', 'medium')"
+                                                class="py-2 px-2.5 sm:py-2.5 sm:px-3 rounded-md border-2 text-[11px] sm:text-xs font-semibold text-center transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                                                :class="readerPrefs.fontWeight === 'medium' ? 'border-[#13416B] bg-[#13416B]/5 text-[#13416B] font-bold dark:border-white dark:text-white' : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700'">
+                                                <i class="fas fa-bold text-xs"></i> Lebih Pekat (500)
                                             </button>
                                         </div>
                                     </div>
@@ -494,14 +602,12 @@
                                 <div class="rounded-md border shadow-sm overflow-hidden transition-all duration-300 reader-container"
                                     :class="{
                                         'reader-theme-dark': isDark,
-                                        'bg-white border-slate-200 text-slate-800': !isDark
+                                        'reader-theme-sepia': !isDark && readerPrefs.paperTheme === 'sepia',
+                                        'bg-white border-slate-200 text-slate-800': !isDark && readerPrefs.paperTheme !== 'sepia'
                                     }">
 
                                     <!-- Body Mock Content -->
-                                    <div class="p-3.5 sm:p-4 lg:p-5 transition-all duration-300"
-                                        :class="{
-                                            'max-w-md mx-auto': readerPrefs.contentWidth === 'focus'
-                                        }">
+                                    <div class="p-3.5 sm:p-4 lg:p-5 transition-all duration-300">
                                         <h4 class="font-extrabold leading-tight mb-2 sm:mb-3"
                                             :class="{
                                                 'text-sm sm:text-base lg:text-lg': readerPrefs.fontSize === 'sm',
@@ -518,7 +624,9 @@
                                             :class="[
                                                 'reader-font-' + readerPrefs.fontSize,
                                                 readerPrefs.fontFamily === 'serif' ? 'reader-font-serif' : 'reader-font-sans',
-                                                readerPrefs.lineHeight === 'loose' ? 'reader-leading-loose' : 'reader-leading-normal'
+                                                getLineHeightClass(),
+                                                readerPrefs.textAlign === 'justify' ? 'reader-align-justify' : 'reader-align-left',
+                                                readerPrefs.fontWeight === 'medium' ? 'reader-weight-medium' : ''
                                             ]">
                                             <p class="mb-2 sm:mb-2.5">
                                                 Penerapan standar ergonomi dan kenyamanan visual di lingkungan belajar digital terbukti dapat menjaga fokus serta mengurangi ketegangan mata secara signifikan saat membaca materi berdurasi panjang.
@@ -540,12 +648,14 @@
                                     </div>
 
                                     <!-- Bottom mock bar -->
-                                    <div class="p-2 sm:p-2.5 lg:p-3 border-t text-center text-[10px] sm:text-[11px] reader-card-footer"
+                                    <div class="px-3.5 sm:px-4 py-2.5 border-t text-left text-[10px] sm:text-[11px] reader-card-footer flex items-center gap-2"
                                         :class="{
                                             'border-[#263346] bg-[#131A26] text-slate-400': isDark,
-                                            'border-slate-100 bg-slate-50 text-slate-500': !isDark
+                                            'border-[#E6D9C5] bg-[#F3E8D7] text-[#8C7B68]': !isDark && readerPrefs.paperTheme === 'sepia',
+                                            'border-slate-100 bg-slate-50 text-slate-500': !isDark && readerPrefs.paperTheme !== 'sepia'
                                         }">
-                                        <i class="fas fa-check-circle mr-1"></i> Tampilan materi kursus akan otomatis mengikuti format ini.
+                                        <i class="fas fa-circle-info shrink-0 text-xs"></i>
+                                        <span>Tampilan materi kursus akan otomatis mengikuti format ini.</span>
                                     </div>
                                 </div>
                             </div>
