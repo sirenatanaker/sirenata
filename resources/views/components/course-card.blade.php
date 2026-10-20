@@ -76,7 +76,7 @@
         <div class="mb-3 sm:mb-4">
             <div class="w-full bg-gray-200 rounded-full h-1.5 sm:h-2">
                 <div
-                    class="h-1.5 sm:h-2 rounded-full transition-all duration-300 {{ $course->status === 'completed' ? 'bg-emerald-600' : 'bg-indigo-600' }}"
+                    class="h-1.5 sm:h-2 rounded-full transition-all duration-300 {{ $course->status === 'completed' ? 'bg-emerald-600' : 'bg-amber-500' }}"
                     style="width: {{ $course->progress }}%"
                 ></div>
             </div>
@@ -86,7 +86,7 @@
         @if ($course->status !== 'completed')
             <a
                 href="{{ route('user.course.my-course.detail', ['slug' => $course->slug]) }}"
-                class="block w-full bg-indigo-600 text-white py-2 sm:py-2.5 rounded-lg font-medium sm:font-semibold hover:bg-indigo-700 transition-colors text-center text-xs sm:text-sm"
+                class="block w-full bg-amber-500 text-white py-2 sm:py-2.5 rounded-lg font-medium sm:font-semibold hover:bg-amber-600 transition-colors text-center text-xs sm:text-sm"
             >
                 Lanjutkan Belajar
             </a>

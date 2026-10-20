@@ -8,9 +8,6 @@
     if ($isDone) {
         $barClass = 'bg-emerald-500 dark:bg-emerald-400';
         $pctText = 'text-emerald-600 dark:text-emerald-400';
-    } elseif ($pct >= 50) {
-        $barClass = 'bg-[#13416B] dark:bg-white';
-        $pctText = 'text-[#13416B] dark:text-white';
     } else {
         $barClass = 'bg-amber-500 dark:bg-amber-400';
         $pctText = 'text-amber-600 dark:text-amber-400';
@@ -98,8 +95,8 @@
                     <i class="fas fa-play mr-1"></i> Mulai Belajar
                 </div>
             @else
-                <div class="w-full py-1.5 sm:py-2.5 text-[10px] sm:text-xs font-bold text-center rounded-lg sm:rounded-xl transition-colors bg-[#13416B] text-white border border-[#13416B] shadow-xs group-hover:bg-[#0f3354] group-hover:border-[#0f3354] dark:bg-[#13416B] dark:border-[#13416B] dark:text-white dark:group-hover:bg-[#1a558c]">
-                    <i class="fas fa-arrow-right mr-1"></i> Lanjutkan Belajar
+                <div class="w-full py-1.5 sm:py-2.5 text-[10px] sm:text-xs font-bold text-center rounded-lg sm:rounded-xl transition-colors bg-amber-500 text-white border border-amber-500 shadow-xs group-hover:bg-amber-600 group-hover:border-amber-600">
+                    Lanjutkan Belajar
                 </div>
             @endif
         </div>

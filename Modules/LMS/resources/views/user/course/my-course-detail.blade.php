@@ -42,13 +42,10 @@
             $currentProgress = data_get($course, 'current_progress', 0);
             $isFullyCompleted = data_get($course, 'is_fully_completed', false);
 
-            // Warna progress: <50% kuning, 50-99% biru, 100% hijau
+            // Warna progress: 100% hijau, sedang berprogress amber
             if ($currentProgress >= 100) {
                 $progressBarClass = 'bg-emerald-500';
                 $progressTextClass = 'text-emerald-600';
-            } elseif ($currentProgress >= 50) {
-                $progressBarClass = 'bg-[#13416B]';
-                $progressTextClass = 'text-[#13416B]';
             } else {
                 $progressBarClass = 'bg-amber-500';
                 $progressTextClass = 'text-amber-600';

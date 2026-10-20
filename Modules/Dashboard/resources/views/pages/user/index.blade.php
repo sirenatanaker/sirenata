@@ -142,14 +142,11 @@
                                 $lThumb .= '&font-size=0.33';
                             }
 
-                            // Warna progress: <50% kuning, 50-99% biru, 100% hijau
+                            // Warna progress: 100% hijau, sedang berprogress amber
                             $lPct = (int) ($lastCourse->progress ?? 0);
                             if ($lPct >= 100) {
                                 $lBar = 'bg-emerald-500';
                                 $lText = 'text-emerald-600';
-                            } elseif ($lPct >= 50) {
-                                $lBar = 'bg-[#13416B]';
-                                $lText = 'text-[#13416B]';
                             } else {
                                 $lBar = 'bg-amber-500';
                                 $lText = 'text-amber-600';
@@ -193,7 +190,7 @@
 
                                     @if ($lPct >= 100)
                                         <a href="{{ route('user.course.my-course.detail', $lastCourse->slug) }}"
-                                            class="flex items-center justify-center gap-2 w-full bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-600 hover:text-white hover:border-emerald-600 px-5 py-2.5 sm:py-3 rounded-lg font-bold transition-all shadow-sm text-sm sm:text-base group">
+                                            class="flex items-center justify-center gap-2 w-full bg-emerald-600 text-white hover:bg-emerald-700 px-5 py-2.5 sm:py-3 rounded-lg font-bold transition-all shadow-sm text-sm sm:text-base group">
                                             <i class="fas fa-award text-sm sm:text-base"></i>
                                             <span>Lihat Sertifikat</span>
                                         </a>
@@ -205,8 +202,7 @@
                                         </a>
                                     @else
                                         <a href="{{ route('user.course.my-course.detail', $lastCourse->slug) }}?target=auto"
-                                            class="flex items-center justify-center gap-2 w-full bg-[#13416B] text-white hover:bg-[#0f3354] px-5 py-2.5 sm:py-3 rounded-lg font-bold transition-all shadow-sm text-sm sm:text-base group">
-                                            <i class="fas fa-play text-xs sm:text-sm group-hover:scale-110 transition-transform"></i>
+                                            class="flex items-center justify-center w-full bg-amber-500 text-white hover:bg-amber-600 px-5 py-2.5 sm:py-3 rounded-lg font-bold transition-all shadow-sm text-sm sm:text-base group">
                                             <span>Lanjutkan Belajar</span>
                                         </a>
                                     @endif
@@ -331,14 +327,11 @@
                                         $rThumb .= '&font-size=0.33';
                                     }
 
-                                    // Warna progress: <50% kuning, 50-99% biru, 100% hijau
+                                    // Warna progress: 100% hijau, sedang berprogress amber
                                     $rPct = (int) ($course->pivot->progress ?? 0);
                                     if ($rPct >= 100) {
                                         $rBar = 'bg-emerald-500';
                                         $rText = 'text-emerald-600';
-                                    } elseif ($rPct >= 50) {
-                                        $rBar = 'bg-[#13416B]';
-                                        $rText = 'text-[#13416B]';
                                     } else {
                                         $rBar = 'bg-amber-500';
                                         $rText = 'text-amber-600';
