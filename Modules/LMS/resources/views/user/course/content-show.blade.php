@@ -570,12 +570,12 @@
 
             {{-- Action Footer --}}
             <div data-tour="aksi"
-                class="px-5 py-5 sm:px-10 sm:py-6 border-t border-slate-100 bg-slate-50 flex flex-col-reverse sm:flex-row justify-between items-center gap-3 sm:gap-4 reader-footer transition-colors duration-200"
+                class="px-4 py-4 sm:px-10 sm:py-6 border-t border-slate-100 bg-slate-50 flex flex-col-reverse sm:flex-row justify-between items-center gap-2.5 sm:gap-4 reader-footer transition-colors duration-200"
                 :class="{
                     '!bg-[#131A26] !border-[#263346]': isDark
                 }">
                 <a href="{{ route('user.course.my-course.detail', $slug) }}"
-                    class="w-full sm:w-auto text-sm font-bold text-slate-500 hover:text-slate-800 transition-colors text-center py-2.5 sm:py-2 border border-slate-200 sm:border-transparent rounded-xl sm:rounded-none bg-white sm:bg-transparent"
+                    class="w-full sm:w-auto text-xs sm:text-sm font-bold text-slate-500 hover:text-slate-800 transition-colors text-center py-2.5 sm:py-3 px-3.5 sm:px-5 border border-slate-200 sm:border-slate-300 rounded-xl bg-white sm:bg-transparent"
                     :class="{
                         '!text-slate-300 sm:!bg-transparent !border-[#263346] !bg-[#1E2837]': isDark
                     }">
@@ -584,11 +584,11 @@
 
                 @if (!data_get($content, 'is_completed'))
                     <button type="button" x-show="!canComplete" @click="scrollToEnd()"
-                        class="w-full sm:w-auto px-6 py-3 sm:py-3.5 text-sm font-bold text-slate-500 bg-slate-100 border border-slate-200 rounded-xl flex items-center justify-center gap-2 hover:bg-slate-200 transition-colors"
+                        class="w-full sm:w-auto px-4 sm:px-6 py-2.5 sm:py-3.5 text-xs sm:text-sm font-bold text-slate-500 bg-slate-100 border border-slate-200 rounded-xl flex items-center justify-center gap-1.5 sm:gap-2 hover:bg-slate-200 transition-colors"
                         :class="{
                             '!bg-[#1E2837] !border-[#263346] !text-slate-300': isDark
                         }">
-                        <i class="fas fa-info-circle text-xs"></i>
+                        <i class="fas fa-info-circle text-[11px] sm:text-xs"></i>
                         <span
                             x-text="(!reachedEnd ? 'Baca materi hingga akhir' : '') + (!reachedEnd && !videoCompleted ? ' & ' : '') + (!videoCompleted ? 'Tonton video materi minimal 90%' : '') + ' untuk lanjut'"></span>
                     </button>
@@ -600,24 +600,23 @@
                         x-transition:enter-end="opacity-100 translate-y-0" @submit="submitting = true">
                         @csrf
                         <button type="submit" :disabled="submitting"
-                            class="w-full sm:w-auto px-6 py-3 sm:py-3.5 text-sm font-bold text-white bg-[#13416B] rounded-xl hover:bg-[#0f3354] transition-all shadow-sm flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed">
-                            <i class="fas fa-check-circle text-base sm:text-lg" x-show="!submitting"></i>
-                            <i class="fas fa-spinner fa-spin text-base sm:text-lg" x-show="submitting"
+                            class="w-full sm:w-auto px-4 sm:px-6 py-2.5 sm:py-3.5 text-xs sm:text-sm font-bold text-white bg-[#13416B] rounded-xl hover:bg-[#0f3354] transition-all shadow-sm flex items-center justify-center gap-1.5 sm:gap-2 disabled:opacity-70 disabled:cursor-not-allowed">
+                            <i class="fas fa-check-circle text-xs sm:text-base" x-show="!submitting"></i>
+                            <i class="fas fa-spinner fa-spin text-xs sm:text-base" x-show="submitting"
                                 style="display: none;"></i>
-                            <span x-text="submitting ? 'Menyimpan...' : 'Tandai Selesai & Lanjut'"></span>
+                            <span x-text="submitting ? 'Menyimpan...' : 'Tandai Selesai'"></span>
                         </button>
                     </form>
                 @else
                     <div class="flex items-center gap-2 w-full sm:w-auto">
                         <span
-                            class="completed-pop flex-1 sm:flex-initial px-6 py-3 sm:py-3.5 text-sm font-bold text-white bg-emerald-600 border border-emerald-600 rounded-xl text-center flex items-center justify-center gap-2 shadow-sm cursor-default select-none">
-                            <i class="fas fa-check-double text-base sm:text-lg"></i> Selesai Dipelajari
+                            class="completed-pop flex-1 sm:flex-initial px-3 sm:px-6 py-2.5 sm:py-3.5 text-xs sm:text-sm font-bold text-white bg-emerald-600 border border-emerald-600 rounded-xl text-center flex items-center justify-center gap-1.5 sm:gap-2 shadow-sm cursor-default select-none">
+                            <i class="fas fa-check-double text-xs sm:text-base"></i> Selesai Dipelajari
                         </span>
                         @if (!empty($nextUrl) && $nextUrl !== route('user.course.my-course.detail', $slug))
                             <a href="{{ $nextUrl }}"
-                                class="flex-1 sm:flex-initial px-6 py-3 sm:py-3.5 text-sm font-bold text-white bg-[#13416B] rounded-xl hover:bg-[#0f3354] transition-all shadow-sm flex items-center justify-center gap-2 text-center whitespace-nowrap">
-                                <span>Lanjut</span>
-                                <i class="fas fa-arrow-right text-xs"></i>
+                                class="flex-1 sm:flex-initial px-4 sm:px-6 py-2.5 sm:py-3.5 text-xs sm:text-sm font-bold text-white bg-[#13416B] rounded-xl hover:bg-[#0f3354] transition-all shadow-sm flex items-center justify-center text-center whitespace-nowrap">
+                                Lanjut
                             </a>
                         @endif
                     </div>

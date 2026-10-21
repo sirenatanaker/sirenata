@@ -130,9 +130,7 @@ class CourseController extends Controller
                 : 'Materi berhasil ditandai selesai. Progress: ' . $result['progress'] . '%'
         );
 
-        $nextUrl = $this->getNextItemRoute($content, (string) $request->user()->id);
-
-        return $nextUrl ? redirect($nextUrl) : redirect()->back();
+        return redirect()->back();
     }
 
     public function showContent(string $slug, string $contentId): View|RedirectResponse

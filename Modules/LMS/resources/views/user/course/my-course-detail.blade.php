@@ -2,21 +2,21 @@
     title="Kursus Saya | {{ data_get($course, 'course_name') ?? data_get($course, 'name') }} | SIRENATA">
 
     <!-- PERBAIKAN: Menghapus padding horizontal di mobile (px-0) -->
-    <div class="px-0 py-4 sm:p-6 max-w-full mx-auto">
+    <div class="px-0 py-2 sm:p-6 max-w-full mx-auto">
 
         {{-- Breadcrumb Custom (Responsif & Tanpa Icon Home) --}}
-        <nav class="hidden md:flex mb-5 sm:mb-6 mt-4 px-4 sm:px-0" aria-label="Breadcrumb">
-            <ol class="inline-flex items-center flex-wrap gap-y-1.5 gap-x-2">
+        <nav class="flex mb-4 sm:mb-6 mt-0 sm:mt-4 " aria-label="Breadcrumb">
+            <ol class="inline-flex items-center flex-wrap gap-y-1 gap-x-1.5 sm:gap-x-2">
                 <li>
                     <a href="{{ route('user.course.my-course') }}"
-                        class="text-sm font-medium text-slate-500 hover:text-[#13416B] transition-colors whitespace-nowrap">
+                        class="text-xs sm:text-sm font-medium text-slate-500 hover:text-[#13416B] transition-colors whitespace-nowrap">
                         Kursus Saya
                     </a>
                 </li>
                 <li>
-                    <div class="flex items-center gap-2">
-                        <i class="fas fa-chevron-right text-slate-400 text-[10px]"></i>
-                        <span class="text-sm font-medium text-slate-800 leading-snug">
+                    <div class="flex items-center gap-1.5 sm:gap-2">
+                        <i class="fas fa-chevron-right text-slate-400 text-[9px] sm:text-[10px]"></i>
+                        <span class="text-xs sm:text-sm font-semibold text-slate-800 leading-snug truncate max-w-[200px] xs:max-w-[260px] sm:max-w-none">
                             {{ data_get($course, 'course_name') ?? data_get($course, 'name') }}
                         </span>
                     </div>
@@ -63,7 +63,7 @@
             class="bg-white rounded-none sm:rounded-md shadow-sm border-y border-x-0 sm:border sm:border-x border-slate-200 p-4 sm:p-6 lg:p-8 mb-6 flex flex-col md:flex-row gap-6 lg:gap-8 items-start transition-all">
             {{-- Bagian Kiri: Thumbnail --}}
             <div
-                class="w-full md:w-1/3 lg:w-1/4 shrink-0 rounded-xl overflow-hidden bg-slate-100 aspect-video md:aspect-[4/3] relative border border-slate-100">
+                class="w-full md:w-1/3 lg:w-1/4 shrink-0 rounded-md overflow-hidden bg-slate-100 aspect-video md:aspect-[4/3] relative border border-slate-100">
                 <img src="{{ $thumbnailUrl }}" alt="{{ $courseName }}" class="w-full h-full object-cover" />
                 
                 {{-- Tombol Panduan di Resolusi Mobile (Diletakkan di atas thumbnail agar tidak mengganggu badge) --}}
@@ -88,7 +88,7 @@
                     </span>
                     {{-- Tombol Panduan Desktop --}}
                     <button type="button" onclick="window.startCoursePlayerTour && window.startCoursePlayerTour()"
-                        class="hidden md:inline-flex ml-auto items-center gap-1.5 px-3 py-1.5 text-[11px] font-bold text-[#13416B] bg-[#13416B]/10 border border-[#13416B]/20 rounded-lg hover:bg-[#13416B]/20 transition-colors">
+                        class="hidden md:inline-flex ml-auto items-center gap-1.5 px-3 py-1.5 text-[11px] font-bold text-[#13416B] bg-[#13416B]/10 border border-[#13416B]/20 rounded-md hover:bg-[#13416B]/20 transition-colors">
                         <i class="fas fa-route"></i> Panduan
                     </button>
                 </div>
@@ -138,7 +138,7 @@
             </div>
 
             <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-                <div class="p-3 sm:p-4 bg-slate-50 rounded-xl border border-slate-100 flex flex-col justify-between">
+                <div class="p-3 sm:p-4 bg-slate-50 rounded-md border border-slate-100 flex flex-col justify-between">
                     <span
                         class="text-[10px] sm:text-xs uppercase font-bold text-slate-500 mb-2 flex items-center gap-1.5">
                         <i class="fas fa-info-circle"></i> Status
@@ -148,7 +148,7 @@
                         {{ $isFullyCompleted ? 'Selesai' : 'Berjalan' }}
                     </span>
                 </div>
-                <div class="p-3 sm:p-4 bg-slate-50 rounded-xl border border-slate-100 flex flex-col justify-between">
+                <div class="p-3 sm:p-4 bg-slate-50 rounded-md border border-slate-100 flex flex-col justify-between">
                     <span
                         class="text-[10px] sm:text-xs uppercase font-bold text-slate-500 mb-1.5 flex items-center gap-1.5">
                         <i class="fas fa-layer-group"></i> Modul
@@ -156,7 +156,7 @@
                     <span
                         class="text-base sm:text-lg font-extrabold text-slate-800">{{ count(data_get($course, 'sections', [])) }}</span>
                 </div>
-                <div class="p-3 sm:p-4 bg-slate-50 rounded-xl border border-slate-100 flex flex-col justify-between">
+                <div class="p-3 sm:p-4 bg-slate-50 rounded-md border border-slate-100 flex flex-col justify-between">
                     <span
                         class="text-[10px] sm:text-xs uppercase font-bold text-slate-500 mb-1.5 flex items-center gap-1.5">
                         <i class="fas fa-file-alt"></i> Total Tahapan
@@ -164,7 +164,7 @@
                     <span class="text-base sm:text-lg font-extrabold text-slate-800">{{ $totalItems }} <span
                             class="text-[10px] sm:text-xs font-medium text-slate-500">(Topik & Evaluasi)</span></span>
                 </div>
-                <div class="p-3 sm:p-4 bg-slate-50 rounded-xl border border-slate-100 flex flex-col justify-between">
+                <div class="p-3 sm:p-4 bg-slate-50 rounded-md border border-slate-100 flex flex-col justify-between">
                     <span
                         class="text-[10px] sm:text-xs uppercase font-bold text-slate-500 mb-1.5 flex items-center gap-1.5">
                         <i class="fas fa-check-double"></i> Selesai
@@ -180,7 +180,7 @@
         @if (!$isFullyCompleted)
             <!-- PERBAIKAN: rounded-none border-x-0 di mobile -->
             <div
-                class="block lg:hidden bg-slate-50 border-y border-x-0 sm:border sm:border-x border-slate-200 rounded-none sm:rounded-xl p-4 mb-6 flex items-start gap-3 shadow-sm mx-0">
+                class="block lg:hidden bg-slate-50 border-y border-x-0 sm:border sm:border-x border-slate-200 rounded-none sm:rounded-md p-4 mb-6 flex items-start gap-3 shadow-sm mx-0">
                 <i class="fas fa-info-circle text-slate-400 mt-0.5 text-base shrink-0"></i>
                 <p class="text-[11px] sm:text-xs text-slate-600 leading-relaxed font-medium">
                     Topik dipelajari berurutan. Tekan <strong
@@ -200,18 +200,14 @@
                     class="bg-white rounded-none sm:rounded-md shadow-sm border-y border-x-0 sm:border sm:border-x border-slate-200 p-4 sm:p-6">
 
                     <div
-                        class="flex flex-col sm:flex-row sm:items-center justify-between mb-5 sm:mb-6 pb-4 border-b border-slate-100 gap-3 sm:gap-4">
+                        class="flex items-center justify-between mb-5 sm:mb-6 pb-4 border-b border-slate-100 gap-3 sm:gap-4">
                         <div class="flex items-center gap-3">
-                            <div class="p-2.5 bg-slate-50 text-slate-600 rounded-xl shrink-0 mt-0">
+                            <div class="p-2.5 bg-slate-50 text-slate-600 rounded-md shrink-0 mt-0">
                                 <i class="fas fa-list-ul text-lg"></i>
                             </div>
                             <h2 class="text-md sm:text-lg font-extrabold text-slate-800 leading-tight">Daftar Modul
                                 Pembelajaran</h2>
                         </div>
-                        <span
-                            class="text-[11px] sm:text-xs text-slate-600 font-bold bg-slate-100 px-3 py-1.5 rounded-lg border border-slate-200 shrink-0 self-start sm:self-auto">
-                            {{ count(data_get($course, 'sections', [])) }} Modul
-                        </span>
                     </div>
                     <div x-data="{
                         activeAccordion: localStorage.getItem('active_section_{{ $courseSlug }}') || 'section-0',
@@ -371,7 +367,7 @@
                             <div x-data="{ id: 'section-{{ $index }}', locked: {{ $isLocked ? 'true' : 'false' }} }" id="section-{{ $index }}"
                                 data-section-id="{{ $sectionId }}"
                                 data-locked="{{ $isLocked ? 1 : 0 }}" data-completed="{{ $isSectionCompleted ? 1 : 0 }}"
-                                class="border {{ $isLocked ? 'border-slate-100 bg-slate-50' : 'border-slate-200 bg-white' }} rounded-xl overflow-hidden shadow-sm transition-all duration-500"
+                                class="border {{ $isLocked ? 'border-slate-100 bg-slate-50' : 'border-slate-200 bg-white' }} rounded-md overflow-hidden shadow-sm transition-all duration-500"
                                 :class="{
                                     'border-[#13416B] shadow-md ring-1 ring-gray-100': activeAccordion == id && !
                                         locked
@@ -465,7 +461,7 @@
                                             @endphp
 
                                             <div
-                                                class="flex flex-col sm:flex-row sm:items-center justify-between p-3.5 sm:p-4 rounded-xl border {{ $isContentLocked ? 'border-slate-200 bg-slate-50' : 'border-slate-200 bg-white hover:border-[#13416B]/40 hover:shadow-sm' }} transition-all duration-200 gap-3 sm:gap-4">
+                                                class="flex flex-col sm:flex-row sm:items-center justify-between p-3.5 sm:p-4 rounded-md border {{ $isContentLocked ? 'border-slate-200 bg-slate-50' : 'border-slate-200 bg-white hover:border-[#13416B]/40 hover:shadow-sm' }} transition-all duration-200 gap-3 sm:gap-4">
                                                 <div
                                                     class="flex items-start sm:items-center gap-3 sm:gap-4 flex-1 min-w-0">
                                                     @php
@@ -489,35 +485,34 @@
                                                             class="font-bold {{ $isContentLocked ? 'text-slate-500' : 'text-slate-800' }} text-sm leading-tight break-words">
                                                             {{ $contentName }}
                                                         </p>
-                                                        <div class="mt-2 flex items-center gap-1.5">
-                                                            @if ($isContentItemCompleted)
+                                                        @if ($isContentItemCompleted)
+                                                            <div class="mt-2 flex items-center gap-1.5">
                                                                 <span
                                                                     class="inline-flex items-center gap-1 text-[10px] font-bold text-white bg-emerald-600 px-2 py-0.5 rounded-full border border-emerald-600">
                                                                     <i class="fas fa-check"></i> Selesai
                                                                 </span>
-                                                            @elseif ($isContentLocked)
+                                                            </div>
+                                                        @elseif ($isContentLocked)
+                                                            <div class="mt-2 flex items-center gap-1.5">
                                                                 <span
                                                                     class="inline-flex items-center gap-1 text-[10px] font-bold text-white bg-slate-400 px-2 py-0.5 rounded-full border border-slate-400">
-                                                                    <i class="fas fa-lock text-[9px]"></i> Selesaikan topik sebelumnya
+                                                                    <i class="fas fa-lock text-[9px]"></i> Terkunci
                                                                 </span>
-                                                            @else
+                                                            </div>
+                                                        @else
+                                                            <div class="mt-2 flex items-center gap-1.5">
                                                                 <span
                                                                     class="inline-flex items-center text-[10px] font-bold text-white bg-amber-500 px-2 py-0.5 rounded-full border border-amber-500">
                                                                     Belum Selesai
                                                                 </span>
-                                                            @endif
-                                                        </div>
+                                                            </div>
+                                                        @endif
                                                     </div>
                                                 </div>
 
-                                                @if ($isContentLocked)
-                                                    <span aria-disabled="true"
-                                                        class="w-full sm:w-auto mt-2 sm:mt-0 px-4 py-2.5 sm:py-2 bg-slate-100 text-slate-400 border border-slate-200 rounded-xl text-xs font-bold text-center shrink-0 flex items-center justify-center gap-2 cursor-not-allowed select-none">
-                                                        <i class="fas fa-lock"></i> Terkunci
-                                                    </span>
-                                                @else
+                                                @if (!$isContentLocked)
                                                     <a href="{{ route('user.course.content.show', ['slug' => $courseSlug, 'content' => $contentId]) }}"
-                                                        class="w-full sm:w-auto mt-2 sm:mt-0 px-4 py-2.5 sm:py-2 {{ $isContentItemCompleted ? 'bg-white border border-[#13416B]/30 text-[#13416B] hover:bg-[#13416B]/10' : 'bg-[#13416B] hover:bg-[#0f3354] text-white shadow-sm' }} rounded-xl text-xs font-bold transition-all text-center shrink-0 flex items-center justify-center gap-2">
+                                                        class="w-full sm:w-auto mt-2 sm:mt-0 px-4 py-2.5 sm:py-2 {{ $isContentItemCompleted ? 'bg-white border border-[#13416B]/30 text-[#13416B] hover:bg-[#13416B]/10' : 'bg-[#13416B] hover:bg-[#0f3354] text-white shadow-sm' }} rounded-md text-xs font-bold transition-all text-center shrink-0 flex items-center justify-center gap-2">
                                                         <i
                                                             class="fas {{ $isContentItemCompleted ? 'fa-eye' : 'fa-play' }}"></i>
                                                         {{ $isContentItemCompleted ? 'Lihat Kembali' : 'Pelajari Topik' }}
@@ -528,7 +523,7 @@
                                             @php $isPreviousContentDone = $isContentItemCompleted; @endphp
                                         @empty
                                             <div
-                                                class="p-4 text-center text-slate-500 text-sm bg-white rounded-xl border border-dashed border-slate-200">
+                                                class="p-4 text-center text-slate-500 text-sm bg-white rounded-md border border-dashed border-slate-200">
                                                 <i class="fas fa-folder-open mb-2 text-slate-300 text-xl block"></i>
                                                 Topik sedang disiapkan.
                                             </div>
@@ -539,9 +534,14 @@
                                             @php $isPostTestBabLocked = !$isContentCompleted && !$isPostTestBabCompleted; @endphp
                                             <div class="mt-4 pt-4 border-t border-slate-200/80">
                                                 <div
-                                                    class="flex flex-col sm:flex-row sm:items-center justify-between p-3.5 sm:p-5 rounded-xl border {{ $isPostTestBabLocked ? 'bg-slate-100 border-slate-200' : 'bg-[#13416B] border-[#13416B] hover:shadow-sm' }} transition-all gap-4">
+                                                    class="flex flex-col sm:flex-row sm:items-center justify-between p-3.5 sm:p-5 rounded-md border {{ $isPostTestBabLocked ? 'bg-slate-100 border-slate-200' : 'bg-[#13416B] border-[#13416B] shadow-sm' }} transition-all gap-4">
                                                     <div
                                                         class="flex items-start sm:items-center gap-3 sm:gap-4 flex-1 min-w-0">
+                                                        <div
+                                                            class="w-10 h-10 rounded-md flex items-center justify-center shrink-0 {{ $isPostTestBabLocked ? 'bg-slate-200 text-slate-400 border border-slate-300' : 'bg-white/20 text-white border border-white/30' }}">
+                                                            <i
+                                                                class="fas {{ $isPostTestBabLocked ? 'fa-lock' : 'fa-clipboard-check' }} text-sm sm:text-base"></i>
+                                                        </div>
                                                         <div class="flex-1 min-w-0">
                                                             <p
                                                                 class="font-bold text-sm leading-tight break-words {{ $isPostTestBabLocked ? 'text-slate-600' : 'text-white' }}">
@@ -566,12 +566,12 @@
 
                                                     @if ($isPostTestBabLocked)
                                                         <span aria-disabled="true"
-                                                            class="w-full sm:w-auto mt-1 sm:mt-0 px-5 py-2.5 bg-white text-slate-400 border border-slate-200 rounded-xl text-xs font-bold text-center shrink-0 flex items-center justify-center gap-2 cursor-not-allowed select-none">
-                                                            <i class="fas fa-lock"></i> Terkunci
+                                                            class="w-full sm:w-auto mt-1 sm:mt-0 px-5 py-2.5 bg-white text-slate-400 border border-slate-200 rounded-md text-xs font-bold text-center shrink-0 flex items-center justify-center gap-2 cursor-not-allowed select-none">
+                                                            <i class="fas fa-lock text-[11px]"></i> Terkunci
                                                         </span>
                                                     @else
                                                         <a href="{{ route('user.course.test.show', ['slug' => $courseSlug, 'postTestId' => $postTestBab->id]) }}"
-                                                            class="w-full sm:w-auto mt-1 sm:mt-0 px-5 py-2.5 {{ $isPostTestBabCompleted ? 'bg-white border border-[#13416B]/30 text-[#13416B] hover:bg-slate-100' : 'bg-amber-400 hover:bg-amber-500 text-gray-800 shadow-sm font-bold' }} rounded-xl text-xs transition-all text-center shrink-0 flex items-center justify-center gap-2">
+                                                            class="w-full sm:w-auto mt-1 sm:mt-0 px-5 py-2.5 {{ $isPostTestBabCompleted ? 'bg-white border border-[#13416B]/30 text-[#13416B] hover:bg-slate-100' : 'bg-amber-400 hover:bg-amber-500 text-gray-800 shadow-sm font-bold' }} rounded-md text-xs transition-all text-center shrink-0 flex items-center justify-center gap-2">
                                                             <i
                                                                 class="fas {{ $isPostTestBabCompleted ? 'fa-eye' : 'fa-pencil-alt' }}"></i>
                                                             {{ $isPostTestBabCompleted ? 'Lihat Hasil' : 'Kerjakan Evaluasi' }}
@@ -589,7 +589,7 @@
                             @endphp
                         @empty
                             <div
-                                class="p-8 text-center text-slate-500 bg-slate-50 rounded-xl border border-dashed border-slate-200">
+                                class="p-8 text-center text-slate-500 bg-slate-50 rounded-md border border-dashed border-slate-200">
                                 <i class="fas fa-layer-group mb-3 text-slate-300 text-3xl block"></i>
                                 <p class="font-semibold text-sm">Belum ada modul pembelajaran.</p>
                             </div>
@@ -616,7 +616,7 @@
                                 </div>
                                 <div class="flex-1 min-w-0">
                                     <p
-                                        class="text-[10px] sm:text-xs font-bold uppercase tracking-wider {{ $isEvaluasiAkhirLocked ? 'text-slate-400' : 'text-blue-100' }} mb-1">
+                                        class="text-[10px] sm:text-xs font-bold uppercase tracking-wider {{ $isEvaluasiAkhirLocked ? 'text-slate-400' : 'text-blue-200' }} mb-1">
                                         Tahap Akhir
                                     </p>
                                     <h3
@@ -626,20 +626,14 @@
                                 </div>
                             </div>
 
-                            @if ($isEvaluasiAkhirLocked)
-                                <span
-                                    class="inline-flex w-full sm:w-auto items-center justify-center gap-1.5 px-4 py-2.5 text-[11px] sm:text-xs font-bold text-slate-500 bg-white border border-slate-200 rounded-xl text-center shadow-sm">
-                                    <i class="fas fa-lock text-[10px]" aria-hidden="true"></i>
-                                    Selesaikan Modul Dahulu
-                                </span>
-                            @elseif($isEvaluasiAkhirCompleted)
+                            @if ($isEvaluasiAkhirCompleted)
                                 <a href="{{ route('user.course.test.show', ['slug' => $courseSlug, 'postTestId' => $evaluasiAkhir->id]) }}"
-                                    class="w-full sm:w-auto px-5 py-2.5 text-sm font-bold text-[#13416B] bg-white hover:bg-slate-50 rounded-xl text-center shadow-sm transition-all flex items-center justify-center gap-2 border border-transparent whitespace-nowrap">
+                                    class="w-full sm:w-auto px-5 py-2.5 text-sm font-bold text-[#13416B] bg-white hover:bg-slate-50 rounded-md text-center shadow-sm transition-all flex items-center justify-center gap-2 border border-transparent whitespace-nowrap">
                                     <i class="fas fa-eye"></i> Lihat Hasil
                                 </a>
-                            @else
+                            @elseif (!$isEvaluasiAkhirLocked)
                                 <a href="{{ route('user.course.test.show', ['slug' => $courseSlug, 'postTestId' => $evaluasiAkhir->id]) }}"
-                                    class="w-full sm:w-auto px-5 py-2.5 text-sm font-bold text-[#13416B] bg-white hover:bg-slate-50 rounded-xl text-center shadow-sm transition-all flex items-center justify-center gap-2 border border-transparent whitespace-nowrap">
+                                    class="w-full sm:w-auto px-5 py-2.5 text-sm font-bold text-[#13416B] bg-white hover:bg-slate-50 rounded-md text-center shadow-sm transition-all flex items-center justify-center gap-2 border border-transparent whitespace-nowrap">
                                     <i class="fas fa-play"></i> Mulai Evaluasi
                                 </a>
                             @endif
@@ -653,17 +647,17 @@
 
                             <div class="mt-5 flex flex-wrap items-center gap-2 sm:gap-3">
                                 <span
-                                    class="text-[11px] sm:text-xs font-semibold text-slate-600 bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-200 flex items-center gap-1.5">
+                                    class="text-[11px] sm:text-xs font-semibold text-slate-600 bg-slate-50 px-3 py-1.5 rounded-md border border-slate-200 flex items-center gap-1.5">
                                     <i class="fas fa-list-ol text-slate-400"></i>
                                     {{ data_get($evaluasiAkhir, 'questions', collect())->count() ?? 0 }} Soal
                                 </span>
                                 <span
-                                    class="text-[11px] sm:text-xs font-semibold text-slate-600 bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-200 flex items-center gap-1.5">
+                                    class="text-[11px] sm:text-xs font-semibold text-slate-600 bg-slate-50 px-3 py-1.5 rounded-md border border-slate-200 flex items-center gap-1.5">
                                     <i class="fas fa-stopwatch text-slate-400"></i>
                                     {{ data_get($evaluasiAkhir, 'duration', 0) }} Menit
                                 </span>
                                 <span
-                                    class="text-[11px] sm:text-xs font-semibold text-slate-600 bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-200 flex items-center gap-1.5">
+                                    class="text-[11px] sm:text-xs font-semibold text-slate-600 bg-slate-50 px-3 py-1.5 rounded-md border border-slate-200 flex items-center gap-1.5">
                                     <i class="fas fa-bullseye text-slate-400"></i> KKM:
                                     {{ data_get($evaluasiAkhir, 'passing_score', 0) }}
                                 </span>
@@ -695,7 +689,7 @@
                         @if (!empty(data_get($course, 'certificate_file')))
                             {{-- STATE 1: SERTIFIKAT SUDAH DITERBITKAN --}}
                             <div class="space-y-5">
-                                <div class="bg-emerald-50 border border-emerald-200 rounded-xl p-5 text-center">
+                                <div class="bg-emerald-50 border border-emerald-200 rounded-md p-5 text-center">
                                     <div
                                         class="w-14 h-14 shrink-0 bg-white text-emerald-600 rounded-full shadow-sm flex items-center justify-center mx-auto mb-3 text-2xl border border-emerald-100">
                                         <i class="fas fa-award"></i>
@@ -703,11 +697,11 @@
                                     <p class="font-bold text-emerald-800 text-sm">Sertifikat Siap Diunduh</p>
                                     <p class="text-xs text-emerald-600 mt-1.5 leading-relaxed">
                                         Selamat! Anda berhak mendapatkan sertifikat ini sebagai bukti sah telah
-                                        menguasai seluruh materi.
+                                         menguasai seluruh materi.
                                     </p>
                                 </div>
 
-                                <div class="bg-slate-50 p-4 rounded-xl border border-slate-100 space-y-3 text-xs">
+                                <div class="bg-slate-50 p-4 rounded-md border border-slate-100 space-y-3 text-xs">
                                     <div class="flex justify-between border-b border-slate-200 pb-2">
                                         <span class="text-slate-500 font-semibold">Nomor</span>
                                         <span
@@ -722,7 +716,7 @@
 
                                 <div class="flex flex-col gap-2.5">
                                     <a href="{{ data_get($course, 'certificate_file') }}" target="_blank" download
-                                        class="w-full bg-[#13416B] hover:bg-[#0f3354] text-white py-3 rounded-xl font-bold transition-all shadow-sm flex items-center justify-center gap-2 text-sm">
+                                        class="w-full bg-[#13416B] hover:bg-[#0f3354] text-white py-3 rounded-md font-bold transition-all shadow-sm flex items-center justify-center gap-2 text-sm">
                                         <i class="fas fa-download"></i> Unduh PDF
                                     </a>
                                 </div>
@@ -730,7 +724,7 @@
                         @else
                             {{-- STATE 2: SELESAI, TAPI BELUM DITERBITKAN --}}
                             <div class="space-y-5">
-                                <div class="bg-[#13416B]/5 border border-[#13416B]/20 rounded-xl p-5 text-center">
+                                <div class="bg-[#13416B]/5 border border-[#13416B]/20 rounded-md p-5 text-center">
                                     <div
                                         class="w-14 h-14 shrink-0 bg-white text-[#13416B] rounded-full shadow-sm flex items-center justify-center mx-auto mb-3 text-2xl border border-[#13416B]/20">
                                         <i class="fas fa-medal"></i>
@@ -742,7 +736,7 @@
                                     </p>
                                 </div>
 
-                                <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 flex items-start gap-3">
+                                <div class="bg-slate-50 border border-slate-200 rounded-md p-4 flex items-start gap-3">
                                     <i class="fas fa-id-card text-[#13416B]/60 mt-0.5 text-lg shrink-0"></i>
                                     <div>
                                         <p class="text-[11px] text-slate-600 leading-relaxed">
@@ -759,7 +753,7 @@
                                     method="POST" x-data="{ loading: false }" @submit="loading = true">
                                     @csrf
                                     <button type="submit" :disabled="loading"
-                                        class="w-full bg-[#13416B] hover:bg-[#0f3354] text-white py-3 rounded-xl font-bold transition-all shadow-sm flex items-center justify-center gap-2 text-sm disabled:opacity-70 disabled:cursor-not-allowed">
+                                        class="w-full bg-[#13416B] hover:bg-[#0f3354] text-white py-3 rounded-md font-bold transition-all shadow-sm flex items-center justify-center gap-2 text-sm disabled:opacity-70 disabled:cursor-not-allowed">
                                         <template x-if="!loading">
                                             <span class="flex items-center gap-2"><i class="fas fa-cogs"></i>
                                                 Terbitkan Sertifikat</span>
