@@ -296,7 +296,7 @@
             <div class="lg:col-span-5 flex flex-col gap-5 sm:gap-6 lg:h-full min-h-0">
 
                 <!-- CARD 3: Kursus Saya (Menyesuaikan Tinggi & Card ke-4 Mengintip Blur) -->
-                <div class="bg-white rounded-md p-5 sm:p-6 shadow-sm flex flex-col lg:flex-1 w-full min-h-0">
+                <div class="bg-white rounded-none sm:rounded-md p-4 sm:p-6 shadow-none sm:shadow-sm flex flex-col lg:flex-1 w-full min-h-0">
                     <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-100 shrink-0">
                         <div>
                             <h2 class="text-base md:text-lg font-extrabold text-slate-800">Kursus Saya</h2>
@@ -310,7 +310,7 @@
 
                     <!-- Area daftar kursus yang di set relatif dan menyembunyikan elemen berlebih -->
                     <div class="relative flex-1">
-                        <div class="space-y-3 flex flex-col">
+                        <div class="space-y-3.5 sm:space-y-3 flex flex-col">
                             @forelse ($recentCourses->take(4) as $course)
                                 @php
                                     $rThumb = $course->thumbnail
@@ -341,7 +341,7 @@
                                 <!-- Tambahan "shrink-0" memastikan card kursus tidak memipih/gepeng meskipun meluber -->
                                 <a href="{{ route('user.course.my-course.detail', $course->slug) }}"
                                     @if ($loop->index === 3) aria-hidden="true" tabindex="-1" @endif
-                                    class="shrink-0 flex flex-row gap-3 sm:gap-4 bg-slate-50/70 rounded-xl p-3 sm:p-4 transition-all duration-200 hover:bg-slate-100/90 hover:shadow-xs group items-start {{ $loop->index === 3 ? 'max-h-[76px] overflow-hidden pointer-events-none select-none' : '' }}">
+                                    class="shrink-0 flex flex-row gap-3 sm:gap-4 bg-transparent sm:bg-slate-50/70 rounded-none sm:rounded-xl p-0 sm:p-4 border-b border-slate-100 sm:border-b-0 pb-3.5 sm:pb-0 transition-all duration-200 hover:bg-slate-100/90 hover:shadow-xs group items-start {{ $loop->index === 3 ? 'max-h-[76px] overflow-hidden pointer-events-none select-none' : '' }}">
 
                                     <div
                                         class="w-24 min-h-[4.5rem] sm:w-32 sm:h-20 shrink-0 rounded-md overflow-hidden bg-slate-100 relative shadow-xs">
@@ -413,7 +413,7 @@
 
                 <!-- CARD 4: Terakhir Dilihat (Perpustakaan) -->
                 <div
-                    class="bg-white rounded-md p-4 sm:p-5 shadow-sm border border-slate-200 flex flex-col justify-between shrink-0">
+                    class="bg-white rounded-none sm:rounded-md p-4 sm:p-5 shadow-none sm:shadow-sm border-0 sm:border border-slate-200 flex flex-col justify-between shrink-0">
                     <div>
                         <div class="mb-3 pb-3 border-b border-slate-100 shrink-0">
                             <h2 class="text-base md:text-lg font-extrabold text-slate-800">Terakhir Dilihat</h2>
@@ -422,7 +422,7 @@
 
                         @if (isset($lastLibrary) && $lastLibrary)
                             <a href="{{ route('user.library.index') }}?open={{ $lastLibrary->id }}"
-                                class="flex items-stretch gap-4 p-4 rounded-xl border border-slate-100 bg-slate-50 hover:bg-slate-100 hover:border-slate-300 transition-all group">
+                                class="flex items-stretch gap-3 sm:gap-4 p-0 sm:p-4 rounded-none sm:rounded-xl border-0 sm:border border-slate-100 bg-transparent sm:bg-slate-50 hover:bg-slate-100 hover:border-slate-300 transition-all group">
 
                                 <div
                                     class="w-20 min-h-[6.5rem] sm:min-h-[5.5rem] self-stretch rounded-md overflow-hidden shrink-0 shadow-sm relative bg-white border border-slate-200 flex items-center justify-center">
