@@ -65,6 +65,12 @@
             <div
                 class="w-full md:w-1/3 lg:w-1/4 shrink-0 rounded-xl overflow-hidden bg-slate-100 aspect-video md:aspect-[4/3] relative border border-slate-100">
                 <img src="{{ $thumbnailUrl }}" alt="{{ $courseName }}" class="w-full h-full object-cover" />
+                
+                {{-- Tombol Panduan di Resolusi Mobile (Diletakkan di atas thumbnail agar tidak mengganggu badge) --}}
+                <button type="button" onclick="window.startCoursePlayerTour && window.startCoursePlayerTour()"
+                    class="md:hidden absolute top-2.5 right-2.5 z-10 inline-flex items-center gap-1.5 px-2.5 py-1 text-[10px] font-bold text-[#13416B] bg-white/95 backdrop-blur-sm border border-slate-200/80 rounded-md shadow-xs hover:bg-white transition-colors">
+                    <i class="fas fa-route"></i> Panduan
+                </button>
             </div>
 
             {{-- Bagian Kanan: Informasi Kursus --}}
@@ -80,8 +86,9 @@
                         <i class="fas {{ $isFullyCompleted ? 'fa-check-circle' : 'fa-clock' }}"></i>
                         {{ $isFullyCompleted ? 'Selesai' : 'Sedang Berjalan' }}
                     </span>
+                    {{-- Tombol Panduan Desktop --}}
                     <button type="button" onclick="window.startCoursePlayerTour && window.startCoursePlayerTour()"
-                        class="ml-auto inline-flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-bold text-[#13416B] bg-[#13416B]/10 border border-[#13416B]/20 rounded-lg hover:bg-[#13416B]/20 transition-colors">
+                        class="hidden md:inline-flex ml-auto items-center gap-1.5 px-3 py-1.5 text-[11px] font-bold text-[#13416B] bg-[#13416B]/10 border border-[#13416B]/20 rounded-lg hover:bg-[#13416B]/20 transition-colors">
                         <i class="fas fa-route"></i> Panduan
                     </button>
                 </div>

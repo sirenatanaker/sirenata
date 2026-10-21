@@ -48,7 +48,7 @@
                         <i class="fas fa-search text-xs text-slate-400 group-hover:text-[#13416B] dark:group-hover:text-white transition-colors shrink-0" aria-hidden="true"></i>
                         <span class="text-[9px] truncate"
                               :class="query ? 'text-slate-900 dark:text-white font-medium' : 'text-slate-400 dark:text-slate-400'"
-                              x-text="query || 'Cari kursus & modul...'"></span>
+                              x-text="query || 'Cari Kursus dan Koleksi Perpustakaan'"></span>
                     </button>
 
                     {{-- Input Pencarian Desktop (sm ke atas) --}}
@@ -61,7 +61,7 @@
                         <input type="text" x-model="query" @input.debounce.500ms="fetchResults"
                             @focus="if(query.length > 1) isOpen = true"
                             class="bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-400 text-sm rounded-xl focus:ring-[#13416B] dark:focus:ring-white focus:border-[#13416B] dark:focus:border-white block w-full ps-11 pe-10 py-2.5 transition-colors"
-                            placeholder="Cari kursus dan koleksi perpustakaan..." autocomplete="off">
+                            placeholder="Cari Kursus dan Koleksi Perpustakaan" autocomplete="off">
 
                         <!-- Ikon Loading Desktop -->
                         <div x-show="isLoading" x-cloak
@@ -83,7 +83,7 @@
 
                             <!-- State Kosong / Tidak Ditemukan -->
                             <template
-                                x-if="!isLoading && enrolledCourses.length === 0 && availableCatalogs.length === 0 && libraries.length === 0 && query.length > 1">
+                                x-if="!isLoading && enrolledCourses.length === 0 && availableCatalogs.length === 0 && catalogCategories.length === 0 && libraries.length === 0 && query.trim().length >= 2">
                                 <div class="p-6 text-center">
                                     <div class="mb-3 flex items-center justify-center text-slate-300 dark:text-slate-600">
                                         <i class="fas fa-search text-xl" aria-hidden="true"></i>
@@ -145,6 +145,34 @@
                                                     </div>
                                                     <div class="flex-1 min-w-0">
                                                         <p class="text-xs md:text-sm font-bold text-slate-800 dark:text-white line-clamp-2 sm:truncate leading-snug break-words group-hover:text-[#13416B] dark:group-hover:text-white"
+                                                            x-text="item.title"></p>
+                                                        <p class="text-[10px] text-slate-500 dark:text-slate-400 truncate mt-0.5"
+                                                            x-text="item.subtitle"></p>
+                                                    </div>
+                                                    <i class="fas fa-chevron-right text-xs text-slate-300 dark:text-slate-600 opacity-0 group-hover:opacity-100 transition-opacity" aria-hidden="true"></i>
+                                                </a>
+                                            </li>
+                                        </template>
+                                    </ul>
+                                </div>
+                            </template>
+
+                            <!-- Hasil: Kategori Katalog Kursus -->
+                            <template x-if="catalogCategories.length > 0">
+                                <div>
+                                    <div
+                                        class="px-3 sm:px-5 py-2 bg-slate-50/80 dark:bg-slate-900/40 border-y border-slate-100 dark:border-slate-700/60 text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                                        Kategori Katalog Kursus</div>
+                                    <ul>
+                                        <template x-for="item in catalogCategories">
+                                            <li>
+                                                <a :href="item.url"
+                                                    class="flex items-center gap-3 px-3 sm:px-5 py-2 sm:py-3 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors border-l-2 border-transparent hover:border-[#13416B] dark:hover:border-white group">
+                                                    <div class="w-8 h-8 rounded-lg bg-[#13416B]/10 dark:bg-white/10 text-[#13416B] dark:text-white flex items-center justify-center shrink-0">
+                                                        <i class="fas fa-layer-group text-xs"></i>
+                                                    </div>
+                                                    <div class="flex-1 min-w-0">
+                                                        <p class="text-xs md:text-sm font-bold text-slate-800 dark:text-white truncate group-hover:text-[#13416B] dark:group-hover:text-white"
                                                             x-text="item.title"></p>
                                                         <p class="text-[10px] text-slate-500 dark:text-slate-400 truncate mt-0.5"
                                                             x-text="item.subtitle"></p>
@@ -229,7 +257,7 @@
 
                                         <input type="text" x-ref="mobileSearchInput" x-model="query" @input.debounce.400ms="fetchResults"
                                             class="bg-slate-100 dark:bg-slate-700/60 border-0 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-400 text-xs rounded-xl focus:ring-2 focus:ring-[#13416B] dark:focus:ring-white block w-full ps-8 pe-8 py-2.5 transition-all"
-                                            placeholder="Ketik kata kunci pencarian..." autocomplete="off">
+                                            placeholder="Cari Kursus dan Koleksi Perpustakaan" autocomplete="off">
 
                                         <div class="absolute inset-y-0 end-0 flex items-center pe-2.5">
                                             <template x-if="isLoading">
@@ -266,7 +294,7 @@
                                 </template>
 
                                 <!-- State Kosong / Tidak Ditemukan -->
-                                <template x-if="!isLoading && enrolledCourses.length === 0 && availableCatalogs.length === 0 && libraries.length === 0 && query.trim().length >= 2">
+                                <template x-if="!isLoading && enrolledCourses.length === 0 && availableCatalogs.length === 0 && catalogCategories.length === 0 && libraries.length === 0 && query.trim().length >= 2">
                                     <div class="py-10 px-4 text-center">
                                         <div class="w-12 h-12 rounded-full bg-slate-100 dark:bg-slate-700/50 flex items-center justify-center mx-auto mb-3 text-slate-300 dark:text-slate-600">
                                             <i class="fas fa-search text-base"></i>
@@ -340,6 +368,34 @@
                                     </div>
                                 </template>
 
+                                <!-- Hasil: Kategori Katalog Kursus -->
+                                <template x-if="catalogCategories.length > 0">
+                                    <div class="mb-3">
+                                        <div class="px-3 py-1.5 bg-slate-50/80 dark:bg-slate-900/40 rounded-lg text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">
+                                            Kategori Katalog Kursus
+                                        </div>
+                                        <ul class="space-y-1">
+                                            <template x-for="item in catalogCategories">
+                                                <li>
+                                                    <a :href="item.url" @click="closeMobileSearch()"
+                                                        class="flex items-center gap-2.5 p-2 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors border border-transparent hover:border-slate-200 dark:hover:border-slate-700">
+                                                        <div class="w-8 h-8 rounded-lg bg-[#13416B]/10 dark:bg-white/10 text-[#13416B] dark:text-white flex items-center justify-center shrink-0">
+                                                            <i class="fas fa-layer-group text-xs"></i>
+                                                        </div>
+                                                        <div class="flex-1 min-w-0">
+                                                            <p class="text-xs font-bold text-slate-800 dark:text-white truncate"
+                                                                x-text="item.title"></p>
+                                                            <p class="text-[10px] text-slate-500 dark:text-slate-400 truncate mt-0.5"
+                                                                x-text="item.subtitle"></p>
+                                                        </div>
+                                                        <i class="fas fa-chevron-right text-xs text-slate-300 dark:text-slate-600"></i>
+                                                    </a>
+                                                </li>
+                                            </template>
+                                        </ul>
+                                    </div>
+                                </template>
+
                                 <!-- Hasil: Perpustakaan / Buku -->
                                 <template x-if="libraries.length > 0">
                                     <div class="mb-2">
@@ -387,6 +443,7 @@
                             isLoading: false,
                             enrolledCourses: [],
                             availableCatalogs: [],
+                            catalogCategories: [],
                             libraries: [],
                             openMobileSearch() {
                                 this.mobileOpen = true;
@@ -407,6 +464,7 @@
                                 this.query = '';
                                 this.enrolledCourses = [];
                                 this.availableCatalogs = [];
+                                this.catalogCategories = [];
                                 this.libraries = [];
                                 if (this.$refs.mobileSearchInput) {
                                     this.$refs.mobileSearchInput.focus();
@@ -417,6 +475,7 @@
                                     this.isOpen = false;
                                     this.enrolledCourses = [];
                                     this.availableCatalogs = [];
+                                    this.catalogCategories = [];
                                     this.libraries = [];
                                     return;
                                 }
@@ -436,6 +495,7 @@
                                     .then(data => {
                                         this.enrolledCourses = data.enrolled_courses || [];
                                         this.availableCatalogs = data.available_catalogs || [];
+                                        this.catalogCategories = data.catalog_categories || [];
                                         this.libraries = data.libraries || [];
                                         this.isLoading = false;
                                     })
@@ -488,19 +548,19 @@
                             @if (auth()->user()->hasRole('user'))
                                 <!-- Navigasi Khusus User: Informasi Saya, Sertifikat Saya, Pengaturan -->
                                 <li>
-                                    <a href="{{ route('user.profile') }}#personal"
+                                    <a href="{{ route('user.profile') }}#personal" @click="open = false"
                                         class="flex items-center gap-3 p-2.5 rounded-xl text-slate-700 dark:text-slate-200 hover:bg-[#13416B]/10 hover:text-[#13416B] dark:hover:bg-slate-700 dark:hover:text-white font-medium transition-colors">
                                         <i class="fas fa-user-circle w-4 shrink-0 text-center text-slate-400 dark:text-slate-500" aria-hidden="true"></i> Informasi Saya
                                     </a>
                                 </li>
                                 <li>
-                                    <a href="{{ route('user.profile') }}#certificates"
+                                    <a href="{{ route('user.profile') }}#certificates" @click="open = false"
                                         class="flex items-center gap-3 p-2.5 rounded-xl text-slate-700 dark:text-slate-200 hover:bg-[#13416B]/10 hover:text-[#13416B] dark:hover:bg-slate-700 dark:hover:text-white font-medium transition-colors">
                                         <i class="fas fa-award w-4 shrink-0 text-center text-slate-400 dark:text-slate-500" aria-hidden="true"></i> Sertifikat Saya
                                     </a>
                                 </li>
                                 <li>
-                                    <a href="{{ route('user.profile') }}#pengaturan"
+                                    <a href="{{ route('user.profile') }}#pengaturan" @click="open = false"
                                         class="flex items-center gap-3 p-2.5 rounded-xl text-slate-700 dark:text-slate-200 hover:bg-[#13416B]/10 hover:text-[#13416B] dark:hover:bg-slate-700 dark:hover:text-white font-medium transition-colors">
                                         <i class="fas fa-gear w-4 shrink-0 text-center text-slate-400 dark:text-slate-500" aria-hidden="true"></i> Pengaturan
                                     </a>

@@ -20,6 +20,7 @@
         showScrollTop: false,
 
         init() {
+            this.scrollToActiveTab();
             window.addEventListener('hashchange', () => {
                 const hash = window.location.hash;
                 if (hash === '#pengaturan' || hash === '#settings') {
@@ -29,6 +30,7 @@
                 } else if (hash === '#personal' || hash === '#informasi') {
                     this.tab = 'personal';
                 }
+                this.scrollToActiveTab();
                 this.$nextTick(() => this.checkPreviewReached());
             });
 
@@ -41,6 +43,7 @@
             }
 
             this.$watch('tab', (val) => {
+                this.scrollToActiveTab();
                 if (val !== 'settings') {
                     this.showScrollTop = false;
                 } else {
@@ -112,9 +115,17 @@
 
         selectPaperTheme(theme) {
             this.updatePref('paperTheme', theme);
-            if (theme === 'sepia' && this.isDark) {
-                this.setDarkMode(false);
-            }
+        },
+
+        scrollToActiveTab() {
+            this.$nextTick(() => {
+                const container = this.$refs.tabContainer;
+                const activeBtn = container?.querySelector('[data-tab="' + this.tab + '"]');
+                if (activeBtn && container) {
+                    const scrollLeft = activeBtn.offsetLeft - (container.clientWidth / 2) + (activeBtn.clientWidth / 2);
+                    container.scrollTo({ left: Math.max(0, scrollLeft), behavior: 'smooth' });
+                }
+            });
         },
 
         getLineHeightClass() {
@@ -191,19 +202,19 @@
 
         <!-- Tabs -->
         <div class="bg-white dark:bg-slate-800 rounded-md shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
-            <div class="flex gap-1 px-3 sm:px-6 pt-2.5 sm:pt-3.5 border-b border-slate-200 dark:border-slate-700 overflow-x-auto hide-scrollbar">
-                <button type="button" @click="tab = 'personal'; window.location.hash = 'personal'"
+            <div x-ref="tabContainer" class="flex gap-1 px-3 sm:px-6 pt-2.5 sm:pt-3.5 border-b border-slate-200 dark:border-slate-700 overflow-x-auto hide-scrollbar scroll-smooth">
+                <button type="button" data-tab="personal" @click="tab = 'personal'; window.location.hash = 'personal'"
                     :class="tab === 'personal' ? 'text-[#13416B] dark:text-white border-[#13416B] dark:border-white' : 'text-slate-500 dark:text-slate-400 border-transparent hover:text-slate-800 dark:hover:text-white'"
                     class="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-bold border-b-2 -mb-px transition-colors whitespace-nowrap cursor-pointer">
                     <i class="fas fa-user text-xs sm:text-sm"></i> Informasi Pribadi
                 </button>
-                <button type="button" @click="tab = 'certificates'; window.location.hash = 'certificates'"
+                <button type="button" data-tab="certificates" @click="tab = 'certificates'; window.location.hash = 'certificates'"
                     :class="tab === 'certificates' ? 'text-[#13416B] dark:text-white border-[#13416B] dark:border-white' : 'text-slate-500 dark:text-slate-400 border-transparent hover:text-slate-800 dark:hover:text-white'"
                     class="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-bold border-b-2 -mb-px transition-colors whitespace-nowrap cursor-pointer">
                     <i class="fas fa-award text-xs sm:text-sm"></i> Sertifikat Saya
                     <span class="text-[10px] sm:text-xs font-bold bg-[#13416B]/10 dark:bg-white/10 text-[#13416B] dark:text-white rounded-full px-1.5 sm:px-2 py-0.5">{{ $stats['certificates'] }}</span>
                 </button>
-                <button type="button" @click="tab = 'settings'; window.location.hash = 'pengaturan'"
+                <button type="button" data-tab="settings" @click="tab = 'settings'; window.location.hash = 'pengaturan'"
                     :class="tab === 'settings' ? 'text-[#13416B] dark:text-white border-[#13416B] dark:border-white' : 'text-slate-500 dark:text-slate-400 border-transparent hover:text-slate-800 dark:hover:text-white'"
                     class="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-bold border-b-2 -mb-px transition-colors whitespace-nowrap cursor-pointer">
                     <i class="fas fa-gear text-xs sm:text-sm"></i> Pengaturan
@@ -601,7 +612,8 @@
                                 <!-- Live Reader Card Mockup -->
                                 <div class="rounded-md border shadow-sm overflow-hidden transition-all duration-300 reader-container"
                                     :class="{
-                                        'reader-theme-dark': isDark,
+                                        'reader-theme-dark-sepia': isDark && readerPrefs.paperTheme === 'sepia',
+                                        'reader-theme-dark': isDark && readerPrefs.paperTheme !== 'sepia',
                                         'reader-theme-sepia': !isDark && readerPrefs.paperTheme === 'sepia',
                                         'bg-white border-slate-200 text-slate-800': !isDark && readerPrefs.paperTheme !== 'sepia'
                                     }">

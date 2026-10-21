@@ -4,6 +4,7 @@ namespace Modules\Dashboard\Services;
 
 use App\Models\User;
 use Illuminate\Support\Collection;
+use Modules\LMS\Models\Category;
 use Modules\LMS\Models\Course;
 use Modules\LMS\Models\Library;
 use Modules\LMS\Models\PostTest;
@@ -231,6 +232,7 @@ class UserDashboardService
             return [
                 'enrolled_courses' => [],
                 'available_catalogs' => [],
+                'catalog_categories' => [],
                 'libraries' => [],
             ];
         }
@@ -251,7 +253,10 @@ class UserDashboardService
         $enrolledCourses = Course::whereIn('id', $enrolledCourseIds)
             ->where(function ($query) use ($keyword) {
                 $query->where('name', 'like', "%{$keyword}%")
-                    ->orWhere('description', 'like', "%{$keyword}%");
+                    ->orWhere('description', 'like', "%{$keyword}%")
+                    ->orWhereHas('category', function ($q) use ($keyword) {
+                        $q->where('name', 'like', "%{$keyword}%");
+                    });
             })
             ->with('category')
             ->limit(4)
@@ -272,7 +277,10 @@ class UserDashboardService
         $availableCatalogs = Course::whereNotIn('id', $enrolledCourseIds)
             ->where(function ($query) use ($keyword) {
                 $query->where('name', 'like', "%{$keyword}%")
-                    ->orWhere('description', 'like', "%{$keyword}%");
+                    ->orWhere('description', 'like', "%{$keyword}%")
+                    ->orWhereHas('category', function ($q) use ($keyword) {
+                        $q->where('name', 'like', "%{$keyword}%");
+                    });
             })
             ->with('category')
             ->limit(4)
@@ -287,6 +295,20 @@ class UserDashboardService
                         ? (str_starts_with($item->thumbnail, 'http') ? $item->thumbnail : asset('storage/' . $item->thumbnail))
                         : null,
                     'color' => 'bg-emerald-600',
+                ];
+            });
+
+        // Pencarian Kategori Katalog Kursus
+        $catalogCategories = Category::where('name', 'like', "%{$keyword}%")
+            ->withCount('courses')
+            ->limit(3)
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'id' => $item->id,
+                    'title' => $item->name,
+                    'subtitle' => ($item->courses_count ?? 0) . ' Kursus dalam Kategori',
+                    'url' => route('user.catalog.index', ['categories' => [$item->id]]),
                 ];
             });
 
@@ -309,6 +331,7 @@ class UserDashboardService
         return [
             'enrolled_courses' => $enrolledCourses,
             'available_catalogs' => $availableCatalogs,
+            'catalog_categories' => $catalogCategories,
             'libraries' => $libraries,
         ];
     }

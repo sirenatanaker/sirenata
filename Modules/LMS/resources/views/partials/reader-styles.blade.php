@@ -215,6 +215,55 @@
     color: #94A3B8 !important;
 }
 
+/* --- 5b. Reader Theme: Dark Sepia (Sepia di Mode Gelap) --- */
+.reader-theme-dark-sepia {
+    background-color: #201a15 !important;
+    border-color: #382c22 !important;
+    color: #dfcebc !important;
+}
+.reader-theme-dark-sepia .reader-card-header,
+.reader-theme-dark-sepia .reader-card-footer,
+.reader-theme-dark-sepia .reader-footer {
+    background-color: #18130e !important;
+    border-color: #382c22 !important;
+}
+.reader-theme-dark-sepia h1,
+.reader-theme-dark-sepia h2,
+.reader-theme-dark-sepia h3,
+.reader-theme-dark-sepia h4,
+.reader-theme-dark-sepia p,
+.reader-theme-dark-sepia li,
+.reader-theme-dark-sepia td,
+.reader-theme-dark-sepia th {
+    color: #ede2d4 !important;
+}
+.reader-theme-dark-sepia span:not([class*="badge"]):not([class*="bg-"]) {
+    color: inherit;
+}
+.reader-theme-dark-sepia a:not([class*="btn"]):not([class*="bg-"]):not([class*="text-white"]) {
+    color: #d49a5b !important;
+    text-decoration: underline;
+}
+.reader-theme-dark-sepia .quill-content-render blockquote {
+    background-color: #2a2119 !important;
+    border-left-color: #a46322 !important;
+    color: #dfcebc !important;
+}
+.reader-theme-dark-sepia .border-slate-100,
+.reader-theme-dark-sepia .border-slate-200 {
+    border-color: #382c22 !important;
+}
+.reader-theme-dark-sepia hr {
+    border-color: #382c22 !important;
+}
+.reader-theme-dark-sepia .bg-slate-50 {
+    background-color: #251e18 !important;
+}
+.reader-theme-dark-sepia .text-slate-400,
+.reader-theme-dark-sepia .text-slate-500 {
+    color: #a89682 !important;
+}
+
 /* --- 6. Text Alignment Presets --- */
 .reader-align-justify,
 .reader-align-justify p:not([class*="ql-align-"]),
