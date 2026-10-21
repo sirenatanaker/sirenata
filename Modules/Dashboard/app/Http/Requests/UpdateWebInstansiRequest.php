@@ -17,7 +17,7 @@ class UpdateWebInstansiRequest extends FormRequest
             'asalInstansi' => ['required_if:sector,instansi', Rule::in(['pusat', 'provinsi', 'kabkota'])],
             'instansi' => ['required', 'string', 'max:255'],
             'instansi_lainnya' => ['required_if:instansi,lainnya', 'nullable', 'string', 'max:255'],
-            'unit_kerja' => ['required', 'string', 'max:255'],
+            'unit_kerja' => ['required_if:sector,instansi', 'nullable', 'string', 'max:255'],
             'province_code' => ['nullable', 'required_if:asalInstansi,provinsi,kabkota', 'required_if:sector,swasta'],
             'regency_code' => ['nullable', 'required_if:asalInstansi,kabkota', 'required_if:sector,swasta'],
         ];

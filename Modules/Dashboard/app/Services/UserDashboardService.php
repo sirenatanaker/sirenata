@@ -171,7 +171,7 @@ class UserDashboardService
         if (($data['sector'] ?? '') === 'swasta') {
             $profile->institution_type = InstitutionType::SWASTA->value;
             $profile->instansi = trim($data['instansi']);
-            $profile->unit_kerja = $data['unit_kerja'];
+            $profile->unit_kerja = !empty($data['unit_kerja']) ? trim($data['unit_kerja']) : null;
             $profile->save();
 
             UserScope::updateOrCreate(

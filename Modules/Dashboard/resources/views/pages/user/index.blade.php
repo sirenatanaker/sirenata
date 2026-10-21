@@ -1007,16 +1007,15 @@
                         const sector = $(this).val();
                         if (sector === 'swasta') {
                             $('#asalInstansiSection').addClass('hidden');
-                            $('#kementerianSection, #provinsiSection, #kabkotaSection, #instansiSection, #customInstansiSection')
+                            $('#kementerianSection, #provinsiSection, #kabkotaSection, #instansiSection, #customInstansiSection, #unitKerjaSection')
                                 .addClass('hidden');
                             $('input[name="asalInstansi"]').prop('checked', false);
                             $('#provinsi').val('').trigger('change');
                             $('#kabkota').empty().append(new Option('Pilih Kabupaten/Kota', ''));
                             $('#swastaSection').removeClass('hidden');
                             $('#provinsiSection').removeClass('hidden');
-                            $('#unitKerjaSection').removeClass('hidden');
                             $('#companyName').prop('required', true);
-                            $('#unitKerja').prop('required', true);
+                            $('#unitKerja').val('').prop('required', false);
                             $('#customInstansi').prop('required', false);
                         } else {
                             $('#swastaSection').addClass('hidden');
@@ -1257,11 +1256,7 @@
                                 showFormError('Pilih kabupaten/kota domisili!');
                                 return;
                             }
-                            if (!$('#unitKerja').val().trim()) {
-                                e.preventDefault();
-                                showFormError('Masukkan unit kerja!');
-                                return;
-                            }
+                            $('#unitKerja').val('');
                             $('#asalInstansiSection input, #kementerian, #instansi, #customInstansi, #finalInstansiPusat')
                                 .prop('disabled', true);
                             return;
