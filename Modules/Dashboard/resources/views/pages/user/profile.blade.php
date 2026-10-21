@@ -23,6 +23,11 @@
 
                 init() {
                     this.scrollToActiveTab();
+                    if (window.location.hash) {
+                        this.scrollDownToTabs(150);
+                        this.scrollDownToTabs(400);
+                    }
+
                     window.addEventListener('hashchange', () => {
                         const hash = window.location.hash;
                         if (hash === '#pengaturan' || hash === '#settings') {
@@ -33,6 +38,7 @@
                             this.tab = 'personal';
                         }
                         this.scrollToActiveTab();
+                        this.scrollDownToTabs(50);
                         this.$nextTick(() => this.checkPreviewReached());
                     });
 
@@ -130,6 +136,35 @@
                     });
                 },
 
+                scrollDownToTabs(delay = 50) {
+                    setTimeout(() => {
+                        const tabsEl = document.getElementById('profile-tabs-section');
+                        if (tabsEl) {
+                            const navbarOffset = window.innerWidth >= 640 ? 95 : 85;
+                            const elementPosition = tabsEl.getBoundingClientRect().top;
+                            const offsetPosition = elementPosition + window.pageYOffset - navbarOffset;
+                            window.scrollTo({
+                                top: Math.max(0, offsetPosition),
+                                behavior: 'smooth'
+                            });
+                        }
+                    }, delay);
+                },
+
+                handleTabSwitch(targetTab) {
+                    this.tab = targetTab;
+                    const hashTarget = targetTab === 'settings' ? 'pengaturan' : (targetTab === 'certificates' ? 'certificates' : 'personal');
+                    if (window.location.hash !== '#' + hashTarget) {
+                        try {
+                            history.replaceState(null, null, '#' + hashTarget);
+                        } catch (e) {
+                            window.location.hash = hashTarget;
+                        }
+                    }
+                    this.scrollToActiveTab();
+                    this.scrollDownToTabs(50);
+                },
+
                 getLineHeightClass() {
                     const lh = this.readerPrefs.lineHeight;
                     if (lh === '1' || lh === '1.0') return 'reader-leading-1-0';
@@ -155,7 +190,7 @@
         }
     </script>
 
-    <div class="p-0 sm:p-4 md:p-6" x-data="userProfilePage()" @dark-mode-toggled.window="isDark = $event.detail.isDark">
+    <div class="p-0 sm:p-4 md:p-6" x-data="userProfilePage()" @dark-mode-toggled.window="isDark = $event.detail.isDark" x-on:switch-profile-tab.window="handleTabSwitch($event.detail.tab)">
         <!-- Breadcrumb -->
         <div class="mb-3 px-3 sm:px-0">
             <x-breadcrumb :items="[['label' => 'Profil Saya']]" />
@@ -207,7 +242,7 @@
         </div>
 
         <!-- Tabs -->
-        <div class="bg-white dark:bg-slate-800 rounded-md shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
+        <div id="profile-tabs-section" class="scroll-mt-20 sm:scroll-mt-24 bg-white dark:bg-slate-800 rounded-md shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
             <div x-ref="tabContainer" class="flex gap-1 px-3 sm:px-6 pt-2.5 sm:pt-3.5 border-b border-slate-200 dark:border-slate-700 overflow-x-auto hide-scrollbar scroll-smooth">
                 <button type="button" data-tab="personal" @click="tab = 'personal'; window.location.hash = 'personal'"
                     :class="tab === 'personal' ? 'text-[#13416B] dark:text-white border-[#13416B] dark:border-white' : 'text-slate-500 dark:text-slate-400 border-transparent hover:text-slate-800 dark:hover:text-white'"

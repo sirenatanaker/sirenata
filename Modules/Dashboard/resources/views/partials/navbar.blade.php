@@ -548,19 +548,22 @@
                             @if (auth()->user()->hasRole('user'))
                                 <!-- Navigasi Khusus User: Informasi Saya, Sertifikat Saya, Pengaturan -->
                                 <li>
-                                    <a href="{{ route('user.profile') }}#personal" @click="open = false"
+                                    <a href="{{ route('user.profile') }}#personal"
+                                        @click="open = false; window.dispatchEvent(new CustomEvent('switch-profile-tab', { detail: { tab: 'personal' } }))"
                                         class="flex items-center gap-3 p-2.5 rounded-xl text-slate-700 dark:text-slate-200 hover:bg-[#13416B]/10 hover:text-[#13416B] dark:hover:bg-slate-700 dark:hover:text-white font-medium transition-colors">
                                         <i class="fas fa-user-circle w-4 shrink-0 text-center text-slate-400 dark:text-slate-500" aria-hidden="true"></i> Informasi Saya
                                     </a>
                                 </li>
                                 <li>
-                                    <a href="{{ route('user.profile') }}#certificates" @click="open = false"
+                                    <a href="{{ route('user.profile') }}#certificates"
+                                        @click="open = false; window.dispatchEvent(new CustomEvent('switch-profile-tab', { detail: { tab: 'certificates' } }))"
                                         class="flex items-center gap-3 p-2.5 rounded-xl text-slate-700 dark:text-slate-200 hover:bg-[#13416B]/10 hover:text-[#13416B] dark:hover:bg-slate-700 dark:hover:text-white font-medium transition-colors">
                                         <i class="fas fa-award w-4 shrink-0 text-center text-slate-400 dark:text-slate-500" aria-hidden="true"></i> Sertifikat Saya
                                     </a>
                                 </li>
                                 <li>
-                                    <a href="{{ route('user.profile') }}#pengaturan" @click="open = false"
+                                    <a href="{{ route('user.profile') }}#pengaturan"
+                                        @click="open = false; window.dispatchEvent(new CustomEvent('switch-profile-tab', { detail: { tab: 'settings' } }))"
                                         class="flex items-center gap-3 p-2.5 rounded-xl text-slate-700 dark:text-slate-200 hover:bg-[#13416B]/10 hover:text-[#13416B] dark:hover:bg-slate-700 dark:hover:text-white font-medium transition-colors">
                                         <i class="fas fa-gear w-4 shrink-0 text-center text-slate-400 dark:text-slate-500" aria-hidden="true"></i> Pengaturan
                                     </a>

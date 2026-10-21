@@ -61,8 +61,8 @@
                 </div>
                 <!-- Dekorasi Watermark Background -->
                 <div
-                    class="absolute -right-4 -bottom-4 text-white opacity-[0.08] group-hover:opacity-[0.14] transition-all duration-500 pointer-events-none transform group-hover:scale-110 z-0">
-                    <i class="fas fa-book-open text-7xl sm:text-8xl" aria-hidden="true"></i>
+                    class="absolute -right-5 -bottom-5 sm:-right-6 sm:-bottom-6 text-white opacity-[0.10] group-hover:opacity-[0.16] transition-all duration-500 pointer-events-none transform group-hover:scale-110 z-0">
+                    <i class="fas fa-book-open text-8xl sm:text-9xl" aria-hidden="true"></i>
                 </div>
             </div>
 
@@ -83,8 +83,8 @@
                     </div>
                 </div>
                 <div
-                    class="absolute -right-4 -bottom-4 text-white opacity-[0.08] group-hover:opacity-[0.14] transition-all duration-500 pointer-events-none transform group-hover:scale-110 z-0">
-                    <i class="fas fa-chart-pie text-7xl sm:text-8xl" aria-hidden="true"></i>
+                    class="absolute -right-5 -bottom-5 sm:-right-6 sm:-bottom-6 text-white opacity-[0.10] group-hover:opacity-[0.16] transition-all duration-500 pointer-events-none transform group-hover:scale-110 z-0">
+                    <i class="fas fa-chart-pie text-8xl sm:text-9xl" aria-hidden="true"></i>
                 </div>
             </div>
 
@@ -105,8 +105,8 @@
                     </div>
                 </div>
                 <div
-                    class="absolute -right-4 -bottom-4 text-white opacity-[0.12] group-hover:opacity-[0.18] transition-all duration-500 pointer-events-none transform group-hover:scale-110 z-0">
-                    <i class="fas fa-award text-7xl sm:text-8xl" aria-hidden="true"></i>
+                    class="absolute -right-5 -bottom-5 sm:-right-6 sm:-bottom-6 text-white opacity-[0.12] group-hover:opacity-[0.18] transition-all duration-500 pointer-events-none transform group-hover:scale-110 z-0">
+                    <i class="fas fa-award text-8xl sm:text-9xl" aria-hidden="true"></i>
                 </div>
             </div>
         </div>
@@ -154,9 +154,9 @@
                         @endphp
 
                         <div
-                            class="bg-slate-50/70 rounded-xl shadow-xs flex flex-row overflow-hidden transition-all hover:bg-slate-100/80 hover:shadow-sm mb-1 group">
-                            <!-- Thumbnail Kiri (Persegi Panjang Landscape Ringkas) -->
-                            <div class="w-32 sm:w-40 md:w-48 lg:w-52 xl:w-56 shrink-0 bg-slate-100 relative overflow-hidden">
+                            class="bg-slate-50/70 rounded-md shadow-xs flex flex-row overflow-hidden transition-all hover:bg-slate-100/80 hover:shadow-sm mb-1 group">
+                            <!-- Thumbnail Kiri (Persegi Panjang Landscape Ringkas, Disembunyikan di Mobile) -->
+                            <div class="hidden sm:block sm:w-40 md:w-48 lg:w-52 xl:w-56 shrink-0 bg-slate-100 relative overflow-hidden">
                                 <img src="{{ $lThumb }}" alt="{{ $lastCourse->name }}"
                                     class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
                             </div>
@@ -190,19 +190,19 @@
 
                                     @if ($lPct >= 100)
                                         <a href="{{ route('user.course.my-course.detail', $lastCourse->slug) }}"
-                                            class="flex items-center justify-center gap-2 w-full bg-emerald-600 text-white hover:bg-emerald-700 px-5 py-2.5 sm:py-3 rounded-lg font-bold transition-all shadow-sm text-sm sm:text-base group">
+                                            class="flex items-center justify-center gap-2 w-full bg-emerald-600 text-white hover:bg-emerald-700 px-5 py-2.5 sm:py-3 rounded-md font-bold transition-all shadow-sm text-sm sm:text-base group">
                                             <i class="fas fa-award text-sm sm:text-base"></i>
                                             <span>Lihat Sertifikat</span>
                                         </a>
                                     @elseif ($lPct <= 0)
                                         <a href="{{ route('user.course.my-course.detail', $lastCourse->slug) }}?target=auto"
-                                            class="flex items-center justify-center gap-2 w-full bg-emerald-600 text-white hover:bg-emerald-700 px-5 py-2.5 sm:py-3 rounded-lg font-bold transition-all shadow-sm text-sm sm:text-base group">
+                                            class="flex items-center justify-center gap-2 w-full bg-emerald-600 text-white hover:bg-emerald-700 px-5 py-2.5 sm:py-3 rounded-md font-bold transition-all shadow-sm text-sm sm:text-base group">
                                             <i class="fas fa-play text-xs sm:text-sm group-hover:scale-110 transition-transform"></i>
                                             <span>Mulai Belajar</span>
                                         </a>
                                     @else
                                         <a href="{{ route('user.course.my-course.detail', $lastCourse->slug) }}?target=auto"
-                                            class="flex items-center justify-center w-full bg-amber-500 text-white hover:bg-amber-600 px-5 py-2.5 sm:py-3 rounded-lg font-bold transition-all shadow-sm text-sm sm:text-base group">
+                                            class="flex items-center justify-center w-full bg-amber-500 text-white hover:bg-amber-600 px-5 py-2.5 sm:py-3 rounded-md font-bold transition-all shadow-sm text-sm sm:text-base group">
                                             <span>Lanjutkan Belajar</span>
                                         </a>
                                     @endif
