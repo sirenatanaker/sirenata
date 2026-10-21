@@ -353,22 +353,15 @@
                                     <div class="w-10 h-1 bg-slate-200 rounded-full"></div>
                                 </div>
 
-                                {{-- Header Modal: Title, Thumbnail, Meta & Close Button --}}
+                                {{-- Header Modal: Title, Meta & Close Button --}}
                                 <div class="px-5 sm:px-6 pt-4 sm:pt-5 pb-4 border-b border-slate-100 bg-white shrink-0">
                                     <div class="flex items-start justify-between gap-3.5 sm:gap-4">
-                                        <div class="flex items-start gap-3.5 sm:gap-4 flex-1 min-w-0">
-                                            <template x-if="selected.thumbnail">
-                                                <div class="shrink-0 w-24 sm:w-36 aspect-video rounded-md overflow-hidden bg-slate-100">
-                                                    <img :src="selected.thumbnail" :alt="selected.name" class="w-full h-full object-cover" />
-                                                </div>
-                                            </template>
-                                            <div class="flex-1 min-w-0">
-                                                <h3 id="enroll-title" class="text-base sm:text-lg font-bold text-slate-900 leading-snug line-clamp-2"
-                                                    :title="selected.name" x-text="selected.name"></h3>
-                                                
-                                                <p class="text-xs text-slate-500 leading-relaxed mt-1 line-clamp-2"
-                                                   x-show="selected.description" x-text="selected.description"></p>
-                                            </div>
+                                        <div class="flex-1 min-w-0">
+                                            <h3 id="enroll-title" class="text-base sm:text-lg font-bold text-slate-900 leading-snug line-clamp-2"
+                                                :title="selected.name" x-text="selected.name"></h3>
+                                            
+                                            <p class="text-xs text-slate-500 leading-relaxed mt-1 line-clamp-2"
+                                               x-show="selected.description" x-text="selected.description"></p>
                                         </div>
                                         <button type="button" @click="close()" aria-label="Tutup"
                                                 class="shrink-0 w-8 h-8 -mr-1 rounded-lg flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors">
