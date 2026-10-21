@@ -11,7 +11,7 @@
         <div>
             <x-lms::user.course-tabs active="all" :total="$meta['total'] ?? 0" />
 
-            <div class="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6 px-0 sm:px-4 md:px-0">
+            <div class="grid grid-cols-2 lg:grid-cols-3 gap-y-6 gap-x-3 sm:gap-6 px-0 sm:px-4 md:px-0">
                 @forelse ($courses as $course)
                     <x-lms::user.course-card :course="$course" />
                 @empty

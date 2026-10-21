@@ -15,10 +15,10 @@
 @endphp
 
 <a href="{{ route('user.course.my-course.detail', $course->slug) }}"
-    class="group flex flex-col bg-white dark:bg-slate-800/90 rounded-md border border-slate-200 dark:border-slate-700/80 shadow-sm hover:shadow-xl hover:border-[#13416B]/30 dark:hover:border-slate-500 hover:-translate-y-1 transition-all duration-300 overflow-hidden">
+    class="group flex flex-col bg-transparent sm:bg-white sm:dark:bg-slate-800/90 rounded-none sm:rounded-md border-0 sm:border border-slate-200 dark:border-slate-700/80 shadow-none sm:shadow-sm hover:shadow-xl hover:border-[#13416B]/30 dark:hover:border-slate-500 hover:-translate-y-1 transition-all duration-300 overflow-hidden">
 
     {{-- Thumbnail & Badge --}}
-    <div class="relative h-24 sm:h-48 overflow-hidden bg-slate-100 dark:bg-slate-900/50">
+    <div class="relative h-24 sm:h-48 overflow-hidden bg-slate-100 dark:bg-slate-900/50 rounded-t-md">
         @if (!empty($course->thumbnail_url))
             <img src="{{ $course->thumbnail_url }}"
                 alt="{{ $course->course_name ?? $course->name }}"
@@ -31,29 +31,25 @@
 
         {{-- Badge Kategori --}}
         <div class="absolute top-2 left-2 sm:top-3 sm:left-3 max-w-[60%] sm:max-w-none">
-            <span class="block truncate px-1.5 py-0.5 sm:px-2.5 sm:py-1 text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-slate-800 dark:text-white bg-white/90 dark:bg-slate-900/85 dark:border dark:border-slate-700/80 backdrop-blur-sm rounded shadow-sm">
+            <span class="block truncate px-1.5 py-0.5 sm:px-2.5 sm:py-1 text-[8px] sm:text-[10px] font-bold uppercase tracking-wider text-slate-800 dark:text-white bg-white/90 dark:bg-slate-900/85 dark:border dark:border-slate-700/80 backdrop-blur-sm rounded shadow-sm">
                 {{ $course->category->name ?? 'Umum' }}
             </span>
         </div>
 
-        {{-- Badge Status --}}
+        {{-- Badge Status (Mojok Kanan Atas mengikuti thumbnail dengan rounded-bl-md) --}}
         @if ($isDone)
-            <div class="absolute top-2 right-2 sm:top-3 sm:right-3">
-                <span class="px-2 py-0.5 sm:px-2.5 sm:py-1 text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-white bg-emerald-600 rounded shadow-sm flex items-center gap-1">
-                    <i class="fas fa-check-circle"></i> <span class="hidden sm:inline">Selesai</span>
-                </span>
-            </div>
+            <span class="absolute top-0 right-0 z-10 px-2.5 sm:px-3 py-1 text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-white bg-emerald-600 shadow-xs flex items-center gap-1 rounded-none rounded-bl-md rounded-tr-md">
+                <i class="fas fa-check-circle"></i> <span class="hidden sm:inline">Selesai</span>
+            </span>
         @elseif ($pct > 0)
-            <div class="absolute top-2 right-2 sm:top-3 sm:right-3">
-                <span class="px-2 py-0.5 sm:px-2.5 sm:py-1 text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-white bg-amber-500 rounded shadow-sm flex items-center gap-1">
-                    <i class="fas fa-clock"></i> <span class="hidden sm:inline">Berjalan</span>
-                </span>
-            </div>
+            <span class="absolute top-0 right-0 z-10 px-2.5 sm:px-3 py-1 text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-white bg-amber-500 shadow-xs flex items-center gap-1 rounded-none rounded-bl-md rounded-tr-md">
+                <i class="fas fa-clock"></i> <span class="hidden sm:inline">Berjalan</span>
+            </span>
         @endif
     </div>
 
     {{-- Konten Text --}}
-    <div class="p-3 sm:p-5 flex flex-col flex-1">
+    <div class="p-0 pt-2.5 sm:p-5 flex flex-col flex-1">
         <h3 class="text-xs sm:text-base font-bold text-slate-800 dark:text-white leading-snug mb-1.5 sm:mb-2 group-hover:text-[#13416B] dark:group-hover:text-slate-200 transition-colors line-clamp-2"
             title="{{ $course->course_name ?? $course->name }}">
             {{ $course->course_name ?? $course->name }}

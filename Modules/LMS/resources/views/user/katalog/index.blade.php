@@ -249,12 +249,12 @@
                 @keydown.escape.window="onEscape()"
             >
                 {{-- Grid Cards Responsif --}}
-                <div class="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6 px-0 sm:px-4 md:px-0">
+                <div class="grid grid-cols-2 lg:grid-cols-3 gap-y-6 gap-x-3 sm:gap-6 px-0 sm:px-4 md:px-0">
                     @forelse ($courses as $course)
-                        <div class="group flex flex-col bg-white rounded-md border border-slate-200 shadow-sm hover:shadow-xl hover:border-[#13416B]/30 hover:-translate-y-1 transition-all duration-300 overflow-hidden">
+                        <div class="group flex flex-col bg-transparent sm:bg-white rounded-none sm:rounded-md border-0 sm:border border-slate-200 shadow-none sm:shadow-sm hover:shadow-xl hover:border-[#13416B]/30 hover:-translate-y-1 transition-all duration-300 overflow-hidden">
 
                             {{-- Thumbnail & Badge --}}
-                            <div class="relative h-24 sm:h-48 overflow-hidden bg-slate-100">
+                            <div class="relative h-24 sm:h-48 overflow-hidden bg-slate-100 rounded-t-md">
                                 @if (!empty($course->thumbnail))
                                     <img src="{{ str_starts_with($course->thumbnail, 'http') ? $course->thumbnail : asset('storage/' . $course->thumbnail) }}"
                                         alt="{{ $course->name }}"
@@ -266,14 +266,14 @@
                                 @endif
 
                                 <div class="absolute top-2 left-2 sm:top-3 sm:left-3 max-w-[85%]">
-                                    <span class="block truncate px-1.5 py-0.5 sm:px-2.5 sm:py-1 text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-[#13416B] bg-white/95 backdrop-blur-sm rounded-md shadow-sm">
+                                    <span class="block truncate px-1.5 py-0.5 sm:px-2.5 sm:py-1 text-[8px] sm:text-[10px] font-bold uppercase tracking-wider text-[#13416B] bg-white/95 backdrop-blur-sm rounded-md shadow-sm">
                                         {{ $course->category->name ?? 'Umum' }}
                                     </span>
                                 </div>
                             </div>
 
                             {{-- Konten Text --}}
-                            <div class="p-3 sm:p-5 flex flex-col flex-1">
+                            <div class="p-0 pt-2.5 sm:p-5 flex flex-col flex-1">
                                 <h3 class="text-xs sm:text-base font-bold text-slate-800 leading-snug mb-1.5 sm:mb-2 group-hover:text-[#13416B] transition-colors line-clamp-2" title="{{ $course->name }}">
                                     {{ $course->name }}
                                 </h3>
