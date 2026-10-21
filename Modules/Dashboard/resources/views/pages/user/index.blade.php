@@ -125,8 +125,8 @@
                 <div class="bg-white rounded-md p-4 sm:p-5 shadow-sm shrink-0">
                     <!-- Header Card -->
                     <div class="mb-3.5 pb-2.5 sm:pb-3 border-b border-slate-100 shrink-0">
-                        <h2 class="text-base lg:text-lg font-extrabold text-slate-800">Lanjutkan Belajar</h2>
-                        <p class="text-[11px] sm:text-xs text-slate-500">Aktivitas pembelajaran terakhir Anda</p>
+                        <h2 class="text-lg sm:text-xl font-extrabold text-slate-800">Lanjutkan Belajar</h2>
+                        <p class="text-xs sm:text-sm text-slate-500">Aktivitas pembelajaran terakhir Anda</p>
                     </div>
 
                     @if ($lastCourse)
@@ -165,19 +165,19 @@
                             <div class="min-w-0 flex-1 flex flex-col justify-between p-3 sm:p-4">
                                 <div class="mb-2">
                                     <span
-                                        class="text-[9px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Aktivitas
+                                        class="text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-wider block mb-1">Aktivitas
                                         Terakhir</span>
-                                    <h3 class="font-bold text-slate-800 text-sm sm:text-base line-clamp-2 mb-1">
+                                    <h3 class="font-bold text-slate-800 text-base sm:text-lg line-clamp-2 mb-1.5 leading-snug">
                                         {{ $lastCourse->name }}
                                     </h3>
-                                    <p class="text-[10px] sm:text-[11px] text-slate-500 line-clamp-2 leading-relaxed">
+                                    <p class="text-xs sm:text-sm text-slate-500 line-clamp-2 leading-relaxed">
                                         {{ $lastCourse->description ?? 'Lanjutkan pembelajaran Anda pada kursus ini.' }}
                                     </p>
                                 </div>
 
                                 <div class="mt-auto">
                                     <div
-                                        class="flex items-center justify-between text-[9px] sm:text-[10px] text-slate-500 mb-1 font-medium">
+                                        class="flex items-center justify-between text-[10px] sm:text-xs text-slate-500 mb-1 font-medium">
                                         <span>Progress</span>
                                         <span class="font-bold {{ $lText }}">{{ $lastCourse->progress }}%</span>
                                     </div>
@@ -299,8 +299,8 @@
                 <div class="bg-white rounded-none sm:rounded-md p-4 sm:p-6 shadow-none sm:shadow-sm flex flex-col lg:flex-1 w-full min-h-0">
                     <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-100 shrink-0">
                         <div>
-                            <h2 class="text-base md:text-lg font-extrabold text-slate-800">Kursus Saya</h2>
-                            <p class="text-[11px] sm:text-xs text-slate-500">Daftar kursus yang Anda ikuti</p>
+                            <h2 class="text-lg sm:text-xl font-extrabold text-slate-800">Kursus Saya</h2>
+                            <p class="text-xs sm:text-sm text-slate-500">Daftar kursus yang Anda ikuti</p>
                         </div>
                         <a href="{{ route('user.course.my-course') }}"
                             class="text-xs sm:text-sm font-semibold text-[#13416B] hover:text-[#0f3354] hover:underline transition-colors shrink-0">
@@ -373,19 +373,19 @@
                                     <div class="min-w-0 flex-1 flex flex-col justify-between h-full w-full py-0.5">
                                         <div>
                                             <h3
-                                                class="font-bold text-slate-800 text-xs sm:text-sm line-clamp-2 leading-snug group-hover:text-[#13416B] transition-colors mb-1">
+                                                class="font-bold text-slate-800 text-sm sm:text-base line-clamp-2 leading-snug group-hover:text-[#13416B] transition-colors mb-1">
                                                 {{ $course->name }}
                                             </h3>
 
                                             <p
-                                                class="line-clamp-2 text-[10px] sm:text-xs text-slate-500 mb-2 leading-relaxed">
+                                                class="line-clamp-2 text-xs text-slate-500 mb-2 leading-relaxed">
                                                 {{ $course->description ?? 'Deskripsi kursus tidak tersedia.' }}
                                             </p>
                                         </div>
 
                                         <div>
                                             <div
-                                                class="flex items-center justify-between text-[9px] sm:text-[10px] text-slate-500 mb-1 font-medium">
+                                                class="flex items-center justify-between text-[10px] sm:text-xs text-slate-500 mb-1 font-medium">
                                                 <span>Progress</span>
                                                 <span class="font-bold {{ $rText }}">{{ $course->pivot->progress }}%</span>
                                             </div>
