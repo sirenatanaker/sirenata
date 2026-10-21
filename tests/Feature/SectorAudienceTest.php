@@ -41,18 +41,19 @@ test('new users can register as swasta with a company name', function () {
     $user = User::create(['name' => 'Swasta', 'email' => 'swasta@contoh.id', 'password' => 'password']);
     $user->assignRole('user');
 
-    $this->actingAs($user)->post(route('user.update-instansi'), [
-        'sector' => 'swasta',
-        'instansi' => 'PT Maju Bersama',
-        'unit_kerja' => 'HRD',
-        'province_code' => '11',
-        'regency_code' => '1101',
-    ])->assertRedirect(route('user.dashboard'));
+    $this->withoutMiddleware(\Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class)
+        ->actingAs($user)->post(route('user.update-instansi'), [
+            'sector' => 'swasta',
+            'instansi' => 'PT Maju Bersama',
+            'province_code' => '11',
+            'regency_code' => '1101',
+        ])->assertRedirect(route('user.dashboard'));
 
     $profile = $user->fresh()->profile;
 
     expect($profile->institution_type)->toBe('swasta')
         ->and($profile->instansi)->toBe('PT Maju Bersama')
+        ->and($profile->unit_kerja)->toBeNull()
         ->and($user->fresh()->scopeArea->province_code)->toBe('11')
         ->and($user->fresh()->scopeArea->regency_code)->toBe('1101');
 });

@@ -151,7 +151,7 @@
                 <div class="p-3 sm:p-4 bg-slate-50 rounded-md border border-slate-100 flex flex-col justify-between">
                     <span
                         class="text-[10px] sm:text-xs uppercase font-bold text-slate-500 mb-1.5 flex items-center gap-1.5">
-                        <i class="fas fa-layer-group"></i> Modul
+                        <i class="far fa-folder-open"></i> Modul
                     </span>
                     <span
                         class="text-base sm:text-lg font-extrabold text-slate-800">{{ count(data_get($course, 'sections', [])) }}</span>
@@ -167,7 +167,7 @@
                 <div class="p-3 sm:p-4 bg-slate-50 rounded-md border border-slate-100 flex flex-col justify-between">
                     <span
                         class="text-[10px] sm:text-xs uppercase font-bold text-slate-500 mb-1.5 flex items-center gap-1.5">
-                        <i class="fas fa-check-double"></i> Selesai
+                        <i class="fas fa-check"></i> Selesai
                     </span>
                     <span class="text-base sm:text-lg font-extrabold text-[#13416B]">{{ $completedItems }}
                         <span class="text-xs sm:text-sm text-slate-400 font-medium">/ {{ $totalItems }}</span>

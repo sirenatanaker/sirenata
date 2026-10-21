@@ -29,21 +29,18 @@
             </div>
         @endif
 
-        {{-- Badge Kategori --}}
-        <div class="absolute top-2 left-2 sm:top-3 sm:left-3 max-w-[60%] sm:max-w-none">
-            <span class="block truncate px-1.5 py-0.5 sm:px-2.5 sm:py-1 text-[8px] sm:text-[10px] font-bold uppercase tracking-wider text-slate-800 dark:text-white bg-white/90 dark:bg-slate-900/85 dark:border dark:border-slate-700/80 backdrop-blur-sm rounded shadow-sm">
-                {{ $course->category->name ?? 'Umum' }}
-            </span>
-        </div>
-
         {{-- Badge Status (Mojok Kanan Atas mengikuti thumbnail dengan rounded-bl-md) --}}
         @if ($isDone)
             <span class="absolute top-0 right-0 z-10 px-2.5 sm:px-3 py-1 text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-white bg-emerald-600 shadow-xs flex items-center gap-1 rounded-none rounded-bl-md rounded-tr-md">
-                <i class="fas fa-check-circle"></i> <span class="hidden sm:inline">Selesai</span>
+                <i class="fas fa-check-circle text-[8.5px] sm:text-[9.5px]"></i> <span>Selesai</span>
             </span>
         @elseif ($pct > 0)
             <span class="absolute top-0 right-0 z-10 px-2.5 sm:px-3 py-1 text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-white bg-amber-500 shadow-xs flex items-center gap-1 rounded-none rounded-bl-md rounded-tr-md">
-                <i class="fas fa-clock"></i> <span class="hidden sm:inline">Berjalan</span>
+                <i class="fas fa-clock text-[8.5px] sm:text-[9.5px]"></i> <span>Berjalan</span>
+            </span>
+        @else
+            <span class="absolute top-0 right-0 z-10 px-2.5 sm:px-3 py-1 text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-white bg-slate-500 shadow-xs flex items-center gap-1 rounded-none rounded-bl-md rounded-tr-md">
+                <i class="fas fa-play text-[8.5px] sm:text-[9.5px]"></i> <span>Belum Mulai</span>
             </span>
         @endif
     </div>
@@ -58,12 +55,12 @@
         {{-- INFO COURSE: Modul & Peserta (Kalem & Profesional) --}}
         <div class="flex items-center gap-2 sm:gap-2.5 mb-2 sm:mb-2.5 text-[10px] sm:text-xs font-medium text-slate-500 dark:text-slate-400">
             <span class="inline-flex items-center gap-1.5">
-                <i class="fas fa-layer-group text-slate-400 dark:text-slate-500 text-[10px] sm:text-xs"></i>
+                <i class="far fa-folder-open text-slate-400 dark:text-slate-500 text-[10px] sm:text-xs"></i>
                 <span>{{ $course->total_modul ?? 0 }} Modul</span>
             </span>
             <span class="text-slate-300 dark:text-slate-600 select-none">•</span>
             <span class="inline-flex items-center gap-1.5">
-                <i class="fas fa-users text-slate-400 dark:text-slate-500 text-[10px] sm:text-xs"></i>
+                <i class="far fa-user text-slate-400 dark:text-slate-500 text-[10px] sm:text-xs"></i>
                 <span>{{ number_format($course->students_count ?? 0, 0, ',', '.') }} Peserta</span>
             </span>
         </div>

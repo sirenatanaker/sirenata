@@ -265,11 +265,11 @@
                                     </div>
                                 @endif
 
-                                <div class="absolute top-2 left-2 sm:top-3 sm:left-3 max-w-[85%]">
-                                    <span class="block truncate px-1.5 py-0.5 sm:px-2.5 sm:py-1 text-[8px] sm:text-[10px] font-bold uppercase tracking-wider text-[#13416B] bg-white/95 backdrop-blur-sm rounded-md shadow-sm">
-                                        {{ $course->category->name ?? 'Umum' }}
-                                    </span>
-                                </div>
+                                {{-- Badge Kategori (Mojok Kanan Atas seperti status label pada card kursus) --}}
+                                <span class="absolute top-0 right-0 z-10 max-w-[80%] px-2.5 sm:px-3 py-1 text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-white bg-[#13416B] shadow-xs flex items-center gap-1 rounded-none rounded-bl-md rounded-tr-md">
+                                    <i class="fas fa-tag text-[8px] sm:text-[9px] flex-shrink-0"></i>
+                                    <span class="truncate">{{ $course->category->name ?? 'Umum' }}</span>
+                                </span>
                             </div>
 
                             {{-- Konten Text --}}
@@ -281,12 +281,12 @@
                                 {{-- Statistik: modul & peserta (Kalem & Profesional) --}}
                                 <div class="flex items-center gap-2 sm:gap-2.5 mb-2 sm:mb-2.5 text-[10px] sm:text-xs font-medium text-slate-500">
                                     <span class="inline-flex items-center gap-1.5">
-                                        <i class="fas fa-layer-group text-slate-400 text-[10px] sm:text-xs"></i>
+                                        <i class="far fa-folder-open text-slate-400 text-[10px] sm:text-xs"></i>
                                         <span>{{ $course->sections_count }} Modul</span>
                                     </span>
                                     <span class="text-slate-300 select-none">•</span>
                                     <span class="inline-flex items-center gap-1.5">
-                                        <i class="fas fa-users text-slate-400 text-[10px] sm:text-xs"></i>
+                                        <i class="far fa-user text-slate-400 text-[10px] sm:text-xs"></i>
                                         <span>{{ number_format($course->students_count ?? 0, 0, ',', '.') }} Peserta</span>
                                     </span>
                                 </div>

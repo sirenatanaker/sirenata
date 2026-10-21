@@ -611,7 +611,7 @@
                     <div class="flex items-center gap-2 w-full sm:w-auto">
                         <span
                             class="completed-pop flex-1 sm:flex-initial px-3 sm:px-6 py-2.5 sm:py-3.5 text-xs sm:text-sm font-bold text-white bg-emerald-600 border border-emerald-600 rounded-xl text-center flex items-center justify-center gap-1.5 sm:gap-2 shadow-sm cursor-default select-none">
-                            <i class="fas fa-check-double text-xs sm:text-base"></i> Selesai Dipelajari
+                            <i class="fas fa-check text-xs sm:text-base"></i> Selesai Dipelajari
                         </span>
                         @if (!empty($nextUrl) && $nextUrl !== route('user.course.my-course.detail', $slug))
                             <a href="{{ $nextUrl }}"
