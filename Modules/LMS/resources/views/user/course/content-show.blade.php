@@ -608,10 +608,19 @@
                         </button>
                     </form>
                 @else
-                    <span
-                        class="completed-pop w-full sm:w-auto px-6 py-3 sm:py-3.5 text-sm font-bold text-white bg-emerald-600 border border-emerald-600 rounded-xl text-center flex items-center justify-center gap-2 shadow-sm cursor-default select-none">
-                        <i class="fas fa-check-double text-base sm:text-lg"></i> Selesai Dipelajari
-                    </span>
+                    <div class="flex items-center gap-2 w-full sm:w-auto">
+                        <span
+                            class="completed-pop flex-1 sm:flex-initial px-6 py-3 sm:py-3.5 text-sm font-bold text-white bg-emerald-600 border border-emerald-600 rounded-xl text-center flex items-center justify-center gap-2 shadow-sm cursor-default select-none">
+                            <i class="fas fa-check-double text-base sm:text-lg"></i> Selesai Dipelajari
+                        </span>
+                        @if (!empty($nextUrl) && $nextUrl !== route('user.course.my-course.detail', $slug))
+                            <a href="{{ $nextUrl }}"
+                                class="flex-1 sm:flex-initial px-6 py-3 sm:py-3.5 text-sm font-bold text-white bg-[#13416B] rounded-xl hover:bg-[#0f3354] transition-all shadow-sm flex items-center justify-center gap-2 text-center whitespace-nowrap">
+                                <span>Lanjut</span>
+                                <i class="fas fa-arrow-right text-xs"></i>
+                            </a>
+                        @endif
+                    </div>
                 @endif
             </div>
         </div>

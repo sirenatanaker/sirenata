@@ -2,7 +2,10 @@
 
 namespace Modules\LMS\Services\Api;
 
+use Illuminate\Support\Facades\DB;
 use Modules\LMS\Models\Course;
+use Modules\LMS\Models\CourseSection;
+use Modules\LMS\Models\PostTest;
 use Modules\LMS\Models\SectionContent;
 use Modules\LMS\Models\StudentContentProgress;
 
@@ -12,9 +15,9 @@ class CourseProgressService
      * Tandai konten sebagai selesai ditonton
      * dan hitung ulang progress course otomatis
      */
-    public function completeContent(SectionContent $content, ?int $userId = null): array
+    public function completeContent(SectionContent $content, ?string $userId = null): array
     {
-        $userId   = $userId ?? auth()->id();
+        $userId   = $userId ?? (string) auth()->id();
         $courseId = $content->section->course_id;
         $course   = Course::findOrFail($courseId);
 
@@ -31,15 +34,6 @@ class CourseProgressService
             ];
         }
 
-        // Kalau course sudah completed, tidak perlu update
-        if ($enrollment->pivot->status === 'completed') {
-            return [
-                'success' => false,
-                'code'    => 422,
-                'message' => 'Course ini sudah selesai',
-            ];
-        }
-
         // Simpan progress konten — ignore kalau sudah ada
         StudentContentProgress::firstOrCreate(
             [
@@ -51,16 +45,40 @@ class CourseProgressService
             ]
         );
 
+        // Kalau course sudah completed, tetap tandai konten dan return sukses
+        if ($enrollment->pivot->status === 'completed') {
+            return [
+                'success'      => true,
+                'code'         => 200,
+                'message'      => 'Course ini sudah selesai',
+                'progress'     => 100,
+                'status'       => 'completed',
+                'is_completed' => true,
+            ];
+        }
+
         // Hitung ulang progress
         $progress = $this->calculateProgress($userId, $courseId);
+
+        // Cek evaluasi akhir apakah ada dan apakah sudah lulus
+        $evaluasiAkhir = PostTest::where('course_id', $courseId)->whereNull('course_section_id')->first();
+        $isEvaluasiAkhirCompleted = false;
+        if ($evaluasiAkhir) {
+            $isEvaluasiAkhirCompleted = DB::table('post_test_results')
+                ->where('user_id', $userId)
+                ->where('post_test_id', $evaluasiAkhir->id)
+                ->where('is_passed', 1)
+                ->exists();
+        }
+        $isFullyCompleted = $progress >= 100 && (! $evaluasiAkhir || $isEvaluasiAkhirCompleted);
 
         // Update pivot course_student
         $pivotData = [
             'progress' => $progress,
-            'status'   => $progress >= 100 ? 'completed' : 'in_progress',
+            'status'   => $isFullyCompleted ? 'completed' : 'in_progress',
         ];
 
-        if ($progress >= 100) {
+        if ($isFullyCompleted) {
             $pivotData['completed_at'] = now();
         }
 
@@ -69,17 +87,17 @@ class CourseProgressService
         return [
             'success'      => true,
             'code'         => 200,
-            'message'      => $progress >= 100
+            'message'      => $isFullyCompleted
                 ? 'Selamat! Kamu telah menyelesaikan course ini'
                 : 'Progress berhasil diupdate',
             'progress'     => $progress,
             'status'       => $pivotData['status'],
-            'is_completed' => $progress >= 100,
+            'is_completed' => $isFullyCompleted,
         ];
     }
 
     /**
-     * Hitung progress: (konten selesai / total konten) * 100
+     * Hitung progress: ((konten selesai + tes lulus) / total item) * 100
      */
     public function calculateProgress(string $userId, string $courseId): int
     {
@@ -88,7 +106,15 @@ class CourseProgressService
             $q->where('course_id', $courseId);
         })->count();
 
-        if ($totalContents === 0) return 0;
+        // Total evaluasi / tes (evaluasi bab + evaluasi akhir)
+        $sectionIds = CourseSection::where('course_id', $courseId)->pluck('id');
+        $totalTests = PostTest::where('course_id', $courseId)
+            ->orWhereIn('course_section_id', $sectionIds)
+            ->count();
+
+        $totalItems = $totalContents + $totalTests;
+
+        if ($totalItems === 0) return 0;
 
         // Konten yang sudah diselesaikan user di course ini
         $completedContents = StudentContentProgress::where('user_id', $userId)
@@ -97,7 +123,20 @@ class CourseProgressService
             })
             ->count();
 
-        return (int) round(($completedContents / $totalContents) * 100);
+        // Evaluasi yang sudah lulus
+        $passedTests = DB::table('post_test_results')
+            ->where('user_id', $userId)
+            ->where('is_passed', 1)
+            ->whereIn('post_test_id', function ($q) use ($courseId, $sectionIds) {
+                $q->select('id')->from('post_tests')
+                    ->where('course_id', $courseId)
+                    ->orWhereIn('course_section_id', $sectionIds);
+            })
+            ->count();
+
+        $completedItems = $completedContents + $passedTests;
+
+        return (int) round(($completedItems / $totalItems) * 100);
     }
 
     /**

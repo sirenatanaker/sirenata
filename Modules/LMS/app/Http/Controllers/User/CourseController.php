@@ -6,8 +6,12 @@ use App\Http\Controllers\Controller;
 use Devrabiul\ToastMagic\Facades\ToastMagic;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
+use Modules\LMS\Models\CourseSection;
+use Modules\LMS\Models\PostTest;
 use Modules\LMS\Models\SectionContent;
+use Modules\LMS\Models\StudentContentProgress;
 use Modules\LMS\Services\Api\CourseProgressService;
 use Modules\LMS\Services\CertificateService;
 use Modules\LMS\Services\CourseService;
@@ -112,7 +116,7 @@ class CourseController extends Controller
             return redirect()->back();
         }
 
-        $result = $this->courseProgressService->completeContent($content, $request->user()->id);
+        $result = $this->courseProgressService->completeContent($content, (string) $request->user()->id);
 
         if (!$result['success']) {
             ToastMagic::error($result['message']);
@@ -126,7 +130,9 @@ class CourseController extends Controller
                 : 'Materi berhasil ditandai selesai. Progress: ' . $result['progress'] . '%'
         );
 
-        return redirect()->back();
+        $nextUrl = $this->getNextItemRoute($content, (string) $request->user()->id);
+
+        return $nextUrl ? redirect($nextUrl) : redirect()->back();
     }
 
     public function showContent(string $slug, string $contentId): View|RedirectResponse
@@ -140,11 +146,97 @@ class CourseController extends Controller
             return redirect()->route('user.course.my-course.detail', $slug);
         }
 
+        $nextUrl = $this->getNextItemRoute($content, (string) auth()->id());
+
         return view('lms::user.course.content-show', [
             'course'  => $result['data'] ?? null,
             'content' => $content,
             'slug'    => $slug,
+            'nextUrl' => $nextUrl,
         ]);
+    }
+
+    private function getNextItemRoute(SectionContent $content, string $userId): ?string
+    {
+        $content->loadMissing('section.course');
+        $section = $content->section;
+        $course = $section?->course;
+        if (!$course || !$section) {
+            return null;
+        }
+
+        $passedTestIds = DB::table('post_test_results')
+            ->where('user_id', $userId)
+            ->where('is_passed', 1)
+            ->pluck('post_test_id')
+            ->toArray();
+
+        // 1. Cek topik berikutnya di section (modul) yang sama
+        $contents = SectionContent::where('course_section_id', $section->id)
+            ->orderBy('position', 'asc')
+            ->orderBy('created_at', 'asc')
+            ->get();
+
+        $currentIndex = $contents->search(fn($item) => $item->id === $content->id);
+        if ($currentIndex !== false && isset($contents[$currentIndex + 1])) {
+            return route('user.course.content.show', [
+                'slug'    => $course->slug,
+                'content' => $contents[$currentIndex + 1]->id,
+            ]);
+        }
+
+        // 2. Cek evaluasi bab (post test) modul ini jika ada dan belum lulus
+        $sectionTest = PostTest::where('course_section_id', $section->id)->first();
+        if ($sectionTest && !in_array($sectionTest->id, $passedTestIds)) {
+            return route('user.course.test.show', [
+                'slug'       => $course->slug,
+                'postTestId' => $sectionTest->id,
+            ]);
+        }
+
+        // 3. Cek modul (section) berikutnya
+        $sections = CourseSection::where('course_id', $course->id)
+            ->orderBy('position', 'asc')
+            ->orderBy('created_at', 'asc')
+            ->get();
+
+        $currentSectionIndex = $sections->search(fn($item) => $item->id === $section->id);
+        if ($currentSectionIndex !== false) {
+            for ($i = $currentSectionIndex + 1; $i < $sections->count(); $i++) {
+                $nextSec = $sections[$i];
+                $firstContent = SectionContent::where('course_section_id', $nextSec->id)
+                    ->orderBy('position', 'asc')
+                    ->orderBy('created_at', 'asc')
+                    ->first();
+
+                if ($firstContent) {
+                    return route('user.course.content.show', [
+                        'slug'    => $course->slug,
+                        'content' => $firstContent->id,
+                    ]);
+                }
+
+                $nextSecTest = PostTest::where('course_section_id', $nextSec->id)->first();
+                if ($nextSecTest && !in_array($nextSecTest->id, $passedTestIds)) {
+                    return route('user.course.test.show', [
+                        'slug'       => $course->slug,
+                        'postTestId' => $nextSecTest->id,
+                    ]);
+                }
+            }
+        }
+
+        // 4. Cek evaluasi akhir kursus jika ada dan belum lulus
+        $evaluasiAkhir = PostTest::where('course_id', $course->id)->whereNull('course_section_id')->first();
+        if ($evaluasiAkhir && !in_array($evaluasiAkhir->id, $passedTestIds)) {
+            return route('user.course.test.show', [
+                'slug'       => $course->slug,
+                'postTestId' => $evaluasiAkhir->id,
+            ]);
+        }
+
+        // 5. Jika semua tahapan selesai, kembali ke detail kursus
+        return route('user.course.my-course.detail', $course->slug);
     }
 
     public function submitTest(Request $request, string $slug, string $postTestId): RedirectResponse
