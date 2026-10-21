@@ -567,33 +567,7 @@
                                 </li>
                             @endif
 
-                            <!-- Tombol Ganti Dark Mode Eksklusif di User Dropdown (Semua Role) -->
-                            <li>
-                                <button type="button" @click="toggleDarkMode()"
-                                    class="flex w-full cursor-pointer items-center justify-between p-2.5 rounded-xl text-slate-700 dark:text-slate-200 hover:bg-[#13416B]/10 hover:text-[#13416B] dark:hover:bg-slate-700 dark:hover:text-white font-medium transition-colors text-left group">
-                                    <span class="flex items-center gap-3">
-                                        <i class="fas fa-moon w-4 shrink-0 text-center text-slate-400 dark:text-slate-400" x-show="!isDarkMode" aria-hidden="true"></i>
-                                        <svg x-show="isDarkMode" class="w-4 h-4 shrink-0 text-slate-400 dark:text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                                            <circle cx="12" cy="12" r="4"></circle>
-                                            <path d="M12 2v2"></path>
-                                            <path d="M12 20v2"></path>
-                                            <path d="m4.93 4.93 1.41 1.41"></path>
-                                            <path d="m17.66 17.66 1.41 1.41"></path>
-                                            <path d="M2 12h2"></path>
-                                            <path d="M20 12h2"></path>
-                                            <path d="m6.34 17.66-1.41 1.41"></path>
-                                            <path d="m19.07 4.93-1.41 1.41"></path>
-                                        </svg>
-                                        <span>Mode Gelap</span>
-                                    </span>
-                                    <!-- Saklar Mini Switch Toggle -->
-                                    <div class="relative inline-flex h-5 w-9 shrink-0 items-center rounded-full border border-transparent transition-colors duration-200 ease-in-out"
-                                        :class="isDarkMode ? 'bg-[#13416B] dark:bg-white' : 'bg-slate-200 dark:bg-slate-700'">
-                                        <span class="pointer-events-none inline-block h-3.5 w-3.5 rounded-full bg-white dark:bg-slate-900 shadow-xs transform transition duration-200 ease-in-out"
-                                            :class="isDarkMode ? 'translate-x-4.5' : 'translate-x-0.5'"></span>
-                                    </div>
-                                </button>
-                            </li>
+                            <!-- Tombol Ganti Dark Mode Eksklusif di User Dropdown (Dihapus sesuai permintaan user) -->
 
                             <li class="my-1 border-t border-slate-100 dark:border-slate-700/60"></li>
 

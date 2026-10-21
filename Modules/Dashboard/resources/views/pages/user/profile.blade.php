@@ -1,155 +1,161 @@
 <x-dashboard::layouts.dashboard title="Profil Saya">
 
-    <div class="p-0 sm:p-4 md:p-6" x-data="{
-        tab: (window.location.hash === '#pengaturan' || window.location.hash === '#settings')
-            ? 'settings'
-            : ((window.location.hash === '#certificates' || window.location.hash === '#sertifikat')
-                ? 'certificates'
-                : 'personal'),
-        isDark: window.isDarkMode ? window.isDarkMode() : false,
-        readerPrefs: {
-            fontSize: 'normal',
-            fontFamily: 'sans',
-            lineHeight: '1.5',
-            textAlign: 'left',
-            paperTheme: 'white',
-            fontWeight: 'normal'
-        },
-        savedFeedback: false,
-        feedbackTimer: null,
-        showScrollTop: false,
+    <script>
+        function userProfilePage() {
+            return {
+                tab: (window.location.hash === '#pengaturan' || window.location.hash === '#settings')
+                    ? 'settings'
+                    : ((window.location.hash === '#certificates' || window.location.hash === '#sertifikat')
+                        ? 'certificates'
+                        : 'personal'),
+                isDark: window.isDarkMode ? window.isDarkMode() : false,
+                readerPrefs: {
+                    fontSize: 'normal',
+                    fontFamily: 'sans',
+                    lineHeight: '1.5',
+                    textAlign: 'left',
+                    paperTheme: 'white',
+                    fontWeight: 'normal'
+                },
+                savedFeedback: false,
+                feedbackTimer: null,
+                showScrollTop: false,
 
-        init() {
-            this.scrollToActiveTab();
-            window.addEventListener('hashchange', () => {
-                const hash = window.location.hash;
-                if (hash === '#pengaturan' || hash === '#settings') {
-                    this.tab = 'settings';
-                } else if (hash === '#certificates' || hash === '#sertifikat') {
-                    this.tab = 'certificates';
-                } else if (hash === '#personal' || hash === '#informasi') {
-                    this.tab = 'personal';
-                }
-                this.scrollToActiveTab();
-                this.$nextTick(() => this.checkPreviewReached());
-            });
-
-            const saved = localStorage.getItem('sirenata_reading_prefs');
-            if (saved) {
-                try {
-                    const parsed = JSON.parse(saved);
-                    this.readerPrefs = Object.assign(this.readerPrefs, parsed);
-                } catch (e) {}
-            }
-
-            this.$watch('tab', (val) => {
-                this.scrollToActiveTab();
-                if (val !== 'settings') {
-                    this.showScrollTop = false;
-                } else {
-                    this.$nextTick(() => this.checkPreviewReached());
-                }
-            });
-
-            let scrollTicking = false;
-            window.addEventListener('scroll', () => {
-                if (!scrollTicking) {
-                    window.requestAnimationFrame(() => {
-                        this.checkPreviewReached();
-                        scrollTicking = false;
+                init() {
+                    this.scrollToActiveTab();
+                    window.addEventListener('hashchange', () => {
+                        const hash = window.location.hash;
+                        if (hash === '#pengaturan' || hash === '#settings') {
+                            this.tab = 'settings';
+                        } else if (hash === '#certificates' || hash === '#sertifikat') {
+                            this.tab = 'certificates';
+                        } else if (hash === '#personal' || hash === '#informasi') {
+                            this.tab = 'personal';
+                        }
+                        this.scrollToActiveTab();
+                        this.$nextTick(() => this.checkPreviewReached());
                     });
-                    scrollTicking = true;
+
+                    const saved = localStorage.getItem('sirenata_reading_prefs');
+                    if (saved) {
+                        try {
+                            const parsed = JSON.parse(saved);
+                            this.readerPrefs = Object.assign(this.readerPrefs, parsed);
+                        } catch (e) {}
+                    }
+
+                    this.$watch('tab', (val) => {
+                        this.scrollToActiveTab();
+                        if (val !== 'settings') {
+                            this.showScrollTop = false;
+                        } else {
+                            this.$nextTick(() => this.checkPreviewReached());
+                        }
+                    });
+
+                    let scrollTicking = false;
+                    window.addEventListener('scroll', () => {
+                        if (!scrollTicking) {
+                            window.requestAnimationFrame(() => {
+                                this.checkPreviewReached();
+                                scrollTicking = false;
+                            });
+                            scrollTicking = true;
+                        }
+                    }, { passive: true });
+
+                    window.addEventListener('resize', () => {
+                        this.checkPreviewReached();
+                    }, { passive: true });
+                },
+
+                checkPreviewReached() {
+                    if (this.tab !== 'settings') {
+                        this.showScrollTop = false;
+                        return;
+                    }
+                    const el = document.getElementById('preview-section');
+                    if (!el) {
+                        this.showScrollTop = false;
+                        return;
+                    }
+                    const rect = el.getBoundingClientRect();
+                    if (window.innerWidth < 1024) {
+                        // Pada mobile/tablet, pratinjau berada di bawah controls
+                        this.showScrollTop = rect.top <= (window.innerHeight * 0.85) && window.scrollY > 120;
+                    } else {
+                        // Pada desktop (2 kolom), muncul jika halaman ter-scroll ke bawah
+                        this.showScrollTop = window.scrollY > 350;
+                    }
+                },
+
+                setDarkMode(enabled) {
+                    if (window.setDarkMode) {
+                        window.setDarkMode(enabled);
+                        this.isDark = enabled;
+                        this.showSavedToast();
+                    }
+                },
+
+                updatePref(key, value) {
+                    this.readerPrefs[key] = value;
+                    this.persist();
+                },
+
+                resetPrefs() {
+                    this.readerPrefs = {
+                        fontSize: 'normal',
+                        fontFamily: 'sans',
+                        lineHeight: '1.5',
+                        textAlign: 'left',
+                        paperTheme: 'white',
+                        fontWeight: 'normal'
+                    };
+                    this.persist();
+                    this.setDarkMode(false);
+                },
+
+                selectPaperTheme(theme) {
+                    this.updatePref('paperTheme', theme);
+                },
+
+                scrollToActiveTab() {
+                    this.$nextTick(() => {
+                        const container = this.$refs.tabContainer;
+                        const activeBtn = container?.querySelector(`[data-tab='${this.tab}']`);
+                        if (activeBtn && container) {
+                            const scrollLeft = activeBtn.offsetLeft - (container.clientWidth / 2) + (activeBtn.clientWidth / 2);
+                            container.scrollTo({ left: Math.max(0, scrollLeft), behavior: 'smooth' });
+                        }
+                    });
+                },
+
+                getLineHeightClass() {
+                    const lh = this.readerPrefs.lineHeight;
+                    if (lh === '1' || lh === '1.0') return 'reader-leading-1-0';
+                    if (lh === '1.2') return 'reader-leading-1-2';
+                    if (lh === '2' || lh === '2.0' || lh === 'loose') return 'reader-leading-2-0';
+                    if (lh === '2.5') return 'reader-leading-2-5';
+                    return 'reader-leading-1-5';
+                },
+
+                persist() {
+                    localStorage.setItem('sirenata_reading_prefs', JSON.stringify(this.readerPrefs));
+                    this.showSavedToast();
+                },
+
+                showSavedToast() {
+                    this.savedFeedback = true;
+                    if (this.feedbackTimer) clearTimeout(this.feedbackTimer);
+                    this.feedbackTimer = setTimeout(() => {
+                        this.savedFeedback = false;
+                    }, 2000);
                 }
-            }, { passive: true });
-
-            window.addEventListener('resize', () => {
-                this.checkPreviewReached();
-            }, { passive: true });
-        },
-
-        checkPreviewReached() {
-            if (this.tab !== 'settings') {
-                this.showScrollTop = false;
-                return;
-            }
-            const el = document.getElementById('preview-section');
-            if (!el) {
-                this.showScrollTop = false;
-                return;
-            }
-            const rect = el.getBoundingClientRect();
-            if (window.innerWidth < 1024) {
-                // Pada mobile/tablet, pratinjau berada di bawah controls
-                this.showScrollTop = rect.top <= (window.innerHeight * 0.85) && window.scrollY > 120;
-            } else {
-                // Pada desktop (2 kolom), muncul jika halaman ter-scroll ke bawah
-                this.showScrollTop = window.scrollY > 350;
-            }
-        },
-
-        setDarkMode(enabled) {
-            if (window.setDarkMode) {
-                window.setDarkMode(enabled);
-                this.isDark = enabled;
-                this.showSavedToast();
-            }
-        },
-
-        updatePref(key, value) {
-            this.readerPrefs[key] = value;
-            this.persist();
-        },
-
-        resetPrefs() {
-            this.readerPrefs = {
-                fontSize: 'normal',
-                fontFamily: 'sans',
-                lineHeight: '1.5',
-                textAlign: 'left',
-                paperTheme: 'white',
-                fontWeight: 'normal'
             };
-            this.persist();
-            this.setDarkMode(false);
-        },
-
-        selectPaperTheme(theme) {
-            this.updatePref('paperTheme', theme);
-        },
-
-        scrollToActiveTab() {
-            this.$nextTick(() => {
-                const container = this.$refs.tabContainer;
-                const activeBtn = container?.querySelector('[data-tab="' + this.tab + '"]');
-                if (activeBtn && container) {
-                    const scrollLeft = activeBtn.offsetLeft - (container.clientWidth / 2) + (activeBtn.clientWidth / 2);
-                    container.scrollTo({ left: Math.max(0, scrollLeft), behavior: 'smooth' });
-                }
-            });
-        },
-
-        getLineHeightClass() {
-            const lh = this.readerPrefs.lineHeight;
-            if (lh === '1' || lh === '1.0') return 'reader-leading-1-0';
-            if (lh === '1.2') return 'reader-leading-1-2';
-            if (lh === '2' || lh === '2.0' || lh === 'loose') return 'reader-leading-2-0';
-            if (lh === '2.5') return 'reader-leading-2-5';
-            return 'reader-leading-1-5';
-        },
-
-        persist() {
-            localStorage.setItem('sirenata_reading_prefs', JSON.stringify(this.readerPrefs));
-            this.showSavedToast();
-        },
-
-        showSavedToast() {
-            this.savedFeedback = true;
-            if (this.feedbackTimer) clearTimeout(this.feedbackTimer);
-            this.feedbackTimer = setTimeout(() => {
-                this.savedFeedback = false;
-            }, 2000);
         }
-    }" @dark-mode-toggled.window="isDark = $event.detail.isDark">
+    </script>
+
+    <div class="p-0 sm:p-4 md:p-6" x-data="userProfilePage()" @dark-mode-toggled.window="isDark = $event.detail.isDark">
         <!-- Breadcrumb -->
         <div class="mb-3 px-3 sm:px-0">
             <x-breadcrumb :items="[['label' => 'Profil Saya']]" />

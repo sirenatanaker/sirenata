@@ -56,13 +56,13 @@
                     <!-- Badge Putih Solid, Ikon Dark Navy -->
                     <div
                         class="w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-white text-[#13416B] flex items-center justify-center shrink-0 shadow-sm">
-                        <i class="fas fa-graduation-cap text-xl sm:text-2xl" aria-hidden="true"></i>
+                        <i class="fas fa-book-open text-xl sm:text-2xl" aria-hidden="true"></i>
                     </div>
                 </div>
                 <!-- Dekorasi Watermark Background -->
                 <div
                     class="absolute -right-4 -bottom-4 text-white opacity-[0.08] group-hover:opacity-[0.14] transition-all duration-500 pointer-events-none transform group-hover:scale-110 z-0">
-                    <i class="fas fa-graduation-cap text-7xl sm:text-8xl" aria-hidden="true"></i>
+                    <i class="fas fa-book-open text-7xl sm:text-8xl" aria-hidden="true"></i>
                 </div>
             </div>
 
@@ -79,12 +79,12 @@
                     <!-- Badge Putih Solid, Ikon Slate Blue -->
                     <div
                         class="w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-white text-[#547996] flex items-center justify-center shrink-0 shadow-sm">
-                        <i class="fas fa-chart-line text-xl sm:text-2xl" aria-hidden="true"></i>
+                        <i class="fas fa-chart-pie text-xl sm:text-2xl" aria-hidden="true"></i>
                     </div>
                 </div>
                 <div
                     class="absolute -right-4 -bottom-4 text-white opacity-[0.08] group-hover:opacity-[0.14] transition-all duration-500 pointer-events-none transform group-hover:scale-110 z-0">
-                    <i class="fas fa-chart-line text-7xl sm:text-8xl" aria-hidden="true"></i>
+                    <i class="fas fa-chart-pie text-7xl sm:text-8xl" aria-hidden="true"></i>
                 </div>
             </div>
 
@@ -101,12 +101,12 @@
                     <!-- Badge Putih Solid, Ikon Light Blue -->
                     <div
                         class="w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-white text-[#2b658d] flex items-center justify-center shrink-0 shadow-sm">
-                        <i class="fas fa-circle-check text-xl sm:text-2xl" aria-hidden="true"></i>
+                        <i class="fas fa-award text-xl sm:text-2xl" aria-hidden="true"></i>
                     </div>
                 </div>
                 <div
                     class="absolute -right-4 -bottom-4 text-white opacity-[0.12] group-hover:opacity-[0.18] transition-all duration-500 pointer-events-none transform group-hover:scale-110 z-0">
-                    <i class="fas fa-circle-check text-7xl sm:text-8xl" aria-hidden="true"></i>
+                    <i class="fas fa-award text-7xl sm:text-8xl" aria-hidden="true"></i>
                 </div>
             </div>
         </div>
@@ -344,30 +344,38 @@
                                     class="shrink-0 flex flex-row gap-3 sm:gap-4 bg-transparent sm:bg-slate-50/70 rounded-none sm:rounded-xl p-0 sm:p-4 border-b border-slate-100 sm:border-b-0 pb-3.5 sm:pb-0 transition-all duration-200 hover:bg-slate-100/90 hover:shadow-xs group items-start {{ $loop->index === 3 ? 'max-h-[76px] overflow-hidden pointer-events-none select-none' : '' }}">
 
                                     <div
-                                        class="w-24 min-h-[4.5rem] sm:w-32 sm:h-20 shrink-0 rounded-md overflow-hidden bg-slate-100 relative shadow-xs">
+                                        class="w-28 sm:w-36 aspect-video shrink-0 rounded-md overflow-hidden bg-slate-100 relative shadow-xs">
                                         <img src="{{ $rThumb }}" alt="{{ $course->name }}"
                                             class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+
+                                        {{-- Badge Status di Pojok Kanan Atas Thumbnail (Normal case & diperkecil) --}}
+                                        @if ($course->pivot->status === 'completed' || $rPct >= 100)
+                                            <span
+                                                class="absolute top-0 right-0 z-10 px-1.5 sm:px-2 py-0.5 text-[7px] sm:text-[8px] font-semibold text-white bg-emerald-600 shadow-xs flex items-center gap-1 rounded-none rounded-bl-md">
+                                                <i class="fas fa-check-circle text-[6.5px] sm:text-[7.5px]"></i>
+                                                <span>Selesai</span>
+                                            </span>
+                                        @elseif ($rPct > 0)
+                                            <span
+                                                class="absolute top-0 right-0 z-10 px-1.5 sm:px-2 py-0.5 text-[7px] sm:text-[8px] font-semibold text-white bg-amber-500 shadow-xs flex items-center gap-1 rounded-none rounded-bl-md">
+                                                <i class="fas fa-clock text-[6.5px] sm:text-[7.5px]"></i>
+                                                <span>Berjalan</span>
+                                            </span>
+                                        @else
+                                            <span
+                                                class="absolute top-0 right-0 z-10 px-1.5 sm:px-2 py-0.5 text-[7px] sm:text-[8px] font-semibold text-white bg-slate-500/90 shadow-xs flex items-center gap-1 rounded-none rounded-bl-md">
+                                                <i class="fas fa-play text-[6.5px] sm:text-[7.5px]"></i>
+                                                <span>Belum Mulai</span>
+                                            </span>
+                                        @endif
                                     </div>
 
                                     <div class="min-w-0 flex-1 flex flex-col justify-between h-full w-full py-0.5">
                                         <div>
-                                            <div class="flex items-start justify-between gap-2 mb-1.5">
-                                                <h3
-                                                    class="font-bold text-slate-800 text-xs sm:text-sm line-clamp-2 leading-snug group-hover:text-[#13416B] transition-colors flex-1">
-                                                    {{ $course->name }}
-                                                </h3>
-
-                                                @if ($course->pivot->status === 'completed' || $rPct >= 100)
-                                                    <span
-                                                        class="inline-flex items-center px-1.5 py-0.5 rounded-md text-[9px] font-bold text-white bg-emerald-600 shrink-0">Selesai</span>
-                                                @elseif ($rPct > 0)
-                                                    <span
-                                                        class="inline-flex items-center px-1.5 py-0.5 rounded-md text-[9px] font-bold text-white bg-amber-500 shrink-0">Berjalan</span>
-                                                @else
-                                                    <span
-                                                        class="inline-flex items-center px-1.5 py-0.5 rounded-md text-[9px] font-bold text-white bg-slate-400 shrink-0">Belum Dimulai</span>
-                                                @endif
-                                            </div>
+                                            <h3
+                                                class="font-bold text-slate-800 text-xs sm:text-sm line-clamp-2 leading-snug group-hover:text-[#13416B] transition-colors mb-1">
+                                                {{ $course->name }}
+                                            </h3>
 
                                             <p
                                                 class="line-clamp-2 text-[10px] sm:text-xs text-slate-500 mb-2 leading-relaxed">
