@@ -47,13 +47,17 @@ class DashbordController extends Controller
             }
 
             if ($request->has('sdm_year')) {
+                $year = (int) $request->input('sdm_year');
                 return response()->json([
-                    'sdmPerProvinsi' => $this->adminPusatDashboardService->getSdmPerProvinsi((int) $request->input('sdm_year')),
+                    'sdmPerProvinsi' => $this->adminPusatDashboardService->getSdmPerProvinsi($year),
+                    'sdmMonthlyTrend' => $this->adminPusatDashboardService->getSdmMonthlyTrend($year),
                 ]);
             }
 
+            $defaultYear = (int) $request->input('sdm_year', (int) date('Y'));
             return response()->json([
-                'sdmPerProvinsi' => $this->adminPusatDashboardService->getSdmPerProvinsi((int) $request->input('sdm_year', (int) date('Y'))),
+                'sdmPerProvinsi' => $this->adminPusatDashboardService->getSdmPerProvinsi($defaultYear),
+                'sdmMonthlyTrend' => $this->adminPusatDashboardService->getSdmMonthlyTrend($defaultYear),
                 'rtkMasaAktifPerProvinsi' => $this->adminPusatDashboardService->getRtkMasaAktifPerProvinsi($request->input('rtk_year', 'all')),
                 'rtkMasaBerakhirPerProvinsi' => $this->adminPusatDashboardService->getRtkMasaBerakhirPerProvinsi($request->input('rtk_end_year', 'all')),
             ]);

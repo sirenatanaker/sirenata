@@ -115,6 +115,7 @@ class AdminPusatDashboardService
             'genderMale' => $genderMale,
             'genderFemale' => $genderFemale,
             'sdmPerProvinsi' => $sdmPerProvinsi,
+            'sdmMonthlyTrend' => $this->getSdmMonthlyTrend($selectedSdmYear),
             'rtkMasaAktifPerProvinsi' => $rtkMasaAktifPerProvinsi,
             'rtkMasaBerakhirPerProvinsi' => $rtkMasaBerakhirPerProvinsi,
             'rtkStatusDistribution' => $rtkStatusDistribution,
@@ -131,13 +132,12 @@ class AdminPusatDashboardService
     }
 
     /**
-     * Get SDM per Provinsi grouped by gender.
+     * Get SDM per Provinsi.
      */
     public function getSdmPerProvinsi(int $selectedSdmYear): Collection
     {
         $userCountsByProvince = DB::table('user_scopes')
             ->join('users', 'user_scopes.user_id', '=', 'users.id')
-            ->join('user_profiles', 'users.id', '=', 'user_profiles.user_id')
             ->join('model_has_roles', function ($join) {
                 $join->on('users.id', '=', 'model_has_roles.model_uuid')
                     ->where('model_has_roles.model_type', '=', 'App\\Models\\User');
@@ -146,28 +146,48 @@ class AdminPusatDashboardService
             ->where('roles.name', 'user')
             ->whereYear('users.created_at', $selectedSdmYear)
             ->whereNotNull('user_scopes.province_code')
-            ->select('user_scopes.province_code', 'user_profiles.gender', DB::raw('count(*) as total'))
-            ->groupBy('user_scopes.province_code', 'user_profiles.gender')
+            ->select('user_scopes.province_code', DB::raw('count(*) as total'))
+            ->groupBy('user_scopes.province_code')
             ->get();
 
         $provinceCodes = $userCountsByProvince->pluck('province_code')->unique()->toArray();
         $provinces = Province::whereIn('code', $provinceCodes)->pluck('name', 'code');
 
-        return collect($provinceCodes)->map(function ($code) use ($userCountsByProvince, $provinces) {
-            $provinceData = $userCountsByProvince->where('province_code', $code);
-            $maleCount = $provinceData->where('gender', 'male')->first()->total ?? 0;
-            $femaleCount = $provinceData->where('gender', 'female')->first()->total ?? 0;
-
+        return $userCountsByProvince->map(function ($row) use ($provinces) {
+            $code = $row->province_code;
             return (object) [
                 'province_code' => $code,
                 'province_name' => collect(explode(' ', $provinces[$code] ?? 'Unknown (' . $code . ')'))
                     ->map(fn($w) => ucfirst(strtolower($w)))
                     ->join(' '),
-                'male' => $maleCount,
-                'female' => $femaleCount,
-                'total' => $maleCount + $femaleCount,
+                'total' => (int) $row->total,
             ];
         })->sortByDesc('total')->values();
+    }
+
+    /**
+     * Get monthly SDM registration trend (Jan - Dec) for a year.
+     */
+    public function getSdmMonthlyTrend(int $selectedSdmYear): array
+    {
+        $monthlyCounts = DB::table('users')
+            ->join('model_has_roles', function ($join) {
+                $join->on('users.id', '=', 'model_has_roles.model_uuid')
+                    ->where('model_has_roles.model_type', '=', 'App\\Models\\User');
+            })
+            ->join('roles', 'model_has_roles.role_id', '=', 'roles.uuid')
+            ->where('roles.name', 'user')
+            ->whereYear('users.created_at', $selectedSdmYear)
+            ->selectRaw('MONTH(users.created_at) as month, count(*) as total')
+            ->groupBy('month')
+            ->pluck('total', 'month')
+            ->toArray();
+
+        $months = [];
+        for ($m = 1; $m <= 12; $m++) {
+            $months[] = (int) ($monthlyCounts[$m] ?? 0);
+        }
+        return $months;
     }
 
     /**

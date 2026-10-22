@@ -115,6 +115,7 @@ class AdminProvinsiDashboardService
         return [
             'user' => $user,
             'sdmPerKabKota' => $sdmPerKabKota,
+            'sdmMonthlyTrend' => $this->getSdmMonthlyTrend($provinceCode, $selectedSdmYear),
             'genderMale' => $genderMale,
             'genderFemale' => $genderFemale,
             'rtkMasaAktifPerKabKota' => $rtkMasaAktifPerKabKota,
@@ -144,37 +145,54 @@ class AdminProvinsiDashboardService
                     ->where('model_has_roles.model_type', '=', 'App\\Models\\User');
             })
             ->join('roles', 'model_has_roles.role_id', '=', 'roles.uuid')
-            ->join('user_profiles', 'users.id', '=', 'user_profiles.user_id')
             ->where('roles.name', 'user')
             ->where('user_scopes.province_code', $provinceCode)
             ->whereYear('users.created_at', $selectedSdmYear)
             ->whereNotNull('user_scopes.regency_code')
-            ->select(
-                'user_scopes.regency_code',
-                'user_profiles.gender',
-                DB::raw('count(*) as total')
-            )
-            ->groupBy('user_scopes.regency_code', 'user_profiles.gender')
+            ->select('user_scopes.regency_code', DB::raw('count(*) as total'))
+            ->groupBy('user_scopes.regency_code')
             ->get();
 
         $regencyCodes = $userCountsByRegency->pluck('regency_code')->unique()->toArray();
         $regencies = Regency::whereIn('code', $regencyCodes)->pluck('name', 'code');
 
-        return collect($regencyCodes)->map(function ($code) use ($userCountsByRegency, $regencies) {
-            $regencyData = $userCountsByRegency->where('regency_code', $code);
-            $maleCount = $regencyData->where('gender', 'male')->first()->total ?? 0;
-            $femaleCount = $regencyData->where('gender', 'female')->first()->total ?? 0;
-
+        return $userCountsByRegency->map(function ($row) use ($regencies) {
+            $code = $row->regency_code;
             return (object) [
                 'regency_code' => $code,
                 'regency_name' => collect(explode(' ', $regencies[$code] ?? 'Unknown (' . $code . ')'))
                     ->map(fn($w) => ucfirst(strtolower($w)))
                     ->join(' '),
-                'male' => $maleCount,
-                'female' => $femaleCount,
-                'total' => $maleCount + $femaleCount,
+                'total' => (int) $row->total,
             ];
         })->sortByDesc('total')->values();
+    }
+
+    /**
+     * Get monthly SDM registration trend (Jan - Dec) for a year in a province.
+     */
+    public function getSdmMonthlyTrend(?string $provinceCode, int $selectedSdmYear): array
+    {
+        $monthlyCounts = DB::table('users')
+            ->join('user_scopes', 'users.id', '=', 'user_scopes.user_id')
+            ->join('model_has_roles', function ($join) {
+                $join->on('users.id', '=', 'model_has_roles.model_uuid')
+                    ->where('model_has_roles.model_type', '=', 'App\\Models\\User');
+            })
+            ->join('roles', 'model_has_roles.role_id', '=', 'roles.uuid')
+            ->where('roles.name', 'user')
+            ->where('user_scopes.province_code', $provinceCode)
+            ->whereYear('users.created_at', $selectedSdmYear)
+            ->selectRaw('MONTH(users.created_at) as month, count(*) as total')
+            ->groupBy('month')
+            ->pluck('total', 'month')
+            ->toArray();
+
+        $months = [];
+        for ($m = 1; $m <= 12; $m++) {
+            $months[] = (int) ($monthlyCounts[$m] ?? 0);
+        }
+        return $months;
     }
 
     /**

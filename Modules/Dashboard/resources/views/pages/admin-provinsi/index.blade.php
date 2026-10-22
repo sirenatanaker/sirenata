@@ -6,21 +6,40 @@
         $rtkRejected = (int) $rtkStatusDistribution->get('rejected', 0);
         $rtkTotal    = $rtkApproved + $rtkPending + $rtkRejected;
         $rtkAktif    = (int) $rtkMasaAktifPerKabKota->count();
-        $percentOf   = fn (int $value) => $rtkTotal > 0 ? (int) round($value / $rtkTotal * 100) : 0;
-
-        // Kelas ditulis lengkap agar terdeteksi Tailwind
-        $tones = [
-            'emerald' => ['chip' => 'bg-emerald-50 text-emerald-600 border-emerald-100', 'bar' => 'bg-emerald-500', 'text' => 'text-emerald-600'],
-            'amber'   => ['chip' => 'bg-amber-50 text-amber-600 border-amber-100', 'bar' => 'bg-amber-500', 'text' => 'text-amber-600'],
-            'red'     => ['chip' => 'bg-red-50 text-red-600 border-red-100', 'bar' => 'bg-red-500', 'text' => 'text-red-600'],
-            'navy'    => ['chip' => 'bg-[#13416B]/10 text-[#13416B] border-[#13416B]/20', 'bar' => 'bg-[#13416B]', 'text' => 'text-[#13416B]'],
-        ];
 
         $kpis = [
-            ['label' => 'RTK Disetujui', 'value' => $rtkApproved, 'hint' => 'Verifikasi disetujui', 'icon' => 'fa-check-double', 'tone' => 'emerald', 'pct' => $percentOf($rtkApproved)],
-            ['label' => 'Menunggu Verifikasi', 'value' => $rtkPending, 'hint' => 'RTK kab/kota menunggu verifikasi', 'icon' => 'fa-hourglass-half', 'tone' => 'amber', 'pct' => $percentOf($rtkPending)],
-            ['label' => 'RTK Ditolak', 'value' => $rtkRejected, 'hint' => 'Dikembalikan ke daerah', 'icon' => 'fa-ban', 'tone' => 'red', 'pct' => $percentOf($rtkRejected)],
-            ['label' => 'RTK Aktif', 'value' => $rtkAktif, 'hint' => 'Kabupaten/Kota aktif', 'icon' => 'fa-file-contract', 'tone' => 'navy', 'pct' => null],
+            [
+                'label' => 'RTK Disetujui',
+                'value' => $rtkApproved,
+                'hint' => 'Verifikasi disetujui',
+                'icon' => 'fa-check-double',
+                'bg' => 'bg-emerald-600',
+                'text' => 'text-emerald-600',
+            ],
+            [
+                'label' => 'Menunggu Verifikasi',
+                'value' => $rtkPending,
+                'hint' => 'RTK kab/kota menunggu verifikasi',
+                'icon' => 'fa-hourglass-half',
+                'bg' => 'bg-amber-500',
+                'text' => 'text-amber-500',
+            ],
+            [
+                'label' => 'RTK Ditolak',
+                'value' => $rtkRejected,
+                'hint' => 'Dikembalikan ke daerah',
+                'icon' => 'fa-ban',
+                'bg' => 'bg-red-500',
+                'text' => 'text-red-500',
+            ],
+            [
+                'label' => 'RTK Aktif',
+                'value' => $rtkAktif,
+                'hint' => 'Kabupaten/Kota aktif',
+                'icon' => 'fa-file-contract',
+                'bg' => 'bg-[#13416B]',
+                'text' => 'text-[#13416B]',
+            ],
         ];
     @endphp
 
@@ -43,43 +62,29 @@
         @endif
 
         {{-- ===================================== --}}
-        {{-- 1. KPI                                --}}
+        {{-- 1. KPI (Solid Colored Cards)          --}}
         {{-- ===================================== --}}
         <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-5">
             @foreach ($kpis as $kpi)
-                @php $tone = $tones[$kpi['tone']]; @endphp
                 <div
-                    class="flex flex-col bg-white rounded-md border border-slate-200 shadow-sm p-5 transition-all duration-200 hover:shadow-md hover:-translate-y-0.5">
-                    <div class="flex items-start justify-between gap-3">
-                        <div class="min-w-0">
-                            <p class="text-xs font-semibold uppercase tracking-wider text-slate-500">{{ $kpi['label'] }}</p>
-                            <p class="mt-2 text-3xl font-extrabold text-slate-900 tabular-nums">
-                                {{ number_format($kpi['value'], 0, ',', '.') }}</p>
+                    class="relative overflow-hidden {{ $kpi['bg'] }} rounded-md p-5 sm:p-6 shadow-md transition-all duration-300 hover:shadow-lg hover:-translate-y-1 group z-0">
+                    <div class="relative z-10 flex items-center justify-between">
+                        <div>
+                            <p class="text-white/85 text-xs font-bold uppercase mb-1 tracking-wider">{{ $kpi['label'] }}</p>
+                            <h3 class="text-2xl sm:text-3xl font-extrabold text-white tabular-nums">
+                                {{ number_format($kpi['value'], 0, ',', '.') }}
+                            </h3>
+                            <p class="text-[10px] sm:text-xs text-white/80 mt-1">{{ $kpi['hint'] }}</p>
                         </div>
                         <div
-                            class="w-11 h-11 rounded-md border flex items-center justify-center shrink-0 {{ $tone['chip'] }}">
-                            <i class="fas {{ $kpi['icon'] }}"></i>
+                            class="w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-white {{ $kpi['text'] }} flex items-center justify-center shrink-0 shadow-sm relative z-10 transition-transform duration-300 group-hover:scale-105">
+                            <i class="fas {{ $kpi['icon'] }} text-xl sm:text-2xl" aria-hidden="true"></i>
                         </div>
                     </div>
-                    <p class="mt-1 text-xs text-slate-500">{{ $kpi['hint'] }}</p>
-
-                    <div class="mt-auto pt-4">
-                        @if ($kpi['pct'] !== null)
-                            <div class="flex items-center justify-between text-[11px] text-slate-500 mb-1.5">
-                                <span>Porsi dari total RTK</span>
-                                <span class="font-semibold tabular-nums {{ $tone['text'] }}">{{ $kpi['pct'] }}%</span>
-                            </div>
-                            <div class="h-1.5 rounded-full bg-slate-100 overflow-hidden">
-                                <div class="h-full rounded-full {{ $tone['bar'] }}" style="width: {{ $kpi['pct'] }}%"></div>
-                            </div>
-                        @else
-                            <div class="flex items-center justify-between text-[11px] text-slate-500">
-                                <span>Total RTK tercatat</span>
-                                <span class="font-semibold tabular-nums {{ $tone['text'] }}">
-                                    {{ number_format($rtkTotal, 0, ',', '.') }}
-                                </span>
-                            </div>
-                        @endif
+                    <!-- Dekorasi Watermark Background -->
+                    <div
+                        class="absolute -right-5 -bottom-5 sm:-right-6 sm:-bottom-6 text-white opacity-[0.10] group-hover:opacity-[0.16] transition-all duration-500 pointer-events-none transform group-hover:scale-110 z-0">
+                        <i class="fas {{ $kpi['icon'] }} text-8xl sm:text-9xl" aria-hidden="true"></i>
                     </div>
                 </div>
             @endforeach
@@ -95,14 +100,9 @@
                 class="lg:col-span-7 xl:col-span-8 bg-white rounded-md border border-slate-200 shadow-sm overflow-hidden flex flex-col">
                 <header
                     class="px-5 sm:px-6 py-4 border-b border-slate-100 flex flex-col sm:flex-row sm:items-start justify-between gap-4">
-                    <div class="flex items-start gap-3">
-                        <div class="w-10 h-10 rounded-md bg-[#13416B] text-white flex items-center justify-center shrink-0">
-                            <i class="fas fa-chart-bar"></i>
-                        </div>
-                        <div>
-                            <h2 class="text-base sm:text-lg font-semibold text-slate-900">Komparasi Masa Berlaku RTK</h2>
-                            <p class="text-sm text-slate-500">Tahun penyusunan dan masa berakhir dokumen per Kabupaten/Kota</p>
-                        </div>
+                    <div>
+                        <h2 class="text-base sm:text-lg font-semibold text-slate-900">Komparasi Masa Berlaku RTK</h2>
+                        <p class="text-sm text-slate-500">Tahun penyusunan dan masa berakhir dokumen per Kabupaten/Kota</p>
                     </div>
 
                     <div class="w-full sm:w-auto sm:max-w-xs shrink-0">
@@ -213,14 +213,9 @@
         <section class="bg-white rounded-md border border-slate-200 shadow-sm overflow-hidden">
             <header
                 class="px-5 sm:px-6 py-4 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div class="flex items-start gap-3">
-                    <div class="w-10 h-10 rounded-md bg-[#547996] text-white flex items-center justify-center shrink-0">
-                        <i class="fas fa-user-graduate"></i>
-                    </div>
-                    <div>
-                        <h2 class="text-base sm:text-lg font-semibold text-slate-900">Distribusi Pendaftar E-Learning</h2>
-                        <p class="text-sm text-slate-500">Jumlah pengguna terdaftar berdasarkan Kabupaten/Kota</p>
-                    </div>
+                <div>
+                    <h2 class="text-base sm:text-lg font-semibold text-slate-900">Distribusi Pendaftar E-Learning</h2>
+                    <p class="text-sm text-slate-500">Tren registrasi bulanan dan sebaran peserta per Kabupaten/Kota</p>
                 </div>
 
                 <div class="w-full sm:w-auto sm:max-w-xs shrink-0">
@@ -237,27 +232,27 @@
             </header>
 
             <div class="p-5 sm:p-6">
-                {{-- Ringkasan --}}
-                <div id="sdmSummary" class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-5">
-                    {{-- Total: biru muda (serasi dengan navy & slate), teks putih --}}
-                    <div class="rounded-md bg-[#8BB1CC] px-4 py-3">
-                        <p class="text-xs font-semibold uppercase tracking-wider text-white/90">Total Peserta</p>
+                {{-- Ringkasan 3 Metrik Relevan --}}
+                <div id="sdmSummary" class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6">
+                    {{-- 1. Total Peserta --}}
+                    <div class="rounded-md bg-[#13416B] px-4 py-3">
+                        <p class="text-xs font-semibold uppercase tracking-wider text-white/80">Total Peserta Terdaftar</p>
                         <p id="sdmTotal" class="mt-1 text-2xl font-extrabold text-white tabular-nums">0</p>
                     </div>
-                    {{-- Laki-laki: navy (sama dengan batang laki-laki di daftar) --}}
-                    <div class="rounded-md bg-[#13416B] px-4 py-3">
-                        <p class="text-xs font-semibold uppercase tracking-wider text-white/80">Laki-laki</p>
+                    {{-- 2. Daerah Aktif Terjangkau --}}
+                    <div class="rounded-md bg-[#547996] px-4 py-3">
+                        <p class="text-xs font-semibold uppercase tracking-wider text-white/85">Wilayah Terjangkau</p>
                         <p class="mt-1 flex items-baseline gap-2">
-                            <span id="sdmMale" class="text-2xl font-extrabold text-white tabular-nums">0</span>
-                            <span id="sdmMalePct" class="text-xs font-semibold text-white/80 tabular-nums">(0%)</span>
+                            <span id="sdmActiveRegions" class="text-2xl font-extrabold text-white tabular-nums">0</span>
+                            <span class="text-xs font-semibold text-white/85">Kab/Kota</span>
                         </p>
                     </div>
-                    {{-- Perempuan: slate blue (sama dengan batang perempuan di daftar) --}}
-                    <div class="rounded-md bg-[#547996] px-4 py-3">
-                        <p class="text-xs font-semibold uppercase tracking-wider text-white/85">Perempuan</p>
+                    {{-- 3. Rata-rata per Wilayah --}}
+                    <div class="rounded-md bg-[#8BB1CC] px-4 py-3">
+                        <p class="text-xs font-semibold uppercase tracking-wider text-white/90">Rata-rata per Wilayah</p>
                         <p class="mt-1 flex items-baseline gap-2">
-                            <span id="sdmFemale" class="text-2xl font-extrabold text-white tabular-nums">0</span>
-                            <span id="sdmFemalePct" class="text-xs font-semibold text-white/85 tabular-nums">(0%)</span>
+                            <span id="sdmAvgRegion" class="text-2xl font-extrabold text-white tabular-nums">0</span>
+                            <span class="text-xs font-semibold text-white/90">Peserta</span>
                         </p>
                     </div>
                 </div>
@@ -266,8 +261,29 @@
                     Gagal memuat data pendaftar. Coba pilih ulang tahun atau muat ulang halaman.
                 </p>
 
-                <div id="sdmListContainer"
-                    class="space-y-1 max-h-[500px] overflow-y-auto pr-2 custom-scrollbar transition-opacity duration-200 {{ $sdmPerKabKota->count() > 0 ? '' : 'hidden' }}">
+                {{-- Layout Dua Kolom: Kiri Tren Bulanan, Kanan Sebaran Daerah --}}
+                <div id="sdmContentGrid" class="grid grid-cols-1 lg:grid-cols-12 gap-6 {{ $sdmPerKabKota->count() > 0 ? '' : 'hidden' }}">
+                    {{-- Kiri: Chart.js Tren Pendaftaran Bulanan --}}
+                    <div class="lg:col-span-7 xl:col-span-8 flex flex-col">
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="text-sm font-semibold text-slate-800">Tren Pendaftaran Peserta (<span id="sdmTrendYearLabel">Tahun {{ $selectedSdmYear }}</span>)</h3>
+                            <span id="sdmTrendPeakNote" class="text-xs text-slate-500">Laju registrasi bulanan</span>
+                        </div>
+                        <div class="relative w-full h-[320px] sm:h-[360px] bg-slate-50/50 rounded-md border border-slate-100 p-3 sm:p-4">
+                            <canvas id="sdmTrendChart"></canvas>
+                        </div>
+                    </div>
+
+                    {{-- Kanan: Leaderboard Sebaran Wilayah --}}
+                    <div class="lg:col-span-5 xl:col-span-4 flex flex-col">
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="text-sm font-semibold text-slate-800">Peringkat Sebaran Wilayah</h3>
+                            <span class="text-xs text-slate-500">Berdasarkan total peserta</span>
+                        </div>
+                        <div id="sdmListContainer"
+                            class="space-y-1.5 max-h-[360px] overflow-y-auto pr-1 custom-scrollbar">
+                        </div>
+                    </div>
                 </div>
 
                 <div id="sdmEmptyState"
@@ -664,7 +680,6 @@
 
                     const cardTemplate = (raw) => {
                         const item = normalize(raw);
-                        const accent = 'bg-[#13416B]';
                         const typeIcon = 'fa-file-signature';
                         const statuses = `
                             <div class="mt-3 space-y-2">
@@ -673,8 +688,7 @@
                             </div>`;
 
                         return `
-                            <article class="relative pl-5 pr-4 py-4 rounded-md border border-slate-200 bg-white overflow-hidden transition-all duration-200 hover:bg-slate-50 hover:shadow-sm">
-                                <span class="absolute left-0 top-0 bottom-0 w-1 ${accent}"></span>
+                            <article class="p-4 rounded-md bg-slate-50 transition-colors duration-200 hover:bg-slate-100">
                                 <div class="flex items-center justify-between gap-2">
                                     <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md border text-xs font-medium ${item.badge}">
                                         <i class="fas ${typeIcon} text-[10px]"></i>${escapeHtml(item.category)}
@@ -684,7 +698,7 @@
                                 <h3 class="mt-3 text-sm font-semibold text-slate-900 line-clamp-2" title="${escapeHtml(item.title)}">${escapeHtml(item.title)}</h3>
                                 <p class="mt-0.5 text-xs text-slate-500 truncate">${escapeHtml(item.subtitle)}</p>
                                 ${statuses}
-                                <div class="flex justify-end mt-3 pt-3 border-t border-slate-100">
+                                <div class="flex justify-end mt-3 pt-3 border-t border-slate-200/60">
                                     <a href="${escapeHtml(item.url)}" class="inline-flex items-center text-sm font-semibold text-[#13416B] hover:text-[#547996] transition-colors">
                                         ${escapeHtml(item.action)}<i class="fas fa-chevron-right ml-1.5 text-xs"></i>
                                     </a>
@@ -758,66 +772,180 @@
                 })();
 
                 // =========================================================
-                // 3. LEADERBOARD E-LEARNING
+                // 3. DISTRIBUSI & TREN PENDAFTAR E-LEARNING
                 // =========================================================
-                const SdmLeaderboard = (() => {
+                const SdmSection = (() => {
+                    const contentGridEl = $('sdmContentGrid');
                     const listEl = $('sdmListContainer');
                     const emptyEl = $('sdmEmptyState');
                     const errorEl = $('sdmError');
+                    const canvasEl = $('sdmTrendChart');
+                    let trendChart = null;
                     let requestId = 0;
+
+                    const MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+                    const MONTH_FULL = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
 
                     const rankClass = (index) => index < 3 ?
                         'bg-[#13416B] text-white' :
-                        'bg-slate-100 text-slate-500';
+                        'bg-slate-100 text-slate-600 font-semibold';
 
                     const rowTemplate = (item, index, maxTotal, grandTotal) => {
-                        const malePct = (item.male / maxTotal) * 100;
-                        const femalePct = (item.female / maxTotal) * 100;
+                        const pct = maxTotal > 0 ? ((item.total / maxTotal) * 100) : 0;
                         const share = grandTotal > 0 ? ((item.total / grandTotal) * 100).toFixed(1).replace('.', ',') : '0';
 
                         return `
-                            <div class="flex items-start gap-4 px-2 py-3 rounded-md transition-colors duration-200 hover:bg-slate-50">
-                                <span class="w-7 h-7 rounded-md flex items-center justify-center text-xs font-bold tabular-nums shrink-0 ${rankClass(index)}">${index + 1}</span>
-                                <div class="flex-1 min-w-0">
-                                    <div class="flex items-baseline justify-between gap-3">
-                                        <span class="text-sm font-semibold text-slate-900 truncate">${escapeHtml(item.regency_name)}</span>
-                                        <span class="shrink-0 text-sm text-slate-500">
-                                            <strong class="text-base font-bold text-[#13416B] tabular-nums">${formatNumber(item.total)}</strong> peserta
-                                            <span class="hidden sm:inline text-xs text-slate-400 ml-1">(${share}%)</span>
-                                        </span>
-                                    </div>
-                                    <div class="mt-2 w-full h-2 rounded-full bg-slate-100 overflow-hidden flex">
-                                        <div class="bg-[#13416B] h-full transition-all duration-500 ease-out" style="width: ${malePct}%" title="Laki-laki: ${item.male}"></div>
-                                        <div class="bg-[#547996] h-full transition-all duration-500 ease-out" style="width: ${femalePct}%" title="Perempuan: ${item.female}"></div>
-                                    </div>
-                                    <div class="mt-1.5 flex gap-4 text-xs text-slate-500">
-                                        <span><i class="fas fa-male text-[#13416B] mr-1"></i>${formatNumber(item.male)}</span>
-                                        <span><i class="fas fa-female text-[#547996] mr-1"></i>${formatNumber(item.female)}</span>
+                            <div class="p-2.5 rounded-md transition-colors duration-200 hover:bg-slate-50">
+                                <div class="flex items-center gap-3">
+                                    <span class="w-6 h-6 rounded-md flex items-center justify-center text-xs tabular-nums shrink-0 ${rankClass(index)}">${index + 1}</span>
+                                    <div class="flex-1 min-w-0">
+                                        <div class="flex items-baseline justify-between gap-2 mb-1">
+                                            <span class="text-xs sm:text-sm font-semibold text-slate-800 truncate" title="${escapeHtml(item.regency_name)}">${escapeHtml(item.regency_name)}</span>
+                                            <span class="shrink-0 text-xs text-slate-500">
+                                                <strong class="font-bold text-[#13416B] tabular-nums">${formatNumber(item.total)}</strong>
+                                                <span class="text-slate-400 ml-0.5">(${share}%)</span>
+                                            </span>
+                                        </div>
+                                        <div class="w-full h-1.5 rounded-full bg-slate-100 overflow-hidden">
+                                            <div class="bg-[#13416B] h-full rounded-full transition-all duration-500 ease-out" style="width: ${pct}%"></div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>`;
                     };
 
-                    function renderSummary(data) {
-                        const male = data.reduce((sum, i) => sum + Number(i.male || 0), 0);
-                        const female = data.reduce((sum, i) => sum + Number(i.female || 0), 0);
-                        const total = data.reduce((sum, i) => sum + Number(i.total || 0), 0);
-                        const pct = (v) => '(' + (total > 0 ? Math.round((v / total) * 100) : 0) + '%)';
+                    function buildTrendChart(monthlyData) {
+                        if (!canvasEl) return;
+                        const ctx = canvasEl.getContext('2d');
+                        
+                        const gradient = ctx.createLinearGradient(0, 0, 0, 300);
+                        gradient.addColorStop(0, 'rgba(19, 65, 107, 0.22)');
+                        gradient.addColorStop(1, 'rgba(19, 65, 107, 0.01)');
+
+                        trendChart = new Chart(ctx, {
+                            type: 'line',
+                            data: {
+                                labels: MONTH_NAMES,
+                                datasets: [{
+                                    label: 'Pendaftar Baru',
+                                    data: monthlyData,
+                                    borderColor: '#13416B',
+                                    borderWidth: 2.5,
+                                    backgroundColor: gradient,
+                                    fill: true,
+                                    tension: 0.35,
+                                    pointBackgroundColor: '#13416B',
+                                    pointBorderColor: '#ffffff',
+                                    pointBorderWidth: 2,
+                                    pointRadius: 4,
+                                    pointHoverRadius: 6,
+                                    pointHoverBackgroundColor: '#13416B',
+                                    pointHoverBorderColor: '#ffffff',
+                                    pointHoverBorderWidth: 2.5,
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                interaction: {
+                                    intersect: false,
+                                    mode: 'index',
+                                },
+                                plugins: {
+                                    legend: { display: false },
+                                    tooltip: {
+                                        backgroundColor: 'rgba(19, 65, 107, 0.95)',
+                                        padding: 10,
+                                        cornerRadius: 6,
+                                        titleFont: { size: 12, weight: 'bold' },
+                                        bodyFont: { size: 12 },
+                                        callbacks: {
+                                            title: (items) => MONTH_FULL[items[0].dataIndex] || items[0].label,
+                                            label: (item) => ` Pendaftar: ${formatNumber(item.raw)} peserta`
+                                        }
+                                    }
+                                },
+                                scales: {
+                                    x: {
+                                        grid: { display: false },
+                                        ticks: {
+                                            font: { size: 11, family: "'Inter', sans-serif" },
+                                            color: '#64748b'
+                                        }
+                                    },
+                                    y: {
+                                        beginAtZero: true,
+                                        grid: {
+                                            color: '#f1f5f9',
+                                            drawTicks: false
+                                        },
+                                        ticks: {
+                                            precision: 0,
+                                            font: { size: 11, family: "'Inter', sans-serif" },
+                                            color: '#64748b'
+                                        }
+                                    }
+                                }
+                            }
+                        });
+                    }
+
+                    function updateTrendChart(monthlyData) {
+                        if (!trendChart) {
+                            buildTrendChart(monthlyData);
+                            return;
+                        }
+                        trendChart.data.datasets[0].data = monthlyData;
+                        trendChart.resize();
+                        trendChart.update();
+                    }
+
+                    function renderSummary(regions, monthlyData) {
+                        const total = regions.reduce((sum, i) => sum + Number(i.total || 0), 0);
+                        const activeCount = regions.filter(i => Number(i.total || 0) > 0).length;
+                        const avgPerRegion = activeCount > 0 ? Math.round(total / activeCount) : 0;
+
+                        let peakMonthIndex = -1;
+                        let peakVal = 0;
+                        monthlyData.forEach((val, idx) => {
+                            if (val > peakVal) {
+                                peakVal = val;
+                                peakMonthIndex = idx;
+                            }
+                        });
+
+                        const peakNoteEl = $('sdmTrendPeakNote');
+                        if (peakNoteEl) {
+                            peakNoteEl.textContent = peakMonthIndex >= 0 && peakVal > 0 
+                                ? `Puncak di bulan ${MONTH_FULL[peakMonthIndex]} (${formatNumber(peakVal)} peserta)`
+                                : 'Laju registrasi bulanan';
+                        }
 
                         $('sdmTotal').textContent = formatNumber(total);
-                        $('sdmMale').textContent = formatNumber(male);
-                        $('sdmFemale').textContent = formatNumber(female);
-                        $('sdmMalePct').textContent = pct(male);
-                        $('sdmFemalePct').textContent = pct(female);
+                        $('sdmActiveRegions').textContent = formatNumber(activeCount);
+                        $('sdmAvgRegion').textContent = formatNumber(avgPerRegion);
+
                         return total;
                     }
 
-                    function render(data) {
-                        const list = toList(data);
-                        const hasData = list.length > 0;
-                        show(listEl, hasData);
+                    function render(regionData, monthlyData = []) {
+                        const list = toList(regionData);
+                        const months = Array.isArray(monthlyData) && monthlyData.length === 12 
+                            ? monthlyData 
+                            : Array(12).fill(0);
+                        const hasData = list.length > 0 || months.some(v => v > 0);
+
+                        show(contentGridEl, hasData);
                         show(emptyEl, !hasData);
-                        const grandTotal = renderSummary(list);
+
+                        const grandTotal = renderSummary(list, months);
+
+                        if (hasData) {
+                            requestAnimationFrame(() => {
+                                updateTrendChart(months);
+                            });
+                        }
+
                         if (!hasData) return;
 
                         const sorted = [...list].sort((a, b) => b.total - a.total);
@@ -829,22 +957,25 @@
                         const current = ++requestId;
                         const select = $('sdmYearFilter');
                         select.disabled = true;
-                        listEl.classList.add('opacity-50');
+                        if (contentGridEl) contentGridEl.classList.add('opacity-50');
                         show(errorEl, false);
+
+                        const labelEl = $('sdmTrendYearLabel');
+                        if (labelEl) labelEl.textContent = 'Tahun ' + year;
 
                         try {
                             const res = await fetchDashboard({
                                 sdm_year: year
                             });
                             if (current !== requestId) return;
-                            render(res.sdmPerKabKota);
+                            render(res.sdmPerKabKota, res.sdmMonthlyTrend);
                         } catch (err) {
                             console.error('Gagal memuat data SDM:', err);
                             if (current === requestId) show(errorEl, true);
                         } finally {
                             if (current === requestId) {
                                 select.disabled = false;
-                                listEl.classList.remove('opacity-50');
+                                if (contentGridEl) contentGridEl.classList.remove('opacity-50');
                             }
                         }
                     }
@@ -860,10 +991,10 @@
                 // =========================================================
                 renderRtk(toList(@json($rtkMasaAktifPerKabKota->values())));
                 PendingApprovals.init(@json(collect($initialPendingApprovals)->values()));
-                SdmLeaderboard.render(@json($sdmPerKabKota->values()));
+                SdmSection.render(@json($sdmPerKabKota->values()), @json($sdmMonthlyTrend));
 
                 $('rtkYearFilter').addEventListener('change', (e) => loadRtk(e.target.value));
-                $('sdmYearFilter').addEventListener('change', (e) => SdmLeaderboard.loadYear(e.target.value));
+                $('sdmYearFilter').addEventListener('change', (e) => SdmSection.loadYear(e.target.value));
             });
         </script>
     @endpush

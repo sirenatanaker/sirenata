@@ -50,13 +50,17 @@ class DashboardController extends Controller
             }
 
             if ($request->has('sdm_year')) {
+                $year = (int) $request->input('sdm_year');
                 return response()->json([
-                    'sdmPerKabKota' => $this->adminProvinsiDashboardService->getSdmPerKabKota($provinceCode, (int) $request->input('sdm_year')),
+                    'sdmPerKabKota' => $this->adminProvinsiDashboardService->getSdmPerKabKota($provinceCode, $year),
+                    'sdmMonthlyTrend' => $this->adminProvinsiDashboardService->getSdmMonthlyTrend($provinceCode, $year),
                 ]);
             }
 
+            $defaultYear = (int) $request->input('sdm_year', (int) date('Y'));
             return response()->json([
-                'sdmPerKabKota' => $this->adminProvinsiDashboardService->getSdmPerKabKota($provinceCode, (int) $request->input('sdm_year', (int) date('Y'))),
+                'sdmPerKabKota' => $this->adminProvinsiDashboardService->getSdmPerKabKota($provinceCode, $defaultYear),
+                'sdmMonthlyTrend' => $this->adminProvinsiDashboardService->getSdmMonthlyTrend($provinceCode, $defaultYear),
                 'rtkMasaAktifPerKabKota' => $this->adminProvinsiDashboardService->getRtkMasaAktifPerKabKota($provinceCode, $request->input('rtk_year', 'all')),
                 'rtkMasaBerakhirPerKabKota' => $this->adminProvinsiDashboardService->getRtkMasaBerakhirPerKabKota($provinceCode, $request->input('rtk_end_year', 'all')),
             ]);
