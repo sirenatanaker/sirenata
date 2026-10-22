@@ -38,10 +38,12 @@
             </h2>
         @endif
 
-        <!-- Badge Kategori -->
+        <!-- Badge Kategori (Mojok Kanan Atas seperti di card kursus user) -->
         @if ($course->category)
-            <span class="absolute left-3 top-3 z-10 rounded-full border border-white/20 bg-slate-900/60 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-white backdrop-blur-md">
-                {{ $course->category->name }}
+            <span
+                class="absolute top-0 right-0 z-10 max-w-[85%] px-3 sm:px-3.5 py-1.5 text-[10px] sm:text-xs font-bold uppercase tracking-wider text-white bg-[#13416B] shadow-sm flex items-center gap-1.5 rounded-none rounded-bl-lg rounded-tr-md">
+                <i class="fas fa-tag text-[9px] sm:text-[10px] flex-shrink-0"></i>
+                <span class="truncate">{{ $course->category->name }}</span>
             </span>
         @endif
     </div>
@@ -58,9 +60,9 @@
 
     <!-- Card Footer -->
     <div class="flex items-center justify-between border-t border-slate-100 px-3 pb-3 pt-2 md:px-2 md:pb-2 lg:px-5 lg:pb-5 lg:pt-3 text-[11px] md:text-[10px] lg:text-xs font-medium text-slate-500">
-        <span class="flex items-center gap-1 rounded-md border border-slate-100 bg-slate-50 px-1.5 py-1 lg:gap-1.5 lg:px-2 text-slate-600">
-            <i class="fas fa-layer-group text-[#13416B]"></i>
-            {{ $modulesCount }} Modul
+        <span class="flex items-center gap-1.5 rounded-md border border-slate-100 bg-slate-50 px-2 py-1 text-slate-600">
+            <i class="far fa-folder-open text-slate-400 text-[10px] sm:text-xs"></i>
+            <span>{{ $modulesCount }} Modul</span>
         </span>
     </div>
 </a>
