@@ -249,7 +249,7 @@
                 @keydown.escape.window="onEscape()"
             >
                 {{-- Grid Cards Responsif --}}
-                <div class="grid grid-cols-2 lg:grid-cols-3 gap-y-6 gap-x-3 sm:gap-6 px-0 sm:px-4 md:px-0">
+                <div class="grid grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-y-6 gap-x-3 sm:gap-6 px-0 sm:px-4 md:px-0">
                     @forelse ($courses as $course)
                         <div class="group flex flex-col bg-transparent sm:bg-white rounded-none sm:rounded-md border-0 sm:border border-slate-200 shadow-none sm:shadow-sm hover:shadow-xl hover:border-[#13416B]/30 hover:-translate-y-1 transition-all duration-300 overflow-hidden">
 

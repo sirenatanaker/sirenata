@@ -190,19 +190,19 @@
 
                                     @if ($lPct >= 100)
                                         <a href="{{ route('user.course.my-course.detail', $lastCourse->slug) }}"
-                                            class="flex items-center justify-center gap-2 w-full bg-emerald-600 text-white hover:bg-emerald-700 px-5 py-2.5 sm:py-3 rounded-md font-bold transition-all shadow-sm text-sm sm:text-base group">
-                                            <i class="fas fa-award text-sm sm:text-base"></i>
+                                            class="flex items-center justify-center gap-2 w-full bg-emerald-600 text-white hover:bg-emerald-700 px-4 py-2 sm:py-2.5 rounded-md font-bold transition-all shadow-xs text-xs sm:text-sm group">
+                                            <i class="fas fa-award text-xs sm:text-sm"></i>
                                             <span>Lihat Sertifikat</span>
                                         </a>
                                     @elseif ($lPct <= 0)
                                         <a href="{{ route('user.course.my-course.detail', $lastCourse->slug) }}?target=auto"
-                                            class="flex items-center justify-center gap-2 w-full bg-emerald-600 text-white hover:bg-emerald-700 px-5 py-2.5 sm:py-3 rounded-md font-bold transition-all shadow-sm text-sm sm:text-base group">
-                                            <i class="fas fa-play text-xs sm:text-sm group-hover:scale-110 transition-transform"></i>
+                                            class="flex items-center justify-center gap-2 w-full bg-emerald-600 text-white hover:bg-emerald-700 px-4 py-2 sm:py-2.5 rounded-md font-bold transition-all shadow-xs text-xs sm:text-sm group">
+                                            <i class="fas fa-play text-[10px] sm:text-xs group-hover:scale-110 transition-transform"></i>
                                             <span>Mulai Belajar</span>
                                         </a>
                                     @else
                                         <a href="{{ route('user.course.my-course.detail', $lastCourse->slug) }}?target=auto"
-                                            class="flex items-center justify-center w-full bg-amber-500 text-white hover:bg-amber-600 px-5 py-2.5 sm:py-3 rounded-md font-bold transition-all shadow-sm text-sm sm:text-base group">
+                                            class="flex items-center justify-center w-full bg-amber-500 text-white hover:bg-amber-600 px-4 py-2 sm:py-2.5 rounded-md font-bold transition-all shadow-xs text-xs sm:text-sm group">
                                             <span>Lanjutkan Belajar</span>
                                         </a>
                                     @endif

@@ -145,14 +145,19 @@
 
                     if ($isVideo) {
                         $buttonLabel = 'Tonton Video';
+                        $buttonIcon = 'fa-play';
                     } elseif ($isPeraturan) {
                         $buttonLabel = 'Baca Dokumen';
+                        $buttonIcon = 'fa-file-lines';
                     } elseif ($isDoc) {
-                        $buttonLabel = 'Baca File';
+                        $buttonLabel = 'Baca Buku';
+                        $buttonIcon = 'fa-book-open';
                     } elseif (!empty($library->external_link)) {
                         $buttonLabel = 'Buka Tautan';
+                        $buttonIcon = 'fa-arrow-up-right-from-square';
                     } else {
-                        $buttonLabel = 'Buka Pustaka';
+                        $buttonLabel = 'Buka Koleksi';
+                        $buttonIcon = 'fa-book-reader';
                     }
                 @endphp
 
@@ -162,6 +167,10 @@
 
                     {{-- Cover Area (Disesuaikan untuk mendukung URL Eksternal / Inisial maupun Upload Lokal) --}}
                     <div class="relative aspect-[4/5] overflow-hidden bg-slate-100">
+                        <!-- Efek Punggung Buku (Spine Crease) Khas Buku Fisik Perpustakaan -->
+                        <div class="absolute left-0 top-0 bottom-0 w-3 bg-gradient-to-r from-black/25 via-black/10 to-transparent pointer-events-none z-10"></div>
+                        <div class="absolute left-3 top-0 bottom-0 w-[1px] bg-white/20 pointer-events-none z-10"></div>
+
                         @if ($library->cover_image)
                             <img src="{{ $library->cover_image_url }}" alt="{{ $library->title }}"
                                 class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105">
@@ -212,7 +221,7 @@
 
                         {{-- Hover Overlay (Hanya Desktop) --}}
                         <div
-                            class="hidden lg:flex absolute inset-0 bg-slate-900/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 items-center justify-center backdrop-blur-[2px]">
+                            class="hidden lg:flex absolute inset-0 bg-slate-900/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 items-center justify-center backdrop-blur-[2px] z-10">
                             <button x-data
                                 @click="$dispatch('open-modal', 'library-modal-{{ $library->id }}'); window.recordLibraryHistory('{{ $library->id }}')"
                                 class="bg-white text-[#13416B] font-bold text-sm px-6 py-3 rounded-full shadow-xl transform translate-y-4 group-hover:translate-y-0 transition-all duration-300 hover:bg-slate-50 hover:scale-105">
@@ -220,29 +229,29 @@
                             </button>
                         </div>
 
-                        {{-- Kategori Badge Absolute --}}
-                        <div class="absolute top-3 left-3 z-20">
-                            <span
-                                class="px-2.5 py-1 text-[8px] sm:text-[10px] font-bold uppercase tracking-wider text-slate-800 bg-white/95 backdrop-blur-sm rounded shadow-sm border border-slate-100">
-                                {{ $library->libraryCategory->name ?? 'Materi' }}
-                            </span>
-                        </div>
+                        {{-- Kategori Badge di Sebelah Kanan (Khas Perpustakaan: Teal + Bookmark Icon) --}}
+                        <span
+                            class="absolute top-0 right-0 z-20 max-w-[80%] px-2.5 sm:px-3 py-1 text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-white bg-teal-700 shadow-xs flex items-center gap-1 rounded-none rounded-bl-md rounded-tr-xl">
+                            <i class="fas fa-bookmark text-[8px] sm:text-[9px] flex-shrink-0"></i>
+                            <span class="truncate">{{ $library->libraryCategory->name ?? 'Pustaka' }}</span>
+                        </span>
                     </div>
 
                     {{-- Informasi Buku Area --}}
-                    <div class="p-4 sm:p-5 flex flex-col flex-1 bg-white">
-                        <h3 class="font-bold text-slate-800 text-[10px] md:text-sm leading-snug line-clamp-2 mb-2 group-hover:text-[#13416B] transition-colors"
+                    <div class="p-3.5 sm:p-5 flex flex-col flex-1 bg-white">
+                        <h3 class="font-bold text-slate-800 text-xs sm:text-sm leading-snug line-clamp-2 mb-2 group-hover:text-[#13416B] transition-colors"
                             title="{{ $library->title }}">
                             {{ $library->title }}
                         </h3>
 
-                        {{-- Action Button Dibuat Lebar Penuh --}}
-                        <div class="mt-auto pt-4 border-t border-slate-100">
+                        {{-- Tombol Aksi Bergaya Buku Perpustakaan --}}
+                        <div class="mt-auto pt-3 border-t border-slate-100">
                             <button x-data
                                 @click="$dispatch('open-modal', 'library-modal-{{ $library->id }}'); window.recordLibraryHistory('{{ $library->id }}')"
-                                class="w-full py-2.5 bg-slate-50 border border-slate-200 text-slate-700 rounded-xl group-hover:bg-[#13416B] group-hover:text-white group-hover:border-[#13416B] text-[10px] sm:text-xs font-bold transition-all duration-300 flex items-center justify-center gap-2">
+                                class="w-full py-2 px-3 bg-slate-50 border border-slate-200/90 text-slate-700 rounded-lg group-hover:bg-[#13416B] group-hover:text-white group-hover:border-[#13416B] text-[10px] sm:text-xs font-semibold transition-all duration-200 flex items-center justify-center gap-1.5 shadow-2xs group-hover:shadow-sm">
+                                <i class="fas {{ $buttonIcon }} text-[10px] text-[#13416B] group-hover:text-white transition-colors"></i>
                                 <span>{{ $buttonLabel }}</span>
-                             
+                                <i class="fas fa-chevron-right text-[8px] opacity-40 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all"></i>
                             </button>
                         </div>
                     </div>

@@ -17,8 +17,8 @@
 <a href="{{ route('user.course.my-course.detail', $course->slug) }}"
     class="group flex flex-col bg-transparent sm:bg-white sm:dark:bg-slate-800/90 rounded-none sm:rounded-md border-0 sm:border border-slate-200 dark:border-slate-700/80 shadow-none sm:shadow-sm hover:shadow-xl hover:border-[#13416B]/30 dark:hover:border-slate-500 hover:-translate-y-1 transition-all duration-300 overflow-hidden">
 
-    {{-- Thumbnail & Badge --}}
-    <div class="relative h-24 sm:h-48 overflow-hidden bg-slate-100 dark:bg-slate-900/50 rounded-t-md">
+    {{-- Thumbnail & Badge (Persegi Panjang 16:9 Aspect Video) --}}
+    <div class="relative w-full aspect-video overflow-hidden bg-slate-100 dark:bg-slate-900/50 rounded-t-md">
         @if (!empty($course->thumbnail_url))
             <img src="{{ $course->thumbnail_url }}"
                 alt="{{ $course->course_name ?? $course->name }}"
@@ -29,20 +29,11 @@
             </div>
         @endif
 
-        {{-- Badge Status (Mojok Kanan Atas mengikuti thumbnail dengan rounded-bl-md) --}}
-        @if ($isDone)
-            <span class="absolute top-0 right-0 z-10 px-2.5 sm:px-3 py-1 text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-white bg-emerald-600 shadow-xs flex items-center gap-1 rounded-none rounded-bl-md rounded-tr-md">
-                <i class="fas fa-check-circle text-[8.5px] sm:text-[9.5px]"></i> <span>Selesai</span>
-            </span>
-        @elseif ($pct > 0)
-            <span class="absolute top-0 right-0 z-10 px-2.5 sm:px-3 py-1 text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-white bg-amber-500 shadow-xs flex items-center gap-1 rounded-none rounded-bl-md rounded-tr-md">
-                <i class="fas fa-clock text-[8.5px] sm:text-[9.5px]"></i> <span>Berjalan</span>
-            </span>
-        @else
-            <span class="absolute top-0 right-0 z-10 px-2.5 sm:px-3 py-1 text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-white bg-slate-500 shadow-xs flex items-center gap-1 rounded-none rounded-bl-md rounded-tr-md">
-                <i class="fas fa-play text-[8.5px] sm:text-[9.5px]"></i> <span>Belum Mulai</span>
-            </span>
-        @endif
+        {{-- Badge Kategori (Mojok Kanan Atas seperti di card katalog) --}}
+        <span class="absolute top-0 right-0 z-10 max-w-[80%] px-2.5 sm:px-3 py-1 text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-white bg-[#13416B] shadow-xs flex items-center gap-1 rounded-none rounded-bl-md rounded-tr-md">
+            <i class="fas fa-tag text-[8px] sm:text-[9px] flex-shrink-0"></i>
+            <span class="truncate">{{ $course->category->name ?? 'Umum' }}</span>
+        </span>
     </div>
 
     {{-- Konten Text --}}
@@ -80,15 +71,15 @@
             </div>
 
             @if ($isDone)
-                <div class="w-full py-1.5 sm:py-2.5 text-[10px] sm:text-xs font-bold text-center rounded-lg sm:rounded-xl transition-colors bg-emerald-600 text-white border border-emerald-600 shadow-xs group-hover:bg-emerald-700 group-hover:border-emerald-700">
+                <div class="w-full py-1.5 sm:py-2 text-[10px] sm:text-xs font-bold text-center rounded-md sm:rounded-lg transition-colors bg-emerald-600 text-white border border-emerald-600 shadow-xs group-hover:bg-emerald-700 group-hover:border-emerald-700">
                     <i class="fas fa-award mr-1"></i> Lihat Sertifikat
                 </div>
             @elseif ($pct <= 0)
-                <div class="w-full py-1.5 sm:py-2.5 text-[10px] sm:text-xs font-bold text-center rounded-lg sm:rounded-xl transition-colors bg-emerald-600 text-white border border-emerald-600 shadow-xs group-hover:bg-emerald-700 group-hover:border-emerald-700">
+                <div class="w-full py-1.5 sm:py-2 text-[10px] sm:text-xs font-bold text-center rounded-md sm:rounded-lg transition-colors bg-emerald-600 text-white border border-emerald-600 shadow-xs group-hover:bg-emerald-700 group-hover:border-emerald-700">
                     <i class="fas fa-play mr-1"></i> Mulai Belajar
                 </div>
             @else
-                <div class="w-full py-1.5 sm:py-2.5 text-[10px] sm:text-xs font-bold text-center rounded-lg sm:rounded-xl transition-colors bg-amber-500 text-white border border-amber-500 shadow-xs group-hover:bg-amber-600 group-hover:border-amber-600">
+                <div class="w-full py-1.5 sm:py-2 text-[10px] sm:text-xs font-bold text-center rounded-md sm:rounded-lg transition-colors bg-amber-500 text-white border border-amber-500 shadow-xs group-hover:bg-amber-600 group-hover:border-amber-600">
                     Lanjutkan Belajar
                 </div>
             @endif

@@ -50,7 +50,7 @@
             </div>
 
             <!-- Courses Grid -->
-            <div x-show="activeFilter !== 'sertifikat'" class="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6 mt-4 sm:mt-6">
+            <div x-show="activeFilter !== 'sertifikat'" class="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-3 sm:gap-6 mt-4 sm:mt-6">
                 <!-- Course Card 1 - SELESAI -->
                 <div x-show="activeFilter === 'all' || activeFilter === 'sudah-selesai'"
                     class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_12px_24px_-8px_rgba(99,102,241,0.3)] hover:border-indigo-500">
