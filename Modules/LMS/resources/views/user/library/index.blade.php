@@ -102,36 +102,51 @@
         {{-- ========================================== --}}
         {{-- NAVIGASI FILTER KATEGORI (PILLS STYLE)     --}}
         {{-- ========================================== --}}
-        <div class="mb-8">
-            <h2 class="text-sm font-bold text-slate-800 mb-3 flex items-center gap-2">
-                <i class="fas fa-filter text-slate-400"></i> Filter Kategori
-            </h2>
-            <nav class="flex flex-wrap gap-2">
-                {{-- Tombol "Semua Koleksi" --}}
-                <a href="{{ route('user.library.index', ['search' => $search]) }}"
-                    class="px-4 py-2 rounded-full text-[10px] md:text-xs font-bold transition-all duration-200 border flex items-center gap-2 {{ !$type ? 'bg-[#13416B] text-white border-[#13416B] shadow-md' : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50 hover:border-slate-300' }}">
-                    <span>Semua Koleksi</span>
-                    <span
-                        class="{{ !$type ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-500' }} px-1.5 py-0.5 rounded-md text-[10px]">{{ $totalKoleksi ?? 0 }}</span>
-                </a>
-
-                {{-- Loop Kategori --}}
-                @foreach ($libraryCategories as $libraryCategory)
-                    <a href="{{ route('user.library.index', ['type' => $libraryCategory->name, 'search' => $search]) }}"
-                        class="px-4 py-2 rounded-full text-[10px] md:text-xs font-bold transition-all duration-200 border flex items-center gap-2 {{ $type == $libraryCategory->name ? 'bg-[#13416B] text-white border-[#13416B] shadow-md' : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50 hover:border-slate-300' }}">
-                        <span>{{ $libraryCategory->name }}</span>
-                        <span
-                            class="{{ $type == $libraryCategory->name ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-500' }} px-1.5 py-0.5 rounded-md text-[10px]">{{ $libraryCategory->libraries_count ?? 0 }}</span>
+        <div class="mb-6 sm:mb-8">
+            <div class="flex items-center justify-between mb-2.5 sm:mb-3">
+                <h2 class="text-xs sm:text-sm font-bold text-slate-800 flex items-center gap-2">
+                    <i class="fas fa-filter text-slate-400"></i> Filter Kategori
+                </h2>
+                @if ($type)
+                    <a href="{{ route('user.library.index', ['search' => $search]) }}"
+                        class="text-[11px] font-bold text-amber-600 hover:text-amber-700 flex items-center gap-1 transition-colors">
+                        <i class="fas fa-rotate-left text-[10px]"></i> Reset
                     </a>
-                @endforeach
-            </nav>
+                @endif
+            </div>
+
+            <div class="relative">
+                <nav
+                    class="flex items-center gap-2 overflow-x-auto pb-2 pt-0.5 sm:flex-wrap sm:pb-0 scroll-smooth [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden -mx-2 px-2 sm:mx-0 sm:px-0">
+                    {{-- Tombol "Semua Koleksi" --}}
+                    <a href="{{ route('user.library.index', ['search' => $search]) }}"
+                        class="shrink-0 px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-full text-xs font-semibold transition-all duration-200 border flex items-center gap-2 shadow-2xs {{ !$type ? 'bg-[#13416B] text-white border-[#13416B] shadow-xs' : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50 hover:border-slate-300' }}">
+                        <span>Semua Koleksi</span>
+                        <span
+                            class="{{ !$type ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-500' }} px-1.5 py-0.5 rounded-full text-[10px] font-bold">{{ $totalKoleksi ?? 0 }}</span>
+                    </a>
+
+                    {{-- Loop Kategori --}}
+                    @foreach ($libraryCategories as $libraryCategory)
+                        <a href="{{ route('user.library.index', ['type' => $libraryCategory->name, 'search' => $search]) }}"
+                            class="shrink-0 px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-full text-xs font-semibold transition-all duration-200 border flex items-center gap-2 shadow-2xs {{ $type == $libraryCategory->name ? 'bg-[#13416B] text-white border-[#13416B] shadow-xs' : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50 hover:border-slate-300' }}">
+                            <span>{{ $libraryCategory->name }}</span>
+                            <span
+                                class="{{ $type == $libraryCategory->name ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-500' }} px-1.5 py-0.5 rounded-full text-[10px] font-bold">{{ $libraryCategory->libraries_count ?? 0 }}</span>
+                        </a>
+                    @endforeach
+
+                    {{-- Spacer kecil di mobile agar pill terakhir tidak mepet tepi layar saat di-scroll --}}
+                    <div class="shrink-0 w-2 sm:hidden"></div>
+                </nav>
+            </div>
         </div>
 
         {{-- ========================================== --}}
         {{-- KONTEN UTAMA                               --}}
         {{-- ========================================== --}}
-        <!-- Grid diatur maksimal 3 kolom (lg:grid-cols-3) agar card lebih lebar di desktop -->
-        <div id="library-grid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8 ">
+        <!-- Grid diatur maksimal 4 kolom agar serasi dengan katalog & kursus -->
+        <div id="library-grid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-y-6 gap-x-3 sm:gap-6 lg:gap-8">
             @forelse($libraries as $library)
                 @php
                     $typeName = strtolower($library->libraryCategory->name ?? 'default');
@@ -163,10 +178,10 @@
 
                 <!-- Card Style Buku -->
                 <div id="library-card-{{ $library->id }}"
-                    class="group flex flex-col bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden hover:shadow-xl hover:border-[#13416B]/30 transition-all duration-300 hover:-translate-y-1">
+                    class="group flex flex-col bg-transparent sm:bg-white rounded-none sm:rounded-xl border-0 sm:border border-slate-200 shadow-none sm:shadow-sm hover:shadow-xl hover:border-[#13416B]/30 transition-all duration-300 hover:-translate-y-1 overflow-hidden">
 
                     {{-- Cover Area (Disesuaikan untuk mendukung URL Eksternal / Inisial maupun Upload Lokal) --}}
-                    <div class="relative aspect-[4/5] overflow-hidden bg-slate-100">
+                    <div class="relative aspect-[4/5] overflow-hidden bg-slate-100 rounded-t-md sm:rounded-t-none">
                         <!-- Efek Punggung Buku (Spine Crease) Khas Buku Fisik Perpustakaan -->
                         <div class="absolute left-0 top-0 bottom-0 w-3 bg-gradient-to-r from-black/25 via-black/10 to-transparent pointer-events-none z-10"></div>
                         <div class="absolute left-3 top-0 bottom-0 w-[1px] bg-white/20 pointer-events-none z-10"></div>
@@ -231,27 +246,27 @@
 
                         {{-- Kategori Badge di Sebelah Kanan (Khas Perpustakaan: Teal + Bookmark Icon) --}}
                         <span
-                            class="absolute top-0 right-0 z-20 max-w-[80%] px-2.5 sm:px-3 py-1 text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-white bg-teal-700 shadow-xs flex items-center gap-1 rounded-none rounded-bl-md rounded-tr-xl">
+                            class="absolute top-0 right-0 z-20 max-w-[80%] px-2.5 sm:px-3 py-1 text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-white bg-teal-700 shadow-xs flex items-center gap-1 rounded-none rounded-bl-md rounded-tr-md sm:rounded-tr-xl">
                             <i class="fas fa-bookmark text-[8px] sm:text-[9px] flex-shrink-0"></i>
                             <span class="truncate">{{ $library->libraryCategory->name ?? 'Pustaka' }}</span>
                         </span>
                     </div>
 
                     {{-- Informasi Buku Area --}}
-                    <div class="p-3.5 sm:p-5 flex flex-col flex-1 bg-white">
+                    <div class="p-0 pt-2.5 sm:p-5 flex flex-col flex-1 bg-transparent sm:bg-white">
                         <h3 class="font-bold text-slate-800 text-xs sm:text-sm leading-snug line-clamp-2 mb-2 group-hover:text-[#13416B] transition-colors"
                             title="{{ $library->title }}">
                             {{ $library->title }}
                         </h3>
 
                         {{-- Tombol Aksi Bergaya Buku Perpustakaan --}}
-                        <div class="mt-auto pt-3 border-t border-slate-100">
+                        <div class="mt-auto pt-2.5 sm:pt-3 border-t border-slate-100">
                             <button x-data
                                 @click="$dispatch('open-modal', 'library-modal-{{ $library->id }}'); window.recordLibraryHistory('{{ $library->id }}')"
-                                class="w-full py-2 px-3 bg-slate-50 border border-slate-200/90 text-slate-700 rounded-lg group-hover:bg-[#13416B] group-hover:text-white group-hover:border-[#13416B] text-[10px] sm:text-xs font-semibold transition-all duration-200 flex items-center justify-center gap-1.5 shadow-2xs group-hover:shadow-sm">
-                                <i class="fas {{ $buttonIcon }} text-[10px] text-[#13416B] group-hover:text-white transition-colors"></i>
+                                class="w-full py-1.5 sm:py-2 px-2.5 sm:px-3 bg-[#13416B] hover:bg-[#0f3354] group-hover:bg-[#0f3354] border border-[#13416B] text-white rounded-md sm:rounded-lg text-[10px] sm:text-xs font-semibold transition-all duration-200 flex items-center justify-center gap-1.5 shadow-xs hover:shadow-sm">
+                                <i class="fas {{ $buttonIcon }} text-[10px] text-white"></i>
                                 <span>{{ $buttonLabel }}</span>
-                                <i class="fas fa-chevron-right text-[8px] opacity-40 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all"></i>
+                                <i class="fas fa-chevron-right text-[8px] opacity-75 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all"></i>
                             </button>
                         </div>
                     </div>
