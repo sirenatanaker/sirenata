@@ -52,7 +52,7 @@
         </div>
 
         <!-- Kanan: Floating Cards & Orang -->
-        <div class="relative hidden h-[340px] sm:block sm:h-[380px] md:h-[440px] lg:h-[520px] reveal-right" style="transition-delay: 0.2s;">
+        <div class="relative hidden h-[360px] sm:block sm:h-[420px] md:h-[480px] lg:h-[560px] translate-y-3 sm:translate-y-4 lg:translate-y-7 reveal-right" style="transition-delay: 0.2s;">
             <!-- Lingkaran Garis Putar Dasar -->
             <div
                 class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[240px] h-[240px] sm:w-[280px] sm:h-[280px] md:w-[330px] md:h-[330px] lg:w-[405px] lg:h-[405px] rounded-full border border-slate-200/60 animate-[spin_60s_linear_infinite] z-0">
@@ -69,9 +69,9 @@
                 <div class="relative">
                     <img src="{{ asset('images/Header.webp') }}" alt="Ilustrasi Perencana"
                         class="relative z-10 w-full h-auto object-contain"
-                        style="-webkit-mask-image: linear-gradient(to bottom, black 78%, transparent 100%); mask-image: linear-gradient(to bottom, black 78%, transparent 100%);">
+                        style="-webkit-mask-image: linear-gradient(to bottom, black 86%, transparent 100%); mask-image: linear-gradient(to bottom, black 86%, transparent 100%);">
                     <div
-                        class="pointer-events-none absolute inset-x-[-8%] bottom-0 h-24 bg-gradient-to-t from-slate-50/90 via-slate-50/45 to-transparent blur-md">
+                        class="pointer-events-none absolute inset-x-[-8%] bottom-0 h-16 bg-gradient-to-t from-slate-50/90 via-slate-50/45 to-transparent blur-md">
                     </div>
                 </div>
             </div>
@@ -105,7 +105,7 @@
 
             <!-- CARD 1: Kiri Bawah - Makro (Di Depan Laptop, Sejajar dengan Card Mikro di Kanan) -->
             <div
-                class="hidden lg:block absolute bottom-4 sm:bottom-4 md:bottom-5 lg:bottom-6 -left-1 sm:-left-1 md:-left-3 lg:-left-6 w-[175px] sm:w-[185px] md:w-[210px] lg:w-[230px] bg-white rounded-xl shadow-xl border border-slate-100 z-30 overflow-hidden">
+                class="hidden lg:block absolute bottom-2 sm:bottom-2 md:bottom-3 lg:bottom-3 -left-1 sm:-left-1 md:-left-3 lg:-left-6 w-[175px] sm:w-[185px] md:w-[210px] lg:w-[230px] bg-white rounded-xl shadow-xl border border-slate-100 z-30 overflow-hidden">
                 <div class="h-12 sm:h-13 md:h-16 lg:h-18 bg-[#81A9CA] flex items-center justify-center relative">
                     <h2 class="text-2xl sm:text-2xl md:text-3xl lg:text-4xl font-medium text-white/95 leading-none"
                         style="font-family: Arial, sans-serif; letter-spacing: -2px;">

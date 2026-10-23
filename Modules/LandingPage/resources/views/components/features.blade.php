@@ -14,13 +14,10 @@
         <!-- Grid 3 Card SaaS Style -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8 reveal-up">
 
-            <!-- ========================================================================= -->
-            <!-- CARD 1: PENGHITUNGAN RTK (MERGE OPSI 1 & OPSI 3)                           -->
-            <!-- Alur 4 Langkah: Upload Excel -> Parameter -> Hitung -> Unduh Draft Word    -->
-            <!-- ========================================================================= -->
-            <div class="group flex flex-col justify-between rounded-2xl border border-slate-200/90 bg-white p-5 sm:p-6 transition-all duration-300 hover:-translate-y-1 hover:border-[#13416B]/40 hover:shadow-xl shadow-xs">
-                <!-- SaaS UI Canvas: Alur 4 Langkah & Transformasi Excel ke Dokumen Word -->
-                <div class="h-[215px] w-full rounded-xl bg-slate-50/90 border border-slate-200/70 p-3.5 sm:p-4 mb-5 flex flex-col justify-between group-hover:bg-[#13416B]/[0.02] transition-colors">
+            <!-- Card 1: Penghitungan RTK (Kalkulator RTK Daerah) -->
+            <div class="group flex flex-col justify-between rounded-2xl border border-slate-200/90 bg-white overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:border-[#13416B]/40 hover:shadow-xl shadow-xs">
+                <!-- SaaS UI Thumbnail: Alur 4 Langkah & File Transformasi (Full Width Edge-to-Edge) -->
+                <div class="w-full h-[215px] bg-slate-50/80 border-b border-slate-200/80 p-4 sm:p-5 flex flex-col justify-between group-hover:bg-[#13416B]/[0.02] transition-colors">
                     <!-- Window Top Bar -->
                     <div class="flex items-center justify-between pb-2 border-b border-slate-200/60">
                         <div class="flex items-center gap-1.5">
@@ -33,26 +30,26 @@
                         </span>
                     </div>
 
-                    <!-- Mini Stepper 4 Langkah (Konsep Opsi 3) -->
-                    <div class="flex items-center justify-between px-1 pt-0.5">
-                        <div class="flex items-center gap-1">
-                            <span class="w-3.5 h-3.5 rounded-full bg-emerald-500 text-white text-[7px] font-bold flex items-center justify-center">✓</span>
-                            <span class="text-[8px] font-bold text-slate-600">Unggah</span>
+                    <!-- Mini Stepper 4 Langkah -->
+                    <div class="flex items-center justify-between px-1">
+                        <div class="flex items-center gap-1.5">
+                            <span class="w-4 h-4 rounded-full bg-emerald-500 text-white text-[8px] font-bold flex items-center justify-center">✓</span>
+                            <span class="text-[9px] font-bold text-slate-600">Unggah</span>
                         </div>
-                        <span class="h-0.5 w-3 bg-emerald-400"></span>
-                        <div class="flex items-center gap-1">
-                            <span class="w-3.5 h-3.5 rounded-full bg-emerald-500 text-white text-[7px] font-bold flex items-center justify-center">✓</span>
-                            <span class="text-[8px] font-bold text-slate-600">Parameter</span>
+                        <span class="h-0.5 w-5 sm:w-7 bg-emerald-400"></span>
+                        <div class="flex items-center gap-1.5">
+                            <span class="w-4 h-4 rounded-full bg-emerald-500 text-white text-[8px] font-bold flex items-center justify-center">✓</span>
+                            <span class="text-[9px] font-bold text-slate-600">Parameter</span>
                         </div>
-                        <span class="h-0.5 w-3 bg-[#13416B]"></span>
-                        <div class="flex items-center gap-1">
-                            <span class="w-3.5 h-3.5 rounded-full bg-[#13416B] text-white text-[7px] font-bold flex items-center justify-center animate-pulse">3</span>
-                            <span class="text-[8px] font-extrabold text-[#13416B]">Hitung</span>
+                        <span class="h-0.5 w-5 sm:w-7 bg-[#13416B]"></span>
+                        <div class="flex items-center gap-1.5">
+                            <span class="w-4 h-4 rounded-full bg-[#13416B] text-white text-[8px] font-bold flex items-center justify-center animate-pulse">3</span>
+                            <span class="text-[9px] font-extrabold text-[#13416B]">Hitung</span>
                         </div>
-                        <span class="h-0.5 w-3 bg-slate-200"></span>
-                        <div class="flex items-center gap-1">
-                            <span class="w-3.5 h-3.5 rounded-full bg-slate-200 text-slate-500 text-[7px] font-bold flex items-center justify-center">4</span>
-                            <span class="text-[8px] font-medium text-slate-400">Unduh</span>
+                        <span class="h-0.5 w-5 sm:w-7 bg-slate-200"></span>
+                        <div class="flex items-center gap-1.5">
+                            <span class="w-4 h-4 rounded-full bg-slate-200 text-slate-500 text-[8px] font-bold flex items-center justify-center">4</span>
+                            <span class="text-[9px] font-medium text-slate-400">Unduh</span>
                         </div>
                     </div>
 
@@ -92,23 +89,25 @@
                     </div>
                 </div>
 
-                <!-- Text Content (Tanpa Icon Badge) -->
-                <div>
-                    <h3 class="text-lg sm:text-xl font-bold text-slate-900 mb-2 group-hover:text-[#13416B] transition-colors">
-                        Penghitungan RTK
-                    </h3>
-                    <p class="text-slate-600 leading-relaxed text-sm">
-                        Alat bantu otomasi penghitungan proyeksi 9 indikator makro dari data Excel menjadi draft dokumen RTKD format Word siap telaah.
-                    </p>
+                <!-- Text Content (Padded) -->
+                <div class="p-5 sm:p-6 flex flex-col flex-1 justify-between">
+                    <div>
+                        <h3 class="text-lg sm:text-xl font-bold text-slate-900 mb-2 group-hover:text-[#13416B] transition-colors">
+                            Penghitungan RTK
+                        </h3>
+                        <p class="text-slate-600 leading-relaxed text-sm">
+                            Alat bantu otomasi penghitungan proyeksi 9 indikator makro dari data Excel menjadi draft dokumen RTKD format Word siap telaah.
+                        </p>
+                    </div>
                 </div>
             </div>
 
             <!-- Card 2: LMS Terintegrasi (Konteks Layout Halaman Detail LMS) -->
-            <div class="group flex flex-col justify-between rounded-2xl border border-slate-200/90 bg-white p-5 sm:p-6 transition-all duration-300 hover:-translate-y-1 hover:border-[#13416B]/40 hover:shadow-xl shadow-xs">
-                <!-- SaaS UI Canvas: Menyerupai Halaman Detail & Card Course LMS -->
-                <div class="relative h-[215px] w-full rounded-xl bg-slate-50/90 border border-slate-200/70 p-4 mb-5 flex flex-col justify-between group-hover:bg-[#547996]/[0.02] transition-colors overflow-hidden">
+            <div class="group flex flex-col justify-between rounded-2xl border border-slate-200/90 bg-white overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:border-[#13416B]/40 hover:shadow-xl shadow-xs">
+                <!-- SaaS UI Thumbnail: Menyerupai Halaman Detail & Card Course LMS (Full Width Edge-to-Edge) -->
+                <div class="relative w-full h-[215px] bg-slate-50/80 border-b border-slate-200/80 p-4 sm:p-5 flex flex-col justify-between group-hover:bg-[#547996]/[0.02] transition-colors">
                     <!-- Badge Kategori (Mojok Kanan Atas persis desain card kursus) -->
-                    <span class="absolute top-0 right-0 z-10 px-3 py-1.5 text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-white bg-[#13416B] shadow-xs flex items-center gap-1.5 rounded-none rounded-bl-lg rounded-tr-xl">
+                    <span class="absolute top-0 right-0 z-10 px-3.5 py-1.5 text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-white bg-[#13416B] shadow-xs flex items-center gap-1.5 rounded-none rounded-bl-lg">
                         <i class="fas fa-tag text-[8px] sm:text-[9px] flex-shrink-0"></i>
                         <span>Perencanaan</span>
                     </span>
@@ -137,16 +136,16 @@
                     </div>
 
                     <!-- Mini Statistik Belajar (Modul, Selesai, Sertifikat) -->
-                    <div class="grid grid-cols-3 gap-1.5 pt-2 border-t border-slate-200/60 text-center">
-                        <div class="bg-white p-1 rounded-md border border-slate-200/60 flex flex-col justify-center">
+                    <div class="grid grid-cols-3 gap-1.5 sm:gap-2 pt-2 border-t border-slate-200/60 text-center">
+                        <div class="bg-white p-1.5 rounded-md border border-slate-200/60 flex flex-col justify-center">
                             <span class="text-[8px] uppercase font-bold text-slate-400 block">Modul</span>
                             <span class="text-[11px] font-extrabold text-slate-800">4 Topik</span>
                         </div>
-                        <div class="bg-white p-1 rounded-md border border-slate-200/60 flex flex-col justify-center">
+                        <div class="bg-white p-1.5 rounded-md border border-slate-200/60 flex flex-col justify-center">
                             <span class="text-[8px] uppercase font-bold text-slate-400 block">Selesai</span>
                             <span class="text-[11px] font-extrabold text-slate-700">9 / 12</span>
                         </div>
-                        <div class="bg-white p-1 rounded-md border border-slate-200/60 flex flex-col justify-center">
+                        <div class="bg-white p-1.5 rounded-md border border-slate-200/60 flex flex-col justify-center">
                             <span class="text-[8px] uppercase font-bold text-slate-400 block">Sertifikat</span>
                             <span class="text-[10px] sm:text-[11px] font-bold text-slate-500 inline-flex items-center justify-center gap-1">
                                 <i class="fas fa-lock text-[8px] text-slate-400"></i>
@@ -156,21 +155,23 @@
                     </div>
                 </div>
 
-                <!-- Text Content (Tanpa Icon Badge) -->
-                <div>
-                    <h3 class="text-lg sm:text-xl font-bold text-slate-900 mb-2 group-hover:text-[#13416B] transition-colors">
-                        LMS Terintegrasi
-                    </h3>
-                    <p class="text-slate-600 leading-relaxed text-sm">
-                        Transfer pengetahuan terstruktur melalui modul pelatihan daring, video pembelajaran, hingga sertifikasi kelulusan resmi.
-                    </p>
+                <!-- Text Content (Padded) -->
+                <div class="p-5 sm:p-6 flex flex-col flex-1 justify-between">
+                    <div>
+                        <h3 class="text-lg sm:text-xl font-bold text-slate-900 mb-2 group-hover:text-[#13416B] transition-colors">
+                            LMS Terintegrasi
+                        </h3>
+                        <p class="text-slate-600 leading-relaxed text-sm">
+                            Transfer pengetahuan terstruktur melalui modul pelatihan daring, video pembelajaran, hingga sertifikasi kelulusan resmi.
+                        </p>
+                    </div>
                 </div>
             </div>
 
             <!-- Card 3: Pelaporan & Arsip (Konteks Modul Laporan & Status RTK) -->
-            <div class="group flex flex-col justify-between rounded-2xl border border-slate-200/90 bg-white p-5 sm:p-6 transition-all duration-300 hover:-translate-y-1 hover:border-[#13416B]/40 hover:shadow-xl shadow-xs md:col-span-2 lg:col-span-1">
-                <!-- SaaS UI Canvas: Menyerupai Modul Laporan & Status Dokumen RTK -->
-                <div class="h-[215px] w-full rounded-xl bg-slate-50/90 border border-slate-200/70 p-4 mb-5 flex flex-col justify-between group-hover:bg-[#2D5B84]/[0.02] transition-colors">
+            <div class="group flex flex-col justify-between rounded-2xl border border-slate-200/90 bg-white overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:border-[#13416B]/40 hover:shadow-xl shadow-xs md:col-span-2 lg:col-span-1">
+                <!-- SaaS UI Thumbnail: Menyerupai Modul Laporan & Status Dokumen RTK (Full Width Edge-to-Edge) -->
+                <div class="w-full h-[215px] bg-slate-50/80 border-b border-slate-200/80 p-4 sm:p-5 flex flex-col justify-between group-hover:bg-[#2D5B84]/[0.02] transition-colors">
                     <!-- Wilayah & Periode (Sesuai Header Laporan RTKD) -->
                     <div class="flex items-center justify-between pb-2.5 border-b border-slate-200/60">
                         <span class="px-2 py-0.5 bg-slate-100 text-slate-600 rounded-md text-[9px] font-medium border border-slate-200 flex items-center gap-1">
@@ -214,14 +215,16 @@
                     </div>
                 </div>
 
-                <!-- Text Content (Tanpa Icon Badge) -->
-                <div>
-                    <h3 class="text-lg sm:text-xl font-bold text-slate-900 mb-2 group-hover:text-[#13416B] transition-colors">
-                        Pelaporan &amp; Arsip
-                    </h3>
-                    <p class="text-slate-600 leading-relaxed text-sm">
-                        Pemantauan dokumen RTKD dan fitur sanggahan nilai dengan integrasi bukti pendukung yang aman dari daerah ke pusat.
-                    </p>
+                <!-- Text Content (Padded) -->
+                <div class="p-5 sm:p-6 flex flex-col flex-1 justify-between">
+                    <div>
+                        <h3 class="text-lg sm:text-xl font-bold text-slate-900 mb-2 group-hover:text-[#13416B] transition-colors">
+                            Pelaporan &amp; Arsip
+                        </h3>
+                        <p class="text-slate-600 leading-relaxed text-sm">
+                            Pemantauan dokumen RTKD dan fitur sanggahan nilai dengan integrasi bukti pendukung yang aman dari daerah ke pusat.
+                        </p>
+                    </div>
                 </div>
             </div>
 
