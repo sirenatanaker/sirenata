@@ -6,20 +6,33 @@
 </head>
 
 <body x-data="{ 
-          sidebarOpen: localStorage.getItem('sidebar_collapsed') !== null 
-              ? localStorage.getItem('sidebar_collapsed') === 'false' 
-              : window.innerWidth >= 1024,
+          sidebarOpen: window.innerWidth >= 768 
+              ? (localStorage.getItem('sidebar_collapsed') !== null 
+                  ? localStorage.getItem('sidebar_collapsed') === 'false' 
+                  : window.innerWidth >= 1024)
+              : false,
           isTabletOrDesktop: window.innerWidth >= 768,
+          currentWidth: window.innerWidth,
           toggleSidebar() {
               this.sidebarOpen = !this.sidebarOpen;
-              localStorage.setItem('sidebar_collapsed', (!this.sidebarOpen).toString());
-              setTimeout(() => {
-                  window.dispatchEvent(new Event('resize'));
-              }, 310);
+              // Hanya simpan state dan kirim event resize di layar desktop/tablet
+              if (window.innerWidth >= 768) {
+                  localStorage.setItem('sidebar_collapsed', (!this.sidebarOpen).toString());
+                  setTimeout(() => {
+                      window.dispatchEvent(new Event('resize'));
+                  }, 310);
+              }
           },
           checkResize() {
+              // Abaikan jika lebar layar tidak benar-benar berubah (misal dari event resize buatan atau scroll)
+              if (window.innerWidth === this.currentWidth) return;
+              
+              const wasTabletOrDesktop = this.isTabletOrDesktop;
               this.isTabletOrDesktop = window.innerWidth >= 768;
-              if (window.innerWidth < 768) {
+              this.currentWidth = window.innerWidth;
+              
+              // Hanya tutup sidebar jika pengguna mengubah ukuran layar dari desktop/tablet ke mobile
+              if (wasTabletOrDesktop && !this.isTabletOrDesktop) {
                   this.sidebarOpen = false;
               }
           }
@@ -29,9 +42,6 @@
       
     <!-- Navbar -->
     @include('dashboard::partials.navbar')
-    
-    <!-- Overlay (Mobile & Tablet) -->
-    @include('dashboard::partials.overlay')
 
     <!-- Sidebar -->
     @include('dashboard::partials.sidebar')
