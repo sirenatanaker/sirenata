@@ -14,56 +14,81 @@
         <!-- Grid 3 Card SaaS Style -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8 reveal-up">
 
-            <!-- Card 1: Penghitungan RTK (SaaS Analytics & Projection Engine) -->
+            <!-- ========================================================================= -->
+            <!-- CARD 1: PENGHITUNGAN RTK (MERGE OPSI 1 & OPSI 3)                           -->
+            <!-- Alur 4 Langkah: Upload Excel -> Parameter -> Hitung -> Unduh Draft Word    -->
+            <!-- ========================================================================= -->
             <div class="group flex flex-col justify-between rounded-2xl border border-slate-200/90 bg-white p-5 sm:p-6 transition-all duration-300 hover:-translate-y-1 hover:border-[#13416B]/40 hover:shadow-xl shadow-xs">
-                <!-- SaaS UI Canvas: Kalkulator Proyeksi RTK -->
-                <div class="h-[215px] w-full rounded-xl bg-slate-50/90 border border-slate-200/70 p-4 mb-5 flex flex-col justify-between group-hover:bg-[#13416B]/[0.02] transition-colors">
-                    <!-- Window Top -->
-                    <div class="flex items-center justify-between pb-2.5 border-b border-slate-200/60">
+                <!-- SaaS UI Canvas: Alur 4 Langkah & Transformasi Excel ke Dokumen Word -->
+                <div class="h-[215px] w-full rounded-xl bg-slate-50/90 border border-slate-200/70 p-3.5 sm:p-4 mb-5 flex flex-col justify-between group-hover:bg-[#13416B]/[0.02] transition-colors">
+                    <!-- Window Top Bar -->
+                    <div class="flex items-center justify-between pb-2 border-b border-slate-200/60">
                         <div class="flex items-center gap-1.5">
                             <span class="w-2 h-2 rounded-full bg-slate-300"></span>
                             <span class="w-2 h-2 rounded-full bg-slate-300"></span>
-                            <span class="text-[11px] font-bold text-slate-700 ml-1">Kalkulator RTK Makro</span>
+                            <span class="text-[11px] font-bold text-slate-700 ml-1">Kalkulator RTK Daerah</span>
                         </div>
-                        <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200/60">
-                            Auto-Forecast
+                        <span class="text-[9px] font-bold px-2 py-0.5 rounded bg-blue-50 text-blue-700 border border-blue-200/70">
+                            Excel &rarr; Word
                         </span>
                     </div>
 
-                    <!-- Mini Projection Chart Visual -->
-                    <div class="my-auto pt-1">
-                        <div class="flex items-baseline justify-between mb-2">
-                            <span class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Tren Kebutuhan Naker</span>
-                            <span class="text-xs font-black text-[#13416B]">+42.500 <span class="text-[10px] font-medium text-emerald-600">(+4.8%)</span></span>
+                    <!-- Mini Stepper 4 Langkah (Konsep Opsi 3) -->
+                    <div class="flex items-center justify-between px-1 pt-0.5">
+                        <div class="flex items-center gap-1">
+                            <span class="w-3.5 h-3.5 rounded-full bg-emerald-500 text-white text-[7px] font-bold flex items-center justify-center">✓</span>
+                            <span class="text-[8px] font-bold text-slate-600">Unggah</span>
                         </div>
-                        <!-- Mini Bar Chart Simulation -->
-                        <div class="flex items-end justify-between gap-2 h-14 bg-white p-2 rounded-lg border border-slate-200/60">
-                            <div class="flex-1 flex flex-col items-center gap-1">
-                                <div class="w-full bg-[#13416B]/25 rounded-sm" style="height: 40%"></div>
-                                <span class="text-[8px] text-slate-400 font-medium">2023</span>
-                            </div>
-                            <div class="flex-1 flex flex-col items-center gap-1">
-                                <div class="w-full bg-[#13416B]/40 rounded-sm" style="height: 55%"></div>
-                                <span class="text-[8px] text-slate-400 font-medium">2024</span>
-                            </div>
-                            <div class="flex-1 flex flex-col items-center gap-1">
-                                <div class="w-full bg-[#13416B]/60 rounded-sm" style="height: 70%"></div>
-                                <span class="text-[8px] text-slate-400 font-medium">2025</span>
-                            </div>
-                            <div class="flex-1 flex flex-col items-center gap-1">
-                                <div class="w-full bg-[#13416B] rounded-sm" style="height: 85%"></div>
-                                <span class="text-[8px] text-slate-400 font-bold">2026</span>
-                            </div>
-                            <div class="flex-1 flex flex-col items-center gap-1">
-                                <div class="w-full bg-amber-400 rounded-sm" style="height: 100%"></div>
-                                <span class="text-[8px] text-amber-700 font-bold">Target</span>
-                            </div>
+                        <span class="h-0.5 w-3 bg-emerald-400"></span>
+                        <div class="flex items-center gap-1">
+                            <span class="w-3.5 h-3.5 rounded-full bg-emerald-500 text-white text-[7px] font-bold flex items-center justify-center">✓</span>
+                            <span class="text-[8px] font-bold text-slate-600">Parameter</span>
+                        </div>
+                        <span class="h-0.5 w-3 bg-[#13416B]"></span>
+                        <div class="flex items-center gap-1">
+                            <span class="w-3.5 h-3.5 rounded-full bg-[#13416B] text-white text-[7px] font-bold flex items-center justify-center animate-pulse">3</span>
+                            <span class="text-[8px] font-extrabold text-[#13416B]">Hitung</span>
+                        </div>
+                        <span class="h-0.5 w-3 bg-slate-200"></span>
+                        <div class="flex items-center gap-1">
+                            <span class="w-3.5 h-3.5 rounded-full bg-slate-200 text-slate-500 text-[7px] font-bold flex items-center justify-center">4</span>
+                            <span class="text-[8px] font-medium text-slate-400">Unduh</span>
                         </div>
                     </div>
 
+                    <!-- Wujud Nyata File Input & Output (Clean Tanpa Deskripsi Tambahan) -->
+                    <div class="space-y-2 my-auto">
+                        <!-- Input File: Excel Data Historis & PDRB -->
+                        <div class="flex items-center justify-between p-2 rounded-lg bg-white border border-slate-200/80 shadow-2xs">
+                            <div class="flex items-center gap-2.5 min-w-0">
+                                <div class="w-6 h-6 rounded bg-emerald-100 text-emerald-700 flex items-center justify-center text-xs shrink-0">
+                                    <i class="fas fa-file-excel"></i>
+                                </div>
+                                <span class="text-xs font-bold text-slate-800 truncate">Data_RTK_Makro.xlsx</span>
+                            </div>
+                            <span class="text-[8px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200/60 shrink-0 flex items-center gap-1">
+                                <i class="fas fa-check text-[7px]"></i> Diproses
+                            </span>
+                        </div>
+
+                        <!-- Output File: Dokumen Word Draft RTKD -->
+                        <div class="flex items-center justify-between p-2 rounded-lg bg-blue-50/50 border border-blue-200/80 shadow-2xs">
+                            <div class="flex items-center gap-2.5 min-w-0">
+                                <div class="w-6 h-6 rounded bg-blue-100 text-[#13416B] flex items-center justify-center text-xs shrink-0">
+                                    <i class="fas fa-file-word"></i>
+                                </div>
+                                <span class="text-xs font-bold text-slate-800 truncate">Draft_RTKD_Dokumen.docx</span>
+                            </div>
+                            <span class="text-[8px] font-bold text-[#13416B] bg-white px-2 py-0.5 rounded border border-blue-300/60 shrink-0 flex items-center gap-1 shadow-2xs">
+                                <i class="fas fa-download text-[7px]"></i> Unduh
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Footer: Identitas Resmi & 9 Indikator -->
                     <div class="pt-2 border-t border-slate-200/50 flex items-center justify-between text-[10px] text-slate-500 font-medium">
-                        <span>Basis: PDRB &amp; Elastisitas</span>
-                        <span class="text-[#13416B] font-bold">Makro &amp; Mikro</span>
+                        <span>9 Indikator Makro</span>
+                        <span class="text-[#13416B] font-bold">Standar Kemnaker RI</span>
                     </div>
                 </div>
 
@@ -73,7 +98,7 @@
                         Penghitungan RTK
                     </h3>
                     <p class="text-slate-600 leading-relaxed text-sm">
-                        Alat bantu dalam perhitungan rencana tenaga kerja makro dan mikro sesuai kondisi daerah secara cepat, terstandar, dan presisi.
+                        Alat bantu otomasi penghitungan proyeksi 9 indikator makro dari data Excel menjadi draft dokumen RTKD format Word siap telaah.
                     </p>
                 </div>
             </div>
