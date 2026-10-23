@@ -107,7 +107,7 @@
                 <h4 class="text-4xl sm:text-5xl font-extrabold text-white mb-2 stat-counter tracking-tight"
                     data-target="{{ $sCourse['num'] }}" data-suffix="{{ $sCourse['suf'] }}"
                     style="font-family: 'Oswald', sans-serif;">0</h4>
-                <p class="text-xs text-slate-400 leading-relaxed">Pelatihan aktif di e-learning LMS untuk aparatur daerah.</p>
+                <p class="text-xs text-slate-400 leading-relaxed">Pelatihan aktif untuk aparatur daerah.</p>
             </div>
         </div>
     </div>
