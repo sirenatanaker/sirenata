@@ -76,8 +76,8 @@
                 </div>
             </div>
 
-            <!-- DEKORASI TITIK-TITIK MATRIX (SVG GRID PATTERN) -->
-            <div class="hidden lg:block absolute bottom-24 right-4 z-10 w-10 h-24 pointer-events-none opacity-40">
+            <!-- DEKORASI TITIK-TITIK MATRIX (SVG GRID PATTERN - Diturunkan) -->
+            <div class="hidden lg:block absolute bottom-8 right-4 z-10 w-10 h-24 pointer-events-none opacity-40">
                 <svg width="100%" height="100%">
                     <pattern id="dot-grid" x="0" y="0" width="12" height="12" patternUnits="userSpaceOnUse">
                         <circle cx="2" cy="2" r="1.5" class="fill-yellow-600" />
@@ -86,54 +86,69 @@
                 </svg>
             </div>
 
-            <!-- CARD 2: Kiri Atas - IPK (Di Atas, Ditumpuk di Belakang Makro, Terpotong, Digeser / Tidak Sejajar) -->
+            <!-- CHAT BUBBLE 2: Kiri Atas - Indeks IPK (Dinaikkan sedikit) -->
             <div
-                class="hidden lg:block absolute bottom-24 sm:bottom-24 md:bottom-28 lg:bottom-36 -left-2 sm:-left-3 md:-left-6 lg:-left-11 w-[165px] sm:w-[175px] md:w-[195px] lg:w-[215px] bg-white rounded-xl shadow-md border border-slate-100 z-10 overflow-hidden">
-                <div class="h-11 sm:h-12 md:h-14 lg:h-16 bg-[#507A9E] flex items-center justify-center relative">
-                    <h2 class="text-xl sm:text-2xl md:text-2xl lg:text-3xl font-medium text-white/95 leading-none"
-                        style="font-family: Arial, sans-serif; letter-spacing: -1px;">
-                        IK
-                    </h2>
+                class="hidden lg:flex items-start gap-2.5 absolute bottom-32 sm:bottom-36 lg:bottom-42 -left-3 sm:-left-5 lg:-left-10 w-[220px] sm:w-[235px] lg:w-[245px] bg-white/95 backdrop-blur-md border border-slate-200/80 shadow-lg shadow-slate-900/5 p-2.5 sm:p-3 z-20 transition-all duration-300 hover:scale-105 hover:shadow-xl"
+                style="border-radius: 16px 16px 2px 16px;">
+                <div class="w-7 h-7 rounded-full bg-amber-500 text-white flex items-center justify-center text-xs shrink-0 shadow-sm mt-0.5">
+                    <i class="fas fa-award text-[10px]"></i>
                 </div>
-                <div class="p-2 sm:p-2.5 md:p-3">
-                    <h3 class="font-bold text-slate-800 text-[10px] sm:text-[11px] md:text-xs mb-0.5 sm:mb-1 leading-tight">Indeks Pembangunan Ketenagakerjaan</h3>
-                    <p class="text-[8px] sm:text-[8.5px] md:text-[9px] text-slate-500 line-clamp-2 mb-0">
-                        Pengukuran dan evaluasi 7 indikator utama ketenagakerjaan daerah.
+                <div class="flex-1 min-w-0">
+                    <div class="flex items-center justify-between gap-1 mb-1">
+                        <span class="text-[11px] font-bold text-slate-800 truncate">Indeks IPK</span>
+                        <span class="text-[8.5px] font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200/60 leading-none">Evaluasi</span>
+                    </div>
+                    <p class="text-[9.5px] text-slate-600 leading-snug mb-2">
+                        Pengukuran capaian pembangunan ketenagakerjaan daerah.
                     </p>
+                    <div class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-slate-100/90 text-slate-700 text-[8.5px] font-semibold border border-slate-200/70">
+                        <i class="fas fa-list-check text-amber-600 text-[9px]"></i>
+                        <span>7 Indikator Utama</span>
+                    </div>
                 </div>
             </div>
 
-            <!-- CARD 1: Kiri Bawah - Makro (Di Depan Laptop, Sejajar dengan Card Mikro di Kanan) -->
+            <!-- CHAT BUBBLE 1: Kiri Bawah - RTK Makro (Dinaikkan sedikit) -->
             <div
-                class="hidden lg:block absolute bottom-2 sm:bottom-2 md:bottom-3 lg:bottom-3 -left-1 sm:-left-1 md:-left-3 lg:-left-6 w-[175px] sm:w-[185px] md:w-[210px] lg:w-[230px] bg-white rounded-xl shadow-xl border border-slate-100 z-30 overflow-hidden">
-                <div class="h-12 sm:h-13 md:h-16 lg:h-18 bg-[#81A9CA] flex items-center justify-center relative">
-                    <h2 class="text-2xl sm:text-2xl md:text-3xl lg:text-4xl font-medium text-white/95 leading-none"
-                        style="font-family: Arial, sans-serif; letter-spacing: -2px;">
-                        PM
-                    </h2>
+                class="hidden lg:flex items-start gap-2.5 absolute bottom-5 sm:bottom-7 lg:bottom-9 -left-2 sm:-left-3 lg:-left-6 w-[230px] sm:w-[245px] lg:w-[255px] bg-white/95 backdrop-blur-md border border-slate-200/80 shadow-xl shadow-slate-900/10 p-2.5 sm:p-3 z-30 transition-all duration-300 hover:scale-105 hover:shadow-2xl"
+                style="border-radius: 16px 16px 2px 16px;">
+                <div class="w-7 h-7 rounded-full bg-[#13416B] text-white flex items-center justify-center text-xs shrink-0 shadow-sm mt-0.5">
+                    <i class="fas fa-chart-line text-[10px]"></i>
                 </div>
-                <div class="p-2 sm:p-2.5 md:p-3 lg:p-4">
-                    <h3 class="font-bold text-slate-800 text-[10px] sm:text-[11px] md:text-xs mb-0.5 sm:mb-1 lg:mb-1.5 leading-tight">Perencanaan Tenaga Kerja Makro</h3>
-                    <p class="text-[8px] sm:text-[8.5px] md:text-[9px] text-slate-500 mb-0 line-clamp-2">
-                        Penyusunan Rencana Tenaga Kerja dengan pendekatan makro ekonomi dan ketenagakerjaan.
+                <div class="flex-1 min-w-0">
+                    <div class="flex items-center justify-between gap-1 mb-1">
+                        <span class="text-[11px] font-bold text-slate-800 truncate">RTK Makro</span>
+                        <span class="text-[8.5px] font-bold text-[#13416B] bg-blue-50 px-2 py-0.5 rounded-full border border-blue-200/60 leading-none">Pusat &amp; Daerah</span>
+                    </div>
+                    <p class="text-[9.5px] text-slate-600 leading-snug mb-2">
+                        Penyusunan proyeksi kebutuhan naker berbasis ekonomi makro.
                     </p>
+                    <div class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-[#13416B]/5 text-[#13416B] text-[8.5px] font-bold border border-[#13416B]/15">
+                        <i class="fas fa-layer-group text-[#13416B] text-[9px]"></i>
+                        <span>Proyeksi Sektor &amp; Wilayah</span>
+                    </div>
                 </div>
             </div>
 
-            <!-- CARD 3: Kanan Atas - Mikro (Dibelakang Ilustrasi Orang) -->
+            <!-- CHAT BUBBLE 3: Kanan - RTK Mikro (Diturunkan mendekati dekorasi titik-titik) -->
             <div
-                class="hidden lg:block absolute top-10 sm:top-14 md:top-20 lg:top-32 -right-1 sm:-right-2 md:-right-3 lg:-right-6 w-[175px] sm:w-[185px] md:w-[210px] lg:w-[230px] bg-white rounded-xl shadow-lg border border-slate-100 z-10 overflow-hidden">
-                <div class="h-12 sm:h-13 md:h-16 lg:h-18 bg-[#103F6E] flex items-center justify-center relative">
-                    <h2 class="text-2xl sm:text-2xl md:text-3xl lg:text-4xl font-medium text-white/95 leading-none"
-                        style="font-family: Arial, sans-serif; letter-spacing: -1px;">
-                        PM
-                    </h2>
+                class="hidden lg:flex items-start gap-2.5 absolute bottom-32 sm:bottom-36 md:bottom-40 lg:bottom-44 -right-2 sm:-right-4 lg:-right-6 w-[220px] sm:w-[235px] lg:w-[245px] bg-white/95 backdrop-blur-md border border-slate-200/80 shadow-lg shadow-slate-900/5 p-2.5 sm:p-3 z-20 transition-all duration-300 hover:scale-105 hover:shadow-xl"
+                style="border-radius: 16px 16px 16px 2px;">
+                <div class="w-7 h-7 rounded-full bg-[#507A9E] text-white flex items-center justify-center text-xs shrink-0 shadow-sm mt-0.5">
+                    <i class="fas fa-building text-[10px]"></i>
                 </div>
-                <div class="p-2 sm:p-2.5 md:p-3 lg:p-4">
-                    <h3 class="font-bold text-slate-800 text-[10px] sm:text-[11px] md:text-xs mb-0.5 sm:mb-1 lg:mb-1.5 leading-tight">Perencanaan Tenaga Kerja Mikro</h3>
-                    <p class="text-[8px] sm:text-[8.5px] md:text-[9px] text-slate-500 line-clamp-2 mb-0">
-                        Analisis kebutuhan tenaga kerja di tingkat instansi atau perusahaan secara terperinci.
+                <div class="flex-1 min-w-0">
+                    <div class="flex items-center justify-between gap-1 mb-1">
+                        <span class="text-[11px] font-bold text-slate-800 truncate">RTK Mikro</span>
+                        <span class="text-[8.5px] font-bold text-slate-700 bg-slate-100 px-2 py-0.5 rounded-full border border-slate-200/60 leading-none">Instansi</span>
+                    </div>
+                    <p class="text-[9.5px] text-slate-600 leading-snug mb-2">
+                        Perencanaan formasi dan analisis kebutuhan naker perusahaan.
                     </p>
+                    <div class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-slate-100/90 text-slate-700 text-[8.5px] font-semibold border border-slate-200/70">
+                        <i class="fas fa-users-gear text-slate-600 text-[9px]"></i>
+                        <span>Kebutuhan Unit Kerja</span>
+                    </div>
                 </div>
             </div>
         </div>
