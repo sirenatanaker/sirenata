@@ -51,7 +51,7 @@
             </div>
 
             <div class="relative hidden h-[320px] items-center justify-center sm:flex sm:h-[380px] lg:h-[520px] reveal-right">
-                <div class="absolute left-1/2 top-1/2 h-[190px] w-[190px] -translate-x-1/2 -translate-y-[52%] bg-gradient-to-tr from-amber-400 via-amber-300 to-amber-200 opacity-65 animate-blob lg:h-[340px] lg:w-[340px]"
+                <div class="absolute left-1/2 top-1/2 h-[190px] w-[190px] -translate-x-1/2 -translate-y-[52%] bg-gradient-to-tr from-amber-400 via-amber-300 to-amber-200 opacity-65 lg:h-[340px] lg:w-[340px]"
                     style="border-radius: 42% 58% 63% 37% / 48% 40% 60% 52%;">
                 </div>
 
@@ -68,7 +68,7 @@
                 </svg>
 
                 <div
-                    class="absolute bottom-2 left-3 z-20 w-32 rounded-lg border border-white/80 bg-white/95 p-2.5 shadow-xl animate-card-float-2 md:w-32 md:p-2.5 lg:bottom-8 lg:left-6 lg:w-44 lg:rounded-2xl lg:p-4">
+                    class="absolute bottom-2 left-3 z-20 w-32 rounded-lg border border-white/80 bg-white/95 p-2.5 shadow-xl transition-all duration-300 hover:scale-105 md:w-32 md:p-2.5 lg:bottom-8 lg:left-6 lg:w-44 lg:rounded-2xl lg:p-4">
                     <div class="mb-2 flex items-center justify-between lg:mb-3">
                         <span class="text-[9px] font-bold uppercase tracking-wider text-slate-400 lg:text-[10px]">Progres
                             Kursus</span>
@@ -85,7 +85,7 @@
 
                 <!-- CHAT MESSAGE CARD: Sertifikat Diperoleh (Bentuk message) -->
                 <div
-                    class="absolute bottom-18 right-2 sm:bottom-24 sm:right-3 lg:bottom-30 lg:right-4 z-20 flex items-center gap-2 rounded-xl border border-white/80 bg-[#13416B] px-2.5 py-2 text-white shadow-xl animate-card-float-1 md:gap-2.5 md:px-3 md:py-2.5 lg:gap-3.5 lg:px-4 lg:py-3 transition-all duration-300 hover:scale-105"
+                    class="absolute bottom-18 right-2 sm:bottom-24 sm:right-3 lg:bottom-30 lg:right-4 z-20 flex items-center gap-2 rounded-xl border border-white/80 bg-[#13416B] px-2.5 py-2 text-white shadow-xl transition-all duration-300 hover:scale-105 md:gap-2.5 md:px-3 md:py-2.5 lg:gap-3.5 lg:px-4 lg:py-3"
                     style="border-radius: 18px 18px 18px 3px;">
                     <span
                         class="flex h-8 w-8 items-center justify-center rounded-xl bg-amber-400 text-[#13416B] shrink-0 md:h-8 md:w-8 lg:h-10 lg:w-10">
@@ -97,7 +97,7 @@
                     </div>
                 </div>
 
-                <div class="relative z-10 w-full max-w-[430px] lg:max-w-[485px] animate-float drop-shadow-2xl">
+                <div class="relative z-10 w-full max-w-[430px] lg:max-w-[485px] drop-shadow-2xl">
                     <div class="relative">
                         <img src="{{ asset('images/LMS.webp') }}"
                             alt="Aparatur sedang belajar menggunakan laptop"

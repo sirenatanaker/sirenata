@@ -118,7 +118,7 @@
                     </svg>
                 </div>
                 <img src="{{ asset('images/FAQ.webp') }}" alt="Pusat Bantuan Kemnaker"
-                    class="relative z-10 w-full max-w-[280px] md:max-w-[340px] lg:max-w-[480px] h-auto object-contain drop-shadow-2xl animate-float mt-4 lg:mt-8"
+                    class="relative z-10 w-full max-w-[280px] md:max-w-[340px] lg:max-w-[480px] h-auto object-contain drop-shadow-2xl mt-4 lg:mt-8"
                     style="-webkit-mask-image: linear-gradient(to bottom, black 87%, transparent 100%); mask-image: linear-gradient(to bottom, black 87%, transparent 100%);">
             </div>
 
