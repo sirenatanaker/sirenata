@@ -132,7 +132,7 @@
                 <div class="flex-1 min-w-0">
                     <div class="flex items-center justify-between gap-1 mb-1">
                         <span class="text-xs sm:text-[13px] font-bold text-slate-800 truncate">RTK Mikro</span>
-                        <span class="text-[9.5px] font-bold text-slate-700 bg-slate-100 px-2 py-0.5 rounded-full border border-slate-200/60 leading-none">Instansi</span>
+                        <span class="text-[9.5px] font-bold text-slate-700 bg-slate-100 px-2 py-0.5 rounded-full border border-slate-200/60 leading-none">Perusahaan</span>
                     </div>
                     <p class="text-[11px] text-slate-600 leading-snug mb-0">
                         Perencanaan formasi dan analisis kebutuhan naker perusahaan.
