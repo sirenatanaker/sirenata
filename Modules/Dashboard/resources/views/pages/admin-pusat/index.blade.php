@@ -61,7 +61,7 @@
                             <p class="text-[10px] sm:text-xs text-white/80 mt-1">{{ $kpi['hint'] }}</p>
                         </div>
                         <div class="shrink-0 text-white/80 group-hover:text-white transition-all duration-300 transform group-hover:scale-110">
-                            <i class="fas {{ $kpi['icon'] }} text-4xl sm:text-5xl" aria-hidden="true"></i>
+                            <i class="fas {{ $kpi['icon'] }} text-2xl sm:text-3xl" aria-hidden="true"></i>
                         </div>
                     </div>
                     <!-- Efek Dekoratif Bubbles Geometris Profesional -->

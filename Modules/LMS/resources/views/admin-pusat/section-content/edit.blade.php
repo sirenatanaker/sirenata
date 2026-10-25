@@ -695,6 +695,10 @@
             icons['indent']['+1'] = '<i class="fas fa-indent text-[13.5px] text-slate-500 ql-icon-custom"></i>';
             icons['header']['1'] = '<b class="text-[13.5px] font-sans">H1</b>';
             icons['header']['2'] = '<b class="text-[13.5px] font-sans">H2</b>';
+            icons['align'][''] = '<i class="fas fa-align-left text-[14px] text-slate-600 ql-icon-custom"></i>';
+            icons['align']['center'] = '<i class="fas fa-align-center text-[14px] text-slate-600 ql-icon-custom"></i>';
+            icons['align']['right'] = '<i class="fas fa-align-right text-[14px] text-slate-600 ql-icon-custom"></i>';
+            icons['align']['justify'] = '<i class="fas fa-align-justify text-[14px] text-slate-600 ql-icon-custom"></i>';
 
             var quill = new Quill('#editor-container', {
                 bounds: '#editor-container', // <--- PENTING: Mencegah modal/tooltip rumus terpotong ke luar editor
@@ -735,6 +739,57 @@
                 placeholder: 'Ketik dokumen / materi pembelajaran di sini...',
                 theme: 'snow'
             });
+
+            // Cegah scroll jump ke atas ketika rumus matematika (formula) disubmit / disimpan
+            if (quill.root) {
+                const originalRootFocus = quill.root.focus.bind(quill.root);
+                quill.root.focus = function(options) {
+                    originalRootFocus(Object.assign({ preventScroll: true }, options));
+                };
+            }
+
+            if (quill.theme && quill.theme.tooltip) {
+                const originalTooltipSave = quill.theme.tooltip.save.bind(quill.theme.tooltip);
+                quill.theme.tooltip.save = function() {
+                    const savedScrollY = window.scrollY || window.pageYOffset || document.documentElement.scrollTop;
+                    originalTooltipSave();
+                    window.scrollTo({ top: savedScrollY, behavior: 'instant' });
+                    requestAnimationFrame(() => {
+                        window.scrollTo({ top: savedScrollY, behavior: 'instant' });
+                    });
+                    setTimeout(() => {
+                        window.scrollTo({ top: savedScrollY, behavior: 'instant' });
+                    }, 20);
+                    setTimeout(() => {
+                        window.scrollTo({ top: savedScrollY, behavior: 'instant' });
+                    }, 80);
+                };
+
+                const tooltipRoot = quill.theme.tooltip.root;
+                if (tooltipRoot) {
+                    const tooltipInput = tooltipRoot.querySelector('input');
+                    if (tooltipInput) {
+                        tooltipInput.addEventListener('keydown', function(e) {
+                            if (e.key === 'Enter') {
+                                e.stopPropagation();
+                                const savedScrollY = window.scrollY || window.pageYOffset || document.documentElement.scrollTop;
+                                setTimeout(() => {
+                                    window.scrollTo({ top: savedScrollY, behavior: 'instant' });
+                                }, 0);
+                            }
+                        }, true);
+                    }
+                    const actionBtn = tooltipRoot.querySelector('a.ql-action');
+                    if (actionBtn) {
+                        actionBtn.addEventListener('click', function(e) {
+                            const savedScrollY = window.scrollY || window.pageYOffset || document.documentElement.scrollTop;
+                            setTimeout(() => {
+                                window.scrollTo({ top: savedScrollY, behavior: 'instant' });
+                            }, 0);
+                        }, true);
+                    }
+                }
+            }
 
             // Sisipkan teks label di luar menu dropdown (Ukuran Huruf, Jarak Baris, Jarak Huruf)
             function setupLabeledPickers() {
@@ -1440,11 +1495,54 @@
             .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
             .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
 
-            /* TOOLTIP UI */
+            /* TOOLTIP UI - Ditampilkan di ATAS tombol agar tidak menutupi icon maupun dropdown menu */
             .quill-tooltip { position: relative; }
-            .quill-tooltip:hover::after { content: attr(data-tooltip); position: absolute; bottom: -32px; left: 50%; transform: translateX(-50%); background-color: #1e293b; color: #ffffff; padding: 6px 12px; border-radius: 6px; font-size: 11px; font-weight: bold; white-space: nowrap; z-index: 1000; pointer-events: none; opacity: 0; animation: fadeInTooltip 0.2s forwards; animation-delay: 0.3s; }
-            .quill-tooltip:hover::before { content: ''; position: absolute; bottom: -8px; left: 50%; transform: translateX(-50%); border-width: 5px; border-style: solid; border-color: transparent transparent #1e293b transparent; opacity: 0; animation: fadeInTooltip 0.2s forwards; animation-delay: 0.3s; }
+            .quill-tooltip:hover::after {
+                content: attr(data-tooltip);
+                position: absolute;
+                bottom: calc(100% + 8px);
+                left: 50%;
+                transform: translateX(-50%);
+                background-color: #1e293b;
+                color: #ffffff;
+                padding: 5px 10px;
+                border-radius: 6px;
+                font-size: 11px;
+                font-weight: 600;
+                white-space: nowrap;
+                z-index: 1000;
+                pointer-events: none;
+                opacity: 0;
+                animation: fadeInTooltip 0.2s forwards;
+                animation-delay: 0.25s;
+                box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
+            }
+            .quill-tooltip:hover::before {
+                content: '';
+                position: absolute;
+                bottom: calc(100% + 2px);
+                left: 50%;
+                transform: translateX(-50%);
+                border-width: 6px 5px 0 5px;
+                border-style: solid;
+                border-color: #1e293b transparent transparent transparent;
+                opacity: 0;
+                animation: fadeInTooltip 0.2s forwards;
+                animation-delay: 0.25s;
+                pointer-events: none;
+                z-index: 1000;
+            }
             @keyframes fadeInTooltip { to { opacity: 1; } }
+
+            /* Saat dropdown picker sedang terbuka/aktif, SEMBUNYIKAN tooltip agar tidak mengganggu pilihan user */
+            .ql-picker.ql-expanded::after,
+            .ql-picker.ql-expanded::before,
+            .ql-picker.ql-expanded:hover::after,
+            .ql-picker.ql-expanded:hover::before {
+                display: none !important;
+                opacity: 0 !important;
+                visibility: hidden !important;
+            }
 
             /* ========================================================
                DESAIN UI TOOLBAR (Sesuai Panduan Border Kotak Rounded)
@@ -1498,6 +1596,72 @@
             .ql-toolbar.ql-snow .ql-color, .ql-toolbar.ql-snow .ql-background { width: 40px !important; }
             .ql-toolbar.ql-snow .ql-color .ql-picker-label, .ql-toolbar.ql-snow .ql-background .ql-picker-label { padding: 0 3px 0 7px !important; }
             .ql-toolbar.ql-snow .ql-color .ql-picker-label svg, .ql-toolbar.ql-snow .ql-background .ql-picker-label svg { width: 18px !important; height: 18px !important; display: block !important; margin-right: 2px; }
+
+            /* DESAIN DROPDOWN RATA TEKS (ALIGNMENT) */
+            .ql-toolbar.ql-snow .ql-picker.ql-align {
+                width: 36px !important;
+                height: 34px !important;
+            }
+            .ql-toolbar.ql-snow .ql-picker.ql-align .ql-picker-label {
+                padding: 0 !important;
+                display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+                height: 100% !important;
+                width: 100% !important;
+                border: none !important;
+            }
+            .ql-toolbar.ql-snow .ql-picker.ql-align .ql-picker-label .ql-icon-custom {
+                font-size: 15px !important;
+                color: #475569 !important;
+                display: inline-flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+            }
+            .ql-toolbar.ql-snow .ql-picker.ql-align:hover .ql-picker-label .ql-icon-custom {
+                color: #1e293b !important;
+            }
+            .ql-toolbar.ql-snow .ql-picker.ql-align.ql-expanded .ql-picker-label .ql-icon-custom {
+                color: #1e3a8a !important;
+            }
+            .ql-toolbar.ql-snow .ql-picker.ql-align .ql-picker-options {
+                width: 36px !important;
+                min-width: 36px !important;
+                padding: 4px !important;
+                display: none;
+                top: calc(100% + 4px) !important;
+            }
+            .ql-toolbar.ql-snow .ql-picker.ql-align.ql-expanded .ql-picker-options {
+                display: flex !important;
+                flex-direction: column !important;
+                align-items: center !important;
+            }
+            .ql-toolbar.ql-snow .ql-picker.ql-align .ql-picker-item {
+                width: 28px !important;
+                height: 28px !important;
+                padding: 0 !important;
+                display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+                margin: 2px 0 !important;
+                border-radius: 4px !important;
+            }
+            .ql-toolbar.ql-snow .ql-picker.ql-align .ql-picker-item .ql-icon-custom {
+                font-size: 14px !important;
+                color: #475569 !important;
+            }
+            .ql-toolbar.ql-snow .ql-picker.ql-align .ql-picker-item:hover,
+            .ql-toolbar.ql-snow .ql-picker.ql-align .ql-picker-item.ql-selected {
+                background-color: #f1f5f9 !important;
+            }
+            .ql-toolbar.ql-snow .ql-picker.ql-align .ql-picker-item:hover .ql-icon-custom,
+            .ql-toolbar.ql-snow .ql-picker.ql-align .ql-picker-item.ql-selected .ql-icon-custom {
+                color: #1e3a8a !important;
+            }
+            .ql-toolbar.ql-snow .ql-picker.ql-align svg {
+                width: 18px !important;
+                height: 18px !important;
+            }
 
             /* WRAPPER KELOMPOK DENGAN LABEL TEKS DI LUAR DROPDOWN */
             .ql-toolbar.ql-snow .ql-labeled-group {

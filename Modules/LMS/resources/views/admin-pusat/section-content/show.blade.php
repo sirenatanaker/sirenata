@@ -59,7 +59,7 @@
                 @endphp
 
                 @if ($hasDoc || $hasLibrary)
-                    <div class="w-full {{ !empty($content->content_text) ? 'pt-5 sm:pt-6 border-t border-slate-100' : '' }}">
+                    <div class="w-full {{ !empty($content->content_text) ? 'pt-3 sm:pt-4 border-t border-slate-100' : '' }}">
                         <div class="mb-3">
                             <h3 class="text-xs sm:text-sm font-extrabold text-slate-800 flex items-center gap-2 uppercase tracking-wider">
                                 <i class="fas fa-bookmark text-[#13416B]"></i>
@@ -70,93 +70,89 @@
                             </p>
                         </div>
 
-                        <div class="space-y-3">
+                        <div class="divide-y divide-slate-100">
                             <!-- Dokumen Lampiran (Bisa Banyak) -->
                             @if ($hasDoc)
-                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3">
-                                    @foreach ($allDocs as $doc)
-                                        @php
-                                            $docUrl = $doc->file_url ?? (filter_var($doc->file_path, FILTER_VALIDATE_URL) ? $doc->file_path : asset('storage/' . $doc->file_path));
-                                            $docName = $doc->file_name ?? basename($doc->file_path);
-                                            $docExt = strtolower(pathinfo($docName, PATHINFO_EXTENSION));
-                                            $iconClass = 'fa-file-alt text-slate-500';
-                                            if (in_array($docExt, ['pdf'])) {
-                                                $iconClass = 'fa-file-pdf text-red-500';
-                                            } elseif (in_array($docExt, ['doc', 'docx'])) {
-                                                $iconClass = 'fa-file-word text-blue-600';
-                                            } elseif (in_array($docExt, ['xls', 'xlsx', 'csv'])) {
-                                                $iconClass = 'fa-file-excel text-emerald-600';
-                                            } elseif (in_array($docExt, ['ppt', 'pptx'])) {
-                                                $iconClass = 'fa-file-powerpoint text-amber-600';
-                                            } elseif (in_array($docExt, ['zip', 'rar'])) {
-                                                $iconClass = 'fa-file-archive text-yellow-600';
-                                            }
-                                        @endphp
-                                        <div class="group flex items-center justify-between gap-3 p-3 sm:p-3.5 rounded-xl border border-slate-200/90 bg-slate-50/70 hover:bg-white hover:border-[#13416B]/40 hover:shadow-xs transition-all duration-200">
-                                            <div class="flex items-center gap-3 min-w-0 flex-1">
-                                                <div class="w-12 h-12 rounded-xl bg-white border border-slate-200 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform shadow-2xs">
-                                                    <i class="fas {{ $iconClass }} text-xl"></i>
-                                                </div>
-                                                <div class="flex-1 min-w-0">
-                                                    <h4 class="text-xs sm:text-sm font-bold text-slate-800 leading-snug group-hover:text-[#13416B] transition-colors line-clamp-2 break-words" title="{{ $docName }}">
-                                                        {{ $docName }}
-                                                    </h4>
-                                                    @if (!empty($doc->formatted_file_size))
-                                                        <span class="text-[10px] text-slate-400 font-medium inline-block mt-0.5">{{ $doc->formatted_file_size }}</span>
-                                                    @endif
-                                                </div>
+                                @foreach ($allDocs as $doc)
+                                    @php
+                                        $docUrl = $doc->file_url ?? (filter_var($doc->file_path, FILTER_VALIDATE_URL) ? $doc->file_path : asset('storage/' . $doc->file_path));
+                                        $docName = $doc->file_name ?? basename($doc->file_path);
+                                        $docExt = strtolower(pathinfo($docName, PATHINFO_EXTENSION));
+                                        $iconClass = 'fa-file-alt text-slate-500';
+                                        if (in_array($docExt, ['pdf'])) {
+                                            $iconClass = 'fa-file-pdf text-red-500';
+                                        } elseif (in_array($docExt, ['doc', 'docx'])) {
+                                            $iconClass = 'fa-file-word text-blue-600';
+                                        } elseif (in_array($docExt, ['xls', 'xlsx', 'csv'])) {
+                                            $iconClass = 'fa-file-excel text-emerald-600';
+                                        } elseif (in_array($docExt, ['ppt', 'pptx'])) {
+                                            $iconClass = 'fa-file-powerpoint text-amber-600';
+                                        } elseif (in_array($docExt, ['zip', 'rar'])) {
+                                            $iconClass = 'fa-file-archive text-yellow-600';
+                                        }
+                                    @endphp
+                                    <div class="group flex items-center justify-between gap-3 py-2.5 sm:py-3 px-1.5 sm:px-2 rounded-lg hover:bg-slate-50/80 transition-colors">
+                                        <div class="flex items-center gap-3 min-w-0 flex-1">
+                                            <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-slate-100 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+                                                <i class="fas {{ $iconClass }} text-base sm:text-lg"></i>
                                             </div>
-                                            <a href="{{ $docUrl }}" target="_blank" download
-                                                class="inline-flex shrink-0 items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold text-white bg-[#13416B] hover:bg-[#0f3354] transition-all shadow-2xs hover:shadow-xs"
-                                                title="Buka / Unduh Dokumen">
-                                                <i class="fas fa-download text-[10px]"></i>
-                                                <span class="hidden sm:inline">Unduh</span>
-                                            </a>
+                                            <div class="flex-1 min-w-0">
+                                                <h4 class="text-xs sm:text-sm font-semibold text-slate-800 leading-snug group-hover:text-[#13416B] transition-colors line-clamp-1 break-words" title="{{ $docName }}">
+                                                    {{ $docName }}
+                                                </h4>
+                                                @if (!empty($doc->formatted_file_size))
+                                                    <span class="text-[11px] text-slate-400 font-medium inline-block mt-0.5">{{ $doc->formatted_file_size }}</span>
+                                                @endif
+                                            </div>
                                         </div>
-                                    @endforeach
-                                </div>
+                                        <a href="{{ $docUrl }}" target="_blank" download
+                                            class="inline-flex shrink-0 items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold text-white bg-[#13416B] hover:bg-[#0f3354] transition-all shadow-2xs hover:shadow-xs"
+                                            title="Buka / Unduh Dokumen">
+                                            <i class="fas fa-download text-[10px]"></i>
+                                            <span class="hidden sm:inline">Unduh</span>
+                                        </a>
+                                    </div>
+                                @endforeach
                             @endif
 
                             <!-- Koleksi Perpustakaan Terkait (Bisa Banyak & Thumbnail Saja) -->
                             @if ($hasLibrary)
-                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3">
-                                    @foreach ($allLibs as $lib)
-                                        @php
-                                            $libCover = $lib->cover_image_url;
-                                            $libUrl = route('user.library.index', ['open' => $lib->id]);
-                                        @endphp
-                                        <div class="group flex items-center justify-between gap-3 p-3 sm:p-3.5 rounded-xl border border-slate-200/90 bg-slate-50/70 hover:bg-white hover:border-[#13416B]/40 hover:shadow-xs transition-all duration-200">
-                                            <div class="flex items-center gap-3 min-w-0 flex-1">
-                                                {{-- THUMBNAIL SAJA (TANPA ICON, rounded-md) --}}
-                                                <div class="w-12 h-16 rounded-md bg-slate-100 border border-slate-200 overflow-hidden shrink-0 group-hover:scale-105 transition-transform relative shadow-2xs">
-                                                    @if ($libCover)
-                                                        <img src="{{ $libCover }}" alt="{{ $lib->title }}" class="w-full h-full object-cover">
-                                                    @else
-                                                        <div class="w-full h-full bg-gradient-to-br from-slate-200 to-slate-300 flex items-center justify-center text-slate-400">
-                                                            <span class="text-[8px] font-bold text-slate-400 uppercase">BUKU</span>
-                                                        </div>
-                                                    @endif
-                                                </div>
-                                                <div class="flex-1 min-w-0">
-                                                    <h4 class="text-xs sm:text-sm font-bold text-slate-800 leading-snug group-hover:text-[#13416B] transition-colors line-clamp-2" title="{{ $lib->title }}">
-                                                        {{ $lib->title }}
-                                                    </h4>
-                                                    @if (!empty($lib->description))
-                                                        <p class="text-[11px] text-slate-500 line-clamp-2 leading-tight mt-0.5">
-                                                            {{ strip_tags($lib->description) }}
-                                                        </p>
-                                                    @endif
-                                                </div>
+                                @foreach ($allLibs as $lib)
+                                    @php
+                                        $libCover = $lib->cover_image_url;
+                                        $libUrl = route('user.library.index', ['open' => $lib->id]);
+                                    @endphp
+                                    <div class="group flex items-center justify-between gap-3 py-2.5 sm:py-3 px-1.5 sm:px-2 rounded-lg hover:bg-slate-50/80 transition-colors">
+                                        <div class="flex items-center gap-3 min-w-0 flex-1">
+                                            {{-- THUMBNAIL BUKU --}}
+                                            <div class="w-9 h-12 sm:w-10 sm:h-13 rounded-md bg-slate-100 overflow-hidden shrink-0 group-hover:scale-105 transition-transform relative shadow-2xs">
+                                                @if ($libCover)
+                                                    <img src="{{ $libCover }}" alt="{{ $lib->title }}" class="w-full h-full object-cover">
+                                                @else
+                                                    <div class="w-full h-full bg-gradient-to-br from-slate-200 to-slate-300 flex items-center justify-center text-slate-400">
+                                                        <span class="text-[8px] font-bold text-slate-400 uppercase">BUKU</span>
+                                                    </div>
+                                                @endif
                                             </div>
-                                            <a href="{{ $libUrl }}" target="_blank"
-                                                class="inline-flex shrink-0 items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold text-[#13416B] bg-[#13416B]/10 hover:bg-[#13416B] hover:text-white transition-all shadow-2xs"
-                                                title="Buka Koleksi di Perpustakaan">
-                                                <span>Buka</span>
-                                                <i class="fas fa-arrow-up-right-from-square text-[9px]"></i>
-                                            </a>
+                                            <div class="flex-1 min-w-0">
+                                                <h4 class="text-xs sm:text-sm font-semibold text-slate-800 leading-snug group-hover:text-[#13416B] transition-colors line-clamp-1" title="{{ $lib->title }}">
+                                                    {{ $lib->title }}
+                                                </h4>
+                                                @if (!empty($lib->description))
+                                                    <p class="text-[11px] text-slate-500 line-clamp-1 leading-tight mt-0.5">
+                                                        {{ strip_tags($lib->description) }}
+                                                    </p>
+                                                @endif
+                                            </div>
                                         </div>
-                                    @endforeach
-                                </div>
+                                        <a href="{{ $libUrl }}" target="_blank"
+                                            class="inline-flex shrink-0 items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold text-[#13416B] bg-[#13416B]/10 hover:bg-[#13416B] hover:text-white transition-all shadow-2xs"
+                                            title="Buka Koleksi di Perpustakaan">
+                                            <span>Buka</span>
+                                            <i class="fas fa-arrow-up-right-from-square text-[9px]"></i>
+                                        </a>
+                                    </div>
+                                @endforeach
                             @endif
                         </div>
                     </div>
