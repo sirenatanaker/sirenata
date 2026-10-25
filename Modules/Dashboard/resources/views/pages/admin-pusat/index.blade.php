@@ -65,10 +65,13 @@
                             <i class="fas {{ $kpi['icon'] }} text-xl sm:text-2xl" aria-hidden="true"></i>
                         </div>
                     </div>
-                    <!-- Dekorasi Watermark Background -->
-                    <div
-                        class="absolute -right-5 -bottom-5 sm:-right-6 sm:-bottom-6 text-white opacity-[0.10] group-hover:opacity-[0.16] transition-all duration-500 pointer-events-none transform group-hover:scale-110 z-0">
-                        <i class="fas {{ $kpi['icon'] }} text-8xl sm:text-9xl" aria-hidden="true"></i>
+                    <!-- Efek Dekoratif Bubbles Geometris Profesional -->
+                    <div class="absolute inset-0 pointer-events-none z-0">
+                        <div class="absolute -top-12 -right-10 w-44 h-44 border-[16px] border-white/5 rounded-full group-hover:scale-105 transition-transform duration-500"></div>
+                        <div class="absolute -bottom-10 right-10 w-28 h-28 bg-white/5 rounded-full"></div>
+                        <div class="absolute top-3 right-24 w-12 h-12 border-[4px] border-white/15 rounded-full"></div>
+                        <div class="absolute bottom-4 right-32 w-3 h-3 bg-white/20 rounded-full"></div>
+                        <div class="absolute top-5 right-40 w-2 h-2 bg-white/10 rounded-full"></div>
                     </div>
                 </div>
             @endforeach

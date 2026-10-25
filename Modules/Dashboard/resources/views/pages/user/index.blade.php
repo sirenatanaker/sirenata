@@ -55,10 +55,19 @@
                     <div class="absolute top-5 right-40 w-2 h-2 bg-white/10 rounded-full"></div>
                 </div>
 
-                <div class="relative z-10">
-                    <p class="text-white/85 text-xs sm:text-sm font-bold uppercase mb-1 tracking-wider">Total Kursus</p>
-                    <h3 class="text-2xl sm:text-3xl font-extrabold text-white">{{ $stats['total'] }}</h3>
-                    <p class="text-[10px] sm:text-xs text-white/80 mt-1">Seluruh kursus pada sistem</p>
+                <div class="relative z-10 flex items-center justify-between gap-3">
+                    <div>
+                        <p class="text-white/85 text-xs sm:text-sm font-bold uppercase mb-1 tracking-wider">Total Kursus</p>
+                        <h3 class="text-2xl sm:text-3xl font-extrabold text-white">{{ $stats['total'] }}</h3>
+                        <p class="text-[10px] sm:text-xs text-white/80 mt-1">Seluruh kursus pada sistem</p>
+                    </div>
+
+                    <!-- Badge Putih Solid, Ikon Topi Toga / Edukasi -->
+                    <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-white text-[#13416B] flex items-center justify-center shrink-0 shadow-sm group-hover:scale-105 transition-transform duration-300">
+                        <svg class="w-6 h-6 sm:w-7 sm:h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M4.26 10.147a60.438 60.438 0 0 0-.491 6.347A48.62 48.62 0 0 1 12 20.904a48.62 48.62 0 0 1 8.232-4.41 60.46 60.46 0 0 0-.491-6.347m-15.482 0a50.636 50.636 0 0 0-2.658-.813A59.906 59.906 0 0 1 12 3.493a59.903 59.903 0 0 1 10.399 5.84c-.896.248-1.783.52-2.658.814m-15.482 0A50.717 50.717 0 0 1 12 13.489a50.702 50.702 0 0 1 7.74-3.342M6.75 15a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5Zm0 0v-3.675A55.378 55.378 0 0 1 12 8.443m-5.25 6.557q.105.105.215.205" />
+                        </svg>
+                    </div>
                 </div>
             </div>
 
@@ -74,10 +83,19 @@
                     <div class="absolute top-5 right-40 w-2 h-2 bg-white/10 rounded-full"></div>
                 </div>
 
-                <div class="relative z-10">
-                    <p class="text-white/85 text-xs sm:text-sm font-bold uppercase mb-1 tracking-wider">Rata-rata Progress</p>
-                    <h3 class="text-2xl sm:text-3xl font-extrabold text-white">{{ $stats['avg_progress'] }}%</h3>
-                    <p class="text-[10px] sm:text-xs text-white/80 mt-1">Tingkat penyelesaian topik</p>
+                <div class="relative z-10 flex items-center justify-between gap-3">
+                    <div>
+                        <p class="text-white/85 text-xs sm:text-sm font-bold uppercase mb-1 tracking-wider">Rata-rata Progress</p>
+                        <h3 class="text-2xl sm:text-3xl font-extrabold text-white">{{ $stats['avg_progress'] }}%</h3>
+                        <p class="text-[10px] sm:text-xs text-white/80 mt-1">Tingkat penyelesaian topik</p>
+                    </div>
+
+                    <!-- Badge Putih Solid, Ikon Tren Progress -->
+                    <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-white text-[#547996] flex items-center justify-center shrink-0 shadow-sm group-hover:scale-105 transition-transform duration-300">
+                        <svg class="w-6 h-6 sm:w-7 sm:h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18 9 11.25l4.306 4.306a11.95 11.95 0 0 1 5.814-5.518l2.74-1.22m0 0-5.94-2.281m5.94 2.28-2.28 5.941" />
+                        </svg>
+                    </div>
                 </div>
             </div>
 
@@ -93,10 +111,19 @@
                     <div class="absolute top-5 right-40 w-2 h-2 bg-white/15 rounded-full"></div>
                 </div>
 
-                <div class="relative z-10">
-                    <p class="text-white/85 text-xs sm:text-sm font-bold uppercase mb-1 tracking-wider">Kursus Selesai</p>
-                    <h3 class="text-2xl sm:text-3xl font-extrabold text-white">{{ $stats['selesai'] }}</h3>
-                    <p class="text-[10px] sm:text-xs text-white/80 mt-1">Kursus yang telah dituntaskan</p>
+                <div class="relative z-10 flex items-center justify-between gap-3">
+                    <div>
+                        <p class="text-white/85 text-xs sm:text-sm font-bold uppercase mb-1 tracking-wider">Kursus Selesai</p>
+                        <h3 class="text-2xl sm:text-3xl font-extrabold text-white">{{ $stats['selesai'] }}</h3>
+                        <p class="text-[10px] sm:text-xs text-white/80 mt-1">Kursus yang telah dituntaskan</p>
+                    </div>
+
+                    <!-- Badge Putih Solid, Ikon Piala Prestasi -->
+                    <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-white text-[#2b658d] flex items-center justify-center shrink-0 shadow-sm group-hover:scale-105 transition-transform duration-300">
+                        <svg class="w-6 h-6 sm:w-7 sm:h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 18.75h-9m9 0a3 3 0 0 1 3 3h-15a3 3 0 0 1 3-3m9 0v-3.375c0-.621-.503-1.125-1.125-1.125h-.871M7.5 18.75v-3.375c0-.621.504-1.125 1.125-1.125h.872m5.004 0A6.002 6.002 0 0 0 18 9.75V6A2.25 2.25 0 0 0 15.75 3.75H8.25A2.25 2.25 0 0 0 6 6v3.75a6.002 6.002 0 0 0 3.504 5.625m4.992 0a6.01 6.01 0 0 1-4.992 0M6 6.75H4.875A2.625 2.625 0 0 0 2.25 9.375V9.75a5.25 5.25 0 0 0 4.125 5.143M18 6.75h1.125a2.625 2.625 0 0 1 2.625 2.625V9.75a5.25 5.25 0 0 1-4.125 5.143" />
+                        </svg>
+                    </div>
                 </div>
             </div>
         </div>
