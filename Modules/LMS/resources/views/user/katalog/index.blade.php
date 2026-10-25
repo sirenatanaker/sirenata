@@ -12,7 +12,7 @@
         {{-- ========================================== --}}
         {{-- HEADER KATALOG DENGAN ILUSTRASI GRUP       --}}
         {{-- ========================================== --}}
-        <div class="relative bg-[#13416B] rounded-md p-6 sm:p-8 lg:p-10 mb-6 sm:mb-8 flex items-center justify-between border border-blue-900/20 shadow-lg overflow-hidden min-h-[280px] sm:min-h-[280px] lg:min-h-[320px]">
+        <div class="relative bg-[#13416B] rounded-md px-5 py-4 sm:p-8 lg:p-10 mb-4 sm:mb-8 flex items-center justify-between border border-blue-900/20 shadow-lg overflow-hidden min-h-[180px] sm:min-h-[280px] lg:min-h-[320px]">
             
             <!-- Efek Dekoratif Bubbles Geometris Profesional -->
             <div class="absolute inset-0 pointer-events-none z-0">
@@ -26,19 +26,19 @@
             </div>
 
             <!-- Sisi Kiri: Teks Utama -->
-            <div class="relative z-20 w-full sm:w-[60%] lg:w-[60%]  text-left ">
+            <div class="relative z-20 w-full sm:w-[60%] lg:w-[60%] text-left">
                 
                 {{-- BADGE: MENGGUNAKAN FONT KALAM --}}
-                <span class="inline-flex items-center gap-2 px-3 py-1 bg-white/10 backdrop-blur-md rounded-md text-sm sm:text-base tracking-wider text-white border border-white/10 mb-4 shadow-sm" style="font-family: 'Kalam', cursive;">
+                <span class="inline-flex items-center gap-2 px-2.5 py-0.5 sm:px-3 sm:py-1 bg-white/10 backdrop-blur-md rounded-md text-xs sm:text-base tracking-wider text-white border border-white/10 mb-2 sm:mb-4 shadow-sm" style="font-family: 'Kalam', cursive;">
                      Eksplorasi Kompetensi
                 </span>
                 
                 {{-- JUDUL: MENGGUNAKAN FONT OSWALD --}}
-                <h1 class="text-2xl md:text-4xl lg:text-5xl text-white mb-4" style="font-family: 'Oswald', sans-serif;">
+                <h1 class="text-xl sm:text-3xl md:text-4xl lg:text-5xl text-white mb-2 sm:mb-4" style="font-family: 'Oswald', sans-serif;">
                     Katalog Pembelajaran
                 </h1>
                 
-                <p class="text-sm md:text-base text-blue-100/90 leading-relaxed max-w-xl lg:max-w-2xl font-medium">
+                <p class="text-xs sm:text-sm md:text-base text-blue-100/90 leading-relaxed max-w-xl lg:max-w-2xl font-medium">
                     Temukan dan pelajari berbagai kursus pengembangan kompetensi yang dirancang khusus untuk meningkatkan keterampilan dan profesionalitas Anda.
                 </p>
 
@@ -173,18 +173,18 @@
                     });
 
                     return [$c->id => [
-                        'name'         => $c->name,
-                        'category'     => $c->category->name ?? 'Umum',
-                        'description'  => $c->description,
-                        'students'     => $c->students_count,
-                        'modules'      => $c->sections_count,
-                        'topics'       => $sections->sum(fn($s) => count($s['contents'])),
-                        'thumbnail'    => ! empty($c->thumbnail)
+                        'name'          => $c->name,
+                        'category'      => $c->category->name ?? 'Umum',
+                        'description'   => $c->description,
+                        'students'      => $c->students_count,
+                        'modules'       => $c->sections_count,
+                        'topics'        => $sections->sum(fn($s) => count($s['contents'])),
+                        'thumbnail'     => ! empty($c->thumbnail)
                             ? (str_starts_with($c->thumbnail, 'http') ? $c->thumbnail : asset('storage/' . $c->thumbnail))
                             : null,
                         'audienceLabel' => ($c->audience ?? 'instansi') === 'swasta' ? 'Swasta' : 'Instansi',
-                        'sections'     => $sections,
-                        'enrollUrl'    => route('user.catalog.enroll', $c->slug),
+                        'sections'      => $sections,
+                        'enrollUrl'     => route('user.catalog.enroll', $c->slug),
                     ]];
                 });
             @endphp
@@ -392,7 +392,7 @@
                                 <div class="flex-1 overflow-y-auto px-5 sm:px-6 py-4 sm:py-5 custom-scrollbar bg-slate-50/40">
                                     <div class="mb-3.5">
                                         <h4 class="text-xs font-bold uppercase tracking-wider text-slate-500">Struktur Kurikulum</h4>
-                                        <p class="text-[11px] text-slate-400 mt-0.5">Daftar modul dan materi pembelajaran</p>
+                                        <p class="text-[11px] text-slate-400 mt-0.5">Daftar modul dan topik materi pembelajaran</p>
                                     </div>
 
                                     <div class="space-y-2.5">
@@ -427,6 +427,7 @@
                                                      x-cloak
                                                      class="border-t border-slate-100 bg-slate-50/30 p-2.5 sm:p-3 space-y-1.5">
                                                     
+                                                    <!-- Daftar Materi Konten -->
                                                     <template x-for="(content, j) in section.contents" :key="j">
                                                         <div class="flex items-center gap-2.5 px-3 py-2 rounded-lg bg-white border border-slate-100 hover:border-slate-200 transition-colors text-xs">
                                                             <span class="w-6 h-6 rounded-md flex items-center justify-center shrink-0 text-[10px]"
@@ -441,9 +442,6 @@
                                                             <span class="flex-1 min-w-0 font-medium text-slate-700 leading-snug truncate"
                                                                   :title="content.name"
                                                                   x-text="content.name"></span>
-
-                                                            <span class="shrink-0 text-[10px] font-medium text-slate-400 capitalize"
-                                                                  x-text="content.type === 'video' ? 'Video' : (content.type === 'document' ? 'Dokumen' : 'Teks')"></span>
                                                         </div>
                                                     </template>
 

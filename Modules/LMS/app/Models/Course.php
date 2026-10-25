@@ -11,6 +11,7 @@ use Cviebrock\EloquentSluggable\Services\SlugService;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Modules\LMS\Database\Factories\CourseFactory;
 
 // use Modules\LMS\Database\Factories\CourseFactory;
@@ -93,6 +94,16 @@ class Course extends Model
     public function sections(): HasMany
     {
         return $this->hasMany(CourseSection::class)->orderBy('position');
+    }
+
+    public function evaluasiAkhir(): HasOne
+    {
+        return $this->hasOne(PostTest::class, 'course_id')->whereNull('course_section_id');
+    }
+
+    public function postTests(): HasMany
+    {
+        return $this->hasMany(PostTest::class, 'course_id');
     }
 
     // public function students()

@@ -6,16 +6,16 @@
     <!-- CSS Global Khusus untuk memberikan jarak aman konten bawah di layar HP/Mobile -->
     <style>
         @media (max-width: 767px) {
-            body { padding-bottom: 76px !important; }
+            body { padding-bottom: 68px !important; }
         }
     </style>
 
     <aside
-        class="fixed z-50 bg-white transition-all duration-300
-               /* MOBILE (Menjadi Bottom Navigation) */
-               bottom-0 left-0 w-full h-[70px] sm:h-[76px] border-t border-slate-200 shadow-[0_-4px_15px_rgba(0,0,0,0.04)] translate-y-0
+        class="fixed z-50 bg-white/95 dark:bg-[#131A26]/95 backdrop-blur-md transition-all duration-300
+               /* MOBILE (Menjadi Bottom Navigation Bersih & Modern) */
+               bottom-0 left-0 w-full h-[62px] sm:h-[66px] border-t border-slate-200/90 dark:border-[#263346] shadow-[0_-4px_20px_rgba(0,0,0,0.05)] translate-y-0
                /* TABLET & DESKTOP (Menjadi Left Sidebar YouTube Style) */
-               md:top-0 md:bottom-auto md:h-full md:border-e md:border-t-0 md:shadow-none"
+               md:top-0 md:bottom-auto md:h-full md:border-e md:border-t-0 md:shadow-none md:bg-white md:dark:bg-transparent"
         :class="sidebarOpen ? 'md:w-64' : 'md:w-20'"
         @keydown.escape.window="sidebarOpen = false" x-cloak>
         
@@ -44,7 +44,7 @@
             </div>
 
             <!-- Menu Wrapper -->
-            <div class="flex-1 w-full h-full md:h-auto md:overflow-y-auto overflow-x-auto scrollbar-hide flex items-center justify-around md:justify-start md:block pb-safe md:py-3">
+            <div class="flex-1 w-full h-full md:h-auto md:overflow-y-auto overflow-hidden flex items-center justify-around md:justify-start md:block pb-safe md:py-3">
                 @include('dashboard::partials.user.sidebar-item')
             </div>
         </div>

@@ -1,4 +1,4 @@
-<ul class="dashboard-sidebar-items flex flex-col gap-1.5 space-y-1 font-semibold w-full transition-all duration-300"
+<ul class="dashboard-sidebar-items flex flex-col gap-1.5 space-y-1 font-bold w-full transition-all duration-300"
     :class="sidebarOpen ? 'px-3' : 'px-2'">
 
     <!-- Dashboard -->
