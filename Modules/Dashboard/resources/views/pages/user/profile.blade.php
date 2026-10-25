@@ -247,7 +247,7 @@
                 <button type="button" data-tab="personal" @click="tab = 'personal'; window.location.hash = 'personal'"
                     :class="tab === 'personal' ? 'text-[#13416B] dark:text-white border-[#13416B] dark:border-white' : 'text-slate-500 dark:text-slate-400 border-transparent hover:text-slate-800 dark:hover:text-white'"
                     class="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-bold border-b-2 -mb-px transition-colors whitespace-nowrap cursor-pointer">
-                    <i class="fas fa-user text-xs sm:text-sm"></i> Informasi Pribadi
+                    <i class="fas fa-user text-xs sm:text-sm"></i> Informasi Saya
                 </button>
                 <button type="button" data-tab="certificates" @click="tab = 'certificates'; window.location.hash = 'certificates'"
                     :class="tab === 'certificates' ? 'text-[#13416B] dark:text-white border-[#13416B] dark:border-white' : 'text-slate-500 dark:text-slate-400 border-transparent hover:text-slate-800 dark:hover:text-white'"
@@ -263,42 +263,66 @@
             </div>
 
             <div class="p-3.5 sm:p-5 lg:p-6">
-                <!-- Tab: Personal -->
+                <!-- Tab: Personal (Informasi Saya) -->
                 <div x-show="tab === 'personal'" x-cloak>
                     <form action="{{ route('user.profile.update') }}" method="POST" enctype="multipart/form-data">
                         @csrf
                         <div class="mb-4 sm:mb-5">
-                            <h3 class="text-base sm:text-lg font-bold text-slate-900 dark:text-white">Informasi Pribadi</h3>
-                            <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400">Kelola data diri akun Anda.</p>
+                            <h3 class="text-base sm:text-lg font-bold text-slate-900 dark:text-white">Informasi Saya</h3>
+                            <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400">Kelola data identitas dan instansi akun Anda.</p>
                         </div>
 
-                        @php $ssoUser = ! empty($user->siapkerja_id); @endphp
-                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-3.5 sm:gap-5 mb-3.5 sm:mb-5">
+                        @php
+                            $ssoUser = ! empty($user->siapkerja_id);
+                            $rawType = $user->profile?->institution_type;
+                            $typeStr = is_object($rawType) ? ($rawType->value ?? '') : (string) $rawType;
+
+                            // Lembaga / Kementerian Pusat
+                            $isPusat = ($typeStr === 'pusat' || (empty($typeStr) && empty($user->scopeArea?->province_code)));
+
+                            // Wilayah (Provinsi & Kab/Kota) HANYA untuk:
+                            // 1. Instansi Provinsi
+                            // 2. Instansi Kabupaten/Kota
+                            // 3. Orang / Lembaga Swasta
+                            $isProvinsi = ($typeStr === 'provinsi');
+                            $isKabKota  = in_array($typeStr, ['kab_kota', 'kabkota']);
+                            $isSwasta   = ($typeStr === 'swasta');
+                            $showRegion = ! $isPusat && ($isProvinsi || $isKabKota || $isSwasta || ! empty($user->scopeArea?->province_code));
+
+                            $instansiLabel = match ($typeStr) {
+                                'pusat'               => 'Kementerian / Lembaga',
+                                'provinsi'            => 'Instansi (Provinsi)',
+                                'kab_kota', 'kabkota' => 'Instansi (Kabupaten/Kota)',
+                                'swasta'              => 'Perusahaan / Lembaga Swasta',
+                                default               => ($isPusat ? 'Kementerian / Lembaga' : 'Instansi'),
+                            };
+                        @endphp
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-5 mb-4 sm:mb-5">
+                            {{-- Nama Lengkap --}}
                             @if ($ssoUser)
                                 <x-form.input name="full_name" label="Nama Lengkap" value="{{ $user->profile?->full_name ?? $user->name }}" disabled helper="Mengikuti nama akun SIAPKerja" class="rounded-md text-xs sm:text-sm" />
                             @else
                                 <x-form.input name="full_name" label="Nama Lengkap" :required="true" value="{{ $user->profile?->full_name }}" class="rounded-md text-xs sm:text-sm" />
                             @endif
-                            <x-form.input name="nik" label="NIK" value="{{ $user->profile?->nik }}" readonly class="bg-gray-100 dark:bg-slate-700/50 border border-gray-200 dark:border-slate-600 rounded-md cursor-not-allowed text-xs sm:text-sm" />
-                        </div>
 
-                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5 sm:gap-5 mb-4 sm:mb-5">
+                            {{-- Email --}}
                             <x-form.input name="email" label="Email" value="{{ $user->email }}" readonly helper="Mengikuti akun login" class="bg-gray-100 dark:bg-slate-700/50 border border-gray-200 dark:border-slate-600 rounded-md cursor-not-allowed text-xs sm:text-sm" />
-                            <x-form.input name="phone" label="Nomor Handphone" type="tel" inputmode="numeric" pattern="[0-9+]*" placeholder="08xxxx atau +628xxxx" value="{{ $user->profile?->phone }}" helper="Boleh dikosongkan" class="rounded-md text-xs sm:text-sm" />
-                            <x-form.select name="gender" label="Gender" class="rounded-md text-xs sm:text-sm">
-                                <option value="" disabled selected>Pilih Gender</option>
-                                <option value="male"
-                                    {{ old('gender', $user->profile?->gender) == 'male' ? 'selected' : '' }}>Laki-laki
-                                </option>
-                                <option value="female"
-                                    {{ old('gender', $user->profile?->gender) == 'female' ? 'selected' : '' }}>
-                                    Perempuan
-                                </option>
-                            </x-form.select>
-                            <x-form.input name="instansi" label="Kementerian/Lembaga" value="{{ $user->profile?->instansi }}" placeholder="Kementerian Ketenagakerjaan RI" class="rounded-md text-xs sm:text-sm" />
-                            <x-form.input name="unit_kerja" label="Unit Kerja" value="{{ $user->profile?->unit_kerja }}" placeholder="SDM" class="rounded-md text-xs sm:text-sm" />
-                            <x-form.input name="province_name" label="Provinsi" value="{{ $user->scopeArea?->province?->name }}" readonly helper="Mengikuti data wilayah" class="bg-gray-100 dark:bg-slate-700/50 border border-gray-200 dark:border-slate-600 rounded-md cursor-not-allowed text-xs sm:text-sm" />
-                            <x-form.input name="regency_name" label="Kab/Kota" value="{{ $user->scopeArea?->regency?->name }}" readonly helper="Mengikuti data wilayah" class="bg-gray-100 dark:bg-slate-700/50 border border-gray-200 dark:border-slate-600 rounded-md cursor-not-allowed text-xs sm:text-sm" />
+
+                            {{-- Instansi / Kementerian / Lembaga --}}
+                            <x-form.input name="instansi" :label="$instansiLabel" value="{{ $user->profile?->instansi }}" placeholder="Contoh: Kementerian Ketenagakerjaan RI" class="rounded-md text-xs sm:text-sm" />
+
+                            {{-- Unit Kerja --}}
+                            <x-form.input name="unit_kerja" label="Unit Kerja" value="{{ $user->profile?->unit_kerja }}" placeholder="Contoh: Pusat Pasar Kerja / Bidang SDM" class="rounded-md text-xs sm:text-sm" />
+
+                            {{-- Wilayah (HANYA untuk Instansi Provinsi, Kab/Kota, dan Swasta) --}}
+                            @if ($showRegion)
+                                <x-form.input name="province_name" label="Provinsi" value="{{ $user->scopeArea?->province?->name ?? '-' }}" readonly helper="Mengikuti data wilayah instansi" class="bg-gray-100 dark:bg-slate-700/50 border border-gray-200 dark:border-slate-600 rounded-md cursor-not-allowed text-xs sm:text-sm" />
+
+                                @if ($isKabKota || $isSwasta || ! empty($user->scopeArea?->regency?->name))
+                                    <x-form.input name="regency_name" label="Kab/Kota" value="{{ $user->scopeArea?->regency?->name ?? '-' }}" readonly helper="Mengikuti data wilayah instansi" class="bg-gray-100 dark:bg-slate-700/50 border border-gray-200 dark:border-slate-600 rounded-md cursor-not-allowed text-xs sm:text-sm" />
+                                @endif
+                            @endif
                         </div>
 
                         <div class="flex justify-end">
