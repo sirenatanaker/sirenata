@@ -6,8 +6,8 @@
             <ol class="inline-flex items-center flex-wrap gap-y-1.5 gap-x-2">
                 <li>
                     <a href="{{ route('admin-pusat.management-course.courses.index') }}"
-                        class="text-sm font-medium text-slate-500 hover:text-[#13416B] transition-colors whitespace-nowrap flex items-center gap-1.5">
-                        <i class="fas fa-home text-xs"></i> Daftar Course
+                        class="text-sm font-medium text-slate-500 hover:text-[#13416B] transition-colors whitespace-nowrap">
+                        Daftar Course
                     </a>
                 </li>
                 <li>
@@ -88,7 +88,7 @@
                     <div class="px-5 sm:px-6 py-4 sm:py-5 border-b border-slate-100 bg-slate-50 flex flex-col sm:flex-row justify-between sm:items-center gap-4">
                         <div class="flex items-center gap-3">
                             <div class="p-2.5 bg-white text-[#13416B] rounded-xl shrink-0 border border-slate-200 shadow-sm">
-                                <i class="fas fa-layer-group text-lg"></i>
+                                <i class="far fa-folder-open text-lg"></i>
                             </div>
                             <h2 class="text-base sm:text-lg font-bold text-slate-800 tracking-wide">Kurikulum / Modul Belajar</h2>
                         </div>
@@ -365,8 +365,8 @@
                             <i class="fas fa-edit"></i> Edit Informasi Course
                         </a>
                         <a href="{{ route('admin-pusat.management-course.courses.index') }}"
-                            class="flex items-center justify-center w-full px-3 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-sm font-bold text-slate-700 bg-white border border-slate-300 rounded-md sm:rounded-xl hover:bg-slate-50 transition-colors shadow-sm gap-2">
-                            <i class="fas fa-arrow-left"></i> Kembali ke Daftar
+                            class="flex items-center justify-center w-full px-3 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-sm font-bold text-slate-700 bg-white border border-slate-300 rounded-md sm:rounded-xl hover:bg-slate-50 transition-colors shadow-sm">
+                            Kembali ke Daftar
                         </a>
                     </div>
                 </div>

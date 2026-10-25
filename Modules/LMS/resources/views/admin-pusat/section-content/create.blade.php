@@ -107,12 +107,16 @@
                     <h4 class="font-bold text-slate-800 mb-3 border-b border-slate-100 pb-2">Format Teks & Paragraf</h4>
                     <ul class="grid grid-cols-1 md:grid-cols-2 gap-y-3 gap-x-4 text-xs">
                         <li class="flex gap-2 items-start">
-                            <span class="inline-flex items-center justify-between border border-slate-300 rounded px-2 py-0.5 bg-white shrink-0 w-[110px] text-[11px]">Arial <i class="fas fa-caret-down"></i></span>
-                            <span>Memilih jenis huruf (Font Family).</span>
+                            <span class="inline-flex items-center justify-between border border-slate-300 rounded px-2 py-0.5 bg-white shrink-0 text-[11px] gap-1.5"><span class="text-slate-500 font-semibold">Ukuran Huruf</span> <b>14</b> <i class="fas fa-caret-down"></i></span>
+                            <span>Menentukan ukuran huruf teks (10, 12, 14, 16, 18, 24, 32).</span>
                         </li>
                         <li class="flex gap-2 items-start">
-                            <span class="inline-flex items-center justify-between border border-slate-300 rounded px-2 py-0.5 bg-white shrink-0 w-[55px] text-[11px]">14 <i class="fas fa-caret-down"></i></span>
-                            <span>Menentukan ukuran huruf.</span>
+                            <span class="inline-flex items-center justify-between border border-slate-300 rounded px-2 py-0.5 bg-white shrink-0 text-[11px] gap-1.5"><span class="text-slate-500 font-semibold">Jarak Baris</span> <b>1.5</b> <i class="fas fa-caret-down"></i></span>
+                            <span>Mengatur kerapatan baris (1.0, 1.2, 1.5, 2.0, 2.5).</span>
+                        </li>
+                        <li class="flex gap-2 items-start">
+                            <span class="inline-flex items-center justify-between border border-slate-300 rounded px-2 py-0.5 bg-white shrink-0 text-[11px] gap-1.5"><span class="text-slate-500 font-semibold">Jarak Huruf</span> <b>0</b> <i class="fas fa-caret-down"></i></span>
+                            <span>Mengatur spasi / jarak antar huruf (0 (Default), 1, 2, 3, 4).</span>
                         </li>
                         <li class="flex gap-2 items-start">
                             <span class="inline-flex items-center justify-center border border-slate-300 rounded w-7 h-7 bg-white font-bold shrink-0">B</span>
@@ -145,14 +149,6 @@
                         <li class="flex gap-2 items-start">
                             <span class="inline-flex items-center justify-center border border-slate-300 rounded w-10 h-7 bg-white shrink-0"><span class="bg-yellow-300 px-0.5 font-bold">A</span><i class="fas fa-caret-down text-[10px] ml-1"></i></span>
                             <span>Warna latar belakang teks (Highlight).</span>
-                        </li>
-                        <li class="flex gap-2 items-start">
-                            <span class="inline-flex items-center justify-between border border-slate-300 rounded px-2 py-0.5 bg-white shrink-0 w-[140px] text-[11px]">Jarak Baris (Normal) <i class="fas fa-caret-down"></i></span>
-                            <span>Mengatur kerenggangan spasi baris atas dan bawah.</span>
-                        </li>
-                        <li class="flex gap-2 items-start">
-                            <span class="inline-flex items-center justify-between border border-slate-300 rounded px-2 py-0.5 bg-white shrink-0 w-[140px] text-[11px]">Jarak Huruf (Normal) <i class="fas fa-caret-down"></i></span>
-                            <span>Mengatur spasi / jarak antar huruf.</span>
                         </li>
                     </ul>
                 </div>
@@ -306,8 +302,8 @@
             const Parchment = Quill.import('parchment');
             const Font = Quill.import('formats/font'); Font.whitelist = ['arial', 'times-new-roman', 'calibri', 'verdana', 'courier']; Quill.register(Font, true);
             const Size = Quill.import('attributors/style/size'); Size.whitelist = ['10px', '12px', '14px', '16px', '18px', '24px', '32px']; Quill.register(Size, true);
-            const LineHeightStyle = new Parchment.Attributor.Style('lineHeight', 'line-height', { scope: Parchment.Scope.BLOCK, whitelist: ['1', '1.2', '1.5', '2.0', '2.5'] }); Quill.register(LineHeightStyle, true);
-            const LetterSpacingStyle = new Parchment.Attributor.Style('letterSpacing', 'letter-spacing', { scope: Parchment.Scope.INLINE, whitelist: ['1px', '2px', '3px', '4px'] }); Quill.register(LetterSpacingStyle, true);
+            const LineHeightStyle = new Parchment.Attributor.Style('lineHeight', 'line-height', { scope: Parchment.Scope.BLOCK, whitelist: ['1', '1.0', '1.2', '1.5', '2.0', '2.5'] }); Quill.register(LineHeightStyle, true);
+            const LetterSpacingStyle = new Parchment.Attributor.Style('letterSpacing', 'letter-spacing', { scope: Parchment.Scope.INLINE, whitelist: ['0', '0px', '1px', '2px', '3px', '4px'] }); Quill.register(LetterSpacingStyle, true);
 
             class VideoElementSpec extends QuillBlotFormatter.BlotSpec {
                 constructor(formatter) { super(formatter); this.targetElement = null; }
@@ -326,25 +322,25 @@
 
             // OVERRIDE ICON QUILL DEFAULT DENGAN CUSTOM HTML
             var icons = Quill.import('ui/icons');
-            icons['bold'] = '<strong class="text-[14px] font-sans">B</strong>';
-            icons['italic'] = '<em class="text-[14px] font-serif">I</em>';
-            icons['underline'] = '<u class="text-[14px] font-sans">U</u>';
-            icons['strike'] = '<s class="text-[14px] font-sans">S</s>';
-            icons['script']['sub'] = '<span class="text-[13px] font-sans">X<sub class="text-[10px]">2</sub></span>';
-            icons['script']['super'] = '<span class="text-[13px] font-sans">X<sup class="text-[10px]">2</sup></span>';
-            icons['link'] = '<i class="fas fa-link text-[12px] text-slate-500 ql-icon-custom"></i>';
-            icons['image'] = '<i class="fas fa-image text-[12px] text-slate-500 ql-icon-custom"></i>';
-            icons['video'] = '<i class="fas fa-video text-[12px] text-slate-500 ql-icon-custom"></i>';
-            icons['blockquote'] = '<i class="fas fa-quote-right text-[12px] text-slate-500 ql-icon-custom"></i>';
-            icons['code-block'] = '<i class="fas fa-code text-[12px] text-slate-500 ql-icon-custom"></i>';
-            icons['formula'] = '<i class="fas fa-square-root-variable text-[12px] text-slate-500 ql-icon-custom"></i>';
-            icons['clean'] = '<i class="fas fa-eraser text-[12px] text-slate-500 ql-icon-custom"></i>';
-            icons['list']['ordered'] = '<i class="fas fa-list-ol text-[12px] text-slate-500 ql-icon-custom"></i>';
-            icons['list']['bullet'] = '<i class="fas fa-list-ul text-[12px] text-slate-500 ql-icon-custom"></i>';
-            icons['indent']['-1'] = '<i class="fas fa-outdent text-[12px] text-slate-500 ql-icon-custom"></i>';
-            icons['indent']['+1'] = '<i class="fas fa-indent text-[12px] text-slate-500 ql-icon-custom"></i>';
-            icons['header']['1'] = '<b class="text-[12px] font-sans">H1</b>';
-            icons['header']['2'] = '<b class="text-[12px] font-sans">H2</b>';
+            icons['bold'] = '<strong class="text-[15px] font-sans">B</strong>';
+            icons['italic'] = '<em class="text-[15px] font-serif">I</em>';
+            icons['underline'] = '<u class="text-[15px] font-sans">U</u>';
+            icons['strike'] = '<s class="text-[15px] font-sans">S</s>';
+            icons['script']['sub'] = '<span class="text-[14px] font-sans">X<sub class="text-[10px]">2</sub></span>';
+            icons['script']['super'] = '<span class="text-[14px] font-sans">X<sup class="text-[10px]">2</sup></span>';
+            icons['link'] = '<i class="fas fa-link text-[13.5px] text-slate-500 ql-icon-custom"></i>';
+            icons['image'] = '<i class="fas fa-image text-[13.5px] text-slate-500 ql-icon-custom"></i>';
+            icons['video'] = '<i class="fas fa-video text-[13.5px] text-slate-500 ql-icon-custom"></i>';
+            icons['blockquote'] = '<i class="fas fa-quote-right text-[13.5px] text-slate-500 ql-icon-custom"></i>';
+            icons['code-block'] = '<i class="fas fa-code text-[13.5px] text-slate-500 ql-icon-custom"></i>';
+            icons['formula'] = '<i class="fas fa-square-root-variable text-[13.5px] text-slate-500 ql-icon-custom"></i>';
+            icons['clean'] = '<i class="fas fa-eraser text-[13.5px] text-slate-500 ql-icon-custom"></i>';
+            icons['list']['ordered'] = '<i class="fas fa-list-ol text-[13.5px] text-slate-500 ql-icon-custom"></i>';
+            icons['list']['bullet'] = '<i class="fas fa-list-ul text-[13.5px] text-slate-500 ql-icon-custom"></i>';
+            icons['indent']['-1'] = '<i class="fas fa-outdent text-[13.5px] text-slate-500 ql-icon-custom"></i>';
+            icons['indent']['+1'] = '<i class="fas fa-indent text-[13.5px] text-slate-500 ql-icon-custom"></i>';
+            icons['header']['1'] = '<b class="text-[13.5px] font-sans">H1</b>';
+            icons['header']['2'] = '<b class="text-[13.5px] font-sans">H2</b>';
 
             var quill = new Quill('#editor-container', {
                 bounds: '#editor-container', // <--- PENTING: Mencegah modal/tooltip rumus terpotong ke luar editor
@@ -353,11 +349,12 @@
                     blotFormatter: { specs: [ QuillBlotFormatter.ImageSpec, QuillBlotFormatter.IframeVideoSpec, VideoElementSpec ] },
                     toolbar: {
                         container: [
-                            [{ 'font': ['arial', 'times-new-roman', 'calibri', 'verdana', 'courier'] }, { 'size': ['10px', '12px', '14px', '16px', '18px', '24px', '32px'] }],
+                            [{ 'size': ['10px', '12px', '14px', '16px', '18px', '24px', '32px'] }],
+                            [{ 'lineHeight': ['1.0', '1.2', '1.5', '2.0', '2.5'] }],
+                            [{ 'letterSpacing': [false, '1px', '2px', '3px', '4px'] }],
                             ['bold', 'italic', 'underline', 'strike'],
                             [{ 'script': 'sub'}, { 'script': 'super' }],
                             [{ 'color': [] }, { 'background': [] }],
-                            [{ 'lineHeight': ['1', '1.2', '1.5', '2.0', '2.5'] }, { 'letterSpacing': ['1px', '2px', '3px', '4px'] }],
                             [{ 'align': [] }, { 'list': 'ordered' }, { 'list': 'bullet' }, { 'indent': '-1' }, { 'indent': '+1' }],
                             ['link', 'image', 'video'],
                             ['blockquote', 'code-block', 'formula', 'clean']
@@ -371,6 +368,32 @@
                 placeholder: 'Ketik dokumen / materi pembelajaran di sini...',
                 theme: 'snow'
             });
+
+            // Sisipkan teks label di luar menu dropdown (Ukuran Huruf, Jarak Baris, Jarak Huruf)
+            function setupLabeledPickers() {
+                const items = [
+                    { selector: '.ql-size', label: 'Ukuran Huruf' },
+                    { selector: '.ql-lineHeight', label: 'Jarak Baris' },
+                    { selector: '.ql-letterSpacing', label: 'Jarak Huruf' }
+                ];
+                items.forEach(item => {
+                    const picker = document.querySelector(item.selector);
+                    if (!picker || picker.dataset.labeled) return;
+                    picker.dataset.labeled = 'true';
+
+                    const group = document.createElement('span');
+                    group.className = 'ql-labeled-group';
+
+                    const labelEl = document.createElement('span');
+                    labelEl.className = 'ql-custom-label';
+                    labelEl.textContent = item.label;
+
+                    picker.parentNode.insertBefore(group, picker);
+                    group.appendChild(labelEl);
+                    group.appendChild(picker);
+                });
+            }
+            setupLabeledPickers();
 
             setTimeout(() => {
                 document.querySelectorAll('.ql-toolbar button, .ql-toolbar .ql-picker').forEach(el => {
@@ -395,8 +418,8 @@
                     else if(el.classList.contains('ql-color')) title = 'Warna Teks';
                     else if(el.classList.contains('ql-background')) title = 'Warna Sorotan (Highlight)';
                     else if(el.classList.contains('ql-align')) title = 'Rata Teks (Alignment)';
-                    else if(el.classList.contains('ql-lineHeight')) title = 'Jarak Antar Baris (Line Spacing)';
-                    else if(el.classList.contains('ql-letterSpacing')) title = 'Spasi Huruf';
+                    else if(el.classList.contains('ql-lineHeight')) title = 'Jarak Baris';
+                    else if(el.classList.contains('ql-letterSpacing')) title = 'Jarak Huruf';
                     if(title) { el.setAttribute('data-tooltip', title); el.classList.add('quill-tooltip'); }
                 });
             }, 500);
@@ -417,7 +440,40 @@
                     btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1.5"></i> Mengunggah...'; btn.disabled = true; document.getElementById('upload-progress-container').classList.remove('hidden');
                     const formData = new FormData(); formData.append('video', fileInput); formData.append('_token', '{{ csrf_token() }}'); const xhr = new XMLHttpRequest(); xhr.open('POST', "{{ route('admin-pusat.management-course.upload-video-editor') }}", true); xhr.setRequestHeader('Accept', 'application/json'); 
                     xhr.upload.onprogress = function(e) { if (e.lengthComputable) { const percentComplete = (e.loaded / e.total) * 100; const loadedMB = (e.loaded / (1024 * 1024)).toFixed(2); const totalMB = (e.total / (1024 * 1024)).toFixed(2); document.getElementById('upload-progress-text').innerText = `${loadedMB} MB / ${totalMB} MB`; document.getElementById('upload-progress-percent').innerText = `${Math.round(percentComplete)}%`; document.getElementById('upload-progress-bar').style.width = percentComplete + '%'; } };
-                    xhr.onload = function() { if (xhr.status === 200 || xhr.status === 201) { try { const data = JSON.parse(xhr.responseText); if (data.success) { quill.insertEmbed(range ? range.index : quill.getLength(), 'video', data.url); quill.setSelection((range ? range.index : quill.getLength()) + 1); closeVideoModal(); } else alert('Gagal mengunggah video: ' + (data.message || 'Error')); } catch (error) { alert('Respon server tidak valid.'); } } else if (xhr.status === 422) { alert('Validasi Gagal.'); } else if (xhr.status === 413) { alert('Ukuran terlalu besar.'); } else alert('Kesalahan server (Error ' + xhr.status + ').'); btn.innerHTML = '<i class="fas fa-check mr-1.5"></i> Sisipkan'; btn.disabled = false; document.getElementById('upload-progress-container').classList.add('hidden'); };
+                    xhr.onload = function() {
+                        if (xhr.status === 200 || xhr.status === 201) {
+                            try {
+                                const data = JSON.parse(xhr.responseText);
+                                if (data.success) {
+                                    quill.insertEmbed(range ? range.index : quill.getLength(), 'video', data.url);
+                                    quill.setSelection((range ? range.index : quill.getLength()) + 1);
+                                    closeVideoModal();
+                                } else {
+                                    alert('Gagal mengunggah video: ' + (data.message || 'Error'));
+                                }
+                            } catch (error) {
+                                alert('Respon server tidak valid.');
+                            }
+                        } else if (xhr.status === 422) {
+                            let errorMsg = 'Validasi video gagal.';
+                            try {
+                                const res = JSON.parse(xhr.responseText);
+                                if (res.errors && res.errors.video) {
+                                    errorMsg = res.errors.video.join('\n');
+                                } else if (res.message) {
+                                    errorMsg = res.message;
+                                }
+                            } catch(e) {}
+                            alert(errorMsg);
+                        } else if (xhr.status === 413) {
+                            alert('Ukuran video terlalu besar melebihi batas upload server.');
+                        } else {
+                            alert('Kesalahan server (Error ' + xhr.status + ').');
+                        }
+                        btn.innerHTML = '<i class="fas fa-check mr-1.5"></i> Sisipkan';
+                        btn.disabled = false;
+                        document.getElementById('upload-progress-container').classList.add('hidden');
+                    };
                     xhr.onerror = function() { alert('Gagal mengunggah.'); btn.innerHTML = '<i class="fas fa-check mr-1.5"></i> Sisipkan'; btn.disabled = false; document.getElementById('upload-progress-container').classList.add('hidden'); }; xhr.send(formData);
                 } else { var urlInput = document.getElementById('video-url-input').value.trim(); if (!urlInput) return alert('Masukkan Link URL!'); quill.insertEmbed(range ? range.index : quill.getLength(), 'video', urlInput); quill.setSelection((range ? range.index : quill.getLength()) + 1); closeVideoModal(); }
             });
@@ -446,14 +502,14 @@
                ======================================================== */
             .ql-toolbar.ql-snow {
                 border-radius: 0.75rem 0.75rem 0 0; border-color: #cbd5e1; background-color: #ffffff;
-                padding: 12px 16px; display: flex; flex-wrap: wrap; gap: 8px 14px; border-bottom: 1px solid #cbd5e1;
+                padding: 12px 18px; display: flex; flex-wrap: wrap; gap: 8px 12px; border-bottom: 1px solid #cbd5e1;
             }
             .ql-toolbar.ql-snow .ql-formats { display: flex; align-items: center; gap: 6px; margin-right: 0 !important; }
-            .ql-toolbar.ql-snow .ql-formats::after { content: ''; display: inline-block; width: 1px; height: 20px; background-color: #e2e8f0; margin-left: 8px; }
+            .ql-toolbar.ql-snow .ql-formats::after { content: ''; display: inline-block; width: 1px; height: 24px; background-color: #cbd5e1; margin-left: 8px; }
             .ql-toolbar.ql-snow .ql-formats:last-child::after { display: none; }
             .ql-toolbar.ql-snow button {
-                border: 1px solid #cbd5e1 !important; border-radius: 6px !important; background-color: #ffffff !important;
-                width: 28px !important; height: 28px !important; display: inline-flex !important; align-items: center !important;
+                border: 1px solid #cbd5e1 !important; border-radius: 8px !important; background-color: #ffffff !important;
+                width: 34px !important; height: 34px !important; display: inline-flex !important; align-items: center !important;
                 justify-content: center !important; color: #475569 !important; transition: all 0.2s ease; padding: 0 !important;
             }
             .ql-toolbar.ql-snow button svg { display: none !important; }
@@ -463,19 +519,80 @@
             .ql-toolbar.ql-snow button.ql-active .ql-icon-custom { color: #1e3a8a !important; }
 
             .ql-toolbar.ql-snow .ql-picker {
-                border: 1px solid #cbd5e1 !important; border-radius: 6px !important; background-color: #ffffff !important;
-                height: 28px !important; color: #475569 !important;
+                border: 1px solid #cbd5e1 !important; border-radius: 8px !important; background-color: #ffffff !important;
+                height: 34px !important; color: #475569 !important;
             }
-            .ql-toolbar.ql-snow .ql-picker-label { padding: 0 8px !important; border: none !important; line-height: 26px !important; display: flex; align-items: center; justify-content: space-between; }
-            .ql-toolbar.ql-snow .ql-picker-label::before { line-height: 26px !important; }
+            .ql-toolbar.ql-snow .ql-picker-label { padding: 0 8px !important; border: none !important; line-height: 32px !important; display: flex; align-items: center; justify-content: space-between; }
+            .ql-toolbar.ql-snow .ql-picker-label::before { line-height: 32px !important; }
             .ql-toolbar.ql-snow .ql-picker:hover { border-color: #94a3b8 !important; }
-            
-            .ql-toolbar.ql-snow .ql-color, .ql-toolbar.ql-snow .ql-background { width: 36px !important; }
-            .ql-toolbar.ql-snow .ql-color .ql-picker-label, .ql-toolbar.ql-snow .ql-background .ql-picker-label { padding: 0 2px 0 6px !important; }
-            .ql-toolbar.ql-snow .ql-color .ql-picker-label svg, .ql-toolbar.ql-snow .ql-background .ql-picker-label svg { width: 16px !important; height: 16px !important; display: block !important; margin-right: 2px; }
 
-            /* LABEL DINAMIS: FONT SIZE & FAMILY */
-            .ql-picker.ql-size { width: 60px !important; }
+            .ql-toolbar.ql-snow .ql-picker-options {
+                border: 1px solid #cbd5e1 !important;
+                border-radius: 8px !important;
+                box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1) !important;
+                padding: 4px !important;
+                background-color: #ffffff !important;
+            }
+            .ql-toolbar.ql-snow .ql-picker-item {
+                padding: 5px 8px !important;
+                font-size: 12.5px !important;
+                border-radius: 4px !important;
+                cursor: pointer;
+            }
+            .ql-toolbar.ql-snow .ql-picker-item:hover,
+            .ql-toolbar.ql-snow .ql-picker-item.ql-selected {
+                background-color: #f1f5f9 !important;
+                color: #1e3a8a !important;
+                font-weight: 600 !important;
+            }
+            
+            .ql-toolbar.ql-snow .ql-color, .ql-toolbar.ql-snow .ql-background { width: 40px !important; }
+            .ql-toolbar.ql-snow .ql-color .ql-picker-label, .ql-toolbar.ql-snow .ql-background .ql-picker-label { padding: 0 3px 0 7px !important; }
+            .ql-toolbar.ql-snow .ql-color .ql-picker-label svg, .ql-toolbar.ql-snow .ql-background .ql-picker-label svg { width: 18px !important; height: 18px !important; display: block !important; margin-right: 2px; }
+
+            /* WRAPPER KELOMPOK DENGAN LABEL TEKS DI LUAR DROPDOWN */
+            .ql-toolbar.ql-snow .ql-labeled-group {
+                display: inline-flex !important;
+                align-items: center !important;
+                gap: 8px !important;
+                background-color: #f8fafc;
+                border: 1px solid #cbd5e1;
+                border-radius: 8px;
+                padding: 2px 6px 2px 10px;
+                height: 34px;
+                vertical-align: middle;
+            }
+            .ql-toolbar.ql-snow .ql-custom-label {
+                font-size: 12px !important;
+                font-weight: 700 !important;
+                color: #334155 !important;
+                white-space: nowrap !important;
+                user-select: none !important;
+                line-height: 1 !important;
+            }
+            .ql-toolbar.ql-snow .ql-labeled-group .ql-picker {
+                border: none !important;
+                height: 28px !important;
+                background: transparent !important;
+                margin: 0 !important;
+            }
+            .ql-toolbar.ql-snow .ql-labeled-group .ql-picker .ql-picker-label {
+                border: 1px solid #cbd5e1 !important;
+                border-radius: 6px !important;
+                background-color: #ffffff !important;
+                padding-left: 8px !important;
+                padding-right: 20px !important;
+                height: 28px !important;
+                line-height: 26px !important;
+                font-size: 12.5px !important;
+                font-weight: 600 !important;
+            }
+            .ql-toolbar.ql-snow .ql-labeled-group .ql-picker:hover .ql-picker-label {
+                border-color: #94a3b8 !important;
+            }
+
+            /* UKURAN DROPDOWN DI DALAM GROUP */
+            .ql-picker.ql-size { width: 54px !important; }
             .ql-picker.ql-size .ql-picker-item[data-value="10px"]::before { content: '10'; font-size: 10px !important;}
             .ql-picker.ql-size .ql-picker-item[data-value="12px"]::before { content: '12'; font-size: 12px !important;}
             .ql-picker.ql-size .ql-picker-item[data-value="14px"]::before { content: '14'; font-size: 14px !important;}
@@ -483,7 +600,7 @@
             .ql-picker.ql-size .ql-picker-item[data-value="18px"]::before { content: '18'; font-size: 18px !important;}
             .ql-picker.ql-size .ql-picker-item[data-value="24px"]::before { content: '24'; font-size: 24px !important;}
             .ql-picker.ql-size .ql-picker-item[data-value="32px"]::before { content: '32'; font-size: 32px !important;}
-            .ql-picker.ql-size .ql-picker-item:not([data-value])::before { content: 'Bawaan'; }
+            .ql-picker.ql-size .ql-picker-item:not([data-value])::before { content: '14'; }
             .ql-picker.ql-size .ql-picker-label[data-value="10px"]::before { content: '10'; }
             .ql-picker.ql-size .ql-picker-label[data-value="12px"]::before { content: '12'; }
             .ql-picker.ql-size .ql-picker-label[data-value="14px"]::before { content: '14'; }
@@ -493,51 +610,47 @@
             .ql-picker.ql-size .ql-picker-label[data-value="32px"]::before { content: '32'; }
             .ql-picker.ql-size .ql-picker-label:not([data-value])::before { content: '14'; }
 
-            .ql-picker.ql-font { width: 130px !important; }
-            .ql-picker.ql-font .ql-picker-item[data-value="arial"]::before { content: 'Arial'; font-family: 'Arial'; }
-            .ql-picker.ql-font .ql-picker-item[data-value="times-new-roman"]::before { content: 'Times New Roman'; font-family: 'Times New Roman'; }
-            .ql-picker.ql-font .ql-picker-item[data-value="calibri"]::before { content: 'Calibri'; font-family: 'Calibri', sans-serif; }
-            .ql-picker.ql-font .ql-picker-item[data-value="verdana"]::before { content: 'Verdana'; font-family: 'Verdana'; }
-            .ql-picker.ql-font .ql-picker-item[data-value="courier"]::before { content: 'Courier New'; font-family: 'Courier New', monospace; }
-            .ql-picker.ql-font .ql-picker-item:not([data-value])::before { content: 'System Font'; }
-            .ql-picker.ql-font .ql-picker-label[data-value="arial"]::before { content: 'Arial'; font-family: 'Arial'; }
-            .ql-picker.ql-font .ql-picker-label[data-value="times-new-roman"]::before { content: 'Times New Roman'; font-family: 'Times New Roman'; }
-            .ql-picker.ql-font .ql-picker-label[data-value="calibri"]::before { content: 'Calibri'; font-family: 'Calibri', sans-serif; }
-            .ql-picker.ql-font .ql-picker-label[data-value="verdana"]::before { content: 'Verdana'; font-family: 'Verdana'; }
-            .ql-picker.ql-font .ql-picker-label[data-value="courier"]::before { content: 'Courier New'; font-family: 'Courier New', monospace; }
-            .ql-picker.ql-font .ql-picker-label:not([data-value])::before { content: 'Arial'; }
-
-            /* LABEL DINAMIS: JARAK BARIS & HURUF (TEKS/NORMAL) */
-            .ql-picker.ql-lineHeight, .ql-picker.ql-letterSpacing { width: 175px !important; }
-            .ql-picker.ql-lineHeight .ql-picker-item[data-value="1"]::before { content: 'Jarak Baris (Rapat)'; }
-            .ql-picker.ql-lineHeight .ql-picker-item[data-value="1.2"]::before { content: 'Jarak Baris (Normal)'; }
-            .ql-picker.ql-lineHeight .ql-picker-item[data-value="1.5"]::before { content: 'Jarak Baris (Sedang)'; }
-            .ql-picker.ql-lineHeight .ql-picker-item[data-value="2.0"]::before { content: 'Jarak Baris (Lebar)'; }
-            .ql-picker.ql-lineHeight .ql-picker-item[data-value="2.5"]::before { content: 'Jarak Baris (Sangat Lebar)'; }
-            .ql-picker.ql-lineHeight .ql-picker-item:not([data-value])::before { content: 'Jarak Baris (Bawaan)'; }
+            /* LABEL DINAMIS: JARAK BARIS & HURUF */
+            .ql-picker.ql-lineHeight { width: 62px !important; }
+            .ql-picker.ql-lineHeight .ql-picker-item[data-value="1"]::before,
+            .ql-picker.ql-lineHeight .ql-picker-item[data-value="1.0"]::before { content: '1.0'; }
+            .ql-picker.ql-lineHeight .ql-picker-item[data-value="1.2"]::before { content: '1.2'; }
+            .ql-picker.ql-lineHeight .ql-picker-item[data-value="1.5"]::before { content: '1.5'; }
+            .ql-picker.ql-lineHeight .ql-picker-item[data-value="2.0"]::before,
+            .ql-picker.ql-lineHeight .ql-picker-item[data-value="2"]::before { content: '2.0'; }
+            .ql-picker.ql-lineHeight .ql-picker-item[data-value="2.5"]::before { content: '2.5'; }
+            .ql-picker.ql-lineHeight .ql-picker-item:not([data-value])::before { content: '1.5'; }
             
-            .ql-picker.ql-lineHeight .ql-picker-label[data-value="1"]::before { content: 'Jarak Baris (Rapat)'; }
-            .ql-picker.ql-lineHeight .ql-picker-label[data-value="1.2"]::before { content: 'Jarak Baris (Normal)'; }
-            .ql-picker.ql-lineHeight .ql-picker-label[data-value="1.5"]::before { content: 'Jarak Baris (Sedang)'; }
-            .ql-picker.ql-lineHeight .ql-picker-label[data-value="2.0"]::before { content: 'Jarak Baris (Lebar)'; }
-            .ql-picker.ql-lineHeight .ql-picker-label[data-value="2.5"]::before { content: 'Jarak Baris (Sangat Lebar)'; }
-            .ql-picker.ql-lineHeight .ql-picker-label:not([data-value])::before { content: 'Jarak Baris (Normal)'; }
+            .ql-picker.ql-lineHeight .ql-picker-label[data-value="1"]::before,
+            .ql-picker.ql-lineHeight .ql-picker-label[data-value="1.0"]::before { content: '1.0'; }
+            .ql-picker.ql-lineHeight .ql-picker-label[data-value="1.2"]::before { content: '1.2'; }
+            .ql-picker.ql-lineHeight .ql-picker-label[data-value="1.5"]::before { content: '1.5'; }
+            .ql-picker.ql-lineHeight .ql-picker-label[data-value="2.0"]::before,
+            .ql-picker.ql-lineHeight .ql-picker-label[data-value="2"]::before { content: '2.0'; }
+            .ql-picker.ql-lineHeight .ql-picker-label[data-value="2.5"]::before { content: '2.5'; }
+            .ql-picker.ql-lineHeight .ql-picker-label:not([data-value])::before { content: '1.5'; }
 
-            .ql-picker.ql-letterSpacing .ql-picker-item[data-value="1px"]::before { content: 'Jarak Huruf (Renggang)'; }
-            .ql-picker.ql-letterSpacing .ql-picker-item[data-value="2px"]::before { content: 'Jarak Huruf (Lebih Renggang)'; }
-            .ql-picker.ql-letterSpacing .ql-picker-item[data-value="3px"]::before { content: 'Jarak Huruf (Sangat Renggang)'; }
-            .ql-picker.ql-letterSpacing .ql-picker-item[data-value="4px"]::before { content: 'Jarak Huruf (Ekstra Renggang)'; }
-            .ql-picker.ql-letterSpacing .ql-picker-item:not([data-value])::before { content: 'Jarak Huruf (Normal)'; }
+            .ql-picker.ql-letterSpacing { width: 52px !important; }
+            .ql-picker.ql-letterSpacing .ql-picker-options { min-width: 104px !important; }
+            .ql-picker.ql-letterSpacing .ql-picker-item[data-value="1px"]::before { content: '1'; }
+            .ql-picker.ql-letterSpacing .ql-picker-item[data-value="2px"]::before { content: '2'; }
+            .ql-picker.ql-letterSpacing .ql-picker-item[data-value="3px"]::before { content: '3'; }
+            .ql-picker.ql-letterSpacing .ql-picker-item[data-value="4px"]::before { content: '4'; }
+            .ql-picker.ql-letterSpacing .ql-picker-item:not([data-value])::before,
+            .ql-picker.ql-letterSpacing .ql-picker-item[data-value=""]::before,
+            .ql-picker.ql-letterSpacing .ql-picker-item[data-value="false"]::before { content: '0 (Default)'; font-weight: 600; }
 
-            .ql-picker.ql-letterSpacing .ql-picker-label[data-value="1px"]::before { content: 'Jarak Huruf (Renggang)'; }
-            .ql-picker.ql-letterSpacing .ql-picker-label[data-value="2px"]::before { content: 'Jarak Huruf (Lebih Renggang)'; }
-            .ql-picker.ql-letterSpacing .ql-picker-label[data-value="3px"]::before { content: 'Jarak Huruf (Sangat Renggang)'; }
-            .ql-picker.ql-letterSpacing .ql-picker-label[data-value="4px"]::before { content: 'Jarak Huruf (Ekstra Renggang)'; }
-            .ql-picker.ql-letterSpacing .ql-picker-label:not([data-value])::before { content: 'Jarak Huruf (Normal)'; }
+            .ql-picker.ql-letterSpacing .ql-picker-label[data-value="1px"]::before { content: '1'; }
+            .ql-picker.ql-letterSpacing .ql-picker-label[data-value="2px"]::before { content: '2'; }
+            .ql-picker.ql-letterSpacing .ql-picker-label[data-value="3px"]::before { content: '3'; }
+            .ql-picker.ql-letterSpacing .ql-picker-label[data-value="4px"]::before { content: '4'; }
+            .ql-picker.ql-letterSpacing .ql-picker-label:not([data-value])::before,
+            .ql-picker.ql-letterSpacing .ql-picker-label[data-value=""]::before,
+            .ql-picker.ql-letterSpacing .ql-picker-label[data-value="false"]::before { content: '0'; }
 
             /* STYLE EDITOR CONTAINER BAWAAN */
-            .ql-container.ql-snow { border-radius: 0 0 0.75rem 0.75rem; border-color: #cbd5e1; min-height: 500px; font-family: inherit; font-size: 0.95rem; line-height: 1.7; }
-            .ql-editor { min-height: 500px; padding: 24px; }
+            .ql-container.ql-snow { border-radius: 0 0 0.75rem 0.75rem; border-color: #cbd5e1; min-height: 520px; font-family: inherit; font-size: 0.98rem; line-height: 1.7; }
+            .ql-editor { min-height: 520px; padding: 24px; }
             .ql-editor pre.ql-syntax { background-color: #0f172a; color: #e2e8f0; padding: 1.25rem; border-radius: 0.5rem; }
 
             /* ========================================================
