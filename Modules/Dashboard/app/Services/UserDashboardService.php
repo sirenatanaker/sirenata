@@ -37,18 +37,20 @@ class UserDashboardService
             $dbLastCourse = Course::with('category')->where('slug', $lastCourse->slug)->first();
             if ($dbLastCourse) {
                 $lastCourse->description = $dbLastCourse->description;
+                $lastCourse->category = $dbLastCourse->category;
                 $lastCourse->category_name = $dbLastCourse->category ? $dbLastCourse->category->name : null;
                 $lastCourse->thumbnail = $dbLastCourse->thumbnail;
             }
         }
 
-        // 2. Thumbnail untuk recent courses
-        $recentCourses = $user->enrolledCourses()->latest()->take(5)->get();
+        // 2. Thumbnail & Kategori untuk recent courses
+        $recentCourses = $user->enrolledCourses()->with('category')->latest()->take(5)->get();
         $recentCourses->transform(function ($course) {
-            $dbCourse = Course::where('slug', $course->slug)->first();
+            $dbCourse = Course::with('category')->where('slug', $course->slug)->first();
             if ($dbCourse) {
                 $course->description = $dbCourse->description;
                 $course->thumbnail = $dbCourse->thumbnail;
+                $course->category = $dbCourse->category;
             }
             return $course;
         });

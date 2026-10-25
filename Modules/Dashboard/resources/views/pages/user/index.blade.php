@@ -46,67 +46,57 @@
             <!-- Total Kursus (Dark Navy) -->
             <div
                 class="relative overflow-hidden bg-[#13416B] rounded-md p-5 sm:p-6 shadow-md transition-all duration-300 hover:shadow-lg hover:-translate-y-1 group z-0">
-                <div class="relative z-10 flex items-center justify-between">
-                    <div>
-                        <p class="text-white/85 text-xs sm:text-sm font-bold uppercase mb-1 tracking-wider">Total Kursus
-                        </p>
-                        <h3 class="text-2xl sm:text-3xl font-extrabold text-white">{{ $stats['total'] }}</h3>
-                        <p class="text-[10px] sm:text-xs text-white/80 mt-1">Seluruh kursus pada sistem</p>
-                    </div>
-                    <!-- Badge Putih Solid, Ikon Dark Navy -->
-                    <div
-                        class="w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-white text-[#13416B] flex items-center justify-center shrink-0 shadow-sm">
-                        <i class="fas fa-book-open text-xl sm:text-2xl" aria-hidden="true"></i>
-                    </div>
+                <!-- Efek Dekoratif Bubbles Geometris Profesional -->
+                <div class="absolute inset-0 pointer-events-none z-0">
+                    <div class="absolute -top-12 -right-10 w-44 h-44 border-[16px] border-white/5 rounded-full group-hover:scale-105 transition-transform duration-500"></div>
+                    <div class="absolute -bottom-10 right-10 w-28 h-28 bg-white/5 rounded-full"></div>
+                    <div class="absolute top-3 right-24 w-12 h-12 border-[4px] border-amber-400/20 rounded-full"></div>
+                    <div class="absolute bottom-4 right-32 w-3 h-3 bg-blue-300/20 rounded-full"></div>
+                    <div class="absolute top-5 right-40 w-2 h-2 bg-white/10 rounded-full"></div>
                 </div>
-                <!-- Dekorasi Watermark Background -->
-                <div
-                    class="absolute -right-5 -bottom-5 sm:-right-6 sm:-bottom-6 text-white opacity-[0.10] group-hover:opacity-[0.16] transition-all duration-500 pointer-events-none transform group-hover:scale-110 z-0">
-                    <i class="fas fa-book-open text-8xl sm:text-9xl" aria-hidden="true"></i>
+
+                <div class="relative z-10">
+                    <p class="text-white/85 text-xs sm:text-sm font-bold uppercase mb-1 tracking-wider">Total Kursus</p>
+                    <h3 class="text-2xl sm:text-3xl font-extrabold text-white">{{ $stats['total'] }}</h3>
+                    <p class="text-[10px] sm:text-xs text-white/80 mt-1">Seluruh kursus pada sistem</p>
                 </div>
             </div>
 
             <!-- Rata-rata Progress (Slate Blue) -->
             <div
                 class="relative overflow-hidden bg-[#547996] rounded-md p-5 sm:p-6 shadow-md transition-all duration-300 hover:shadow-lg hover:-translate-y-1 group z-0">
-                <div class="relative z-10 flex items-center justify-between">
-                    <div>
-                        <p class="text-white/85 text-xs sm:text-sm font-bold uppercase mb-1 tracking-wider">Rata-rata
-                            Progress</p>
-                        <h3 class="text-2xl sm:text-3xl font-extrabold text-white">{{ $stats['avg_progress'] }}%</h3>
-                        <p class="text-[10px] sm:text-xs text-white/80 mt-1">Tingkat penyelesaian topik</p>
-                    </div>
-                    <!-- Badge Putih Solid, Ikon Slate Blue -->
-                    <div
-                        class="w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-white text-[#547996] flex items-center justify-center shrink-0 shadow-sm">
-                        <i class="fas fa-chart-pie text-xl sm:text-2xl" aria-hidden="true"></i>
-                    </div>
+                <!-- Efek Dekoratif Bubbles Geometris Profesional -->
+                <div class="absolute inset-0 pointer-events-none z-0">
+                    <div class="absolute -top-12 -right-10 w-44 h-44 border-[16px] border-white/5 rounded-full group-hover:scale-105 transition-transform duration-500"></div>
+                    <div class="absolute -bottom-10 right-10 w-28 h-28 bg-white/5 rounded-full"></div>
+                    <div class="absolute top-3 right-24 w-12 h-12 border-[4px] border-amber-400/25 rounded-full"></div>
+                    <div class="absolute bottom-4 right-32 w-3 h-3 bg-white/20 rounded-full"></div>
+                    <div class="absolute top-5 right-40 w-2 h-2 bg-white/10 rounded-full"></div>
                 </div>
-                <div
-                    class="absolute -right-5 -bottom-5 sm:-right-6 sm:-bottom-6 text-white opacity-[0.10] group-hover:opacity-[0.16] transition-all duration-500 pointer-events-none transform group-hover:scale-110 z-0">
-                    <i class="fas fa-chart-pie text-8xl sm:text-9xl" aria-hidden="true"></i>
+
+                <div class="relative z-10">
+                    <p class="text-white/85 text-xs sm:text-sm font-bold uppercase mb-1 tracking-wider">Rata-rata Progress</p>
+                    <h3 class="text-2xl sm:text-3xl font-extrabold text-white">{{ $stats['avg_progress'] }}%</h3>
+                    <p class="text-[10px] sm:text-xs text-white/80 mt-1">Tingkat penyelesaian topik</p>
                 </div>
             </div>
 
             <!-- Kursus Selesai (Light Blue) -->
             <div
                 class="relative overflow-hidden bg-[#8BB1CC] rounded-md p-5 sm:p-6 shadow-md transition-all duration-300 hover:shadow-lg hover:-translate-y-1 group z-0">
-                <div class="relative z-10 flex items-center justify-between">
-                    <div>
-                        <p class="text-white/85 text-xs sm:text-sm font-bold uppercase mb-1 tracking-wider">Kursus
-                            Selesai</p>
-                        <h3 class="text-2xl sm:text-3xl font-extrabold text-white">{{ $stats['selesai'] }}</h3>
-                        <p class="text-[10px] sm:text-xs text-white/80 mt-1">Kursus yang telah dituntaskan</p>
-                    </div>
-                    <!-- Badge Putih Solid, Ikon Light Blue -->
-                    <div
-                        class="w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-white text-[#2b658d] flex items-center justify-center shrink-0 shadow-sm">
-                        <i class="fas fa-award text-xl sm:text-2xl" aria-hidden="true"></i>
-                    </div>
+                <!-- Efek Dekoratif Bubbles Geometris Profesional -->
+                <div class="absolute inset-0 pointer-events-none z-0">
+                    <div class="absolute -top-12 -right-10 w-44 h-44 border-[16px] border-white/10 rounded-full group-hover:scale-105 transition-transform duration-500"></div>
+                    <div class="absolute -bottom-10 right-10 w-28 h-28 bg-white/10 rounded-full"></div>
+                    <div class="absolute top-3 right-24 w-12 h-12 border-[4px] border-amber-300/30 rounded-full"></div>
+                    <div class="absolute bottom-4 right-32 w-3 h-3 bg-white/25 rounded-full"></div>
+                    <div class="absolute top-5 right-40 w-2 h-2 bg-white/15 rounded-full"></div>
                 </div>
-                <div
-                    class="absolute -right-5 -bottom-5 sm:-right-6 sm:-bottom-6 text-white opacity-[0.12] group-hover:opacity-[0.18] transition-all duration-500 pointer-events-none transform group-hover:scale-110 z-0">
-                    <i class="fas fa-award text-8xl sm:text-9xl" aria-hidden="true"></i>
+
+                <div class="relative z-10">
+                    <p class="text-white/85 text-xs sm:text-sm font-bold uppercase mb-1 tracking-wider">Kursus Selesai</p>
+                    <h3 class="text-2xl sm:text-3xl font-extrabold text-white">{{ $stats['selesai'] }}</h3>
+                    <p class="text-[10px] sm:text-xs text-white/80 mt-1">Kursus yang telah dituntaskan</p>
                 </div>
             </div>
         </div>
@@ -154,16 +144,29 @@
                         @endphp
 
                         <div
-                            class="bg-slate-50/70 rounded-md shadow-xs flex flex-row overflow-hidden transition-all hover:bg-slate-100/80 hover:shadow-sm mb-1 group">
-                            <!-- Thumbnail Kiri (Persegi Panjang Landscape Ringkas, Disembunyikan di Mobile) -->
-                            <div class="hidden sm:block sm:w-40 md:w-48 lg:w-52 xl:w-56 shrink-0 bg-slate-100 relative overflow-hidden">
+                            class="relative bg-slate-50/70 rounded-md shadow-xs flex flex-row overflow-hidden transition-all hover:bg-slate-100/80 hover:shadow-sm mb-1 group">
+
+                            {{-- Badge Kategori di Resolusi Mobile (Dibuat sama seperti badge desktop: mojok kanan atas dengan sudut rounded-bl-md) --}}
+                            <span class="sm:hidden absolute top-0 right-0 z-10 max-w-[70%] px-2 sm:px-2.5 py-1 text-[8px] sm:text-[9px] font-bold uppercase tracking-wider text-white bg-[#13416B] shadow-xs flex items-center gap-1 rounded-none rounded-bl-md">
+                                <i class="fas fa-tag text-[7.5px] sm:text-[8.5px] flex-shrink-0"></i>
+                                <span class="truncate">{{ $lastCourse->category?->name ?? ($lastCourse->category_name ?? 'Umum') }}</span>
+                            </span>
+
+                            <!-- Thumbnail Kiri (Persegi Panjang Landscape, lebih lebar di resolusi desktop) -->
+                            <div class="hidden sm:block sm:w-48 md:w-56 lg:w-64 xl:w-72 2xl:w-80 shrink-0 bg-slate-100 relative overflow-hidden">
                                 <img src="{{ $lThumb }}" alt="{{ $lastCourse->name }}"
                                     class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+
+                                {{-- Badge Kategori (Mojok Kanan Atas Thumbnail seperti dicard kursus lainnya) --}}
+                                <span class="absolute top-0 right-0 z-10 max-w-[85%] px-2 sm:px-2.5 py-1 text-[8px] sm:text-[9px] font-bold uppercase tracking-wider text-white bg-[#13416B] shadow-xs flex items-center gap-1 rounded-none rounded-bl-md">
+                                    <i class="fas fa-tag text-[7.5px] sm:text-[8.5px] flex-shrink-0"></i>
+                                    <span class="truncate">{{ $lastCourse->category?->name ?? ($lastCourse->category_name ?? 'Umum') }}</span>
+                                </span>
                             </div>
 
                             <!-- Konten Teks & Progress Kanan -->
                             <div class="min-w-0 flex-1 flex flex-col justify-between p-3 sm:p-4">
-                                <div class="mb-2">
+                                <div class="mb-2 pr-16 sm:pr-0">
                                     <span
                                         class="text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-wider block mb-1">Aktivitas
                                         Terakhir</span>
@@ -348,26 +351,12 @@
                                         <img src="{{ $rThumb }}" alt="{{ $course->name }}"
                                             class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
 
-                                        {{-- Badge Status di Pojok Kanan Atas Thumbnail (Normal case & diperkecil) --}}
-                                        @if ($course->pivot->status === 'completed' || $rPct >= 100)
-                                            <span
-                                                class="absolute top-0 right-0 z-10 px-1.5 sm:px-2 py-0.5 text-[7px] sm:text-[8px] font-semibold text-white bg-emerald-600 shadow-xs flex items-center gap-1 rounded-none rounded-bl-md">
-                                                <i class="fas fa-check-circle text-[6.5px] sm:text-[7.5px]"></i>
-                                                <span>Selesai</span>
-                                            </span>
-                                        @elseif ($rPct > 0)
-                                            <span
-                                                class="absolute top-0 right-0 z-10 px-1.5 sm:px-2 py-0.5 text-[7px] sm:text-[8px] font-semibold text-white bg-amber-500 shadow-xs flex items-center gap-1 rounded-none rounded-bl-md">
-                                                <i class="fas fa-clock text-[6.5px] sm:text-[7.5px]"></i>
-                                                <span>Berjalan</span>
-                                            </span>
-                                        @else
-                                            <span
-                                                class="absolute top-0 right-0 z-10 px-1.5 sm:px-2 py-0.5 text-[7px] sm:text-[8px] font-semibold text-white bg-slate-500/90 shadow-xs flex items-center gap-1 rounded-none rounded-bl-md">
-                                                <i class="fas fa-play text-[6.5px] sm:text-[7.5px]"></i>
-                                                <span>Belum Mulai</span>
-                                            </span>
-                                        @endif
+                                        {{-- Badge Kategori di Pojok Kanan Atas Thumbnail --}}
+                                        <span
+                                            class="absolute top-0 right-0 z-10 max-w-[85%] px-1.5 sm:px-2 py-0.5 text-[7px] sm:text-[8px] font-bold uppercase tracking-wider text-white bg-[#13416B] shadow-xs flex items-center gap-1 rounded-none rounded-bl-md">
+                                            <i class="fas fa-tag text-[6.5px] sm:text-[7.5px] flex-shrink-0"></i>
+                                            <span class="truncate">{{ $course->category?->name ?? 'Umum' }}</span>
+                                        </span>
                                     </div>
 
                                     <div class="min-w-0 flex-1 flex flex-col justify-between h-full w-full py-0.5">
