@@ -748,6 +748,7 @@
 
     @push('scripts')
         @include('lms::user.course.partials.guide-assets')
+        @include('lms::partials.custom-video-player')
         <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
         <script>

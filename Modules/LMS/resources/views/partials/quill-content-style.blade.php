@@ -4,7 +4,7 @@
 
 /* --- Media: gambar, video, iframe (termasuk embed YouTube) --- */
 .quill-content-render img,
-.quill-content-render video,
+.quill-content-render video:not(.plyr video):not(.yt-player-wrapper video),
 .quill-content-render iframe.ql-video,
 .quill-content-render iframe {
     display: inline-block !important;
@@ -18,8 +18,8 @@
 
 .quill-content-render img[style*="margin: auto"],
 .quill-content-render img[style*="display: block"],
-.quill-content-render video[style*="margin: auto"],
-.quill-content-render video[style*="display: block"],
+.quill-content-render video:not(.plyr video):not(.yt-player-wrapper video)[style*="margin: auto"],
+.quill-content-render video:not(.plyr video):not(.yt-player-wrapper video)[style*="display: block"],
 .quill-content-render iframe[style*="margin: auto"],
 .quill-content-render iframe[style*="display: block"] {
     display: block !important;
@@ -28,7 +28,7 @@
 }
 
 .quill-content-render img[style*="float: left"],
-.quill-content-render video[style*="float: left"],
+.quill-content-render video:not(.plyr video):not(.yt-player-wrapper video)[style*="float: left"],
 .quill-content-render iframe[style*="float: left"] {
     float: left !important;
     margin-right: 1.5rem !important;
@@ -37,12 +37,49 @@
 }
 
 .quill-content-render img[style*="float: right"],
-.quill-content-render video[style*="float: right"],
+.quill-content-render video:not(.plyr video):not(.yt-player-wrapper video)[style*="float: right"],
 .quill-content-render iframe[style*="float: right"] {
     float: right !important;
     margin-left: 1.5rem !important;
     margin-bottom: 1rem !important;
     margin-top: 0.5rem !important;
+}
+
+/* --- Penyesuaian Video Player Plyr (Tanpa Shadow, Responsif) --- */
+.quill-content-render .plyr,
+.quill-content-render .plyr--video {
+    box-shadow: none !important;
+    border-radius: 0.75rem !important;
+    overflow: hidden !important;
+    box-sizing: border-box !important;
+}
+.quill-content-render .plyr video {
+    display: block !important;
+    width: 100% !important;
+    height: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border-radius: inherit !important;
+    box-shadow: none !important;
+    object-fit: contain !important;
+    background-color: #000000 !important;
+}
+.quill-content-render .plyr[style*="float: left"] {
+    float: left !important;
+    margin-right: 1.5rem !important;
+    margin-bottom: 1rem !important;
+    margin-top: 0.5rem !important;
+}
+.quill-content-render .plyr[style*="float: right"] {
+    float: right !important;
+    margin-left: 1.5rem !important;
+    margin-bottom: 1rem !important;
+    margin-top: 0.5rem !important;
+}
+.quill-content-render .plyr[style*="margin-left: auto"],
+.quill-content-render .plyr[style*="margin: auto"] {
+    margin-left: auto !important;
+    margin-right: auto !important;
 }
 
 /* --- Alignment & indent Quill --- */
