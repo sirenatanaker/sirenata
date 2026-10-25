@@ -52,17 +52,16 @@
             @foreach ($kpis as $kpi)
                 <div
                     class="relative overflow-hidden {{ $kpi['bg'] }} rounded-md p-5 sm:p-6 shadow-md transition-all duration-300 hover:shadow-lg hover:-translate-y-1 group z-0">
-                    <div class="relative z-10 flex items-center justify-between">
-                        <div>
+                    <div class="relative z-10 flex items-center justify-between gap-4">
+                        <div class="min-w-0">
                             <p class="text-white/85 text-xs font-bold uppercase mb-1 tracking-wider">{{ $kpi['label'] }}</p>
                             <h3 class="text-2xl sm:text-3xl font-extrabold text-white tabular-nums">
                                 {{ number_format($kpi['value'], 0, ',', '.') }}
                             </h3>
                             <p class="text-[10px] sm:text-xs text-white/80 mt-1">{{ $kpi['hint'] }}</p>
                         </div>
-                        <div
-                            class="w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-white {{ $kpi['text'] }} flex items-center justify-center shrink-0 shadow-sm relative z-10 transition-transform duration-300 group-hover:scale-105">
-                            <i class="fas {{ $kpi['icon'] }} text-xl sm:text-2xl" aria-hidden="true"></i>
+                        <div class="shrink-0 text-white/80 group-hover:text-white transition-all duration-300 transform group-hover:scale-110">
+                            <i class="fas {{ $kpi['icon'] }} text-4xl sm:text-5xl" aria-hidden="true"></i>
                         </div>
                     </div>
                     <!-- Efek Dekoratif Bubbles Geometris Profesional -->
@@ -84,7 +83,7 @@
 
             {{-- KIRI: GRAFIK MASA BERLAKU RTK --}}
             <section
-                class="lg:col-span-7 xl:col-span-8 bg-white rounded-md border border-slate-200 shadow-sm overflow-hidden flex flex-col">
+                class="lg:col-span-7 xl:col-span-7 bg-white rounded-md border border-slate-200 shadow-sm overflow-hidden flex flex-col">
                 <header
                     class="px-5 sm:px-6 py-4 border-b border-slate-100 flex flex-col sm:flex-row sm:items-start justify-between gap-4">
                     <div>
@@ -121,7 +120,7 @@
                         Gagal memuat data RTK. Coba pilih ulang tahun atau muat ulang halaman.
                     </p>
 
-                    <div class="relative flex-1 min-h-[400px]">
+                    <div class="relative flex-1 min-h-[420px] sm:min-h-[460px] flex flex-col">
                         {{-- Area scroll: label sumbu Y ikut scroll, sumbu X tetap menempel di bawah --}}
                         <div id="rtkChartScroll"
                             class="absolute inset-0 overflow-y-auto custom-scrollbar transition-opacity duration-200 {{ $rtkMasaAktifPerProvinsi->count() > 0 ? '' : 'hidden' }}">
@@ -136,13 +135,14 @@
                         </div>
 
                         <div id="rtkCombinedEmptyState"
-                            class="bg-slate-50 rounded-md p-10 text-center border border-dashed border-slate-200 {{ $rtkMasaAktifPerProvinsi->count() > 0 ? 'hidden' : '' }}">
-                            <div
-                                class="w-12 h-12 bg-white border border-slate-200 rounded-md flex items-center justify-center mx-auto mb-3 text-slate-400">
-                                <i class="fas fa-chart-area text-lg"></i>
+                            class="w-full flex-1 min-h-[420px] sm:min-h-[460px] flex flex-col items-center justify-center py-16 px-6 sm:px-12 text-center bg-slate-50/60 rounded-xl border border-dashed border-slate-200 transition-all {{ $rtkMasaAktifPerProvinsi->count() > 0 ? 'hidden' : '' }}">
+                            <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-white border border-slate-200/90 shadow-xs flex items-center justify-center mb-4 text-slate-300">
+                                <i class="fas fa-file-contract text-2xl sm:text-3xl text-slate-300"></i>
                             </div>
-                            <p class="text-sm font-semibold text-slate-700">Belum ada data RTK</p>
-                            <p class="text-xs text-slate-500 mt-1">Belum ada penyusunan dokumen RTK Provinsi yang tercatat.</p>
+                            <h3 class="text-base sm:text-lg font-bold text-slate-700 mb-1">Belum ada data RTK</h3>
+                            <p class="text-xs sm:text-sm text-slate-400 max-w-md mx-auto leading-relaxed">
+                                Belum ada penyusunan dokumen RTK Provinsi yang tercatat.
+                            </p>
                         </div>
                     </div>
                 </div>
@@ -150,16 +150,16 @@
 
             {{-- KANAN: PERLU PERSETUJUAN --}}
             <section id="pendingSection"
-                class="lg:col-span-5 xl:col-span-4 bg-white rounded-md border border-slate-200 shadow-sm overflow-hidden flex flex-col scroll-mt-6">
-                <header class="px-5 sm:px-6 py-4 border-b border-slate-100">
-                    <div class="flex items-center justify-between gap-3">
-                        <div class="flex items-center gap-3 min-w-0">
-                            <h2 class="text-base sm:text-lg font-semibold text-slate-900">Perlu Persetujuan</h2>
-                        </div>
-                        <span
-                            class="inline-flex items-center justify-center min-w-8 h-8 px-2 rounded-full bg-[#13416B] text-white text-sm font-semibold tabular-nums">
-                            {{ $totalPendingApprovals }}
-                        </span>
+                class="lg:col-span-5 xl:col-span-5 bg-white rounded-md border border-slate-200 shadow-sm overflow-hidden flex flex-col scroll-mt-6">
+                <header class="relative px-5 sm:px-6 py-4 border-b border-slate-100">
+                    {{-- Badge Total Mojok Kanan Atas seperti di Card Kursus (Lebih Besar & Jelas) --}}
+                    <span
+                        class="absolute top-0 right-0 z-10 px-3.5 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-bold text-white bg-amber-500 shadow-xs flex items-center gap-1.5 rounded-none rounded-bl-xl">
+                        Total {{ $totalPendingApprovals }}
+                    </span>
+
+                    <div class="flex items-center gap-3 min-w-0 pr-28 sm:pr-36">
+                        <h2 class="text-base sm:text-lg font-semibold text-slate-900">Perlu Persetujuan</h2>
                     </div>
                     <p class="text-sm text-slate-500 mt-2">RTKD (provinsi) &amp; Projek Daerah yang menunggu persetujuan</p>
                 </header>
