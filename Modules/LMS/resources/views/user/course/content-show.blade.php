@@ -123,7 +123,7 @@
 
                 {{-- Header Nav: Tombol Kembali --}}
                 <div class="mb-6 sm:mb-8">
-                    <a href="{{ route('user.course.my-course.detail', $slug) }}"
+                    <a href="{{ route('user.course.my-course.detail', $slug ?? data_get($course, 'slug', '')) }}"
                         class="group inline-flex items-center gap-3 text-sm font-medium text-slate-500 hover:text-[#13416B] transition-colors"
                         :class="{
                             '!text-slate-400 hover:!text-white': isDark
@@ -480,66 +480,168 @@
                     </div>
                 @endif
 
-                {{-- 2. Document Attachment --}}
+                {{-- 2. Referensi & Sumber Belajar Tambahan (Dokumen & Koleksi Perpustakaan) --}}
                 @php
-                    $docUrl = data_get($content, 'document_url') ?? data_get($content, 'document');
+                    $allDocs = $content->all_documents;
+                    $allLibs = $content->all_libraries;
+                    $hasDoc = $allDocs->isNotEmpty();
+                    $hasLibrary = $allLibs->isNotEmpty();
                 @endphp
 
-                @if ($docUrl)
+                @if ($hasDoc || $hasLibrary)
                     <div class="{{ !empty($contentText) ? 'pt-8 border-t border-slate-100' : '' }}"
                         :class="{
                             '!border-[#263346]': isDark
                         }">
-                        <h3
-                            class="text-xs sm:text-sm font-bold text-slate-800 mb-4 flex items-center gap-2 uppercase tracking-wider"
-                            :class="{
-                                '!text-slate-400': isDark
-                            }">
-                            <i class="fas fa-paperclip text-slate-400"></i> Lampiran Pendukung
-                        </h3>
-                        <a href="{{ $docUrl }}" target="_blank"
-                            class="group flex flex-col sm:flex-row sm:items-center p-4 sm:p-5 rounded-2xl border border-slate-200 bg-slate-50 hover:bg-[#13416B]/5 hover:border-[#13416B]/30 transition-all duration-300 gap-4"
-                            :class="{
-                                '!bg-[#1E2837] !border-[#263346]': isDark
-                            }">
-
-                            <div class="flex items-center gap-4 flex-1">
-                                <div
-                                    class="w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-white border border-slate-200 flex items-center justify-center shrink-0 group-hover:border-[#13416B]/40 group-hover:shadow-sm transition-all"
-                                    :class="{
-                                        '!bg-[#263346] !border-[#334155]': isDark
-                                    }">
-                                    <i class="fas fa-file-pdf text-xl sm:text-2xl text-red-500"></i>
-                                </div>
-                                <div class="flex-1">
-                                    <p
-                                        class="text-sm sm:text-base font-bold text-slate-800 group-hover:text-[#13416B] transition-colors leading-tight"
-                                        :class="{
-                                            '!text-slate-200 group-hover:!text-white': isDark
-                                        }">
-                                        Unduh Dokumen Materi
-                                    </p>
-                                    <p class="text-[11px] sm:text-xs text-slate-500 mt-1"
-                                        :class="{
-                                            '!text-slate-400': isDark
-                                        }">Format PDF/DOCX tersedia untuk
-                                        dipelajari luring.</p>
-                                </div>
-                            </div>
-
-                            <div
-                                class="w-full sm:w-10 h-10 rounded-xl sm:rounded-full bg-white border border-slate-200 flex items-center justify-center text-slate-500 font-bold text-xs sm:text-sm group-hover:text-white group-hover:bg-[#13416B] group-hover:border-[#13416B] transition-all gap-2"
+                        <div class="mb-4">
+                            <h3 class="text-xs sm:text-sm font-extrabold text-slate-800 flex items-center gap-2 uppercase tracking-wider"
                                 :class="{
-                                    '!bg-[#263346] !border-[#334155] !text-slate-300': isDark
+                                    '!text-slate-200': isDark
                                 }">
-                                <i class="fas fa-download"></i> <span class="sm:hidden">Unduh Sekarang</span>
-                            </div>
-                        </a>
+                                <i class="fas fa-bookmark text-[#13416B]" :class="{ '!text-[#8fbbe0]': isDark }"></i>
+                                Referensi & Sumber Belajar Lainnya
+                            </h3>
+                            <p class="text-[11px] sm:text-xs text-slate-500 mt-0.5"
+                                :class="{
+                                    '!text-slate-400': isDark
+                                }">
+                                Dokumen materi pelengkap dan literatur referensi perpustakaan terkait topik ini.
+                            </p>
+                        </div>
+
+                        <div class="space-y-4">
+                            {{-- Dokumen Lampiran (Bisa Banyak) --}}
+                            @if ($hasDoc)
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                                    @foreach ($allDocs as $doc)
+                                        @php
+                                            $docUrl = $doc->file_url ?? (filter_var($doc->file_path, FILTER_VALIDATE_URL) ? $doc->file_path : asset('storage/' . $doc->file_path));
+                                            $docName = $doc->file_name ?? basename($doc->file_path);
+                                            $docExt = strtolower(pathinfo($docName, PATHINFO_EXTENSION));
+                                            $iconClass = 'fa-file-alt text-slate-500';
+                                            $badgeText = strtoupper($docExt ?: 'FILE');
+                                            $badgeBg = 'bg-slate-100 text-slate-700';
+                                            if (in_array($docExt, ['pdf'])) {
+                                                $iconClass = 'fa-file-pdf text-red-500';
+                                                $badgeBg = 'bg-red-50 text-red-600 border border-red-200';
+                                            } elseif (in_array($docExt, ['doc', 'docx'])) {
+                                                $iconClass = 'fa-file-word text-blue-600';
+                                                $badgeBg = 'bg-blue-50 text-blue-600 border border-blue-200';
+                                            } elseif (in_array($docExt, ['xls', 'xlsx', 'csv'])) {
+                                                $iconClass = 'fa-file-excel text-emerald-600';
+                                                $badgeBg = 'bg-emerald-50 text-emerald-600 border border-emerald-200';
+                                            } elseif (in_array($docExt, ['ppt', 'pptx'])) {
+                                                $iconClass = 'fa-file-powerpoint text-amber-600';
+                                                $badgeBg = 'bg-amber-50 text-amber-600 border border-amber-200';
+                                            } elseif (in_array($docExt, ['zip', 'rar'])) {
+                                                $iconClass = 'fa-file-archive text-yellow-600';
+                                                $badgeBg = 'bg-yellow-50 text-yellow-600 border border-yellow-200';
+                                            }
+                                        @endphp
+                                        <div class="group flex flex-col justify-between p-4 rounded-2xl border border-slate-200 bg-slate-50 hover:bg-white hover:border-[#13416B]/30 hover:shadow-sm transition-all duration-300"
+                                            :class="{
+                                                '!bg-[#1E2837] !border-[#263346] hover:!bg-[#222e40]': isDark
+                                            }">
+                                            <div class="flex items-start gap-3">
+                                                <div class="w-11 h-11 rounded-xl bg-white border border-slate-200 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform"
+                                                    :class="{
+                                                        '!bg-[#263346] !border-[#334155]': isDark
+                                                    }">
+                                                    <i class="fas {{ $iconClass }} text-xl"></i>
+                                                </div>
+                                                <div class="flex-1 min-w-0">
+                                                    <h4 class="text-xs sm:text-sm font-bold text-slate-800 leading-snug group-hover:text-[#13416B] transition-colors line-clamp-2 break-words"
+                                                        :class="{
+                                                            '!text-slate-200 group-hover:!text-white': isDark
+                                                        }" title="{{ $docName }}">
+                                                        {{ $docName }}
+                                                    </h4>
+                                                    @if (!empty($doc->formatted_file_size))
+                                                        <p class="text-[10px] text-slate-400 mt-0.5">{{ $doc->formatted_file_size }}</p>
+                                                    @endif
+                                                </div>
+                                            </div>
+
+                                            <div class="mt-3 pt-2.5 border-t border-slate-200/60 flex items-center justify-end"
+                                                :class="{
+                                                    '!border-[#263346]': isDark
+                                                }">
+                                                <a href="{{ $docUrl }}" target="_blank" download
+                                                    class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold text-white bg-[#13416B] hover:bg-[#0f3354] transition-all shadow-xs">
+                                                    <i class="fas fa-download text-[11px]"></i> Unduh
+                                                </a>
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            @endif
+
+                            {{-- Koleksi Perpustakaan Terkait (Bisa Banyak & Thumbnail Saja) --}}
+                            @if ($hasLibrary)
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                                    @foreach ($allLibs as $lib)
+                                        @php
+                                            $libCategory = $lib->libraryCategory?->name ?? 'Pustaka';
+                                            $libCover = $lib->cover_image_url;
+                                            $libUrl = route('user.library.index', ['open' => $lib->id]);
+                                        @endphp
+                                        <div class="group flex flex-col justify-between p-4 rounded-2xl border border-slate-200 bg-slate-50 hover:bg-white hover:border-[#13416B]/30 hover:shadow-sm transition-all duration-300"
+                                            :class="{
+                                                '!bg-[#1E2837] !border-[#263346] hover:!bg-[#222e40]': isDark
+                                            }">
+                                            <div class="flex items-start gap-3.5">
+                                                {{-- THUMBNAIL SAJA (TANPA ICON) --}}
+                                                <div class="w-12 h-16 rounded-md bg-slate-100 border border-slate-200 overflow-hidden shrink-0 group-hover:scale-105 transition-transform relative shadow-xs"
+                                                    :class="{
+                                                        '!bg-[#263346] !border-[#334155]': isDark
+                                                    }">
+                                                    @if ($libCover)
+                                                        <img src="{{ $libCover }}" alt="{{ $lib->title }}" class="w-full h-full object-cover">
+                                                    @else
+                                                        <div class="w-full h-full bg-gradient-to-br from-slate-200 to-slate-300" :class="{ '!from-[#2a384c] !to-[#1e2837]': isDark }"></div>
+                                                    @endif
+                                                </div>
+                                                <div class="flex-1 min-w-0">
+                                                    <h4 class="text-xs sm:text-sm font-bold text-slate-800 leading-snug group-hover:text-[#13416B] transition-colors line-clamp-2"
+                                                        :class="{
+                                                            '!text-slate-200 group-hover:!text-white': isDark
+                                                        }">
+                                                        {{ $lib->title }}
+                                                    </h4>
+                                                    @if (!empty($lib->description))
+                                                        <p class="text-[11px] text-slate-500 mt-1 line-clamp-2 leading-relaxed"
+                                                            :class="{
+                                                                '!text-slate-400': isDark
+                                                            }">
+                                                            {{ strip_tags($lib->description) }}
+                                                        </p>
+                                                    @endif
+                                                </div>
+                                            </div>
+
+                                            <div class="mt-3 pt-2.5 border-t border-slate-200/60 flex items-center justify-end"
+                                                :class="{
+                                                    '!border-[#263346]': isDark
+                                                }">
+                                                <a href="{{ $libUrl }}" target="_blank"
+                                                    class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold text-[#13416B] bg-[#13416B]/10 hover:bg-[#13416B] hover:text-white transition-all shadow-xs"
+                                                    :class="{
+                                                        '!bg-[#263346] !text-[#8fbbe0] hover:!bg-[#13416B] hover:!text-white': isDark
+                                                    }">
+                                                    <span>Buka Koleksi</span>
+                                                    <i class="fas fa-external-link-alt text-[9px]"></i>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            @endif
+                        </div>
                     </div>
                 @endif
 
                 {{-- Empty State --}}
-                @if (empty($contentText) && !$docUrl)
+                @if (empty($contentText) && !$hasDoc && !$hasLibrary)
                     <div
                         class="text-center py-12 sm:py-16 px-4 bg-slate-50 rounded-2xl border border-dashed border-slate-200"
                         :class="{

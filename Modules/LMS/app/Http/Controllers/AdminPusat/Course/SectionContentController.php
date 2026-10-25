@@ -37,7 +37,8 @@ class SectionContentController extends Controller
     {
         try {
             $validated = $request->validated();
-            $result = $this->sectionContentService->storeSectionContent($validated, $request->file('document'));
+            $files = $request->file('documents') ?? ($request->file('document') ? [$request->file('document')] : []);
+            $result = $this->sectionContentService->storeSectionContent($validated, $files);
 
             if (!$result['success']) {
                 ToastMagic::error($result['message']);
@@ -78,7 +79,8 @@ class SectionContentController extends Controller
     {
         try {
             $validated = $request->validated();
-            $result = $this->sectionContentService->updateContent($id, $validated, $request->file('document'));
+            $files = $request->file('documents') ?? ($request->file('document') ? [$request->file('document')] : []);
+            $result = $this->sectionContentService->updateContent($id, $validated, $files);
 
             if (!$result['success']) {
                 ToastMagic::error($result['message']);

@@ -879,7 +879,7 @@ class CourseService
 
     public function getStudentContentForShow(string $contentId): SectionContent
     {
-        $content = SectionContent::findOrFail($contentId);
+        $content = SectionContent::with(['documents', 'libraries.libraryCategory'])->findOrFail($contentId);
         $content->is_completed = $content->isCompletedByUser((string) Auth::id());
 
         return $content;

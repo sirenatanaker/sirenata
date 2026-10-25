@@ -66,25 +66,187 @@
                     </div>
                 </div>
 
-                <!-- Dokumen Lampiran -->
-                <div>
-                    <label class="block text-sm font-bold text-slate-700 mb-2">
-                        Dokumen Lampiran <span class="text-slate-400 font-normal">(Opsional - Bisa pilih banyak file)</span>
-                    </label>
+                <!-- Dokumen Lampiran & Referensi Sumber Belajar -->
+                @php
+                    $existingDocuments = $content->all_documents;
+                    $selectedLibIds = old('library_ids', $content->all_libraries->pluck('id')->all());
+                    if (!is_array($selectedLibIds)) {
+                        $selectedLibIds = old('library_id') ? [old('library_id')] : [];
+                    }
+                    $selectedLibraries = $libraries->whereIn('id', $selectedLibIds);
+                @endphp
+                <div class="space-y-3">
+                    <div>
+                        <h3 class="text-sm font-bold text-slate-700">
+                            Dokumen Lampiran & Referensi Belajar <span class="text-xs font-normal text-slate-400">(Opsional - Bisa Banyak)</span>
+                        </h3>
+                    </div>
 
-                    @if ($content->document_url)
-                        <div class="mb-3 text-sm flex items-center gap-2 p-3 bg-indigo-50 border border-indigo-100 rounded-lg">
-                            <span class="text-slate-600 font-medium">Dokumen saat ini:</span>
-                            <a href="{{ $content->document_url }}" target="_blank"
-                                class="text-[#13416B] hover:underline flex items-center gap-1.5 font-bold">
-                                <i class="fas fa-file-alt"></i> Lihat Dokumen
-                            </a>
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+                        <!-- 1. Dropzone Unggah Berkas Dokumen (Bisa Banyak) -->
+                        <div class="flex flex-col justify-between p-4 rounded-xl bg-white border border-slate-200 shadow-2xs">
+                            <div>
+                                <div class="flex items-center justify-between mb-2.5">
+                                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-700">
+                                        <i class="fas fa-file-arrow-up text-[#13416B] mr-1"></i> Dokumen Berkas Lampiran
+                                    </label>
+                                    <span id="file-count-badge" class="{{ $existingDocuments->count() ? '' : 'hidden' }} text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#13416B]/10 text-[#13416B]">
+                                        {{ $existingDocuments->count() }} Berkas
+                                    </span>
+                                </div>
+                                
+                                <input type="file" name="documents[]" id="document_file" class="hidden" multiple
+                                    accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.zip,.rar,.csv" />
+
+                                <!-- Container Hidden Inputs untuk berkas yang ditandai dihapus -->
+                                <div id="delete-documents-container"></div>
+
+                                <!-- List Berkas Yang Sudah Tersimpan Sebelumnya -->
+                                <div id="existing-documents-list" class="{{ $existingDocuments->count() ? '' : 'hidden' }} space-y-2 mb-3">
+                                    @foreach ($existingDocuments as $doc)
+                                        @php
+                                            $ext = strtolower($doc->file_extension);
+                                            $iconClass = match($ext) {
+                                                'pdf' => 'fas fa-file-pdf text-red-500',
+                                                'doc', 'docx' => 'fas fa-file-word text-blue-600',
+                                                'xls', 'xlsx', 'csv' => 'fas fa-file-excel text-emerald-600',
+                                                'ppt', 'pptx' => 'fas fa-file-powerpoint text-amber-600',
+                                                'zip', 'rar', '7z' => 'fas fa-file-archive text-yellow-600',
+                                                default => 'fas fa-file-alt text-[#13416B]',
+                                            };
+                                        @endphp
+                                        <div class="existing-doc-card p-2.5 rounded-xl border border-blue-200 bg-blue-50/40 flex items-center justify-between gap-3" data-id="{{ $doc->id }}">
+                                            <div class="flex items-center gap-2.5 min-w-0">
+                                                <div class="w-8 h-8 rounded-lg bg-white border border-blue-200 flex items-center justify-center shrink-0 shadow-2xs">
+                                                    <i class="{{ $iconClass }} text-sm"></i>
+                                                </div>
+                                                <div class="min-w-0">
+                                                    <div class="flex items-center gap-1.5">
+                                                        <span class="px-1.5 py-0.2 text-[8px] font-bold uppercase rounded bg-blue-100 text-[#13416B]">Tersimpan</span>
+                                                        <p class="text-xs font-bold text-slate-800 truncate">{{ $doc->file_name }}</p>
+                                                    </div>
+                                                    <p class="text-[10px] text-slate-500 font-medium">{{ $doc->formatted_file_size }}</p>
+                                                </div>
+                                            </div>
+                                            <div class="flex items-center gap-1 shrink-0">
+                                                <a href="{{ $doc->file_url }}" target="_blank"
+                                                    class="inline-flex items-center gap-1 text-[11px] font-bold text-[#13416B] hover:underline px-2 py-1">
+                                                    <i class="fas fa-external-link-alt text-[9px]"></i> Buka
+                                                </a>
+                                                <button type="button" class="btn-delete-existing-doc w-6 h-6 rounded-lg flex items-center justify-center text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors cursor-pointer" data-id="{{ $doc->id }}" title="Hapus Berkas Ini">
+                                                    <i class="fas fa-trash-alt text-xs"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                </div>
+
+                                <!-- List Berkas Baru Terpilih -->
+                                <div id="new-documents-list" class="hidden space-y-2 mb-3"></div>
+
+                                <!-- Dropzone Area -->
+                                <div id="document-dropzone"
+                                    class="border-2 border-dashed border-slate-300 hover:border-[#13416B] rounded-xl p-5 text-center cursor-pointer transition-all bg-slate-50/50 hover:bg-slate-50 flex flex-col items-center justify-center min-h-[120px]">
+                                    <div class="w-10 h-10 rounded-full bg-[#13416B]/10 text-[#13416B] flex items-center justify-center mb-2">
+                                        <i class="fas fa-cloud-arrow-up text-lg"></i>
+                                    </div>
+                                    <p class="text-xs font-bold text-slate-700">
+                                        Tarik & letakkan beberapa berkas di sini atau <span class="text-[#13416B] underline">Pilih Berkas</span>
+                                    </p>
+                                    <p class="text-[10px] text-slate-400 mt-1">
+                                        PDF, DOCX, XLSX, PPTX, ZIP, CSV (Maks. 20 MB/file)
+                                    </p>
+                                </div>
+
+                                <!-- Tombol Tambah Berkas Lainnya -->
+                                <div id="btn-add-more-docs-wrap" class="hidden mt-2.5">
+                                    <button type="button" id="btn-add-more-docs"
+                                        class="w-full py-2 px-3 rounded-lg border border-dashed border-slate-300 hover:border-[#13416B] text-slate-600 hover:text-[#13416B] bg-slate-50 hover:bg-[#13416B]/5 text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer">
+                                        <i class="fas fa-plus text-[10px]"></i> Tambah Berkas Lainnya
+                                    </button>
+                                </div>
+                            </div>
+
+                         
                         </div>
-                    @endif
 
-                    <input type="file" name="documents[]" multiple accept=".pdf,.doc,.docx"
-                        class="w-full text-sm text-slate-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-bold file:bg-[#13416B]/10 file:text-[#13416B] hover:file:bg-[#13416B]/20 transition-all border border-slate-200 rounded-xl" />
-                    <p class="text-[11px] font-medium text-slate-400 mt-1.5"><i class="fas fa-info-circle mr-1"></i>Format: PDF, DOC, DOCX. Abaikan jika tidak ingin mengganti file. (Max: 10MB/file).</p>
+                        <!-- 2. Tautkan dari Perpustakaan (Bisa Banyak & Thumbnail Saja Tanpa Icon) -->
+                        <div class="flex flex-col justify-between p-4 rounded-xl bg-white border border-slate-200 shadow-2xs">
+                            <div>
+                                <div class="flex items-center justify-between mb-2.5">
+                                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-700">
+                                        <i class="fas fa-book-bookmark text-[#13416B] mr-1"></i> Koleksi Perpustakaan Terkait
+                                    </label>
+                                    <span id="library-count-badge" class="{{ $selectedLibraries->count() ? '' : 'hidden' }} text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200">
+                                        {{ $selectedLibraries->count() }} Koleksi
+                                    </span>
+                                </div>
+
+                                <div id="library-inputs-container">
+                                    @foreach ($selectedLibraries as $selLib)
+                                        <input type="hidden" name="library_ids[]" value="{{ $selLib->id }}" class="lib-input-hidden" data-id="{{ $selLib->id }}">
+                                    @endforeach
+                                </div>
+
+                                <!-- State: Belum Ada Koleksi Terpilih -->
+                                <div id="library-empty-state" class="{{ $selectedLibraries->count() ? 'hidden' : '' }} border-2 border-dashed border-slate-300 rounded-xl p-5 text-center bg-slate-50/50 flex flex-col items-center justify-center min-h-[130px]">
+                                    <p class="text-xs font-medium text-slate-600 mb-2.5">
+                                        Tautkan satu atau beberapa buku, jurnal, atau modul dari perpustakaan digital.
+                                    </p>
+                                    <button type="button" id="btn-open-library-modal"
+                                        class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold text-white bg-[#13416B] hover:bg-[#0f3354] shadow-xs transition-all cursor-pointer">
+                                        <i class="fas fa-plus text-xs"></i> Pilih dari Perpustakaan
+                                    </button>
+                                </div>
+
+                                <!-- State: List Koleksi Terpilih -->
+                                <div id="selected-libraries-list" class="{{ $selectedLibraries->count() ? '' : 'hidden' }} space-y-2 mt-1">
+                                    @foreach ($selectedLibraries as $selLib)
+                                        @php
+                                            $catName = $selLib->libraryCategory?->name ?? 'Pustaka';
+                                            $coverUrl = $selLib->cover_image_url;
+                                        @endphp
+                                        <div class="selected-lib-card border border-indigo-200 bg-indigo-50/30 rounded-xl p-2.5 flex items-center justify-between gap-3" data-id="{{ $selLib->id }}">
+                                            <div class="flex items-start gap-2.5 min-w-0">
+                                                {{-- THUMBNAIL SAJA (TANPA ICON) --}}
+                                                <div class="w-10 h-14 rounded-md bg-slate-100 border border-slate-200 overflow-hidden shrink-0 shadow-2xs">
+                                                    @if ($coverUrl)
+                                                        <img src="{{ $coverUrl }}" alt="{{ $selLib->title }}" class="w-full h-full object-cover">
+                                                    @else
+                                                        <div class="w-full h-full bg-gradient-to-br from-slate-200 to-slate-300"></div>
+                                                    @endif
+                                                </div>
+                                                <div class="min-w-0">
+                                                    <span class="inline-block px-1.5 py-0.2 text-[8px] font-extrabold uppercase rounded bg-indigo-100 text-indigo-700 border border-indigo-200 mb-0.5">
+                                                        {{ $catName }}
+                                                    </span>
+                                                    <h4 class="text-xs font-bold text-slate-800 line-clamp-2 leading-tight">
+                                                        {{ $selLib->title }}
+                                                    </h4>
+                                                    <p class="text-[10px] text-slate-500 line-clamp-2 mt-0.5">
+                                                        {{ Str::limit(strip_tags($selLib->description ?? ''), 120) }}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                            <button type="button" class="btn-remove-selected-lib w-7 h-7 rounded-lg flex items-center justify-center text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors shrink-0 cursor-pointer" data-id="{{ $selLib->id }}" title="Hapus Tautan">
+                                                <i class="fas fa-trash-alt text-xs"></i>
+                                            </button>
+                                        </div>
+                                    @endforeach
+                                </div>
+
+                                <!-- Tombol Tambah Koleksi Lainnya -->
+                                <div id="btn-add-more-libs-wrap" class="{{ $selectedLibraries->count() ? '' : 'hidden' }} mt-2.5">
+                                    <button type="button" id="btn-add-more-libs"
+                                        class="w-full py-2 px-3 rounded-lg border border-dashed border-indigo-200 hover:border-[#13416B] text-[#13416B] bg-indigo-50/50 hover:bg-indigo-50 text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer">
+                                        <i class="fas fa-plus text-[10px]"></i> Tambah Koleksi Lainnya
+                                    </button>
+                                </div>
+                            </div>
+
+                          
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Action Buttons -->
@@ -244,53 +406,233 @@
     </div>
 
     <!-- MODAL VIDEO -->
-    <div id="custom-video-modal" class="fixed inset-0 z-[9999] hidden items-center justify-center bg-slate-900/50 backdrop-blur-sm transition-opacity">
-        <div class="bg-white rounded-2xl shadow-xl w-full max-w-md p-6 border border-slate-200">
-            <div class="flex justify-between items-center mb-5">
-                <h3 class="text-base font-bold text-slate-700 flex items-center gap-2"><i class="fas fa-video text-[#13416B]"></i> Sisipkan Video</h3>
-                <button type="button" id="btn-close-video" class="text-slate-400 hover:text-slate-600 transition-colors"><i class="fas fa-times text-lg"></i></button>
+    <div id="custom-video-modal" class="fixed inset-0 z-[9999] hidden items-center justify-center bg-slate-900/60 backdrop-blur-sm transition-opacity p-4">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-xl p-5 sm:p-6 border border-slate-200 overflow-hidden flex flex-col max-h-[90vh]">
+            
+            <!-- Top Controls (Header "Sisipkan Video" Dihapus sesuai permintaan, hanya tombol close di kanan) -->
+            <div class="flex justify-end items-center mb-2">
+                <button type="button" id="btn-close-video" class="w-8 h-8 rounded-full flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer" title="Tutup Modal">
+                    <i class="fas fa-times text-base"></i>
+                </button>
             </div>
             
-            <div class="space-y-4">
-                <div>
-                    <label class="block text-sm font-bold text-slate-700 mb-2">Pilih Sumber Video:</label>
-                    <div class="flex flex-col sm:flex-row gap-3">
-                        <label class="flex items-center gap-2 cursor-pointer bg-slate-50 p-2.5 rounded-lg border border-slate-200 flex-1 hover:bg-slate-100 transition">
-                            <input type="radio" name="video_source" value="upload" checked class="w-4 h-4 text-[#13416B] focus:ring-[#13416B]">
-                            <span class="text-sm font-bold text-slate-700">Upload (.mp4)</span>
-                        </label>
-                        <label class="flex items-center gap-2 cursor-pointer bg-slate-50 p-2.5 rounded-lg border border-slate-200 flex-1 hover:bg-slate-100 transition">
-                            <input type="radio" name="video_source" value="link" class="w-4 h-4 text-[#13416B] focus:ring-[#13416B]">
-                            <span class="text-sm font-bold text-slate-700">Link YouTube</span>
-                        </label>
-                    </div>
+            <div class="overflow-y-auto space-y-4 pr-0.5 custom-scrollbar">
+                <!-- Segmented Tab Source Switcher -->
+                <div class="p-1 bg-slate-100 rounded-xl flex gap-1 border border-slate-200/80">
+                    <button type="button" id="tab-video-upload" class="flex-1 py-2 px-3 rounded-lg text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-2 bg-white text-[#13416B] shadow-xs cursor-pointer">
+                        <i class="fas fa-cloud-arrow-up text-sm"></i> Unggah Video (File)
+                    </button>
+                    <button type="button" id="tab-video-link" class="flex-1 py-2 px-3 rounded-lg text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-2 text-slate-500 hover:text-slate-800 cursor-pointer">
+                        <i class="fab fa-youtube text-red-600 text-sm"></i> Tautan YouTube
+                    </button>
                 </div>
 
-                <div id="panel-upload" class="p-4 bg-slate-50 border border-slate-200 rounded-xl block transition-all">
-                    <label class="block text-sm font-bold text-slate-700 mb-2">Pilih File Video (Internal)</label>
-                    <input type="file" id="video-file-input" accept="video/mp4,video/webm,video/ogg" class="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-bold file:bg-[#13416B]/10 file:text-[#13416B] hover:file:bg-[#13416B]/20">
-                    <p class="text-[10px] font-medium text-slate-400 mt-2">Maksimal ukuran file: 100MB.</p>
-                    
-                    <div id="upload-progress-container" class="hidden mt-4">
-                        <div class="flex justify-between text-xs font-bold text-slate-600 mb-1.5">
-                            <span id="upload-progress-text">0 MB / 0 MB</span>
-                            <span id="upload-progress-percent" class="text-[#13416B]">0%</span>
+                <!-- Panel 1: Upload Video File (Advance Dropzone & Preview) -->
+                <div id="panel-upload" class="block transition-all space-y-3">
+                    <input type="file" id="video-file-input" accept="video/mp4,video/webm,video/ogg,video/quicktime,video/x-matroska" class="hidden">
+
+                    <!-- Interactive Drag & Drop Area -->
+                    <div id="video-dropzone" class="border-2 border-dashed border-slate-300 hover:border-[#13416B] bg-slate-50/70 hover:bg-blue-50/30 rounded-2xl p-6 sm:p-8 text-center cursor-pointer transition-all duration-200 group">
+                        <div class="w-16 h-16 rounded-2xl bg-white shadow-xs border border-slate-200 text-[#13416B] flex items-center justify-center mx-auto mb-3.5 group-hover:scale-105 group-hover:border-[#13416B]/40 transition-all">
+                            <i class="fas fa-film text-2xl"></i>
+                        </div>
+                        <p class="text-sm font-bold text-slate-800 mb-1">
+                            Tarik & lepas file video di sini, atau <span class="text-[#13416B] underline font-extrabold">Telusuri Berkas</span>
+                        </p>
+                        <p class="text-xs text-slate-400 mb-3">Format didukung: MP4, WebM, OGG, MKV, MOV</p>
+                        <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-200/60 text-[11px] font-semibold text-slate-600">
+                            <i class="fas fa-info-circle text-[10px] text-slate-400"></i> Maksimal ukuran: 100 MB
+                        </div>
+                    </div>
+
+                    <!-- Selected File Info & Live Video Player Preview -->
+                    <div id="video-file-card" class="hidden bg-slate-50 border border-slate-200 rounded-2xl p-4 transition-all space-y-3">
+                        <div class="relative rounded-xl overflow-hidden bg-black shadow-inner aspect-video flex items-center justify-center">
+                            <video id="video-preview-player" controls class="w-full h-full object-contain"></video>
+                        </div>
+
+                        <div class="flex items-center justify-between gap-3 bg-white p-3 rounded-xl border border-slate-200 shadow-xs">
+                            <div class="flex items-center gap-3 min-w-0">
+                                <div class="w-10 h-10 rounded-lg bg-[#13416B]/10 text-[#13416B] flex items-center justify-center shrink-0">
+                                    <i class="fas fa-file-video text-lg"></i>
+                                </div>
+                                <div class="min-w-0">
+                                    <p id="video-file-name" class="text-xs sm:text-sm font-bold text-slate-800 truncate">video.mp4</p>
+                                    <p id="video-file-size" class="text-[11px] text-slate-400 font-medium">0 MB</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-1.5 shrink-0">
+                                <button type="button" id="btn-change-video" class="px-2.5 py-1.5 text-xs font-bold text-[#13416B] hover:bg-[#13416B]/10 rounded-lg transition-colors flex items-center gap-1 cursor-pointer" title="Ganti Berkas">
+                                    <i class="fas fa-sync-alt text-[10px]"></i> Ganti
+                                </button>
+                                <button type="button" id="btn-remove-video" class="px-2.5 py-1.5 text-xs font-bold text-red-600 hover:bg-red-50 rounded-lg transition-colors flex items-center gap-1 cursor-pointer" title="Hapus Berkas">
+                                    <i class="fas fa-trash-alt text-[10px]"></i> Hapus
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Upload Progress Realtime Bar -->
+                    <div id="upload-progress-container" class="hidden p-4 rounded-xl bg-blue-50/60 border border-blue-100 transition-all">
+                        <div class="flex justify-between items-center text-xs font-bold text-slate-700 mb-2">
+                            <span class="flex items-center gap-2 text-[#13416B]">
+                                <i class="fas fa-spinner fa-spin"></i> Sedang mengunggah video ke server...
+                            </span>
+                            <span id="upload-progress-percent" class="text-[#13416B] bg-white px-2 py-0.5 rounded-full border border-blue-200 text-[11px] font-extrabold shadow-2xs">0%</span>
                         </div>
                         <div class="w-full bg-slate-200 rounded-full h-2.5 overflow-hidden">
-                            <div id="upload-progress-bar" class="bg-[#13416B] h-2.5 rounded-full transition-all duration-300" style="width: 0%"></div>
+                            <div id="upload-progress-bar" class="bg-gradient-to-r from-[#13416B] to-blue-600 h-2.5 rounded-full transition-all duration-300" style="width: 0%"></div>
                         </div>
+                        <p id="upload-progress-text" class="text-[11px] font-medium text-slate-500 mt-2 text-right">0 MB / 0 MB</p>
                     </div>
                 </div>
 
-                <div id="panel-link" class="p-4 bg-slate-50 border border-slate-200 rounded-xl hidden transition-all">
-                    <label class="block text-sm font-bold text-slate-700 mb-2">Masukkan Tautan YouTube</label>
-                    <input type="url" id="video-url-input" placeholder="https://youtube.com/..." class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-[#13416B] focus:ring-1 focus:ring-[#13416B]">
+                <!-- Panel 2: Link Video YouTube -->
+                <div id="panel-link" class="hidden space-y-3.5 transition-all">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1.5">Tautan URL Video YouTube</label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-red-600">
+                                <i class="fab fa-youtube text-lg"></i>
+                            </span>
+                            <input type="url" id="video-url-input" placeholder="https://www.youtube.com/watch?v=..." class="w-full rounded-xl border border-slate-300 pl-11 pr-3 py-2.5 text-xs sm:text-sm focus:border-[#13416B] focus:ring-1 focus:ring-[#13416B] shadow-xs">
+                        </div>
+                        <p class="text-[11px] text-slate-400 mt-1">Salin dan tempel link video YouTube (watch, embed, atau share link).</p>
+                    </div>
+
+                    <!-- Live YouTube Video Preview Frame -->
+                    <div id="youtube-preview-container" class="hidden rounded-xl overflow-hidden border border-slate-200 shadow-xs bg-black aspect-video relative">
+                        <iframe id="youtube-preview-frame" class="w-full h-full" frameborder="0" allowfullscreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>
+                    </div>
                 </div>
             </div>
 
-            <div class="flex justify-end gap-3 mt-6">
-                <button type="button" id="btn-cancel-video" class="px-5 py-2 text-sm font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors">Batal</button>
-                <button type="button" id="btn-save-video" class="px-5 py-2 text-sm font-bold text-white bg-[#13416B] hover:bg-[#0f3354] rounded-xl transition-colors"><i class="fas fa-check mr-1.5"></i> Sisipkan</button>
+            <!-- Footer Modal -->
+            <div class="flex justify-end gap-3 mt-6 pt-4 border-t border-slate-100 shrink-0">
+                <button type="button" id="btn-cancel-video" class="px-5 py-2.5 text-xs sm:text-sm font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors cursor-pointer">Batal</button>
+                <button type="button" id="btn-save-video" class="px-6 py-2.5 text-xs sm:text-sm font-bold text-white bg-[#13416B] hover:bg-[#0f3354] rounded-xl transition-colors shadow-sm flex items-center gap-2 cursor-pointer">
+                    <i class="fas fa-check text-xs"></i> Sisipkan Video
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL PILIH KOLEKSI PERPUSTAKAAN -->
+    <div id="library-picker-modal" class="fixed inset-0 z-[9999] hidden items-center justify-center bg-slate-900/60 backdrop-blur-sm transition-opacity p-4">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-3xl border border-slate-200 overflow-hidden flex flex-col max-h-[85vh]">
+            <!-- Header Modal -->
+            <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between shrink-0 bg-slate-50">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-8 h-8 rounded-lg bg-[#13416B]/10 text-[#13416B] flex items-center justify-center">
+                        <i class="fas fa-book text-sm"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-base font-bold text-slate-800">Pilih Koleksi Perpustakaan</h3>
+                        <p class="text-xs text-slate-500">Tautkan literatur pustaka sebagai bahan bacaan referensi topik ini</p>
+                    </div>
+                </div>
+                <button type="button" id="btn-close-library-modal" class="w-8 h-8 rounded-full flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-slate-200/60 transition-colors cursor-pointer">
+                    <i class="fas fa-times text-base"></i>
+                </button>
+            </div>
+
+            <!-- Search Bar & Filters -->
+            <div class="p-4 sm:p-5 border-b border-slate-100 space-y-3 shrink-0">
+                <div class="relative">
+                    <i class="fas fa-search absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+                    <input type="text" id="library-search-input" placeholder="Cari judul koleksi atau kategori pustaka..."
+                        class="w-full pl-10 pr-4 py-2.5 text-sm rounded-xl border border-slate-300 focus:border-[#13416B] focus:ring-1 focus:ring-[#13416B] transition-all">
+                </div>
+
+                @php
+                    $libraryCategories = $libraries->pluck('libraryCategory.name')->filter()->unique()->values();
+                @endphp
+                <div class="flex items-center gap-1.5 overflow-x-auto pb-1 custom-scrollbar text-xs">
+                    <button type="button" class="lib-cat-btn active px-3 py-1 rounded-full font-bold bg-[#13416B] text-white transition-all cursor-pointer" data-category="ALL">
+                        Semua ({{ $libraries->count() }})
+                    </button>
+                    @foreach ($libraryCategories as $catName)
+                        <button type="button" class="lib-cat-btn px-3 py-1 rounded-full font-medium bg-slate-100 text-slate-600 hover:bg-slate-200 transition-all cursor-pointer" data-category="{{ Str::lower($catName) }}">
+                            {{ $catName }}
+                        </button>
+                    @endforeach
+                </div>
+            </div>
+
+            <!-- List / Grid of Libraries -->
+            <div class="p-4 sm:p-6 overflow-y-auto custom-scrollbar flex-1">
+                <div id="library-grid-container" class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                    @forelse ($libraries as $lib)
+                        @php
+                            $catName = $lib->libraryCategory?->name ?? 'Pustaka';
+                            $coverUrl = $lib->cover_image_url;
+                            $descText = Str::limit(strip_tags($lib->description ?? ''), 80);
+                        @endphp
+                        <div class="lib-item group p-3.5 rounded-xl border border-slate-200 hover:border-[#13416B]/50 hover:shadow-md bg-white transition-all flex items-start gap-3 cursor-pointer"
+                            data-id="{{ $lib->id }}"
+                            data-title="{{ $lib->title }}"
+                            data-category="{{ $catName }}"
+                            data-category-lower="{{ Str::lower($catName) }}"
+                            data-cover="{{ $coverUrl ?? '' }}"
+                            data-desc="{{ $descText }}">
+                            
+                            <div class="w-12 h-16 rounded-md bg-slate-100 border border-slate-200 overflow-hidden shrink-0 relative shadow-2xs">
+                                @if ($coverUrl)
+                                    <img src="{{ $coverUrl }}" alt="{{ $lib->title }}" class="w-full h-full object-cover">
+                                @else
+                                    <div class="w-full h-full bg-gradient-to-br from-slate-200 to-slate-300"></div>
+                                @endif
+                            </div>
+
+                            <div class="flex-1 min-w-0 flex flex-col justify-between h-full">
+                                <div>
+                                    <span class="inline-block px-1.5 py-0.5 text-[9px] font-extrabold uppercase rounded bg-indigo-50 text-indigo-700 border border-indigo-200 mb-1">
+                                        {{ $catName }}
+                                    </span>
+                                    <h4 class="text-xs font-bold text-slate-800 group-hover:text-[#13416B] line-clamp-2 leading-snug">
+                                        {{ $lib->title }}
+                                    </h4>
+                                    @if ($descText)
+                                        <p class="text-[10px] text-slate-400 line-clamp-2 mt-0.5">{{ $descText }}</p>
+                                    @endif
+                                </div>
+                                <div class="mt-2 flex items-center justify-between">
+                                    <span class="lib-status-text text-[10px] font-semibold text-slate-400">
+                                        <i class="far fa-circle mr-0.5"></i> Belum Dipilih
+                                    </span>
+                                    <span class="lib-action-badge text-[10px] px-2 py-0.5 rounded bg-slate-100 text-slate-600 transition-all font-bold">
+                                        Pilih
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    @empty
+                        <div class="col-span-2 py-8 text-center text-slate-400">
+                            <i class="fas fa-book-open text-3xl mb-2 text-slate-300"></i>
+                            <p class="text-xs">Belum ada koleksi perpustakaan yang terdaftar.</p>
+                        </div>
+                    @endforelse
+                </div>
+
+                <!-- Empty Search State -->
+                <div id="library-search-empty" class="hidden py-10 text-center">
+                    <i class="fas fa-search text-3xl text-slate-300 mb-2"></i>
+                    <p class="text-xs font-bold text-slate-600">Tidak ada koleksi perpustakaan yang cocok</p>
+                    <p class="text-[11px] text-slate-400 mt-0.5">Coba gunakan kata kunci pencarian atau kategori lain</p>
+                </div>
+            </div>
+
+            <!-- Footer Modal -->
+            <div class="px-6 py-3 border-t border-slate-100 bg-slate-50 flex items-center justify-between shrink-0">
+                <span id="modal-selected-count" class="text-xs font-bold text-slate-700">0 Koleksi Dipilih</span>
+                <div class="flex items-center gap-2">
+                    <button type="button" id="btn-cancel-library-modal" class="px-4 py-1.5 text-xs font-bold text-slate-600 bg-white border border-slate-200 hover:bg-slate-100 rounded-lg transition-colors cursor-pointer">
+                        Batal
+                    </button>
+                    <button type="button" id="btn-apply-library-modal" class="px-4 py-1.5 text-xs font-bold text-white bg-[#13416B] hover:bg-[#0f3354] rounded-lg transition-colors cursor-pointer">
+                        Terapkan Pilihan
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -373,7 +715,20 @@
                         ],
                         handlers: {
                             'link': function() { var range = quill.getSelection(true); var text = range && range.length > 0 ? quill.getText(range.index, range.length) : ''; document.getElementById('link-text-input').value = text; document.getElementById('link-url-input').value = ''; const modal = document.getElementById('custom-link-modal'); modal.classList.remove('hidden'); modal.classList.add('flex'); setTimeout(() => document.getElementById('link-url-input').focus(), 100); window.quillLinkRange = range; },
-                            'video': function() { var range = quill.getSelection(true); window.quillVideoRange = range; document.getElementById('video-url-input').value = ''; document.getElementById('video-file-input').value = ''; document.getElementById('upload-progress-container').classList.add('hidden'); document.getElementById('upload-progress-bar').style.width = '0%'; const modal = document.getElementById('custom-video-modal'); modal.classList.remove('hidden'); modal.classList.add('flex'); }
+                            'video': function() {
+                                var range = quill.getSelection(true);
+                                window.quillVideoRange = range;
+                                switchVideoTab('upload');
+                                resetVideoFile();
+                                videoUrlInput.value = '';
+                                youtubePreviewFrame.src = '';
+                                youtubePreviewContainer.classList.add('hidden');
+                                uploadProgressContainer.classList.add('hidden');
+                                uploadProgressBar.style.width = '0%';
+                                const modal = document.getElementById('custom-video-modal');
+                                modal.classList.remove('hidden');
+                                modal.classList.add('flex');
+                            }
                         }
                     }
                 },
@@ -440,18 +795,179 @@
             document.getElementById('btn-close-link').addEventListener('click', closeLinkModal); document.getElementById('btn-cancel-link').addEventListener('click', closeLinkModal);
             document.getElementById('btn-save-link').addEventListener('click', function() { var text = document.getElementById('link-text-input').value.trim(); var url = document.getElementById('link-url-input').value.trim(); var range = window.quillLinkRange; if (!url) return alert('URL wajib diisi!'); if (!/^https?:\/\//i.test(url)) url = 'https://' + url; if (!text) text = url; quill.focus(); if (range && range.length > 0) { quill.deleteText(range.index, range.length); quill.insertText(range.index, text, 'link', url); quill.setSelection(range.index + text.length); } else { var cursorPosition = range ? range.index : quill.getLength(); quill.insertText(cursorPosition, text, 'link', url); quill.setSelection(cursorPosition + text.length); } closeLinkModal(); });
 
-            document.querySelectorAll('input[name="video_source"]').forEach(radio => { radio.addEventListener('change', function() { if (this.value === 'upload') { document.getElementById('panel-upload').classList.remove('hidden'); document.getElementById('panel-upload').classList.add('block'); document.getElementById('panel-link').classList.remove('block'); document.getElementById('panel-link').classList.add('hidden'); } else { document.getElementById('panel-link').classList.remove('hidden'); document.getElementById('panel-link').classList.add('block'); document.getElementById('panel-upload').classList.remove('block'); document.getElementById('panel-upload').classList.add('hidden'); } }); });
+            // STATE & HANDLER MODAL VIDEO ADVANCED
+            let currentVideoSource = 'upload';
+            let selectedVideoFile = null;
+            let previewObjectUrl = null;
 
-            function closeVideoModal() { document.getElementById('custom-video-modal').classList.add('hidden'); document.getElementById('custom-video-modal').classList.remove('flex'); }
-            document.getElementById('btn-close-video').addEventListener('click', closeVideoModal); document.getElementById('btn-cancel-video').addEventListener('click', closeVideoModal);
-            
-            document.getElementById('btn-save-video').addEventListener('click', function() {
-                var source = document.querySelector('input[name="video_source"]:checked').value; var range = window.quillVideoRange; var btn = this;
+            const tabUpload = document.getElementById('tab-video-upload');
+            const tabLink = document.getElementById('tab-video-link');
+            const panelUpload = document.getElementById('panel-upload');
+            const panelLink = document.getElementById('panel-link');
+            const videoDropzone = document.getElementById('video-dropzone');
+            const videoFileInput = document.getElementById('video-file-input');
+            const videoFileCard = document.getElementById('video-file-card');
+            const videoPreviewPlayer = document.getElementById('video-preview-player');
+            const videoFileName = document.getElementById('video-file-name');
+            const videoFileSize = document.getElementById('video-file-size');
+            const btnRemoveVideo = document.getElementById('btn-remove-video');
+            const btnChangeVideo = document.getElementById('btn-change-video');
+            const videoUrlInput = document.getElementById('video-url-input');
+            const youtubePreviewContainer = document.getElementById('youtube-preview-container');
+            const youtubePreviewFrame = document.getElementById('youtube-preview-frame');
+            const uploadProgressContainer = document.getElementById('upload-progress-container');
+            const uploadProgressBar = document.getElementById('upload-progress-bar');
+            const uploadProgressText = document.getElementById('upload-progress-text');
+            const uploadProgressPercent = document.getElementById('upload-progress-percent');
+
+            function switchVideoTab(source) {
+                currentVideoSource = source;
                 if (source === 'upload') {
-                    var fileInput = document.getElementById('video-file-input').files[0]; if (!fileInput) return alert('Silakan pilih file video terlebih dahulu!');
-                    btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1.5"></i> Mengunggah...'; btn.disabled = true; document.getElementById('upload-progress-container').classList.remove('hidden');
-                    const formData = new FormData(); formData.append('video', fileInput); formData.append('_token', '{{ csrf_token() }}'); const xhr = new XMLHttpRequest(); xhr.open('POST', "{{ route('admin-pusat.management-course.upload-video-editor') }}", true); xhr.setRequestHeader('Accept', 'application/json'); 
-                    xhr.upload.onprogress = function(e) { if (e.lengthComputable) { const percentComplete = (e.loaded / e.total) * 100; const loadedMB = (e.loaded / (1024 * 1024)).toFixed(2); const totalMB = (e.total / (1024 * 1024)).toFixed(2); document.getElementById('upload-progress-text').innerText = `${loadedMB} MB / ${totalMB} MB`; document.getElementById('upload-progress-percent').innerText = `${Math.round(percentComplete)}%`; document.getElementById('upload-progress-bar').style.width = percentComplete + '%'; } };
+                    tabUpload.className = 'flex-1 py-2 px-3 rounded-lg text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-2 bg-white text-[#13416B] shadow-xs cursor-pointer';
+                    tabLink.className = 'flex-1 py-2 px-3 rounded-lg text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-2 text-slate-500 hover:text-slate-800 cursor-pointer';
+                    panelUpload.classList.remove('hidden');
+                    panelUpload.classList.add('block');
+                    panelLink.classList.remove('block');
+                    panelLink.classList.add('hidden');
+                } else {
+                    tabLink.className = 'flex-1 py-2 px-3 rounded-lg text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-2 bg-white text-[#13416B] shadow-xs cursor-pointer';
+                    tabUpload.className = 'flex-1 py-2 px-3 rounded-lg text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-2 text-slate-500 hover:text-slate-800 cursor-pointer';
+                    panelLink.classList.remove('hidden');
+                    panelLink.classList.add('block');
+                    panelUpload.classList.remove('block');
+                    panelUpload.classList.add('hidden');
+                    setTimeout(() => videoUrlInput.focus(), 100);
+                }
+            }
+            tabUpload.addEventListener('click', () => switchVideoTab('upload'));
+            tabLink.addEventListener('click', () => switchVideoTab('link'));
+
+            function handleFileSelect(file) {
+                if (!file) return;
+                const maxSize = 100 * 1024 * 1024; // 100MB
+                if (file.size > maxSize) {
+                    alert('Ukuran file video melebihi batas maksimal 100MB!');
+                    return;
+                }
+                selectedVideoFile = file;
+                videoFileName.textContent = file.name;
+                videoFileSize.textContent = (file.size / (1024 * 1024)).toFixed(2) + ' MB';
+
+                if (previewObjectUrl) {
+                    URL.revokeObjectURL(previewObjectUrl);
+                }
+                previewObjectUrl = URL.createObjectURL(file);
+                videoPreviewPlayer.src = previewObjectUrl;
+
+                videoDropzone.classList.add('hidden');
+                videoFileCard.classList.remove('hidden');
+            }
+
+            function resetVideoFile() {
+                selectedVideoFile = null;
+                videoFileInput.value = '';
+                if (previewObjectUrl) {
+                    URL.revokeObjectURL(previewObjectUrl);
+                    previewObjectUrl = null;
+                }
+                videoPreviewPlayer.pause();
+                videoPreviewPlayer.src = '';
+                videoFileCard.classList.add('hidden');
+                videoDropzone.classList.remove('hidden');
+            }
+
+            videoDropzone.addEventListener('click', () => videoFileInput.click());
+            btnChangeVideo.addEventListener('click', () => videoFileInput.click());
+            btnRemoveVideo.addEventListener('click', resetVideoFile);
+
+            videoFileInput.addEventListener('change', function() {
+                if (this.files && this.files[0]) {
+                    handleFileSelect(this.files[0]);
+                }
+            });
+
+            // Drag and Drop Effects
+            ['dragenter', 'dragover'].forEach(eventName => {
+                videoDropzone.addEventListener(eventName, (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    videoDropzone.classList.add('border-[#13416B]', 'bg-blue-50/60', 'scale-[1.01]');
+                });
+            });
+            ['dragleave', 'drop'].forEach(eventName => {
+                videoDropzone.addEventListener(eventName, (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    videoDropzone.classList.remove('border-[#13416B]', 'bg-blue-50/60', 'scale-[1.01]');
+                });
+            });
+            videoDropzone.addEventListener('drop', (e) => {
+                const files = e.dataTransfer.files;
+                if (files && files.length > 0) {
+                    handleFileSelect(files[0]);
+                }
+            });
+
+            // YouTube Live Preview
+            function parseYouTubeEmbedUrl(url) {
+                if (!url) return null;
+                const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|shorts\/|watch\?.+&v=))([\w-]{11})/i);
+                if (match && match[1]) {
+                    return `https://www.youtube.com/embed/${match[1]}`;
+                }
+                return null;
+            }
+
+            videoUrlInput.addEventListener('input', function() {
+                const embedUrl = parseYouTubeEmbedUrl(this.value.trim());
+                if (embedUrl) {
+                    youtubePreviewFrame.src = embedUrl;
+                    youtubePreviewContainer.classList.remove('hidden');
+                } else {
+                    youtubePreviewFrame.src = '';
+                    youtubePreviewContainer.classList.add('hidden');
+                }
+            });
+
+            function closeVideoModal() {
+                const modal = document.getElementById('custom-video-modal');
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+                if (videoPreviewPlayer) {
+                    videoPreviewPlayer.pause();
+                }
+            }
+            document.getElementById('btn-close-video').addEventListener('click', closeVideoModal);
+            document.getElementById('btn-cancel-video').addEventListener('click', closeVideoModal);
+
+            document.getElementById('btn-save-video').addEventListener('click', function() {
+                var range = window.quillVideoRange;
+                var btn = this;
+                if (currentVideoSource === 'upload') {
+                    if (!selectedVideoFile) return alert('Silakan pilih atau tarik file video terlebih dahulu!');
+                    btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1.5"></i> Mengunggah...';
+                    btn.disabled = true;
+                    uploadProgressContainer.classList.remove('hidden');
+
+                    const formData = new FormData();
+                    formData.append('video', selectedVideoFile);
+                    formData.append('_token', '{{ csrf_token() }}');
+
+                    const xhr = new XMLHttpRequest();
+                    xhr.open('POST', "{{ route('admin-pusat.management-course.upload-video-editor') }}", true);
+                    xhr.setRequestHeader('Accept', 'application/json');
+
+                    xhr.upload.onprogress = function(e) {
+                        if (e.lengthComputable) {
+                            const percentComplete = (e.loaded / e.total) * 100;
+                            const loadedMB = (e.loaded / (1024 * 1024)).toFixed(2);
+                            const totalMB = (e.total / (1024 * 1024)).toFixed(2);
+                            uploadProgressText.innerText = `${loadedMB} MB / ${totalMB} MB`;
+                            uploadProgressPercent.innerText = `${Math.round(percentComplete)}%`;
+                            uploadProgressBar.style.width = percentComplete + '%';
+                        }
+                    };
+
                     xhr.onload = function() {
                         if (xhr.status === 200 || xhr.status === 201) {
                             try {
@@ -482,17 +998,438 @@
                         } else {
                             alert('Kesalahan server (Error ' + xhr.status + ').');
                         }
-                        btn.innerHTML = '<i class="fas fa-check mr-1.5"></i> Sisipkan';
+                        btn.innerHTML = '<i class="fas fa-check text-xs"></i> Sisipkan Video';
                         btn.disabled = false;
-                        document.getElementById('upload-progress-container').classList.add('hidden');
+                        uploadProgressContainer.classList.add('hidden');
                     };
-                    xhr.onerror = function() { alert('Gagal mengunggah.'); btn.innerHTML = '<i class="fas fa-check mr-1.5"></i> Sisipkan'; btn.disabled = false; document.getElementById('upload-progress-container').classList.add('hidden'); }; xhr.send(formData);
-                } else { var urlInput = document.getElementById('video-url-input').value.trim(); if (!urlInput) return alert('Masukkan Link URL!'); quill.insertEmbed(range ? range.index : quill.getLength(), 'video', urlInput); quill.setSelection((range ? range.index : quill.getLength()) + 1); closeVideoModal(); }
+                    xhr.onerror = function() {
+                        alert('Gagal mengunggah video.');
+                        btn.innerHTML = '<i class="fas fa-check text-xs"></i> Sisipkan Video';
+                        btn.disabled = false;
+                        uploadProgressContainer.classList.add('hidden');
+                    };
+                    xhr.send(formData);
+                } else {
+                    var rawUrl = videoUrlInput.value.trim();
+                    if (!rawUrl) return alert('Silakan masukkan tautan video YouTube!');
+                    var embedUrl = parseYouTubeEmbedUrl(rawUrl) || rawUrl;
+                    quill.insertEmbed(range ? range.index : quill.getLength(), 'video', embedUrl);
+                    quill.setSelection((range ? range.index : quill.getLength()) + 1);
+                    closeVideoModal();
+                }
             });
 
             quill.on('text-change', function() {
                 var contentText = document.getElementById('content_text');
                 if (quill.getText().trim().length === 0 && !quill.root.innerHTML.includes('<img') && !quill.root.innerHTML.includes('<iframe') && !quill.root.innerHTML.includes('<video')) { contentText.value = ''; } else { contentText.value = quill.root.innerHTML; }
+            });
+
+            // ==========================================
+            // LOGIKA DOKUMEN LAMPIRAN BANYAK (EDIT)
+            // ==========================================
+            const docInput = document.getElementById('document_file');
+            const docDropzone = document.getElementById('document-dropzone');
+            const newDocsList = document.getElementById('new-documents-list');
+            const btnAddMoreDocs = document.getElementById('btn-add-more-docs');
+            const btnAddMoreDocsWrap = document.getElementById('btn-add-more-docs-wrap');
+            const fileCountBadge = document.getElementById('file-count-badge');
+            const deleteDocsContainer = document.getElementById('delete-documents-container');
+            const existingDocsList = document.getElementById('existing-documents-list');
+
+            // Queue file baru menggunakan DataTransfer
+            const fileDt = new DataTransfer();
+
+            function formatBytes(bytes, decimals = 1) {
+                if (!bytes || bytes === 0) return '0 Bytes';
+                const k = 1024;
+                const dm = decimals < 0 ? 0 : decimals;
+                const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+                const i = Math.floor(Math.log(bytes) / Math.log(k));
+                return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+            }
+
+            function getIconByExt(filename) {
+                const ext = filename.split('.').pop().toLowerCase();
+                if (['pdf'].includes(ext)) return '<i class="fas fa-file-pdf text-red-500 text-sm"></i>';
+                if (['doc', 'docx'].includes(ext)) return '<i class="fas fa-file-word text-blue-600 text-sm"></i>';
+                if (['xls', 'xlsx', 'csv'].includes(ext)) return '<i class="fas fa-file-excel text-emerald-600 text-sm"></i>';
+                if (['ppt', 'pptx'].includes(ext)) return '<i class="fas fa-file-powerpoint text-amber-600 text-sm"></i>';
+                if (['zip', 'rar', '7z'].includes(ext)) return '<i class="fas fa-file-archive text-yellow-600 text-sm"></i>';
+                return '<i class="fas fa-file-alt text-[#13416B] text-sm"></i>';
+            }
+
+            function updateOverallFileBadge() {
+                const existingVisible = document.querySelectorAll('.existing-doc-card:not(.hidden)').length;
+                const newCount = fileDt.files.length;
+                const total = existingVisible + newCount;
+                if (total > 0) {
+                    fileCountBadge.classList.remove('hidden');
+                    fileCountBadge.textContent = `${total} Berkas`;
+                } else {
+                    fileCountBadge.classList.add('hidden');
+                }
+            }
+
+            function renderFileList() {
+                newDocsList.innerHTML = '';
+                const count = fileDt.files.length;
+
+                if (count > 0) {
+                    newDocsList.classList.remove('hidden');
+                    btnAddMoreDocsWrap.classList.remove('hidden');
+
+                    for (let i = 0; i < count; i++) {
+                        const file = fileDt.files[i];
+                        const card = document.createElement('div');
+                        card.className = 'p-2.5 rounded-xl border border-emerald-200 bg-emerald-50/40 flex items-center justify-between gap-3';
+                        card.innerHTML = `
+                            <div class="flex items-center gap-2.5 min-w-0">
+                                <div class="w-8 h-8 rounded-lg bg-white border border-emerald-200 flex items-center justify-center shrink-0 shadow-2xs">
+                                    ${getIconByExt(file.name)}
+                                </div>
+                                <div class="min-w-0">
+                                    <div class="flex items-center gap-1.5">
+                                        <span class="px-1.5 py-0.2 text-[8px] font-bold uppercase rounded bg-emerald-100 text-emerald-800">Baru</span>
+                                        <p class="text-xs font-bold text-slate-800 truncate">${file.name}</p>
+                                    </div>
+                                    <p class="text-[10px] text-slate-500 font-medium">${formatBytes(file.size)}</p>
+                                </div>
+                            </div>
+                            <button type="button" class="btn-remove-new-doc w-6 h-6 rounded-lg flex items-center justify-center text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors shrink-0 cursor-pointer" data-index="${i}" title="Batalkan Berkas">
+                                <i class="fas fa-times text-xs"></i>
+                            </button>
+                        `;
+                        newDocsList.appendChild(card);
+                    }
+
+                    // Event listener hapus item berkas baru
+                    newDocsList.querySelectorAll('.btn-remove-new-doc').forEach(btn => {
+                        btn.addEventListener('click', function(e) {
+                            e.stopPropagation();
+                            const idx = parseInt(this.dataset.index);
+                            removeFileFromQueue(idx);
+                        });
+                    });
+                } else {
+                    newDocsList.classList.add('hidden');
+                    btnAddMoreDocsWrap.classList.add('hidden');
+                }
+                updateOverallFileBadge();
+            }
+
+            function addFilesToQueue(files) {
+                for (let i = 0; i < files.length; i++) {
+                    const f = files[i];
+                    if (f.size > 20 * 1024 * 1024) {
+                        alert(`Berkas "${f.name}" melebihi batas 20 MB!`);
+                        continue;
+                    }
+                    fileDt.items.add(f);
+                }
+                docInput.files = fileDt.files;
+                renderFileList();
+            }
+
+            function removeFileFromQueue(index) {
+                fileDt.items.remove(index);
+                docInput.files = fileDt.files;
+                renderFileList();
+            }
+
+            if (docDropzone) {
+                docDropzone.addEventListener('click', () => docInput.click());
+                docDropzone.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    docDropzone.classList.add('border-[#13416B]', 'bg-[#13416B]/5');
+                });
+                docDropzone.addEventListener('dragleave', (e) => {
+                    e.preventDefault();
+                    docDropzone.classList.remove('border-[#13416B]', 'bg-[#13416B]/5');
+                });
+                docDropzone.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    docDropzone.classList.remove('border-[#13416B]', 'bg-[#13416B]/5');
+                    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+                        addFilesToQueue(e.dataTransfer.files);
+                    }
+                });
+            }
+
+            if (docInput) {
+                docInput.addEventListener('change', function() {
+                    if (this.files && this.files.length > 0) {
+                        addFilesToQueue(this.files);
+                    }
+                });
+            }
+
+            if (btnAddMoreDocs) {
+                btnAddMoreDocs.addEventListener('click', () => docInput.click());
+            }
+
+            // Hapus berkas lama (existing)
+            document.querySelectorAll('.btn-delete-existing-doc').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const docId = this.dataset.id;
+                    if (confirm('Apakah Anda yakin ingin menghapus berkas lampiran ini?')) {
+                        const card = this.closest('.existing-doc-card');
+                        if (card) {
+                            card.classList.add('hidden');
+                        }
+                        // Tambahkan input hidden delete_document_ids[]
+                        const inputHidden = document.createElement('input');
+                        inputHidden.type = 'hidden';
+                        inputHidden.name = 'delete_document_ids[]';
+                        inputHidden.value = docId;
+                        deleteDocsContainer.appendChild(inputHidden);
+
+                        // Cek apakah ada existing doc yang masih terlihat
+                        const remaining = document.querySelectorAll('.existing-doc-card:not(.hidden)').length;
+                        if (remaining === 0 && existingDocsList) {
+                            existingDocsList.classList.add('hidden');
+                        }
+                        updateOverallFileBadge();
+                    }
+                });
+            });
+
+            // ==========================================
+            // LOGIKA KOLEKSI PERPUSTAKAAN BANYAK (MULTIPLE)
+            // ==========================================
+            const libModal = document.getElementById('library-picker-modal');
+            const btnOpenLibModal = document.getElementById('btn-open-library-modal');
+            const btnAddMoreLibs = document.getElementById('btn-add-more-libs');
+            const btnAddMoreLibsWrap = document.getElementById('btn-add-more-libs-wrap');
+            const btnCloseLibModal = document.getElementById('btn-close-library-modal');
+            const btnCancelLibModal = document.getElementById('btn-cancel-library-modal');
+            const btnApplyLibModal = document.getElementById('btn-apply-library-modal');
+            const libEmptyState = document.getElementById('library-empty-state');
+            const selectedLibsList = document.getElementById('selected-libraries-list');
+            const libInputsContainer = document.getElementById('library-inputs-container');
+            const libraryCountBadge = document.getElementById('library-count-badge');
+            const modalSelectedCount = document.getElementById('modal-selected-count');
+            const libSearchInput = document.getElementById('library-search-input');
+            const libCatBtns = document.querySelectorAll('.lib-cat-btn');
+            const libItems = document.querySelectorAll('.lib-item');
+            const libSearchEmpty = document.getElementById('library-search-empty');
+
+            // Set ID koleksi terpilih
+            let selectedLibraryIds = new Set();
+            document.querySelectorAll('.lib-input-hidden').forEach(input => {
+                if (input.value) selectedLibraryIds.add(input.value);
+            });
+
+            function updateModalItemsState() {
+                libItems.forEach(item => {
+                    const id = item.dataset.id;
+                    const isSelected = selectedLibraryIds.has(id);
+                    const badge = item.querySelector('.lib-action-badge');
+                    const statusText = item.querySelector('.lib-status-text');
+
+                    if (isSelected) {
+                        item.classList.add('border-[#13416B]', 'bg-[#13416B]/5');
+                        if (badge) {
+                            badge.className = 'lib-action-badge text-[10px] px-2 py-0.5 rounded bg-[#13416B] text-white transition-all font-bold';
+                            badge.textContent = 'Terpilih';
+                        }
+                        if (statusText) {
+                            statusText.className = 'lib-status-text text-[10px] font-semibold text-[#13416B]';
+                            statusText.innerHTML = '<i class="fas fa-check-circle mr-0.5"></i> Ditautkan';
+                        }
+                    } else {
+                        item.classList.remove('border-[#13416B]', 'bg-[#13416B]/5');
+                        if (badge) {
+                            badge.className = 'lib-action-badge text-[10px] px-2 py-0.5 rounded bg-slate-100 text-slate-600 transition-all font-bold';
+                            badge.textContent = 'Pilih';
+                        }
+                        if (statusText) {
+                            statusText.className = 'lib-status-text text-[10px] font-semibold text-slate-400';
+                            statusText.innerHTML = '<i class="far fa-circle mr-0.5"></i> Belum Dipilih';
+                        }
+                    }
+                });
+
+                if (modalSelectedCount) {
+                    modalSelectedCount.textContent = `${selectedLibraryIds.size} Koleksi Dipilih`;
+                }
+            }
+
+            function openLibModal() {
+                if (!libModal) return;
+                updateModalItemsState();
+                libModal.classList.remove('hidden');
+                libModal.classList.add('flex');
+                if (libSearchInput) {
+                    libSearchInput.value = '';
+                    filterLibraries();
+                    setTimeout(() => libSearchInput.focus(), 100);
+                }
+            }
+
+            function closeLibModal() {
+                if (!libModal) return;
+                libModal.classList.add('hidden');
+                libModal.classList.remove('flex');
+            }
+
+            if (btnOpenLibModal) btnOpenLibModal.addEventListener('click', openLibModal);
+            if (btnAddMoreLibs) btnAddMoreLibs.addEventListener('click', openLibModal);
+            if (btnCloseLibModal) btnCloseLibModal.addEventListener('click', closeLibModal);
+            if (btnCancelLibModal) btnCancelLibModal.addEventListener('click', closeLibModal);
+
+            // Toggle item saat diklik di modal
+            libItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    const id = this.dataset.id;
+                    if (selectedLibraryIds.has(id)) {
+                        selectedLibraryIds.delete(id);
+                    } else {
+                        selectedLibraryIds.add(id);
+                    }
+                    updateModalItemsState();
+                });
+            });
+
+            // Terapkan Pilihan dari modal ke form
+            if (btnApplyLibModal) {
+                btnApplyLibModal.addEventListener('click', function() {
+                    renderSelectedLibrariesForm();
+                    closeLibModal();
+                });
+            }
+
+            function renderSelectedLibrariesForm() {
+                selectedLibsList.innerHTML = '';
+                libInputsContainer.innerHTML = '';
+
+                const count = selectedLibraryIds.size;
+                if (count > 0) {
+                    libEmptyState.classList.add('hidden');
+                    selectedLibsList.classList.remove('hidden');
+                    if (btnAddMoreLibsWrap) btnAddMoreLibsWrap.classList.remove('hidden');
+                    if (libraryCountBadge) {
+                        libraryCountBadge.classList.remove('hidden');
+                        libraryCountBadge.textContent = `${count} Koleksi`;
+                    }
+
+                    selectedLibraryIds.forEach(id => {
+                        const itemEl = document.querySelector(`.lib-item[data-id="${id}"]`);
+                        if (!itemEl) return;
+
+                        const title = itemEl.dataset.title;
+                        const category = itemEl.dataset.category;
+                        const cover = itemEl.dataset.cover;
+                        const desc = itemEl.dataset.desc;
+
+                        // Tambah input hidden
+                        const hiddenInput = document.createElement('input');
+                        hiddenInput.type = 'hidden';
+                        hiddenInput.name = 'library_ids[]';
+                        hiddenInput.value = id;
+                        hiddenInput.className = 'lib-input-hidden';
+                        hiddenInput.dataset.id = id;
+                        libInputsContainer.appendChild(hiddenInput);
+
+                        // Card di form (THUMBNAIL SAJA, TANPA ICON)
+                        const card = document.createElement('div');
+                        card.className = 'selected-lib-card border border-indigo-200 bg-indigo-50/30 rounded-xl p-2.5 flex items-center justify-between gap-3';
+                        card.dataset.id = id;
+
+                        const thumbHtml = cover 
+                            ? `<img src="${cover}" alt="${title}" class="w-full h-full object-cover">` 
+                            : `<div class="w-full h-full bg-gradient-to-br from-slate-200 to-slate-300"></div>`;
+
+                        card.innerHTML = `
+                            <div class="flex items-start gap-2.5 min-w-0">
+                                <div class="w-10 h-14 rounded-md bg-slate-100 border border-slate-200 overflow-hidden shrink-0 shadow-2xs">
+                                    ${thumbHtml}
+                                </div>
+                                <div class="min-w-0">
+                                    <span class="inline-block px-1.5 py-0.2 text-[8px] font-extrabold uppercase rounded bg-indigo-100 text-indigo-700 border border-indigo-200 mb-0.5">
+                                        ${category}
+                                    </span>
+                                    <h4 class="text-xs font-bold text-slate-800 line-clamp-2 leading-tight">${title}</h4>
+                                    <p class="text-[10px] text-slate-500 line-clamp-2 mt-0.5">${desc || ''}</p>
+                                </div>
+                            </div>
+                            <button type="button" class="btn-remove-selected-lib w-7 h-7 rounded-lg flex items-center justify-center text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors shrink-0 cursor-pointer" data-id="${id}" title="Hapus Tautan">
+                                <i class="fas fa-trash-alt text-xs"></i>
+                            </button>
+                        `;
+                        selectedLibsList.appendChild(card);
+                    });
+
+                    // Event remove pada masing-masing card di form
+                    selectedLibsList.querySelectorAll('.btn-remove-selected-lib').forEach(btn => {
+                        btn.addEventListener('click', function() {
+                            const id = this.dataset.id;
+                            selectedLibraryIds.delete(id);
+                            renderSelectedLibrariesForm();
+                        });
+                    });
+                } else {
+                    libEmptyState.classList.remove('hidden');
+                    selectedLibsList.classList.add('hidden');
+                    if (btnAddMoreLibsWrap) btnAddMoreLibsWrap.classList.add('hidden');
+                    if (libraryCountBadge) libraryCountBadge.classList.add('hidden');
+                }
+            }
+
+            // Remove listener pada card yang di-render server-side
+            document.querySelectorAll('.btn-remove-selected-lib').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const id = this.dataset.id;
+                    selectedLibraryIds.delete(id);
+                    renderSelectedLibrariesForm();
+                });
+            });
+
+            // Filter pencarian dan kategori di modal
+            let currentLibCatFilter = 'ALL';
+            function filterLibraries() {
+                const query = (libSearchInput?.value || '').toLowerCase().trim();
+                let visibleCount = 0;
+
+                libItems.forEach(item => {
+                    const title = (item.dataset.title || '').toLowerCase();
+                    const desc = (item.dataset.desc || '').toLowerCase();
+                    const cat = (item.dataset.categoryLower || '').toLowerCase();
+
+                    const matchCat = (currentLibCatFilter === 'ALL' || cat === currentLibCatFilter);
+                    const matchQuery = (!query || title.includes(query) || desc.includes(query) || cat.includes(query));
+
+                    if (matchCat && matchQuery) {
+                        item.classList.remove('hidden');
+                        visibleCount++;
+                    } else {
+                        item.classList.add('hidden');
+                    }
+                });
+
+                if (libSearchEmpty) {
+                    if (visibleCount === 0) {
+                        libSearchEmpty.classList.remove('hidden');
+                    } else {
+                        libSearchEmpty.classList.add('hidden');
+                    }
+                }
+            }
+
+            if (libSearchInput) {
+                libSearchInput.addEventListener('input', filterLibraries);
+            }
+
+            libCatBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    libCatBtns.forEach(b => {
+                        b.classList.remove('active', 'bg-[#13416B]', 'text-white');
+                        b.classList.add('bg-slate-100', 'text-slate-600');
+                    });
+                    this.classList.add('active', 'bg-[#13416B]', 'text-white');
+                    this.classList.remove('bg-slate-100', 'text-slate-600');
+                    currentLibCatFilter = this.dataset.category;
+                    filterLibraries();
+                });
             });
         </script>
         

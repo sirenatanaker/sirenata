@@ -18,7 +18,12 @@ class StoreSectionContentWebRequest extends FormRequest
             'course_section_id' => ['required', 'string'],
             'name'              => ['required', 'string', 'max:255'],
             'video'             => ['nullable', 'string'],
-            'document'          => ['nullable', 'file', 'mimes:pdf,doc,docx', 'max:10240'],
+            'document'          => ['nullable', 'file', 'mimes:pdf,doc,docx,xls,xlsx,ppt,pptx,zip,rar,csv', 'max:20480'],
+            'documents'         => ['nullable', 'array'],
+            'documents.*'       => ['nullable', 'file', 'mimes:pdf,doc,docx,xls,xlsx,ppt,pptx,zip,rar,csv', 'max:20480'],
+            'library_id'        => ['nullable', 'string', 'exists:libraries,id'],
+            'library_ids'       => ['nullable', 'array'],
+            'library_ids.*'     => ['nullable', 'string', 'exists:libraries,id'],
             'content_text'      => ['nullable', 'string'],
         ];
     }
