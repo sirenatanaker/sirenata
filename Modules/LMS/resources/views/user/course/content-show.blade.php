@@ -1,9 +1,10 @@
 <x-dashboard::layouts.dashboard title="{{ data_get($content, 'name', 'Detail Topik') }} | SIRENATA">
-    <div class="p-0 sm:p-4 md:p-6 max-w-full mx-auto min-h-screen" x-data="{
+    <div class="p-0 sm:p-4 md:p-6 lg:p-8 max-w-full mx-auto min-h-screen" x-data="{
         reachedEnd: {{ data_get($content, 'is_completed') ? 'true' : 'false' }},
         videoCompleted: {{ data_get($content, 'is_completed') ? 'true' : 'false' }},
         submitting: false,
         showQuickSettings: false,
+        showScrollTop: false,
         isDark: window.isDarkMode ? window.isDarkMode() : false,
         readerPrefs: {
             fontSize: 'normal',
@@ -107,6 +108,7 @@
             return 'reader-leading-1-5';
         }
     }" @dark-mode-toggled.window="isDark = $event.detail.isDark"
+    @scroll.window.passive="showScrollTop = (window.scrollY > 350)"
     x-effect="document.body.classList.toggle('overflow-hidden', showQuickSettings && window.innerWidth < 640)">
 
         {{-- Main Content Container --}}
@@ -119,7 +121,7 @@
             }">
 
             {{-- Body Content --}}
-            <div class="p-4 sm:p-7 lg:p-8 transition-all duration-200">
+            <div class="p-4 sm:p-7 lg:p-10 xl:p-14 transition-all duration-200">
 
                 {{-- Header Nav: Tombol Kembali --}}
                 <div class="mb-3.5 sm:mb-4">
@@ -481,19 +483,19 @@
                 @endphp
 
                 @if ($hasDoc || $hasLibrary)
-                    <div class="{{ !empty($contentText) ? 'pt-3 sm:pt-4 border-t border-slate-100' : '' }}"
+                    <div class="{{ !empty($contentText) ? 'pt-4 sm:pt-5 border-t border-slate-100' : '' }}"
                         :class="{
                             '!border-[#263346]': isDark
                         }">
-                        <div class="mb-3">
-                            <h3 class="text-xs sm:text-sm font-extrabold text-slate-800 flex items-center gap-2 uppercase tracking-wider"
+                        <div class="mb-3.5">
+                            <h3 class="text-sm sm:text-base font-extrabold text-slate-800 flex items-center gap-2 uppercase tracking-wider"
                                 :class="{
                                     '!text-slate-200': isDark
                                 }">
                                 <i class="fas fa-bookmark text-[#13416B]" :class="{ '!text-[#8fbbe0]': isDark }"></i>
                                 Referensi & Sumber Belajar Lainnya
                             </h3>
-                            <p class="text-[11px] sm:text-xs text-slate-500 mt-0.5"
+                            <p class="text-xs sm:text-[13px] text-slate-500 mt-1"
                                 :class="{
                                     '!text-slate-400': isDark
                                 }">
@@ -523,36 +525,36 @@
                                             $iconClass = 'fa-file-archive text-yellow-600';
                                         }
                                     @endphp
-                                    <div class="group flex items-center justify-between gap-3 py-2.5 sm:py-3 px-1.5 sm:px-2 rounded-lg transition-colors"
+                                    <div class="group flex items-center justify-between gap-3 sm:gap-4 py-3 sm:py-3.5 px-2 sm:px-3 rounded-xl transition-colors"
                                         :class="{
                                             'hover:bg-slate-50/70': !isDark,
                                             'hover:!bg-[#1e2837]/40': isDark
                                         }">
-                                        <div class="flex items-center gap-3 min-w-0 flex-1">
-                                            <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-slate-100 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform"
+                                        <div class="flex items-center gap-3 sm:gap-3.5 min-w-0 flex-1">
+                                            <div class="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-slate-100 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform"
                                                 :class="{
                                                     '!bg-[#263346]': isDark
                                                 }">
-                                                <i class="fas {{ $iconClass }} text-base sm:text-lg"></i>
+                                                <i class="fas {{ $iconClass }} text-lg sm:text-xl"></i>
                                             </div>
                                             <div class="flex-1 min-w-0">
-                                                <h4 class="text-xs sm:text-sm font-semibold text-slate-800 leading-snug group-hover:text-[#13416B] transition-colors line-clamp-1 break-words"
+                                                <h4 class="text-xs sm:text-[15px] font-bold text-slate-800 leading-snug group-hover:text-[#13416B] transition-colors line-clamp-2 sm:line-clamp-1 break-words"
                                                     :class="{
                                                         '!text-slate-200 group-hover:!text-white': isDark
                                                     }" title="{{ $docName }}">
                                                     {{ $docName }}
                                                 </h4>
                                                 @if (!empty($doc->formatted_file_size))
-                                                    <span class="text-[11px] text-slate-400 font-medium inline-block mt-0.5">
+                                                    <span class="text-[11px] sm:text-xs text-slate-400 font-medium inline-block mt-0.5">
                                                         {{ $doc->formatted_file_size }}
                                                     </span>
                                                 @endif
                                             </div>
                                         </div>
                                         <a href="{{ $docUrl }}" target="_blank" download
-                                            class="inline-flex shrink-0 items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold text-white bg-[#13416B] hover:bg-[#0f3354] transition-all shadow-2xs hover:shadow-xs"
+                                            class="inline-flex shrink-0 items-center gap-1.5 px-3.5 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-bold text-white bg-[#13416B] hover:bg-[#0f3354] transition-all shadow-2xs hover:shadow-xs"
                                             title="Unduh Berkas">
-                                            <i class="fas fa-download text-[10px]"></i>
+                                            <i class="fas fa-download text-[11px] sm:text-xs"></i>
                                             <span class="hidden sm:inline">Unduh</span>
                                         </a>
                                     </div>
@@ -566,14 +568,14 @@
                                         $libCover = $lib->cover_image_url;
                                         $libUrl = route('user.library.index', ['open' => $lib->id]);
                                     @endphp
-                                    <div class="group flex items-center justify-between gap-3 py-2.5 sm:py-3 px-1.5 sm:px-2 rounded-lg transition-colors"
+                                    <div class="group flex items-center justify-between gap-3 sm:gap-4 py-3 sm:py-3.5 px-2 sm:px-3 rounded-xl transition-colors"
                                         :class="{
                                             'hover:bg-slate-50/70': !isDark,
                                             'hover:!bg-[#1e2837]/40': isDark
                                         }">
-                                        <div class="flex items-center gap-3 min-w-0 flex-1">
+                                        <div class="flex items-center gap-3 sm:gap-3.5 min-w-0 flex-1">
                                             {{-- THUMBNAIL BUKU --}}
-                                            <div class="w-9 h-12 sm:w-10 sm:h-13 rounded-md bg-slate-100 overflow-hidden shrink-0 group-hover:scale-105 transition-transform relative shadow-2xs"
+                                            <div class="w-10 h-14 sm:w-11 sm:h-15 rounded-md bg-slate-100 overflow-hidden shrink-0 group-hover:scale-105 transition-transform relative shadow-2xs"
                                                 :class="{
                                                     '!bg-[#263346]': isDark
                                                 }">
@@ -582,19 +584,19 @@
                                                 @else
                                                     <div class="w-full h-full bg-gradient-to-br from-slate-200 to-slate-300 flex items-center justify-center text-slate-400"
                                                         :class="{ '!from-[#2a384c] !to-[#1e2837]': isDark }">
-                                                        <span class="text-[8px] font-bold text-slate-400 uppercase">BUKU</span>
+                                                        <span class="text-[9px] font-bold text-slate-400 uppercase">BUKU</span>
                                                     </div>
                                                 @endif
                                             </div>
                                             <div class="flex-1 min-w-0">
-                                                <h4 class="text-xs sm:text-sm font-semibold text-slate-800 leading-snug group-hover:text-[#13416B] transition-colors line-clamp-1"
+                                                <h4 class="text-xs sm:text-[15px] font-bold text-slate-800 leading-snug group-hover:text-[#13416B] transition-colors line-clamp-2 sm:line-clamp-1 break-words"
                                                     :class="{
                                                         '!text-slate-200 group-hover:!text-white': isDark
                                                     }" title="{{ $lib->title }}">
                                                     {{ $lib->title }}
                                                 </h4>
                                                 @if (!empty($lib->description))
-                                                    <p class="text-[11px] text-slate-500 line-clamp-1 leading-tight mt-0.5"
+                                                    <p class="hidden sm:block text-[11px] sm:text-xs text-slate-500 line-clamp-1 leading-tight mt-0.5"
                                                         :class="{
                                                             '!text-slate-400': isDark
                                                         }">
@@ -604,13 +606,13 @@
                                             </div>
                                         </div>
                                         <a href="{{ $libUrl }}" target="_blank"
-                                            class="inline-flex shrink-0 items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold text-[#13416B] bg-[#13416B]/10 hover:bg-[#13416B] hover:text-white transition-all shadow-2xs"
+                                            class="inline-flex shrink-0 items-center gap-1.5 px-3.5 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-bold text-[#13416B] bg-[#13416B]/10 hover:bg-[#13416B] hover:text-white transition-all shadow-2xs"
                                             :class="{
                                                 '!bg-[#263346] !text-[#8fbbe0] hover:!bg-[#13416B] hover:!text-white': isDark
                                             }"
                                             title="Buka Koleksi Perpustakaan">
                                             <span>Buka</span>
-                                            <i class="fas fa-arrow-up-right-from-square text-[9px]"></i>
+                                            <i class="fas fa-arrow-up-right-from-square text-[10px]"></i>
                                         </a>
                                     </div>
                                 @endforeach
@@ -651,25 +653,37 @@
 
             {{-- Action Footer --}}
             <div data-tour="aksi"
-                class="px-4 py-3.5 sm:px-8 sm:py-4.5 border-t border-slate-100 bg-slate-50 flex flex-col-reverse sm:flex-row justify-between items-center gap-2 sm:gap-3 reader-footer transition-colors duration-200"
+                class="px-4 py-3.5 sm:px-8 sm:py-4.5 lg:px-10 xl:px-14 lg:py-5 border-t border-slate-100 bg-slate-50 flex flex-col-reverse sm:flex-row justify-between items-center gap-2.5 sm:gap-3 lg:gap-4 reader-footer transition-colors duration-200"
                 :class="{
                     '!bg-[#131A26] !border-[#263346]': isDark
                 }">
-                <a href="{{ route('user.course.my-course.detail', $slug) }}"
-                    class="w-full sm:w-auto text-xs sm:text-sm font-bold text-slate-500 hover:text-slate-800 transition-colors text-center py-2 sm:py-2.5 px-3.5 sm:px-4.5 border border-slate-200 sm:border-slate-300 rounded-xl bg-white sm:bg-transparent"
-                    :class="{
-                        '!text-slate-300 sm:!bg-transparent !border-[#263346] !bg-[#1E2837]': isDark
-                    }">
-                    <i class="fas fa-list mr-1.5"></i> Daftar Modul
-                </a>
+                <div class="flex items-center gap-2 lg:gap-3 w-full sm:w-auto">
+                    <a href="{{ route('user.course.my-course.detail', $slug) }}"
+                        class="flex-1 sm:flex-initial text-xs sm:text-sm lg:text-base font-bold text-slate-500 hover:text-slate-800 transition-colors text-center py-2 sm:py-2.5 lg:py-3 px-3.5 sm:px-4.5 lg:px-6 border border-slate-200 sm:border-slate-300 rounded-xl bg-white sm:bg-transparent flex items-center justify-center gap-2 shadow-2xs"
+                        :class="{
+                            '!text-slate-300 sm:!bg-transparent !border-[#263346] !bg-[#1E2837]': isDark
+                        }">
+                        <i class="fas fa-list text-xs lg:text-sm"></i>
+                        <span>Daftar Modul</span>
+                    </a>
+                    <button type="button" @click="window.scrollTo({ top: 0, behavior: 'smooth' })"
+                        class="flex-1 sm:flex-initial text-xs sm:text-sm lg:text-base font-bold text-slate-500 hover:text-slate-800 transition-colors text-center py-2 sm:py-2.5 lg:py-3 px-3 sm:px-3.5 lg:px-5 border border-slate-200 sm:border-slate-300 rounded-xl bg-white sm:bg-transparent flex items-center justify-center gap-2 cursor-pointer shadow-2xs"
+                        :class="{
+                            '!text-slate-300 sm:!bg-transparent !border-[#263346] !bg-[#1E2837]': isDark
+                        }"
+                        title="Kembali ke atas materi">
+                        <i class="fas fa-arrow-up text-xs lg:text-sm"></i>
+                        <span>Ke Atas</span>
+                    </button>
+                </div>
 
                 @if (!data_get($content, 'is_completed'))
                     <button type="button" x-show="!canComplete" @click="scrollToEnd()"
-                        class="w-full sm:w-auto px-4 sm:px-5 py-2 sm:py-2.5 text-xs sm:text-sm font-bold text-slate-500 bg-slate-100 border border-slate-200 rounded-xl flex items-center justify-center gap-1.5 sm:gap-2 hover:bg-slate-200 transition-colors"
+                        class="w-full sm:w-auto px-4 sm:px-5 lg:px-6 py-2 sm:py-2.5 lg:py-3 text-xs sm:text-sm lg:text-base font-bold text-slate-500 bg-slate-100 border border-slate-200 rounded-xl flex items-center justify-center gap-2 hover:bg-slate-200 transition-colors"
                         :class="{
                             '!bg-[#1E2837] !border-[#263346] !text-slate-300': isDark
                         }">
-                        <i class="fas fa-info-circle text-[11px] sm:text-xs"></i>
+                        <i class="fas fa-info-circle text-[11px] sm:text-xs lg:text-sm"></i>
                         <span
                             x-text="(!reachedEnd ? 'Baca materi hingga akhir' : '') + (!reachedEnd && !videoCompleted ? ' & ' : '') + (!videoCompleted ? 'Tonton video materi minimal 90%' : '') + ' untuk lanjut'"></span>
                     </button>
@@ -681,29 +695,40 @@
                         x-transition:enter-end="opacity-100 translate-y-0" @submit="submitting = true">
                         @csrf
                         <button type="submit" :disabled="submitting"
-                            class="w-full sm:w-auto px-4 sm:px-5 py-2 sm:py-2.5 text-xs sm:text-sm font-bold text-white bg-[#13416B] rounded-xl hover:bg-[#0f3354] transition-all shadow-sm flex items-center justify-center gap-1.5 sm:gap-2 disabled:opacity-70 disabled:cursor-not-allowed">
-                            <i class="fas fa-check-circle text-xs sm:text-base" x-show="!submitting"></i>
-                            <i class="fas fa-spinner fa-spin text-xs sm:text-base" x-show="submitting"
+                            class="w-full sm:w-auto px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 lg:py-3 text-xs sm:text-sm lg:text-base font-bold text-white bg-[#13416B] rounded-xl hover:bg-[#0f3354] transition-all shadow-sm flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed">
+                            <i class="fas fa-check-circle text-xs sm:text-base lg:text-lg" x-show="!submitting"></i>
+                            <i class="fas fa-spinner fa-spin text-xs sm:text-base lg:text-lg" x-show="submitting"
                                 style="display: none;"></i>
                             <span x-text="submitting ? 'Menyimpan...' : 'Tandai Selesai'"></span>
                         </button>
                     </form>
                 @else
-                    <div class="flex items-center gap-2 w-full sm:w-auto">
-                        <span
-                            class="completed-pop flex-1 sm:flex-initial px-3 sm:px-5 py-2 sm:py-2.5 text-xs sm:text-sm font-bold text-white bg-emerald-600 border border-emerald-600 rounded-xl text-center flex items-center justify-center gap-1.5 sm:gap-2 shadow-sm cursor-default select-none">
-                            <i class="fas fa-check text-xs sm:text-base"></i> Selesai Dipelajari
-                        </span>
-                        @if (!empty($nextUrl) && $nextUrl !== route('user.course.my-course.detail', $slug))
-                            <a href="{{ $nextUrl }}"
-                                class="flex-1 sm:flex-initial px-4 sm:px-5 py-2 sm:py-2.5 text-xs sm:text-sm font-bold text-white bg-[#13416B] rounded-xl hover:bg-[#0f3354] transition-all shadow-sm flex items-center justify-center text-center whitespace-nowrap">
-                                Lanjutkan
-                            </a>
-                        @endif
-                    </div>
+                    <a href="{{ !empty($nextUrl) ? $nextUrl : route('user.course.my-course.detail', $slug) }}"
+                        class="completed-pop w-full sm:w-auto px-5 sm:px-7 lg:px-9 py-2 sm:py-2.5 lg:py-3 text-xs sm:text-sm lg:text-base font-bold text-white bg-emerald-600 hover:bg-emerald-700 border border-emerald-600 rounded-xl transition-all shadow-sm flex items-center justify-center text-center whitespace-nowrap">
+                        <span>Lanjutkan</span>
+                    </a>
                 @endif
             </div>
         </div>
+
+        {{-- Floating Button Naik ke Atas --}}
+        <button type="button"
+            @click="window.scrollTo({ top: 0, behavior: 'smooth' })"
+            x-show="showScrollTop"
+            x-cloak
+            x-transition:enter="transition ease-out duration-200"
+            x-transition:enter-start="opacity-0 translate-y-3 scale-90"
+            x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+            x-transition:leave="transition ease-in duration-150"
+            x-transition:leave-start="opacity-100 translate-y-0 scale-100"
+            x-transition:leave-end="opacity-0 translate-y-3 scale-90"
+            class="fixed bottom-6 right-6 z-40 p-3 sm:px-4 sm:py-2.5 lg:px-5 lg:py-3 rounded-full sm:rounded-xl bg-white/95 hover:bg-white text-slate-700 hover:text-[#13416B] border border-slate-200/90 shadow-lg backdrop-blur-sm transition-all flex items-center gap-2 cursor-pointer group"
+            :class="{ '!bg-[#1a2230]/95 hover:!bg-[#1a2230] !border-[#263346] !text-slate-200': isDark }"
+            title="Kembali ke atas materi">
+            <i class="fas fa-arrow-up text-xs sm:text-sm lg:text-base group-hover:-translate-y-0.5 transition-transform text-[#13416B]"
+                :class="{ '!text-white': isDark }"></i>
+            <span class="hidden sm:inline text-xs lg:text-sm font-bold">Ke Atas</span>
+        </button>
     </div>
 
     @push('styles')
