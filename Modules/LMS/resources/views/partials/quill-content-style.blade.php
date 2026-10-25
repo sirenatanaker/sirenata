@@ -10,8 +10,8 @@
     display: inline-block !important;
     max-width: 100% !important;
     height: auto;
-    margin-top: 1.5rem;
-    margin-bottom: 1.5rem;
+    margin-top: 1rem;
+    margin-bottom: 1rem;
     border-radius: 0.5rem;
     box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
 }
@@ -80,6 +80,24 @@
 .quill-content-render .plyr[style*="margin: auto"] {
     margin-left: auto !important;
     margin-right: auto !important;
+}
+
+/* --- Khusus Resolusi Mobile: Video & Media Dipaksa Full Width (w-full) --- */
+@media (max-width: 639.98px) {
+    .quill-content-render video,
+    .quill-content-render iframe,
+    .quill-content-render .plyr,
+    .quill-content-render .plyr--video,
+    .quill-content-render .yt-player-wrapper {
+        width: 100% !important;
+        max-width: 100% !important;
+        height: auto !important;
+        float: none !important;
+        margin-left: auto !important;
+        margin-right: auto !important;
+        display: block !important;
+        clear: both !important;
+    }
 }
 
 /* --- Alignment & indent Quill --- */

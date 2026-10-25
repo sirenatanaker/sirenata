@@ -106,6 +106,24 @@
         margin-left: auto !important;
         margin-right: auto !important;
     }
+
+    /* Khusus Resolusi Mobile: Video Player Dipaksa Full Width (w-full) */
+    @media (max-width: 639.98px) {
+        .quill-content-render .plyr,
+        .quill-content-render .plyr--video,
+        .quill-content-render video,
+        .plyr,
+        .plyr--video {
+            width: 100% !important;
+            max-width: 100% !important;
+            height: auto !important;
+            float: none !important;
+            margin-left: auto !important;
+            margin-right: auto !important;
+            display: block !important;
+            clear: both !important;
+        }
+    }
 </style>
 
 <script>
@@ -297,20 +315,20 @@
                     if (alignment === 'left') {
                         container.style.display = 'block';
                         container.style.float = 'left';
-                        container.style.margin = '0.5rem 1.5rem 1rem 0';
+                        container.style.margin = '0.35rem 1.25rem 0.75rem 0';
                         container.style.clear = 'none';
                     } else if (alignment === 'right') {
                         container.style.display = 'block';
                         container.style.float = 'right';
-                        container.style.margin = '0.5rem 0 1rem 1.5rem';
+                        container.style.margin = '0.35rem 0 0.75rem 1.25rem';
                         container.style.clear = 'none';
                     } else {
                         // Center
                         container.style.display = 'block';
                         container.style.marginLeft = 'auto';
                         container.style.marginRight = 'auto';
-                        container.style.marginTop = '1.5rem';
-                        container.style.marginBottom = '1.5rem';
+                        container.style.marginTop = '1rem';
+                        container.style.marginBottom = '1rem';
                         container.style.float = 'none';
                         container.style.clear = 'both';
                     }
