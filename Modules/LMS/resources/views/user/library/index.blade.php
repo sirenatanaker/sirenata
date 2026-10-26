@@ -243,13 +243,6 @@
                                 <i class="fas {{ $isVideo ? 'fa-play' : 'fa-book-reader' }} mr-2"></i> Buka Koleksi
                             </button>
                         </div>
-
-                        {{-- Kategori Badge di Sebelah Kanan (Khas Perpustakaan: Teal + Bookmark Icon) --}}
-                        <span
-                            class="absolute top-0 right-0 z-20 max-w-[80%] px-2.5 sm:px-3 py-1 text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-white bg-teal-700 shadow-xs flex items-center gap-1 rounded-none rounded-bl-md rounded-tr-md sm:rounded-tr-xl">
-                            <i class="fas fa-bookmark text-[8px] sm:text-[9px] flex-shrink-0"></i>
-                            <span class="truncate">{{ $library->libraryCategory->name ?? 'Pustaka' }}</span>
-                        </span>
                     </div>
 
                     {{-- Informasi Buku Area --}}

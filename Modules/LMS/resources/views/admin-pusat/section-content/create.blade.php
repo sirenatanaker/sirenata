@@ -85,8 +85,8 @@
                         <div class="flex flex-col justify-between p-4 rounded-xl bg-white border border-slate-200 shadow-2xs">
                             <div>
                                 <div class="flex items-center justify-between mb-2.5">
-                                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-700">
-                                        <i class="fas fa-file-arrow-up text-[#13416B] mr-1"></i> Dokumen Berkas Lampiran
+                                    <label class="block text-xs sm:text-sm font-bold uppercase tracking-wider text-slate-700">
+                                        Dokumen Berkas Lampiran
                                     </label>
                                     <span id="file-count-badge" class="hidden text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#13416B]/10 text-[#13416B]">0 Berkas</span>
                                 </div>
@@ -127,8 +127,8 @@
                         <div class="flex flex-col justify-between p-4 rounded-xl bg-white border border-slate-200 shadow-2xs">
                             <div>
                                 <div class="flex items-center justify-between mb-2.5">
-                                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-700">
-                                        <i class="fas fa-book-bookmark text-[#13416B] mr-1"></i> Koleksi Perpustakaan Terkait
+                                    <label class="block text-xs sm:text-sm font-bold uppercase tracking-wider text-slate-700">
+                                        Koleksi Perpustakaan Terkait
                                     </label>
                                     <span id="library-count-badge" class="{{ $selectedLibraries->count() ? '' : 'hidden' }} text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200">
                                         {{ $selectedLibraries->count() }} Koleksi
@@ -156,13 +156,12 @@
                                 <div id="selected-libraries-list" class="{{ $selectedLibraries->count() ? '' : 'hidden' }} space-y-2 mt-1">
                                     @foreach ($selectedLibraries as $selLib)
                                         @php
-                                            $catName = $selLib->libraryCategory?->name ?? 'Pustaka';
                                             $coverUrl = $selLib->cover_image_url;
                                         @endphp
-                                        <div class="selected-lib-card border border-indigo-200 bg-indigo-50/30 rounded-xl p-2.5 flex items-center justify-between gap-3" data-id="{{ $selLib->id }}">
-                                            <div class="flex items-start gap-2.5 min-w-0">
-                                                {{-- THUMBNAIL SAJA (TANPA ICON) --}}
-                                                <div class="w-10 h-14 rounded-md bg-slate-100 border border-slate-200 overflow-hidden shrink-0 shadow-2xs">
+                                        <div class="selected-lib-card border border-indigo-200 bg-indigo-50/30 rounded-xl p-3 sm:p-3.5 flex items-center justify-between gap-3 sm:gap-4 transition shadow-2xs" data-id="{{ $selLib->id }}">
+                                            <div class="flex items-start gap-3 min-w-0">
+                                                {{-- THUMBNAIL LEBIH BESAR --}}
+                                                <div class="w-12 h-16 sm:w-14 sm:h-20 rounded-md bg-slate-100 border border-slate-200 overflow-hidden shrink-0 shadow-2xs">
                                                     @if ($coverUrl)
                                                         <img src="{{ $coverUrl }}" alt="{{ $selLib->title }}" class="w-full h-full object-cover">
                                                     @else
@@ -170,19 +169,16 @@
                                                     @endif
                                                 </div>
                                                 <div class="min-w-0">
-                                                    <span class="inline-block px-1.5 py-0.2 text-[8px] font-extrabold uppercase rounded bg-indigo-100 text-indigo-700 border border-indigo-200 mb-0.5">
-                                                        {{ $catName }}
-                                                    </span>
-                                                    <h4 class="text-xs font-bold text-slate-800 line-clamp-2 leading-tight">
+                                                    <h4 class="text-xs sm:text-sm font-bold text-slate-800 line-clamp-2 leading-snug">
                                                         {{ $selLib->title }}
                                                     </h4>
-                                                    <p class="text-[10px] text-slate-500 line-clamp-2 mt-0.5">
-                                                        {{ Str::limit(strip_tags($selLib->description ?? ''), 120) }}
+                                                    <p class="text-[11px] sm:text-xs text-slate-500 line-clamp-2 mt-1 leading-relaxed">
+                                                        {{ Str::limit(strip_tags($selLib->description ?? ''), 140) }}
                                                     </p>
                                                 </div>
                                             </div>
-                                            <button type="button" class="btn-remove-selected-lib w-7 h-7 rounded-lg flex items-center justify-center text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors shrink-0 cursor-pointer" data-id="{{ $selLib->id }}" title="Hapus Tautan">
-                                                <i class="fas fa-trash-alt text-xs"></i>
+                                            <button type="button" class="btn-remove-selected-lib w-7 h-7 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors shrink-0 cursor-pointer" data-id="{{ $selLib->id }}" title="Hapus Tautan">
+                                                <i class="fas fa-trash-alt text-xs sm:text-sm"></i>
                                             </button>
                                         </div>
                                     @endforeach
@@ -410,6 +406,98 @@
         </div>
     </div>
 
+    <!-- MODAL FORMULA MATEMATIKA (VISUAL EQUATION BUILDER SEPERTI DI WORD) -->
+    <div id="custom-formula-modal" class="fixed inset-0 z-[9999] hidden items-center justify-center bg-slate-900/60 backdrop-blur-sm transition-opacity p-4">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl p-5 sm:p-6 border border-slate-200 flex flex-col max-h-[92vh] overflow-hidden">
+            <!-- Tombol Tutup Modal di Kanan Atas -->
+            <div class="flex justify-end mb-1 shrink-0">
+                <button type="button" id="btn-close-formula" class="w-8 h-8 rounded-full flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer" title="Tutup Modal">
+                    <i class="fas fa-times text-base"></i>
+                </button>
+            </div>
+
+            <!-- Body with scroll -->
+            <div class="space-y-5 overflow-y-auto pr-1 flex-1">
+                <!-- 1. Struktur Rumus Dasar -->
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-2">
+                        Struktur Rumus
+                    </label>
+                    <div class="grid grid-cols-3 sm:grid-cols-6 gap-2.5">
+                        <button type="button" data-cmd="\frac{#?}{#?}" class="btn-formula-cmd flex flex-col items-center justify-center p-2.5 bg-slate-50 hover:bg-[#13416B]/10 border border-slate-200 hover:border-[#13416B] rounded-xl transition group cursor-pointer" title="Pecahan / Pembagian (a/b)">
+                            <span class="text-base font-serif font-bold text-slate-800 group-hover:text-[#13416B]">a/b</span>
+                            <span class="text-[10px] text-slate-500 font-semibold mt-0.5">Pecahan</span>
+                        </button>
+                        <button type="button" data-cmd="{#?}^{#?}" class="btn-formula-cmd flex flex-col items-center justify-center p-2.5 bg-slate-50 hover:bg-[#13416B]/10 border border-slate-200 hover:border-[#13416B] rounded-xl transition group cursor-pointer" title="Pangkat Atas (x²)">
+                            <span class="text-base font-serif font-bold text-slate-800 group-hover:text-[#13416B]">x<sup>2</sup></span>
+                            <span class="text-[10px] text-slate-500 font-semibold mt-0.5">Pangkat</span>
+                        </button>
+                        <button type="button" data-cmd="{#?}_{#?}" class="btn-formula-cmd flex flex-col items-center justify-center p-2.5 bg-slate-50 hover:bg-[#13416B]/10 border border-slate-200 hover:border-[#13416B] rounded-xl transition group cursor-pointer" title="Indeks Bawah (Pᵤ)">
+                            <span class="text-base font-serif font-bold text-slate-800 group-hover:text-[#13416B]">P<sub>u</sub></span>
+                            <span class="text-[10px] text-slate-500 font-semibold mt-0.5">Indeks Bawah</span>
+                        </button>
+                        <button type="button" data-cmd="{#?}_{#?}^{#?}" class="btn-formula-cmd flex flex-col items-center justify-center p-2.5 bg-slate-50 hover:bg-[#13416B]/10 border border-slate-200 hover:border-[#13416B] rounded-xl transition group cursor-pointer" title="Pangkat & Indeks Gabungan (Xᵢ²)">
+                            <span class="text-base font-serif font-bold text-slate-800 group-hover:text-[#13416B]">X<sub>i</sub><sup>2</sup></span>
+                            <span class="text-[10px] text-slate-500 font-semibold mt-0.5">Kombinasi</span>
+                        </button>
+                        <button type="button" data-cmd="\sqrt{#?}" class="btn-formula-cmd flex flex-col items-center justify-center p-2.5 bg-slate-50 hover:bg-[#13416B]/10 border border-slate-200 hover:border-[#13416B] rounded-xl transition group cursor-pointer" title="Akar Kuadrat (√x)">
+                            <span class="text-base font-serif font-bold text-slate-800 group-hover:text-[#13416B]">√x</span>
+                            <span class="text-[10px] text-slate-500 font-semibold mt-0.5">Akar</span>
+                        </button>
+                        <button type="button" data-cmd="\text{#?}" class="btn-formula-cmd flex flex-col items-center justify-center p-2.5 bg-slate-50 hover:bg-[#13416B]/10 border border-slate-200 hover:border-[#13416B] rounded-xl transition group cursor-pointer" title="Teks Tegak dalam Rumus">
+                            <span class="text-base font-sans font-bold text-slate-800 group-hover:text-[#13416B]">Teks</span>
+                            <span class="text-[10px] text-slate-500 font-semibold mt-0.5">Teks Kata</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 2. Simbol Operasi & Relasi Cepat -->
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-2">
+                        Simbol Cepat
+                    </label>
+                    <div class="flex flex-wrap gap-2">
+                        <button type="button" data-cmd=" \times " class="btn-formula-cmd px-3 py-1.5 bg-slate-100 hover:bg-[#13416B] hover:text-white rounded-lg text-xs font-bold text-slate-700 transition cursor-pointer" title="Kali Silang (×)">×</button>
+                        <button type="button" data-cmd=" \div " class="btn-formula-cmd px-3 py-1.5 bg-slate-100 hover:bg-[#13416B] hover:text-white rounded-lg text-xs font-bold text-slate-700 transition cursor-pointer" title="Bagi (÷)">÷</button>
+                        <button type="button" data-cmd=" \pm " class="btn-formula-cmd px-3 py-1.5 bg-slate-100 hover:bg-[#13416B] hover:text-white rounded-lg text-xs font-bold text-slate-700 transition cursor-pointer" title="Plus Minus (±)">±</button>
+                        <button type="button" data-cmd=" \ge " class="btn-formula-cmd px-3 py-1.5 bg-slate-100 hover:bg-[#13416B] hover:text-white rounded-lg text-xs font-bold text-slate-700 transition cursor-pointer" title="Lebih Dari Sama Dengan (≥)">≥</button>
+                        <button type="button" data-cmd=" \le " class="btn-formula-cmd px-3 py-1.5 bg-slate-100 hover:bg-[#13416B] hover:text-white rounded-lg text-xs font-bold text-slate-700 transition cursor-pointer" title="Kurang Dari Sama Dengan (≤)">≤</button>
+                        <button type="button" data-cmd=" \ne " class="btn-formula-cmd px-3 py-1.5 bg-slate-100 hover:bg-[#13416B] hover:text-white rounded-lg text-xs font-bold text-slate-700 transition cursor-pointer" title="Tidak Sama Dengan (≠)">≠</button>
+                        <button type="button" data-cmd=" \approx " class="btn-formula-cmd px-3 py-1.5 bg-slate-100 hover:bg-[#13416B] hover:text-white rounded-lg text-xs font-bold text-slate-700 transition cursor-pointer" title="Mendekati / Kira-kira (≈)">≈</button>
+                        <button type="button" data-cmd="\%" class="btn-formula-cmd px-3 py-1.5 bg-slate-100 hover:bg-[#13416B] hover:text-white rounded-lg text-xs font-bold text-slate-700 transition cursor-pointer" title="Persen (%)">%</button>
+                        <button type="button" data-cmd=" \sum " class="btn-formula-cmd px-3 py-1.5 bg-slate-100 hover:bg-[#13416B] hover:text-white rounded-lg text-xs font-bold text-slate-700 transition cursor-pointer" title="Sigma / Penjumlahan (∑)">∑</button>
+                        <button type="button" data-cmd="\bar{#?}" class="btn-formula-cmd px-3 py-1.5 bg-slate-100 hover:bg-[#13416B] hover:text-white rounded-lg text-xs font-bold text-slate-700 transition cursor-pointer" title="Rata-rata (X̄)">X̄</button>
+                        <button type="button" data-cmd=" \rightarrow " class="btn-formula-cmd px-3 py-1.5 bg-slate-100 hover:bg-[#13416B] hover:text-white rounded-lg text-xs font-bold text-slate-700 transition cursor-pointer" title="Panah Kanan (→)">→</button>
+                    </div>
+                </div>
+
+                <!-- 3. Kanvas Interaktif Langsung Diedit -->
+                <div>
+                    <div class="flex justify-between items-center mb-2">
+                        <label class="block text-xs font-bold text-slate-700">
+                            Kanvas Rumus
+                        </label>
+                        <button type="button" id="btn-clear-formula" class="text-[11px] font-semibold text-rose-600 hover:text-rose-700 flex items-center gap-1 cursor-pointer">
+                            <i class="fas fa-trash-can text-[10px]"></i> Bersihkan
+                        </button>
+                    </div>
+
+                    <div class="relative bg-slate-50 border-2 border-slate-300 focus-within:border-[#13416B] focus-within:ring-2 focus-within:ring-[#13416B]/20 rounded-2xl p-4 sm:p-5 transition shadow-inner min-h-[96px] flex items-center justify-center">
+                        <math-field id="formula-math-field" class="w-full text-xl sm:text-2xl bg-transparent outline-none text-slate-800 text-center" default-mode="math"></math-field>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer Modal -->
+            <div class="flex justify-end gap-2.5 pt-4 border-t border-slate-100 mt-4 shrink-0">
+                <button type="button" id="btn-cancel-formula" class="px-5 py-2 text-xs sm:text-sm font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-xl transition cursor-pointer">Batal</button>
+                <button type="button" id="btn-save-formula" class="px-5 py-2 text-xs sm:text-sm font-bold text-white bg-[#13416B] hover:bg-[#0f3354] rounded-xl transition shadow-xs hover:shadow-sm cursor-pointer flex items-center gap-1.5">
+                    <i class="fas fa-check"></i> Sisipkan ke Dokumen
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- MODAL PILIH KOLEKSI PERPUSTAKAAN -->
     <div id="library-picker-modal" class="fixed inset-0 z-[9999] hidden items-center justify-center bg-slate-900/60 backdrop-blur-sm transition-opacity p-4">
         <div class="bg-white rounded-2xl shadow-2xl w-full max-w-3xl border border-slate-200 overflow-hidden flex flex-col max-h-[85vh]">
@@ -480,9 +568,6 @@
 
                             <div class="flex-1 min-w-0 flex flex-col justify-between h-full">
                                 <div>
-                                    <span class="inline-block px-1.5 py-0.5 text-[9px] font-extrabold uppercase rounded bg-indigo-50 text-indigo-700 border border-indigo-200 mb-1">
-                                        {{ $catName }}
-                                    </span>
                                     <h4 class="text-xs font-bold text-slate-800 group-hover:text-[#13416B] line-clamp-2 leading-snug">
                                         {{ $lib->title }}
                                     </h4>
@@ -536,6 +621,29 @@
         <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" />
         <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+        <script defer src="https://cdn.jsdelivr.net/npm/mathlive"></script>
+        <style>
+            math-field {
+                border: none;
+                outline: none;
+                background: transparent;
+                font-size: 1.5rem;
+                width: 100%;
+                min-height: 55px;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+            }
+            math-field:focus-within {
+                outline: none;
+            }
+            math-field::part(virtual-keyboard-toggle) {
+                display: none !important;
+            }
+            math-field::part(menu-toggle) {
+                display: none !important;
+            }
+        </style>
         <link href="https://cdn.quilljs.com/1.3.7/quill.snow.css" rel="stylesheet">
         <script src="https://cdn.quilljs.com/1.3.7/quill.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/quill-blot-formatter@1.0.5/dist/quill-blot-formatter.min.js"></script>
@@ -613,7 +721,8 @@
                         ],
                         handlers: {
                             'link': function() { var range = quill.getSelection(true); var text = range && range.length > 0 ? quill.getText(range.index, range.length) : ''; document.getElementById('link-text-input').value = text; document.getElementById('link-url-input').value = ''; const modal = document.getElementById('custom-link-modal'); modal.classList.remove('hidden'); modal.classList.add('flex'); setTimeout(() => document.getElementById('link-url-input').focus(), 100); window.quillLinkRange = range; },
-                            'video': function() { var range = quill.getSelection(true); window.quillVideoRange = range; document.getElementById('video-url-input').value = ''; document.getElementById('video-file-input').value = ''; document.getElementById('upload-progress-container').classList.add('hidden'); document.getElementById('upload-progress-bar').style.width = '0%'; const modal = document.getElementById('custom-video-modal'); modal.classList.remove('hidden'); modal.classList.add('flex'); }
+                            'video': function() { var range = quill.getSelection(true); window.quillVideoRange = range; document.getElementById('video-url-input').value = ''; document.getElementById('video-file-input').value = ''; document.getElementById('upload-progress-container').classList.add('hidden'); document.getElementById('upload-progress-bar').style.width = '0%'; const modal = document.getElementById('custom-video-modal'); modal.classList.remove('hidden'); modal.classList.add('flex'); },
+                            'formula': function() { var range = quill.getSelection(true); window.quillFormulaRange = range; openFormulaModal(); }
                         }
                     }
                 },
@@ -781,6 +890,136 @@
                 } else { var urlInput = document.getElementById('video-url-input').value.trim(); if (!urlInput) return alert('Masukkan Link URL!'); quill.insertEmbed(range ? range.index : quill.getLength(), 'video', urlInput); quill.setSelection((range ? range.index : quill.getLength()) + 1); closeVideoModal(); }
             });
 
+            // ============================================================
+            // LOGIKA VISUAL EQUATION BUILDER (WORD-STYLE WYSIWYG MATHLIVE)
+            // ============================================================
+            const formulaModal = document.getElementById('custom-formula-modal');
+            const mathField = document.getElementById('formula-math-field');
+
+            if (mathField) {
+                // Nonaktifkan virtual keyboard otomatis di layar agar tidak menghalangi popup
+                mathField.mathVirtualKeyboardPolicy = "manual";
+            }
+
+            function openFormulaModal() {
+                if (!formulaModal) return;
+                formulaModal.classList.remove('hidden');
+                formulaModal.classList.add('flex');
+                setTimeout(() => {
+                    if (mathField && typeof mathField.focus === 'function') {
+                        mathField.focus();
+                    }
+                }, 150);
+            }
+
+            function closeFormulaModal() {
+                if (!formulaModal) return;
+                formulaModal.classList.add('hidden');
+                formulaModal.classList.remove('flex');
+            }
+
+            document.querySelectorAll('.close-formula-modal-btn, #btn-close-formula, #btn-cancel-formula').forEach(btn => {
+                btn.addEventListener('click', closeFormulaModal);
+            });
+
+            if (formulaModal) {
+                formulaModal.addEventListener('click', function(e) {
+                    if (e.target === formulaModal) closeFormulaModal();
+                });
+            }
+
+            document.getElementById('btn-clear-formula')?.addEventListener('click', function() {
+                if (!mathField) return;
+                mathField.value = '';
+                if (typeof mathField.focus === 'function') mathField.focus();
+            });
+
+            document.querySelectorAll('.btn-formula-cmd').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    if (!mathField) return;
+                    const cmd = this.getAttribute('data-cmd') || '';
+                    if (!cmd) return;
+
+                    if (typeof mathField.executeCommand === 'function') {
+                        mathField.executeCommand(['insert', cmd]);
+                        mathField.focus();
+                    } else {
+                        mathField.value = (mathField.value || '') + cmd;
+                    }
+                });
+            });
+
+            document.getElementById('btn-save-formula')?.addEventListener('click', function() {
+                if (!mathField) return;
+                let latex = '';
+                if (typeof mathField.getValue === 'function') {
+                    latex = mathField.getValue('latex-expanded');
+                }
+                if (!latex) {
+                    latex = mathField.value || '';
+                }
+
+                // Bersihkan placeholder sisa jika pengguna membiarkan kotak kosong
+                latex = latex.replace(/\\placeholder\{\}/g, '').replace(/#\?/g, '').trim();
+
+                if (!latex) {
+                    alert('Silakan pilih struktur rumus atau buat rumus terlebih dahulu!');
+                    return;
+                }
+
+                const range = window.quillFormulaRange;
+                const index = range ? range.index : quill.getLength();
+
+                quill.insertEmbed(index, 'formula', latex, 'user');
+                quill.setSelection(index + 1, 'silent');
+                closeFormulaModal();
+
+                // Langsung scroll ke posisi rumus yang baru ditambahkan
+                setTimeout(() => {
+                    quill.focus();
+                    quill.setSelection(index + 1, 'silent');
+
+                    let targetEl = null;
+                    try {
+                        const [leaf] = quill.getLeaf(index);
+                        if (leaf && leaf.domNode) {
+                            targetEl = leaf.domNode.nodeType === Node.ELEMENT_NODE 
+                                ? leaf.domNode 
+                                : leaf.domNode.parentElement;
+                        }
+                    } catch (e) {}
+
+                    if (!targetEl || !targetEl.classList.contains('ql-formula')) {
+                        const formulas = quill.root.querySelectorAll('.ql-formula');
+                        if (formulas.length > 0) {
+                            targetEl = formulas[formulas.length - 1];
+                        }
+                    }
+
+                    if (targetEl && typeof targetEl.scrollIntoView === 'function') {
+                        targetEl.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'center',
+                            inline: 'nearest'
+                        });
+                        targetEl.classList.add('ring-2', 'ring-[#13416B]', 'ring-offset-2', 'rounded');
+                        setTimeout(() => {
+                            targetEl.classList.remove('ring-2', 'ring-[#13416B]', 'ring-offset-2', 'rounded');
+                        }, 2000);
+                    } else {
+                        const bounds = quill.getBounds(index);
+                        if (bounds) {
+                            const editorRect = quill.container.getBoundingClientRect();
+                            const targetY = window.pageYOffset + editorRect.top + bounds.top - (window.innerHeight / 2);
+                            window.scrollTo({
+                                top: Math.max(0, targetY),
+                                behavior: 'smooth'
+                            });
+                        }
+                    }
+                }, 100);
+            });
+
             quill.on('text-change', function() {
                 var contentText = document.getElementById('content_text');
                 if (quill.getText().trim().length === 0 && !quill.root.innerHTML.includes('<img') && !quill.root.innerHTML.includes('<iframe') && !quill.root.innerHTML.includes('<video')) { contentText.value = ''; } else { contentText.value = quill.root.innerHTML; }
@@ -832,19 +1071,19 @@
                     for (let i = 0; i < fileDt.files.length; i++) {
                         const file = fileDt.files[i];
                         const card = document.createElement('div');
-                        card.className = 'p-2.5 rounded-xl border border-emerald-200 bg-emerald-50/40 flex items-center justify-between gap-3';
+                        card.className = 'p-3 sm:p-3.5 rounded-xl border border-emerald-200 bg-emerald-50/50 flex items-center justify-between gap-3 sm:gap-4 transition shadow-2xs';
                         card.innerHTML = `
-                            <div class="flex items-center gap-2.5 min-w-0">
-                                <div class="w-8 h-8 rounded-lg bg-white border border-emerald-200 flex items-center justify-center shrink-0 shadow-2xs">
+                            <div class="flex items-center gap-3 min-w-0">
+                                <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-md bg-white border border-emerald-200 flex items-center justify-center shrink-0 shadow-2xs">
                                     ${getIconByExt(file.name)}
                                 </div>
                                 <div class="min-w-0">
-                                    <p class="text-xs font-bold text-slate-800 truncate leading-snug">${file.name}</p>
-                                    <p class="text-[10px] text-slate-500">${formatBytes(file.size)}</p>
+                                    <p class="text-xs sm:text-sm font-bold text-slate-800 line-clamp-2 leading-snug break-words">${file.name}</p>
+                                    <p class="text-[11px] sm:text-xs text-slate-500 font-medium mt-0.5">${formatBytes(file.size)}</p>
                                 </div>
                             </div>
-                            <button type="button" class="btn-remove-new-doc w-6 h-6 rounded-lg flex items-center justify-center text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors shrink-0 cursor-pointer" data-index="${i}" title="Batalkan Berkas">
-                                <i class="fas fa-times text-xs"></i>
+                            <button type="button" class="btn-remove-new-doc w-7 h-7 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors shrink-0 cursor-pointer" data-index="${i}" title="Batalkan Berkas">
+                                <i class="fas fa-times text-xs sm:text-sm"></i>
                             </button>
                         `;
                         newDocsList.appendChild(card);
@@ -1053,9 +1292,9 @@
                         hiddenInput.dataset.id = id;
                         libInputsContainer.appendChild(hiddenInput);
 
-                        // Card di form (THUMBNAIL SAJA, TANPA ICON)
+                        // Card di form (THUMBNAIL LEBIH BESAR)
                         const card = document.createElement('div');
-                        card.className = 'selected-lib-card border border-indigo-200 bg-indigo-50/30 rounded-xl p-2.5 flex items-center justify-between gap-3';
+                        card.className = 'selected-lib-card border border-indigo-200 bg-indigo-50/30 rounded-xl p-3 sm:p-3.5 flex items-center justify-between gap-3 sm:gap-4 transition shadow-2xs';
                         card.dataset.id = id;
 
                         const thumbHtml = cover 
@@ -1063,20 +1302,17 @@
                             : `<div class="w-full h-full bg-gradient-to-br from-slate-200 to-slate-300"></div>`;
 
                         card.innerHTML = `
-                            <div class="flex items-start gap-2.5 min-w-0">
-                                <div class="w-10 h-14 rounded-md bg-slate-100 border border-slate-200 overflow-hidden shrink-0 shadow-2xs">
+                            <div class="flex items-start gap-3 min-w-0">
+                                <div class="w-12 h-16 sm:w-14 sm:h-20 rounded-md bg-slate-100 border border-slate-200 overflow-hidden shrink-0 shadow-2xs">
                                     ${thumbHtml}
                                 </div>
                                 <div class="min-w-0">
-                                    <span class="inline-block px-1.5 py-0.2 text-[8px] font-extrabold uppercase rounded bg-indigo-100 text-indigo-700 border border-indigo-200 mb-0.5">
-                                        ${category}
-                                    </span>
-                                    <h4 class="text-xs font-bold text-slate-800 line-clamp-2 leading-tight">${title}</h4>
-                                    <p class="text-[10px] text-slate-500 line-clamp-2 mt-0.5">${desc || ''}</p>
+                                    <h4 class="text-xs sm:text-sm font-bold text-slate-800 line-clamp-2 leading-snug">${title}</h4>
+                                    <p class="text-[11px] sm:text-xs text-slate-500 line-clamp-2 mt-1 leading-relaxed">${desc || ''}</p>
                                 </div>
                             </div>
-                            <button type="button" class="btn-remove-selected-lib w-7 h-7 rounded-lg flex items-center justify-center text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors shrink-0 cursor-pointer" data-id="${id}" title="Hapus Tautan">
-                                <i class="fas fa-trash-alt text-xs"></i>
+                            <button type="button" class="btn-remove-selected-lib w-7 h-7 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors shrink-0 cursor-pointer" data-id="${id}" title="Hapus Tautan">
+                                <i class="fas fa-trash-alt text-xs sm:text-sm"></i>
                             </button>
                         `;
                         selectedLibsList.appendChild(card);
