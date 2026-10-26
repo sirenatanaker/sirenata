@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="light light-only">
 
 <head>
-    @include('partials.head')
+    @include('partials.head', ['disableDarkMode' => true])
 
     {{-- Vite CSS --}}
     {{-- {{ module_vite('build-landingpage', 'resources/assets/sass/app.scss') }} --}}

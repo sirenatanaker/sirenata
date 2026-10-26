@@ -1,6 +1,11 @@
 {{-- SIRENATA Global Dark Mode Integration --}}
 <script>
     (function () {
+        if (document.documentElement.classList.contains('light-only')) {
+            document.documentElement.classList.remove('dark');
+            return;
+        }
+
         const saved = localStorage.getItem('sirenata_dark_mode');
         if (saved === 'true') {
             document.documentElement.classList.add('dark');
