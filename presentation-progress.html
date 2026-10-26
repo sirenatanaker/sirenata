@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Laporan Progress Pengembangan Sistem E-Learning SIRENATA</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        * {
+            box-sizing: border-box;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+        }
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #0b1320;
+            color: #1e293b;
+            margin: 0;
+            padding: 0;
+        }
+        .heading-font {
+            font-family: 'Space+Grotesk', 'Plus Jakarta Sans', sans-serif;
+        }
+        
+        /* Ukuran Standar Slide 16:9 (Landscape HD) */
+        .slide-page {
+            width: 1440px;
+            height: 810px;
+            max-width: 1440px;
+            max-height: 810px;
+            overflow: hidden;
+            position: relative;
+            background: #ffffff;
+            margin: 20px auto;
+            page-break-after: always;
+            page-break-inside: avoid;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.4);
+            display: flex;
+            flex-direction: column;
+        }
+
+        @media print {
+            body {
+                background: transparent;
+            }
+            .slide-page {
+                margin: 0;
+                box-shadow: none;
+                width: 100vw;
+                height: 100vh;
+                max-width: none;
+                max-height: none;
+            }
+            @page {
+                size: 16in 9in;
+                margin: 0;
+            }
+        }
+
+        .gradient-navy {
+            background: linear-gradient(135deg, #091f33 0%, #13416B 60%, #1d578c 100%);
+        }
+        .gradient-card {
+            background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+        }
+        .gradient-accent {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        }
+    </style>
+</head>
+<body class="py-6 print:py-0">
+
+    <!-- ========================================== -->
+    <!-- SLIDE 1: COVER PRESENTASI -->
+    <!-- ========================================== -->
+    <div class="slide-page gradient-navy text-white p-16 justify-between relative">
+        <!-- Background Accent Grid -->
+        <div class="absolute inset-0 opacity-10 pointer-events-none" style="background-image: radial-gradient(#ffffff 1px, transparent 1px); background-size: 32px 32px;"></div>
+        
+        <!-- Header Brand -->
+        <div class="flex items-center justify-between z-10">
+            <div class="flex items-center gap-3">
+                <div class="w-12 h-12 rounded-xl bg-white/10 backdrop-blur border border-white/20 flex items-center justify-center text-emerald-400 text-2xl font-bold">
+                    <i class="fas fa-graduation-cap"></i>
+                </div>
+                <div>
+                    <h3 class="text-lg font-extrabold tracking-wider uppercase text-slate-200">SIRENATA E-LEARNING</h3>
+                    <p class="text-xs text-slate-400 font-medium tracking-wide">Kementerian Ketenagakerjaan RI</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-3">
+                <span class="px-4 py-1.5 rounded-full bg-emerald-500/20 border border-emerald-400/30 text-emerald-300 text-xs font-semibold tracking-wide flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> Progress Milestone Selesai
+                </span>
+                <span class="px-4 py-1.5 rounded-full bg-white/10 border border-white/15 text-slate-300 text-xs font-semibold">
+                    Q4 Update
+                </span>
+            </div>
+        </div>
+
+        <!-- Hero Title -->
+        <div class="max-w-4xl z-10 my-auto">
+            <div class="inline-flex items-center gap-2 text-emerald-400 font-bold text-sm uppercase tracking-widest mb-4">
+                <i class="fas fa-rocket"></i> Laporan Resmi Capaian Pengembangan
+            </div>
+            <h1 class="text-5xl font-extrabold leading-tight text-white mb-6">
+                Modernisasi Modul LMS, Integrasi SSO SIAPkerja, & Otomasi Sertifikasi
+            </h1>
+            <p class="text-lg text-slate-300 leading-relaxed max-w-3xl">
+                Transformasi konten materi interaktif berbasis KaTeX, implementasi Post Test & penerbitan sertifikat otomatis, integrasi autentikasi tunggal (SSO) Kemnaker, dan penguatan keamanan sistem (Security Vulnerability Fixes).
+            </p>
+        </div>
+
+        <!-- Footer Meta -->
+        <div class="pt-8 border-t border-white/15 flex items-center justify-between z-10 text-sm text-slate-300">
+            <div class="flex items-center gap-8">
+                <div>
+                    <p class="text-xs text-slate-400 uppercase tracking-wider">Pemateri / Tim Pengembang</p>
+                    <p class="font-bold text-white">Software Engineering Team</p>
+                </div>
+                <div>
+                    <p class="text-xs text-slate-400 uppercase tracking-wider">Platform</p>
+                    <p class="font-bold text-white">SIRENATA LMS Core v2.0</p>
+                </div>
+            </div>
+            <div class="text-right">
+                <p class="text-xs text-slate-400 uppercase tracking-wider">Target Presentasi</p>
+                <p class="font-bold text-emerald-400">Executive & Stakeholders Review</p>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- ========================================== -->
+    <!-- SLIDE 2: KONTEKS PENGGUNA (ROLE ECOSYSTEM) -->
+    <!-- ========================================== -->
+    <div class="slide-page bg-slate-50 p-14 justify-between">
+        <!-- Top Bar -->
+        <div class="flex items-center justify-between border-b border-slate-200 pb-4">
+            <div>
+                <p class="text-xs font-bold uppercase tracking-wider text-[#13416B]">Fondasi Arsitektur Sistem</p>
+                <h2 class="text-2xl font-bold text-slate-900">Konteks Ekosistem & Peran Pengguna (User Roles)</h2>
+            </div>
+            <span class="text-xs font-bold text-slate-400 bg-slate-200/60 px-3 py-1 rounded-md">Slide 02 / 07</span>
+        </div>
+
+        <!-- Content Grid 3 Roles -->
+        <div class="grid grid-cols-3 gap-6 my-auto">
+            <!-- Role 1: User / Peserta -->
+            <div class="bg-white p-7 rounded-2xl border border-slate-200/80 shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow">
+                <div>
+                    <div class="w-14 h-14 rounded-2xl bg-blue-50 text-[#13416B] flex items-center justify-center text-2xl font-bold mb-5">
+                        <i class="fas fa-user-graduate"></i>
+                    </div>
+                    <div class="flex items-center justify-between mb-2">
+                        <h3 class="text-xl font-bold text-slate-800">User / Peserta</h3>
+                        <span class="text-[11px] font-bold uppercase px-2.5 py-0.5 rounded-full bg-blue-100 text-blue-700">Aktor Utama</span>
+                    </div>
+                    <p class="text-xs text-slate-500 font-semibold mb-4">Aparatur Sipil Negara (ASN Pusat, Daerah & Publik)</p>
+                    <ul class="text-xs text-slate-600 space-y-2.5">
+                        <li class="flex items-start gap-2.5">
+                            <i class="fas fa-check text-emerald-500 mt-0.5"></i>
+                            <span>Mengakses modul pembelajaran mandiri secara interaktif.</span>
+                        </li>
+                        <li class="flex items-start gap-2.5">
+                            <i class="fas fa-check text-emerald-500 mt-0.5"></i>
+                            <span>Menyelesaikan evaluasi <strong>Post Test</strong> untuk menguji kompetensi.</span>
+                        </li>
+                        <li class="flex items-start gap-2.5">
+                            <i class="fas fa-check text-emerald-500 mt-0.5"></i>
+                            <span>Mengklaim & mengunduh <strong>E-Sertifikat otomatis</strong> saat lulus.</span>
+                        </li>
+                        <li class="flex items-start gap-2.5">
+                            <i class="fas fa-check text-emerald-500 mt-0.5"></i>
+                            <span>Membaca referensi berkas & buku perpustakaan digital terintegrasi.</span>
+                        </li>
+                    </ul>
+                </div>
+                <div class="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-[#13416B]">
+                    <span>Fokus: Pengalaman Belajar & Evaluasi</span>
+                    <i class="fas fa-arrow-right"></i>
+                </div>
+            </div>
+
+            <!-- Role 2: Admin Provinsi -->
+            <div class="bg-white p-7 rounded-2xl border border-slate-200/80 shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow">
+                <div>
+                    <div class="w-14 h-14 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center text-2xl font-bold mb-5">
+                        <i class="fas fa-landmark"></i>
+                    </div>
+                    <div class="flex items-center justify-between mb-2">
+                        <h3 class="text-xl font-bold text-slate-800">Admin Provinsi</h3>
+                        <span class="text-[11px] font-bold uppercase px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-700">Daerah</span>
+                    </div>
+                    <p class="text-xs text-slate-500 font-semibold mb-4">Dinas Tenaga Kerja Tingkat Daerah / Regional</p>
+                    <ul class="text-xs text-slate-600 space-y-2.5">
+                        <li class="flex items-start gap-2.5">
+                            <i class="fas fa-check text-amber-500 mt-0.5"></i>
+                            <span>Memantau tingkat partisipasi peserta dari wilayah provinsi terkait.</span>
+                        </li>
+                        <li class="flex items-start gap-2.5">
+                            <i class="fas fa-check text-amber-500 mt-0.5"></i>
+                            <span>Monitoring progres ketuntasan materi & kelulusan pelatihan daerah.</span>
+                        </li>
+                        <li class="flex items-start gap-2.5">
+                            <i class="fas fa-check text-amber-500 mt-0.5"></i>
+                            <span>Akses rekapitulasi data demografi & kesiapan tenaga kerja daerah.</span>
+                        </li>
+                    </ul>
+                </div>
+                <div class="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-amber-700">
+                    <span>Fokus: Monitoring Wilayah & Pelaporan</span>
+                    <i class="fas fa-arrow-right"></i>
+                </div>
+            </div>
+
+            <!-- Role 3: Admin Pusat / Mentor -->
+            <div class="bg-white p-7 rounded-2xl border border-slate-200/80 shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow">
+                <div>
+                    <div class="w-14 h-14 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-2xl font-bold mb-5">
+                        <i class="fas fa-shield-halved"></i>
+                    </div>
+                    <div class="flex items-center justify-between mb-2">
+                        <h3 class="text-xl font-bold text-slate-800">Admin Pusat</h3>
+                        <span class="text-[11px] font-bold uppercase px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-700">Nasional</span>
+                    </div>
+                    <p class="text-xs text-slate-500 font-semibold mb-4">Pengelola Kurikulum Nasional & Barenbang Kemnaker</p>
+                    <ul class="text-xs text-slate-600 space-y-2.5">
+                        <li class="flex items-start gap-2.5">
+                            <i class="fas fa-check text-emerald-500 mt-0.5"></i>
+                            <span>Penyusunan konten kurikulum kaya (teks, formula, video, berkas).</span>
+                        </li>
+                        <li class="flex items-start gap-2.5">
+                            <i class="fas fa-check text-emerald-500 mt-0.5"></i>
+                            <span>Konfigurasi passing grade evaluasi & bank soal Post Test.</span>
+                        </li>
+                        <li class="flex items-start gap-2.5">
+                            <i class="fas fa-check text-emerald-500 mt-0.5"></i>
+                            <span>Manajemen sertifikat, seeder kurikulum, dan pengawasan nasional.</span>
+                        </li>
+                    </ul>
+                </div>
+                <div class="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-emerald-700">
+                    <span>Fokus: Kontrol Penuh & Manajemen Sistem</span>
+                    <i class="fas fa-arrow-right"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom Takeaway -->
+        <div class="bg-blue-50/70 border border-blue-200/60 rounded-xl p-4 flex items-center justify-between text-xs text-slate-700">
+            <span class="flex items-center gap-2 font-medium">
+                <i class="fas fa-lightbulb text-[#13416B] text-base"></i>
+                <strong>Prinsip Desain:</strong> Setiap perbaikan modul di bawah ini secara langsung mengoptimalkan interaksi dan workflow ketiga aktor di atas.
+            </span>
+            <span class="font-bold text-[#13416B]">Role-Based Access Control (RBAC) Verified</span>
+        </div>
+    </div>
+
+
+    <!-- ========================================== -->
+    <!-- SLIDE 3: HIGHLIGHT 4 PILAR UTAMA -->
+    <!-- ========================================== -->
+    <div class="slide-page bg-slate-50 p-14 justify-between">
+        <!-- Top Bar -->
+        <div class="flex items-center justify-between border-b border-slate-200 pb-4">
+            <div>
+                <p class="text-xs font-bold uppercase tracking-wider text-[#13416B]">Executive Summary</p>
+                <h2 class="text-2xl font-bold text-slate-900">Ringkasan 4 Pilar Kemajuan Pengembangan</h2>
+            </div>
+            <span class="text-xs font-bold text-slate-400 bg-slate-200/60 px-3 py-1 rounded-md">Slide 03 / 07</span>
+        </div>
+
+        <!-- 4 Grid Cards -->
+        <div class="grid grid-cols-2 gap-6 my-auto">
+            <!-- Pilar 1 -->
+            <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm flex items-start gap-5">
+                <div class="w-14 h-14 rounded-2xl bg-blue-50 text-[#13416B] flex items-center justify-center text-2xl shrink-0 font-bold">
+                    <i class="fas fa-layer-group"></i>
+                </div>
+                <div class="flex-1">
+                    <div class="flex items-center justify-between mb-1">
+                        <h4 class="text-lg font-bold text-slate-900">1. Transformasi Konten LMS Fleksibel</h4>
+                        <span class="text-[10px] font-bold uppercase bg-blue-100 text-[#13416B] px-2 py-0.5 rounded">Major Refactor</span>
+                    </div>
+                    <p class="text-xs text-slate-600 leading-relaxed mb-3">
+                        Mengubah konsep materi yang semula <strong>hanya upload file</strong> menjadi format <strong>Rich Interactive Content</strong>. Kini mendukung teks terstruktur, formula matematis KaTeX, video streaming, dan integrasi koleksi buku perpustakaan.
+                    </p>
+                    <div class="flex flex-wrap gap-1.5 text-[11px] font-semibold text-slate-500">
+                        <span class="px-2 py-0.5 bg-slate-100 rounded">Quill WYSIWYG</span>
+                        <span class="px-2 py-0.5 bg-slate-100 rounded">KaTeX Math Formula</span>
+                        <span class="px-2 py-0.5 bg-slate-100 rounded">Digital Library Integration</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pilar 2 -->
+            <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm flex items-start gap-5">
+                <div class="w-14 h-14 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-2xl shrink-0 font-bold">
+                    <i class="fas fa-certificate"></i>
+                </div>
+                <div class="flex-1">
+                    <div class="flex items-center justify-between mb-1">
+                        <h4 class="text-lg font-bold text-slate-900">2. Post Test & Otomasi Sertifikat</h4>
+                        <span class="text-[10px] font-bold uppercase bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded">New Feature</span>
+                    </div>
+                    <p class="text-xs text-slate-600 leading-relaxed mb-3">
+                        Implementasi modul evaluasi akhir (Post Test). Ketika peserta mencapai ambang batas nilai kelulusan, sistem secara <strong>otomatis menerbitkan e-sertifikat</strong> resmi tanpa perlu approval manual admin satu per satu.
+                    </p>
+                    <div class="flex flex-wrap gap-1.5 text-[11px] font-semibold text-slate-500">
+                        <span class="px-2 py-0.5 bg-slate-100 rounded">Passing Grade Check</span>
+                        <span class="px-2 py-0.5 bg-slate-100 rounded">Instant PDF Generator</span>
+                        <span class="px-2 py-0.5 bg-slate-100 rounded">Zero Manual Intervention</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pilar 3 -->
+            <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm flex items-start gap-5">
+                <div class="w-14 h-14 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-2xl shrink-0 font-bold">
+                    <i class="fas fa-fingerprint"></i>
+                </div>
+                <div class="flex-1">
+                    <div class="flex items-center justify-between mb-1">
+                        <h4 class="text-lg font-bold text-slate-900">3. Integrasi SSO SIAPkerja Kemnaker</h4>
+                        <span class="text-[10px] font-bold uppercase bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded">Integration</span>
+                    </div>
+                    <p class="text-xs text-slate-600 leading-relaxed mb-3">
+                        Mengintegrasikan sistem autentikasi tunggal (Single Sign-On) Kemnaker RI via Socialite OAuth. Peserta dan pegawai kementerian dapat login satu kali (SSO) dengan akun SIAPkerja tanpa perlu registrasi akun baru terpisah.
+                    </p>
+                    <div class="flex flex-wrap gap-1.5 text-[11px] font-semibold text-slate-500">
+                        <span class="px-2 py-0.5 bg-slate-100 rounded">OAuth 2.0 Kemnaker</span>
+                        <span class="px-2 py-0.5 bg-slate-100 rounded">Auto User-Linking</span>
+                        <span class="px-2 py-0.5 bg-slate-100 rounded">Token & Session Sync</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pilar 4 -->
+            <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm flex items-start gap-5">
+                <div class="w-14 h-14 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center text-2xl shrink-0 font-bold">
+                    <i class="fas fa-shield-virus"></i>
+                </div>
+                <div class="flex-1">
+                    <div class="flex items-center justify-between mb-1">
+                        <h4 class="text-lg font-bold text-slate-900">4. Security Fixes & UI/UX Polish</h4>
+                        <span class="text-[10px] font-bold uppercase bg-rose-100 text-rose-700 px-2 py-0.5 rounded">Hardening</span>
+                    </div>
+                    <p class="text-xs text-slate-600 leading-relaxed mb-3">
+                        Penambalan celah keamanan (vulnerability audit), sanitasi XSS pada rich editor, serta puluhan perbaikan minor: dark mode, UI mobile responsive, perbaikan loncatan scroll editor matematika, & tombol navigasi materi.
+                    </p>
+                    <div class="flex flex-wrap gap-1.5 text-[11px] font-semibold text-slate-500">
+                        <span class="px-2 py-0.5 bg-slate-100 rounded">XSS & Auth Patch</span>
+                        <span class="px-2 py-0.5 bg-slate-100 rounded">Mobile Line-Clamp 2</span>
+                        <span class="px-2 py-0.5 bg-slate-100 rounded">Scroll Jump Fix</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer Bar -->
+        <div class="flex items-center justify-between text-xs text-slate-500 border-t border-slate-200/80 pt-4">
+            <span>Sistem Informasi Perencanaan Tenaga Kerja (SIRENATA)</span>
+            <span class="font-bold text-emerald-600"><i class="fas fa-check-circle mr-1"></i> Semua modul berhasil diuji & disinkronkan</span>
+        </div>
+    </div>
+
+
+    <!-- ========================================== -->
+    <!-- SLIDE 4: DEEP DIVE LMS & KONTEN FLEKSIBEL -->
+    <!-- ========================================== -->
+    <div class="slide-page bg-slate-50 p-14 justify-between">
+        <!-- Top Bar -->
+        <div class="flex items-center justify-between border-b border-slate-200 pb-4">
+            <div>
+                <p class="text-xs font-bold uppercase tracking-wider text-[#13416B]">Pilar 1: Modul LMS</p>
+                <h2 class="text-2xl font-bold text-slate-900">Perombakan Konten: Dari Unggah File Menjadi Rich Interactive Learning</h2>
+            </div>
+            <span class="text-xs font-bold text-slate-400 bg-slate-200/60 px-3 py-1 rounded-md">Slide 04 / 07</span>
+        </div>
+
+        <!-- Comparison Before vs After -->
+        <div class="grid grid-cols-2 gap-8 my-auto">
+            <!-- Box Before -->
+            <div class="bg-red-50/50 border border-red-200/70 p-6 rounded-2xl flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center gap-3 mb-4">
+                        <span class="w-8 h-8 rounded-lg bg-red-100 text-red-600 flex items-center justify-center font-bold text-sm">
+                            <i class="fas fa-times"></i>
+                        </span>
+                        <div>
+                            <h4 class="text-base font-bold text-red-900">Kondisi Sebelumnya (Legacy)</h4>
+                            <p class="text-xs text-red-700">Terbatas & Monoton</p>
+                        </div>
+                    </div>
+                    <ul class="space-y-3 text-xs text-slate-700">
+                        <li class="flex items-start gap-2.5">
+                            <i class="fas fa-minus-circle text-red-400 mt-0.5"></i>
+                            <span><strong>Hanya Unggah File Lampiran:</strong> Materi hanya berupa file PDF/dokumen terpisah yang harus diunduh dulu oleh pengguna.</span>
+                        </li>
+                        <li class="flex items-start gap-2.5">
+                            <i class="fas fa-minus-circle text-red-400 mt-0.5"></i>
+                            <span><strong>Tidak Ada Formula Matematis:</strong> Rumus perhitungan tenaga kerja (PUK, TPAK, TPT) harus dibuat dalam bentuk gambar pecah/buram.</span>
+                        </li>
+                        <li class="flex items-start gap-2.5">
+                            <i class="fas fa-minus-circle text-red-400 mt-0.5"></i>
+                            <span><strong>Terputus dari Referensi Buku:</strong> Tidak ada keterkaitan dengan koleksi perpustakaan digital instansi.</span>
+                        </li>
+                        <li class="flex items-start gap-2.5">
+                            <i class="fas fa-minus-circle text-red-400 mt-0.5"></i>
+                            <span><strong>Kurang Nyaman di HP/Mobile:</strong> File dokumen tidak responsif dan teks sulit dibaca di smartphone.</span>
+                        </li>
+                    </ul>
+                </div>
+                <div class="mt-6 pt-3 border-t border-red-200/60 text-xs font-semibold text-red-800">
+                    Kelemahan: Engagement peserta rendah & materi sulit dipahami
+                </div>
+            </div>
+
+            <!-- Box After -->
+            <div class="bg-emerald-50/50 border border-emerald-200/80 p-6 rounded-2xl flex flex-col justify-between shadow-xs">
+                <div>
+                    <div class="flex items-center gap-3 mb-4">
+                        <span class="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-600 flex items-center justify-center font-bold text-sm">
+                            <i class="fas fa-check"></i>
+                        </span>
+                        <div>
+                            <h4 class="text-base font-bold text-emerald-950">Kondisi Sekarang (Modernized)</h4>
+                            <p class="text-xs text-emerald-700">Kaya Fitur, Interaktif, & Nyaman Dibaca</p>
+                        </div>
+                    </div>
+                    <ul class="space-y-3 text-xs text-slate-700">
+                        <li class="flex items-start gap-2.5">
+                            <i class="fas fa-check-circle text-emerald-500 mt-0.5"></i>
+                            <span><strong>Fleksibilitas Editor Penuh:</strong> Administrator dapat menulis paragraf rata kanan-kiri (justify), menyusun daftar, dan format teks bebas.</span>
+                        </li>
+                        <li class="flex items-start gap-2.5">
+                            <i class="fas fa-check-circle text-emerald-500 mt-0.5"></i>
+                            <span><strong>Integrasi KaTeX Matematika Presisi:</strong> Rumus RTK Makro ($PUK, TPAK, TPT$) di-render tajam, indah, dan berbasis LaTeX standar ilmiah.</span>
+                        </li>
+                        <li class="flex items-start gap-2.5">
+                            <i class="fas fa-check-circle text-emerald-500 mt-0.5"></i>
+                            <span><strong>Hubungan Referensi & Koleksi Buku:</strong> Dilengkapi list dokumen unduhan dan buku perpustakaan digital langsung di bawah materi.</span>
+                        </li>
+                        <li class="flex items-start gap-2.5">
+                            <i class="fas fa-check-circle text-emerald-500 mt-0.5"></i>
+                            <span><strong>Reader Mode & Dark Mode:</strong> Dilengkapi tombol mode malam, ukuran font dinamis, dan navigasi ramah mobile.</span>
+                        </li>
+                    </ul>
+                </div>
+                <div class="mt-6 pt-3 border-t border-emerald-200/60 text-xs font-semibold text-emerald-800 flex items-center justify-between">
+                    <span>Keunggulan: Pemahaman teori & formula ketenagakerjaan meningkat tajam</span>
+                    <i class="fas fa-star text-amber-500"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Seeder Sync Note -->
+        <div class="bg-white border border-slate-200 rounded-xl p-3.5 flex items-center justify-between text-xs text-slate-600">
+            <span>
+                <i class="fas fa-database text-[#13416B] mr-2"></i>
+                <strong>Database Seeder:</strong> Seluruh modul dummy kini telah di-update dengan materi resmi RTK Makro lengkap dengan rumus matematika KaTeX.
+            </span>
+            <span class="text-emerald-600 font-bold"><i class="fas fa-check"></i> CourseSectionSeeder Synced</span>
+        </div>
+    </div>
+
+
+    <!-- ========================================== -->
+    <!-- SLIDE 5: DEEP DIVE POST TEST & SERTIFIKAT -->
+    <!-- ========================================== -->
+    <div class="slide-page bg-slate-50 p-14 justify-between">
+        <!-- Top Bar -->
+        <div class="flex items-center justify-between border-b border-slate-200 pb-4">
+            <div>
+                <p class="text-xs font-bold uppercase tracking-wider text-[#13416B]">Pilar 2: Evaluasi & Hasil Belajar</p>
+                <h2 class="text-2xl font-bold text-slate-900">Implementasi Post Test & Otomasi Penerbitan E-Sertifikat</h2>
+            </div>
+            <span class="text-xs font-bold text-slate-400 bg-slate-200/60 px-3 py-1 rounded-md">Slide 05 / 07</span>
+        </div>
+
+        <!-- Alur Otomasi 4 Step Diagram -->
+        <div class="my-auto">
+            <h4 class="text-sm font-bold uppercase tracking-wider text-slate-500 mb-6 text-center">
+                Alur Kerja Otomasi Sertifikasi Tanpa Intervensi Manual Admin
+            </h4>
+
+            <div class="grid grid-cols-4 gap-4 relative">
+                <!-- Step 1 -->
+                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs relative">
+                    <div class="w-10 h-10 rounded-xl bg-blue-100 text-[#13416B] flex items-center justify-center font-bold text-lg mb-3">
+                        1
+                    </div>
+                    <h5 class="text-sm font-bold text-slate-800 mb-1">Materi Tuntas</h5>
+                    <p class="text-xs text-slate-500 leading-relaxed">
+                        Peserta menyelesaikan seluruh bab materi bacaan hingga batas bawah halaman (end sentinel).
+                    </p>
+                    <div class="mt-4 pt-3 border-t border-slate-100 text-[11px] font-semibold text-blue-600">
+                        <i class="fas fa-book-reader mr-1"></i> Syarat Awal Terbuka
+                    </div>
+                </div>
+
+                <!-- Step 2 -->
+                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs relative">
+                    <div class="w-10 h-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center font-bold text-lg mb-3">
+                        2
+                    </div>
+                    <h5 class="text-sm font-bold text-slate-800 mb-1">Ujian Post Test</h5>
+                    <p class="text-xs text-slate-500 leading-relaxed">
+                        Peserta mengakses soal evaluasi Post Test dengan timer aktif dan batasan kesempatan ujian terukur.
+                    </p>
+                    <div class="mt-4 pt-3 border-t border-slate-100 text-[11px] font-semibold text-amber-600">
+                        <i class="fas fa-stopwatch mr-1"></i> Timer & Bank Soal
+                    </div>
+                </div>
+
+                <!-- Step 3 -->
+                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs relative">
+                    <div class="w-10 h-10 rounded-xl bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-lg mb-3">
+                        3
+                    </div>
+                    <h5 class="text-sm font-bold text-slate-800 mb-1">Validasi Otomatis</h5>
+                    <p class="text-xs text-slate-500 leading-relaxed">
+                        Sistem secara instan mengoreksi jawaban dan mengecek skor terhadap ambang kelulusan (passing grade).
+                    </p>
+                    <div class="mt-4 pt-3 border-t border-slate-100 text-[11px] font-semibold text-indigo-600">
+                        <i class="fas fa-calculator mr-1"></i> Passing Grade Check
+                    </div>
+                </div>
+
+                <!-- Step 4 -->
+                <div class="bg-emerald-500 text-white p-5 rounded-2xl border border-emerald-600 shadow-sm relative">
+                    <div class="w-10 h-10 rounded-xl bg-white/20 text-white flex items-center justify-center font-bold text-lg mb-3">
+                        <i class="fas fa-check"></i>
+                    </div>
+                    <h5 class="text-sm font-bold text-white mb-1">Generate Sertifikat</h5>
+                    <p class="text-xs text-emerald-100 leading-relaxed">
+                        PDF e-sertifikat resmi langsung di-generate otomatis dengan QR Verifikasi unik & siap diunduh.
+                    </p>
+                    <div class="mt-4 pt-3 border-t border-emerald-400/40 text-[11px] font-bold text-white">
+                        <i class="fas fa-award mr-1"></i> Instan & Siap Cetak
+                    </div>
+                </div>
+            </div>
+
+            <!-- Value Metric Boxes -->
+            <div class="grid grid-cols-3 gap-6 mt-8">
+                <div class="bg-white p-4 rounded-xl border border-slate-200 text-center">
+                    <p class="text-2xl font-black text-[#13416B]">100%</p>
+                    <p class="text-xs font-semibold text-slate-600">Otomasi Penuh Penerbitan</p>
+                    <p class="text-[11px] text-slate-400">Admin tidak perlu generate manual</p>
+                </div>
+                <div class="bg-white p-4 rounded-xl border border-slate-200 text-center">
+                    <p class="text-2xl font-black text-emerald-600">&lt; 2 Detik</p>
+                    <p class="text-xs font-semibold text-slate-600">Waktu Terbit Sertifikat</p>
+                    <p class="text-[11px] text-slate-400">Langsung muncul saat klik selesai</p>
+                </div>
+                <div class="bg-white p-4 rounded-xl border border-slate-200 text-center">
+                    <p class="text-2xl font-black text-indigo-600">Anti-Cheat</p>
+                    <p class="text-xs font-semibold text-slate-600">Integritas Hasil Belajar</p>
+                    <p class="text-[11px] text-slate-400">Post test terkunci sebelum materi tuntas</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="text-xs text-slate-400 text-right">
+            Modul Evaluasi & Sertifikasi Terintegrasi Kemnaker RI
+        </div>
+    </div>
+
+
+    <!-- ========================================== -->
+    <!-- SLIDE 6: SSO SIAPKERJA & SECURITY HARDENING -->
+    <!-- ========================================== -->
+    <div class="slide-page bg-slate-50 p-14 justify-between">
+        <!-- Top Bar -->
+        <div class="flex items-center justify-between border-b border-slate-200 pb-4">
+            <div>
+                <p class="text-xs font-bold uppercase tracking-wider text-[#13416B]">Pilar 3 & 4: Infrastruktur & Keamanan</p>
+                <h2 class="text-2xl font-bold text-slate-900">Integrasi SSO SIAPkerja & Penambalan Celah Keamanan (Vulnerability Fix)</h2>
+            </div>
+            <span class="text-xs font-bold text-slate-400 bg-slate-200/60 px-3 py-1 rounded-md">Slide 06 / 07</span>
+        </div>
+
+        <!-- 2 Kolom: SSO dan Security -->
+        <div class="grid grid-cols-2 gap-8 my-auto">
+            <!-- Kolom SSO SIAPkerja -->
+            <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="w-12 h-12 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-xl font-bold">
+                            <i class="fas fa-network-wired"></i>
+                        </div>
+                        <div>
+                            <h4 class="text-base font-bold text-slate-900">Integrasi SSO SIAPkerja Kemnaker</h4>
+                            <p class="text-xs text-indigo-600 font-semibold">Socialite OAuth 2.0 Integration</p>
+                        </div>
+                    </div>
+                    <p class="text-xs text-slate-600 leading-relaxed mb-4">
+                        Menghubungkan autentikasi pengguna ke ekosistem terpadu SIAPkerja Kementerian Ketenagakerjaan:
+                    </p>
+                    <ul class="space-y-2.5 text-xs text-slate-700">
+                        <li class="flex items-start gap-2">
+                            <i class="fas fa-check text-indigo-500 mt-0.5"></i>
+                            <span><strong>Single Sign-On (SSO):</strong> Peserta cukup login menggunakan akun SIAPkerja tanpa harus mengingat password baru.</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <i class="fas fa-check text-indigo-500 mt-0.5"></i>
+                            <span><strong>Penyelarasan Akun Cerdas (Auto-Link):</strong> Mengaitkan email lokal dengan ID SIAPkerja secara aman tanpa membuat akun duplikat.</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <i class="fas fa-check text-indigo-500 mt-0.5"></i>
+                            <span><strong>Manajemen Token:</strong> Menyimpan access token & refresh token untuk menjaga sesi autentikasi tetap valid.</span>
+                        </li>
+                    </ul>
+                </div>
+                <div class="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500 font-medium">
+                    <span>Protokol: OAuth 2.0 Client-Server</span>
+                    <span class="text-emerald-600 font-bold"><i class="fas fa-link mr-1"></i> Terhubung & Aktif</span>
+                </div>
+            </div>
+
+            <!-- Kolom Security Fixes -->
+            <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="w-12 h-12 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center text-xl font-bold">
+                            <i class="fas fa-shield-halved"></i>
+                        </div>
+                        <div>
+                            <h4 class="text-base font-bold text-slate-900">Perbaikan Bug Keamanan (Security Fixes)</h4>
+                            <p class="text-xs text-rose-600 font-semibold">Vulnerability Elimination & Patching</p>
+                        </div>
+                    </div>
+                    <p class="text-xs text-slate-600 leading-relaxed mb-4">
+                        Menutup berbagai potensi celah keamanan berdasarkan audit teknis aplikasi:
+                    </p>
+                    <ul class="space-y-2.5 text-xs text-slate-700">
+                        <li class="flex items-start gap-2">
+                            <i class="fas fa-shield-check text-rose-500 mt-0.5"></i>
+                            <span><strong>Sanitasi Rich Content (Anti-XSS):</strong> Filter tag berbahaya pada konten yang disimpan dari teks editor Quill.</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <i class="fas fa-shield-check text-rose-500 mt-0.5"></i>
+                            <span><strong>Proteksi Hak Akses (Authorization Guard):</strong> Pengetatan middleware RBAC pada endpoint materi, evaluasi, dan data pengguna.</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <i class="fas fa-shield-check text-rose-500 mt-0.5"></i>
+                            <span><strong>Validasi Upload Berkas:</strong> Pembatasan ekstensi dokumen (PDF, ZIP, DOCX) & validasi mime-type server-side.</span>
+                        </li>
+                    </ul>
+                </div>
+                <div class="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500 font-medium">
+                    <span>Audit Status: Zero Critical Vulnerability</span>
+                    <span class="text-emerald-600 font-bold"><i class="fas fa-lock mr-1"></i> Hardened</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Additional Minor Fixes -->
+        <div class="bg-slate-100 rounded-xl p-3.5 flex items-center justify-between text-xs text-slate-600">
+            <span>
+                <i class="fas fa-wrench text-slate-500 mr-2"></i>
+                <strong>Perbaikan Minor Terkait:</strong> Fix jumping scrollbar saat submit formula KaTeX, penataan posisi tooltip menu Quill, & pembersihan layout padding desktop.
+            </span>
+            <span class="text-slate-400 font-semibold">Clean Code Standard</span>
+        </div>
+    </div>
+
+
+    <!-- ========================================== -->
+    <!-- SLIDE 7: PENUTUP & KESIMPULAN -->
+    <!-- ========================================== -->
+    <div class="slide-page gradient-navy text-white p-16 justify-between relative">
+        <div class="flex items-center justify-between z-10 border-b border-white/15 pb-4">
+            <h3 class="text-base font-extrabold tracking-wider uppercase text-slate-200">SIRENATA E-LEARNING</h3>
+            <span class="text-xs font-bold text-emerald-400 bg-emerald-500/20 px-3 py-1 rounded-full border border-emerald-400/30">
+                Next Steps & Alignment
+            </span>
+        </div>
+
+        <div class="max-w-3xl z-10 my-auto">
+            <span class="text-emerald-400 font-bold text-xs uppercase tracking-widest mb-3 inline-block">
+                <i class="fas fa-flag-checkered mr-1"></i> Kesimpulan Capaian
+            </span>
+            <h2 class="text-4xl font-extrabold leading-tight mb-6">
+                Sistem E-Learning Siap untuk Uji Coba Pengguna & Operasional Penuh
+            </h2>
+            <div class="grid grid-cols-2 gap-4 text-xs text-slate-200 mb-8">
+                <div class="bg-white/10 backdrop-blur p-4 rounded-xl border border-white/10">
+                    <p class="font-bold text-emerald-400 text-sm mb-1"><i class="fas fa-check-circle mr-1"></i> Kesiapan LMS</p>
+                    <p class="text-slate-300">Materi kaya interaktif, formula KaTeX, modul Post Test, dan sertifikasi otomatis telah terpasang 100%.</p>
+                </div>
+                <div class="bg-white/10 backdrop-blur p-4 rounded-xl border border-white/10">
+                    <p class="font-bold text-blue-400 text-sm mb-1"><i class="fas fa-shield-alt mr-1"></i> Kesiapan Keamanan & SSO</p>
+                    <p class="text-slate-300">Login terpadu SIAPkerja aktif dan seluruh celah keamanan utama berhasil ditambal secara komprehensif.</p>
+                </div>
+            </div>
+            <p class="text-sm text-slate-300">
+                Mari kita lanjutkan ke sesi <strong>Live Demonstration</strong> untuk melihat interaksi langsung fitur-fitur di atas pada browser.
+            </p>
+        </div>
+
+        <div class="pt-6 border-t border-white/15 flex items-center justify-between z-10 text-xs text-slate-400">
+            <span>Kementerian Ketenagakerjaan Republik Indonesia &bull; 2026</span>
+            <span class="text-white font-bold text-sm tracking-wide">Terima Kasih / Sesi Tanya Jawab (Q&A)</span>
+        </div>
+    </div>
+
+</body>
+</html>

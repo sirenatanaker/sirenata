@@ -15,7 +15,7 @@ test('user profile page has no password section', function () {
 
     $this->actingAs($user)->get(route('user.profile'))
         ->assertOk()
-        ->assertSee('Informasi Pribadi', false)
+        ->assertSee('Informasi Saya', false)
         ->assertSee('Sertifikat Saya', false)
         ->assertDontSee('Ubah Password', false)
         ->assertDontSee('current_password', false);
