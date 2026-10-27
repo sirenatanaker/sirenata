@@ -20,7 +20,11 @@
 .quill-content-render .ql-media-caption,
 .quill-content-render p.ql-align-center:has(em),
 #editor-container .ql-media-caption,
-#editor-container p.ql-align-center:has(em) {
+#editor-container p.ql-align-center:has(em),
+.quill-question .ql-media-caption,
+.quill-question p.ql-align-center:has(em),
+.quill-choice .ql-media-caption,
+.quill-choice p.ql-align-center:has(em) {
     margin-top: 0.25rem !important;
     margin-bottom: 1.25rem !important;
     font-size: 0.85rem !important;
