@@ -11,9 +11,23 @@
     max-width: 100% !important;
     height: auto;
     margin-top: 1rem;
-    margin-bottom: 1rem;
+    margin-bottom: 0.5rem;
     border-radius: 0.5rem;
     box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+}
+
+/* --- Keterangan / Caption Media (Gambar & Video) --- */
+.quill-content-render .ql-media-caption,
+.quill-content-render p.ql-align-center:has(em),
+#editor-container .ql-media-caption,
+#editor-container p.ql-align-center:has(em) {
+    margin-top: 0.25rem !important;
+    margin-bottom: 1.25rem !important;
+    font-size: 0.85rem !important;
+    color: #64748b !important;
+    font-style: italic !important;
+    text-align: center !important;
+    line-height: 1.4 !important;
 }
 
 .quill-content-render img[style*="margin: auto"],

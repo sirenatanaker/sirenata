@@ -36,6 +36,13 @@ class SectionContentService
         return asset('storage/' . $path);
     }
 
+    public function uploadEditorImage($imageFile): string
+    {
+        $path = $imageFile->store('course-images', 'public');
+
+        return asset('storage/' . $path);
+    }
+
     public function storeSectionContent(array $data, $files = null): array
     {
         try {

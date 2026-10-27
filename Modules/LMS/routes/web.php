@@ -50,6 +50,7 @@ Route::prefix('admin-pusat')->middleware(['auth', 'role:admin-pusat'])->name('ad
         });
 
         Route::post('upload-video-editor', [SectionContentController::class, 'uploadVideoEditor'])->name('upload-video-editor');
+        Route::post('upload-image-editor', [SectionContentController::class, 'uploadImageEditor'])->name('upload-image-editor');
     });
 
 

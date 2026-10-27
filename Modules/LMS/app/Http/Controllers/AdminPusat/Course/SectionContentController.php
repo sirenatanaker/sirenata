@@ -11,6 +11,7 @@ use Illuminate\View\View;
 use Modules\LMS\Http\Requests\DeleteSectionContentWebRequest;
 use Modules\LMS\Http\Requests\StoreSectionContentWebRequest;
 use Modules\LMS\Http\Requests\UpdateSectionContentWebRequest;
+use Modules\LMS\Http\Requests\UploadSectionImageRequest;
 use Modules\LMS\Http\Requests\UploadSectionVideoRequest;
 use Modules\LMS\Services\SectionContentService;
 
@@ -101,6 +102,16 @@ class SectionContentController extends Controller
     public function uploadVideoEditor(UploadSectionVideoRequest $request): JsonResponse
     {
         $url = $this->sectionContentService->uploadEditorVideo($request->file('video'));
+
+        return response()->json([
+            'success' => true,
+            'url'     => $url,
+        ]);
+    }
+
+    public function uploadImageEditor(UploadSectionImageRequest $request): JsonResponse
+    {
+        $url = $this->sectionContentService->uploadEditorImage($request->file('image'));
 
         return response()->json([
             'success' => true,

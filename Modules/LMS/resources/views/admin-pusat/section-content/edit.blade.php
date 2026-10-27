@@ -86,15 +86,6 @@
                         <!-- 1. Dropzone Unggah Berkas Dokumen (Bisa Banyak) -->
                         <div class="flex flex-col justify-between p-4 rounded-xl bg-white border border-slate-200 shadow-2xs">
                             <div>
-                                <div class="flex items-center justify-between mb-2.5">
-                                    <label class="block text-xs sm:text-sm font-bold uppercase tracking-wider text-slate-700">
-                                        Dokumen Berkas Lampiran
-                                    </label>
-                                    <span id="file-count-badge" class="{{ $existingDocuments->count() ? '' : 'hidden' }} text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#13416B]/10 text-[#13416B]">
-                                        {{ $existingDocuments->count() }} Berkas
-                                    </span>
-                                </div>
-                                
                                 <input type="file" name="documents[]" id="document_file" class="hidden" multiple
                                     accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.zip,.rar,.csv" />
 
@@ -170,15 +161,6 @@
                         <!-- 2. Tautkan dari Perpustakaan (Bisa Banyak & Thumbnail Saja Tanpa Icon) -->
                         <div class="flex flex-col justify-between p-4 rounded-xl bg-white border border-slate-200 shadow-2xs">
                             <div>
-                                <div class="flex items-center justify-between mb-2.5">
-                                    <label class="block text-xs sm:text-sm font-bold uppercase tracking-wider text-slate-700">
-                                        Koleksi Perpustakaan Terkait
-                                    </label>
-                                    <span id="library-count-badge" class="{{ $selectedLibraries->count() ? '' : 'hidden' }} text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200">
-                                        {{ $selectedLibraries->count() }} Koleksi
-                                    </span>
-                                </div>
-
                                 <div id="library-inputs-container">
                                     @foreach ($selectedLibraries as $selLib)
                                         <input type="hidden" name="library_ids[]" value="{{ $selLib->id }}" class="lib-input-hidden" data-id="{{ $selLib->id }}">
@@ -398,6 +380,110 @@
         </div>
     </div>
 
+    <!-- MODAL GAMBAR -->
+    <div id="custom-image-modal" class="fixed inset-0 z-[9999] hidden items-center justify-center bg-slate-900/60 backdrop-blur-sm transition-opacity p-4">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-xl p-5 sm:p-6 border border-slate-200 overflow-hidden flex flex-col max-h-[90vh]">
+            <!-- Top Controls (Tombol close di kanan) -->
+            <div class="flex justify-end items-center mb-2">
+                <button type="button" id="btn-close-image" class="w-8 h-8 rounded-full flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer" title="Tutup Modal">
+                    <i class="fas fa-times text-base"></i>
+                </button>
+            </div>
+            
+            <div class="overflow-y-auto space-y-4 pr-0.5 custom-scrollbar">
+                <!-- Segmented Tab Source Switcher -->
+                <div class="p-1 bg-slate-100 rounded-xl flex gap-1 border border-slate-200/80">
+                    <button type="button" id="tab-image-upload" class="flex-1 py-2 px-3 rounded-lg text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-2 bg-white text-[#13416B] shadow-xs cursor-pointer">
+                        <i class="fas fa-cloud-arrow-up text-sm"></i> Unggah Gambar (File)
+                    </button>
+                    <button type="button" id="tab-image-link" class="flex-1 py-2 px-3 rounded-lg text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-2 text-slate-500 hover:text-slate-800 cursor-pointer">
+                        <i class="fas fa-link text-sm"></i> Tautan URL Gambar
+                    </button>
+                </div>
+
+                <!-- Panel 1: Upload Gambar File (Drag & Drop + Live Preview) -->
+                <div id="panel-image-upload" class="block transition-all space-y-3">
+                    <input type="file" id="image-file-input" accept="image/png,image/jpeg,image/jpg,image/webp,image/gif,image/svg+xml" class="hidden">
+
+                    <!-- Interactive Drag & Drop Area -->
+                    <div id="image-dropzone" class="border-2 border-dashed border-slate-300 hover:border-[#13416B] bg-slate-50/70 hover:bg-blue-50/30 rounded-2xl p-6 sm:p-8 text-center cursor-pointer transition-all duration-200 group">
+                        <div class="w-16 h-16 rounded-2xl bg-white shadow-xs border border-slate-200 text-[#13416B] flex items-center justify-center mx-auto mb-3.5 group-hover:scale-105 group-hover:border-[#13416B]/40 transition-all">
+                            <i class="fas fa-image text-2xl"></i>
+                        </div>
+                        <p class="text-sm font-bold text-slate-800 mb-1">
+                            Tarik & lepas file gambar di sini, atau <span class="text-[#13416B] underline font-extrabold">Telusuri Berkas</span>
+                        </p>
+                        <p class="text-xs text-slate-400 mb-3">Format didukung: PNG, JPG, JPEG, WEBP, GIF, SVG</p>
+                        <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-200/60 text-[11px] font-semibold text-slate-600">
+                            <i class="fas fa-info-circle text-[10px] text-slate-400"></i> Maksimal ukuran: 10 MB
+                        </div>
+                    </div>
+
+                    <!-- Selected File Info & Live Image Preview -->
+                    <div id="image-file-card" class="hidden bg-slate-50 border border-slate-200 rounded-2xl p-4 transition-all space-y-3">
+                        <div class="relative rounded-xl overflow-hidden bg-slate-900/5 p-2 border border-slate-200/60 flex items-center justify-center min-h-[140px] max-h-[220px]">
+                            <img id="image-preview-element" src="" alt="Pratinjau Gambar" class="max-h-[200px] w-auto max-w-full object-contain rounded-lg shadow-2xs">
+                        </div>
+
+                        <div class="flex items-center justify-between gap-3 bg-white p-3 rounded-xl border border-slate-200 shadow-xs">
+                            <div class="flex items-center gap-3 min-w-0">
+                                <div class="w-10 h-10 rounded-lg bg-[#13416B]/10 text-[#13416B] flex items-center justify-center shrink-0">
+                                    <i class="fas fa-file-image text-lg"></i>
+                                </div>
+                                <div class="min-w-0">
+                                    <p id="image-file-name" class="text-xs sm:text-sm font-bold text-slate-800 truncate">gambar.png</p>
+                                    <p id="image-file-size" class="text-[11px] text-slate-400 font-medium">0 KB</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-1.5 shrink-0">
+                                <button type="button" id="btn-change-image" class="px-2.5 py-1.5 text-xs font-bold text-[#13416B] hover:bg-[#13416B]/10 rounded-lg transition-colors flex items-center gap-1 cursor-pointer" title="Ganti Berkas">
+                                    <i class="fas fa-sync-alt text-[10px]"></i> Ganti
+                                </button>
+                                <button type="button" id="btn-remove-image" class="px-2.5 py-1.5 text-xs font-bold text-red-600 hover:bg-red-50 rounded-lg transition-colors flex items-center gap-1 cursor-pointer" title="Hapus Berkas">
+                                    <i class="fas fa-trash-alt text-[10px]"></i> Hapus
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Panel 2: Link URL Gambar -->
+                <div id="panel-image-link" class="hidden space-y-3.5 transition-all">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1.5">Tautan URL Gambar</label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                                <i class="fas fa-globe text-sm"></i>
+                            </span>
+                            <input type="url" id="image-url-input" placeholder="https://domain.com/gambar.png" class="w-full rounded-xl border border-slate-300 pl-10 pr-3 py-2.5 text-xs sm:text-sm focus:border-[#13416B] focus:ring-1 focus:ring-[#13416B] shadow-xs">
+                        </div>
+                        <p class="text-[11px] text-slate-400 mt-1">Masukkan URL langsung berkas gambar yang dapat diakses publik.</p>
+                    </div>
+
+                    <!-- Live Image URL Preview -->
+                    <div id="image-link-preview-container" class="hidden rounded-xl overflow-hidden border border-slate-200 bg-slate-900/5 p-2 min-h-[120px] max-h-[220px] flex items-center justify-center">
+                        <img id="image-link-preview-element" src="" alt="Pratinjau URL" class="max-h-[200px] w-auto max-w-full object-contain rounded-lg shadow-2xs">
+                    </div>
+                </div>
+
+                <!-- Form Input Keterangan / Caption Gambar -->
+                <div class="pt-2 border-t border-slate-100">
+                    <label class="block text-xs font-bold text-slate-700 mb-1.5">Keterangan / Caption Gambar (Opsional)</label>
+                    <input type="text" id="image-caption-input" placeholder="Contoh: Gambar 1.1 Diagram Alur Sistem..." class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-xs sm:text-sm focus:border-[#13416B] focus:ring-1 focus:ring-[#13416B] shadow-xs">
+                    <p class="text-[11px] text-slate-400 mt-1">Keterangan akan otomatis dimunculkan tepat di bawah gambar.</p>
+                </div>
+            </div>
+
+            <!-- Footer Modal Gambar -->
+            <div class="flex justify-end gap-3 mt-6 pt-4 border-t border-slate-100 shrink-0">
+                <button type="button" id="btn-cancel-image" class="px-5 py-2.5 text-xs sm:text-sm font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors cursor-pointer">Batal</button>
+                <button type="button" id="btn-save-image" class="px-6 py-2.5 text-xs sm:text-sm font-bold text-white bg-[#13416B] hover:bg-[#0f3354] rounded-xl transition-colors shadow-sm flex items-center gap-2 cursor-pointer">
+                    <i class="fas fa-check text-xs"></i> Sisipkan Gambar
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- MODAL VIDEO -->
     <div id="custom-video-modal" class="fixed inset-0 z-[9999] hidden items-center justify-center bg-slate-900/60 backdrop-blur-sm transition-opacity p-4">
         <div class="bg-white rounded-2xl shadow-2xl w-full max-w-xl p-5 sm:p-6 border border-slate-200 overflow-hidden flex flex-col max-h-[90vh]">
@@ -498,9 +584,16 @@
                         <iframe id="youtube-preview-frame" class="w-full h-full" frameborder="0" allowfullscreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>
                     </div>
                 </div>
+
+                <!-- Form Input Keterangan / Caption Video -->
+                <div class="pt-2 border-t border-slate-100">
+                    <label class="block text-xs font-bold text-slate-700 mb-1.5">Keterangan / Caption Video (Opsional)</label>
+                    <input type="text" id="video-caption-input" placeholder="Contoh: Video 1.1 Penjelasan Praktikum Lapangan..." class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-xs sm:text-sm focus:border-[#13416B] focus:ring-1 focus:ring-[#13416B] shadow-xs">
+                    <p class="text-[11px] text-slate-400 mt-1">Keterangan akan otomatis dimunculkan tepat di bawah video.</p>
+                </div>
             </div>
 
-            <!-- Footer Modal -->
+            <!-- Footer Modal Video -->
             <div class="flex justify-end gap-3 mt-6 pt-4 border-t border-slate-100 shrink-0">
                 <button type="button" id="btn-cancel-video" class="px-5 py-2.5 text-xs sm:text-sm font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors cursor-pointer">Batal</button>
                 <button type="button" id="btn-save-video" class="px-6 py-2.5 text-xs sm:text-sm font-bold text-white bg-[#13416B] hover:bg-[#0f3354] rounded-xl transition-colors shadow-sm flex items-center gap-2 cursor-pointer">
@@ -763,6 +856,7 @@
             const Size = Quill.import('attributors/style/size'); Size.whitelist = ['10px', '12px', '14px', '16px', '18px', '24px', '32px']; Quill.register(Size, true);
             const LineHeightStyle = new Parchment.Attributor.Style('lineHeight', 'line-height', { scope: Parchment.Scope.BLOCK, whitelist: ['1', '1.0', '1.2', '1.5', '2.0', '2.5'] }); Quill.register(LineHeightStyle, true);
             const LetterSpacingStyle = new Parchment.Attributor.Style('letterSpacing', 'letter-spacing', { scope: Parchment.Scope.INLINE, whitelist: ['0', '0px', '1px', '2px', '3px', '4px'] }); Quill.register(LetterSpacingStyle, true);
+            const CaptionClass = new Parchment.Attributor.Class('caption', 'ql-media-caption', { scope: Parchment.Scope.BLOCK }); Quill.register(CaptionClass, true);
 
             class VideoElementSpec extends QuillBlotFormatter.BlotSpec {
                 constructor(formatter) { super(formatter); this.targetElement = null; }
@@ -824,19 +918,15 @@
                         ],
                         handlers: {
                             'link': function() { var range = quill.getSelection(true); var text = range && range.length > 0 ? quill.getText(range.index, range.length) : ''; document.getElementById('link-text-input').value = text; document.getElementById('link-url-input').value = ''; const modal = document.getElementById('custom-link-modal'); modal.classList.remove('hidden'); modal.classList.add('flex'); setTimeout(() => document.getElementById('link-url-input').focus(), 100); window.quillLinkRange = range; },
+                            'image': function() {
+                                var range = quill.getSelection(true);
+                                window.quillImageRange = range;
+                                openImageModal();
+                            },
                             'video': function() {
                                 var range = quill.getSelection(true);
                                 window.quillVideoRange = range;
-                                switchVideoTab('upload');
-                                resetVideoFile();
-                                videoUrlInput.value = '';
-                                youtubePreviewFrame.src = '';
-                                youtubePreviewContainer.classList.add('hidden');
-                                uploadProgressContainer.classList.add('hidden');
-                                uploadProgressBar.style.width = '0%';
-                                const modal = document.getElementById('custom-video-modal');
-                                modal.classList.remove('hidden');
-                                modal.classList.add('flex');
+                                openVideoModal();
                             },
                             'formula': function() {
                                 var range = quill.getSelection(true);
@@ -1094,6 +1184,21 @@
                 }
             });
 
+            function openVideoModal() {
+                switchVideoTab('upload');
+                resetVideoFile();
+                videoUrlInput.value = '';
+                const videoCaptionInput = document.getElementById('video-caption-input');
+                if (videoCaptionInput) videoCaptionInput.value = '';
+                youtubePreviewFrame.src = '';
+                youtubePreviewContainer.classList.add('hidden');
+                uploadProgressContainer.classList.add('hidden');
+                uploadProgressBar.style.width = '0%';
+                const modal = document.getElementById('custom-video-modal');
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+            }
+
             function closeVideoModal() {
                 const modal = document.getElementById('custom-video-modal');
                 modal.classList.add('hidden');
@@ -1105,8 +1210,53 @@
             document.getElementById('btn-close-video').addEventListener('click', closeVideoModal);
             document.getElementById('btn-cancel-video').addEventListener('click', closeVideoModal);
 
-            document.getElementById('btn-save-video').addEventListener('click', function() {
+            function insertVideoToQuill(videoUrl) {
                 var range = window.quillVideoRange;
+                var insertIdx = range ? range.index : quill.getLength();
+                var caption = (document.getElementById('video-caption-input')?.value || '').trim();
+
+                if (range && range.length > 0) {
+                    quill.deleteText(range.index, range.length);
+                }
+
+                quill.insertEmbed(insertIdx, 'video', videoUrl, Quill.sources.USER);
+
+                if (caption) {
+                    const captionIdx = insertIdx + 1;
+                    quill.insertText(captionIdx, caption + '\n', Quill.sources.USER);
+                    quill.formatText(captionIdx, caption.length, {
+                        italic: true,
+                        size: '12px',
+                        color: '#64748b'
+                    }, Quill.sources.USER);
+                    quill.formatLine(captionIdx, caption.length, 'align', 'center', Quill.sources.USER);
+                    quill.formatLine(captionIdx, caption.length, 'caption', 'true', Quill.sources.USER);
+
+                    const nextCursor = captionIdx + caption.length + 1;
+                    quill.setSelection(nextCursor, 0, Quill.sources.SILENT);
+                    quill.formatLine(nextCursor, 1, 'align', false, Quill.sources.SILENT);
+                } else {
+                    quill.setSelection(insertIdx + 1, 0, Quill.sources.SILENT);
+                }
+
+                closeVideoModal();
+
+                setTimeout(() => {
+                    if (quill.root) {
+                        const bounds = quill.getBounds(insertIdx);
+                        if (bounds) {
+                            const editorRect = quill.container.getBoundingClientRect();
+                            const targetY = window.pageYOffset + editorRect.top + bounds.top - (window.innerHeight / 3);
+                            window.scrollTo({
+                                top: Math.max(0, targetY),
+                                behavior: 'smooth'
+                            });
+                        }
+                    }
+                }, 100);
+            }
+
+            document.getElementById('btn-save-video').addEventListener('click', function() {
                 var btn = this;
                 if (currentVideoSource === 'upload') {
                     if (!selectedVideoFile) return alert('Silakan pilih atau tarik file video terlebih dahulu!');
@@ -1137,10 +1287,8 @@
                         if (xhr.status === 200 || xhr.status === 201) {
                             try {
                                 const data = JSON.parse(xhr.responseText);
-                                if (data.success) {
-                                    quill.insertEmbed(range ? range.index : quill.getLength(), 'video', data.url);
-                                    quill.setSelection((range ? range.index : quill.getLength()) + 1);
-                                    closeVideoModal();
+                                if (data.success && data.url) {
+                                    insertVideoToQuill(data.url);
                                 } else {
                                     alert('Gagal mengunggah video: ' + (data.message || 'Error'));
                                 }
@@ -1178,11 +1326,283 @@
                     var rawUrl = videoUrlInput.value.trim();
                     if (!rawUrl) return alert('Silakan masukkan tautan video YouTube!');
                     var embedUrl = parseYouTubeEmbedUrl(rawUrl) || rawUrl;
-                    quill.insertEmbed(range ? range.index : quill.getLength(), 'video', embedUrl);
-                    quill.setSelection((range ? range.index : quill.getLength()) + 1);
-                    closeVideoModal();
+                    insertVideoToQuill(embedUrl);
                 }
             });
+
+            // ==========================================
+            // LOGIKA MODAL GAMBAR & CAPTION (RICH EDITOR)
+            // ==========================================
+            let currentImageSource = 'upload';
+            let selectedImageFile = null;
+            let imagePreviewObjectUrl = null;
+
+            const imageFileInput = document.getElementById('image-file-input');
+            const imageDropzone = document.getElementById('image-dropzone');
+            const imageFileCard = document.getElementById('image-file-card');
+            const imagePreviewElement = document.getElementById('image-preview-element');
+            const imageFileName = document.getElementById('image-file-name');
+            const imageFileSize = document.getElementById('image-file-size');
+            const btnChangeImage = document.getElementById('btn-change-image');
+            const btnRemoveImage = document.getElementById('btn-remove-image');
+
+            const tabImageUpload = document.getElementById('tab-image-upload');
+            const tabImageLink = document.getElementById('tab-image-link');
+            const panelImageUpload = document.getElementById('panel-image-upload');
+            const panelImageLink = document.getElementById('panel-image-link');
+            const imageUrlInput = document.getElementById('image-url-input');
+            const imageLinkPreviewContainer = document.getElementById('image-link-preview-container');
+            const imageLinkPreviewElement = document.getElementById('image-link-preview-element');
+            const imageCaptionInput = document.getElementById('image-caption-input');
+
+            function switchImageTab(source) {
+                currentImageSource = source;
+                if (source === 'upload') {
+                    tabImageUpload.classList.add('bg-white', 'text-[#13416B]', 'shadow-xs');
+                    tabImageUpload.classList.remove('text-slate-500');
+                    tabImageLink.classList.remove('bg-white', 'text-[#13416B]', 'shadow-xs');
+                    tabImageLink.classList.add('text-slate-500');
+
+                    panelImageUpload.classList.remove('hidden');
+                    panelImageUpload.classList.add('block');
+                    panelImageLink.classList.remove('block');
+                    panelImageLink.classList.add('hidden');
+                } else {
+                    tabImageLink.classList.add('bg-white', 'text-[#13416B]', 'shadow-xs');
+                    tabImageLink.classList.remove('text-slate-500');
+                    tabImageUpload.classList.remove('bg-white', 'text-[#13416B]', 'shadow-xs');
+                    tabImageUpload.classList.add('text-slate-500');
+
+                    panelImageLink.classList.remove('hidden');
+                    panelImageLink.classList.add('block');
+                    panelImageUpload.classList.remove('block');
+                    panelImageUpload.classList.add('hidden');
+                    setTimeout(() => imageUrlInput.focus(), 50);
+                }
+            }
+
+            if (tabImageUpload) tabImageUpload.addEventListener('click', () => switchImageTab('upload'));
+            if (tabImageLink) tabImageLink.addEventListener('click', () => switchImageTab('link'));
+
+            function handleImageFileSelect(file) {
+                if (!file) return;
+                const maxSize = 10 * 1024 * 1024; // 10MB
+                if (file.size > maxSize) {
+                    alert('Ukuran file gambar melebihi batas maksimal 10MB!');
+                    return;
+                }
+                selectedImageFile = file;
+                imageFileName.textContent = file.name;
+                imageFileSize.textContent = (file.size / 1024 > 1024 ? (file.size / (1024 * 1024)).toFixed(2) + ' MB' : (file.size / 1024).toFixed(1) + ' KB');
+
+                if (imagePreviewObjectUrl) {
+                    URL.revokeObjectURL(imagePreviewObjectUrl);
+                }
+                imagePreviewObjectUrl = URL.createObjectURL(file);
+                imagePreviewElement.src = imagePreviewObjectUrl;
+
+                imageDropzone.classList.add('hidden');
+                imageFileCard.classList.remove('hidden');
+            }
+
+            function resetImageFile() {
+                selectedImageFile = null;
+                imageFileInput.value = '';
+                if (imagePreviewObjectUrl) {
+                    URL.revokeObjectURL(imagePreviewObjectUrl);
+                    imagePreviewObjectUrl = null;
+                }
+                imagePreviewElement.src = '';
+                imageFileCard.classList.add('hidden');
+                imageDropzone.classList.remove('hidden');
+            }
+
+            if (imageDropzone) imageDropzone.addEventListener('click', () => imageFileInput.click());
+            if (btnChangeImage) btnChangeImage.addEventListener('click', () => imageFileInput.click());
+            if (btnRemoveImage) btnRemoveImage.addEventListener('click', resetImageFile);
+
+            if (imageFileInput) {
+                imageFileInput.addEventListener('change', function() {
+                    if (this.files && this.files[0]) {
+                        handleImageFileSelect(this.files[0]);
+                    }
+                });
+            }
+
+            // Drag & drop gambar
+            if (imageDropzone) {
+                ['dragenter', 'dragover'].forEach(eventName => {
+                    imageDropzone.addEventListener(eventName, (e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        imageDropzone.classList.add('border-[#13416B]', 'bg-blue-50/60', 'scale-[1.01]');
+                    });
+                });
+                ['dragleave', 'drop'].forEach(eventName => {
+                    imageDropzone.addEventListener(eventName, (e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        imageDropzone.classList.remove('border-[#13416B]', 'bg-blue-50/60', 'scale-[1.01]');
+                    });
+                });
+                imageDropzone.addEventListener('drop', (e) => {
+                    const files = e.dataTransfer.files;
+                    if (files && files.length > 0) {
+                        handleImageFileSelect(files[0]);
+                    }
+                });
+            }
+
+            // Live URL Gambar Preview
+            if (imageUrlInput) {
+                imageUrlInput.addEventListener('input', function() {
+                    const val = this.value.trim();
+                    if (val && /^https?:\/\//i.test(val)) {
+                        imageLinkPreviewElement.src = val;
+                        imageLinkPreviewContainer.classList.remove('hidden');
+                    } else {
+                        imageLinkPreviewElement.src = '';
+                        imageLinkPreviewContainer.classList.add('hidden');
+                    }
+                });
+            }
+
+            function openImageModal() {
+                switchImageTab('upload');
+                resetImageFile();
+                if (imageUrlInput) imageUrlInput.value = '';
+                if (imageCaptionInput) imageCaptionInput.value = '';
+                if (imageLinkPreviewContainer) imageLinkPreviewContainer.classList.add('hidden');
+                const modal = document.getElementById('custom-image-modal');
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+            }
+
+            function closeImageModal() {
+                const modal = document.getElementById('custom-image-modal');
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            }
+
+            const btnCloseImage = document.getElementById('btn-close-image');
+            const btnCancelImage = document.getElementById('btn-cancel-image');
+            if (btnCloseImage) btnCloseImage.addEventListener('click', closeImageModal);
+            if (btnCancelImage) btnCancelImage.addEventListener('click', closeImageModal);
+
+            function insertImageToQuill(imageUrl) {
+                var range = window.quillImageRange;
+                var insertIdx = range ? range.index : quill.getLength();
+                var caption = (imageCaptionInput?.value || '').trim();
+
+                if (range && range.length > 0) {
+                    quill.deleteText(range.index, range.length);
+                }
+
+                quill.insertEmbed(insertIdx, 'image', imageUrl, Quill.sources.USER);
+                quill.formatLine(insertIdx, 1, 'align', 'center', Quill.sources.USER);
+
+                if (caption) {
+                    quill.insertText(insertIdx + 1, '\n' + caption + '\n', Quill.sources.USER);
+                    const captionTextIdx = insertIdx + 2;
+                    quill.formatText(captionTextIdx, caption.length, {
+                        italic: true,
+                        size: '12px',
+                        color: '#64748b'
+                    }, Quill.sources.USER);
+                    quill.formatLine(captionTextIdx, caption.length, 'align', 'center', Quill.sources.USER);
+                    quill.formatLine(captionTextIdx, caption.length, 'caption', 'true', Quill.sources.USER);
+
+                    const nextCursor = captionTextIdx + caption.length + 1;
+                    quill.setSelection(nextCursor, 0, Quill.sources.SILENT);
+                    quill.formatLine(nextCursor, 1, 'align', false, Quill.sources.SILENT);
+                } else {
+                    quill.insertText(insertIdx + 1, '\n', Quill.sources.USER);
+                    quill.setSelection(insertIdx + 2, 0, Quill.sources.SILENT);
+                }
+
+                closeImageModal();
+
+                setTimeout(() => {
+                    if (quill.root) {
+                        const bounds = quill.getBounds(insertIdx);
+                        if (bounds) {
+                            const editorRect = quill.container.getBoundingClientRect();
+                            const targetY = window.pageYOffset + editorRect.top + bounds.top - (window.innerHeight / 3);
+                            window.scrollTo({
+                                top: Math.max(0, targetY),
+                                behavior: 'smooth'
+                            });
+                        }
+                    }
+                }, 100);
+            }
+
+            const btnSaveImage = document.getElementById('btn-save-image');
+            if (btnSaveImage) {
+                btnSaveImage.addEventListener('click', function() {
+                    const btn = this;
+                    if (currentImageSource === 'upload') {
+                        if (!selectedImageFile) return alert('Silakan pilih atau tarik file gambar terlebih dahulu!');
+                        btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1.5"></i> Mengunggah...';
+                        btn.disabled = true;
+
+                        const formData = new FormData();
+                        formData.append('image', selectedImageFile);
+                        formData.append('_token', '{{ csrf_token() }}');
+
+                        const xhr = new XMLHttpRequest();
+                        xhr.open('POST', "{{ route('admin-pusat.management-course.upload-image-editor') }}", true);
+                        xhr.setRequestHeader('Accept', 'application/json');
+
+                        xhr.onload = function() {
+                            btn.innerHTML = '<i class="fas fa-check text-xs"></i> Sisipkan Gambar';
+                            btn.disabled = false;
+                            if (xhr.status === 200 || xhr.status === 201) {
+                                try {
+                                    const data = JSON.parse(xhr.responseText);
+                                    if (data.success && data.url) {
+                                        insertImageToQuill(data.url);
+                                    } else {
+                                        alert('Gagal mengunggah gambar: ' + (data.message || 'Error'));
+                                    }
+                                } catch(e) {
+                                    alert('Respon server tidak valid.');
+                                }
+                            } else if (xhr.status === 422) {
+                                let errorMsg = 'Validasi gambar gagal.';
+                                try {
+                                    const res = JSON.parse(xhr.responseText);
+                                    if (res.errors && res.errors.image) errorMsg = res.errors.image.join('\n');
+                                    else if (res.message) errorMsg = res.message;
+                                } catch(e) {}
+                                alert(errorMsg);
+                            } else {
+                                // Fallback to FileReader dataURL jika gagal upload AJAX
+                                const reader = new FileReader();
+                                reader.onload = function(evt) {
+                                    insertImageToQuill(evt.target.result);
+                                };
+                                reader.readAsDataURL(selectedImageFile);
+                            }
+                        };
+                        xhr.onerror = function() {
+                            btn.innerHTML = '<i class="fas fa-check text-xs"></i> Sisipkan Gambar';
+                            btn.disabled = false;
+                            // Fallback to FileReader dataURL jika koneksi terputus
+                            const reader = new FileReader();
+                            reader.onload = function(evt) {
+                                insertImageToQuill(evt.target.result);
+                            };
+                            reader.readAsDataURL(selectedImageFile);
+                        };
+                        xhr.send(formData);
+                    } else {
+                        const rawUrl = (imageUrlInput?.value || '').trim();
+                        if (!rawUrl) return alert('Silakan masukkan tautan URL gambar!');
+                        insertImageToQuill(rawUrl);
+                    }
+                });
+            }
 
             // ============================================================
             // LOGIKA VISUAL EQUATION BUILDER (WORD-STYLE WYSIWYG MATHLIVE)
@@ -1357,11 +1777,13 @@
                 const existingVisible = document.querySelectorAll('.existing-doc-card:not(.hidden)').length;
                 const newCount = fileDt.files.length;
                 const total = existingVisible + newCount;
-                if (total > 0) {
-                    fileCountBadge.classList.remove('hidden');
-                    fileCountBadge.textContent = `${total} Berkas`;
-                } else {
-                    fileCountBadge.classList.add('hidden');
+                if (fileCountBadge) {
+                    if (total > 0) {
+                        fileCountBadge.classList.remove('hidden');
+                        fileCountBadge.textContent = `${total} Berkas`;
+                    } else {
+                        fileCountBadge.classList.add('hidden');
+                    }
                 }
             }
 
