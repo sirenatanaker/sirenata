@@ -146,24 +146,56 @@
 
                 {{-- Event Penting Terkini --}}
                 <section class="bg-white rounded-md border border-slate-200 shadow-sm overflow-hidden flex flex-col flex-1">
-                    <header class="px-5 sm:px-6 py-4 border-b border-slate-100 flex items-start gap-3">
-                        <div class="w-10 h-10 rounded-md bg-[#547996] text-white flex items-center justify-center shrink-0">
-                            <i class="fas fa-history"></i>
+                    <header class="px-5 sm:px-6 py-4 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                        <div class="flex items-start gap-3">
+                            <div class="w-10 h-10 rounded-md bg-[#547996] text-white flex items-center justify-center shrink-0">
+                                <i class="fas fa-history"></i>
+                            </div>
+                            <div>
+                                <h2 class="text-base sm:text-lg font-semibold text-slate-900">Event Penting Terkini</h2>
+                                <p class="text-sm text-slate-500">Aktivitas administrator terbaru pada sistem</p>
+                            </div>
                         </div>
-                        <div>
-                            <h2 class="text-base sm:text-lg font-semibold text-slate-900">Event Penting Terkini</h2>
-                            <p class="text-sm text-slate-500">Aktivitas administrator terbaru pada sistem</p>
-                        </div>
+                        <a href="{{ route('super-admin.activity-logs.index') }}"
+                           class="inline-flex items-center gap-1.5 text-xs font-semibold text-[#13416B] hover:text-[#0d2a45] bg-[#13416B]/10 hover:bg-[#13416B]/15 px-3 py-1.5 rounded-md transition-colors self-start sm:self-auto shrink-0">
+                            <span>Lihat Semua</span>
+                            <i class="fas fa-arrow-right text-[10px]"></i>
+                        </a>
                     </header>
 
                     <div class="p-4 flex-1 max-h-[360px] overflow-y-auto custom-scrollbar space-y-3">
                         @forelse ($recentActivities as $activity)
                             @php
-                                $subjectName = $activity->subject_type ? class_basename($activity->subject_type) : 'Sistem';
-                                $title       = ucfirst($activity->description) . ' ' . $subjectName;
-                                $description = $subjectName . ' (' . ($activity->subject?->name ?? $activity->subject_id) . ') telah ' . $activity->description;
-                                $time        = $activity->created_at ? $activity->created_at->diffForHumans(null, true) : '-';
-                                $userName    = $activity->causer?->name ?? 'System';
+                                $base = $activity->subject_type ? class_basename($activity->subject_type) : 'Data';
+                                $subjectTypeLabel = match ($base) {
+                                    'User' => 'Pengguna',
+                                    'Role' => 'Peran (Role)',
+                                    'Permission' => 'Hak Akses',
+                                    'Institution' => 'Instansi / Lembaga',
+                                    'Course' => 'Kursus Pembelajaran',
+                                    default => $base,
+                                };
+
+                                $attrs = $activity->properties['attributes'] ?? $activity->properties['old'] ?? [];
+                                $subjectName = $activity->subject?->name ?? $activity->subject?->title ?? ($attrs['name'] ?? $attrs['title'] ?? ($activity->subject_id ? '#' . substr((string) $activity->subject_id, 0, 8) : '-'));
+
+                                $rawDesc = strtolower(trim((string) $activity->description));
+                                $title = match ($rawDesc) {
+                                    'created' => "Tambah {$subjectTypeLabel}",
+                                    'updated' => "Ubah {$subjectTypeLabel}",
+                                    'deleted' => "Hapus {$subjectTypeLabel}",
+                                    default   => ucfirst($activity->description),
+                                };
+
+                                $description = match ($rawDesc) {
+                                    'created' => "Menambahkan {$subjectTypeLabel} baru: {$subjectName}",
+                                    'updated' => "Mengubah data {$subjectTypeLabel}: {$subjectName}",
+                                    'deleted' => "Menghapus {$subjectTypeLabel}: {$subjectName}",
+                                    default   => $subjectName !== '-' ? "{$subjectTypeLabel} ({$subjectName}): " . ucfirst($activity->description) : ucfirst($activity->description),
+                                };
+
+                                $time     = $activity->created_at ? $activity->created_at->diffForHumans(null, true) : '-';
+                                $userName = $activity->causer?->name ?? 'Sistem Otomatis';
                             @endphp
                             <article
                                 class="flex items-start gap-3 p-3 rounded-md border border-slate-200 bg-white transition-colors hover:bg-slate-50">
@@ -193,8 +225,11 @@
                     </div>
 
                     @if (count($recentActivities) > 0)
-                        <footer class="px-5 sm:px-6 py-3 border-t border-slate-100 text-xs text-slate-500">
-                            Menampilkan {{ count($recentActivities) }} event log terbaru
+                        <footer class="px-5 sm:px-6 py-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500 bg-slate-50/50">
+                            <span>Menampilkan {{ count($recentActivities) }} event log terbaru</span>
+                            <a href="{{ route('super-admin.activity-logs.index') }}" class="font-semibold text-[#13416B] hover:underline inline-flex items-center gap-1">
+                                Kelola Seluruh Log <i class="fas fa-chevron-right text-[10px]"></i>
+                            </a>
                         </footer>
                     @endif
                 </section>

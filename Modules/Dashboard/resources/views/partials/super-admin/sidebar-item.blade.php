@@ -202,6 +202,34 @@
         </div>
     </li>
 
+    <!-- Log Aktivitas -->
+    @php $isActivityLog = request()->routeIs('super-admin.activity-logs.*'); @endphp
+    <li>
+        <a href="{{ route('super-admin.activity-logs.index') }}"
+            title="Log Aktivitas"
+            class="relative flex transition-all duration-200 group py-3 rounded-xl
+            {{ $isActivityLog
+                ? 'text-[#13416B] font-bold bg-[#13416B]/10'
+                : 'text-slate-500 hover:text-[#13416B] hover:bg-slate-100/70' }}"
+            :class="sidebarOpen ? 'flex-row items-center justify-start px-3.5 gap-3.5' : 'flex-col items-center justify-center w-12 h-12 mx-auto p-0'">
+            <span class="w-6 h-6 shrink-0 flex items-center justify-center transition-transform duration-200 group-hover:scale-110">
+                @if ($isActivityLog)
+                    <!-- Solid Clock / History (Active) -->
+                    <svg class="w-5 h-5 text-[#13416B]" viewBox="0 0 24 24" fill="currentColor">
+                        <path fill-rule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25ZM12.75 6a.75.75 0 0 0-1.5 0v6c0 .414.336.75.75.75h4.5a.75.75 0 0 0 0-1.5h-3.75V6Z" clip-rule="evenodd" />
+                    </svg>
+                @else
+                    <!-- Outline Clock / History (Inactive) -->
+                    <svg class="w-5 h-5 text-slate-500 group-hover:text-[#13416B]" fill="none" viewBox="0 0 24 24" stroke-width="1.75" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                    </svg>
+                @endif
+            </span>
+            <span class="text-[15px] text-left leading-snug break-words"
+                  :class="sidebarOpen ? 'block' : 'hidden'">Log Aktivitas</span>
+        </a>
+    </li>
+
     <!-- Manajemen FAQ -->
     @php $isFaq = request()->routeIs('super-admin.faq.*'); @endphp
     <li>

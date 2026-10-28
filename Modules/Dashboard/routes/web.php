@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use Modules\Dashboard\Http\Controllers\NotificationController;
 use Modules\Dashboard\Http\Controllers\PortalDashboardController;
 use Modules\Dashboard\Http\Controllers\SuperAdmin\DashboardController as SuperAdminDashboardController;
+use Modules\Dashboard\Http\Controllers\SuperAdmin\ActivityLogController;
 use Modules\Dashboard\Http\Controllers\AdminPusat\DashbordController as AdminPusatDashboardController;
 use Modules\Dashboard\Http\Controllers\AdminProvinsi\DashboardController as AdminProvinsiDashboardController;
 use Modules\Dashboard\Http\Controllers\AdminKabKota\DashboardController as AdminKabKotaDashboardController;
@@ -28,6 +29,9 @@ Route::prefix('super-admin')->middleware(['auth', 'role:super-admin'])->name('su
     Route::get('/dashboard', [SuperAdminDashboardController::class, 'index'])->name('dashboard');
     Route::get('/profile', [SuperAdminDashboardController::class, 'profile'])->name('profile');
     Route::post('/profile', [SuperAdminDashboardController::class, 'storeOrUpdateProfile'])->name('profile.update');
+
+    Route::get('/activity-logs', [ActivityLogController::class, 'index'])->name('activity-logs.index');
+    Route::get('/activity-logs/{id}', [ActivityLogController::class, 'show'])->name('activity-logs.show');
 });
 
 Route::prefix('admin-pusat')->middleware(['auth', 'role:admin-pusat'])->name('admin-pusat.')->group(function () {

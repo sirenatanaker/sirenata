@@ -29,7 +29,7 @@ class SuperAdminDashboardService
         $recentActivities = collect();
         if (class_exists(Activity::class)) {
             try {
-                $recentActivities = Activity::with('causer')->latest()->take(5)->get();
+                $recentActivities = Activity::with('causer')->latest()->take(10)->get();
             } catch (\Exception $e) {
                 // Keep empty collection
             }
