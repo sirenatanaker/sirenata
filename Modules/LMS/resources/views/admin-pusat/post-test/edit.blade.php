@@ -379,7 +379,7 @@
                                 <label class="block text-sm font-medium text-slate-700 mb-1">Judul Post Test <span
                                         class="text-red-500">*</span></label>
                                 <input type="text" name="title" required value="{{ old('title', $postTest->title) }}"
-                                    placeholder="Contoh: Ujian Evaluasi Pemahaman Bab 1"
+                                    placeholder="{{ empty($postTest->course_section_id) ? 'Evaluasi Akhir Pelatihan' : 'Contoh: Ujian Evaluasi Pemahaman Bab 1' }}"
                                     class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-[#13416B] focus:ring-1 focus:ring-[#13416B]" />
                             </div>
 
@@ -401,9 +401,11 @@
                             </div>
 
                             <div>
-                                <label class="block text-sm font-medium text-slate-700 mb-1">Instruksi Pengerjaan
+                                <label class="block text-sm font-medium text-slate-700 mb-1">Instruksi Pengerjaan / Deskripsi
                                     (Opsional)</label>
-                                <textarea name="description" rows="2" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-[#13416B] focus:ring-1 focus:ring-[#13416B]">{{ old('description', $postTest->description) }}</textarea>
+                                <textarea name="description" rows="2"
+                                    placeholder="{{ empty($postTest->course_section_id) ? 'Ujian utama ini adalah syarat mutlak penyelesaian pelatihan. Pastikan Anda telah menguasai seluruh materi sebelum memulai.' : '' }}"
+                                    class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-[#13416B] focus:ring-1 focus:ring-[#13416B]">{{ old('description', $postTest->description) }}</textarea>
                             </div>
                         </div>
                     </div>
