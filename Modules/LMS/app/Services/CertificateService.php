@@ -137,15 +137,19 @@ class CertificateService
         $completedDate = Carbon::parse($issuedAt)->translatedFormat('d F Y');
         $fullName = $user->siapkerja_id ? $user->name : ($user->profile?->full_name ?? $user->name);
 
+        $displayCertNumber = $enrollment->pivot->official_cert_number ?: $certificateCode;
+
         $pdf = Pdf::loadView('lms::admin-pusat.certificates.certificate-template', [
             'nama_peserta'     => $fullName,
             'nama_kursus'      => $course->name,
             'tanggal_selesai'  => $completedDate,
-            'nomor_sertifikat' => $certificateCode,
+            'nomor_sertifikat' => $displayCertNumber,
+            'certificate_code' => $certificateCode,
             'background_url'   => $backgroundUrl,
             'signature_url'    => $signatureUrl,
             'signer_name'      => $activeSetting->signer_name,
             'signer_title'     => $activeSetting->signer_title,
+            'verification_url' => route('verify-certificate', $certificateCode),
         ]);
 
         $pdf->setPaper('a5', 'landscape');

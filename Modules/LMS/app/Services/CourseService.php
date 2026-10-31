@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use Modules\LMS\Models\BimtekEvent;
 use Modules\LMS\Models\Course;
 use Modules\LMS\Models\CourseSection;
 use Modules\LMS\Models\PostTest;
@@ -295,8 +296,23 @@ class CourseService
             }
         }
 
-        $totalItems = $totalContents + $totalTests;
-        $completedItems = $completedContents + $passedTests;
+        // Hitung Sesi Live Zoom Bimtek ke dalam Progress jika program Bimtek memiliki tautan Zoom
+        $activeBimtek = BimtekEvent::where('course_id', $dbCourse->id)->latest()->first();
+        $hasZoom = (bool) ($activeBimtek && $activeBimtek->zoom_url);
+        $totalZoom = $hasZoom ? 1 : 0;
+        $passedZoom = 0;
+        if ($hasZoom) {
+            $isZoomAttended = DB::table('course_student')
+                ->where('course_id', $dbCourse->id)
+                ->where('user_id', $userId)
+                ->value('zoom_attended');
+            if ($isZoomAttended) {
+                $passedZoom = 1;
+            }
+        }
+
+        $totalItems = $totalContents + $totalTests + $totalZoom;
+        $completedItems = $completedContents + $passedTests + $passedZoom;
 
         return $totalItems > 0 ? (int) round(($completedItems / $totalItems) * 100) : 0;
     }
@@ -327,9 +343,11 @@ class CourseService
                     : null;
 
                 $resultData[] = (object) [
+                    'id'             => $course->id,
                     'slug'           => $course->slug,
                     'name'           => $course->name,
                     'course_name'    => $course->name,
+                    'has_bimtek'     => $course->bimtekEvents()->exists(),
                     'category'       => $course->category ? (object) $course->category->toArray() : (object) ['name' => '-'],
                     'thumbnail'      => $course->thumbnail,
                     'thumbnail_url'  => $thumbnailUrl,
@@ -416,6 +434,9 @@ class CourseService
                 $course->certificate_file = $enrollment->pivot->certificate_file
                     ? Storage::url($enrollment->pivot->certificate_file)
                     : null;
+                $course->official_cert_number = $enrollment->pivot->official_cert_number;
+                $course->cert_submission_status = $enrollment->pivot->cert_submission_status;
+                $course->zoom_attended = $enrollment->pivot->zoom_attended;
             }
 
             $totalContents = 0;
@@ -455,7 +476,7 @@ class CourseService
                 $totalSectionCount = count($sectionContents);
                 $isContentCompleted = $totalSectionCount === 0 || $sectionCompletedCount === $totalSectionCount;
 
-                $postTestBab = PostTest::where('course_section_id', $section->id)->first();
+                $postTestBab = PostTest::with('questions')->where('course_section_id', $section->id)->first();
                 $isPostTestBabCompleted = true;
                 if ($postTestBab) {
                     $totalTests++;
@@ -492,10 +513,16 @@ class CourseService
                 }
             }
 
-            $totalItems = $totalContents + $totalTests;
-            $completedItems = $totalCompletedCount + $passedTests;
+            // Hitung Sesi Live Zoom Bimtek ke dalam Progress jika ada
+            $activeBimtek = BimtekEvent::where('course_id', $course->id)->latest()->first();
+            $hasZoom = (bool) ($activeBimtek && $activeBimtek->zoom_url);
+            $totalZoom = $hasZoom ? 1 : 0;
+            $passedZoom = ($hasZoom && !empty($course->zoom_attended)) ? 1 : 0;
+
+            $totalItems = $totalContents + $totalTests + $totalZoom;
+            $completedItems = $totalCompletedCount + $passedTests + $passedZoom;
             $currentProgress = $totalItems > 0 ? (int) round(($completedItems / $totalItems) * 100) : 0;
-            $isFullyCompleted = $currentProgress >= 100 && (!$evaluasiAkhir || $isEvaluasiAkhirCompleted);
+            $isFullyCompleted = $currentProgress >= 100 && (!$evaluasiAkhir || $isEvaluasiAkhirCompleted) && (!$hasZoom || !empty($course->zoom_attended));
 
             $course->sections = collect($mappedSections);
             $course->course_sections = collect($mappedSections);
@@ -822,31 +849,53 @@ class CourseService
     }
 
     /**
-     * Ambil semua kursus untuk halaman Katalog (Mengecualikan yang sudah diikuti user)
+     * Ambil semua kursus untuk halaman Katalog.
+     * Kursus yang sudah diikuti disembunyikan, KECUALI jika kursus tersebut memiliki
+     * gelombang Bimtek Event yang sedang aktif / buka pendaftaran!
      */
-    public function getCatalogCourses(int $perPage = 12, ?string $search = null, ?array $categoryIds = null)
+    public function getCatalogCourses(int $perPage = 12, ?string $search = null, ?array $categoryIds = null, ?string $programType = null)
     {
         $enrolledCourseIds = $this->getEnrolledCourseIds();
 
-        return Course::with([
+        $query = Course::with([
             'category',
+            'bimtekEvents' => fn($q) => $q->whereIn('status', ['open_registration', 'ongoing'])
+                ->orderByRaw("FIELD(status, 'open_registration', 'ongoing')")
+                ->latest(),
             'sections.contents' => fn($q) => $q
                 ->select('id', 'course_section_id', 'name', 'position', 'video', 'document')
                 ->orderBy('position'),
         ])
             ->withCount(['sections', 'students'])
-            ->when($search, fn($query) => $query->where('name', 'like', "%{$search}%"))
-            ->when(!empty($categoryIds), fn($query) => $query->whereIn('category_id', $categoryIds))
-            ->whereNotIn('id', $enrolledCourseIds)
-            ->latest()
+            ->when($search, fn($q) => $q->where('name', 'like', "%{$search}%"))
+            ->when(!empty($categoryIds), fn($q) => $q->whereIn('category_id', $categoryIds));
+
+        // Filter tipe program jika dipilih oleh user
+        if ($programType === 'bimtek') {
+            $query->whereHas('bimtekEvents', fn($b) => $b->whereIn('status', ['open_registration', 'ongoing']));
+        } elseif ($programType === 'mandiri') {
+            $query->whereDoesntHave('bimtekEvents', fn($b) => $b->whereIn('status', ['open_registration', 'ongoing']));
+        }
+
+        // Syarat tampil di katalog:
+        // 1. Belum pernah di-enroll sama sekali, ATAU
+        // 2. Sudah di-enroll, TETAPI kursus ini memiliki event Bimtek yang sedang aktif / buka pendaftaran!
+        $query->where(function ($q) use ($enrolledCourseIds) {
+            $q->whereNotIn('id', $enrolledCourseIds)
+              ->orWhereHas('bimtekEvents', function ($b) {
+                  $b->whereIn('status', ['open_registration', 'ongoing']);
+              });
+        });
+
+        return $query->latest()
             ->paginate($perPage)
             ->withQueryString();
     }
 
     /**
-     * Mendaftarkan (Enroll) user ke dalam kursus
+     * Mendaftarkan (Enroll) user ke dalam kursus atau gelombang Bimtek Event
      */
-    public function enrollUser(string $slug): array
+    public function enrollUser(string $slug, ?string $bimtekEventId = null): array
     {
         try {
             $course = Course::where('slug', $slug)->first();
@@ -858,18 +907,76 @@ class CourseService
             /** @var User $user */
             $user = Auth::user();
 
-            if ($user->enrolledCourses()->where('course_id', $course->id)->exists()) {
+            // Cek apakah ada gelombang Bimtek aktif
+            $activeBimtek = null;
+            if ($bimtekEventId) {
+                $activeBimtek = BimtekEvent::where('id', $bimtekEventId)->where('course_id', $course->id)->first();
+            }
+            if (!$activeBimtek) {
+                $activeBimtek = BimtekEvent::where('course_id', $course->id)
+                    ->whereIn('status', ['open_registration', 'ongoing'])
+                    ->orderByRaw("FIELD(status, 'open_registration', 'ongoing')")
+                    ->latest()
+                    ->first();
+            }
+
+            $existingEnrollment = $user->enrolledCourses()->where('course_id', $course->id)->first();
+
+            if ($existingEnrollment) {
+                // User sudah punya kursus ini di "Kursus Saya"
+                if ($activeBimtek) {
+                    if ($existingEnrollment->pivot->bimtek_event_id === $activeBimtek->id) {
+                        return [
+                            'success' => true,
+                            'message' => "Anda sudah terdaftar di gelombang {$activeBimtek->batch_name}. Selamat belajar!",
+                        ];
+                    }
+
+                    // Jika gelombang sedang berlangsung atau tutup, tolak pendaftaran
+                    if ($activeBimtek->status !== 'open_registration') {
+                        return [
+                            'success' => false,
+                            'message' => 'Pendaftaran untuk gelombang ini sudah ditutup karena pelatihan sedang berlangsung. Silakan nantikan pembukaan gelombang berikutnya.',
+                        ];
+                    }
+
+                    // Gabungkan user ke gelombang Bimtek yang baru dibuka ini!
+                    $user->enrolledCourses()->updateExistingPivot($course->id, [
+                        'bimtek_event_id'        => $activeBimtek->id,
+                        'cert_submission_status' => 'belum_diajukan',
+                        'updated_at'             => now(),
+                    ]);
+
+                    return [
+                        'success' => true,
+                        'message' => "Selamat! Anda berhasil terdaftar pada {$activeBimtek->batch_name}.",
+                    ];
+                }
+
                 return ['success' => false, 'message' => 'Anda sudah terdaftar di kursus ini.'];
             }
 
+            // Pendaftaran baru (belum pernah enroll kursus ini)
+            if ($activeBimtek && $activeBimtek->status !== 'open_registration') {
+                return [
+                    'success' => false,
+                    'message' => 'Pendaftaran untuk gelombang ini sudah ditutup karena pelatihan sedang berlangsung. Silakan nantikan pembukaan gelombang berikutnya.',
+                ];
+            }
             $user->enrolledCourses()->attach($course->id, [
-                'status'     => 'enrolled',
-                'progress'   => 0,
-                'created_at' => now(),
-                'updated_at' => now(),
+                'status'                 => 'enrolled',
+                'progress'               => 0,
+                'bimtek_event_id'        => $activeBimtek?->id,
+                'cert_submission_status' => $activeBimtek ? 'belum_diajukan' : null,
+                'created_at'             => now(),
+                'updated_at'             => now(),
             ]);
 
-            return ['success' => true, 'message' => 'Berhasil mendaftar kursus! Selamat belajar.'];
+            $message = $activeBimtek
+                ? "Selamat! Anda berhasil terdaftar pada gelombang {$activeBimtek->batch_name}."
+                : 'Berhasil mendaftar kursus! Selamat belajar.';
+
+            return ['success' => true, 'message' => $message];
         } catch (\Exception $e) {
             Log::error('Enrollment error: ' . $e->getMessage());
 

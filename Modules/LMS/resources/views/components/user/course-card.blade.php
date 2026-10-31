@@ -29,6 +29,14 @@
             </div>
         @endif
 
+        @if (!empty($course->has_bimtek))
+            {{-- Badge Bimtek Online (Mojok Kiri Atas) --}}
+            <span class="absolute top-0 left-0 z-10 px-2.5 sm:px-3 py-1 text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-white bg-blue-600 shadow-xs flex items-center gap-1 rounded-none rounded-br-md rounded-tl-md">
+                <i class="fas fa-video text-[8px] sm:text-[9px]"></i>
+                <span>Bimtek Online</span>
+            </span>
+        @endif
+
         {{-- Badge Kategori (Mojok Kanan Atas seperti di card katalog) --}}
         <span class="absolute top-0 right-0 z-10 max-w-[80%] px-2.5 sm:px-3 py-1 text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-white bg-[#13416B] shadow-xs flex items-center gap-1 rounded-none rounded-bl-md rounded-tr-md">
             <i class="fas fa-tag text-[8px] sm:text-[9px] flex-shrink-0"></i>

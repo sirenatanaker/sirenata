@@ -20,6 +20,17 @@ class CertificateSetting extends Model
 
     public static function getActive(): ?self
     {
-        return static::where('is_active', true)->first();
+        $setting = static::where('is_active', true)->first();
+        if (!$setting) {
+            $setting = static::first();
+        }
+        if (!$setting) {
+            $setting = static::create([
+                'signer_name' => 'Kepala Pusat Pengembangan SDM Aparatur',
+                'signer_title' => 'Pembina Utama Madya / PPSDM',
+                'is_active' => true,
+            ]);
+        }
+        return $setting;
     }
 }

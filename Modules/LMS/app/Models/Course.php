@@ -106,12 +106,10 @@ class Course extends Model
         return $this->hasMany(PostTest::class, 'course_id');
     }
 
-    // public function students()
-    // {
-    //     return $this->belongsToMany(User::class, 'course_student')
-    //         ->withPivot(['status', 'progress', 'completed_at', 'certificate_code', 'certificate_file', 'certificate_issued_at'])
-    //         ->withTimestamps();
-    // }
+    public function bimtekEvents(): HasMany
+    {
+        return $this->hasMany(BimtekEvent::class, 'course_id')->latest();
+    }
 
     /**
      * Pivot biasa — semua field di course_student diload lewat withPivot
@@ -126,6 +124,12 @@ class Course extends Model
                 'certificate_code',
                 'certificate_file',
                 'certificate_issued_at',
+                'bimtek_event_id',
+                'cert_submission_id',
+                'cert_submission_status',
+                'official_cert_number',
+                'zoom_attended',
+                'zoom_attended_at',
             ])
             ->withTimestamps();
     }

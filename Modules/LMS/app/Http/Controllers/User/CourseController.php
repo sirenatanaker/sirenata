@@ -95,6 +95,32 @@ class CourseController extends Controller
         ]);
     }
 
+    public function attendZoom(Request $request, string $slug): RedirectResponse
+    {
+        $course = \Modules\LMS\Models\Course::where('slug', $slug)->firstOrFail();
+
+        DB::table('course_student')
+            ->where('course_id', $course->id)
+            ->where('user_id', $request->user()->id)
+            ->update([
+                'zoom_attended'    => true,
+                'zoom_attended_at' => now(),
+            ]);
+
+        $newProgress = $this->courseService->calculateDynamicProgress($course, $request->user()->id);
+        DB::table('course_student')
+            ->where('course_id', $course->id)
+            ->where('user_id', $request->user()->id)
+            ->update([
+                'progress' => $newProgress,
+                'status'   => $newProgress >= 100 ? 'completed' : 'in_progress',
+            ]);
+
+        ToastMagic::success('Presensi Sesi Live Zoom berhasil dikonfirmasi! Tahap Evaluasi Akhir kini telah terbuka.');
+
+        return redirect()->back();
+    }
+
     public function generateCertificate(Request $request, string $slug): RedirectResponse
     {
         $result = $this->certificateService->generateStudentCertificate($request->user(), $slug);

@@ -21,23 +21,37 @@ class CatalogController extends Controller
     {
         $search = $request->get('search');
         $selectedCategories = $request->get('categories', []);
+        $programType = $request->get('type', 'all');
 
         $enrolledCourseIds = $this->courseService->getEnrolledCourseIds();
-        $courses = $this->courseService->getCatalogCourses(12, $search, $selectedCategories);
+        $courses = $this->courseService->getCatalogCourses(12, $search, $selectedCategories, $programType);
         $categories = $this->categoryService->getCategoriesForCatalog($enrolledCourseIds);
+
+        // Ambil ID Bimtek Event yang sudah diikuti oleh user yang sedang login
+        $userBimtekEventIds = [];
+        if (auth()->check()) {
+            $userBimtekEventIds = \Illuminate\Support\Facades\DB::table('course_student')
+                ->where('user_id', auth()->id())
+                ->whereNotNull('bimtek_event_id')
+                ->pluck('bimtek_event_id')
+                ->toArray();
+        }
 
         return view('lms::user.katalog.index', compact(
             'courses',
             'enrolledCourseIds',
+            'userBimtekEventIds',
             'search',
             'categories',
-            'selectedCategories'
+            'selectedCategories',
+            'programType'
         ));
     }
 
-    public function enroll(string $slug): RedirectResponse
+    public function enroll(Request $request, string $slug): RedirectResponse
     {
-        $result = $this->courseService->enrollUser($slug);
+        $bimtekEventId = $request->input('bimtek_event_id');
+        $result = $this->courseService->enrollUser($slug, $bimtekEventId);
 
         if ($result['success']) {
             ToastMagic::success($result['message']);

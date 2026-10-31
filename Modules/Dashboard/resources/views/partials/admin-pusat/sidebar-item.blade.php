@@ -345,7 +345,7 @@
     </li>
 
     <!-- Manajemen Kursus -->
-    @php $isCourse = request()->routeIs('admin-pusat.management-course*'); @endphp
+    @php $isCourse = request()->routeIs('admin-pusat.management-course.courses.*', 'admin-pusat.management-course.course-sections.*', 'admin-pusat.management-course.post-tests.*'); @endphp
     <li>
         <a href="{{ route('admin-pusat.management-course.courses.index') }}"
             title="Manajemen Kursus"
@@ -373,6 +373,62 @@
             </span>
             <span class="text-[15px] text-left leading-snug break-words"
                   :class="sidebarOpen ? 'block' : 'hidden'">Manajemen Kursus</span>
+        </a>
+    </li>
+
+    <!-- Bimtek & Event Online -->
+    @php $isBimtek = request()->routeIs('admin-pusat.management-course.bimtek-events.*'); @endphp
+    <li>
+        <a href="{{ route('admin-pusat.management-course.bimtek-events.index') }}"
+            title="Bimtek & Event Online"
+            class="relative flex transition-all duration-200 group py-3 rounded-xl
+            {{ $isBimtek
+                ? 'text-[#13416B] font-bold bg-[#13416B]/10'
+                : 'text-slate-500 hover:text-[#13416B] hover:bg-slate-100/70' }}"
+            :class="sidebarOpen ? 'flex-row items-center justify-start px-3.5 gap-3.5' : 'flex-col items-center justify-center w-12 h-12 mx-auto p-0'">
+            <span class="w-6 h-6 shrink-0 flex items-center justify-center transition-transform duration-200 group-hover:scale-110">
+                @if ($isBimtek)
+                    <!-- Solid Video Camera (Active) -->
+                    <svg class="w-5 h-5 text-[#13416B]" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M4.5 4.5a3 3 0 0 0-3 3v9a3 3 0 0 0 3 3h8.25a3 3 0 0 0 3-3v-9a3 3 0 0 0-3-3H4.5ZM19.94 18.75l-2.69-2.69V7.94l2.69-2.69c.944-.945 2.56-.276 2.56 1.06v11.38c0 1.336-1.616 2.005-2.56 1.06Z" />
+                    </svg>
+                @else
+                    <!-- Outline Video Camera (Inactive) -->
+                    <svg class="w-5 h-5 text-slate-500 group-hover:text-[#13416B]" fill="none" viewBox="0 0 24 24" stroke-width="1.75" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="m15.75 10.5 4.72-4.72a.75.75 0 0 1 1.28.53v11.38a.75.75 0 0 1-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25h-9A2.25 2.25 0 0 0 2.25 7.5v9a2.25 2.25 0 0 0 2.25 2.25Z" />
+                    </svg>
+                @endif
+            </span>
+            <span class="text-[15px] text-left leading-snug break-words"
+                  :class="sidebarOpen ? 'block' : 'hidden'">Bimtek & Event</span>
+        </a>
+    </li>
+
+    <!-- Pengajuan Sertifikat PPSDM -->
+    @php $isPPSDM = request()->routeIs('admin-pusat.management-course.certificate-submissions.*'); @endphp
+    <li>
+        <a href="{{ route('admin-pusat.management-course.certificate-submissions.index') }}"
+            title="Pengajuan Sertifikat PPSDM"
+            class="relative flex transition-all duration-200 group py-3 rounded-xl
+            {{ $isPPSDM
+                ? 'text-[#13416B] font-bold bg-[#13416B]/10'
+                : 'text-slate-500 hover:text-[#13416B] hover:bg-slate-100/70' }}"
+            :class="sidebarOpen ? 'flex-row items-center justify-start px-3.5 gap-3.5' : 'flex-col items-center justify-center w-12 h-12 mx-auto p-0'">
+            <span class="w-6 h-6 shrink-0 flex items-center justify-center transition-transform duration-200 group-hover:scale-110">
+                @if ($isPPSDM)
+                    <!-- Solid Shield Check (Active) -->
+                    <svg class="w-5 h-5 text-[#13416B]" viewBox="0 0 24 24" fill="currentColor">
+                        <path fill-rule="evenodd" d="M12.516 2.17a.75.75 0 0 0-1.032 0 11.209 11.209 0 0 1-7.877 3.08.75.75 0 0 0-.722.515A12.74 12.74 0 0 0 2.25 9.75c0 5.942 4.064 10.933 9.563 12.348a.749.749 0 0 0 .374 0c5.499-1.415 9.563-6.406 9.563-12.348 0-1.39-.223-2.73-.635-3.985a.75.75 0 0 0-.722-.516l-.143.001c-2.996 0-5.717-1.17-7.734-3.08Zm3.094 8.016a.75.75 0 1 0-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 0 0-1.06 1.06l2.25 2.25a.75.75 0 0 0 1.14-.094l3.75-5.25Z" clip-rule="evenodd" />
+                    </svg>
+                @else
+                    <!-- Outline Shield Check (Inactive) -->
+                    <svg class="w-5 h-5 text-slate-500 group-hover:text-[#13416B]" fill="none" viewBox="0 0 24 24" stroke-width="1.75" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75m-3-7.036A11.959 11.959 0 0 1 3.598 6 11.99 11.99 0 0 0 3 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285Z" />
+                    </svg>
+                @endif
+            </span>
+            <span class="text-[15px] text-left leading-snug break-words"
+                  :class="sidebarOpen ? 'block' : 'hidden'">Pengajuan PPSDM</span>
         </a>
     </li>
 

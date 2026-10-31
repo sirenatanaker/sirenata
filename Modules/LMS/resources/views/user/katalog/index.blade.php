@@ -12,7 +12,7 @@
         {{-- ========================================== --}}
         {{-- HEADER KATALOG DENGAN ILUSTRASI GRUP       --}}
         {{-- ========================================== --}}
-        <div class="relative bg-[#13416B] rounded-md px-5 py-4 sm:p-8 lg:p-10 mb-4 sm:mb-8 flex items-center justify-between border border-blue-900/20 shadow-lg overflow-hidden min-h-[180px] sm:min-h-[280px] lg:min-h-[320px]">
+        <div class="relative bg-[#13416B] rounded-md px-5 py-7 sm:p-8 lg:p-10 mb-6 sm:mb-8 flex items-center justify-between border border-blue-900/20 shadow-lg overflow-hidden min-h-[200px] sm:min-h-[280px] lg:min-h-[320px]">
             
             <!-- Efek Dekoratif Bubbles Geometris Profesional -->
             <div class="absolute inset-0 pointer-events-none z-0">
@@ -55,19 +55,19 @@
 
        
         <div>
-         {{-- HEADER DAFTAR KURSUS & FILTER --}}
-            <div class="mb-6 border-b border-slate-200 pb-4">
+            {{-- HEADER DAFTAR KURSUS & FILTER --}}
+            <div class="mb-5 sm:mb-6 border-b border-slate-200 pb-3.5 sm:pb-4">
                 
                 {{-- Baris Atas: Judul & Tombol Filter (Sejajar di semua resolusi) --}}
-                <div class="flex flex-row items-center justify-between gap-3 sm:gap-4">
+                <div class="flex flex-row items-center justify-between gap-3 sm:gap-4 {{ !empty($selectedCategories) ? 'mb-2.5 sm:mb-4' : 'mb-0' }}">
                     
                     {{-- Kiri: Teks (Diperkecil di mobile) --}}
                     <div class="flex flex-col gap-0.5 sm:gap-1">
                         <h2 class="text-base sm:text-xl font-extrabold text-slate-800 leading-tight">
-                            Jelajahi Kursus Baru
+                            Jelajahi Program Pelatihan
                         </h2>
                         <p class="text-[11px] sm:text-sm font-medium text-slate-500">
-                            Ada <span class="text-[#13416B] font-bold">{{ $courses->total() }}</span> kursus yang siap dipelajari.
+                            Ada <span class="text-[#13416B] font-bold">{{ $courses->total() }}</span> program yang siap dipelajari.
                         </p>
                     </div>
 
@@ -80,7 +80,7 @@
                             <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path>
                             </svg>
-                            <span>Filter</span>
+                            <span>Filter Kategori</span>
                             
                             @if(!empty($selectedCategories))
                                 <span class="flex items-center justify-center w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-amber-400 text-[9px] sm:text-[10px] font-bold text-slate-900 ml-1">
@@ -104,11 +104,14 @@
                             <div class="flex items-center justify-between mb-4">
                                 <h3 class="text-sm font-bold text-slate-800">Kategori Modul</h3>
                                 @if(!empty($selectedCategories))
-                                    <a href="{{ route('user.catalog.index') }}" class="text-[11px] font-bold text-red-500 hover:text-red-700 hover:underline">Reset</a>
+                                    <a href="{{ route('user.catalog.index', ['type' => request('type')]) }}" class="text-[11px] font-bold text-red-500 hover:text-red-700 hover:underline">Reset</a>
                                 @endif
                             </div>
 
                             <form action="{{ route('user.catalog.index') }}" method="GET" id="catalogCategoryForm">
+                                @if(request('type'))
+                                    <input type="hidden" name="type" value="{{ request('type') }}">
+                                @endif
                                 <div class="flex flex-wrap gap-2 max-h-72 overflow-y-auto pr-1 custom-scrollbar">
                                     @forelse($categories as $category)
                                         <label class="cursor-pointer">
@@ -136,11 +139,14 @@
                     </div>
                 </div>
 
-                {{-- Baris Bawah: Chip kategori aktif (Dilepas dari baris atas agar tidak merusak layout sejajar) --}}
+
+
+                {{-- Chip Kategori Aktif --}}
                 @if(!empty($selectedCategories))
-                    <div class="flex flex-wrap items-center gap-2 mt-3 sm:mt-4">
+                    <div class="flex flex-wrap items-center gap-2 mt-3 pt-3 border-t border-slate-100">
+                        <span class="text-xs text-slate-400 font-medium">Filter Kategori:</span>
                         @foreach($categories->whereIn('id', $selectedCategories) as $active)
-                            <a href="{{ route('user.catalog.index', ['categories' => array_values(array_diff($selectedCategories, [$active->id]))]) }}"
+                            <a href="{{ route('user.catalog.index', array_merge(request()->except(['page']), ['categories' => array_values(array_diff($selectedCategories, [$active->id]))])) }}"
                                class="inline-flex items-center gap-1.5 pl-2.5 pr-1.5 py-1 rounded-lg bg-[#13416B]/5 border border-[#13416B]/20 text-[11px] sm:text-xs font-semibold text-[#13416B] hover:bg-[#13416B]/10 transition-colors">
                                 {{ $active->name }}
                                 <svg class="w-3 h-3 text-slate-400 hover:text-red-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -148,8 +154,8 @@
                                 </svg>
                             </a>
                         @endforeach
-                        <a href="{{ route('user.catalog.index') }}" class="text-[11px] sm:text-xs font-semibold text-slate-400 hover:text-red-500 underline underline-offset-2 transition-colors ml-1">
-                            Hapus semua
+                        <a href="{{ route('user.catalog.index', request()->except(['page', 'categories'])) }}" class="text-[11px] sm:text-xs font-semibold text-slate-400 hover:text-red-500 underline underline-offset-2 transition-colors ml-1">
+                            Hapus filter
                         </a>
                     </div>
                 @endif
@@ -161,7 +167,7 @@
             {{-- ========================================== --}}
             @php
                 // Payload ringan untuk modal (tanpa query tambahan per kartu)
-                $coursePayload = $courses->mapWithKeys(function ($c) {
+                $coursePayload = $courses->mapWithKeys(function ($c) use ($enrolledCourseIds, $userBimtekEventIds) {
                     $sections = $c->sections->values()->map(function ($s, $i) {
                         return [
                             'name'     => $s->name ?? $s->title ?? 'Modul ' . ($i + 1),
@@ -172,19 +178,39 @@
                         ];
                     });
 
+                    $activeB = $c->bimtekEvents->first();
+                    $isEnrolledInCourse = in_array($c->id, $enrolledCourseIds);
+                    $isEnrolledInThisBimtek = $activeB && in_array($activeB->id, $userBimtekEventIds);
+
                     return [$c->id => [
-                        'name'          => $c->name,
-                        'category'      => $c->category->name ?? 'Umum',
-                        'description'   => $c->description,
-                        'students'      => $c->students_count,
-                        'modules'       => $c->sections_count,
-                        'topics'        => $sections->sum(fn($s) => count($s['contents'])),
-                        'thumbnail'     => ! empty($c->thumbnail)
+                        'name'                   => $c->name,
+                        'slug'                   => $c->slug,
+                        'myCourseUrl'            => route('user.course.my-course.detail', $c->slug),
+                        'category'               => $c->category->name ?? 'Umum',
+                        'description'            => $c->description,
+                        'students'               => $c->students_count,
+                        'modules'                => $c->sections_count,
+                        'topics'                 => $sections->sum(fn($s) => count($s['contents'])),
+                        'thumbnail'              => ! empty($c->thumbnail)
                             ? (str_starts_with($c->thumbnail, 'http') ? $c->thumbnail : asset('storage/' . $c->thumbnail))
                             : null,
-                        'audienceLabel' => ($c->audience ?? 'instansi') === 'swasta' ? 'Swasta' : 'Instansi',
-                        'sections'      => $sections,
-                        'enrollUrl'     => route('user.catalog.enroll', $c->slug),
+                        'audienceLabel'          => ($c->audience ?? 'instansi') === 'swasta' ? 'Swasta' : 'Instansi',
+                        'sections'               => $sections,
+                        'enrollUrl'              => route('user.catalog.enroll', $c->slug),
+                        'isEvent'                => (bool) $activeB,
+                        'bimtekId'               => $activeB?->id,
+                        'bimtekBatchName'        => $activeB?->batch_name,
+                        'bimtekBatchCode'        => $activeB?->batch_code,
+                        'bimtekStatus'           => $activeB?->status,
+                        'bimtekStatusBadge'      => $activeB?->status_badge,
+                        'bimtekExecutionType'    => $activeB?->execution_type,
+                        'bimtekDates'            => $activeB ? ($activeB->start_date ? $activeB->start_date->format('d M') : '-') . ' s/d ' . ($activeB->end_date ? $activeB->end_date->format('d M Y') : '-') : null,
+                        'bimtekTime'             => $activeB?->start_date ? $activeB->start_date->format('H:i') . ' WIB' : '08:00 WIB',
+                        'bimtekQuota'            => $activeB?->quota ?? 0,
+                        'timelineSteps'          => $activeB ? $activeB->timeline_steps : [],
+                        'currentTimelinePhase'   => $activeB ? $activeB->current_timeline_phase : null,
+                        'isEnrolledInCourse'     => $isEnrolledInCourse,
+                        'isEnrolledInThisBimtek'  => $isEnrolledInThisBimtek,
                     ]];
                 });
             @endphp
@@ -204,7 +230,11 @@
                         this.open = true;
                     },
                     askEnroll(id) {
-                        this.selected = this.courses[id];
+                        const c = this.courses[id];
+                        if (c && c.isEvent && c.bimtekStatus !== 'open_registration' && !c.isEnrolledInThisBimtek) {
+                            return;
+                        }
+                        this.selected = c;
                         this.expandedSections = [0];
                         this.submitting = false;
                         this.confirmOpen = true;
@@ -248,81 +278,46 @@
                 x-effect="document.body.classList.toggle('overflow-hidden', open || confirmOpen)"
                 @keydown.escape.window="onEscape()"
             >
-                {{-- Grid Cards Responsif --}}
-                <div class="grid grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-y-6 gap-x-3 sm:gap-6 px-0 sm:px-4 md:px-0">
-                    @forelse ($courses as $course)
-                        <div class="group flex flex-col bg-transparent sm:bg-white rounded-none sm:rounded-md border-0 sm:border border-slate-200 shadow-none sm:shadow-sm hover:shadow-xl hover:border-[#13416B]/30 hover:-translate-y-1 transition-all duration-300 overflow-hidden">
-
-                            {{-- Thumbnail & Badge --}}
-                            <div class="relative h-24 sm:h-48 overflow-hidden bg-slate-100 rounded-t-md">
-                                @if (!empty($course->thumbnail))
-                                    <img src="{{ str_starts_with($course->thumbnail, 'http') ? $course->thumbnail : asset('storage/' . $course->thumbnail) }}"
-                                        alt="{{ $course->name }}"
-                                        class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
-                                @else
-                                    <div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100">
-                                        <i class="fas fa-graduation-cap text-2xl sm:text-4xl text-slate-300"></i>
-                                    </div>
+                @if ($courses->isNotEmpty())
+                    {{-- 1. KHUSUS MOBILE: 2 Kolom Waterfall/Masonry (Card bawah langsung dempet rapat di bawah card atasnya) --}}
+                    <div class="sm:hidden grid grid-cols-2 gap-3 items-start">
+                        {{-- Kolom Kiri (Ganjil urutan visual: 0, 2, 4, ...) --}}
+                        <div class="flex flex-col gap-5">
+                            @foreach ($courses as $index => $course)
+                                @if ($index % 2 === 0)
+                                    @include('lms::user.katalog.partials.course-card', ['course' => $course])
                                 @endif
-
-                                {{-- Badge Kategori (Mojok Kanan Atas seperti status label pada card kursus) --}}
-                                <span class="absolute top-0 right-0 z-10 max-w-[80%] px-2.5 sm:px-3 py-1 text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-white bg-[#13416B] shadow-xs flex items-center gap-1 rounded-none rounded-bl-md rounded-tr-md">
-                                    <i class="fas fa-tag text-[8px] sm:text-[9px] flex-shrink-0"></i>
-                                    <span class="truncate">{{ $course->category->name ?? 'Umum' }}</span>
-                                </span>
-                            </div>
-
-                            {{-- Konten Text --}}
-                            <div class="p-0 pt-2.5 sm:p-5 flex flex-col flex-1">
-                                <h3 class="text-xs sm:text-base font-bold text-slate-800 leading-snug mb-1.5 sm:mb-2 group-hover:text-[#13416B] transition-colors line-clamp-2" title="{{ $course->name }}">
-                                    {{ $course->name }}
-                                </h3>
-
-                                {{-- Statistik: modul & peserta (Kalem & Profesional) --}}
-                                <div class="flex items-center gap-2 sm:gap-2.5 mb-2 sm:mb-2.5 text-[10px] sm:text-xs font-medium text-slate-500">
-                                    <span class="inline-flex items-center gap-1.5">
-                                        <i class="far fa-folder-open text-slate-400 text-[10px] sm:text-xs"></i>
-                                        <span>{{ $course->sections_count }} Modul</span>
-                                    </span>
-                                    <span class="text-slate-300 select-none">•</span>
-                                    <span class="inline-flex items-center gap-1.5">
-                                        <i class="far fa-user text-slate-400 text-[10px] sm:text-xs"></i>
-                                        <span>{{ number_format($course->students_count ?? 0, 0, ',', '.') }} Peserta</span>
-                                    </span>
-                                </div>
-
-                                <p class="hidden sm:line-clamp-2 text-xs text-slate-500 mb-5 leading-relaxed flex-1">
-                                    {{ $course->description ?? 'Tidak ada deskripsi singkat yang tersedia untuk kursus ini.' }}
-                                </p>
-
-                                {{-- Footer Aksi: ditumpuk di mobile, berdampingan di layar sm+ --}}
-                                <div class="mt-auto pt-3 sm:pt-4 border-t border-slate-100 flex flex-col sm:flex-row gap-1.5 sm:gap-2">
-                                    <button type="button" @click="show('{{ $course->id }}')"
-                                        class="order-2 sm:order-1 flex-1 py-1.5 sm:py-2.5 text-[10px] sm:text-sm font-bold text-center rounded-lg sm:rounded-xl transition-colors bg-white text-[#13416B] border border-[#13416B]/30 hover:bg-[#13416B]/5">
-                                        <span class="sm:hidden">Kurikulum</span>
-                                        <span class="hidden sm:inline">Lihat Kurikulum</span>
-                                    </button>
-                                    <button type="button" @click="askEnroll('{{ $course->id }}')"
-                                        class="order-1 sm:order-2 flex-1 py-1.5 sm:py-2.5 text-[11px] sm:text-sm inline-flex items-center justify-center gap-1.5 font-bold text-center rounded-lg sm:rounded-xl transition-colors bg-amber-500 text-white border border-amber-500 hover:bg-amber-600 shadow-sm">
-                                        Daftar
-                                        <i class="fas fa-arrow-up-right-from-square text-[11px] sm:text-sm"></i>
-                                    </button>
-                                </div>
-                            </div>
+                            @endforeach
                         </div>
-                    @empty
-                        <div class="col-span-full flex flex-col items-center justify-center py-16 px-4 text-center bg-white rounded-2xl border border-dashed border-slate-200">
-                            <div class="w-16 h-16 bg-[#13416B]/5 rounded-full flex items-center justify-center mx-auto mb-4 border border-[#13416B]/10 text-[#13416B]/40">
-                                <i class="fas fa-box-open text-2xl"></i>
-                            </div>
-                            <h3 class="text-base font-bold text-slate-800 mb-1">Belum ada modul di kategori ini</h3>
-                            <p class="text-sm text-slate-500 max-w-sm mb-4">Kamu sudah terdaftar di semua kursus yang tersedia, atau coba ubah filter kategori untuk melihat pilihan lain.</p>
-                            @if(!empty($selectedCategories))
-                                <a href="{{ route('user.catalog.index') }}" class="text-xs font-bold text-[#13416B] hover:underline">Tampilkan semua kategori</a>
-                            @endif
+
+                        {{-- Kolom Kanan (Genap urutan visual: 1, 3, 5, ...) --}}
+                        <div class="flex flex-col gap-5">
+                            @foreach ($courses as $index => $course)
+                                @if ($index % 2 === 1)
+                                    @include('lms::user.katalog.partials.course-card', ['course' => $course])
+                                @endif
+                            @endforeach
                         </div>
-                    @endforelse
-                </div>
+                    </div>
+
+                    {{-- 2. DESKTOP / TABLET: Grid Simetris Sejajar (2, 3, atau 4 kolom) --}}
+                    <div class="hidden sm:grid sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-6 px-4 md:px-0 items-stretch">
+                        @foreach ($courses as $course)
+                            @include('lms::user.katalog.partials.course-card', ['course' => $course])
+                        @endforeach
+                    </div>
+                @else
+                    <div class="col-span-full flex flex-col items-center justify-center py-16 px-4 text-center bg-white rounded-2xl border border-dashed border-slate-200">
+                        <div class="w-16 h-16 bg-[#13416B]/5 rounded-full flex items-center justify-center mx-auto mb-4 border border-[#13416B]/10 text-[#13416B]/40">
+                            <i class="fas fa-box-open text-2xl"></i>
+                        </div>
+                        <h3 class="text-base font-bold text-slate-800 mb-1">Belum ada program di kategori ini</h3>
+                        <p class="text-sm text-slate-500 max-w-sm mb-4">Kamu sudah terdaftar di semua program yang tersedia, atau coba ubah filter kategori/tipe untuk melihat pilihan lain.</p>
+                        @if(!empty($selectedCategories) || request('type'))
+                            <a href="{{ route('user.catalog.index') }}" class="text-xs font-bold text-[#13416B] hover:underline">Tampilkan semua program</a>
+                        @endif
+                    </div>
+                @endif
 
                 {{-- ========== MODAL: RINGKASAN KURIKULUM + KONFIRMASI ========== --}}
                 <div x-show="open" x-cloak style="display: none;"
@@ -357,6 +352,13 @@
                                 <div class="px-5 sm:px-6 pt-4 sm:pt-5 pb-4 border-b border-slate-100 bg-white shrink-0">
                                     <div class="flex items-start justify-between gap-3.5 sm:gap-4">
                                         <div class="flex-1 min-w-0">
+                                            <template x-if="selected.isEvent && selected.bimtekBatchName">
+                                                <div class="inline-flex items-center gap-1.5 text-[11px] sm:text-xs font-bold text-amber-700 bg-amber-50 border border-amber-200/80 px-2 py-0.5 rounded-md mb-1.5 max-w-full">
+                                                    <i class="fas fa-satellite-dish text-[10px] sm:text-[11px] text-amber-600 shrink-0"></i>
+                                                    <span class="truncate" :title="selected.bimtekBatchName" x-text="selected.bimtekBatchName"></span>
+                                                </div>
+                                            </template>
+
                                             <h3 id="enroll-title" class="text-base sm:text-lg font-bold text-slate-900 leading-snug line-clamp-2"
                                                 :title="selected.name" x-text="selected.name"></h3>
                                             
@@ -369,30 +371,123 @@
                                         </button>
                                     </div>
 
-                                    {{-- Meta Stats Ribbon --}}
-                                    <div class="flex flex-wrap items-center gap-3 sm:gap-5 mt-3.5 pt-3 border-t border-slate-100 text-xs text-slate-500">
-                                        <div class="inline-flex items-center gap-1.5 font-medium">
-                                            <i class="far fa-folder-open text-[#13416B]/70 text-xs"></i>
-                                            <span><strong class="font-semibold text-slate-800" x-text="selected.modules"></strong> Modul</span>
-                                        </div>
-                                        <span class="text-slate-200">•</span>
-                                        <div class="inline-flex items-center gap-1.5 font-medium">
-                                            <i class="far fa-file-alt text-[#13416B]/70 text-xs"></i>
-                                            <span><strong class="font-semibold text-slate-800" x-text="selected.topics"></strong> Materi Topik</span>
-                                        </div>
-                                        <span class="text-slate-200">•</span>
-                                        <div class="inline-flex items-center gap-1.5 font-medium">
-                                            <i class="far fa-user text-[#13416B]/70 text-xs"></i>
-                                            <span><strong class="font-semibold text-slate-800" x-text="selected.students.toLocaleString('id-ID')"></strong> Peserta</span>
-                                        </div>
-                                    </div>
                                 </div>
 
-                                {{-- Body: Daftar Kurikulum (Scrollable) --}}
+                                {{-- Body: Detail Kursus & Kurikulum (Scrollable) --}}
                                 <div class="flex-1 overflow-y-auto px-5 sm:px-6 py-4 sm:py-5 custom-scrollbar bg-slate-50/40">
+
+                                    {{-- Timeline Pelaksanaan Pelatihan (Khusus Event Pelatihan) --}}
+                                    <template x-if="selected && selected.isEvent && selected.timelineSteps">
+                                        <div class="mb-6">
+                                            {{-- Header di luar card seperti pada Kurikulum (Badge di bawah title & deskripsi) --}}
+                                            <div class="mb-3.5">
+                                                <h4 class="text-xs font-bold uppercase tracking-wider text-slate-500">Timeline Pelaksanaan Pelatihan</h4>
+                                                <p class="text-[11px] text-slate-400 mt-0.5">Rangkaian tahapan dari registrasi hingga sertifikasi</p>
+                                                <template x-if="selected.currentTimelinePhase">
+                                                    <div class="mt-2">
+                                                        <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider text-white shadow-2xs"
+                                                              :class="selected.currentTimelinePhase.badge_bg">
+                                                            <i class="fas text-[9px]" :class="selected.currentTimelinePhase.icon || 'fa-clock'"></i>
+                                                            <span x-text="selected.currentTimelinePhase.badge"></span>
+                                                        </span>
+                                                    </div>
+                                                </template>
+                                            </div>
+
+                                            {{-- Stepper 3 Tahap Tanpa Outer Card Container (Gap Luwes) --}}
+                                            <div class="relative pl-9 sm:pl-12 space-y-4 before:absolute before:left-3 sm:before:left-4 before:top-2 before:bottom-2 before:w-0.5 before:bg-slate-200">
+                                                <template x-for="(step, idx) in selected.timelineSteps" :key="idx">
+                                                    <div class="relative">
+                                                        {{-- Dot / Icon Step --}}
+                                                        <div class="absolute -left-9 sm:-left-12 top-1 w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all shadow-2xs"
+                                                             :class="{
+                                                                 'bg-emerald-600 text-white ring-4 ring-emerald-50': step.status === 'completed',
+                                                                 'bg-[#13416B] text-white ring-4 ring-blue-100 animate-pulse': step.status === 'active',
+                                                                 'bg-white text-slate-400 border-2 border-slate-300': step.status === 'upcoming'
+                                                             }">
+                                                            <template x-if="step.status === 'completed'">
+                                                                <i class="fas fa-check text-[10px] sm:text-xs"></i>
+                                                            </template>
+                                                            <template x-if="step.status !== 'completed'">
+                                                                <span x-text="step.step"></span>
+                                                            </template>
+                                                        </div>
+
+                                                        {{-- Card Timeline --}}
+                                                        <div class="p-3 sm:p-3.5 rounded-xl border transition-all"
+                                                             :class="{
+                                                                 'bg-white border-[#13416B]/30 shadow-xs ring-1 ring-[#13416B]/10': step.status === 'active',
+                                                                 'bg-slate-50/70 border-slate-200/80': step.status === 'completed',
+                                                                 'bg-white border-slate-200/70': step.status === 'upcoming'
+                                                             }">
+                                                            <div class="flex items-center justify-between gap-2 flex-wrap">
+                                                                <div class="flex items-center gap-1.5 font-bold text-xs sm:text-sm text-slate-800">
+                                                                    <i class="fas" :class="step.icon + (step.status === 'active' ? ' text-[#13416B]' : ' text-slate-400')"></i>
+                                                                    <span x-text="step.title"></span>
+                                                                </div>
+                                                                <span class="px-2 py-0.5 rounded text-[10px] font-bold"
+                                                                      :class="{
+                                                                          'bg-emerald-100 text-emerald-700': step.status === 'completed',
+                                                                          'bg-[#13416B] text-white': step.status === 'active',
+                                                                          'bg-slate-100 text-slate-500': step.status === 'upcoming'
+                                                                      }"
+                                                                      x-text="step.status === 'completed' ? 'Selesai' : (step.status === 'active' ? 'Sedang Berlangsung' : 'Akan Datang')">
+                                                                </span>
+                                                            </div>
+                                                            <p class="text-[11px] text-slate-500 mt-1 leading-relaxed" x-text="step.subtitle"></p>
+                                                            
+                                                            <div class="mt-2.5 pt-2 border-t border-slate-100 flex flex-wrap items-center gap-3 text-[11px] text-slate-700 font-medium">
+                                                                <span class="inline-flex items-center gap-1.5">
+                                                                    <i class="far fa-calendar-alt text-[#13416B]"></i>
+                                                                    <span x-text="step.date_range"></span>
+                                                                </span>
+                                                                <template x-if="step.zoom_time">
+                                                                    <span class="inline-flex items-center gap-1.5 text-blue-700 font-semibold">
+                                                                        <i class="fas fa-video text-blue-500"></i>
+                                                                        <span>Live Zoom: <strong x-text="step.zoom_time"></strong></span>
+                                                                    </span>
+                                                                </template>
+                                                                <template x-if="step.step === 1">
+                                                                    <span class="inline-flex items-center gap-1.5 text-slate-500">
+                                                                        <i class="fas fa-users text-slate-400"></i>
+                                                                        <span>Kuota: <strong x-text="selected.bimtekQuota + ' Peserta'"></strong></span>
+                                                                    </span>
+                                                                </template>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </template>
+                                            </div>
+                                        </div>
+                                    </template>
+
                                     <div class="mb-3.5">
-                                        <h4 class="text-xs font-bold uppercase tracking-wider text-slate-500">Struktur Kurikulum</h4>
-                                        <p class="text-[11px] text-slate-400 mt-0.5">Daftar modul dan topik materi pembelajaran</p>
+                                        <div>
+                                            <h4 class="text-xs font-bold uppercase tracking-wider text-slate-500">Struktur Kurikulum</h4>
+                                            <p class="text-[11px] text-slate-400 mt-0.5">Daftar modul dan topik materi pembelajaran</p>
+                                        </div>
+
+                                        {{-- Meta Stats Ribbon (Modul • Peserta • Live Zoom) --}}
+                                        <div class="flex flex-wrap items-center gap-2 sm:gap-3 mt-2.5 pt-2.5 border-t border-slate-200/70 text-[11px] sm:text-xs text-slate-600">
+                                            <div class="inline-flex items-center gap-1.5 font-medium">
+                                                <i class="far fa-folder-open text-[#13416B]/80 text-xs"></i>
+                                                <span><strong class="font-bold text-slate-800" x-text="selected.modules"></strong> Modul</span>
+                                            </div>
+                                            <span class="text-slate-300">•</span>
+                                            <div class="inline-flex items-center gap-1.5 font-medium">
+                                                <i class="far fa-user text-[#13416B]/80 text-xs"></i>
+                                                <span><strong class="font-bold text-slate-800" x-text="selected.students.toLocaleString('id-ID')"></strong> Peserta</span>
+                                            </div>
+                                            <template x-if="selected.isEvent">
+                                                <div class="inline-flex items-center gap-2 font-medium">
+                                                    <span class="text-slate-300">•</span>
+                                                    <span class="inline-flex items-center gap-1 text-blue-700 bg-blue-50 px-2 py-0.5 rounded-md border border-blue-200/60 font-semibold">
+                                                        <i class="fas fa-video text-blue-500 text-[11px]"></i>
+                                                        <span>Live Zoom</span>
+                                                    </span>
+                                                </div>
+                                            </template>
+                                        </div>
                                     </div>
 
                                     <div class="space-y-2.5">
@@ -463,23 +558,68 @@
                                 </div>
 
                                 {{-- Footer Modal: Aksi --}}
-                                <div class="px-5 sm:px-6 py-3.5 sm:py-4 border-t border-slate-100 bg-white shrink-0">
-                                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2.5 sm:gap-3">
-                                        <p class="text-xs sm:text-sm text-slate-600 font-medium text-center sm:text-left">
-                                            Apakah Anda ingin mendaftar kursus ini?
-                                        </p>
-                                        <div class="flex items-center gap-2 justify-end w-full sm:w-auto">
-                                            <button type="button" @click="close()"
-                                                    class="flex-1 sm:flex-none px-4 py-2.5 text-xs sm:text-sm font-semibold rounded-xl text-slate-600 bg-white border border-slate-200 hover:bg-slate-50 transition-colors">
-                                                Tutup
-                                            </button>
-                                            <button type="button" @click="confirmOpen = true"
-                                                    class="flex-1 sm:flex-none px-5 py-2.5 text-xs sm:text-sm font-semibold rounded-xl text-white bg-amber-500 hover:bg-amber-600 shadow-sm transition-all inline-flex items-center justify-center gap-1.5 text-center">
-                                                <span>Daftar Kursus Ini</span>
-                                                <i class="fas fa-arrow-up-right-from-square text-[11px] sm:text-xs"></i>
-                                            </button>
+                                <div class="px-4 sm:px-6 py-3 sm:py-4 border-t border-slate-100 bg-white shrink-0">
+                                    {{-- KONDISI 1: SEDANG BERLANGSUNG / MENUNGGU BATCH BERIKUTNYA --}}
+                                    <template x-if="selected.isEvent && !selected.isEnrolledInThisBimtek && selected.bimtekStatus !== 'open_registration'">
+                                        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2.5 sm:gap-3">
+                                            <p class="text-xs sm:text-sm text-slate-500 font-medium text-center sm:text-left">
+                                                Pendaftaran ditutup (menunggu batch berikutnya).
+                                            </p>
+
+                                            {{-- Tombol Aksi --}}
+                                            <div class="flex items-center gap-2 justify-end w-full sm:w-auto shrink-0">
+                                                <button type="button" @click="close()"
+                                                        class="flex-1 sm:flex-none px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-semibold rounded-xl text-slate-600 bg-white border border-slate-200 hover:bg-slate-50 transition-colors">
+                                                    Tutup
+                                                </button>
+                                                <button type="button" disabled
+                                                        class="flex-1 sm:flex-none px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-semibold rounded-xl text-slate-400 bg-slate-100 border border-slate-200 cursor-not-allowed inline-flex items-center justify-center shadow-none">
+                                                    <span class="truncate">Menunggu Batch Berikutnya</span>
+                                                </button>
+                                            </div>
                                         </div>
-                                    </div>
+                                    </template>
+
+                                    {{-- KONDISI 2: SUDAH TERDAFTAR --}}
+                                    <template x-if="selected.isEvent && selected.isEnrolledInThisBimtek">
+                                        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2.5 sm:gap-3">
+                                            <div class="text-xs sm:text-sm text-emerald-700 font-semibold text-center sm:text-left flex items-center justify-center sm:justify-start gap-1.5">
+                                                <i class="fas fa-check-circle text-emerald-600"></i>
+                                                <span>Anda telah terdaftar pada gelombang ini.</span>
+                                            </div>
+                                            <div class="flex items-center gap-2 justify-end w-full sm:w-auto shrink-0">
+                                                <button type="button" @click="close()"
+                                                        class="flex-1 sm:flex-none px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-semibold rounded-xl text-slate-600 bg-white border border-slate-200 hover:bg-slate-50 transition-colors">
+                                                    Tutup
+                                                </button>
+                                                <a :href="selected.myCourseUrl"
+                                                   class="flex-1 sm:flex-none px-5 py-2 sm:py-2.5 text-xs sm:text-sm font-semibold rounded-xl text-white bg-emerald-600 hover:bg-emerald-700 shadow-sm transition-all inline-flex items-center justify-center gap-1.5 text-center">
+                                                    <span>Masuk Pelatihan</span>
+                                                    <i class="fas fa-arrow-up-right-from-square text-[9px] sm:text-xs"></i>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </template>
+
+                                    {{-- KONDISI 3: BISA DAFTAR (OPEN REGISTRATION / MANDIRI) --}}
+                                    <template x-if="(!selected.isEvent) || (selected.isEvent && !selected.isEnrolledInThisBimtek && selected.bimtekStatus === 'open_registration')">
+                                        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2.5 sm:gap-3">
+                                            <p class="text-xs sm:text-sm text-slate-600 font-medium text-center sm:text-left">
+                                                <span x-text="selected.isEvent ? 'Tertarik mengikuti pelatihan ini? Pendaftaran masih dibuka.' : 'Apakah Anda ingin mendaftar kursus ini?'"></span>
+                                            </p>
+                                            <div class="flex items-center gap-2 justify-end w-full sm:w-auto shrink-0">
+                                                <button type="button" @click="close()"
+                                                        class="flex-1 sm:flex-none px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-semibold rounded-xl text-slate-600 bg-white border border-slate-200 hover:bg-slate-50 transition-colors">
+                                                    Tutup
+                                                </button>
+                                                <button type="button" @click="confirmOpen = true"
+                                                        class="flex-1 sm:flex-none px-5 py-2 sm:py-2.5 text-xs sm:text-sm font-semibold rounded-xl text-white bg-amber-500 hover:bg-amber-600 shadow-sm transition-all inline-flex items-center justify-center gap-1.5 text-center">
+                                                    <span>Daftar</span>
+                                                    <i class="fas fa-arrow-up-right-from-square text-[9px] sm:text-xs"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </template>
                                 </div>
                             </div>
                         </template>
@@ -505,20 +645,71 @@
                          x-transition:leave-end="opacity-0 scale-95"
                          class="relative w-full max-w-md bg-white rounded-2xl shadow-2xl p-6 sm:p-7 text-center">
 
-                        <div class="w-12 h-12 mx-auto mb-3.5 rounded-full bg-amber-50 text-amber-500 border border-amber-100 flex items-center justify-center text-xl">
-                            <i class="fas fa-question"></i>
-                        </div>
+                        {{-- KONDISI A: MODAL KONFIRMASI EVENT BIMTEK --}}
+                        <template x-if="selected && selected.isEvent">
+                            <div>
+                                <div class="w-12 h-12 mx-auto mb-3.5 rounded-full bg-blue-50 text-[#13416B] border border-blue-100 flex items-center justify-center text-xl">
+                                    <i class="fas fa-calendar-check"></i>
+                                </div>
 
-                        <h3 id="confirm-title" class="text-base sm:text-lg font-bold text-slate-800 mb-1.5">Daftar ke kursus ini?</h3>
-                        <p class="text-xs sm:text-sm text-slate-500 leading-relaxed mb-6">
-                            Kamu akan mendaftar ke
-                            <span class="font-semibold text-slate-700" x-text="selected ? selected.name : ''"></span>
-                            dan kursus ini akan langsung masuk ke daftar Kursus Saya.
-                        </p>
+                                <h3 id="confirm-title" class="text-base sm:text-lg font-extrabold text-slate-800 mb-1">
+                                    Daftar ke Pelatihan Ini?
+                                </h3>
+                                <p class="text-xs text-slate-500 leading-relaxed mb-4">
+                                    Anda akan mendaftar ke gelombang pelatihan daring resmi kementerian:
+                                </p>
+
+                                {{-- Kartu Ringkasan Tiket Event --}}
+                                <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200 text-left text-xs space-y-2.5 mb-4">
+                                    <div>
+                                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Materi Program</span>
+                                        <p class="font-extrabold text-slate-900 mt-0.5" x-text="selected.name"></p>
+                                    </div>
+                                    <div class="grid grid-cols-2 gap-2 pt-2 border-t border-slate-200/80">
+                                        <div>
+                                            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Gelombang / Angkatan</span>
+                                            <p class="font-bold text-[#13416B] mt-0.5 truncate" x-text="selected.bimtekBatchName"></p>
+                                        </div>
+                                        <div>
+                                            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Kuota</span>
+                                            <p class="font-bold text-slate-800 mt-0.5" x-text="selected.bimtekQuota + ' Peserta'"></p>
+                                        </div>
+                                    </div>
+                                    <div class="pt-2 border-t border-slate-200/80">
+                                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Jadwal Pelaksanaan</span>
+                                        <p class="font-semibold text-slate-800 mt-0.5">
+                                            <span x-text="selected.bimtekDates"></span> (<span x-text="selected.bimtekTime"></span>)
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <div class="p-2.5 rounded-lg bg-emerald-50 border border-emerald-200/70 text-[11px] text-emerald-800 text-left mb-5 flex items-start gap-2">
+                                    <i class="fas fa-info-circle text-emerald-600 mt-0.5 shrink-0 text-sm"></i>
+                                    <span>Pastikan Anda dapat mengikuti rangkaian jadwal pelaksanaan dan menuntaskan seluruh materi pembelajaran.</span>
+                                </div>
+                            </div>
+                        </template>
+
+                        {{-- KONDISI B: MODAL KONFIRMASI KURSUS MANDIRI BIASA --}}
+                        <template x-if="selected && !selected.isEvent">
+                            <div>
+                                <div class="w-12 h-12 mx-auto mb-3.5 rounded-full bg-amber-50 text-amber-500 border border-amber-100 flex items-center justify-center text-xl">
+                                    <i class="fas fa-question"></i>
+                                </div>
+
+                                <h3 id="confirm-title" class="text-base sm:text-lg font-bold text-slate-800 mb-1.5">Daftar ke kursus ini?</h3>
+                                <p class="text-xs sm:text-sm text-slate-500 leading-relaxed mb-6">
+                                    Kamu akan mendaftar ke
+                                    <span class="font-semibold text-slate-700" x-text="selected ? selected.name : ''"></span>
+                                    dan kursus ini akan langsung masuk ke daftar Kursus Saya.
+                                </p>
+                            </div>
+                        </template>
 
                         <template x-if="selected">
                             <form :action="selected.enrollUrl" method="POST" @submit="submitting = true">
                                 @csrf
+                                <input type="hidden" name="bimtek_event_id" :value="selected.bimtekId">
                                 <div class="flex flex-col-reverse sm:flex-row gap-2">
                                     <button type="button" @click="cancelConfirm()" :disabled="submitting"
                                             class="flex-1 px-4 py-2.5 text-xs sm:text-sm font-semibold rounded-xl text-slate-600 bg-white border border-slate-200 hover:bg-slate-50 transition-colors disabled:opacity-50">
@@ -530,7 +721,7 @@
                                             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                                             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
                                         </svg>
-                                        <span x-text="submitting ? 'Mendaftarkan...' : 'Ya, Daftar'"></span>
+                                        <span x-text="submitting ? 'Mendaftarkan...' : (selected.isEvent ? 'Ya, Daftar Pelatihan' : 'Ya, Daftar')"></span>
                                     </button>
                                 </div>
                             </form>
@@ -539,7 +730,7 @@
                         <div x-show="!open && !submitting" class="mt-5 pt-4 border-t border-slate-100">
                             <button type="button" @click="confirmOpen = false; open = true"
                                     class="inline-flex items-center gap-1.5 text-xs font-semibold text-[#13416B] hover:underline">
-                                <i class="fas fa-list-ul text-[11px]"></i> Lihat kurikulum dulu
+                                <i class="fas fa-list-ul text-[11px]"></i> Lihat detail dulu
                             </button>
                         </div>
                     </div>

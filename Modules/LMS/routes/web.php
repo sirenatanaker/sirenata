@@ -4,6 +4,9 @@ use Illuminate\Support\Facades\Route;
 use Modules\LMS\Http\Controllers\AdminKabKota\RekapitulasiController as AdminKabKotaRekapitulasiController;
 use Modules\LMS\Http\Controllers\AdminProvince\RekapitulasiController as AdminProvinceRekapitulasiController;
 use Modules\LMS\Http\Controllers\AdminPusat\CertificateController as AdminPusatCertificateController;
+use Modules\LMS\Http\Controllers\AdminPusat\BimtekEventController;
+use Modules\LMS\Http\Controllers\AdminPusat\CertificateSubmissionController;
+use Modules\LMS\Http\Controllers\PublicCertificateVerifierController;
 use Modules\LMS\Http\Controllers\AdminPusat\Course\CourseController;
 use Modules\LMS\Http\Controllers\AdminPusat\Course\CategoryController as AdminPusatCourseCategoryController;
 use Modules\LMS\Http\Controllers\AdminPusat\Course\CourseSectionController;
@@ -38,6 +41,14 @@ Route::prefix('admin-pusat')->middleware(['auth', 'role:admin-pusat'])->name('ad
         Route::put('categories/{category}', [AdminPusatCourseCategoryController::class, 'update'])->name('categories.update');
         Route::delete('categories/{category}', [AdminPusatCourseCategoryController::class, 'destroy'])->name('categories.destroy');
         Route::resource('courses', CourseController::class);
+        Route::resource('bimtek-events', BimtekEventController::class);
+        Route::post('bimtek-events/{eventId}/toggle-attendance/{userId}', [BimtekEventController::class, 'toggleAttendance'])->name('bimtek-events.toggle-attendance');
+        
+        Route::resource('certificate-submissions', CertificateSubmissionController::class);
+        Route::get('certificate-submissions/{id}/export-excel', [CertificateSubmissionController::class, 'exportExcel'])->name('certificate-submissions.export-excel');
+        Route::post('certificate-submissions/{id}/save-numbers', [CertificateSubmissionController::class, 'saveNumbers'])->name('certificate-submissions.save-numbers');
+        Route::post('certificate-submissions/{id}/generate-pdfs', [CertificateSubmissionController::class, 'generatePdfs'])->name('certificate-submissions.generate-pdfs');
+
         Route::resource('course-sections', CourseSectionController::class);
         Route::resource('course-sections-contents', SectionContentController::class);
         Route::prefix('post-test')->name('post-tests.')->group(function () {
@@ -97,6 +108,7 @@ Route::prefix('user')->middleware(['auth', 'role:user'])->name('user.')->group(f
         Route::get('/my-course/progress', 'myCourseProgress')->name('my-course.progress');
         Route::get('/my-course/finish', 'myCourseFinish')->name('my-course.finish');
         Route::get('/my-course/{slug}', 'myCourseDetail')->name('my-course.detail');
+        Route::post('/my-course/{slug}/attend-zoom', 'attendZoom')->name('my-course.attend-zoom');
         Route::post('/my-course/{slug}/generate-certificate', 'generateCertificate')->name('my-course.generate-certificate');
         Route::post('/content/{content}/complete', 'completeContent')->name('content.complete');
         Route::get('/my-course/{slug}/content/{content}', 'showContent')->name('content.show');
@@ -109,3 +121,6 @@ Route::prefix('user')->middleware(['auth', 'role:user'])->name('user.')->group(f
         Route::post('/{slug}/enroll', 'enroll')->name('enroll');
     });
 });
+
+// Verifikasi Keaslian Sertifikat Resmi Publik (Scan QR Code)
+Route::get('/verify-certificate/{code}', [PublicCertificateVerifierController::class, 'verify'])->name('verify-certificate');

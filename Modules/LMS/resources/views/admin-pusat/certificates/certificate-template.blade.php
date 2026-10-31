@@ -154,29 +154,47 @@
         ">pada tanggal {{ $tanggal_selesai ?? '__ ________ ____' }}</p>
     </div>
 
-    {{-- Nomor Sertifikat --}}
+    {{-- Nomor Sertifikat & QR Code Verifikasi --}}
     <div style="
         position: absolute;
-        bottom: 50px;
+        bottom: 45px;
         left: 80px;
         z-index: 2;
         text-align: left;
     ">
-        <p style="
-            font-size: 10px;
-            color: #718096;
-            margin: 0 0 2px 0;
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-            font-weight: 500;
-        ">Nomor Sertifikat</p>
-        <p style="
-            font-size: 11px;
-            font-weight: 600;
-            color: #1a2e40;
-            margin: 0;
-            letter-spacing: 1px;
-        ">{{ $nomor_sertifikat ?? 'CERT-XXXX-XXX-000' }}</p>
+        <table style="border: none; margin: 0; padding: 0;">
+            <tr>
+                @if(!empty($verification_url))
+                    <td style="padding-right: 12px; vertical-align: middle;">
+                        <img src="https://api.qrserver.com/v1/create-qr-code/?size=60x60&data={{ urlencode($verification_url) }}"
+                             alt="QR Verifikasi"
+                             style="width: 55px; height: 55px; border: 1px solid #cbd5e1; padding: 2px; background: white;">
+                    </td>
+                @endif
+                <td style="vertical-align: middle;">
+                    <p style="
+                        font-size: 10px;
+                        color: #718096;
+                        margin: 0 0 2px 0;
+                        text-transform: uppercase;
+                        letter-spacing: 1.5px;
+                        font-weight: 500;
+                    ">Nomor Sertifikat (PPSDM)</p>
+                    <p style="
+                        font-size: 11px;
+                        font-weight: 700;
+                        color: #1a2e40;
+                        margin: 0 0 2px 0;
+                        letter-spacing: 0.5px;
+                    ">{{ $nomor_sertifikat ?? 'CERT-XXXX-XXX-000' }}</p>
+                    @if(!empty($certificate_code))
+                        <p style="font-size: 8.5px; color: #94a3b8; margin: 0; font-family: monospace;">
+                            ID: {{ $certificate_code }}
+                        </p>
+                    @endif
+                </td>
+            </tr>
+        </table>
     </div>
 
     {{-- Tanda Tangan --}}
