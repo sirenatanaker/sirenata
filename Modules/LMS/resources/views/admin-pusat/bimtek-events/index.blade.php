@@ -130,9 +130,15 @@
                                     <p class="font-bold text-slate-800 text-xs tabular-nums">
                                         {{ $item->start_date ? $item->start_date->format('d M Y') : '-' }} s/d {{ $item->end_date ? $item->end_date->format('d M Y') : '-' }}
                                     </p>
-                                    <p class="text-[11px] text-slate-400 mt-0.5">
-                                        Pukul {{ $item->start_date ? $item->start_date->format('H:i') : '08:00' }} WIB
-                                    </p>
+                                    @if ($item->zoom_scheduled_at)
+                                        <p class="text-[11px] text-blue-600 font-semibold mt-0.5">
+                                            <i class="fas fa-video text-[10px] mr-0.5"></i> Zoom: {{ $item->zoom_schedule_formatted }}
+                                        </p>
+                                    @else
+                                        <p class="text-[11px] text-slate-400 mt-0.5">
+                                            Pukul {{ $item->start_date ? $item->start_date->format('H:i') : '08:00' }} WIB
+                                        </p>
+                                    @endif
                                 </td>
                                 <td class="py-3 px-3.5">
                                     <div class="flex items-center gap-1.5">

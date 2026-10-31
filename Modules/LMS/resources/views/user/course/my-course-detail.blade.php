@@ -567,12 +567,12 @@
                                                             <!-- Info Evaluasi Topik: Cukup Text Saja (Jumlah Soal & Durasi) -->
                                                             <div class="mt-1 flex flex-wrap items-center gap-x-2.5 gap-y-1 text-xs text-slate-500">
                                                                 <span class="inline-flex items-center gap-1">
-                                                                    <i class="fas fa-list-ol text-slate-400 text-[10px]"></i>
+                                                                    <i class="fas fa-list-ol text-slate-400 text-xs"></i>
                                                                     {{ data_get($postTestBab, 'questions', collect())->count() ?? 0 }} Soal
                                                                 </span>
                                                                 <span class="text-slate-300">•</span>
                                                                 <span class="inline-flex items-center gap-1">
-                                                                    <i class="fas fa-stopwatch text-slate-400 text-[10px]"></i>
+                                                                    <i class="fas fa-stopwatch text-slate-400 text-xs"></i>
                                                                     {{ data_get($postTestBab, 'duration', 0) }} Menit
                                                                 </span>
                                                             </div>
@@ -655,7 +655,7 @@
 
                                 @if ($isZoomUnlocked)
                                     <p class="text-xs text-slate-600 font-medium">
-                                        <i class="far fa-calendar-alt mr-1 text-slate-400"></i> Jadwal: <span class="font-bold text-slate-800">{{ $activeBimtek->start_date ? $activeBimtek->start_date->format('d M Y, H:i') : '-' }} s/d {{ $activeBimtek->end_date ? $activeBimtek->end_date->format('d M Y, H:i') : '-' }} WIB</span>
+                                        <i class="far fa-calendar-alt mr-1 text-slate-400"></i> Jadwal: <span class="font-bold text-slate-800">{{ $activeBimtek->zoom_schedule_formatted }}</span>
                                     </p>
                                     @if ($activeBimtek->zoom_meeting_id)
                                         <div class="flex items-center gap-3 pt-1 text-[11px] text-slate-500 font-mono">
@@ -671,7 +671,7 @@
                                         Selesaikan seluruh materi topik pembelajaran mandiri untuk membuka tautan Sesi Live Zoom.
                                     </p>
                                     <p class="text-[11px] text-slate-500 font-bold pt-0.5">
-                                        <i class="far fa-calendar-alt mr-1 text-slate-400"></i> Jadwal: {{ $activeBimtek->start_date ? $activeBimtek->start_date->format('d M Y, H:i') : '-' }} s/d {{ $activeBimtek->end_date ? $activeBimtek->end_date->format('d M Y, H:i') : '-' }} WIB
+                                        <i class="far fa-calendar-alt mr-1 text-slate-400"></i> Jadwal: <span class="text-slate-700">{{ $activeBimtek->zoom_schedule_formatted }}</span>
                                     </p>
                                 @endif
                             </div>

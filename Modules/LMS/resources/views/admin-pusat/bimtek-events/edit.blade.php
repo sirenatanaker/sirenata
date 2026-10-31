@@ -134,24 +134,30 @@
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <div>
                             <label for="zoom_scheduled_at" class="block text-xs font-semibold text-slate-700 mb-1">
-                                Jadwal Mulai Sesi Zoom
+                                Tanggal & Jam Mulai Sesi Zoom
                             </label>
                             <input type="datetime-local" id="zoom_scheduled_at" name="zoom_scheduled_at"
                                    value="{{ old('zoom_scheduled_at', $event->zoom_scheduled_at ? $event->zoom_scheduled_at->format('Y-m-d\TH:i') : '') }}"
                                    class="w-full px-3 py-2 rounded-lg border border-slate-300 text-xs sm:text-sm bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500">
+                            @error('zoom_scheduled_at')
+                                <p class="text-xs text-rose-500 mt-1">{{ $message }}</p>
+                            @enderror
                         </div>
                         <div>
                             <label for="zoom_end_at" class="block text-xs font-semibold text-slate-700 mb-1">
-                                Jadwal Selesai Sesi Zoom (Opsional)
+                                Tanggal & Jam Selesai Sesi Zoom (Opsional)
                             </label>
                             <input type="datetime-local" id="zoom_end_at" name="zoom_end_at"
                                    value="{{ old('zoom_end_at', $event->zoom_end_at ? $event->zoom_end_at->format('Y-m-d\TH:i') : '') }}"
                                    class="w-full px-3 py-2 rounded-lg border border-slate-300 text-xs sm:text-sm bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500">
+                            @error('zoom_end_at')
+                                <p class="text-xs text-rose-500 mt-1">{{ $message }}</p>
+                            @enderror
                         </div>
                     </div>
                     <p class="text-[11px] text-blue-800/80 leading-relaxed">
                         <i class="fas fa-info-circle mr-1 text-blue-600"></i>
-                        Tentukan tanggal & jam spesifik tatap muka Zoom (misal tanggal tertentu di antara periode pelatihan). Peserta wajib menuntaskan materi mandiri sebelum sesi tatap muka ini.
+                        Bebas memilih tanggal dan jam spesifik tatap muka Zoom selama masih berada di dalam rentang waktu pelaksanaan (misal pelaksanaan 04 Nov - 09 Nov, sesi Zoom dijadwalkan pada 08 Nov pukul 09:00 WIB).
                     </p>
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -197,4 +203,31 @@
         </div>
 
     </div>
+
+    @push('scripts')
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                const startInput = document.getElementById('start_date');
+                const endInput = document.getElementById('end_date');
+                const zoomStartInput = document.getElementById('zoom_scheduled_at');
+                const zoomEndInput = document.getElementById('zoom_end_at');
+
+                function syncZoomRange() {
+                    if (!startInput || !endInput || !zoomStartInput || !zoomEndInput) return;
+                    const minVal = startInput.value || '';
+                    const maxVal = endInput.value || '';
+
+                    zoomStartInput.min = minVal;
+                    zoomStartInput.max = maxVal;
+                    zoomEndInput.min = zoomStartInput.value || minVal;
+                    zoomEndInput.max = maxVal;
+                }
+
+                startInput?.addEventListener('change', syncZoomRange);
+                endInput?.addEventListener('change', syncZoomRange);
+                zoomStartInput?.addEventListener('change', syncZoomRange);
+                syncZoomRange();
+            });
+        </script>
+    @endpush
 </x-dashboard::layouts.dashboard>
