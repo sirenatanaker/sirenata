@@ -29,6 +29,7 @@ class BimtekEvent extends Model
         'zoom_url',
         'zoom_meeting_id',
         'zoom_passcode',
+        'zoom_attendance_code',
         'zoom_scheduled_at',
         'zoom_end_at',
         'assessment_start_at',
@@ -76,6 +77,7 @@ class BimtekEvent extends Model
                 'official_cert_number',
                 'cert_submission_status',
                 'zoom_attended',
+                'zoom_joined_at',
                 'zoom_attended_at',
                 'certificate_file',
             ])

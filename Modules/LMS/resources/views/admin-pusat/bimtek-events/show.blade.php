@@ -68,6 +68,9 @@
                     <div class="text-xs text-slate-600 font-mono space-y-0.5">
                         @if ($event->zoom_meeting_id) <p>Meeting ID: <strong>{{ $event->zoom_meeting_id }}</strong></p> @endif
                         @if ($event->zoom_passcode) <p>Passcode: <strong>{{ $event->zoom_passcode }}</strong></p> @endif
+                        @if ($event->zoom_attendance_code)
+                            <p class="pt-1 text-emerald-700">Kode Presensi (Dibagikan di Zoom): <strong class="px-1.5 py-0.5 rounded bg-emerald-50 border border-emerald-200">{{ $event->zoom_attendance_code }}</strong></p>
+                        @endif
                     </div>
                 @else
                     <p class="text-xs text-slate-400 italic">Tautan Zoom belum diatur.</p>

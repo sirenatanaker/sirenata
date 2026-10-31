@@ -1093,6 +1093,22 @@ class CourseService
             }
         }
 
-        return is_null($test->course_section_id);
+        if (!is_null($test->course_section_id)) {
+            return false;
+        }
+
+        $activeBimtek = BimtekEvent::where('course_id', $course->id)->latest()->first();
+        if ($activeBimtek && $activeBimtek->zoom_url) {
+            $zoomAttended = DB::table('course_student')
+                ->where('course_id', $course->id)
+                ->where('user_id', Auth::id())
+                ->value('zoom_attended');
+
+            if (!$zoomAttended) {
+                return false;
+            }
+        }
+
+        return true;
     }
 }

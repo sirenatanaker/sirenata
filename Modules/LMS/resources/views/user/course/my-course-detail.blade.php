@@ -48,8 +48,10 @@
                 ->where('user_id', auth()->id())
                 ->first();
             $areAllTopicsCompleted = ($totalContents > 0 && $completedContents >= $totalContents);
-            $isZoomUnlocked = !$activeBimtek || $areAllTopicsCompleted;
+            $isZoomUnlocked = true;
             $isZoomAttended = (bool) ($enrollmentData?->zoom_attended);
+            $hasJoinedZoom = !empty($enrollmentData?->zoom_joined_at);
+            $isZoomStarted = !$activeBimtek?->zoom_scheduled_at || now()->greaterThanOrEqualTo($activeBimtek->zoom_scheduled_at);
             $curBimtekPhase = $activeBimtek?->current_timeline_phase;
 
             // Warna progress: 100% hijau, sedang berprogress amber; teks persen slate/gray
@@ -631,34 +633,42 @@
                 {{-- Card Sesi Live Zoom Bimtek Online --}}
                 @if ($activeBimtek && $activeBimtek->zoom_url)
                     <div data-tour="zoom"
+                        x-data="{ hasJoinedZoom: {{ $hasJoinedZoom ? 'true' : 'false' }}, showZoomModal: false }"
+                        @keydown.escape.window="showZoomModal = false"
                         class="bg-white rounded-none sm:rounded-md shadow-sm border-y border-x-0 sm:border sm:border-x border-slate-200 p-4 sm:p-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
                         
-                        <div class="flex items-start gap-3.5">
-                            <div class="w-12 h-12 rounded-md bg-[#547996] text-white border border-[#446680] flex items-center justify-center shrink-0 text-2xl shadow-xs">
-                                <i class="fas fa-video"></i>
-                            </div>
-                            <div class="space-y-1">
-                                <div class="flex items-center gap-2 flex-wrap">
-                                    <h3 class="text-base font-bold text-slate-800">Tatap Muka Online</h3>
+                        <div class="space-y-3">
+                            {{-- Baris Atas: 2 Kolom (Kiri: Badge Icon Zoom, Kanan: Judul & Status Presensi di bawahnya) --}}
+                            <div class="flex items-center gap-3.5">
+                                <div class="w-12 h-12 rounded-md bg-[#547996] text-white border border-[#446680] flex items-center justify-center shrink-0 text-2xl shadow-xs">
+                                    <i class="fas fa-video"></i>
+                                </div>
+                                <div class="space-y-1 min-w-0">
+                                    <h3 class="text-base font-bold text-slate-800 leading-tight">Tatap Muka Online</h3>
                                     @if ($isZoomUnlocked)
-                                        @if ($isZoomAttended)
-                                            <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded text-[10px] font-bold bg-emerald-600 text-white shadow-xs">
-                                                <i class="fas fa-check-circle"></i> Presensi Kehadiran Terverifikasi
-                                            </span>
-                                        @else
-                                            <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded text-[10px] font-bold bg-amber-500 text-white shadow-xs">
-                                                <i class="fas fa-clock"></i> Belum Konfirmasi Hadir
-                                            </span>
-                                        @endif
+                                        <div>
+                                            @if ($isZoomAttended)
+                                                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded text-[10px] font-bold bg-emerald-600 text-white shadow-xs">
+                                                    <i class="fas fa-check-circle"></i> Presensi Kehadiran Terverifikasi
+                                                </span>
+                                            @else
+                                                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded text-[10px] font-bold bg-amber-500 text-white shadow-xs">
+                                                    <i class="fas fa-clock"></i> Belum Konfirmasi Hadir
+                                                </span>
+                                            @endif
+                                        </div>
                                     @endif
                                 </div>
+                            </div>
 
+                            {{-- Baris Bawah: Jadwal, Meeting ID, dan Passcode di bawah 2 kolom sebelumnya --}}
+                            <div class="space-y-1">
                                 @if ($isZoomUnlocked)
                                     <p class="text-xs text-slate-600 font-medium">
                                         <i class="far fa-calendar-alt mr-1 text-slate-400"></i> Jadwal: <span class="font-bold text-slate-800">{{ $activeBimtek->zoom_schedule_formatted }}</span>
                                     </p>
                                     @if ($activeBimtek->zoom_meeting_id)
-                                        <div class="flex items-center gap-3 pt-1 text-[11px] text-slate-500 font-mono">
+                                        <div class="flex flex-wrap items-center gap-x-2.5 gap-y-1 pt-0.5 text-[11px] text-slate-500 font-mono">
                                             <span>Meeting ID: <strong class="text-slate-700 font-bold">{{ $activeBimtek->zoom_meeting_id }}</strong></span>
                                             @if ($activeBimtek->zoom_passcode)
                                                 <span>•</span>
@@ -677,26 +687,164 @@
                             </div>
                         </div>
 
-                        <div class="relative z-10 shrink-0 flex flex-col sm:items-end gap-2 self-start md:self-center">
+                        <div class="relative z-10 shrink-0 flex flex-col sm:items-end gap-2 self-start md:self-center w-full md:w-auto">
                             @if ($isZoomUnlocked)
-                                <div class="flex items-center gap-2 flex-wrap">
-                                    <a href="{{ $activeBimtek->zoom_url }}" target="_blank"
+                                <div class="flex items-center gap-2 flex-wrap sm:justify-end w-full md:w-auto">
+                                    <a href="{{ route('user.course.my-course.join-zoom', $courseSlug) }}" target="_blank"
+                                       @click="hasJoinedZoom = true"
                                        class="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-md font-bold text-xs sm:text-sm bg-[#13416B] text-white hover:bg-[#0f3354] transition-all shadow-sm">
                                         <i class="fas fa-arrow-up-right-from-square text-xs"></i>
                                         <span>Masuk Ruang Zoom</span>
                                     </a>
                                     @if (!$isZoomAttended)
-                                        <form action="{{ route('user.course.my-course.attend-zoom', $courseSlug) }}" method="POST">
-                                            @csrf
-                                            <button type="submit"
-                                                    class="inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-md font-bold text-xs sm:text-sm bg-emerald-600 hover:bg-emerald-700 text-white transition-all shadow-sm">
-                                                <i class="fas fa-check-circle"></i>
-                                                <span>Konfirmasi Hadir</span>
-                                            </button>
-                                        </form>
+                                        <button type="button"
+                                                @click="showZoomModal = true; if (hasJoinedZoom) { $nextTick(() => $refs.zoomCodeInput?.focus()) }"
+                                                :class="hasJoinedZoom
+                                                    ? 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm'
+                                                    : 'bg-slate-100 hover:bg-slate-200 text-slate-600 border border-slate-200'"
+                                                class="inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-md font-bold text-xs sm:text-sm transition-all">
+                                            <i class="fas text-xs" :class="hasJoinedZoom ? 'fa-check-circle' : 'fa-lock text-slate-400'"></i>
+                                            <span>Konfirmasi Hadir</span>
+                                        </button>
                                     @endif
                                 </div>
-                                <span class="text-[10px] text-slate-500 font-medium">Konfirmasi kehadiran diperlukan untuk membuka Evaluasi Akhir</span>
+                                @if ($isZoomAttended)
+                                    <span class="text-[10px] text-slate-500 font-medium">
+                                        {{ !$isPreviousSectionDone ? 'Presensi tercatat! Selesaikan seluruh modul mandiri untuk membuka Evaluasi Akhir' : 'Presensi kehadiran telah terverifikasi' }}
+                                    </span>
+                                @else
+                                    <span x-show="!hasJoinedZoom" class="text-[10px] text-slate-500 font-medium">
+                                        <i class="fas fa-lock text-slate-400 mr-1"></i>Klik <strong>Masuk Ruang Zoom</strong> terlebih dahulu untuk membuka input Kode Presensi
+                                    </span>
+                                    <span x-show="hasJoinedZoom" x-cloak class="text-[10px] text-slate-500 font-medium">
+                                        <i class="fas fa-key text-slate-400 mr-1"></i>Klik <strong>Konfirmasi Hadir</strong> untuk memasukkan Kode Presensi sesi Zoom
+                                    </span>
+                                @endif
+
+                                {{-- Modal (Desktop) & Bottom Sheet (Mobile) untuk Kode Presensi / Info Presensi Zoom --}}
+                                @if (!$isZoomAttended)
+                                    <div x-show="showZoomModal"
+                                         x-cloak
+                                         class="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-0 sm:p-4"
+                                         role="dialog"
+                                         aria-modal="true">
+                                        {{-- Backdrop --}}
+                                        <div x-show="showZoomModal"
+                                             x-transition:enter="transition ease-out duration-200"
+                                             x-transition:enter-start="opacity-0"
+                                             x-transition:enter-end="opacity-100"
+                                             x-transition:leave="transition ease-in duration-150"
+                                             x-transition:leave-start="opacity-100"
+                                             x-transition:leave-end="opacity-0"
+                                             @click="showZoomModal = false"
+                                             class="fixed inset-0 bg-slate-900/50 backdrop-blur-[1px]"></div>
+
+                                        {{-- Panel Modal (Desktop) / Bottom Sheet (Mobile) --}}
+                                        <div x-show="showZoomModal"
+                                             x-transition:enter="transition ease-out duration-200"
+                                             x-transition:enter-start="translate-y-full sm:translate-y-4 sm:scale-95 opacity-0"
+                                             x-transition:enter-end="translate-y-0 sm:scale-100 opacity-100"
+                                             x-transition:leave="transition ease-in duration-150"
+                                             x-transition:leave-start="translate-y-0 sm:scale-100 opacity-100"
+                                             x-transition:leave-end="translate-y-full sm:translate-y-4 sm:scale-95 opacity-0"
+                                             @click.stop
+                                             class="relative z-10 w-full sm:max-w-md bg-white rounded-t-2xl sm:rounded-xl shadow-2xl border-t sm:border border-slate-200 overflow-hidden">
+
+                                            {{-- Handle Bar khusus Bottom Sheet Mobile --}}
+                                            <div class="sm:hidden pt-2.5 pb-1 flex justify-center">
+                                                <div class="w-10 h-1 rounded-full bg-slate-300"></div>
+                                            </div>
+
+                                            {{-- Header Modal --}}
+                                            <div class="flex items-center justify-between gap-3 px-5 py-3.5 sm:py-4 border-b border-slate-100">
+                                                <div class="flex items-center gap-2.5">
+                                                    <div class="w-8 h-8 rounded-md flex items-center justify-center text-sm shrink-0"
+                                                         :class="hasJoinedZoom ? 'bg-[#13416B] text-white' : 'bg-slate-100 text-slate-500'">
+                                                        <i class="fas" :class="hasJoinedZoom ? 'fa-key' : 'fa-lock'"></i>
+                                                    </div>
+                                                    <div>
+                                                        <h4 class="text-sm sm:text-base font-bold text-slate-800 leading-snug"
+                                                            x-text="hasJoinedZoom ? 'Konfirmasi Kehadiran Zoom' : 'Presensi Belum Terbuka'"></h4>
+                                                        <p class="text-[11px] text-slate-500">Tatap Muka Online</p>
+                                                    </div>
+                                                </div>
+                                                <button type="button"
+                                                        @click="showZoomModal = false"
+                                                        class="w-7 h-7 rounded-md text-slate-400 hover:text-slate-600 hover:bg-slate-100 flex items-center justify-center transition-colors">
+                                                    <i class="fas fa-times text-xs"></i>
+                                                </button>
+                                            </div>
+
+                                            {{-- Isi Modal State 1: Belum Klik Masuk Ruang Zoom (Info Modal) --}}
+                                            <div x-show="!hasJoinedZoom" class="p-5 space-y-4">
+                                                <div class="p-3.5 rounded-lg bg-slate-50 border border-slate-200 flex items-start gap-3">
+                                                    <i class="fas fa-lock text-slate-400 mt-0.5 text-sm shrink-0"></i>
+                                                    <div class="space-y-1 text-xs text-slate-600 leading-relaxed">
+                                                        <p class="font-semibold text-slate-800">Masuk ke Ruang Zoom Terlebih Dahulu</p>
+                                                        <p>Untuk menjaga validitas kehadiran, silakan klik tombol <strong>Masuk Ruang Zoom</strong> terlebih dahulu sebelum menginput Kode Presensi.</p>
+                                                    </div>
+                                                </div>
+
+                                                <div class="text-xs text-slate-500 flex items-center gap-2 px-1">
+                                                    <i class="far fa-calendar-alt text-slate-400"></i>
+                                                    <span>Jadwal Sesi: <strong class="text-slate-700">{{ $activeBimtek->zoom_schedule_formatted }}</strong></span>
+                                                </div>
+
+                                                <div class="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
+                                                    <button type="button"
+                                                            @click="showZoomModal = false"
+                                                            class="px-3.5 py-2 rounded-md text-xs font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-colors">
+                                                        Tutup
+                                                    </button>
+                                                    <a href="{{ route('user.course.my-course.join-zoom', $courseSlug) }}" target="_blank"
+                                                       @click="hasJoinedZoom = true; $nextTick(() => $refs.zoomCodeInput?.focus())"
+                                                       class="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-md text-xs font-bold bg-[#13416B] hover:bg-[#0f3354] text-white transition-all shadow-xs">
+                                                        <i class="fas fa-arrow-up-right-from-square text-[11px]"></i>
+                                                        <span>Masuk Ruang Zoom</span>
+                                                    </a>
+                                                </div>
+                                            </div>
+
+                                            {{-- Isi Modal State 2: Sudah Klik Masuk Ruang Zoom (Form Input Kode Presensi) --}}
+                                            <form x-show="hasJoinedZoom"
+                                                  action="{{ route('user.course.my-course.attend-zoom', $courseSlug) }}"
+                                                  method="POST"
+                                                  class="p-5 space-y-4">
+                                                @csrf
+                                                <div class="p-3 rounded-lg bg-slate-50 border border-slate-200 text-xs text-slate-600 leading-relaxed">
+                                                    Masukkan <strong>Kode Presensi</strong> yang dibagikan oleh panitia atau narasumber saat sesi Live Zoom berlangsung.
+                                                </div>
+
+                                                <div>
+                                                    <label for="zoom_attendance_code_input" class="block text-xs font-bold text-slate-700 mb-1.5">
+                                                        Kode Presensi Zoom
+                                                    </label>
+                                                    <input type="text"
+                                                           id="zoom_attendance_code_input"
+                                                           name="attendance_code"
+                                                           x-ref="zoomCodeInput"
+                                                           placeholder="Contoh: HADIR-AKPK2026"
+                                                           required
+                                                           autocomplete="off"
+                                                           class="w-full px-3.5 py-2.5 rounded-md border border-slate-300 text-sm font-mono uppercase tracking-wider text-slate-800 placeholder:text-slate-400 placeholder:normal-case placeholder:tracking-normal placeholder:font-sans focus:outline-none focus:ring-2 focus:ring-[#13416B]/20 focus:border-[#13416B]" />
+                                                </div>
+
+                                                <div class="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
+                                                    <button type="button"
+                                                            @click="showZoomModal = false"
+                                                            class="px-3.5 py-2.5 rounded-md text-xs font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-colors">
+                                                        Batal
+                                                    </button>
+                                                    <button type="submit"
+                                                            class="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-md text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white transition-all shadow-sm">
+                                                        <i class="fas fa-check-circle"></i>
+                                                        <span>Verifikasi & Konfirmasi Hadir</span>
+                                                    </button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                @endif
                             @else
                                 <button type="button" disabled
                                    class="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-md font-bold text-xs sm:text-sm bg-slate-400 text-white border border-slate-400 cursor-not-allowed shadow-none">
@@ -712,7 +860,7 @@
                 {{-- CARD EVALUASI AKHIR --}}
                 @php
                     $isEvaluasiAkhirLocked = !$isPreviousSectionDone;
-                    if ($activeBimtek) {
+                    if ($activeBimtek && $activeBimtek->zoom_url) {
                         $isEvaluasiAkhirLocked = $isEvaluasiAkhirLocked || !$isZoomAttended;
                     }
                 @endphp
@@ -983,7 +1131,7 @@
                         element: '[data-tour="zoom"]',
                         popover: {
                             title: '2. Tatap muka online (Zoom)',
-                            description: 'Setelah materi mandiri selesai, ikuti Sesi Live Zoom bersama narasumber. Konfirmasi kehadiran pada sesi ini diperlukan sebelum Anda dapat mengakses Evaluasi Akhir.',
+                            description: 'Ikuti Sesi Live Zoom sesuai jadwal bersama narasumber. Konfirmasi kehadiran pada sesi ini serta penyelesaian seluruh modul mandiri diperlukan untuk membuka Evaluasi Akhir.',
                         },
                     },
                     @endif

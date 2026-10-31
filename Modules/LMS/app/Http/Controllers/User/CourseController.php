@@ -95,9 +95,58 @@ class CourseController extends Controller
         ]);
     }
 
+    public function joinZoom(Request $request, string $slug): RedirectResponse
+    {
+        $course = \Modules\LMS\Models\Course::where('slug', $slug)->firstOrFail();
+        $activeBimtek = \Modules\LMS\Models\BimtekEvent::where('course_id', $course->id)->latest()->first();
+
+        if (!$activeBimtek || empty($activeBimtek->zoom_url)) {
+            ToastMagic::error('Tautan ruang Zoom belum tersedia.');
+            return redirect()->back();
+        }
+
+        DB::table('course_student')
+            ->where('course_id', $course->id)
+            ->where('user_id', $request->user()->id)
+            ->update([
+                'zoom_joined_at' => now(),
+            ]);
+
+        return redirect()->away($activeBimtek->zoom_url);
+    }
+
     public function attendZoom(Request $request, string $slug): RedirectResponse
     {
         $course = \Modules\LMS\Models\Course::where('slug', $slug)->firstOrFail();
+        $activeBimtek = \Modules\LMS\Models\BimtekEvent::where('course_id', $course->id)->latest()->first();
+
+        $enrollment = DB::table('course_student')
+            ->where('course_id', $course->id)
+            ->where('user_id', $request->user()->id)
+            ->first();
+
+        // Opsi 2a: Wajib klik "Masuk Ruang Zoom" terlebih dahulu
+        if (empty($enrollment?->zoom_joined_at)) {
+            ToastMagic::error('Silakan klik tombol "Masuk Ruang Zoom" terlebih dahulu untuk mengikuti sesi sebelum konfirmasi hadir.');
+            return redirect()->back();
+        }
+
+        // Opsi 2b: Penguncian berdasarkan jadwal waktu Zoom dimulai
+        if ($activeBimtek && $activeBimtek->zoom_scheduled_at && now()->lessThan($activeBimtek->zoom_scheduled_at)) {
+            ToastMagic::error('Presensi belum dibuka. Konfirmasi kehadiran hanya dapat dilakukan saat jadwal Sesi Live Zoom dimulai (' . $activeBimtek->zoom_schedule_formatted . ').');
+            return redirect()->back();
+        }
+
+        // Opsi 1: Validasi Kode Presensi / Token Zoom
+        if ($activeBimtek && !empty($activeBimtek->zoom_attendance_code)) {
+            $inputCode = strtoupper(trim((string) $request->input('attendance_code')));
+            $expectedCode = strtoupper(trim((string) $activeBimtek->zoom_attendance_code));
+
+            if ($inputCode === '' || $inputCode !== $expectedCode) {
+                ToastMagic::error('Kode Presensi Zoom tidak sesuai. Masukkan kode presensi yang dibagikan panitia/narasumber saat sesi Zoom berlangsung.');
+                return redirect()->back();
+            }
+        }
 
         DB::table('course_student')
             ->where('course_id', $course->id)
@@ -116,7 +165,14 @@ class CourseController extends Controller
                 'status'   => $newProgress >= 100 ? 'completed' : 'in_progress',
             ]);
 
-        ToastMagic::success('Presensi Sesi Live Zoom berhasil dikonfirmasi! Tahap Evaluasi Akhir kini telah terbuka.');
+        $evaluasiAkhir = PostTest::where('course_id', $course->id)->whereNull('course_section_id')->first();
+        $canTakeFinalTest = $evaluasiAkhir && $this->courseService->canAccessTest($evaluasiAkhir);
+
+        ToastMagic::success(
+            $canTakeFinalTest
+                ? 'Presensi Sesi Live Zoom berhasil dikonfirmasi! Tahap Evaluasi Akhir kini telah terbuka.'
+                : 'Presensi Sesi Live Zoom berhasil dikonfirmasi! Selesaikan seluruh modul pembelajaran mandiri untuk membuka Evaluasi Akhir.'
+        );
 
         return redirect()->back();
     }
@@ -250,9 +306,9 @@ class CourseController extends Controller
             }
         }
 
-        // 4. Cek evaluasi akhir kursus jika ada dan belum lulus
+        // 4. Cek evaluasi akhir kursus jika ada, belum lulus, dan sudah memenuhi syarat akses (termasuk presensi Zoom)
         $evaluasiAkhir = PostTest::where('course_id', $course->id)->whereNull('course_section_id')->first();
-        if ($evaluasiAkhir && !in_array($evaluasiAkhir->id, $passedTestIds)) {
+        if ($evaluasiAkhir && !in_array($evaluasiAkhir->id, $passedTestIds) && $this->courseService->canAccessTest($evaluasiAkhir)) {
             return route('user.course.test.show', [
                 'slug'       => $course->slug,
                 'postTestId' => $evaluasiAkhir->id,

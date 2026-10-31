@@ -76,6 +76,7 @@ class BimtekEventController extends Controller
             'zoom_url'          => 'nullable|url',
             'zoom_meeting_id'   => 'nullable|string|max:100',
             'zoom_passcode'     => 'nullable|string|max:100',
+            'zoom_attendance_code' => 'nullable|string|max:50',
             'zoom_scheduled_at' => 'nullable|date|after_or_equal:start_date|before_or_equal:end_date',
             'zoom_end_at'       => 'nullable|date|after_or_equal:zoom_scheduled_at|before_or_equal:end_date',
             'location_name'     => 'nullable|string|max:255',
@@ -93,6 +94,10 @@ class BimtekEventController extends Controller
             $course = Course::find($validated['course_id']);
             $slugPrefix = strtoupper(substr(Str::slug($course->name), 0, 8));
             $validated['batch_code'] = 'BIMTEK-' . $slugPrefix . '-' . date('Y') . '-' . strtoupper(Str::random(4));
+        }
+
+        if (!empty($validated['zoom_url']) && empty($validated['zoom_attendance_code'])) {
+            $validated['zoom_attendance_code'] = 'HADIR-' . strtoupper(Str::random(4));
         }
 
         $event = BimtekEvent::create($validated);
@@ -124,6 +129,7 @@ class BimtekEventController extends Controller
                 'course_student.status',
                 'course_student.completed_at',
                 'course_student.bimtek_event_id',
+                'course_student.zoom_joined_at',
                 'course_student.zoom_attended',
                 'course_student.zoom_attended_at',
                 'course_student.cert_submission_status',
@@ -178,6 +184,7 @@ class BimtekEventController extends Controller
             'zoom_url'          => 'nullable|url',
             'zoom_meeting_id'   => 'nullable|string|max:100',
             'zoom_passcode'     => 'nullable|string|max:100',
+            'zoom_attendance_code' => 'nullable|string|max:50',
             'zoom_scheduled_at' => 'nullable|date|after_or_equal:start_date|before_or_equal:end_date',
             'zoom_end_at'       => 'nullable|date|after_or_equal:zoom_scheduled_at|before_or_equal:end_date',
             'location_name'     => 'nullable|string|max:255',
@@ -190,6 +197,10 @@ class BimtekEventController extends Controller
             'zoom_end_at.after_or_equal'        => 'Jadwal selesai Sesi Zoom tidak boleh sebelum jadwal mulai Sesi Zoom.',
             'zoom_end_at.before_or_equal'       => 'Jadwal selesai Sesi Zoom harus berada di dalam rentang waktu pelaksanaan (tidak boleh melewati tanggal selesai).',
         ]);
+
+        if (!empty($validated['zoom_url']) && empty($validated['zoom_attendance_code'])) {
+            $validated['zoom_attendance_code'] = $event->zoom_attendance_code ?: ('HADIR-' . strtoupper(Str::random(4)));
+        }
 
         $event->update($validated);
 

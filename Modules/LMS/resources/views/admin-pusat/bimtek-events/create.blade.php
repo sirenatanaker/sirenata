@@ -164,7 +164,7 @@
                         Bebas memilih tanggal dan jam spesifik tatap muka Zoom selama masih berada di dalam rentang waktu pelaksanaan (misal pelaksanaan 04 Nov - 09 Nov, sesi Zoom dijadwalkan pada 08 Nov pukul 09:00 WIB).
                     </p>
 
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
                         <div>
                             <label for="zoom_meeting_id" class="block text-xs font-semibold text-slate-700 mb-1">
                                 Meeting ID (Opsional)
@@ -180,6 +180,14 @@
                             <input type="text" id="zoom_passcode" name="zoom_passcode" value="{{ old('zoom_passcode') }}"
                                    placeholder="Contoh: SPBE2026"
                                    class="w-full px-3 py-2 rounded-lg border border-slate-300 text-xs sm:text-sm bg-white">
+                        </div>
+                        <div>
+                            <label for="zoom_attendance_code" class="block text-xs font-semibold text-slate-700 mb-1">
+                                Kode Presensi Zoom
+                            </label>
+                            <input type="text" id="zoom_attendance_code" name="zoom_attendance_code" value="{{ old('zoom_attendance_code') }}"
+                                   placeholder="Kosongkan = otomatis (HADIR-XXXX)"
+                                   class="w-full px-3 py-2 rounded-lg border border-slate-300 text-xs sm:text-sm bg-white uppercase font-mono">
                         </div>
                     </div>
                 </div>
