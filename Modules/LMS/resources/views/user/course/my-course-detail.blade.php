@@ -42,11 +42,23 @@
             $currentProgress = data_get($course, 'current_progress', 0);
             $isFullyCompleted = data_get($course, 'is_fully_completed', false);
 
-            $activeBimtek = \Modules\LMS\Models\BimtekEvent::where('course_id', data_get($course, 'id'))->latest()->first();
+            $activeBimtek = null;
             $enrollmentData = \DB::table('course_student')
                 ->where('course_id', data_get($course, 'id'))
                 ->where('user_id', auth()->id())
                 ->first();
+
+            if ($enrollmentData && !empty($enrollmentData->bimtek_event_id)) {
+                $activeBimtek = \Modules\LMS\Models\BimtekEvent::find($enrollmentData->bimtek_event_id);
+            }
+            if (!$activeBimtek) {
+                $activeBimtek = data_get($course, 'active_bimtek') ?? \Modules\LMS\Models\BimtekEvent::where('course_id', data_get($course, 'id'))->latest()->first();
+            }
+
+            $isEventEnded = (bool) (data_get($course, 'is_event_ended') ?? ($activeBimtek && in_array($activeBimtek->status, ['closed', 'completed'])));
+            $isCourseAlreadyFinished = ($currentProgress >= 100) || ($enrollmentData && $enrollmentData->status === 'completed');
+            $canReviewAll = (bool) (data_get($course, 'can_review_all') || $isCourseAlreadyFinished || $isEventEnded);
+
             $areAllTopicsCompleted = ($totalContents > 0 && $completedContents >= $totalContents);
             $isZoomUnlocked = true;
             $isZoomAttended = (bool) ($enrollmentData?->zoom_attended);
@@ -324,7 +336,7 @@
                                 $postTestBab = data_get($section, 'post_test_bab');
                                 $isPostTestBabCompleted = data_get($section, 'is_post_test_bab_completed', true);
                                 $isSectionCompleted = data_get($section, 'is_section_completed', $isContentCompleted && $isPostTestBabCompleted);
-                                $isLocked = data_get($section, 'is_locked', !$isPreviousSectionDone);
+                                $isLocked = $canReviewAll ? false : data_get($section, 'is_locked', !$isPreviousSectionDone);
                             @endphp
 
                             <div x-data="{ id: 'section-{{ $index }}', locked: {{ $isLocked ? 'true' : 'false' }} }" id="section-{{ $index }}"
@@ -419,8 +431,8 @@
                                                 $videoUrlRaw = data_get($content, 'video_url');
                                                 $documentUrlRaw = data_get($content, 'document_url');
                                                 $isContentItemCompleted = data_get($content, 'is_completed', false);
-                                                // Terkunci jika topik sebelumnya belum selesai (kecuali topik ini sudah pernah diselesaikan)
-                                                $isContentLocked = !$isPreviousContentDone && !$isContentItemCompleted;
+                                                // Terkunci jika topik sebelumnya belum selesai (kecuali topik ini sudah pernah diselesaikan atau mode ulas materi)
+                                                $isContentLocked = $canReviewAll ? false : (!$isPreviousContentDone && !$isContentItemCompleted);
                                             @endphp
 
                                             <div
@@ -479,7 +491,7 @@
                                         {{-- Evaluasi per Modul (terkunci sampai semua topik selesai) --}}
                                         @if ($postTestBab)
                                             @php
-                                                $isPostTestBabLocked = !$isContentCompleted && !$isPostTestBabCompleted;
+                                                $isPostTestBabLocked = $canReviewAll ? false : (!$isContentCompleted && !$isPostTestBabCompleted);
                                                 $postTestIconBox = $isPostTestBabLocked
                                                     ? 'bg-slate-400 text-white border-slate-400'
                                                     : 'bg-[#13416B] text-white border-[#13416B]';
@@ -622,7 +634,12 @@
                         </div>
 
                         <div class="relative z-10 shrink-0 flex flex-col sm:items-end gap-2 self-start md:self-center w-full md:w-auto">
-                            @if ($isZoomUnlocked)
+                            @if ($isEventEnded && !$isZoomAttended)
+                                <div class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-md text-xs font-semibold bg-slate-100 text-slate-500 border border-slate-200">
+                                    <i class="fas fa-history text-slate-400"></i>
+                                    <span>Sesi Zoom Telah Berakhir</span>
+                                </div>
+                            @elseif ($isZoomUnlocked)
                                 <div class="flex items-center gap-2 flex-wrap sm:justify-end w-full md:w-auto">
                                     <a href="{{ route('user.course.my-course.join-zoom', $courseSlug) }}" target="_blank"
                                        @click="hasJoinedZoom = true"
@@ -843,11 +860,16 @@
                                             class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-md text-xs sm:text-sm font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 transition-all shadow-xs">
                                             <i class="fas fa-eye text-xs"></i> Lihat Hasil
                                         </a>
-                                    @elseif (!$isEvaluasiAkhirLocked)
+                                    @elseif (!$isEvaluasiAkhirLocked && !$isEventEnded)
                                         <a href="{{ route('user.course.test.show', ['slug' => $courseSlug, 'postTestId' => $evaluasiAkhir->id]) }}"
                                             class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-md text-xs sm:text-sm font-bold bg-[#13416B] hover:bg-[#0f3354] text-white shadow-sm transition-all">
                                             <i class="fas fa-play text-xs"></i> Mulai Evaluasi
                                         </a>
+                                    @elseif ($isEventEnded && !$isEvaluasiAkhirCompleted)
+                                        <div class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-md text-xs font-semibold bg-slate-100 text-slate-500 border border-slate-200">
+                                            <i class="fas fa-clock text-slate-400"></i>
+                                            <span>Periode Pelatihan Telah Berakhir</span>
+                                        </div>
                                     @else
                                         <button type="button" disabled
                                             title="Selesaikan materi mandiri{{ $activeBimtek && $activeBimtek->zoom_url ? ' & presensi Zoom' : '' }} terlebih dahulu"

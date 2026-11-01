@@ -34,6 +34,7 @@ class CourseController extends Controller
         $result = $this->courseService->myCourses(
             page: (int) $request->get('page', 1),
             perPage: (int) $request->get('row_per_page', 11),
+            tab: 'all',
         );
 
         return view('lms::user.course.my-course', [
@@ -50,7 +51,7 @@ class CourseController extends Controller
         $result = $this->courseService->myCourses(
             page: (int) $request->get('page', 1),
             perPage: (int) $request->get('row_per_page', 11),
-            status: self::IN_PROGRESS,
+            tab: 'progress',
         );
 
         return view('lms::user.course.my-course-progress', [
@@ -67,7 +68,7 @@ class CourseController extends Controller
         $result = $this->courseService->myCourses(
             page: (int) $request->get('page', 1),
             perPage: (int) $request->get('row_per_page', 11),
-            status: self::COMPLETED,
+            tab: 'finish',
         );
 
         return view('lms::user.course.my-course-completed', [

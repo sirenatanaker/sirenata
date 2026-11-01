@@ -23,9 +23,10 @@ class CatalogController extends Controller
         $selectedCategories = $request->get('categories', []);
         $programType = $request->get('type', 'all');
 
+        $excludedCourseIds = $this->courseService->getExcludedCatalogCourseIds();
         $enrolledCourseIds = $this->courseService->getEnrolledCourseIds();
         $courses = $this->courseService->getCatalogCourses(12, $search, $selectedCategories, $programType);
-        $categories = $this->categoryService->getCategoriesForCatalog($enrolledCourseIds);
+        $categories = $this->categoryService->getCategoriesForCatalog($excludedCourseIds);
 
         // Ambil ID Bimtek Event yang sudah diikuti oleh user yang sedang login
         $userBimtekEventIds = [];
@@ -39,6 +40,7 @@ class CatalogController extends Controller
 
         return view('lms::user.katalog.index', compact(
             'courses',
+            'excludedCourseIds',
             'enrolledCourseIds',
             'userBimtekEventIds',
             'search',

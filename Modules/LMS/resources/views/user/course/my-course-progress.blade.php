@@ -1,4 +1,4 @@
-<x-dashboard::layouts.dashboard title="Kursus Saya | SIRENATA">
+<x-dashboard::layouts.dashboard title="Kursus Sedang Berjalan | SIRENATA">
     @push('styles')
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -17,10 +17,10 @@
                 @empty
                     <div class="col-span-full flex flex-col items-center justify-center py-16 px-4 text-center bg-white dark:bg-slate-800/90 rounded-2xl border border-dashed border-slate-200 dark:border-slate-700">
                         <div class="w-16 h-16 bg-slate-50 dark:bg-slate-700/60 rounded-full flex items-center justify-center mx-auto mb-4 border border-slate-100 dark:border-slate-600 text-slate-300 dark:text-slate-400">
-                            <i class="fas fa-check-double text-2xl"></i>
+                            <i class="fas fa-spinner text-2xl"></i>
                         </div>
-                        <h3 class="text-base font-bold text-slate-800 dark:text-white mb-1">Semua Kursus Selesai!</h3>
-                        <p class="text-sm text-slate-500 dark:text-slate-300 max-w-sm">Anda tidak memiliki kursus yang sedang berjalan.</p>
+                        <h3 class="text-base font-bold text-slate-800 dark:text-white mb-1">Tidak Ada Kursus Sedang Berjalan</h3>
+                        <p class="text-sm text-slate-500 dark:text-slate-300 max-w-sm">Anda tidak memiliki kursus yang sedang dipelajari saat ini.</p>
                     </div>
                 @endforelse
             </div>

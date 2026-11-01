@@ -111,20 +111,20 @@ class BimtekEvent extends Model
         $evalStart = $this->assessment_start_at ?? $this->end_date;
         $evalEnd   = $this->assessment_end_at ?? $this->end_date?->copy()->addDays(3);
 
-        if ($regStart && $regEnd && $now->between($regStart, $regEnd)) {
+        if ($this->status === 'completed' || ($evalEnd && $now->greaterThan($evalEnd))) {
             return [
-                'phase'      => 'registration',
-                'step'       => 1,
-                'label'      => 'Pendaftaran',
-                'badge'      => 'Pendaftaran Buka',
-                'badge_bg'   => 'bg-emerald-600',
-                'icon'       => 'fa-calendar-check',
-                'date_range' => $regStart->translatedFormat('d M') . ' - ' . $regEnd->translatedFormat('d M Y'),
-                'is_active'  => true,
+                'phase'      => 'completed',
+                'step'       => 3,
+                'label'      => 'Selesai',
+                'badge'      => 'Pelatihan Selesai',
+                'badge_bg'   => 'bg-slate-600',
+                'icon'       => 'fa-clock',
+                'date_range' => ($execStart ? $execStart->translatedFormat('d M') : '-') . ' - ' . ($evalEnd ? $evalEnd->translatedFormat('d M Y') : ($execEnd ? $execEnd->translatedFormat('d M Y') : '-')),
+                'is_active'  => false,
             ];
         }
 
-        if ($execStart && $execEnd && $now->between($execStart, $execEnd)) {
+        if ($this->status === 'ongoing' || ($execStart && $execEnd && $now->between($execStart, $execEnd))) {
             return [
                 'phase'      => 'learning',
                 'step'       => 2,
@@ -132,7 +132,20 @@ class BimtekEvent extends Model
                 'badge'      => 'Sedang Berlangsung',
                 'badge_bg'   => 'bg-blue-600',
                 'icon'       => 'fa-clock',
-                'date_range' => $execStart->translatedFormat('d M') . ' - ' . $execEnd->translatedFormat('d M Y'),
+                'date_range' => ($execStart ? $execStart->translatedFormat('d M') : '-') . ' - ' . ($execEnd ? $execEnd->translatedFormat('d M Y') : '-'),
+                'is_active'  => true,
+            ];
+        }
+
+        if ($regStart && $regEnd && $now->between($regStart, $regEnd)) {
+            return [
+                'phase'      => 'registration',
+                'step'       => 1,
+                'label'      => 'Pendaftaran',
+                'badge'      => 'Pendaftaran Buka',
+                'badge_bg'   => 'bg-emerald-600',
+                'icon'       => 'fa-clock',
+                'date_range' => $regStart->translatedFormat('d M') . ' - ' . $regEnd->translatedFormat('d M Y'),
                 'is_active'  => true,
             ];
         }
@@ -144,22 +157,9 @@ class BimtekEvent extends Model
                 'label'      => 'Evaluasi & Sertifikasi',
                 'badge'      => 'Masa Evaluasi',
                 'badge_bg'   => 'bg-purple-600',
-                'icon'       => 'fa-clipboard-check',
+                'icon'       => 'fa-clock',
                 'date_range' => $evalStart->translatedFormat('d M') . ' - ' . $evalEnd->translatedFormat('d M Y'),
                 'is_active'  => true,
-            ];
-        }
-
-        if ($evalEnd && $now->greaterThan($evalEnd)) {
-            return [
-                'phase'      => 'completed',
-                'step'       => 3,
-                'label'      => 'Selesai',
-                'badge'      => 'Pelatihan Selesai',
-                'badge_bg'   => 'bg-slate-600',
-                'icon'       => 'fa-check-double',
-                'date_range' => ($execStart ? $execStart->translatedFormat('d M') : '-') . ' - ' . $evalEnd->translatedFormat('d M Y'),
-                'is_active'  => false,
             ];
         }
 
@@ -169,7 +169,7 @@ class BimtekEvent extends Model
             'label'      => 'Pendaftaran',
             'badge'      => 'Pendaftaran Buka',
             'badge_bg'   => 'bg-emerald-600',
-            'icon'       => 'fa-calendar-check',
+            'icon'       => 'fa-clock',
             'date_range' => ($regStart ? $regStart->translatedFormat('d M') : '-') . ' - ' . ($regEnd ? $regEnd->translatedFormat('d M Y') : '-'),
             'is_active'  => true,
         ];

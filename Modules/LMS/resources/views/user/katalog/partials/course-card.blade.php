@@ -27,7 +27,7 @@
                 $curPhase = $activeBimtek->current_timeline_phase;
             @endphp
             <span class="absolute top-0 right-0 z-10 px-2 sm:px-3 py-0.5 sm:py-1 text-[8px] sm:text-[10px] font-bold uppercase tracking-wider text-white {{ $curPhase['badge_bg'] ?? 'bg-emerald-600' }} shadow-xs flex items-center gap-1 rounded-none rounded-bl-md rounded-tr-md">
-                <i class="fas {{ $curPhase['icon'] ?? 'fa-clock' }} text-[7px] sm:text-[9px]"></i>
+                <i class="far fa-clock text-[7px] sm:text-[9px]"></i>
                 <span>{{ $curPhase['badge'] ?? 'Pelatihan Terjadwal' }}</span>
             </span>
         </div>

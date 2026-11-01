@@ -1,4 +1,4 @@
-<x-dashboard::layouts.dashboard title="Kursus Saya | SIRENATA">
+<x-dashboard::layouts.dashboard title="Kursus Selesai | SIRENATA">
     @push('styles')
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
