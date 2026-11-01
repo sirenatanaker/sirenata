@@ -16,11 +16,6 @@
 
             <!-- Efek Dekoratif Bubbles Geometris Profesional -->
             <div class="absolute inset-0 pointer-events-none z-0">
-                <!-- Pola titik halus dasar -->
-                <div
-                    class="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.05)_1.5px,transparent_1.5px)] [background-size:24px_24px]">
-                </div>
-
                 <!-- Bubble 1: Cincin Besar Kanan Atas -->
                 <div class="absolute -top-24 -right-16 w-80 h-80 border-[30px] border-white/5 rounded-full"></div>
                 <!-- Bubble 2: Lingkaran Solid Transparan Kanan Bawah -->
@@ -157,22 +152,18 @@
                         str_contains($library->external_link ?? '', 'youtu.be');
                     $isPeraturan = str_contains($typeName, 'peraturan');
                     $isDoc = !empty($library->file_path);
+                    $isLink = !empty($library->external_link) && !$isVideo;
 
                     if ($isVideo) {
                         $buttonLabel = 'Tonton Video';
-                        $buttonIcon = 'fa-play';
                     } elseif ($isPeraturan) {
                         $buttonLabel = 'Baca Dokumen';
-                        $buttonIcon = 'fa-file-lines';
                     } elseif ($isDoc) {
                         $buttonLabel = 'Baca Buku';
-                        $buttonIcon = 'fa-book-open';
-                    } elseif (!empty($library->external_link)) {
+                    } elseif ($isLink) {
                         $buttonLabel = 'Buka Tautan';
-                        $buttonIcon = 'fa-arrow-up-right-from-square';
                     } else {
                         $buttonLabel = 'Buka Koleksi';
-                        $buttonIcon = 'fa-book-reader';
                     }
                 @endphp
 
@@ -247,19 +238,34 @@
 
                     {{-- Informasi Buku Area --}}
                     <div class="p-0 pt-2.5 sm:p-5 flex flex-col flex-1 bg-transparent sm:bg-white">
-                        <h3 class="font-bold text-slate-800 text-xs sm:text-sm leading-snug line-clamp-2 mb-2 group-hover:text-[#13416B] transition-colors"
+                        <h3 class="font-bold text-slate-800 text-xs sm:text-sm leading-snug line-clamp-2 min-h-[2rem] sm:min-h-[2.5rem] mb-2 group-hover:text-[#13416B] transition-colors"
                             title="{{ $library->title }}">
                             {{ $library->title }}
                         </h3>
 
-                        {{-- Tombol Aksi Bergaya Buku Perpustakaan --}}
-                        <div class="mt-auto pt-2.5 sm:pt-3 border-t border-slate-100">
+                        {{-- Tombol Aksi Tab di Pojok Kiri (Flush Sisi Kiri & Rounded-r-xl) --}}
+                        @php
+                            $isLinkAction = ($buttonLabel === 'Buka Tautan');
+                            $isVideoAction = ($buttonLabel === 'Tonton Video');
+                        @endphp
+                        <div class="mt-auto pt-2.5 sm:pt-3.5 border-t border-slate-100 flex items-center justify-start">
                             <button x-data
                                 @click="$dispatch('open-modal', 'library-modal-{{ $library->id }}'); window.recordLibraryHistory('{{ $library->id }}')"
-                                class="w-full py-1.5 sm:py-2 px-2.5 sm:px-3 bg-[#13416B] hover:bg-[#0f3354] group-hover:bg-[#0f3354] border border-[#13416B] text-white rounded-md sm:rounded-lg text-[10px] sm:text-xs font-semibold transition-all duration-200 flex items-center justify-center gap-1.5 shadow-xs hover:shadow-sm">
-                                <i class="fas {{ $buttonIcon }} text-[10px] text-white"></i>
-                                <span>{{ $buttonLabel }}</span>
-                                <i class="fas fa-chevron-right text-[8px] opacity-75 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all"></i>
+                                class="py-1.5 sm:py-2.5 pl-3 sm:pl-5 pr-3.5 sm:pr-6 rounded-l-none rounded-r-xl text-[11px] sm:text-xs lg:text-sm font-bold transition-all duration-200 inline-flex items-center gap-2 shadow-xs hover:shadow-md hover:translate-x-1 -ml-0 sm:-ml-5 bg-[#13416B] hover:bg-[#0f3354] text-white">
+                                
+                                @if ($isLinkAction)
+                                    {{-- Tautan: icon tautan di depan, icon > dihapus --}}
+                                    <i class="fas fa-arrow-up-right-from-square text-[10px] sm:text-xs text-blue-200"></i>
+                                    <span>{{ $buttonLabel }}</span>
+                                @elseif ($isVideoAction)
+                                    {{-- Video: icon play di depan, icon > dihapus --}}
+                                    <i class="fas fa-play text-[9px] sm:text-[11px] text-white"></i>
+                                    <span>{{ $buttonLabel }}</span>
+                                @else
+                                    {{-- Dokumen / Buku / Peraturan: icon dokumen di depan dihapus, icon > tetap di belakang --}}
+                                    <span>{{ $buttonLabel }}</span>
+                                    <i class="fas fa-chevron-right text-[9px] sm:text-[10px] opacity-80 group-hover:translate-x-1 transition-transform"></i>
+                                @endif
                             </button>
                         </div>
                     </div>
