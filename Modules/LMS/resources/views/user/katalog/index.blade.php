@@ -79,7 +79,7 @@
                             <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path>
                             </svg>
-                            <span>Filter Kategori</span>
+                            <span>Filter Kursus</span>
                             
                             @if(!empty($selectedCategories))
                                 <span class="flex items-center justify-center w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-amber-400 text-[9px] sm:text-[10px] font-bold text-slate-900 ml-1">
@@ -101,7 +101,7 @@
                              style="display: none;">
                             
                             <div class="flex items-center justify-between mb-4">
-                                <h3 class="text-sm font-bold text-slate-800">Kategori Modul</h3>
+                                <h3 class="text-sm font-bold text-slate-800">Kategori Kursus</h3>
                                 @if(!empty($selectedCategories))
                                     <a href="{{ route('user.catalog.index', ['type' => request('type')]) }}" class="text-[11px] font-bold text-red-500 hover:text-red-700 hover:underline">Reset</a>
                                 @endif
@@ -180,6 +180,9 @@
                     $activeB = $c->bimtekEvents->first();
                     $isEnrolledInCourse = in_array($c->id, $enrolledCourseIds);
                     $isEnrolledInThisBimtek = $activeB && in_array($activeB->id, $userBimtekEventIds);
+                    $curPhase = $activeB?->current_timeline_phase ?? [];
+                    $phaseKey = $curPhase['phase'] ?? ($activeB?->status === 'open_registration' ? 'registration' : 'learning');
+                    $isRegistrationOpen = ($phaseKey === 'registration' && $activeB?->status === 'open_registration');
 
                     return [$c->id => [
                         'name'                   => $c->name,
@@ -197,6 +200,7 @@
                         'sections'               => $sections,
                         'enrollUrl'              => route('user.catalog.enroll', $c->slug),
                         'isEvent'                => (bool) $activeB,
+                        'isRegistrationOpen'     => $isRegistrationOpen,
                         'bimtekId'               => $activeB?->id,
                         'bimtekBatchName'        => $activeB?->batch_name,
                         'bimtekBatchCode'        => $activeB?->batch_code,
@@ -230,7 +234,7 @@
                     },
                     askEnroll(id) {
                         const c = this.courses[id];
-                        if (c && c.isEvent && c.bimtekStatus !== 'open_registration' && !c.isEnrolledInThisBimtek) {
+                        if (c && c.isEvent && (!c.isRegistrationOpen || c.bimtekStatus !== 'open_registration') && !c.isEnrolledInThisBimtek) {
                             return;
                         }
                         this.selected = c;
@@ -278,29 +282,7 @@
                 @keydown.escape.window="onEscape()"
             >
                 @if ($courses->isNotEmpty())
-                    {{-- 1. KHUSUS MOBILE: 2 Kolom Waterfall/Masonry (Card bawah langsung dempet rapat di bawah card atasnya) --}}
-                    <div class="sm:hidden grid grid-cols-2 gap-3 items-start">
-                        {{-- Kolom Kiri (Ganjil urutan visual: 0, 2, 4, ...) --}}
-                        <div class="flex flex-col gap-5">
-                            @foreach ($courses as $index => $course)
-                                @if ($index % 2 === 0)
-                                    @include('lms::user.katalog.partials.course-card', ['course' => $course])
-                                @endif
-                            @endforeach
-                        </div>
-
-                        {{-- Kolom Kanan (Genap urutan visual: 1, 3, 5, ...) --}}
-                        <div class="flex flex-col gap-5">
-                            @foreach ($courses as $index => $course)
-                                @if ($index % 2 === 1)
-                                    @include('lms::user.katalog.partials.course-card', ['course' => $course])
-                                @endif
-                            @endforeach
-                        </div>
-                    </div>
-
-                    {{-- 2. DESKTOP / TABLET: Grid Simetris Sejajar (2, 3, atau 4 kolom) --}}
-                    <div class="hidden sm:grid sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-6 px-4 md:px-0 items-stretch">
+                    <div class="grid grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-y-6 gap-x-3 sm:gap-6 px-0 sm:px-4 md:px-0 items-stretch">
                         @foreach ($courses as $course)
                             @include('lms::user.katalog.partials.course-card', ['course' => $course])
                         @endforeach
@@ -375,12 +357,27 @@
                                 {{-- Body: Detail Kursus & Kurikulum (Scrollable) --}}
                                 <div class="flex-1 overflow-y-auto px-5 sm:px-6 py-4 sm:py-5 custom-scrollbar bg-slate-50/40">
 
+                                    {{-- Banner Notifikasi Jika Pendaftaran Gelombang Ini Ditutup (Disuruh Ikut Batch Berikutnya) --}}
+                                    <template x-if="selected && selected.isEvent && !selected.isEnrolledInThisBimtek && (!selected.isRegistrationOpen || selected.bimtekStatus !== 'open_registration')">
+                                        <div class="mb-5 p-3.5 sm:p-4 rounded-xl bg-amber-50 border border-amber-200/90 flex items-start gap-3 text-amber-900 shadow-2xs">
+                                            <div class="w-8 h-8 rounded-lg bg-amber-100/80 border border-amber-200 text-amber-700 flex items-center justify-center shrink-0 mt-0.5">
+                                                <i class="fas fa-calendar-times text-sm"></i>
+                                            </div>
+                                            <div class="flex-1 min-w-0">
+                                                <h5 class="text-xs sm:text-sm font-bold text-amber-900 mb-0.5">Pendaftaran Gelombang Ini Telah Ditutup</h5>
+                                                <p class="text-[11px] sm:text-xs text-amber-800/90 leading-relaxed">
+                                                    Pelatihan untuk gelombang ini sedang berlangsung atau masa pendaftaran telah berakhir. Anda dapat mengikuti pelatihan pada <strong>batch / gelombang berikutnya</strong>.
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </template>
+
                                     {{-- Timeline Pelaksanaan Pelatihan (Khusus Event Pelatihan) --}}
                                     <template x-if="selected && selected.isEvent && selected.timelineSteps">
                                         <div class="mb-6">
                                             {{-- Header di luar card seperti pada Kurikulum (Badge di bawah title & deskripsi) --}}
                                             <div class="mb-3.5">
-                                                <h4 class="text-xs font-bold uppercase tracking-wider text-slate-500">Timeline Pelaksanaan Pelatihan</h4>
+                                                <h4 class="text-xs sm:text-sm font-extrabold uppercase tracking-wider text-slate-800">Timeline Pelaksanaan Pelatihan</h4>
                                                 <p class="text-[11px] text-slate-400 mt-0.5">Rangkaian tahapan dari registrasi hingga sertifikasi</p>
                                                 <template x-if="selected.currentTimelinePhase">
                                                     <div class="mt-2">
@@ -462,7 +459,7 @@
 
                                     <div class="mb-3.5">
                                         <div>
-                                            <h4 class="text-xs font-bold uppercase tracking-wider text-slate-500">Struktur Kurikulum</h4>
+                                            <h4 class="text-xs sm:text-sm font-extrabold uppercase tracking-wider text-slate-800">Struktur Kurikulum</h4>
                                             <p class="text-[11px] text-slate-400 mt-0.5">Daftar modul dan topik materi pembelajaran</p>
                                         </div>
 
@@ -559,7 +556,7 @@
                                 {{-- Footer Modal: Aksi --}}
                                 <div class="px-4 sm:px-6 py-3 sm:py-4 border-t border-slate-100 bg-white shrink-0">
                                     {{-- KONDISI 1: SEDANG BERLANGSUNG / MENUNGGU BATCH BERIKUTNYA --}}
-                                    <template x-if="selected.isEvent && !selected.isEnrolledInThisBimtek && selected.bimtekStatus !== 'open_registration'">
+                                    <template x-if="selected.isEvent && !selected.isEnrolledInThisBimtek && (!selected.isRegistrationOpen || selected.bimtekStatus !== 'open_registration')">
                                         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2.5 sm:gap-3">
                                             <p class="text-xs sm:text-sm text-slate-500 font-medium text-center sm:text-left">
                                                 Pendaftaran ditutup (menunggu batch berikutnya).
@@ -572,7 +569,8 @@
                                                     Tutup
                                                 </button>
                                                 <button type="button" disabled
-                                                        class="flex-1 sm:flex-none px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-semibold rounded-xl text-slate-400 bg-slate-100 border border-slate-200 cursor-not-allowed inline-flex items-center justify-center shadow-none">
+                                                        class="flex-1 sm:flex-none px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-semibold rounded-xl text-slate-400 bg-slate-100 border border-slate-200 cursor-not-allowed inline-flex items-center justify-center gap-1.5 shadow-none">
+                                                    <i class="fas fa-lock text-[10px]"></i>
                                                     <span class="truncate">Menunggu Batch Berikutnya</span>
                                                 </button>
                                             </div>
@@ -601,7 +599,7 @@
                                     </template>
 
                                     {{-- KONDISI 3: BISA DAFTAR (OPEN REGISTRATION / MANDIRI) --}}
-                                    <template x-if="(!selected.isEvent) || (selected.isEvent && !selected.isEnrolledInThisBimtek && selected.bimtekStatus === 'open_registration')">
+                                    <template x-if="(!selected.isEvent) || (selected.isEvent && !selected.isEnrolledInThisBimtek && selected.isRegistrationOpen && selected.bimtekStatus === 'open_registration')">
                                         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2.5 sm:gap-3">
                                             <p class="text-xs sm:text-sm text-slate-600 font-medium text-center sm:text-left">
                                                 <span x-text="selected.isEvent ? 'Tertarik mengikuti pelatihan ini? Pendaftaran masih dibuka.' : 'Apakah Anda ingin mendaftar kursus ini?'"></span>

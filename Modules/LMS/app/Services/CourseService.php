@@ -1058,6 +1058,7 @@ class CourseService
         $query = Course::with([
             'category',
             'bimtekEvents' => fn($q) => $q->whereIn('status', ['open_registration', 'ongoing'])
+                ->withCount('participants')
                 ->orderByRaw("FIELD(status, 'open_registration', 'ongoing')")
                 ->latest(),
             'sections.contents' => fn($q) => $q
@@ -1073,18 +1074,8 @@ class CourseService
             $query->whereNotIn('id', $excludedCourseIds);
         }
 
-        // Filter tipe program jika dipilih oleh user
-        if ($programType === 'bimtek') {
-            $query->whereHas('bimtekEvents', fn($b) => $b->whereIn('status', ['open_registration', 'ongoing']));
-        } elseif ($programType === 'mandiri') {
-            $query->whereDoesntHave('bimtekEvents', fn($b) => $b->whereIn('status', ['open_registration', 'ongoing']));
-        } else {
-            // Default katalog: Tampilkan kursus mandiri ATAU bimtek yang punya gelombang aktif
-            $query->where(function ($q) {
-                $q->whereDoesntHave('bimtekEvents')
-                  ->orWhereHas('bimtekEvents', fn($b) => $b->whereIn('status', ['open_registration', 'ongoing']));
-            });
-        }
+        // Katalog hanya menampilkan kursus berbasis event dengan Bimtek Event aktif (open_registration atau ongoing)
+        $query->whereHas('bimtekEvents', fn($b) => $b->whereIn('status', ['open_registration', 'ongoing']));
 
         return $query->latest()
             ->paginate($perPage)
@@ -1140,7 +1131,8 @@ class CourseService
                     }
 
                     // Jika gelombang sedang berlangsung atau tutup, tolak pendaftaran
-                    if ($activeBimtek->status !== 'open_registration') {
+                    $isPhaseNotReg = ($activeBimtek->current_timeline_phase['phase'] ?? 'registration') !== 'registration';
+                    if ($activeBimtek->status !== 'open_registration' || $isPhaseNotReg) {
                         return [
                             'success' => false,
                             'message' => 'Pendaftaran untuk gelombang ini sudah ditutup karena pelatihan sedang berlangsung. Silakan nantikan pembukaan gelombang berikutnya.',
@@ -1174,7 +1166,8 @@ class CourseService
             }
 
             // Pendaftaran baru (belum pernah enroll kursus ini)
-            if ($activeBimtek && $activeBimtek->status !== 'open_registration') {
+            $isPhaseNotReg = ($activeBimtek?->current_timeline_phase['phase'] ?? 'registration') !== 'registration';
+            if ($activeBimtek && ($activeBimtek->status !== 'open_registration' || $isPhaseNotReg)) {
                 return [
                     'success' => false,
                     'message' => 'Pendaftaran untuk gelombang ini sudah ditutup karena pelatihan sedang berlangsung. Silakan nantikan pembukaan gelombang berikutnya.',
