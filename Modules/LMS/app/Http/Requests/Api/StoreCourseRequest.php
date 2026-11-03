@@ -18,7 +18,7 @@ class StoreCourseRequest extends FormRequest
             'audience'    => ['sometimes', 'in:instansi,swasta'],
         
             'thumbnail'   => ['nullable', 'image',  'mimes:png,jpg', 'max:2048'], 
-            'description' => ['required', 'string'],
+            'description' => ['nullable', 'string'],
             'bg_color'    => ['nullable', 'string', 'max:20'],
         ];
     }

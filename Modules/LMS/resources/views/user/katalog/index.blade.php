@@ -381,8 +381,11 @@
                                                 <p class="text-[11px] text-slate-400 mt-0.5">Rangkaian tahapan dari registrasi hingga sertifikasi</p>
                                                 <template x-if="selected.currentTimelinePhase">
                                                     <div class="mt-2">
-                                                        <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider text-white shadow-2xs"
-                                                              :class="selected.currentTimelinePhase.badge_bg">
+                                                        <span class="inline-flex items-center gap-1.5 rounded uppercase tracking-wider text-white shadow-2xs font-bold"
+                                                              :class="[
+                                                                  selected.currentTimelinePhase.badge_bg,
+                                                                  selected.currentTimelinePhase.phase === 'completed' ? 'px-3 py-1 text-xs' : 'px-2.5 py-0.5 text-[10px]'
+                                                              ]">
                                                             <i class="fas text-[9px]" :class="selected.currentTimelinePhase.icon || 'fa-clock'"></i>
                                                             <span x-text="selected.currentTimelinePhase.badge"></span>
                                                         </span>
@@ -530,7 +533,7 @@
                                                                 <i class="fas" :class="icon(content.type)"></i>
                                                             </span>
 
-                                                            <span class="flex-1 min-w-0 font-medium text-slate-700 leading-snug truncate"
+                                                            <span class="flex-1 min-w-0 font-medium text-slate-700 leading-snug line-clamp-2 break-words"
                                                                   :title="content.name"
                                                                   x-text="content.name"></span>
                                                         </div>
@@ -660,7 +663,7 @@
                                 <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200 text-left text-xs space-y-2.5 mb-4">
                                     <div>
                                         <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Materi Program</span>
-                                        <p class="font-extrabold text-slate-900 mt-0.5" x-text="selected.name"></p>
+                                        <p class="font-extrabold text-slate-900 mt-0.5 line-clamp-2" :title="selected.name" x-text="selected.name"></p>
                                     </div>
                                     <div class="grid grid-cols-2 gap-2 pt-2 border-t border-slate-200/80">
                                         <div>

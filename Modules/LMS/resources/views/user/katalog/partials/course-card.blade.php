@@ -55,8 +55,9 @@
 
         {{-- Badge Status Event di Pojok Kanan Atas --}}
         @if ($curPhase)
-            <span class="absolute top-0 right-0 z-10 px-2.5 sm:px-3 py-0.5 sm:py-1 text-[8px] sm:text-[10px] font-bold uppercase tracking-wider text-white {{ $curPhase['badge_bg'] ?? 'bg-emerald-600' }} shadow-xs flex items-center gap-1 rounded-none rounded-bl-md rounded-tr-md">
-                <i class="far fa-clock text-[7px] sm:text-[9px]"></i>
+            @php $isDonePhase = ($curPhase['phase'] ?? '') === 'completed'; @endphp
+            <span class="absolute top-0 right-0 z-10 {{ $isDonePhase ? 'px-3 sm:px-3.5 py-1 sm:py-1.5 text-[9px] sm:text-[11px]' : 'px-2.5 sm:px-3 py-0.5 sm:py-1 text-[8px] sm:text-[10px]' }} font-bold uppercase tracking-wider text-white {{ $curPhase['badge_bg'] ?? 'bg-[#0B5CFF]' }} shadow-xs flex items-center gap-1 rounded-none rounded-bl-md rounded-tr-md">
+                <i class="{{ $isDonePhase ? 'fas fa-check-circle' : 'far fa-clock' }} text-[7px] sm:text-[9px]"></i>
                 <span>{{ $curPhase['badge'] ?? 'Pendaftaran Buka' }}</span>
             </span>
         @endif

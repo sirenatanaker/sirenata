@@ -54,11 +54,13 @@
                 </h1>
 
                 <!-- Deskripsi -->
-                <div class="text-xs sm:text-sm text-slate-600 mb-4 max-w-none">
-                    <p class="leading-relaxed">
-                        {{ $course->description }}
-                    </p>
-                </div>
+                @if ($course->description)
+                    <div class="text-xs sm:text-sm text-slate-600 mb-4 max-w-none">
+                        <p class="leading-relaxed">
+                            {{ $course->description }}
+                        </p>
+                    </div>
+                @endif
 
                 <div class="w-full border-t border-slate-100 pt-3 lg:hidden">
                     <h3 class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Informasi Tambahan</h3>
@@ -205,7 +207,8 @@
                                                                 @endif
                                                             </span>
                                                             <div class="flex-1 min-w-0">
-                                                                <p class="font-bold text-slate-800 text-xs sm:text-sm leading-tight break-words">
+                                                                <p class="font-bold text-slate-800 text-xs sm:text-sm leading-tight break-words line-clamp-2"
+                                                                   title="{{ $content->name }}">
                                                                     {{ $content->name }}
                                                                 </p>
                                                             </div>

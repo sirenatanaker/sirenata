@@ -84,14 +84,61 @@ class BimtekEvent extends Model
             ->withTimestamps();
     }
 
+    /**
+     * Hitung status event secara otomatis berdasarkan rentang periode yang ditentukan
+     */
+    public static function determineStatusFromDates(?string $regStart, ?string $regEnd, string $execStart, string $execEnd, ?string $evalEnd = null): string
+    {
+        $now = now();
+        $rStart = $regStart ? \Carbon\Carbon::parse($regStart) : null;
+        $rEnd   = $regEnd ? \Carbon\Carbon::parse($regEnd) : null;
+        $eStart = \Carbon\Carbon::parse($execStart);
+        $eEnd   = \Carbon\Carbon::parse($execEnd);
+        $evEnd  = $evalEnd ? \Carbon\Carbon::parse($evalEnd) : $eEnd;
+
+        // 1. Jika sudah melewati batas akhir evaluasi/pelaksanaan => selesai
+        if ($now->greaterThan($evEnd)) {
+            return 'completed';
+        }
+
+        // 2. Jika sudah masuk masa pelaksanaan atau setelah pendaftaran ditutup => ongoing
+        if ($now->greaterThanOrEqualTo($eStart) || ($rEnd && $now->greaterThan($rEnd))) {
+            return 'ongoing';
+        }
+
+        // 3. Jika sedang dalam masa pendaftaran => open_registration
+        if ($rStart && $rEnd && $now->between($rStart, $rEnd)) {
+            return 'open_registration';
+        }
+
+        // 4. Jika sebelum masa pendaftaran dibuka => draft
+        if ($rStart && $now->lessThan($rStart)) {
+            return 'draft';
+        }
+
+        return 'open_registration';
+    }
+
     public function getStatusBadgeAttribute(): array
     {
-        return match ($this->status) {
-            'draft'             => ['label' => 'Draft', 'class' => 'bg-slate-100 text-slate-700 border-slate-200'],
-            'open_registration' => ['label' => 'Pendaftaran Buka', 'class' => 'bg-emerald-50 text-emerald-700 border-emerald-200'],
-            'ongoing'           => ['label' => 'Sedang Berlangsung', 'class' => 'bg-blue-50 text-blue-700 border-blue-200'],
-            'completed'         => ['label' => 'Selesai', 'class' => 'bg-purple-50 text-purple-700 border-purple-200'],
-            default             => ['label' => ucfirst($this->status), 'class' => 'bg-slate-100 text-slate-700 border-slate-200'],
+        // Gunakan status yang disinkronkan dengan rentang tanggal saat ini
+        $effectiveStatus = $this->status;
+        if ($this->start_date && $this->end_date) {
+            $effectiveStatus = self::determineStatusFromDates(
+                $this->registration_start_at?->toDateTimeString(),
+                $this->registration_end_at?->toDateTimeString(),
+                $this->start_date->toDateTimeString(),
+                $this->end_date->toDateTimeString(),
+                $this->assessment_end_at?->toDateTimeString()
+            );
+        }
+
+        return match ($effectiveStatus) {
+            'draft'             => ['label' => 'Mendatang / Draft', 'class' => 'bg-slate-600 text-white'],
+            'open_registration' => ['label' => 'Pendaftaran Buka', 'class' => 'bg-[#0B5CFF] text-white'],
+            'ongoing'           => ['label' => 'Sedang Berlangsung', 'class' => 'bg-amber-500 text-white'],
+            'completed'         => ['label' => 'Selesai', 'class' => 'bg-emerald-600 text-white'],
+            default             => ['label' => ucfirst($effectiveStatus), 'class' => 'bg-slate-600 text-white'],
         };
     }
 
@@ -116,9 +163,9 @@ class BimtekEvent extends Model
                 'phase'      => 'completed',
                 'step'       => 3,
                 'label'      => 'Selesai',
-                'badge'      => 'Pelatihan Selesai',
-                'badge_bg'   => 'bg-slate-600',
-                'icon'       => 'fa-clock',
+                'badge'      => 'Selesai',
+                'badge_bg'   => 'bg-emerald-600',
+                'icon'       => 'fa-check-circle',
                 'date_range' => ($execStart ? $execStart->translatedFormat('d M') : '-') . ' - ' . ($evalEnd ? $evalEnd->translatedFormat('d M Y') : ($execEnd ? $execEnd->translatedFormat('d M Y') : '-')),
                 'is_active'  => false,
             ];
@@ -130,7 +177,7 @@ class BimtekEvent extends Model
                 'step'       => 2,
                 'label'      => 'Pelaksanaan Pelatihan',
                 'badge'      => 'Sedang Berlangsung',
-                'badge_bg'   => 'bg-blue-600',
+                'badge_bg'   => 'bg-amber-500',
                 'icon'       => 'fa-clock',
                 'date_range' => ($execStart ? $execStart->translatedFormat('d M') : '-') . ' - ' . ($execEnd ? $execEnd->translatedFormat('d M Y') : '-'),
                 'is_active'  => true,
@@ -143,7 +190,7 @@ class BimtekEvent extends Model
                 'step'       => 1,
                 'label'      => 'Pendaftaran',
                 'badge'      => 'Pendaftaran Buka',
-                'badge_bg'   => 'bg-emerald-600',
+                'badge_bg'   => 'bg-[#0B5CFF]',
                 'icon'       => 'fa-clock',
                 'date_range' => $regStart->translatedFormat('d M') . ' - ' . $regEnd->translatedFormat('d M Y'),
                 'is_active'  => true,
@@ -168,7 +215,7 @@ class BimtekEvent extends Model
             'step'       => 1,
             'label'      => 'Pendaftaran',
             'badge'      => 'Pendaftaran Buka',
-            'badge_bg'   => 'bg-emerald-600',
+            'badge_bg'   => 'bg-[#0B5CFF]',
             'icon'       => 'fa-clock',
             'date_range' => ($regStart ? $regStart->translatedFormat('d M') : '-') . ' - ' . ($regEnd ? $regEnd->translatedFormat('d M Y') : '-'),
             'is_active'  => true,
@@ -254,5 +301,43 @@ class BimtekEvent extends Model
         }
 
         return $start->translatedFormat('d M Y, H:i') . ' WIB s/d ' . $end->translatedFormat('d M Y, H:i') . ' WIB';
+    }
+
+    /**
+     * Tanggal mulai program keseluruhan (pendaftaran / pelaksanaan)
+     */
+    public function getOverallStartAtAttribute()
+    {
+        return $this->registration_start_at ?? $this->start_date;
+    }
+
+    /**
+     * Tanggal selesai program keseluruhan (evaluasi / pelaksanaan)
+     */
+    public function getOverallEndAtAttribute()
+    {
+        return $this->assessment_end_at ?? $this->end_date;
+    }
+
+    /**
+     * Rentang tanggal program keseluruhan dalam format teks
+     */
+    public function getOverallTimelineFormattedAttribute(): string
+    {
+        $start = $this->overall_start_at;
+        $end = $this->overall_end_at;
+
+        if (!$start && !$end) {
+            return 'Jadwal belum ditentukan';
+        }
+
+        if ($start && $end) {
+            if ($start->isSameDay($end)) {
+                return $start->translatedFormat('d F Y, H:i') . ' - ' . $end->translatedFormat('H:i') . ' WIB';
+            }
+            return $start->translatedFormat('d F Y') . ' s/d ' . $end->translatedFormat('d F Y');
+        }
+
+        return ($start ?? $end)->translatedFormat('d F Y');
     }
 }

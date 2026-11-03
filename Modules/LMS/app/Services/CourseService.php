@@ -389,6 +389,7 @@ class CourseService
                 $zoomScheduleText = null;
                 $isRegistrationPhase = false;
                 $isOngoingPhase = false;
+                $isWaitingForStart = false;
 
                 if ($bimtekEvent) {
                     $curPhase = $bimtekEvent->current_timeline_phase ?? [];
@@ -396,6 +397,10 @@ class CourseService
 
                     $isRegistrationPhase = ($phaseKey === 'registration' || $bimtekEvent->status === 'open_registration');
                     $isOngoingPhase = ($phaseKey === 'learning' || $bimtekEvent->status === 'ongoing');
+
+                    if ($tabStatus !== 'finish') {
+                        $isWaitingForStart = ($isRegistrationPhase || ($bimtekEvent->start_date && now()->lessThan($bimtekEvent->start_date)));
+                    }
 
                     if ($phaseKey === 'registration') {
                         $periodeLabel = 'Periode Pendaftaran';
@@ -449,6 +454,7 @@ class CourseService
                     'zoom_schedule_text'    => $zoomScheduleText,
                     'is_registration_phase' => $isRegistrationPhase,
                     'is_ongoing_phase'      => $isOngoingPhase,
+                    'is_waiting_for_start'  => $isWaitingForStart,
                     'batch_students_count'  => $batchStudentsCount,
                     'category'              => $course->category ? (object) $course->category->toArray() : (object) ['name' => '-'],
                     'thumbnail'             => $course->thumbnail,
@@ -575,6 +581,13 @@ class CourseService
             $isCourseAlreadyFinished = ($enrollment && ($enrollment->pivot->status === 'completed' || (int) $enrollment->pivot->progress >= 100));
             $canReviewAll = $isCourseAlreadyFinished || $isEventEnded;
 
+            $isWaitingForStart = false;
+            if ($activeBimtek && !$isCourseAlreadyFinished) {
+                $curPhase = $activeBimtek->current_timeline_phase ?? [];
+                $phaseKey = $curPhase['phase'] ?? 'learning';
+                $isWaitingForStart = ($phaseKey === 'registration' || $activeBimtek->status === 'open_registration' || ($activeBimtek->start_date && now()->lessThan($activeBimtek->start_date)));
+            }
+
             $totalContents = 0;
             $totalTests = 0;
             $passedTests = 0;
@@ -594,7 +607,7 @@ class CourseService
                         if ($isCompleted) {
                             $sectionCompletedCount++;
                         }
-                        $isContentLocked = $canReviewAll ? false : (!$isPreviousContentDone && !$isCompleted);
+                        $isContentLocked = $canReviewAll ? false : ($isWaitingForStart || (!$isPreviousContentDone && !$isCompleted));
 
                         $sectionContents[] = [
                             'id'           => $content->id,
@@ -623,7 +636,7 @@ class CourseService
                 }
 
                 $isSectionCompleted = $isContentCompleted && $isPostTestBabCompleted;
-                $isLocked = $canReviewAll ? false : !$isPreviousSectionDone;
+                $isLocked = $canReviewAll ? false : (!$isWaitingForStart && !$isPreviousSectionDone);
 
                 $sectionArray['section_contents'] = $sectionContents;
                 $sectionArray['contents'] = $sectionContents;
@@ -633,7 +646,7 @@ class CourseService
                 $sectionArray['is_content_completed'] = $isContentCompleted;
                 $sectionArray['is_section_completed'] = $isSectionCompleted;
                 $sectionArray['is_locked'] = $isLocked;
-                $sectionArray['is_post_test_bab_locked'] = $canReviewAll ? false : (!$isContentCompleted && !$isPostTestBabCompleted);
+                $sectionArray['is_post_test_bab_locked'] = $canReviewAll ? false : ($isWaitingForStart || (!$isContentCompleted && !$isPostTestBabCompleted));
 
                 $mappedSections[] = (object) $sectionArray;
                 $isPreviousSectionDone = $isSectionCompleted;
@@ -663,7 +676,7 @@ class CourseService
             $course->course_sections = collect($mappedSections);
             $course->evaluasi_akhir = $evaluasiAkhir;
             $course->is_evaluasi_akhir_completed = $isEvaluasiAkhirCompleted;
-            $course->is_evaluasi_akhir_locked = $canReviewAll ? false : !$isPreviousSectionDone;
+            $course->is_evaluasi_akhir_locked = $canReviewAll ? false : ($isWaitingForStart || !$isPreviousSectionDone);
             $course->total_contents = $totalContents;
             $course->total_tests = $totalTests;
             $course->passed_tests = $passedTests;
@@ -674,6 +687,7 @@ class CourseService
             $course->can_review_all = $canReviewAll;
             $course->is_event_ended = $isEventEnded;
             $course->active_bimtek = $activeBimtek;
+            $course->is_waiting_for_start = $isWaitingForStart;
 
             return [
                 'success' => true,
@@ -778,7 +792,7 @@ class CourseService
                 'category_id' => $data['category_id'],
                 'name'        => $data['name'],
                 'audience'    => $data['audience'] ?? 'instansi',
-                'description' => $data['description'],
+                'description' => $data['description'] ?? '',
                 'thumbnail'   => $thumbnailPath,
             ]);
 
@@ -1256,8 +1270,15 @@ class CourseService
             // Jika event bimtek terkait sudah selesai atau ditutup, izinkan peserta mengulas materi
             if ($enrollment && !empty($enrollment->bimtek_event_id)) {
                 $bimtek = DB::table('bimtek_events')->where('id', $enrollment->bimtek_event_id)->first();
-                if ($bimtek && in_array($bimtek->status, ['closed', 'completed'])) {
-                    return true;
+                if ($bimtek) {
+                    if (in_array($bimtek->status, ['closed', 'completed'])) {
+                        return true;
+                    }
+
+                    // Jika pelatihan belum dimulai (masih tahap pendaftaran / belum masuk start_date), tolak akses materi
+                    if ($bimtek->status === 'open_registration' || $bimtek->status === 'draft' || ($bimtek->start_date && now()->lessThan(\Carbon\Carbon::parse($bimtek->start_date)))) {
+                        return false;
+                    }
                 }
             }
         }
@@ -1306,6 +1327,29 @@ class CourseService
         $course = $courseId ? $this->loadCourseOrdered($courseId) : null;
         if (!$course) {
             return false;
+        }
+
+        $userId = Auth::id();
+        if ($userId) {
+            $enrollment = DB::table('course_student')
+                ->where('course_id', $course->id)
+                ->where('user_id', $userId)
+                ->first();
+
+            // Jika kursus sudah selesai, izinkan akses ulas hasil
+            if ($enrollment && ($enrollment->status === 'completed' || (int) $enrollment->progress >= 100)) {
+                return true;
+            }
+
+            // Jika event bimtek terkait belum mulai tanggal pelaksanaan: tolak akses evaluasi
+            if ($enrollment && !empty($enrollment->bimtek_event_id)) {
+                $bimtek = DB::table('bimtek_events')->where('id', $enrollment->bimtek_event_id)->first();
+                if ($bimtek && !in_array($bimtek->status, ['closed', 'completed'])) {
+                    if ($bimtek->status === 'open_registration' || $bimtek->status === 'draft' || ($bimtek->start_date && now()->lessThan(\Carbon\Carbon::parse($bimtek->start_date)))) {
+                        return false;
+                    }
+                }
+            }
         }
 
         foreach ($course->sections as $section) {

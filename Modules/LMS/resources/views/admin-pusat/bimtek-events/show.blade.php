@@ -1,18 +1,30 @@
 <x-dashboard::layouts.dashboard title="Monitoring Gelombang Bimtek - Admin Pusat">
-    <div class="p-3 sm:p-6 max-w-[1600px] mx-auto space-y-5">
+    <div class="w-full p-8 space-y-6">
 
         {{-- Top Navigasi & Aksi Utama --}}
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
-                <a href="{{ route('admin-pusat.management-course.bimtek-events.index') }}"
-                   class="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-slate-800 transition-colors mb-1">
-                    <i class="fas fa-arrow-left text-[10px]"></i>
-                    <span>Kembali ke Daftar Bimtek</span>
-                </a>
+                {{-- Breadcrumb Navigation (2 Teks) --}}
+                <nav class="flex mb-2" aria-label="Breadcrumb">
+                    <ol class="inline-flex items-center space-x-1 sm:space-x-2">
+                        <li>
+                            <a href="{{ route('admin-pusat.management-course.bimtek-events.index') }}"
+                               class="text-xs sm:text-sm font-medium text-slate-500 hover:text-[#13416B] transition-colors">
+                                Periode Event
+                            </a>
+                        </li>
+                        <li class="inline-flex items-center">
+                            <i class="fas fa-chevron-right text-[10px] text-slate-300 mx-1.5"></i>
+                            <span class="text-xs sm:text-sm font-bold text-slate-900">
+                                Detail & Monitoring
+                            </span>
+                        </li>
+                    </ol>
+                </nav>
                 <div class="flex items-center gap-2.5 flex-wrap">
-                    <h1 class="text-xl sm:text-2xl font-extrabold text-slate-900">{{ $event->batch_name }}</h1>
+                    <h1 class="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">{{ $event->batch_name }}</h1>
                     @php $badge = $event->status_badge; @endphp
-                    <span class="inline-flex px-2.5 py-0.5 rounded-full text-xs font-semibold border {{ $badge['class'] }}">
+                    <span class="inline-flex px-2.5 py-0.5 rounded-md text-xs font-semibold {{ $badge['class'] }}">
                         {{ $badge['label'] }}
                     </span>
                 </div>
@@ -24,114 +36,292 @@
             <div class="flex items-center gap-2 self-start sm:self-auto flex-wrap">
                 <a href="{{ route('admin-pusat.management-course.bimtek-events.edit', $event->id) }}"
                    class="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors shadow-2xs">
-                    <i class="fas fa-pen text-xs text-amber-500"></i>
-                    <span>Edit Jadwal</span>
+                    <span>Edit Linimasa & Kuota</span>
                 </a>
                 <a href="{{ route('admin-pusat.management-course.certificate-submissions.create', ['bimtek_event_id' => $event->id]) }}"
                    class="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-bold text-white bg-[#13416B] hover:bg-[#0e2c48] rounded-lg transition-colors shadow-2xs">
-                    <i class="fas fa-file-signature text-xs"></i>
                     <span>Ajukan Sertifikat ke PPSDM</span>
                 </a>
             </div>
         </div>
 
-        {{-- Kartu Info Detail & Jadwal Zoom --}}
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div class="bg-white rounded-xl border border-slate-200 p-4 space-y-2.5 shadow-2xs">
-                <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">Jadwal & Kuota</span>
+        {{-- ======================================================== --}}
+        {{-- STRUKTUR TIMELINE KESELURUHAN & RINCIAN 3 PERIODE BIMTEK --}}
+        {{-- ======================================================== --}}
+        @php
+            $now = now();
+            $regStart = $event->registration_start_at ?? $event->start_date?->copy()->subDays(7);
+            $regEnd = $event->registration_end_at ?? $event->start_date?->copy()->subDay();
+            $execStart = $event->start_date;
+            $execEnd = $event->end_date;
+            $evalStart = $event->assessment_start_at ?? $event->end_date;
+            $evalEnd = $event->assessment_end_at ?? $event->end_date?->copy()->addDays(3);
+
+            $overallStart = $event->overall_start_at;
+            $overallEnd = $event->overall_end_at;
+            $totalDays = ($overallStart && $overallEnd) ? max(1, $overallStart->diffInDays($overallEnd)) : 0;
+            $quotaPercent = $event->quota > 0 ? min(100, round(($totalRegistered / $event->quota) * 100)) : 0;
+        @endphp
+
+        {{-- Ringkasan Linimasa Keseluruhan (Desain Sirenata) --}}
+        <div class="p-5 sm:p-6 rounded-md bg-[#13416B] text-white shadow-sm space-y-4">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/15 pb-3">
                 <div>
-                    <p class="text-xs text-slate-500">Rentang Tanggal:</p>
-                    <p class="text-sm font-bold text-slate-800">
-                        {{ $event->start_date ? $event->start_date->format('d M Y, H:i') : '-' }} s/d {{ $event->end_date ? $event->end_date->format('d M Y, H:i') : '-' }} WIB
+                    <span class="text-[11px] font-bold uppercase tracking-wider text-slate-300">Linimasa Pelatihan</span>
+                    <h2 class="text-base sm:text-lg font-bold text-white mt-0.5">Timeline Keseluruhan Program</h2>
+                </div>
+
+                <div class="flex items-center gap-2 flex-wrap">
+                    @if ($totalDays > 0)
+                        <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-semibold bg-white/15 border border-white/20 text-white">
+                            Durasi Program: {{ $totalDays }} Hari
+                        </span>
+                    @endif
+                    <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-semibold bg-white/15 border border-white/20 text-white">
+                        Kapasitas Terisi: {{ $totalRegistered }} / {{ $event->quota }} Peserta ({{ $quotaPercent }}%)
+                    </span>
+                </div>
+            </div>
+
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                    <p class="text-xs text-slate-200">Rentang Waktu Penuh (Dari Buka Pendaftaran s/d Batas Akhir Sertifikasi):</p>
+                    <p class="text-base sm:text-xl font-extrabold text-white mt-1">
+                        {{ $event->overall_timeline_formatted }}
                     </p>
                 </div>
-                <div>
-                    <p class="text-xs text-slate-500">Kapasitas Kuota:</p>
-                    <p class="text-sm font-bold text-slate-800">{{ $event->quota }} Peserta (Terisi: {{ $totalRegistered }})</p>
-                </div>
-            </div>
-
-            <div class="bg-white rounded-xl border border-slate-200 p-4 space-y-2.5 shadow-2xs">
-                <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">Sesi Live Zoom (Online)</span>
-                @if ($event->zoom_url)
-                    <div>
-                        <p class="text-xs text-slate-500">Jadwal Sesi Zoom:</p>
-                        <p class="text-xs font-bold text-slate-800">{{ $event->zoom_schedule_formatted }}</p>
+                <div class="w-full md:w-64 space-y-1.5">
+                    <div class="flex justify-between text-xs text-slate-200">
+                        <span>Keterisian Kuota</span>
+                        <span class="font-bold text-amber-300">{{ $quotaPercent }}%</span>
                     </div>
-                    <div>
-                        <a href="{{ $event->zoom_url }}" target="_blank"
-                           class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 transition-colors">
-                            <i class="fas fa-video text-xs"></i>
-                            <span>Buka Ruang Zoom</span>
-                        </a>
+                    <div class="w-full bg-white/20 rounded-full h-2 overflow-hidden">
+                        <div class="bg-amber-400 h-2 rounded-full transition-all" style="width: {{ $quotaPercent }}%"></div>
                     </div>
-                    <div class="text-xs text-slate-600 font-mono space-y-0.5">
-                        @if ($event->zoom_meeting_id) <p>Meeting ID: <strong>{{ $event->zoom_meeting_id }}</strong></p> @endif
-                        @if ($event->zoom_passcode) <p>Passcode: <strong>{{ $event->zoom_passcode }}</strong></p> @endif
-                        @if ($event->zoom_attendance_code)
-                            <p class="pt-1 text-emerald-700">Kode Presensi (Dibagikan di Zoom): <strong class="px-1.5 py-0.5 rounded bg-emerald-50 border border-emerald-200">{{ $event->zoom_attendance_code }}</strong></p>
-                        @endif
-                    </div>
-                @else
-                    <p class="text-xs text-slate-400 italic">Tautan Zoom belum diatur.</p>
-                @endif
-            </div>
-
-            <div class="bg-white rounded-xl border border-slate-200 p-4 space-y-2.5 shadow-2xs">
-                <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">Integrasi Sertifikasi PPSDM</span>
-                <div>
-                    <p class="text-xs text-slate-500">Pengajuan Terdaftar:</p>
-                    <p class="text-sm font-bold text-slate-800">{{ $event->certificateSubmissions->count() }} Berkas Nota Dinas</p>
-                </div>
-                <div>
-                    <p class="text-xs text-slate-500">Peserta Bersertifikat Resmi:</p>
-                    <p class="text-sm font-bold text-emerald-600">{{ $totalCertified }} dari {{ $totalRegistered }} Peserta</p>
                 </div>
             </div>
         </div>
 
+        {{-- Grid Rincian 3 Tahapan Timeline --}}
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+
+            {{-- Tahap 1: Periode Pendaftaran --}}
+            <div class="bg-white rounded-md border border-slate-200 p-4.5 space-y-3 shadow-2xs relative flex flex-col justify-between">
+                <div class="space-y-2.5">
+                    <div class="flex items-center justify-between gap-2 border-b border-slate-100 pb-2">
+                        <div class="flex items-center gap-2">
+                            <span class="w-6 h-6 rounded-full bg-slate-900 text-white text-xs font-bold flex items-center justify-center shrink-0">1</span>
+                            <span class="text-xs font-bold text-slate-800 uppercase tracking-wider">Periode Pendaftaran</span>
+                        </div>
+                        @if ($regStart && $regEnd && $now->between($regStart, $regEnd))
+                            <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                Buka
+                            </span>
+                        @elseif ($regEnd && $now->greaterThan($regEnd))
+                            <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-600">
+                                Selesai
+                            </span>
+                        @else
+                            <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-500">
+                                Mendatang
+                            </span>
+                        @endif
+                    </div>
+
+                    <div>
+                        <p class="text-[11px] text-slate-400 font-medium">Jadwal Buka & Tutup Pendaftaran:</p>
+                        <p class="text-xs sm:text-sm font-semibold text-slate-800 mt-0.5">
+                            @if ($event->registration_start_at && $event->registration_end_at)
+                                {{ $event->registration_start_at->translatedFormat('d M Y, H:i') }} s/d {{ $event->registration_end_at->translatedFormat('d M Y, H:i') }} WIB
+                            @elseif ($event->registration_start_at)
+                                Mulai {{ $event->registration_start_at->translatedFormat('d M Y, H:i') }} WIB
+                            @else
+                                <span class="text-slate-400 italic">Otomatis H-7 sebelum pelaksanaan</span>
+                            @endif
+                        </p>
+                    </div>
+
+                    <p class="text-xs text-slate-500 leading-relaxed">
+                        Calon peserta melakukan pendaftaran mandiri melalui katalog pelatihan.
+                    </p>
+                </div>
+
+                <div class="pt-2 border-t border-slate-100 flex items-center justify-between text-xs">
+                    <span class="text-slate-500">Pendaftar Terdaftar:</span>
+                    <strong class="text-slate-900 font-bold">{{ $totalRegistered }} Peserta</strong>
+                </div>
+            </div>
+
+            {{-- Tahap 2: Periode Pelaksanaan & Sesi Live Zoom --}}
+            <div class="bg-white rounded-md border border-slate-200 p-4.5 space-y-3 shadow-2xs relative flex flex-col justify-between">
+                <div class="space-y-3">
+                    <div class="flex items-center justify-between gap-2 border-b border-slate-100 pb-2">
+                        <div class="flex items-center gap-2">
+                            <span class="w-6 h-6 rounded-full bg-slate-900 text-white text-xs font-bold flex items-center justify-center shrink-0">2</span>
+                            <span class="text-xs font-bold text-slate-800 uppercase tracking-wider">Periode Pelaksanaan</span>
+                        </div>
+                        @if ($execStart && $execEnd && $now->between($execStart, $execEnd))
+                            <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-200">
+                                Berlangsung
+                            </span>
+                        @elseif ($execEnd && $now->greaterThan($execEnd))
+                            <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-600">
+                                Selesai
+                            </span>
+                        @else
+                            <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-500">
+                                Mendatang
+                            </span>
+                        @endif
+                    </div>
+
+                    <div>
+                        <p class="text-[11px] text-slate-400 font-medium">Rentang Waktu Pelatihan:</p>
+                        <p class="text-xs sm:text-sm font-semibold text-slate-800 mt-0.5">
+                            {{ $event->start_date ? $event->start_date->translatedFormat('d M Y, H:i') : '-' }} s/d {{ $event->end_date ? $event->end_date->translatedFormat('d M Y, H:i') : '-' }} WIB
+                        </p>
+                    </div>
+
+                    {{-- Detail Sesi Zoom Terpadu di Pelaksanaan (Biru Kalem & Teks White) --}}
+                    <div class="p-3.5 sm:p-4 rounded-md bg-[#1E40AF] text-white shadow-sm space-y-2.5">
+                        <div class="flex items-center justify-between gap-1 border-b border-white/20 pb-2">
+                            <span class="text-xs font-bold uppercase tracking-wider text-white">Sesi Live Zoom</span>
+                            @if ($event->zoom_url)
+                                <a href="{{ $event->zoom_url }}" target="_blank"
+                                   class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-bold text-[#1E40AF] bg-white hover:bg-blue-50 transition-colors shadow-2xs">
+                                    <span>Buka Zoom</span>
+                                    <i class="fas fa-external-link-alt text-[9px]"></i>
+                                </a>
+                            @endif
+                        </div>
+
+                        <div>
+                            <span class="text-[11px] text-blue-100 block">Jadwal Sesi Zoom:</span>
+                            <p class="text-xs sm:text-sm font-semibold text-white mt-0.5">
+                                {{ $event->zoom_schedule_formatted }}
+                            </p>
+                        </div>
+
+                        @if ($event->zoom_meeting_id || $event->zoom_passcode || $event->zoom_attendance_code)
+                            <div class="text-[11px] text-blue-100 font-mono space-y-1 pt-2 border-t border-white/15">
+                                @if ($event->zoom_meeting_id) <p>Meeting ID: <strong class="text-white font-mono">{{ $event->zoom_meeting_id }}</strong></p> @endif
+                                @if ($event->zoom_passcode) <p>Passcode: <strong class="text-white font-mono">{{ $event->zoom_passcode }}</strong></p> @endif
+                                @if ($event->zoom_attendance_code)
+                                    <p class="pt-0.5 text-white font-sans">
+                                        Kode Presensi: <strong class="px-2 py-0.5 rounded-md bg-white text-[#1E40AF] font-mono text-xs font-bold ml-1">{{ $event->zoom_attendance_code }}</strong>
+                                    </p>
+                                @endif
+                            </div>
+                        @endif
+                    </div>
+                </div>
+
+                <div class="pt-2 border-t border-slate-100 flex items-center justify-between text-xs">
+                    <span class="text-slate-500">Kehadiran Zoom:</span>
+                    <strong class="text-slate-900 font-bold">{{ $totalAttendedZoom }} / {{ $totalRegistered }} Peserta</strong>
+                </div>
+            </div>
+
+            {{-- Tahap 3: Periode Evaluasi & Sertifikat --}}
+            <div class="bg-white rounded-md border border-slate-200 p-4.5 space-y-3 shadow-2xs relative flex flex-col justify-between">
+                <div class="space-y-2.5">
+                    <div class="flex items-center justify-between gap-2 border-b border-slate-100 pb-2">
+                        <div class="flex items-center gap-2">
+                            <span class="w-6 h-6 rounded-full bg-slate-900 text-white text-xs font-bold flex items-center justify-center shrink-0">3</span>
+                            <span class="text-xs font-bold text-slate-800 uppercase tracking-wider">Periode Evaluasi & Sertifikat</span>
+                        </div>
+                        @if ($evalStart && $evalEnd && $now->between($evalStart, $evalEnd))
+                            <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200">
+                                Evaluasi
+                            </span>
+                        @elseif ($evalEnd && $now->greaterThan($evalEnd))
+                            <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-600">
+                                Selesai
+                            </span>
+                        @else
+                            <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-500">
+                                Menunggu
+                            </span>
+                        @endif
+                    </div>
+
+                    <div>
+                        <p class="text-[11px] text-slate-400 font-medium">Batas Evaluasi & Sertifikasi:</p>
+                        <p class="text-xs sm:text-sm font-semibold text-slate-800 mt-0.5">
+                            @if ($event->assessment_start_at && $event->assessment_end_at)
+                                {{ $event->assessment_start_at->translatedFormat('d M Y, H:i') }} s/d {{ $event->assessment_end_at->translatedFormat('d M Y, H:i') }} WIB
+                            @elseif ($event->assessment_start_at)
+                                Mulai {{ $event->assessment_start_at->translatedFormat('d M Y, H:i') }} WIB
+                            @else
+                                <span class="text-slate-400 italic">Setelah periode pelaksanaan selesai</span>
+                            @endif
+                        </p>
+                    </div>
+
+                    <div class="p-3 rounded-md bg-slate-50 border border-slate-200 space-y-1.5 text-xs text-slate-600">
+                        <div class="flex justify-between items-center">
+                            <span>Pengajuan Nota Dinas:</span>
+                            <strong class="font-bold text-slate-800">{{ $event->certificateSubmissions->count() }} Berkas</strong>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span>Nomor PPSDM Terbit:</span>
+                            <strong class="font-bold text-emerald-700">{{ $totalCertified }} dari {{ $totalRegistered }} Peserta</strong>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pt-2 border-t border-slate-100">
+                    <a href="{{ route('admin-pusat.management-course.certificate-submissions.create', ['bimtek_event_id' => $event->id]) }}"
+                       class="w-full inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-bold text-white bg-[#13416B] hover:bg-[#0e2c48] transition-colors">
+                        <span>Proses Pengajuan PPSDM</span>
+                    </a>
+                </div>
+            </div>
+
+        </div>
+
         {{-- 4 Indikator Progres Peserta --}}
         <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
-            <div class="bg-white p-3.5 rounded-xl border border-slate-200 flex items-center justify-between">
+            <div class="bg-white p-3.5 rounded-md border border-slate-200 flex items-center justify-between">
                 <div>
                     <p class="text-[11px] font-medium text-slate-500">Total Peserta</p>
                     <p class="text-xl font-bold text-slate-800">{{ $totalRegistered }}</p>
                 </div>
-                <span class="w-8 h-8 rounded-lg bg-slate-100 text-slate-600 flex items-center justify-center text-xs">
+                <span class="w-8 h-8 rounded-md bg-slate-100 text-slate-600 flex items-center justify-center text-xs">
                     <i class="fas fa-users"></i>
                 </span>
             </div>
-            <div class="bg-white p-3.5 rounded-xl border border-slate-200 flex items-center justify-between">
+            <div class="bg-white p-3.5 rounded-md border border-slate-200 flex items-center justify-between">
                 <div>
                     <p class="text-[11px] font-medium text-slate-500">Tuntas Modul</p>
                     <p class="text-xl font-bold text-emerald-600">{{ $totalCompleted }}</p>
                 </div>
-                <span class="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center text-xs">
+                <span class="w-8 h-8 rounded-md bg-emerald-50 text-emerald-600 flex items-center justify-center text-xs">
                     <i class="fas fa-check-circle"></i>
                 </span>
             </div>
-            <div class="bg-white p-3.5 rounded-xl border border-slate-200 flex items-center justify-between">
+            <div class="bg-white p-3.5 rounded-md border border-slate-200 flex items-center justify-between">
                 <div>
                     <p class="text-[11px] font-medium text-slate-500">Hadir Live Zoom</p>
                     <p class="text-xl font-bold text-blue-600">{{ $totalAttendedZoom }}</p>
                 </div>
-                <span class="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center text-xs">
+                <span class="w-8 h-8 rounded-md bg-blue-50 text-blue-600 flex items-center justify-center text-xs">
                     <i class="fas fa-video"></i>
                 </span>
             </div>
-            <div class="bg-white p-3.5 rounded-xl border border-slate-200 flex items-center justify-between">
+            <div class="bg-white p-3.5 rounded-md border border-slate-200 flex items-center justify-between">
                 <div>
                     <p class="text-[11px] font-medium text-slate-500">Nomor PPSDM Terbit</p>
                     <p class="text-xl font-bold text-[#13416B]">{{ $totalCertified }}</p>
                 </div>
-                <span class="w-8 h-8 rounded-lg bg-[#13416B]/10 text-[#13416B] flex items-center justify-center text-xs">
+                <span class="w-8 h-8 rounded-md bg-[#13416B]/10 text-[#13416B] flex items-center justify-center text-xs">
                     <i class="fas fa-certificate"></i>
                 </span>
             </div>
         </div>
 
         {{-- Tabel Monitoring Peserta --}}
-        <div class="bg-white rounded-xl border border-slate-200 shadow-2xs overflow-hidden">
+        <div class="bg-white rounded-md border border-slate-200 shadow-2xs overflow-hidden">
             <div class="px-5 py-3.5 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-50/50">
                 <div class="flex items-center gap-2">
                     <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>

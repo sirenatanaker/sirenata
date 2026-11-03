@@ -1,51 +1,9 @@
-<x-dashboard::layouts.dashboard title="Bimtek & Event Online - Admin Pusat">
+<x-dashboard::layouts.dashboard title="Periode Event Online - Admin Pusat">
     <div class="p-3 sm:p-6 max-w-[1600px] mx-auto space-y-4 sm:space-y-6">
-
-        {{-- KPI Cards Ringkas --}}
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div class="bg-white rounded-xl border border-slate-200 p-4 flex items-center justify-between shadow-2xs">
-                <div>
-                    <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Total Gelombang Bimtek</p>
-                    <p class="text-2xl font-extrabold text-slate-900 mt-1 tabular-nums">
-                        {{ number_format($totalEvents, 0, ',', '.') }}
-                    </p>
-                    <p class="text-[11px] text-slate-400 mt-0.5">Semua batch yang pernah dibuat</p>
-                </div>
-                <div class="w-11 h-11 rounded-xl bg-[#13416B]/10 text-[#13416B] flex items-center justify-center shrink-0">
-                    <i class="fas fa-video text-lg"></i>
-                </div>
-            </div>
-
-            <div class="bg-white rounded-xl border border-slate-200 p-4 flex items-center justify-between shadow-2xs">
-                <div>
-                    <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Sedang Berlangsung</p>
-                    <p class="text-2xl font-extrabold text-emerald-600 mt-1 tabular-nums">
-                        {{ number_format($ongoingEvents, 0, ',', '.') }}
-                    </p>
-                    <p class="text-[11px] text-slate-400 mt-0.5">Bimtek aktif hari ini</p>
-                </div>
-                <div class="w-11 h-11 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
-                    <i class="fas fa-satellite-dish text-lg"></i>
-                </div>
-            </div>
-
-            <div class="bg-white rounded-xl border border-slate-200 p-4 flex items-center justify-between shadow-2xs">
-                <div>
-                    <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Peserta Terdaftar</p>
-                    <p class="text-2xl font-extrabold text-[#547996] mt-1 tabular-nums">
-                        {{ number_format($totalParticipants, 0, ',', '.') }}
-                    </p>
-                    <p class="text-[11px] text-slate-400 mt-0.5">Total ASN yang mengikuti</p>
-                </div>
-                <div class="w-11 h-11 rounded-xl bg-[#547996]/10 text-[#547996] flex items-center justify-center shrink-0">
-                    <i class="fas fa-users text-lg"></i>
-                </div>
-            </div>
-        </div>
 
         {{-- Filter Card & Tabel --}}
         <x-dashboard::filter-card
-            title="Daftar Gelombang Bimtek & Event"
+            title="Daftar Gelombang Periode Event"
             :total="$events->total() . ' Gelombang'"
             :resetUrl="route('admin-pusat.management-course.bimtek-events.index')">
 
@@ -59,7 +17,7 @@
 
             <x-slot name="filter_inputs">
                 {{-- Status --}}
-                <div class="w-full sm:w-44">
+                <div class="w-full sm:w-48">
                     <label class="block text-xs font-medium text-slate-500 mb-1">Status Pelaksanaan</label>
                     <select name="status" class="w-full px-3 py-2 rounded-lg border border-slate-300 text-xs sm:text-sm">
                         <option value="">Semua Status</option>
@@ -67,17 +25,6 @@
                         <option value="open_registration" @selected(request('status') === 'open_registration')>Pendaftaran Buka</option>
                         <option value="ongoing" @selected(request('status') === 'ongoing')>Sedang Berlangsung</option>
                         <option value="completed" @selected(request('status') === 'completed')>Selesai</option>
-                    </select>
-                </div>
-
-                {{-- Tipe --}}
-                <div class="w-full sm:w-44">
-                    <label class="block text-xs font-medium text-slate-500 mb-1">Metode Pelaksanaan</label>
-                    <select name="execution_type" class="w-full px-3 py-2 rounded-lg border border-slate-300 text-xs sm:text-sm">
-                        <option value="">Semua Metode</option>
-                        <option value="online" @selected(request('execution_type') === 'online')>Online (Zoom)</option>
-                        <option value="offline" @selected(request('execution_type') === 'offline')>Offline (Tatap Muka)</option>
-                        <option value="hybrid" @selected(request('execution_type') === 'hybrid')>Hybrid</option>
                     </select>
                 </div>
 
@@ -101,7 +48,7 @@
                             <th class="py-3 px-3.5 min-w-[220px]">Gelombang & Kode</th>
                             <th class="py-3 px-3.5 min-w-[200px]">Master Kursus</th>
                             <th class="py-3 px-3.5 min-w-[170px]">Jadwal Pelaksanaan</th>
-                            <th class="py-3 px-3.5 min-w-[130px]">Metode / Kuota</th>
+                            <th class="py-3 px-3.5 min-w-[110px]">Kuota</th>
                             <th class="py-3 px-3.5 min-w-[120px] text-center">Status</th>
                             <th class="py-3 px-3.5 w-28 text-center">Aksi</th>
                         </tr>
@@ -114,7 +61,8 @@
                                 </td>
                                 <td class="py-3 px-3.5">
                                     <a href="{{ route('admin-pusat.management-course.bimtek-events.show', $item->id) }}"
-                                       class="font-bold text-slate-900 hover:text-[#13416B] transition-colors line-clamp-1">
+                                       class="font-bold text-slate-900 hover:text-[#13416B] transition-colors line-clamp-2 leading-snug"
+                                       title="{{ $item->batch_name }}">
                                         {{ $item->batch_name }}
                                     </a>
                                     <span class="inline-block mt-0.5 text-[11px] font-mono font-medium text-slate-400">
@@ -122,7 +70,7 @@
                                     </span>
                                 </td>
                                 <td class="py-3 px-3.5">
-                                    <p class="font-semibold text-slate-700 line-clamp-1">
+                                    <p class="font-semibold text-slate-700 line-clamp-2 leading-snug" title="{{ $item->course?->name }}">
                                         {{ $item->course?->name ?? '-' }}
                                     </p>
                                 </td>
@@ -141,28 +89,16 @@
                                     @endif
                                 </td>
                                 <td class="py-3 px-3.5">
-                                    <div class="flex items-center gap-1.5">
-                                        @if ($item->execution_type === 'online')
-                                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-bold bg-blue-50 text-blue-700">
-                                                <i class="fas fa-video text-[10px]"></i> Zoom
-                                            </span>
-                                        @elseif ($item->execution_type === 'offline')
-                                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-bold bg-amber-50 text-amber-700">
-                                                <i class="fas fa-building text-[10px]"></i> Tatap Muka
-                                            </span>
-                                        @else
-                                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-bold bg-purple-50 text-purple-700">
-                                                <i class="fas fa-globe text-[10px]"></i> Hybrid
-                                            </span>
-                                        @endif
-                                        <span class="text-xs text-slate-500">
-                                            ({{ $item->quota }} Peserta)
-                                        </span>
-                                    </div>
+                                    <span class="font-semibold text-slate-800 tabular-nums">
+                                        {{ number_format($item->quota, 0, ',', '.') }} Peserta
+                                    </span>
                                 </td>
                                 <td class="py-3 px-3.5 text-center">
-                                    @php $badge = $item->status_badge; @endphp
-                                    <span class="inline-flex px-2.5 py-0.5 rounded-full text-xs font-semibold border {{ $badge['class'] }}">
+                                    @php
+                                        $badge = $item->status_badge;
+                                        $isCompleted = ($badge['label'] ?? '') === 'Selesai';
+                                    @endphp
+                                    <span class="inline-flex items-center justify-center {{ $isCompleted ? 'px-3.5 py-1 text-xs sm:text-[13px] font-bold tracking-wide shadow-2xs' : 'px-3 py-0.5 text-xs font-semibold' }} rounded-full {{ $badge['class'] }}">
                                         {{ $badge['label'] }}
                                     </span>
                                 </td>

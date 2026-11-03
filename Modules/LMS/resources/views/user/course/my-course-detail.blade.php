@@ -59,6 +59,13 @@
             $isCourseAlreadyFinished = ($currentProgress >= 100) || ($enrollmentData && $enrollmentData->status === 'completed');
             $canReviewAll = (bool) (data_get($course, 'can_review_all') || $isCourseAlreadyFinished || $isEventEnded);
 
+            $isWaitingForStart = (bool) (data_get($course, 'is_waiting_for_start', false));
+            if (!$isWaitingForStart && $activeBimtek && !$isCourseAlreadyFinished) {
+                $curPhase = $activeBimtek->current_timeline_phase ?? [];
+                $phaseKey = $curPhase['phase'] ?? 'learning';
+                $isWaitingForStart = ($phaseKey === 'registration' || $activeBimtek->status === 'open_registration' || ($activeBimtek->start_date && now()->lessThan($activeBimtek->start_date)));
+            }
+
             $areAllTopicsCompleted = ($totalContents > 0 && $completedContents >= $totalContents);
             $isZoomUnlocked = true;
             $isZoomAttended = (bool) ($enrollmentData?->zoom_attended);
@@ -66,9 +73,12 @@
             $isZoomStarted = !$activeBimtek?->zoom_scheduled_at || now()->greaterThanOrEqualTo($activeBimtek->zoom_scheduled_at);
             $curBimtekPhase = $activeBimtek?->current_timeline_phase;
 
-            // Warna progress: 100% hijau, sedang berprogress amber; teks persen slate/gray
+            // Warna progress: 100% hijau, sedang berprogress amber, waiting blue; teks persen slate/gray
             if ($currentProgress >= 100) {
                 $progressBarClass = 'bg-emerald-500';
+                $progressTextClass = 'text-slate-600';
+            } elseif ($isWaitingForStart) {
+                $progressBarClass = 'bg-[#0B5CFF]';
                 $progressTextClass = 'text-slate-600';
             } else {
                 $progressBarClass = 'bg-amber-500';
@@ -78,6 +88,17 @@
             if (empty($thumbnailUrl)) {
                 $encodedName = urlencode($courseName);
                 $thumbnailUrl = "https://ui-avatars.com/api/?name={$encodedName}&background=eff6ff&color=1e3a8a&size=512&font-size=0.33&bold=true";
+            }
+
+            if ($isFullyCompleted) {
+                $badgeText = 'Selesai';
+                $badgeBg = 'bg-emerald-600 text-white';
+            } elseif ($isWaitingForStart) {
+                $badgeText = 'Menunggu Pelaksanaan';
+                $badgeBg = 'bg-[#0B5CFF] text-white';
+            } else {
+                $badgeText = 'Sedang Berjalan';
+                $badgeBg = 'bg-amber-500 text-white';
             }
         @endphp
 
@@ -97,8 +118,8 @@
                 </button>
 
                 {{-- Badge Status di Pojok Kanan Atas Thumbnail (Desain Card Kursus) --}}
-                <span class="absolute top-0 right-0 z-10 px-2.5 sm:px-3 py-1 text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-white {{ $isFullyCompleted ? 'bg-emerald-600' : 'bg-amber-500' }} shadow-xs rounded-none rounded-bl-md rounded-tr-md">
-                    {{ $isFullyCompleted ? 'Selesai' : 'Sedang Berjalan' }}
+                <span class="absolute top-0 right-0 z-10 {{ $isFullyCompleted ? 'px-3 sm:px-3.5 py-1 sm:py-1.5 text-[10px] sm:text-[11px]' : 'px-2.5 sm:px-3 py-1 text-[9px] sm:text-[10px]' }} font-bold uppercase tracking-wider {{ $badgeBg }} shadow-xs rounded-none rounded-bl-md rounded-tr-md">
+                    {{ $badgeText }}
                 </span>
             </div>
 
@@ -128,36 +149,26 @@
                         {{ $courseName }}
                     </h1>
 
-                    {{-- Meta Info (Timeline Pelaksanaan di Bawah Judul) --}}
-                    <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-500 font-medium mb-3">
-                        <span class="inline-flex items-center gap-1.5">
-                            <i class="far fa-calendar-alt text-slate-400"></i>
-                            @if ($activeBimtek && $activeBimtek->start_date)
-                                <span>Periode Pelaksanaan: <strong class="text-slate-700 font-bold">{{ $activeBimtek->start_date->translatedFormat('d M') }} - {{ $activeBimtek->end_date ? $activeBimtek->end_date->translatedFormat('d M Y') : '' }}</strong></span>
-                            @else
-                                <span>Periode Pelaksanaan: <strong class="text-slate-700 font-bold">Mandiri / Fleksibel</strong></span>
-                            @endif
-                        </span>
-                    </div>
-
-                    {{-- Deskripsi --}}
-                    <div class="prose prose-sm max-w-none text-slate-600 mb-4">
-                        <p class="text-xs sm:text-sm leading-relaxed line-clamp-3 sm:line-clamp-4">
-                            {{ data_get($course, 'description', 'Tidak ada deskripsi tersedia untuk course ini.') }}
-                        </p>
-                    </div>
+                    {{-- Deskripsi Kursus Saja (Timeline Dihapus) --}}
+                    @if (!empty(data_get($course, 'description')))
+                        <div class="prose prose-sm max-w-none text-slate-600 mb-4 pt-1">
+                            <p class="text-xs sm:text-sm leading-relaxed line-clamp-3 sm:line-clamp-4">
+                                {{ data_get($course, 'description') }}
+                            </p>
+                        </div>
+                    @endif
 
                     {{-- Progress Bar (Benar-benar di Bawah Deskripsi Tanpa Garis Pemisah) --}}
                     <div class="max-w-md w-full pt-1" data-tour="progres">
                         <div class="flex justify-between items-center mb-1.5">
-                            <span class="text-xs font-semibold text-slate-500">Progres Belajar</span>
+                            <span class="text-xs font-semibold text-slate-500">{{ $isWaitingForStart ? 'Status Pelatihan' : 'Progres Belajar' }}</span>
                             <span class="text-xs sm:text-sm font-bold {{ $progressTextClass }}">
-                                {{ $currentProgress }}%
+                                {{ $isWaitingForStart ? 'Menunggu Pelaksanaan' : $currentProgress . '%' }}
                             </span>
                         </div>
                         <div class="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
                             <div class="{{ $progressBarClass }} h-full rounded-full transition-all duration-700"
-                                style="width: {{ $currentProgress }}%"></div>
+                                style="width: {{ $isWaitingForStart ? 0 : $currentProgress }}%"></div>
                         </div>
                     </div>
                 </div>
@@ -395,7 +406,13 @@
 
                                                 <span class="text-[10px] text-slate-300 hidden sm:inline-block">•</span>
 
-                                                @if ($isLocked)
+                                                @if ($isWaitingForStart)
+                                                    <span
+                                                        class="inline-flex items-center gap-1 text-[11px] sm:text-xs font-semibold text-slate-400 whitespace-nowrap">
+                                                        <i class="fas fa-lock text-[10px]" aria-hidden="true"></i>
+                                                        Dibuka Saat Pelaksanaan
+                                                    </span>
+                                                @elseif ($isLocked)
                                                     <span
                                                         class="inline-flex items-center gap-1 text-[11px] sm:text-xs font-semibold text-slate-400 whitespace-nowrap">
                                                         <i class="fas fa-lock text-[10px]" aria-hidden="true"></i>
@@ -432,7 +449,7 @@
                                                 $documentUrlRaw = data_get($content, 'document_url');
                                                 $isContentItemCompleted = data_get($content, 'is_completed', false);
                                                 // Terkunci jika topik sebelumnya belum selesai (kecuali topik ini sudah pernah diselesaikan atau mode ulas materi)
-                                                $isContentLocked = $canReviewAll ? false : (!$isPreviousContentDone && !$isContentItemCompleted);
+                                                $isContentLocked = $canReviewAll ? false : ($isWaitingForStart || (!$isPreviousContentDone && !$isContentItemCompleted));
                                             @endphp
 
                                             <div
@@ -458,7 +475,8 @@
 
                                                     <div class="flex-1 min-w-0">
                                                         <p
-                                                            class="font-bold text-slate-800 text-sm leading-snug break-words">
+                                                            class="font-bold text-slate-800 text-sm leading-snug break-words line-clamp-2"
+                                                            title="{{ $contentName }}">
                                                             {{ $contentName }}
                                                         </p>
                                                     </div>
@@ -491,7 +509,7 @@
                                         {{-- Evaluasi per Modul (terkunci sampai semua topik selesai) --}}
                                         @if ($postTestBab)
                                             @php
-                                                $isPostTestBabLocked = $canReviewAll ? false : (!$isContentCompleted && !$isPostTestBabCompleted);
+                                                $isPostTestBabLocked = $canReviewAll ? false : ($isWaitingForStart || (!$isContentCompleted && !$isPostTestBabCompleted));
                                                 $postTestIconBox = $isPostTestBabLocked
                                                     ? 'bg-slate-400 text-white border-slate-400'
                                                     : 'bg-[#13416B] text-white border-[#13416B]';
@@ -591,7 +609,13 @@
                                 </div>
                                 <div class="space-y-1 min-w-0">
                                     <h3 class="text-base font-bold text-slate-800 leading-tight">Tatap Muka Online</h3>
-                                    @if ($isZoomUnlocked)
+                                    @if ($isWaitingForStart)
+                                        <div>
+                                            <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded text-[10px] font-bold bg-[#0B5CFF] text-white shadow-xs">
+                                                <i class="far fa-clock"></i> Menunggu Jadwal
+                                            </span>
+                                        </div>
+                                    @elseif ($isZoomUnlocked)
                                         <div>
                                             @if ($isZoomAttended)
                                                 <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded text-[10px] font-bold bg-emerald-600 text-white shadow-xs">
@@ -609,7 +633,7 @@
 
                             {{-- Baris Bawah: Jadwal, Meeting ID, dan Passcode di bawah 2 kolom sebelumnya --}}
                             <div class="space-y-1">
-                                @if ($isZoomUnlocked)
+                                @if ($isWaitingForStart || $isZoomUnlocked)
                                     <p class="text-xs text-slate-600 font-medium">
                                         <i class="far fa-calendar-alt mr-1 text-slate-400"></i> Jadwal: <span class="font-bold text-slate-800">{{ $activeBimtek->zoom_schedule_formatted }}</span>
                                     </p>
@@ -634,7 +658,12 @@
                         </div>
 
                         <div class="relative z-10 shrink-0 flex flex-col sm:items-end gap-2 self-start md:self-center w-full md:w-auto">
-                            @if ($isEventEnded && !$isZoomAttended)
+                            @if ($isWaitingForStart)
+                                <div class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-md text-xs font-semibold bg-slate-100 text-slate-500 border border-slate-200">
+                                    <i class="fas fa-lock text-slate-400"></i>
+                                    <span>Terkunci</span>
+                                </div>
+                            @elseif ($isEventEnded && !$isZoomAttended)
                                 <div class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-md text-xs font-semibold bg-slate-100 text-slate-500 border border-slate-200">
                                     <i class="fas fa-history text-slate-400"></i>
                                     <span>Sesi Zoom Telah Berakhir</span>
@@ -825,9 +854,9 @@
                     <!-- PERBAIKAN: rounded-none border-x-0 di mobile -->
                     <div data-tour="evaluasi"
                         class="bg-white rounded-none sm:rounded-md shadow-sm border-y border-x-0 sm:border sm:border-x border-slate-200 p-4 sm:px-6 sm:py-3.5 lg:px-7 lg:py-4 transition-all relative overflow-hidden">
-                        <div class="flex flex-row items-center justify-between gap-6 lg:gap-8">
+                        <div class="flex flex-row items-end justify-between gap-6 lg:gap-8">
                             {{-- Kolom Kiri: Informasi Evaluasi & Tombol Aksi --}}
-                            <div class="flex-1 min-w-0">
+                            <div class="flex-1 min-w-0 sm:py-1">
                                 <h3 class="text-base sm:text-lg lg:text-xl font-extrabold text-slate-900 leading-snug">
                                     {{ $evaluasiAkhirTitle }}
                                 </h3>
@@ -860,6 +889,12 @@
                                             class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-md text-xs sm:text-sm font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 transition-all shadow-xs">
                                             <i class="fas fa-eye text-xs"></i> Lihat Hasil
                                         </a>
+                                    @elseif ($isWaitingForStart)
+                                        <button type="button" disabled
+                                            title="Evaluasi dibuka saat periode pelaksanaan pelatihan resmi dimulai"
+                                            class="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-5 py-2.5 rounded-md text-xs sm:text-sm font-bold bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed select-none">
+                                            <i class="fas fa-lock text-xs"></i> Evaluasi Terkunci
+                                        </button>
                                     @elseif (!$isEvaluasiAkhirLocked && !$isEventEnded)
                                         <a href="{{ route('user.course.test.show', ['slug' => $courseSlug, 'postTestId' => $evaluasiAkhir->id]) }}"
                                             class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-md text-xs sm:text-sm font-bold bg-[#13416B] hover:bg-[#0f3354] text-white shadow-sm transition-all">
@@ -881,10 +916,10 @@
                             </div>
 
                             {{-- Kolom Kanan: Ilustrasi Gambar khusus Layar Tablet/Desktop (sm ke atas) --}}
-                            <div class="hidden sm:flex sm:shrink-0 items-center justify-center">
+                            <div class="hidden sm:flex sm:shrink-0 items-end justify-center self-end -mb-3.5 lg:-mb-4">
                                 <img src="{{ asset('images/modul_ilustrasi.webp') }}"
                                     alt="Ilustrasi Evaluasi Akhir"
-                                    class="sm:w-44 sm:h-44 md:w-48 md:h-48 lg:w-52 lg:h-52 object-contain {{ $isEvaluasiAkhirLocked ? 'opacity-70 grayscale' : '' }}" />
+                                    class="sm:h-44 md:h-48 lg:h-52 w-auto object-contain object-bottom select-none pointer-events-none {{ $isEvaluasiAkhirLocked ? 'opacity-70 grayscale' : '' }}" />
                             </div>
                         </div>
                     </div>

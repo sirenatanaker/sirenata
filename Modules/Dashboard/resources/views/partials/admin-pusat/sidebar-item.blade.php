@@ -344,18 +344,27 @@
         </div>
     </li>
 
-    <!-- Manajemen Kursus -->
-    @php $isCourse = request()->routeIs('admin-pusat.management-course.courses.*', 'admin-pusat.management-course.course-sections.*', 'admin-pusat.management-course.post-tests.*'); @endphp
-    <li>
-        <a href="{{ route('admin-pusat.management-course.courses.index') }}"
+    <!-- Manajemen Kursus (Dropdown) -->
+    @php
+        $isCourseActive = request()->routeIs(
+            'admin-pusat.management-course.courses.*',
+            'admin-pusat.management-course.course-sections.*',
+            'admin-pusat.management-course.post-tests.*'
+        );
+        $isBimtekActive = request()->routeIs('admin-pusat.management-course.bimtek-events.*');
+        $isCourseOpen = $isCourseActive || $isBimtekActive;
+    @endphp
+    <li x-data="{ open: {{ $isCourseOpen ? 'true' : 'false' }}, flyout: false }" @mouseleave="flyout = false" class="relative">
+        <button @click="sidebarOpen ? open = !open : flyout = !flyout"
+            type="button"
             title="Manajemen Kursus"
-            class="relative flex transition-all duration-200 group py-3 rounded-xl
-            {{ $isCourse
+            class="relative flex transition-all duration-200 group py-3 rounded-xl w-full cursor-pointer
+            {{ $isCourseOpen
                 ? 'text-[#13416B] font-bold bg-[#13416B]/10'
                 : 'text-slate-500 hover:text-[#13416B] hover:bg-slate-100/70' }}"
             :class="sidebarOpen ? 'flex-row items-center justify-start px-3.5 gap-3.5' : 'flex-col items-center justify-center w-12 h-12 mx-auto p-0'">
             <span class="w-6 h-6 shrink-0 flex items-center justify-center transition-transform duration-200 group-hover:scale-110">
-                @if ($isCourse)
+                @if ($isCourseOpen)
                     <!-- Solid Academic Cap (Active) -->
                     <svg class="w-6 h-6 text-[#13416B]" viewBox="0 0 24 24" fill="currentColor">
                         <path d="M11.7 2.805a.75.75 0 01.6 0A60.65 60.65 0 0122.83 8.72a.75.75 0 01-.231 1.337 49.948 49.948 0 00-9.902 3.912l-.003.002c-.114.06-.24.09-.366.09a.75.75 0 01-.366-.09 49.95 49.95 0 00-9.902-3.912.75.75 0 01-.23-1.337A60.653 60.653 0 0111.7 2.805z" />
@@ -371,65 +380,58 @@
                     </svg>
                 @endif
             </span>
-            <span class="text-[15px] text-left leading-snug break-words"
+            <span class="flex-1 text-[15px] text-left leading-snug break-words"
                   :class="sidebarOpen ? 'block' : 'hidden'">Manajemen Kursus</span>
-        </a>
-    </li>
+            <i x-show="sidebarOpen" class="fas fa-chevron-down w-3.5 shrink-0 text-xs text-slate-400 transition-transform duration-200"
+               :class="{ 'rotate-180': open }" aria-hidden="true"></i>
+        </button>
 
-    <!-- Bimtek & Event Online -->
-    @php $isBimtek = request()->routeIs('admin-pusat.management-course.bimtek-events.*'); @endphp
-    <li>
-        <a href="{{ route('admin-pusat.management-course.bimtek-events.index') }}"
-            title="Bimtek & Event Online"
-            class="relative flex transition-all duration-200 group py-3 rounded-xl
-            {{ $isBimtek
-                ? 'text-[#13416B] font-bold bg-[#13416B]/10'
-                : 'text-slate-500 hover:text-[#13416B] hover:bg-slate-100/70' }}"
-            :class="sidebarOpen ? 'flex-row items-center justify-start px-3.5 gap-3.5' : 'flex-col items-center justify-center w-12 h-12 mx-auto p-0'">
-            <span class="w-6 h-6 shrink-0 flex items-center justify-center transition-transform duration-200 group-hover:scale-110">
-                @if ($isBimtek)
-                    <!-- Solid Video Camera (Active) -->
-                    <svg class="w-5 h-5 text-[#13416B]" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M4.5 4.5a3 3 0 0 0-3 3v9a3 3 0 0 0 3 3h8.25a3 3 0 0 0 3-3v-9a3 3 0 0 0-3-3H4.5ZM19.94 18.75l-2.69-2.69V7.94l2.69-2.69c.944-.945 2.56-.276 2.56 1.06v11.38c0 1.336-1.616 2.005-2.56 1.06Z" />
-                    </svg>
-                @else
-                    <!-- Outline Video Camera (Inactive) -->
-                    <svg class="w-5 h-5 text-slate-500 group-hover:text-[#13416B]" fill="none" viewBox="0 0 24 24" stroke-width="1.75" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="m15.75 10.5 4.72-4.72a.75.75 0 0 1 1.28.53v11.38a.75.75 0 0 1-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25h-9A2.25 2.25 0 0 0 2.25 7.5v9a2.25 2.25 0 0 0 2.25 2.25Z" />
-                    </svg>
-                @endif
-            </span>
-            <span class="text-[15px] text-left leading-snug break-words"
-                  :class="sidebarOpen ? 'block' : 'hidden'">Bimtek & Event</span>
-        </a>
-    </li>
+        <!-- Submenu Accordion (Expanded) -->
+        <ul x-show="sidebarOpen && open" x-collapse x-cloak class="mt-1 space-y-1 pl-4">
+            <li>
+                <a href="{{ route('admin-pusat.management-course.courses.index') }}"
+                    class="flex items-center px-3.5 py-2.5 rounded-lg transition-colors text-sm leading-snug break-words font-semibold
+                    {{ $isCourseActive
+                        ? 'text-[#13416B] bg-[#13416B]/10 font-bold'
+                        : 'text-slate-500 hover:bg-slate-100 hover:text-[#13416B]' }}">
+                    Daftar Kursus
+                </a>
+            </li>
+            <li>
+                <a href="{{ route('admin-pusat.management-course.bimtek-events.index') }}"
+                    class="flex items-center px-3.5 py-2.5 rounded-lg transition-colors text-sm leading-snug break-words font-semibold
+                    {{ $isBimtekActive
+                        ? 'text-[#13416B] bg-[#13416B]/10 font-bold'
+                        : 'text-slate-500 hover:bg-slate-100 hover:text-[#13416B]' }}">
+                    Periode Event
+                </a>
+            </li>
+        </ul>
 
-    <!-- Pengajuan Sertifikat PPSDM -->
-    @php $isPPSDM = request()->routeIs('admin-pusat.management-course.certificate-submissions.*'); @endphp
-    <li>
-        <a href="{{ route('admin-pusat.management-course.certificate-submissions.index') }}"
-            title="Pengajuan Sertifikat PPSDM"
-            class="relative flex transition-all duration-200 group py-3 rounded-xl
-            {{ $isPPSDM
-                ? 'text-[#13416B] font-bold bg-[#13416B]/10'
-                : 'text-slate-500 hover:text-[#13416B] hover:bg-slate-100/70' }}"
-            :class="sidebarOpen ? 'flex-row items-center justify-start px-3.5 gap-3.5' : 'flex-col items-center justify-center w-12 h-12 mx-auto p-0'">
-            <span class="w-6 h-6 shrink-0 flex items-center justify-center transition-transform duration-200 group-hover:scale-110">
-                @if ($isPPSDM)
-                    <!-- Solid Shield Check (Active) -->
-                    <svg class="w-5 h-5 text-[#13416B]" viewBox="0 0 24 24" fill="currentColor">
-                        <path fill-rule="evenodd" d="M12.516 2.17a.75.75 0 0 0-1.032 0 11.209 11.209 0 0 1-7.877 3.08.75.75 0 0 0-.722.515A12.74 12.74 0 0 0 2.25 9.75c0 5.942 4.064 10.933 9.563 12.348a.749.749 0 0 0 .374 0c5.499-1.415 9.563-6.406 9.563-12.348 0-1.39-.223-2.73-.635-3.985a.75.75 0 0 0-.722-.516l-.143.001c-2.996 0-5.717-1.17-7.734-3.08Zm3.094 8.016a.75.75 0 1 0-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 0 0-1.06 1.06l2.25 2.25a.75.75 0 0 0 1.14-.094l3.75-5.25Z" clip-rule="evenodd" />
-                    </svg>
-                @else
-                    <!-- Outline Shield Check (Inactive) -->
-                    <svg class="w-5 h-5 text-slate-500 group-hover:text-[#13416B]" fill="none" viewBox="0 0 24 24" stroke-width="1.75" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75m-3-7.036A11.959 11.959 0 0 1 3.598 6 11.99 11.99 0 0 0 3 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285Z" />
-                    </svg>
-                @endif
-            </span>
-            <span class="text-[15px] text-left leading-snug break-words"
-                  :class="sidebarOpen ? 'block' : 'hidden'">Pengajuan PPSDM</span>
-        </a>
+        <!-- Submenu Flyout (Collapsed Mini Mode) -->
+        <div x-show="!sidebarOpen && flyout" x-transition.opacity.duration.150ms x-cloak
+             @click.outside="flyout = false"
+             class="absolute left-full top-0 ms-2 w-64 bg-white border border-slate-200 rounded-xl shadow-xl py-2 z-50">
+            <div class="px-3.5 py-1 text-[11px] font-bold text-slate-400 uppercase tracking-wider border-b border-slate-100 mb-1">
+                Manajemen Kursus
+            </div>
+            <ul class="space-y-0.5 px-1.5">
+                <li>
+                    <a href="{{ route('admin-pusat.management-course.courses.index') }}"
+                        class="block px-3.5 py-2.5 rounded-lg text-sm leading-snug break-words font-semibold transition-colors
+                        {{ $isCourseActive ? 'text-[#13416B] bg-[#13416B]/10 font-bold' : 'text-slate-600 hover:bg-slate-100 hover:text-[#13416B]' }}">
+                        Daftar Kursus
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ route('admin-pusat.management-course.bimtek-events.index') }}"
+                        class="block px-3.5 py-2.5 rounded-lg text-sm leading-snug break-words font-semibold transition-colors
+                        {{ $isBimtekActive ? 'text-[#13416B] bg-[#13416B]/10 font-bold' : 'text-slate-600 hover:bg-slate-100 hover:text-[#13416B]' }}">
+                        Periode Event
+                    </a>
+                </li>
+            </ul>
+        </div>
     </li>
 
     <!-- Manajemen Perpustakaan -->
@@ -460,18 +462,23 @@
         </a>
     </li>
 
-    <!-- Manajemen Sertifikat -->
-    @php $isCert = request()->routeIs('admin-pusat.certificates.*'); @endphp
-    <li>
-        <a href="{{ route('admin-pusat.certificates.index') }}"
+    <!-- Manajemen Sertifikat (Dropdown) -->
+    @php
+        $isCertActive = request()->routeIs('admin-pusat.certificates.*');
+        $isSubmissionsActive = request()->routeIs('admin-pusat.management-course.certificate-submissions.*');
+        $isCertOpen = $isCertActive || $isSubmissionsActive;
+    @endphp
+    <li x-data="{ open: {{ $isCertOpen ? 'true' : 'false' }}, flyout: false }" @mouseleave="flyout = false" class="relative">
+        <button @click="sidebarOpen ? open = !open : flyout = !flyout"
+            type="button"
             title="Manajemen Sertifikat"
-            class="relative flex transition-all duration-200 group py-3 rounded-xl
-            {{ $isCert
+            class="relative flex transition-all duration-200 group py-3 rounded-xl w-full cursor-pointer
+            {{ $isCertOpen
                 ? 'text-[#13416B] font-bold bg-[#13416B]/10'
                 : 'text-slate-500 hover:text-[#13416B] hover:bg-slate-100/70' }}"
             :class="sidebarOpen ? 'flex-row items-center justify-start px-3.5 gap-3.5' : 'flex-col items-center justify-center w-12 h-12 mx-auto p-0'">
             <span class="w-6 h-6 shrink-0 flex items-center justify-center transition-transform duration-200 group-hover:scale-110">
-                @if ($isCert)
+                @if ($isCertOpen)
                     <!-- Solid Check Badge (Active) -->
                     <svg class="w-6 h-6 text-[#13416B]" viewBox="0 0 24 24" fill="currentColor">
                         <path fill-rule="evenodd" d="M8.603 3.799A4.49 4.49 0 0 1 12 2.25c1.357 0 2.573.6 3.397 1.549a4.49 4.49 0 0 1 3.498 1.307 4.491 4.491 0 0 1 1.307 3.497A4.49 4.49 0 0 1 21.75 12a4.49 4.49 0 0 1-1.549 3.397 4.491 4.491 0 0 1-1.307 3.497 4.491 4.491 0 0 1-3.497 1.307A4.49 4.49 0 0 1 12 21.75a4.49 4.49 0 0 1-3.397-1.549 4.49 4.49 0 0 1-3.498-1.306 4.491 4.491 0 0 1-1.307-3.498A4.49 4.49 0 0 1 2.25 12c0-1.357.6-2.573 1.549-3.397a4.49 4.49 0 0 1 1.307-3.497 4.49 4.49 0 0 1 3.497-1.307Zm7.007 6.387a.75.75 0 1 0-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 0 0-1.06 1.06l2.25 2.25a.75.75 0 0 0 1.14-.094l3.75-5.25Z" clip-rule="evenodd" />
@@ -483,8 +490,57 @@
                     </svg>
                 @endif
             </span>
-            <span class="text-[15px] text-left leading-snug break-words"
+            <span class="flex-1 text-[15px] text-left leading-snug break-words"
                   :class="sidebarOpen ? 'block' : 'hidden'">Manajemen Sertifikat</span>
-        </a>
+            <i x-show="sidebarOpen" class="fas fa-chevron-down w-3.5 shrink-0 text-xs text-slate-400 transition-transform duration-200"
+               :class="{ 'rotate-180': open }" aria-hidden="true"></i>
+        </button>
+
+        <!-- Submenu Accordion (Expanded) -->
+        <ul x-show="sidebarOpen && open" x-collapse x-cloak class="mt-1 space-y-1 pl-4">
+            <li>
+                <a href="{{ route('admin-pusat.certificates.index') }}"
+                    class="flex items-center px-3.5 py-2.5 rounded-lg transition-colors text-sm leading-snug break-words font-semibold
+                    {{ $isCertActive
+                        ? 'text-[#13416B] bg-[#13416B]/10 font-bold'
+                        : 'text-slate-500 hover:bg-slate-100 hover:text-[#13416B]' }}">
+                    Daftar Sertifikat
+                </a>
+            </li>
+            <li>
+                <a href="{{ route('admin-pusat.management-course.certificate-submissions.index') }}"
+                    class="flex items-center px-3.5 py-2.5 rounded-lg transition-colors text-sm leading-snug break-words font-semibold
+                    {{ $isSubmissionsActive
+                        ? 'text-[#13416B] bg-[#13416B]/10 font-bold'
+                        : 'text-slate-500 hover:bg-slate-100 hover:text-[#13416B]' }}">
+                    Pengajuan
+                </a>
+            </li>
+        </ul>
+
+        <!-- Submenu Flyout (Collapsed Mini Mode) -->
+        <div x-show="!sidebarOpen && flyout" x-transition.opacity.duration.150ms x-cloak
+             @click.outside="flyout = false"
+             class="absolute left-full top-0 ms-2 w-64 bg-white border border-slate-200 rounded-xl shadow-xl py-2 z-50">
+            <div class="px-3.5 py-1 text-[11px] font-bold text-slate-400 uppercase tracking-wider border-b border-slate-100 mb-1">
+                Manajemen Sertifikat
+            </div>
+            <ul class="space-y-0.5 px-1.5">
+                <li>
+                    <a href="{{ route('admin-pusat.certificates.index') }}"
+                        class="block px-3.5 py-2.5 rounded-lg text-sm leading-snug break-words font-semibold transition-colors
+                        {{ $isCertActive ? 'text-[#13416B] bg-[#13416B]/10 font-bold' : 'text-slate-600 hover:bg-slate-100 hover:text-[#13416B]' }}">
+                        Daftar Sertifikat
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ route('admin-pusat.management-course.certificate-submissions.index') }}"
+                        class="block px-3.5 py-2.5 rounded-lg text-sm leading-snug break-words font-semibold transition-colors
+                        {{ $isSubmissionsActive ? 'text-[#13416B] bg-[#13416B]/10 font-bold' : 'text-slate-600 hover:bg-slate-100 hover:text-[#13416B]' }}">
+                        Pengajuan
+                    </a>
+                </li>
+            </ul>
+        </div>
     </li>
 </ul>

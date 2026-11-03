@@ -162,7 +162,7 @@
                     <!-- Deskripsi -->
                     <div class="col-span-1 md:col-span-2">
                         <x-form.textarea name="description" label="Deskripsi Course" rows="5" :value="$course->description"
-                            placeholder="Tuliskan deskripsi lengkap mengenai course ini..." required />
+                            placeholder="Tuliskan deskripsi lengkap mengenai course ini..." />
                     </div>
                 </div>
 

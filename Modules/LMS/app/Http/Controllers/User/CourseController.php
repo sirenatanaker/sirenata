@@ -106,6 +106,12 @@ class CourseController extends Controller
             return redirect()->back();
         }
 
+        // Cek jika gelombang bimtek belum dibuka/dimulai
+        if ($activeBimtek->start_date && now()->lessThan($activeBimtek->start_date)) {
+            ToastMagic::error('Sesi Live Zoom belum dibuka. Pelatihan gelombang ini dimulai pada tanggal ' . $activeBimtek->start_date->translatedFormat('d F Y') . '.');
+            return redirect()->back();
+        }
+
         DB::table('course_student')
             ->where('course_id', $course->id)
             ->where('user_id', $request->user()->id)
@@ -219,7 +225,17 @@ class CourseController extends Controller
     public function showContent(string $slug, string $contentId): View|RedirectResponse
     {
         $result = $this->courseService->getCourseDetailSlug($slug);
+        $courseData = $result['data'] ?? null;
         $content = $this->courseService->getStudentContentForShow($contentId);
+
+        if ($courseData && !empty($courseData->is_waiting_for_start)) {
+            $startDateStr = $courseData->active_bimtek?->start_date
+                ? $courseData->active_bimtek->start_date->translatedFormat('d F Y')
+                : 'jadwal pelaksanaan';
+            ToastMagic::error("Materi pembelajaran belum dapat diakses. Kelas pelatihan akan dibuka serentak pada {$startDateStr}.");
+
+            return redirect()->route('user.course.my-course.detail', $slug);
+        }
 
         if (!$this->courseService->canAccessContent($content)) {
             ToastMagic::error('Topik ini masih terkunci. Selesaikan topik sebelumnya terlebih dahulu.');
@@ -322,6 +338,17 @@ class CourseController extends Controller
 
     public function submitTest(Request $request, string $slug, string $postTestId): RedirectResponse
     {
+        $resultData = $this->courseService->getCourseDetailSlug($slug);
+        $courseData = $resultData['data'] ?? null;
+        if ($courseData && !empty($courseData->is_waiting_for_start)) {
+            $startDateStr = $courseData->active_bimtek?->start_date
+                ? $courseData->active_bimtek->start_date->translatedFormat('d F Y')
+                : 'jadwal pelaksanaan';
+            ToastMagic::error("Evaluasi belum dapat diakses. Kelas pelatihan akan dibuka serentak pada {$startDateStr}.");
+
+            return redirect()->route('user.course.my-course.detail', $slug);
+        }
+
         $postTest = $this->postTestService->findWithQuestionsOrFail($postTestId);
 
         if (!$this->courseService->canAccessTest($postTest)) {
@@ -346,6 +373,16 @@ class CourseController extends Controller
     public function showTest(Request $request, string $slug, string $postTestId): View|RedirectResponse
     {
         $resultData = $this->courseService->getCourseDetailSlug($slug);
+        $courseData = $resultData['data'] ?? null;
+        if ($courseData && !empty($courseData->is_waiting_for_start)) {
+            $startDateStr = $courseData->active_bimtek?->start_date
+                ? $courseData->active_bimtek->start_date->translatedFormat('d F Y')
+                : 'jadwal pelaksanaan';
+            ToastMagic::error("Evaluasi belum dapat diakses. Kelas pelatihan akan dibuka serentak pada {$startDateStr}.");
+
+            return redirect()->route('user.course.my-course.detail', $slug);
+        }
+
         $postTest = $this->postTestService->findWithQuestionsOrFail($postTestId);
 
         if (!$this->courseService->canAccessTest($postTest)) {

@@ -1,215 +1,334 @@
 <x-dashboard::layouts.dashboard title="Buka Gelombang Bimtek Baru - Admin Pusat">
-    <div class="p-3 sm:p-6 max-w-4xl mx-auto space-y-5">
+    <div class="w-full p-8 space-y-6">
 
-        {{-- Header & Navigasi Kembali --}}
-        <div class="flex items-center justify-between gap-3">
-            <div>
-                <a href="{{ route('admin-pusat.management-course.bimtek-events.index') }}"
-                   class="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-slate-800 transition-colors mb-1">
-                    <i class="fas fa-arrow-left text-[10px]"></i>
-                    <span>Kembali ke Daftar Bimtek</span>
-                </a>
-                <h1 class="text-xl sm:text-2xl font-extrabold text-slate-900">Buka Gelombang Bimtek Baru</h1>
-                <p class="text-xs sm:text-sm text-slate-500 mt-0.5">Jadwalkan Bimtek Online (Zoom) yang terhubung ke silabus kursus yang sudah ada.</p>
-            </div>
-        </div>
+        {{-- Breadcrumb Navigation (2 Teks) --}}
+        <nav class="flex" aria-label="Breadcrumb">
+            <ol class="inline-flex items-center space-x-1 sm:space-x-2">
+                <li>
+                    <a href="{{ route('admin-pusat.management-course.bimtek-events.index') }}"
+                       class="text-sm font-medium text-slate-500 hover:text-[#13416B] transition-colors">
+                        Periode Event
+                    </a>
+                </li>
+                <li class="inline-flex items-center">
+                    <i class="fas fa-chevron-right text-[10px] text-slate-300 mx-1.5"></i>
+                    <span class="text-sm font-bold text-slate-900">
+                        Buka Gelombang Baru
+                    </span>
+                </li>
+            </ol>
+        </nav>
 
         {{-- Form Card --}}
-        <div class="bg-white rounded-xl border border-slate-200 shadow-2xs p-5 sm:p-6">
-            <form action="{{ route('admin-pusat.management-course.bimtek-events.store') }}" method="POST" class="space-y-5">
+        <div class="bg-white rounded-md border border-slate-200 shadow-2xs p-6 sm:p-8">
+            <form action="{{ route('admin-pusat.management-course.bimtek-events.store') }}" method="POST" id="bimtekForm" class="space-y-6">
                 @csrf
 
-                {{-- Pilih Master Kursus --}}
-                <div>
-                    <label for="course_id" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                        Pilih Master Kursus / Kurikulum <span class="text-rose-500">*</span>
-                    </label>
-                    <select id="course_id" name="course_id" required
-                            class="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 text-sm focus:ring-2 focus:ring-[#13416B]/20 focus:border-[#13416B]">
-                        <option value="">-- Pilih Kursus yang Akan Dijadikan Bimtek --</option>
-                        @foreach ($courses as $c)
-                            <option value="{{ $c->id }}" @selected(old('course_id') == $c->id)>
-                                {{ $c->name }}
-                            </option>
-                        @endforeach
-                    </select>
-                    @error('course_id')
-                        <p class="text-xs text-rose-500 mt-1">{{ $message }}</p>
-                    @enderror
-                </div>
+                {{-- Section: Informasi Pokok Gelombang --}}
+                <div class="space-y-4">
+                    <h2 class="text-xs font-bold text-slate-400 uppercase tracking-wider pb-2 border-b border-slate-100">
+                        Informasi Kursus & Kapasitas
+                    </h2>
 
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    {{-- Nama Gelombang --}}
+                    {{-- Pilih Master Kursus --}}
                     <div>
-                        <label for="batch_name" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                            Nama Gelombang / Angkatan <span class="text-rose-500">*</span>
+                        <label for="course_id" class="block text-xs font-semibold text-slate-700 mb-1.5">
+                            Master Kursus / Kurikulum <span class="text-rose-500">*</span>
                         </label>
-                        <input type="text" id="batch_name" name="batch_name" value="{{ old('batch_name') }}"
-                               placeholder="Contoh: Bimtek SPBE Angkatan I 2026" required
-                               class="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 text-sm focus:ring-2 focus:ring-[#13416B]/20 focus:border-[#13416B]">
-                        @error('batch_name')
+                        <select id="course_id" name="course_id" required
+                                class="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 text-sm focus:ring-1 focus:ring-slate-900 focus:border-slate-900 bg-white">
+                            <option value="">-- Pilih Kursus yang Akan Dijadikan Bimtek --</option>
+                            @foreach ($courses as $c)
+                                <option value="{{ $c->id }}" @selected(old('course_id') == $c->id)>
+                                    {{ $c->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                        @error('course_id')
                             <p class="text-xs text-rose-500 mt-1">{{ $message }}</p>
                         @enderror
                     </div>
 
-                    {{-- Kode Batch --}}
-                    <div>
-                        <label for="batch_code" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                            Kode Registrasi Gelombang (Opsional)
-                        </label>
-                        <input type="text" id="batch_code" name="batch_code" value="{{ old('batch_code') }}"
-                               placeholder="Biarkan kosong untuk otomatis (misal: BIMTEK-SPBE-2026-I)"
-                               class="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 text-sm focus:ring-2 focus:ring-[#13416B]/20 focus:border-[#13416B]">
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    {{-- Metode Pelaksanaan --}}
-                    <div>
-                        <label for="execution_type" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                            Metode Pelaksanaan <span class="text-rose-500">*</span>
-                        </label>
-                        <select id="execution_type" name="execution_type" required
-                                class="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 text-sm focus:ring-2 focus:ring-[#13416B]/20 focus:border-[#13416B]">
-                            <option value="online" @selected(old('execution_type') === 'online')>Online (Zoom Meeting)</option>
-                            <option value="offline" @selected(old('execution_type') === 'offline')>Offline (Tatap Muka Fisik)</option>
-                            <option value="hybrid" @selected(old('execution_type') === 'hybrid')>Hybrid (Zoom + Tatap Muka)</option>
-                        </select>
-                    </div>
-
-                    {{-- Kuota Peserta --}}
-                    <div>
-                        <label for="quota" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                            Kapasitas Kuota (Peserta) <span class="text-rose-500">*</span>
-                        </label>
-                        <input type="number" id="quota" name="quota" value="{{ old('quota', 100) }}" min="1" required
-                               class="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 text-sm focus:ring-2 focus:ring-[#13416B]/20 focus:border-[#13416B]">
-                    </div>
-
-                    {{-- Status --}}
-                    <div>
-                        <label for="status" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                            Status <span class="text-rose-500">*</span>
-                        </label>
-                        <select id="status" name="status" required
-                                class="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 text-sm focus:ring-2 focus:ring-[#13416B]/20 focus:border-[#13416B]">
-                            <option value="draft" @selected(old('status') === 'draft')>Draft (Belum Dibuka)</option>
-                            <option value="open_registration" @selected(old('status') === 'open_registration')>Buka Pendaftaran</option>
-                            <option value="ongoing" @selected(old('status') === 'ongoing')>Sedang Berlangsung</option>
-                            <option value="completed" @selected(old('status') === 'completed')>Selesai</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    {{-- Tanggal Mulai --}}
-                    <div>
-                        <label for="start_date" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                            Tanggal & Waktu Mulai <span class="text-rose-500">*</span>
-                        </label>
-                        <input type="datetime-local" id="start_date" name="start_date" value="{{ old('start_date') }}" required
-                               class="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 text-sm focus:ring-2 focus:ring-[#13416B]/20 focus:border-[#13416B]">
-                    </div>
-
-                    {{-- Tanggal Selesai --}}
-                    <div>
-                        <label for="end_date" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                            Tanggal & Waktu Selesai <span class="text-rose-500">*</span>
-                        </label>
-                        <input type="datetime-local" id="end_date" name="end_date" value="{{ old('end_date') }}" required
-                               class="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 text-sm focus:ring-2 focus:ring-[#13416B]/20 focus:border-[#13416B]">
-                    </div>
-                </div>
-
-                {{-- Pengaturan Zoom Meeting (Online) --}}
-                <div class="p-4 rounded-xl bg-blue-50/50 border border-blue-200/80 space-y-3.5">
-                    <div class="flex items-center gap-2 text-blue-900 font-bold text-xs uppercase tracking-wider">
-                        <i class="fas fa-video text-blue-600"></i>
-                        <span>Informasi Live Session Zoom (Online)</span>
-                    </div>
-
-                    <div>
-                        <label for="zoom_url" class="block text-xs font-semibold text-slate-700 mb-1">
-                            Link Meeting Zoom
-                        </label>
-                        <input type="url" id="zoom_url" name="zoom_url" value="{{ old('zoom_url') }}"
-                               placeholder="https://zoom.us/j/1234567890?pwd=..."
-                               class="w-full px-3.5 py-2 rounded-lg border border-slate-300 text-xs sm:text-sm bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500">
-                    </div>
-
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        <div>
-                            <label for="zoom_scheduled_at" class="block text-xs font-semibold text-slate-700 mb-1">
-                                Tanggal & Jam Mulai Sesi Zoom
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        {{-- Nama Gelombang --}}
+                        <div class="md:col-span-1">
+                            <label for="batch_name" class="block text-xs font-semibold text-slate-700 mb-1.5">
+                                Nama Gelombang / Angkatan <span class="text-rose-500">*</span>
                             </label>
-                            <input type="datetime-local" id="zoom_scheduled_at" name="zoom_scheduled_at" value="{{ old('zoom_scheduled_at') }}"
-                                   class="w-full px-3 py-2 rounded-lg border border-slate-300 text-xs sm:text-sm bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500">
-                            @error('zoom_scheduled_at')
+                            <input type="text" id="batch_name" name="batch_name" value="{{ old('batch_name') }}"
+                                   placeholder="Contoh: Bimtek SPBE Angkatan I 2026" required
+                                   class="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 text-sm focus:ring-1 focus:ring-slate-900 focus:border-slate-900">
+                            @error('batch_name')
                                 <p class="text-xs text-rose-500 mt-1">{{ $message }}</p>
                             @enderror
                         </div>
-                        <div>
-                            <label for="zoom_end_at" class="block text-xs font-semibold text-slate-700 mb-1">
-                                Tanggal & Jam Selesai Sesi Zoom (Opsional)
+
+                        {{-- Kode Batch --}}
+                        <div class="md:col-span-1">
+                            <label for="batch_code" class="block text-xs font-semibold text-slate-700 mb-1.5">
+                                Kode Registrasi Gelombang (Opsional)
                             </label>
-                            <input type="datetime-local" id="zoom_end_at" name="zoom_end_at" value="{{ old('zoom_end_at') }}"
-                                   class="w-full px-3 py-2 rounded-lg border border-slate-300 text-xs sm:text-sm bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500">
-                            @error('zoom_end_at')
+                            <input type="text" id="batch_code" name="batch_code" value="{{ old('batch_code') }}"
+                                   placeholder="Otomatis jika dikosongkan (BIMTEK-XXXX)"
+                                   class="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 text-sm focus:ring-1 focus:ring-slate-900 focus:border-slate-900 font-mono text-xs">
+                        </div>
+
+                        {{-- Kuota Peserta --}}
+                        <div class="md:col-span-1">
+                            <label for="quota" class="block text-xs font-semibold text-slate-700 mb-1.5">
+                                Kapasitas Kuota (Peserta) <span class="text-rose-500">*</span>
+                            </label>
+                            <input type="number" id="quota" name="quota" value="{{ old('quota', 100) }}" min="1" required
+                                   class="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 text-sm focus:ring-1 focus:ring-slate-900 focus:border-slate-900">
+                            @error('quota')
                                 <p class="text-xs text-rose-500 mt-1">{{ $message }}</p>
                             @enderror
                         </div>
                     </div>
-                    <p class="text-[11px] text-blue-800/80 leading-relaxed">
-                        <i class="fas fa-info-circle mr-1 text-blue-600"></i>
-                        Bebas memilih tanggal dan jam spesifik tatap muka Zoom selama masih berada di dalam rentang waktu pelaksanaan (misal pelaksanaan 04 Nov - 09 Nov, sesi Zoom dijadwalkan pada 08 Nov pukul 09:00 WIB).
-                    </p>
+                </div>
 
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                {{-- ======================================================== --}}
+                {{-- SEKSI PENGATURAN PERIODE & LINIMASA PROGRAM              --}}
+                {{-- ======================================================== --}}
+                <div class="space-y-4 pt-4 border-t border-slate-100">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1 pb-1">
                         <div>
-                            <label for="zoom_meeting_id" class="block text-xs font-semibold text-slate-700 mb-1">
-                                Meeting ID (Opsional)
-                            </label>
-                            <input type="text" id="zoom_meeting_id" name="zoom_meeting_id" value="{{ old('zoom_meeting_id') }}"
-                                   placeholder="Contoh: 839 2039 1234"
-                                   class="w-full px-3 py-2 rounded-lg border border-slate-300 text-xs sm:text-sm bg-white">
-                        </div>
-                        <div>
-                            <label for="zoom_passcode" class="block text-xs font-semibold text-slate-700 mb-1">
-                                Passcode Zoom (Opsional)
-                            </label>
-                            <input type="text" id="zoom_passcode" name="zoom_passcode" value="{{ old('zoom_passcode') }}"
-                                   placeholder="Contoh: SPBE2026"
-                                   class="w-full px-3 py-2 rounded-lg border border-slate-300 text-xs sm:text-sm bg-white">
-                        </div>
-                        <div>
-                            <label for="zoom_attendance_code" class="block text-xs font-semibold text-slate-700 mb-1">
-                                Kode Presensi Zoom
-                            </label>
-                            <input type="text" id="zoom_attendance_code" name="zoom_attendance_code" value="{{ old('zoom_attendance_code') }}"
-                                   placeholder="Kosongkan = otomatis (HADIR-XXXX)"
-                                   class="w-full px-3 py-2 rounded-lg border border-slate-300 text-xs sm:text-sm bg-white uppercase font-mono">
+                            <h2 class="text-xs font-bold text-slate-400 uppercase tracking-wider">
+                                Pengaturan Periode Linimasa Pelatihan
+                            </h2>
+                            <p class="text-xs text-slate-500 mt-0.5">
+                                Periode harus berurutan. Setiap periode berikutnya tidak dapat memilih tanggal kurang dari atau sama dengan periode sebelumnya.
+                            </p>
                         </div>
                     </div>
+
+                    {{-- Ringkasan Linimasa & Estimasi Status Otomatis (Background Sirenata) --}}
+                    <div class="p-5 sm:p-6 rounded-md bg-[#13416B] text-white shadow-sm space-y-3.5">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-white/15 pb-3">
+                            <div>
+                                <span class="text-[11px] font-semibold text-slate-200 block">Rentang Waktu Keseluruhan Program:</span>
+                                <p id="summary-timeline-text" class="text-sm sm:text-lg font-extrabold text-white mt-0.5">
+                                    Silakan atur tanggal periode di bawah...
+                                </p>
+                            </div>
+                            <div class="flex items-center gap-2 flex-wrap">
+                                <span id="summary-duration-tag" class="hidden px-2.5 py-1 rounded-md text-xs font-semibold bg-white/15 border border-white/20 text-white">
+                                    <span id="summary-duration-text">-</span>
+                                </span>
+                                <span id="summary-status-tag" class="px-2.5 py-1 rounded-md text-xs font-semibold bg-white/15 border border-white/20 text-white">
+                                    Status Otomatis: <strong id="summary-status-text" class="text-white">Menyesuaikan Tanggal</strong>
+                                </span>
+                            </div>
+                        </div>
+
+                        {{-- Step Flow Sederhana --}}
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-xs">
+                            <div class="bg-white/10 rounded-md p-2.5 border border-white/15 text-white">
+                                <span class="text-[11px] font-semibold text-slate-200 block">1. Periode Pendaftaran</span>
+                                <span id="flow-reg-text" class="font-bold text-white mt-0.5 block">-</span>
+                            </div>
+                            <div class="bg-white/10 rounded-md p-2.5 border border-white/15 text-white">
+                                <span class="text-[11px] font-semibold text-slate-200 block">2. Periode Pelaksanaan & Zoom</span>
+                                <span id="flow-exec-text" class="font-bold text-white mt-0.5 block">-</span>
+                            </div>
+                            <div class="bg-white/10 rounded-md p-2.5 border border-white/15 text-white">
+                                <span class="text-[11px] font-semibold text-slate-200 block">3. Evaluasi & Sertifikat</span>
+                                <span id="flow-eval-text" class="font-bold text-white mt-0.5 block">-</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- 1. PERIODE PENDAFTARAN --}}
+                    <div class="p-4 rounded-md border border-slate-200 bg-white space-y-3">
+                        <div class="flex items-center justify-between border-b border-slate-100 pb-2">
+                            <div class="flex items-center gap-2">
+                                <span class="w-6 h-6 rounded-full bg-slate-900 text-white text-xs font-bold flex items-center justify-center shrink-0">1</span>
+                                <h3 class="text-xs font-bold text-slate-800 uppercase tracking-wider">Periode Pendaftaran</h3>
+                            </div>
+                            <span class="text-[11px] text-slate-400">Jadwal pembukaan dan penutupan pendaftaran peserta</span>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label for="registration_start_at" class="block text-xs font-semibold text-slate-700 mb-1">
+                                    Tanggal & Jam Buka Pendaftaran
+                                </label>
+                                <input type="datetime-local" id="registration_start_at" name="registration_start_at"
+                                       value="{{ old('registration_start_at') }}"
+                                       class="w-full px-3 py-2 rounded-lg border border-slate-300 text-xs sm:text-sm focus:ring-1 focus:ring-slate-900 focus:border-slate-900 bg-white">
+                                @error('registration_start_at')
+                                    <p class="text-xs text-rose-500 mt-1">{{ $message }}</p>
+                                @enderror
+                            </div>
+                            <div>
+                                <label for="registration_end_at" class="block text-xs font-semibold text-slate-700 mb-1">
+                                    Tanggal & Jam Tutup Pendaftaran
+                                </label>
+                                <input type="datetime-local" id="registration_end_at" name="registration_end_at"
+                                       value="{{ old('registration_end_at') }}"
+                                       class="w-full px-3 py-2 rounded-lg border border-slate-300 text-xs sm:text-sm focus:ring-1 focus:ring-slate-900 focus:border-slate-900 bg-white">
+                                @error('registration_end_at')
+                                    <p class="text-xs text-rose-500 mt-1">{{ $message }}</p>
+                                @enderror
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- 2. PERIODE PELAKSANAAN & LIVE ZOOM --}}
+                    <div class="p-4 rounded-md border border-slate-200 bg-white space-y-4">
+                        <div class="flex items-center justify-between border-b border-slate-100 pb-2">
+                            <div class="flex items-center gap-2">
+                                <span class="w-6 h-6 rounded-full bg-slate-900 text-white text-xs font-bold flex items-center justify-center shrink-0">2</span>
+                                <h3 class="text-xs font-bold text-slate-800 uppercase tracking-wider">Periode Pelaksanaan & Live Zoom</h3>
+                            </div>
+                            <span class="text-[11px] text-slate-400">Harus setelah periode pendaftaran berakhir</span>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label for="start_date" class="block text-xs font-semibold text-slate-700 mb-1">
+                                    Tanggal & Jam Mulai Pelaksanaan <span class="text-rose-500">*</span>
+                                </label>
+                                <input type="datetime-local" id="start_date" name="start_date" value="{{ old('start_date') }}" required
+                                       class="w-full px-3 py-2 rounded-lg border border-slate-300 text-xs sm:text-sm focus:ring-1 focus:ring-slate-900 focus:border-slate-900 bg-white">
+                                @error('start_date')
+                                    <p class="text-xs text-rose-500 mt-1">{{ $message }}</p>
+                                @enderror
+                            </div>
+                            <div>
+                                <label for="end_date" class="block text-xs font-semibold text-slate-700 mb-1">
+                                    Tanggal & Jam Selesai Pelaksanaan <span class="text-rose-500">*</span>
+                                </label>
+                                <input type="datetime-local" id="end_date" name="end_date" value="{{ old('end_date') }}" required
+                                       class="w-full px-3 py-2 rounded-lg border border-slate-300 text-xs sm:text-sm focus:ring-1 focus:ring-slate-900 focus:border-slate-900 bg-white">
+                                @error('end_date')
+                                    <p class="text-xs text-rose-500 mt-1">{{ $message }}</p>
+                                @enderror
+                            </div>
+                        </div>
+
+                        {{-- SUB-CARD: DETAIL SESI ZOOM (Biru Kalem & Teks White) --}}
+                        <div class="p-4 sm:p-5 rounded-md bg-[#1E40AF] text-white shadow-sm space-y-3.5">
+                            <div class="flex items-center justify-between border-b border-white/20 pb-2.5">
+                                <span class="text-xs font-bold text-white uppercase tracking-wider">
+                                    Detail Sesi Live Zoom
+                                </span>
+                                <span class="text-[11px] text-blue-100 font-medium">
+                                    Jadwal harus di dalam rentang waktu pelaksanaan
+                                </span>
+                            </div>
+
+                            <div>
+                                <label for="zoom_url" class="block text-xs font-semibold text-white mb-1">
+                                    Link URL Meeting Zoom
+                                </label>
+                                <input type="url" id="zoom_url" name="zoom_url" value="{{ old('zoom_url') }}"
+                                       placeholder="https://zoom.us/j/1234567890?pwd=..."
+                                       class="w-full px-3 py-2 rounded-lg border-0 text-xs sm:text-sm bg-white text-slate-900 focus:ring-2 focus:ring-white">
+                                @error('zoom_url')
+                                    <p class="text-xs text-rose-200 mt-1 font-semibold">{{ $message }}</p>
+                                @enderror
+                            </div>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <div>
+                                    <label for="zoom_scheduled_at" class="block text-xs font-semibold text-white mb-1">
+                                        Tanggal & Jam Mulai Sesi Zoom
+                                    </label>
+                                    <input type="datetime-local" id="zoom_scheduled_at" name="zoom_scheduled_at" value="{{ old('zoom_scheduled_at') }}"
+                                           class="w-full px-3 py-2 rounded-lg border-0 text-xs sm:text-sm bg-white text-slate-900 focus:ring-2 focus:ring-white">
+                                    @error('zoom_scheduled_at')
+                                        <p class="text-xs text-rose-200 mt-1 font-semibold">{{ $message }}</p>
+                                    @enderror
+                                </div>
+                                <div>
+                                    <label for="zoom_end_at" class="block text-xs font-semibold text-white mb-1">
+                                        Tanggal & Jam Selesai Sesi Zoom (Opsional)
+                                    </label>
+                                    <input type="datetime-local" id="zoom_end_at" name="zoom_end_at" value="{{ old('zoom_end_at') }}"
+                                           class="w-full px-3 py-2 rounded-lg border-0 text-xs sm:text-sm bg-white text-slate-900 focus:ring-2 focus:ring-white">
+                                    @error('zoom_end_at')
+                                        <p class="text-xs text-rose-200 mt-1 font-semibold">{{ $message }}</p>
+                                    @enderror
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
+                                <div>
+                                    <label for="zoom_meeting_id" class="block text-xs font-semibold text-white mb-1">
+                                        Meeting ID (Opsional)
+                                    </label>
+                                    <input type="text" id="zoom_meeting_id" name="zoom_meeting_id" value="{{ old('zoom_meeting_id') }}"
+                                           placeholder="Contoh: 839 2039 1234"
+                                           class="w-full px-3 py-2 rounded-lg border-0 text-xs sm:text-sm bg-white text-slate-900 focus:ring-2 focus:ring-white">
+                                </div>
+                                <div>
+                                    <label for="zoom_passcode" class="block text-xs font-semibold text-white mb-1">
+                                        Passcode Zoom (Opsional)
+                                    </label>
+                                    <input type="text" id="zoom_passcode" name="zoom_passcode" value="{{ old('zoom_passcode') }}"
+                                           placeholder="Contoh: SPBE2026"
+                                           class="w-full px-3 py-2 rounded-lg border-0 text-xs sm:text-sm bg-white text-slate-900 focus:ring-2 focus:ring-white">
+                                </div>
+                                <div>
+                                    <label for="zoom_attendance_code" class="block text-xs font-semibold text-white mb-1">
+                                        Kode Presensi Zoom
+                                    </label>
+                                    <input type="text" id="zoom_attendance_code" name="zoom_attendance_code" value="{{ old('zoom_attendance_code') }}"
+                                           placeholder="Kosongkan = otomatis (HADIR-XXXX)"
+                                           class="w-full px-3 py-2 rounded-lg border-0 text-xs sm:text-sm bg-white text-slate-900 uppercase font-mono focus:ring-2 focus:ring-white">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- 3. PERIODE EVALUASI & SERTIFIKAT --}}
+                    <div class="p-4 rounded-md border border-slate-200 bg-white space-y-3">
+                        <div class="flex items-center justify-between border-b border-slate-100 pb-2">
+                            <div class="flex items-center gap-2">
+                                <span class="w-6 h-6 rounded-full bg-slate-900 text-white text-xs font-bold flex items-center justify-center shrink-0">3</span>
+                                <h3 class="text-xs font-bold text-slate-800 uppercase tracking-wider">Periode Evaluasi & Sertifikat</h3>
+                            </div>
+                            <span class="text-[11px] text-slate-400">Harus dijadwalkan setelah pelaksanaan selesai</span>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label for="assessment_start_at" class="block text-xs font-semibold text-slate-700 mb-1">
+                                    Tanggal & Jam Mulai Evaluasi
+                                </label>
+                                <input type="datetime-local" id="assessment_start_at" name="assessment_start_at"
+                                       value="{{ old('assessment_start_at') }}"
+                                       class="w-full px-3 py-2 rounded-lg border border-slate-300 text-xs sm:text-sm focus:ring-1 focus:ring-slate-900 focus:border-slate-900 bg-white">
+                                @error('assessment_start_at')
+                                    <p class="text-xs text-rose-500 mt-1">{{ $message }}</p>
+                                @enderror
+                            </div>
+                            <div>
+                                <label for="assessment_end_at" class="block text-xs font-semibold text-slate-700 mb-1">
+                                    Tanggal & Jam Batas Akhir Evaluasi / Sertifikat
+                                </label>
+                                <input type="datetime-local" id="assessment_end_at" name="assessment_end_at"
+                                       value="{{ old('assessment_end_at') }}"
+                                       class="w-full px-3 py-2 rounded-lg border border-slate-300 text-xs sm:text-sm focus:ring-1 focus:ring-slate-900 focus:border-slate-900 bg-white">
+                                @error('assessment_end_at')
+                                    <p class="text-xs text-rose-500 mt-1">{{ $message }}</p>
+                                @enderror
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
 
-                {{-- Deskripsi / Catatan Tambahan --}}
-                <div>
-                    <label for="description" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                        Keterangan / Panduan Peserta
-                    </label>
-                    <textarea id="description" name="description" rows="3"
-                              placeholder="Tuliskan petunjuk teknis atau ketentuan bagi peserta bimtek..."
-                              class="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 text-sm focus:ring-2 focus:ring-[#13416B]/20 focus:border-[#13416B]">{{ old('description') }}</textarea>
-                </div>
-
-                <div class="flex items-center justify-end gap-3 pt-3 border-t border-slate-100">
+                {{-- Action Buttons --}}
+                <div class="flex items-center justify-end gap-3 pt-4 border-t border-slate-100">
                     <a href="{{ route('admin-pusat.management-course.bimtek-events.index') }}"
-                       class="px-4 py-2 text-xs font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors">
+                       class="px-5 py-2.5 sm:px-6 sm:py-3 text-xs sm:text-sm font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors">
                         Batal
                     </a>
                     <button type="submit"
-                            class="px-5 py-2 text-xs font-bold text-white bg-[#13416B] hover:bg-[#0e2c48] rounded-lg transition-colors shadow-2xs">
-                        Simpan & Buka Gelombang
+                            class="px-6 py-2.5 sm:px-8 sm:py-3.5 text-xs sm:text-sm font-bold text-white bg-[#13416B] hover:bg-[#0e2c48] rounded-xl transition-all shadow-sm active:scale-95">
+                        Simpan Gelombang Baru
                     </button>
                 </div>
             </form>
@@ -220,26 +339,196 @@
     @push('scripts')
         <script>
             document.addEventListener('DOMContentLoaded', function () {
-                const startInput = document.getElementById('start_date');
-                const endInput = document.getElementById('end_date');
-                const zoomStartInput = document.getElementById('zoom_scheduled_at');
-                const zoomEndInput = document.getElementById('zoom_end_at');
+                const regStart = document.getElementById('registration_start_at');
+                const regEnd = document.getElementById('registration_end_at');
+                const execStart = document.getElementById('start_date');
+                const execEnd = document.getElementById('end_date');
+                const zoomStart = document.getElementById('zoom_scheduled_at');
+                const zoomEnd = document.getElementById('zoom_end_at');
+                const evalStart = document.getElementById('assessment_start_at');
+                const evalEnd = document.getElementById('assessment_end_at');
 
-                function syncZoomRange() {
-                    if (!startInput || !endInput || !zoomStartInput || !zoomEndInput) return;
-                    const minVal = startInput.value || '';
-                    const maxVal = endInput.value || '';
+                const summaryText = document.getElementById('summary-timeline-text');
+                const durationTag = document.getElementById('summary-duration-tag');
+                const durationText = document.getElementById('summary-duration-text');
+                const statusText = document.getElementById('summary-status-text');
+                const flowReg = document.getElementById('flow-reg-text');
+                const flowExec = document.getElementById('flow-exec-text');
+                const flowEval = document.getElementById('flow-eval-text');
 
-                    zoomStartInput.min = minVal;
-                    zoomStartInput.max = maxVal;
-                    zoomEndInput.min = zoomStartInput.value || minVal;
-                    zoomEndInput.max = maxVal;
+                function formatDateShort(val) {
+                    if (!val) return null;
+                    const d = new Date(val);
+                    if (isNaN(d.getTime())) return null;
+                    return d.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
                 }
 
-                startInput?.addEventListener('change', syncZoomRange);
-                endInput?.addEventListener('change', syncZoomRange);
-                zoomStartInput?.addEventListener('change', syncZoomRange);
-                syncZoomRange();
+                // Fungsi sinkronisasi constraint min/max berurutan (Strict Chronological Order)
+                function syncDateConstraints() {
+                    // 1. regEnd tidak boleh <= regStart
+                    if (regStart?.value) {
+                        regEnd.min = regStart.value;
+                        if (regEnd.value && regEnd.value <= regStart.value) {
+                            regEnd.value = '';
+                        }
+                    } else {
+                        regEnd.removeAttribute('min');
+                    }
+
+                    // 2. execStart tidak boleh <= regEnd (atau regStart)
+                    const regLimit = regEnd?.value || regStart?.value;
+                    if (regLimit) {
+                        execStart.min = regLimit;
+                        if (execStart.value && execStart.value <= regLimit) {
+                            execStart.value = '';
+                        }
+                    } else {
+                        execStart.removeAttribute('min');
+                    }
+
+                    // 3. execEnd tidak boleh <= execStart
+                    if (execStart?.value) {
+                        execEnd.min = execStart.value;
+                        if (execEnd.value && execEnd.value <= execStart.value) {
+                            execEnd.value = '';
+                        }
+
+                        // Zoom min di dalam execStart
+                        if (zoomStart) zoomStart.min = execStart.value;
+                    } else {
+                        execEnd.removeAttribute('min');
+                        if (zoomStart) zoomStart.removeAttribute('min');
+                    }
+
+                    // 4. Zoom bounds di dalam execEnd
+                    if (execEnd?.value) {
+                        if (zoomStart) zoomStart.max = execEnd.value;
+                        if (zoomEnd) zoomEnd.max = execEnd.value;
+
+                        // evalStart tidak boleh < execEnd
+                        if (evalStart) {
+                            evalStart.min = execEnd.value;
+                            if (evalStart.value && evalStart.value < execEnd.value) {
+                                evalStart.value = '';
+                            }
+                        }
+                    } else {
+                        if (zoomStart) zoomStart.removeAttribute('max');
+                        if (zoomEnd) zoomEnd.removeAttribute('max');
+                        if (evalStart) evalStart.removeAttribute('min');
+                    }
+
+                    // 5. zoomEnd tidak boleh <= zoomStart
+                    if (zoomStart?.value) {
+                        if (zoomEnd) {
+                            zoomEnd.min = zoomStart.value;
+                            if (zoomEnd.value && zoomEnd.value <= zoomStart.value) {
+                                zoomEnd.value = '';
+                            }
+                        }
+                    } else if (execStart?.value && zoomEnd) {
+                        zoomEnd.min = execStart.value;
+                    }
+
+                    // 6. evalEnd tidak boleh <= evalStart
+                    const evalLimit = evalStart?.value || execEnd?.value;
+                    if (evalLimit && evalEnd) {
+                        evalEnd.min = evalLimit;
+                        if (evalEnd.value && evalEnd.value <= evalLimit) {
+                            evalEnd.value = '';
+                        }
+                    } else if (evalEnd) {
+                        evalEnd.removeAttribute('min');
+                    }
+                }
+
+                // Fungsi hitung estimasi status otomatis secara real-time
+                function calculateEstimatedStatus(rStartVal, rEndVal, eStartVal, eEndVal, evEndVal) {
+                    const now = new Date();
+                    const eStart = eStartVal ? new Date(eStartVal) : null;
+                    const eEnd = eEndVal ? new Date(eEndVal) : null;
+                    const rStart = rStartVal ? new Date(rStartVal) : null;
+                    const rEnd = rEndVal ? new Date(rEndVal) : null;
+                    const evEnd = evEndVal ? new Date(evEndVal) : eEnd;
+
+                    if (evEnd && now > evEnd) {
+                        return 'Selesai';
+                    }
+                    if (eStart && now >= eStart) {
+                        return 'Sedang Berlangsung';
+                    }
+                    if (rEnd && now > rEnd) {
+                        return 'Sedang Berlangsung';
+                    }
+                    if (rStart && rEnd && now >= rStart && now <= rEnd) {
+                        return 'Pendaftaran Buka';
+                    }
+                    if (rStart && now < rStart) {
+                        return 'Mendatang / Draft';
+                    }
+                    return 'Pendaftaran Buka';
+                }
+
+                function updateTimelineSummary() {
+                    syncDateConstraints();
+
+                    const overallStartVal = regStart?.value || execStart?.value;
+                    const overallEndVal = evalEnd?.value || execEnd?.value || evalStart?.value;
+
+                    if (overallStartVal && overallEndVal) {
+                        const dStart = new Date(overallStartVal);
+                        const dEnd = new Date(overallEndVal);
+
+                        if (!isNaN(dStart.getTime()) && !isNaN(dEnd.getTime())) {
+                            summaryText.textContent = `${formatDateShort(overallStartVal)} s/d ${formatDateShort(overallEndVal)}`;
+
+                            const diffTime = dEnd - dStart;
+                            const diffDays = Math.max(1, Math.ceil(diffTime / (1000 * 60 * 60 * 24)));
+                            if (durationTag && durationText) {
+                                durationText.textContent = `${diffDays} Hari Program`;
+                                durationTag.classList.remove('hidden');
+                            }
+                        }
+                    } else if (overallStartVal) {
+                        summaryText.textContent = `Mulai: ${formatDateShort(overallStartVal)}`;
+                        if (durationTag) durationTag.classList.add('hidden');
+                    } else {
+                        summaryText.textContent = 'Silakan atur tanggal periode di bawah...';
+                        if (durationTag) durationTag.classList.add('hidden');
+                    }
+
+                    // Tampilkan estimasi status
+                    if (execStart?.value && execEnd?.value) {
+                        const est = calculateEstimatedStatus(regStart?.value, regEnd?.value, execStart.value, execEnd.value, evalEnd?.value);
+                        if (statusText) statusText.textContent = est;
+                    } else {
+                        if (statusText) statusText.textContent = 'Menyesuaikan Tanggal';
+                    }
+
+                    // Update mini flow text
+                    if (flowReg) {
+                        flowReg.textContent = (regStart?.value && regEnd?.value)
+                            ? `${formatDateShort(regStart.value)} - ${formatDateShort(regEnd.value)}`
+                            : (regStart?.value ? `Mulai ${formatDateShort(regStart.value)}` : '-');
+                    }
+                    if (flowExec) {
+                        flowExec.textContent = (execStart?.value && execEnd?.value)
+                            ? `${formatDateShort(execStart.value)} - ${formatDateShort(execEnd.value)}`
+                            : '-';
+                    }
+                    if (flowEval) {
+                        flowEval.textContent = (evalStart?.value && evalEnd?.value)
+                            ? `${formatDateShort(evalStart.value)} - ${formatDateShort(evalEnd.value)}`
+                            : (evalStart?.value ? `Mulai ${formatDateShort(evalStart.value)}` : '-');
+                    }
+                }
+
+                [regStart, regEnd, execStart, execEnd, zoomStart, zoomEnd, evalStart, evalEnd].forEach(el => {
+                    el?.addEventListener('change', updateTimelineSummary);
+                    el?.addEventListener('input', updateTimelineSummary);
+                });
+
+                updateTimelineSummary();
             });
         </script>
     @endpush

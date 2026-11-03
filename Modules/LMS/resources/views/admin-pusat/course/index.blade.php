@@ -96,10 +96,12 @@
                                     @endif
                                 </x-table.td>
                                 <x-table.td>
-                                    <p class="font-semibold text-slate-800">{{ $course->name }}</p>
-                                    <p class="mt-1 max-w-xl text-xs text-slate-500 line-clamp-2">
-                                        {{ $course->description ?? 'Tidak ada deskripsi tersedia untuk kursus ini.' }}
-                                    </p>
+                                    <p class="font-semibold text-slate-800 line-clamp-1" title="{{ $course->name }}">{{ $course->name }}</p>
+                                    @if ($course->description)
+                                        <p class="mt-1 max-w-xl text-xs text-slate-500 line-clamp-2">
+                                            {{ $course->description }}
+                                        </p>
+                                    @endif
                                 </x-table.td>
                                 <x-table.td>
                                     <x-badge color="slate">{{ $course->category->name ?? 'Tanpa Kategori' }}</x-badge>

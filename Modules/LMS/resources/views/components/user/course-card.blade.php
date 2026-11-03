@@ -22,17 +22,28 @@
             </div>
         @endif
 
-        {{-- Badge Status Event di Mojok Kanan Atas (khusus program Bimtek) --}}
+        {{-- Badge Status Event di Pojok Kanan Atas --}}
         @if (!empty($course->bimtek_event))
             @php
                 $curPhase = $course->bimtek_event->current_timeline_phase ?? null;
+                $isDonePhase = ($curPhase['phase'] ?? '') === 'completed';
             @endphp
             @if ($curPhase)
-                <span class="absolute top-0 right-0 z-10 px-2.5 sm:px-3 py-0.5 sm:py-1 text-[8px] sm:text-[10px] font-bold uppercase tracking-wider text-white {{ $curPhase['badge_bg'] ?? 'bg-[#13416B]' }} shadow-xs flex items-center gap-1 rounded-none rounded-bl-md rounded-tr-md">
-                    <i class="far fa-clock text-[7px] sm:text-[9px]"></i>
+                <span class="absolute top-0 right-0 z-10 {{ $isDonePhase ? 'px-3 sm:px-3.5 py-1 sm:py-1.5 text-[9px] sm:text-[11px]' : 'px-2.5 sm:px-3 py-0.5 sm:py-1 text-[8px] sm:text-[10px]' }} font-bold uppercase tracking-wider text-white {{ $curPhase['badge_bg'] ?? 'bg-[#0B5CFF]' }} shadow-xs flex items-center gap-1 rounded-none rounded-bl-md rounded-tr-md">
+                    <i class="{{ $isDonePhase ? 'fas fa-check-circle' : 'far fa-clock' }} text-[7px] sm:text-[9px]"></i>
                     <span>{{ $curPhase['badge'] ?? 'Bimtek Online' }}</span>
                 </span>
             @endif
+        @elseif ($isDone)
+            <span class="absolute top-0 right-0 z-10 px-3 sm:px-3.5 py-1 sm:py-1.5 text-[9px] sm:text-[11px] font-bold uppercase tracking-wider text-white bg-emerald-600 shadow-xs flex items-center gap-1 rounded-none rounded-bl-md rounded-tr-md">
+                <i class="fas fa-check-circle text-[7px] sm:text-[9px]"></i>
+                <span>Selesai</span>
+            </span>
+        @elseif ($pct > 0)
+            <span class="absolute top-0 right-0 z-10 px-2.5 sm:px-3 py-0.5 sm:py-1 text-[8px] sm:text-[10px] font-bold uppercase tracking-wider text-white bg-amber-500 shadow-xs flex items-center gap-1 rounded-none rounded-bl-md rounded-tr-md">
+                <i class="far fa-clock text-[7px] sm:text-[9px]"></i>
+                <span>Sedang Berlangsung</span>
+            </span>
         @endif
 
         {{-- Nama Event di Dasar Thumbnail (Overlay Lembut & Icon Putih) --}}
@@ -136,6 +147,10 @@
             @if ($isDone)
                 <div class="w-full py-1.5 sm:py-2 text-[10px] sm:text-xs font-bold text-center rounded-md sm:rounded-lg transition-colors bg-emerald-600 text-white border border-emerald-600 shadow-xs group-hover:bg-emerald-700 group-hover:border-emerald-700">
                     <i class="fas fa-award mr-1"></i> Lihat Sertifikat
+                </div>
+            @elseif (!empty($course->is_waiting_for_start) || !empty($course->is_registration_phase))
+                <div class="w-full py-1.5 sm:py-2 text-[10px] sm:text-xs font-bold text-center rounded-md sm:rounded-lg transition-colors bg-[#0B5CFF] text-white border border-[#0B5CFF] shadow-xs group-hover:bg-blue-700 group-hover:border-blue-700">
+                    <i class="far fa-calendar-check mr-1.5"></i> Menunggu Pelaksanaan
                 </div>
             @elseif ($pct <= 0)
                 <div class="w-full py-1.5 sm:py-2 text-[10px] sm:text-xs font-bold text-center rounded-md sm:rounded-lg transition-colors bg-emerald-600 text-white border border-emerald-600 shadow-xs group-hover:bg-emerald-700 group-hover:border-emerald-700">
