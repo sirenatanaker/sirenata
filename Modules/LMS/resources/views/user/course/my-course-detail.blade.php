@@ -474,7 +474,7 @@
                                                             $contentIconBox = 'bg-slate-400 text-white border-slate-400';
                                                             $contentIcon = 'fa-lock';
                                                         } else {
-                                                            $contentIconBox = 'bg-[#13416B] text-white border-[#13416B]';
+                                                            $contentIconBox = 'bg-[#547996] text-white border-[#446680]';
                                                             $contentIcon = 'fa-file-alt';
                                                         }
                                                     @endphp
@@ -529,7 +529,7 @@
                                                     $postTestIconBox = 'bg-slate-400 text-white border-slate-400';
                                                     $postTestIcon = 'fa-lock';
                                                 } else {
-                                                    $postTestIconBox = 'bg-[#13416B] text-white border-[#13416B]';
+                                                    $postTestIconBox = 'bg-[#1E62D0] text-white border-[#1752b0]';
                                                     $postTestIcon = 'fa-file-signature';
                                                 }
                                             @endphp
@@ -576,7 +576,7 @@
                                                         </button>
                                                     @else
                                                         <a href="{{ route('user.course.test.show', ['slug' => $courseSlug, 'postTestId' => $postTestBab->id]) }}"
-                                                            class="w-full sm:w-auto mt-2 sm:mt-0 px-4 py-2 sm:py-2 {{ $isPostTestBabCompleted ? 'bg-slate-100 border border-slate-200 text-slate-700 hover:bg-slate-200' : 'bg-amber-500 hover:bg-amber-600 text-white shadow-sm' }} rounded-md text-xs font-bold transition-all text-center shrink-0 flex items-center justify-center gap-2">
+                                                            class="w-full sm:w-auto mt-2 sm:mt-0 px-4 py-2 sm:py-2 {{ $isPostTestBabCompleted ? 'bg-slate-100 border border-slate-200 text-slate-700 hover:bg-slate-200' : 'bg-[#13416B] hover:bg-[#0f3354] text-white shadow-sm' }} rounded-md text-xs font-bold transition-all text-center shrink-0 flex items-center justify-center gap-2">
                                                             <i
                                                                 class="fas {{ $isPostTestBabCompleted ? 'fa-eye' : 'fa-pencil-alt' }}"></i>
                                                             {{ $isPostTestBabCompleted ? 'Lihat Hasil' : 'Kerjakan Evaluasi' }}
