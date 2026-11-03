@@ -150,10 +150,19 @@ class PostTestService
     {
         DB::beginTransaction();
         try {
+            $course = null;
+            if (!empty($data['course_slug'])) {
+                $course = Course::where('slug', $data['course_slug'])->first();
+            } elseif (!empty($data['course_id'])) {
+                $course = Course::find($data['course_id']);
+            }
+            $courseName = $course ? ($course->course_name ?? $course->name) : 'Pelatihan';
+            $title = !empty(trim($data['title'] ?? '')) ? $data['title'] : ('Evaluasi Akhir : ' . $courseName);
+
             $postTest = PostTest::create([
                 'course_section_id' => $data['course_section_id'] ?? null,
                 'course_id'         => $data['course_id'] ?? null,
-                'title'             => $data['title'],
+                'title'             => $title,
                 'description'       => $data['description'] ?? null,
                 'passing_score'     => $data['passing_score'] ?? 70,
                 'duration'          => $data['duration'] ?? 30,
@@ -198,8 +207,17 @@ class PostTestService
     {
         DB::beginTransaction();
         try {
+            $course = null;
+            if (!empty($data['course_slug'])) {
+                $course = Course::where('slug', $data['course_slug'])->first();
+            } elseif ($postTest->course_id) {
+                $course = Course::find($postTest->course_id);
+            }
+            $courseName = $course ? ($course->course_name ?? $course->name) : 'Pelatihan';
+            $title = !empty(trim($data['title'] ?? '')) ? $data['title'] : ('Evaluasi Akhir : ' . $courseName);
+
             $postTest->update([
-                'title'         => $data['title'],
+                'title'         => $title,
                 'description'   => $data['description'] ?? null,
                 'passing_score' => $data['passing_score'] ?? 70,
                 'duration'      => $data['duration'] ?? 30,

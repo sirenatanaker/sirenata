@@ -374,17 +374,22 @@
                     <!-- CARD 1: INFORMASI UTAMA POST TEST -->
                     <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden scroll-mt-24"
                         id="section-pengaturan">
-                        <div class="px-6 py-4 border-b border-slate-200 bg-slate-50">
-                            <h2 class="text-base font-bold text-slate-800">1. Pengaturan Umum Post Test</h2>
+                        <div class="px-6 py-4 border-b border-slate-200 bg-slate-50 flex items-center justify-between">
+                            <h2 class="text-base font-bold text-slate-800">1. Pengaturan Evaluasi Akhir</h2>
+                            <span class="text-xs font-semibold px-2.5 py-1 bg-slate-100 text-slate-600 rounded-md border border-slate-200">Format Otomatis</span>
                         </div>
                         <div class="p-6 space-y-4">
-                            <div>
-                                <label class="block text-sm font-medium text-slate-700 mb-1">Judul Post Test <span
-                                        class="text-red-500">*</span></label>
-                                <input type="text" name="title" required
-                                    value="{{ old('title', !$section ? 'Evaluasi Akhir Pelatihan' : '') }}"
-                                    placeholder="{{ !$section ? 'Evaluasi Akhir Pelatihan' : 'Contoh: Ujian Evaluasi Pemahaman Bab 1' }}"
-                                    class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-[#13416B] focus:ring-1 focus:ring-[#13416B]" />
+                            {{-- Field Hidden untuk title & description yang digenerate otomatis --}}
+                            <input type="hidden" name="title" value="Evaluasi Akhir : {{ $course->course_name ?? $course->name }}" />
+
+                            <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                                <div>
+                                    <span class="text-[10px] font-bold uppercase tracking-wider text-slate-500 block mb-0.5">Judul Evaluasi (Statis/Otomatis)</span>
+                                    <p class="text-sm font-extrabold text-slate-800">Evaluasi Akhir : {{ $course->course_name ?? $course->name }}</p>
+                                </div>
+                                <span class="self-start sm:self-auto text-[11px] font-bold text-[#13416B] bg-blue-50 px-3 py-1 rounded-md border border-blue-200">
+                                    <i class="fas fa-magic mr-1"></i> Template Kursus
+                                </span>
                             </div>
 
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -402,14 +407,6 @@
                                         value="{{ old('duration', 30) }}"
                                         class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-[#13416B] focus:ring-1 focus:ring-[#13416B]" />
                                 </div>
-                            </div>
-
-                            <div>
-                                <label class="block text-sm font-medium text-slate-700 mb-1">Instruksi Pengerjaan / Deskripsi
-                                    (Opsional)</label>
-                                <textarea name="description" rows="2"
-                                    placeholder="{{ !$section ? 'Ujian utama ini adalah syarat mutlak penyelesaian pelatihan. Pastikan Anda telah menguasai seluruh materi sebelum memulai.' : '' }}"
-                                    class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-[#13416B] focus:ring-1 focus:ring-[#13416B]">{{ old('description', !$section ? 'Ujian utama ini adalah syarat mutlak penyelesaian pelatihan. Pastikan Anda telah menguasai seluruh materi sebelum memulai.' : '') }}</textarea>
                             </div>
                         </div>
                     </div>

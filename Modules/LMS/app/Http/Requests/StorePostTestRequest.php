@@ -3,6 +3,7 @@
 namespace Modules\LMS\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Modules\LMS\Models\Course;
 
 class StorePostTestRequest extends FormRequest
 {
@@ -11,13 +12,24 @@ class StorePostTestRequest extends FormRequest
         return true;
     }
 
+    protected function prepareForValidation(): void
+    {
+        if (empty($this->title)) {
+            $course = Course::where('slug', $this->course_slug)->first();
+            $courseName = $course ? ($course->course_name ?? $course->name) : 'Pelatihan';
+            $this->merge([
+                'title' => 'Evaluasi Akhir : ' . $courseName,
+            ]);
+        }
+    }
+
     public function rules(): array
     {
         return [
             'course_slug'                => ['required', 'string'],
             'course_section_id'          => ['nullable', 'uuid'],
             'course_id'                  => ['nullable', 'uuid'],
-            'title'                      => ['required', 'string', 'max:255'],
+            'title'                      => ['nullable', 'string', 'max:255'],
             'passing_score'              => ['required', 'integer', 'min:0', 'max:100'],
             'duration'                   => ['required', 'integer', 'min:1'],
             'description'                => ['nullable', 'string'],

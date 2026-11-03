@@ -1,4 +1,4 @@
-<x-dashboard::layouts.dashboard title="{{ $postTest->title }} | SIRENATA">
+<x-dashboard::layouts.dashboard title="Evaluasi Akhir : {{ data_get($course, 'course_name') ?? data_get($course, 'name') }} | SIRENATA">
     {{-- PERBAIKAN RESPONSIVE: Hilangkan padding luar di HP (p-0) agar mepet --}}
     <div class="p-0 sm:p-6 lg:p-8 max-w-full mx-auto font-sans min-h-screen bg-slate-50 sm:bg-transparent">
 
@@ -33,10 +33,10 @@
                             Lembar Evaluasi
                         </span>
                         <h1 class="text-md sm:text-2xl font-extrabold text-slate-900 leading-tight mb-2">
-                            {{ $postTest->title }}
+                            Evaluasi Akhir : {{ data_get($course, 'course_name') ?? data_get($course, 'name') }}
                         </h1>
                         <p class="text-xs md:text-sm text-slate-500 leading-relaxed max-w-3xl">
-                            {{ $postTest->description ?? 'Evaluasi ini menentukan kelulusan Anda. KKM: ' . $postTest->passing_score . '.' }}
+                            Pilihlah salah satu jawaban yang paling tepat pada setiap soal. Selesaikan seluruh pertanyaan sebelum batas waktu berakhir dan capai nilai ambang batas (KKM: {{ $postTest->passing_score }}) untuk dinyatakan lulus evaluasi.
                         </p>
                     </div>
                     
