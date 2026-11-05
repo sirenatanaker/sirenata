@@ -1,4 +1,9 @@
 <x-dashboard::layouts.dashboard title="Evaluasi Akhir : {{ data_get($course, 'course_name') ?? data_get($course, 'name') }} | SIRENATA">
+    @php
+        $backToUrl = !empty(data_get($postTest, 'course_section_id'))
+            ? route('user.course.section.show', ['slug' => $slug, 'sectionId' => data_get($postTest, 'course_section_id')])
+            : route('user.course.my-course.detail', $slug);
+    @endphp
     {{-- PERBAIKAN RESPONSIVE: Hilangkan padding luar di HP (p-0) agar mepet --}}
     <div class="p-0 sm:p-6 lg:p-8 max-w-full mx-auto font-sans min-h-screen bg-slate-50 sm:bg-transparent">
 
@@ -10,7 +15,7 @@
                 
                 {{-- Breadcrumb: Tombol Kembali --}}
                 <div class="mb-6 sm:mb-8">
-                    <a href="{{ route('user.course.my-course.detail', $slug) }}"
+                    <a href="{{ $backToUrl }}"
                         class="group inline-flex items-center gap-3 text-sm font-medium text-slate-500 hover:text-[#13416B] transition-colors">
                         
                         <div class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center shrink-0 group-hover:bg-[#13416B]/10 transition-colors border border-slate-200">
@@ -108,9 +113,9 @@
 
                             <!-- Action Buttons -->
                             <div class="flex flex-row gap-2 sm:gap-4 justify-between border-t border-slate-100 p-4 sm:p-8 mt-2">
-                                <a href="{{ route('user.course.my-course.detail', $slug) }}"
+                                <a href="{{ $backToUrl }}"
                                     class="flex-1 min-w-0 sm:flex-none px-2 sm:px-6 py-3 rounded-xl font-bold bg-white text-slate-700 hover:bg-slate-50 transition-colors border border-slate-200 flex items-center justify-center gap-1.5 sm:gap-2 text-[10px] sm:text-sm text-center shadow-sm">
-                                    <i class="fas fa-list shrink-0"></i> Kembali ke Modul
+                                    <i class="fas fa-list shrink-0"></i> {{ !empty(data_get($postTest, 'course_section_id')) ? 'Kembali ke Modul' : 'Kembali ke Kursus' }}
                                 </a>
 
                                 <div class="flex-1 min-w-0 sm:flex-none sm:w-auto">

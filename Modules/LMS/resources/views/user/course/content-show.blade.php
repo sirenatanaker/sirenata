@@ -1,4 +1,9 @@
 <x-dashboard::layouts.dashboard title="{{ data_get($content, 'name', 'Detail Topik') }} | SIRENATA">
+    @php
+        $backToSectionUrl = !empty(data_get($content, 'course_section_id'))
+            ? route('user.course.section.show', ['slug' => $slug ?? data_get($course, 'slug', ''), 'sectionId' => data_get($content, 'course_section_id')])
+            : route('user.course.my-course.detail', $slug ?? data_get($course, 'slug', ''));
+    @endphp
     <div class="p-0 sm:p-4 md:p-6 lg:p-8 max-w-full mx-auto min-h-screen" x-data="{
         reachedEnd: {{ data_get($content, 'is_completed') ? 'true' : 'false' }},
         videoCompleted: {{ data_get($content, 'is_completed') ? 'true' : 'false' }},
@@ -125,7 +130,7 @@
 
                 {{-- Header Nav: Tombol Kembali --}}
                 <div class="mb-3.5 sm:mb-4">
-                    <a href="{{ route('user.course.my-course.detail', $slug ?? data_get($course, 'slug', '')) }}"
+                    <a href="{{ $backToSectionUrl }}"
                         class="group inline-flex items-center gap-2.5 text-sm font-medium text-slate-500 hover:text-[#13416B] transition-colors"
                         :class="{
                             '!text-slate-400 hover:!text-white': isDark
@@ -658,7 +663,7 @@
                     '!bg-[#131A26] !border-[#263346]': isDark
                 }">
                 <div class="flex items-center gap-2 lg:gap-3 w-full sm:w-auto">
-                    <a href="{{ route('user.course.my-course.detail', $slug) }}"
+                    <a href="{{ $backToSectionUrl }}"
                         class="flex-1 sm:flex-initial text-xs sm:text-sm lg:text-base font-bold text-slate-500 hover:text-slate-800 transition-colors text-center py-2 sm:py-2.5 lg:py-3 px-3.5 sm:px-4.5 lg:px-6 border border-slate-200 sm:border-slate-300 rounded-xl bg-white sm:bg-transparent flex items-center justify-center gap-2 shadow-2xs"
                         :class="{
                             '!text-slate-300 sm:!bg-transparent !border-[#263346] !bg-[#1E2837]': isDark

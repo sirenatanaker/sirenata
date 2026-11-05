@@ -187,403 +187,157 @@
 
                     <div
                         class="flex items-center justify-between mb-5 sm:mb-6 pb-4 border-b border-slate-100 gap-3 sm:gap-4">
-                        <div class="flex items-center gap-3">
-                            <i class="fas fa-list-ul text-slate-700 text-xl sm:text-2xl shrink-0"></i>
-                            <div>
-                                <h2 class="text-base sm:text-lg font-extrabold text-slate-800 leading-tight">Daftar Modul Pembelajaran</h2>
-                                <p class="text-[11px] sm:text-xs text-slate-500 mt-0.5">Selesaikan seluruh tahapan modul secara berurutan</p>
-                            </div>
+                        <div>
+                            <h2 class="text-base sm:text-lg font-extrabold text-slate-800 leading-tight">Timeline & Agenda Pelaksanaan</h2>
+                            <p class="text-[11px] sm:text-xs text-slate-500 mt-0.5">Alur tahapan harian: sesi tatap muka (Zoom), pembelajaran materi, dan evaluasi harian</p>
                         </div>
                     </div>
-                    <div x-data="{
-                        activeAccordion: localStorage.getItem('active_section_{{ $courseSlug }}') || 'section-0',
-                        savedAccordion: null,
-                        isGuideActive: false,
 
-                        closeForGuide() {
-                            this.isGuideActive = true;
-                            if (this.activeAccordion) {
-                                this.savedAccordion = this.activeAccordion;
-                            }
-                            this.activeAccordion = '';
-                        },
-
-                        restoreAfterGuide() {
-                            this.isGuideActive = false;
-                            if (this.savedAccordion) {
-                                this.activeAccordion = this.savedAccordion;
-                            }
-                        },
-                    
-                        init() {
-                            const urlParams = new URLSearchParams(window.location.search);
-                            const targetId = urlParams.get('target');
-                    
-                            /*
-                             * Jika dashboard mengirim target=auto,
-                             * cari modul pertama yang belum selesai.
-                             */
-                            if (targetId === 'auto') {
-                    
-                                setTimeout(() => {
-                    
-                                    const sections = Array.from(
-                                        document.querySelectorAll('[data-section-id]')
-                                    );
-                    
-                                    let targetSection = null;
-                    
-                                    for (const section of sections) {
-                    
-                                        /*
-                                         * Modul terkunci tidak dipilih.
-                                         */
-                                        if (section.dataset.locked === '1') {
-                                            continue;
-                                        }
-                    
-                                        /*
-                                         * Cari bagian yang belum selesai.
-                                         */
-                                        if (section.dataset.completed !== '1') {
-                                            targetSection = section;
-                                            break;
-                                        }
-                                    }
-                    
-                                    /*
-                                     * Jika semua modul selesai,
-                                     * buka modul pertama.
-                                     */
-                                    if (!targetSection && sections.length > 0) {
-                                        targetSection = sections[0];
-                                    }
-                    
-                                    if (targetSection) {
-                                        const secId = targetSection.getAttribute('id');
-                                        if (this.isGuideActive) {
-                                            this.savedAccordion = secId;
-                                        } else {
-                                            this.activeAccordion = secId;
-                    
-                                            setTimeout(() => {
-                                                targetSection.scrollIntoView({
-                                                    behavior: 'smooth',
-                                                    block: 'center'
-                                                });
-                    
-                                                targetSection.classList.add(
-                                                    'ring-2',
-                                                    'ring-[#2563EB]'
-                                                );
-                    
-                                                setTimeout(() => {
-                                                    targetSection.classList.remove(
-                                                        'ring-2',
-                                                        'ring-[#2563EB]'
-                                                    );
-                                                }, 2000);
-                                            }, 150);
-                                        }
-                                    }
-                                }, 300);
-                                return;
-                            }
-                    
-                            /*
-                             * Target normal berdasarkan section ID.
-                             */
-                            if (targetId) {
-                    
-                                setTimeout(() => {
-                    
-                                    const el = document.querySelector(
-                                        `[data-section-id='${targetId}']`
-                                    );
-                    
-                                    if (el) {
-                                        const secId = el.getAttribute('id');
-                                        if (this.isGuideActive) {
-                                            this.savedAccordion = secId;
-                                        } else {
-                                            this.activeAccordion = secId;
-                    
-                                            setTimeout(() => {
-                                                el.scrollIntoView({
-                                                    behavior: 'smooth',
-                                                    block: 'center'
-                                                });
-                    
-                                                el.classList.add(
-                                                    'ring-2',
-                                                    'ring-[#2563EB]'
-                                                );
-                    
-                                                setTimeout(() => {
-                                                    el.classList.remove(
-                                                        'ring-2',
-                                                        'ring-[#2563EB]'
-                                                    );
-                                                }, 2000);
-                                            }, 150);
-                                        }
-                                    }
-                                }, 300);
-                            }
-                        }
-                    }"
-                    @guide-start.window="closeForGuide()"
-                    @guide:start.window="closeForGuide()"
-                    @guide-end.window="restoreAfterGuide()"
-                    @guide:end.window="restoreAfterGuide()"
-                    x-init="init();
-                    
-                    $watch(
-                        'activeAccordion',
-                        value => {
-                            if (!isGuideActive) {
-                                localStorage.setItem(
-                                    'active_section_{{ $courseSlug }}',
-                                    value
-                                );
-                            }
-                        }
-                    )" class="space-y-3 sm:space-y-4">
-
+                    <div class="relative space-y-4 sm:space-y-5">
                         @php
+                            $sectionsList = data_get($course, 'sections', []);
+                            $totalSections = count($sectionsList);
+                            $sectionProofs = $sectionProofs ?? [];
                             $isPreviousSectionDone = true;
                         @endphp
 
-                        @forelse (data_get($course, 'sections', []) as $index => $section)
+                        {{-- Garis vertikal timeline yang menyambung secara kontinu dari badge pertama hingga badge terakhir --}}
+                        @if ($totalSections > 1)
+                            <div class="absolute left-6 sm:left-7 top-6 sm:top-7 bottom-6 sm:bottom-7 w-0.5 bg-slate-200 -translate-x-1/2 pointer-events-none z-0"></div>
+                        @endif
+
+                        @forelse ($sectionsList as $index => $section)
                             @php
                                 $sectionId = data_get($section, 'id') ?? data_get($section, 'section_id');
-                                $sectionName = data_get($section, 'name', 'Bagian ' . ($index + 1));
-                                $sectionContentsRaw = data_get($section, 'section_contents', []);
+                                $rawSectionName = data_get($section, 'name', '');
+                                // Hapus prefix seperti "Modul 1:", "Modul 1 -", "Hari 1:", dll agar langsung ke judul materi
+                                $cleanSectionName = preg_replace('/^(modul|hari)\s*\d+\s*[:\-–]\s*/i', '', $rawSectionName);
+                                $displayTitle = !empty(trim($cleanSectionName)) ? trim($cleanSectionName) : ($rawSectionName ?: 'Hari ' . ($index + 1));
+
+                                $dayDate = null;
+                                try {
+                                    if ($activeBimtek && $activeBimtek->start_date) {
+                                        $dayDate = \Carbon\Carbon::parse($activeBimtek->start_date)->addDays($index);
+                                    }
+                                } catch (\Exception $e) {}
+
+                                $sectionContentsRaw = data_get($section, 'section_contents', []) ?: data_get($section, 'contents', []);
                                 $totalCount = count($sectionContentsRaw);
                                 $completedCount = data_get($section, 'completed_count', 0);
                                 $isContentCompleted = data_get($section, 'is_content_completed', $totalCount === 0 || $completedCount === $totalCount);
                                 $postTestBab = data_get($section, 'post_test_bab');
                                 $isPostTestBabCompleted = data_get($section, 'is_post_test_bab_completed', true);
+                                $hasZoomProof = !empty($sectionProofs[$sectionId]);
                                 $isSectionCompleted = data_get($section, 'is_section_completed', $isContentCompleted && $isPostTestBabCompleted);
                                 $isLocked = $canReviewAll ? false : data_get($section, 'is_locked', !$isPreviousSectionDone);
                             @endphp
 
-                            <div x-data="{ id: 'section-{{ $index }}', locked: {{ $isLocked ? 'true' : 'false' }} }" id="section-{{ $index }}"
-                                data-section-id="{{ $sectionId }}"
-                                data-locked="{{ $isLocked ? 1 : 0 }}" data-completed="{{ $isSectionCompleted ? 1 : 0 }}"
-                                class="border {{ $isLocked ? 'border-slate-100 bg-slate-50' : 'border-slate-200 bg-white' }} rounded-md overflow-hidden shadow-sm transition-all duration-500"
-                                :class="{
-                                    'border-[#13416B] shadow-md ring-1 ring-gray-100': activeAccordion == id && !
-                                        locked
-                                }">
+                            <div class="relative flex items-start gap-3 sm:gap-4 group">
+                                {{-- Node Timeline: Badge Hari seperti Kalender dengan rounded-md, border-b, dan border-r --}}
+                                <div class="flex flex-col items-center justify-center w-12 h-12 sm:w-14 sm:h-14 rounded-md {{ $isLocked ? 'bg-slate-100 text-slate-400 border border-slate-300 border-r-2 border-b-2 border-r-slate-400 border-b-slate-400' : 'bg-[#13416B] text-white border border-[#13416B] border-r-2 border-b-2 border-r-[#092035] border-b-[#092035] shadow-2xs' }} shrink-0 z-10 relative transition-transform group-hover:scale-105">
+                                    <span class="text-[9px] font-bold uppercase tracking-wider {{ $isLocked ? 'text-slate-400' : 'text-slate-300' }} leading-none">HARI</span>
+                                    <span class="text-base sm:text-lg font-black leading-tight mt-0.5">{{ $index + 1 }}</span>
+                                </div>
 
-                                <button @click="if(!locked) activeAccordion = (activeAccordion == id ? '' : id)"
-                                    class="flex items-start sm:items-center justify-between w-full p-3.5 sm:p-5 text-left transition-colors border-l-4 border-l-transparent {{ $isLocked ? 'cursor-not-allowed opacity-80' : 'hover:bg-slate-50/50' }}"
-                                    :class="{ 'bg-slate-50/80 border-l-[#13416B]': activeAccordion == id && !locked }">
-
-                                    <div class="flex items-start gap-3 sm:gap-4 flex-1 min-w-0 pr-2">
-                                        @if ($isLocked)
-                                            <span
-                                                class="flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-slate-400 text-white text-xs mt-0.5 shrink-0 border border-slate-400">
-                                                <i class="fas fa-lock"></i>
-                                            </span>
-                                        @else
-                                            <span
-                                                class="flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-[#13416B] text-white text-xs font-bold mt-0.5 shrink-0 border border-[#13416B]">
-                                                {{ $index + 1 }}
-                                            </span>
-                                        @endif
-
-                                        <div class="flex-1 min-w-0">
-                                            <h3
-                                                class="font-bold {{ $isLocked ? 'text-slate-500' : 'text-slate-800' }} text-sm sm:text-base leading-snug break-words">
-                                                {{ $sectionName }}
+                                {{-- Card Modul Harian (rounded-md) --}}
+                                <div
+                                    class="flex-1 min-w-0 border {{ $isLocked ? 'border-slate-200/80 bg-slate-50/60' : 'border-slate-200 bg-white hover:border-[#13416B]/40 hover:shadow-xs' }} rounded-md p-4 sm:p-5 transition-all flex flex-col md:flex-row md:items-center justify-between gap-4">
+                                    
+                                    {{-- Kolom Kiri: Judul Langsung & Ringkasan Agenda Terpadu dengan Radio Ceklis --}}
+                                    <div class="flex-1 min-w-0">
+                                        <div class="flex flex-wrap items-center gap-2 mb-1">
+                                            <h3 class="font-bold {{ $isLocked ? 'text-slate-500' : 'text-slate-800' }} text-sm sm:text-base leading-snug break-words">
+                                                {{ $displayTitle }}
                                             </h3>
-
-                                            <div
-                                                class="flex flex-wrap items-center gap-x-2 sm:gap-x-3 gap-y-1.5 mt-1.5">
-                                                <span
-                                                    class="text-[11px] sm:text-xs text-slate-500 font-medium flex items-center gap-1 whitespace-nowrap">
-                                                    <i class="far fa-file-alt text-slate-400"></i> {{ $totalCount }}
-                                                    Topik
+                                            @if ($dayDate)
+                                                <span class="text-slate-300 hidden sm:inline">•</span>
+                                                <span class="inline-flex items-center gap-1 text-[11px] font-medium text-slate-400 shrink-0">
+                                                    <i class="far fa-calendar-alt text-slate-400"></i> {{ $dayDate->translatedFormat('d F Y') }}
                                                 </span>
+                                            @endif
+                                        </div>
 
-                                                @if ($postTestBab)
-                                                    <span
-                                                        class="text-[10px] text-slate-300 hidden sm:inline-block">•</span>
-                                                    <span
-                                                        class="text-[11px] sm:text-xs text-slate-500 font-medium flex items-center gap-1 whitespace-nowrap">
-                                                        <i class="fas fa-file-signature text-slate-400"></i> 1 Evaluasi
-                                                    </span>
-                                                @endif
+                                        @php
+                                            $hasZoom = $activeBimtek && $activeBimtek->zoom_url;
+                                        @endphp
 
-                                                <span class="text-[10px] text-slate-300 hidden sm:inline-block">•</span>
+                                        {{-- Baris Aktivitas Agenda Harian: Micro-checklist Bersih, Proporsional & Elegan --}}
+                                        <div class="flex flex-wrap items-center gap-x-4 sm:gap-x-5 gap-y-2 mt-2.5 sm:mt-3">
+                                            {{-- 1. Sesi Tatap Muka Online --}}
+                                            @if ($hasZoom)
+                                                <div class="inline-flex items-center gap-1.5 text-xs sm:text-[13px] {{ $isLocked ? 'text-slate-400' : ($isZoomAttended ? 'text-slate-800 font-medium' : 'text-slate-500') }}" title="{{ $isZoomAttended ? 'Tatap Muka: Hadir' : 'Tatap Muka: Belum Hadir' }}">
+                                                    @if ($isZoomAttended)
+                                                        <span class="w-4 h-4 rounded-full bg-emerald-600 text-white flex items-center justify-center shrink-0 text-[9px] shadow-2xs">
+                                                            <i class="fas fa-check"></i>
+                                                        </span>
+                                                    @else
+                                                        <span class="w-4 h-4 rounded-full border-2 {{ $isLocked ? 'border-slate-300 bg-slate-100' : 'border-slate-300 bg-white' }} shrink-0"></span>
+                                                    @endif
+                                                    <span>Tatap Muka</span>
+                                                </div>
+                                            @endif
 
-                                                @if ($isWaitingForStart)
-                                                    <span
-                                                        class="inline-flex items-center gap-1 text-[11px] sm:text-xs font-semibold text-slate-400 whitespace-nowrap">
-                                                        <i class="fas fa-lock text-[10px]" aria-hidden="true"></i>
-                                                        Dibuka Saat Pelaksanaan
-                                                    </span>
-                                                @elseif ($isLocked)
-                                                    <span
-                                                        class="inline-flex items-center gap-1 text-[11px] sm:text-xs font-semibold text-slate-400 whitespace-nowrap">
-                                                        <i class="fas fa-lock text-[10px]" aria-hidden="true"></i>
-                                                        Terkunci
+                                            {{-- 2. Topik Materi Mandiri --}}
+                                            <div class="inline-flex items-center gap-1.5 text-xs sm:text-[13px] {{ $isLocked ? 'text-slate-400' : ($isContentCompleted ? 'text-slate-800 font-medium' : 'text-slate-500') }}" title="Materi Pembelajaran">
+                                                @if ($isContentCompleted)
+                                                    <span class="w-4 h-4 rounded-full bg-emerald-600 text-white flex items-center justify-center shrink-0 text-[9px] shadow-2xs">
+                                                        <i class="fas fa-check"></i>
                                                     </span>
                                                 @else
-                                                    <span
-                                                        class="text-[11px] sm:text-xs font-semibold {{ $isSectionCompleted ? 'text-emerald-600 font-bold' : 'text-gray-500' }} whitespace-nowrap">
-                                                        {{ $completedCount }}/{{ $totalCount }} Selesai
-                                                    </span>
+                                                    <span class="w-4 h-4 rounded-full border-2 {{ $isLocked ? 'border-slate-300 bg-slate-100' : 'border-slate-300 bg-white' }} shrink-0"></span>
                                                 @endif
+                                                <span>Materi</span>
                                             </div>
+
+                                            {{-- 3. Upload Bukti Pelengkap --}}
+                                            @if ($hasZoom)
+                                                <div class="inline-flex items-center gap-1.5 text-xs sm:text-[13px] {{ $isLocked ? 'text-slate-400' : ($hasZoomProof ? 'text-slate-800 font-medium' : 'text-slate-500') }}" title="{{ $hasZoomProof ? 'Bukti pelengkap sudah diunggah' : 'Belum upload bukti pelengkap' }}">
+                                                    @if ($hasZoomProof)
+                                                        <span class="w-4 h-4 rounded-full bg-emerald-600 text-white flex items-center justify-center shrink-0 text-[9px] shadow-2xs">
+                                                            <i class="fas fa-check"></i>
+                                                        </span>
+                                                    @else
+                                                        <span class="w-4 h-4 rounded-full border-2 {{ $isLocked ? 'border-slate-300 bg-slate-100' : 'border-slate-300 bg-white' }} shrink-0"></span>
+                                                    @endif
+                                                    <span>Bukti Pelengkap</span>
+                                                </div>
+                                            @endif
+
+                                            {{-- 4. Evaluasi Harian (Post-Test Bab) --}}
+                                            @if ($postTestBab)
+                                                <div class="inline-flex items-center gap-1.5 text-xs sm:text-[13px] {{ $isLocked ? 'text-slate-400' : ($isPostTestBabCompleted ? 'text-slate-800 font-medium' : 'text-slate-500') }}" title="{{ $isPostTestBabCompleted ? 'Evaluasi harian tuntas' : 'Evaluasi harian belum dikerjakan' }}">
+                                                    @if ($isPostTestBabCompleted)
+                                                        <span class="w-4 h-4 rounded-full bg-emerald-600 text-white flex items-center justify-center shrink-0 text-[9px] shadow-2xs">
+                                                            <i class="fas fa-check"></i>
+                                                        </span>
+                                                    @else
+                                                        <span class="w-4 h-4 rounded-full border-2 {{ $isLocked ? 'border-slate-300 bg-slate-100' : 'border-slate-300 bg-white' }} shrink-0"></span>
+                                                    @endif
+                                                    <span>Evaluasi</span>
+                                                </div>
+                                            @endif
                                         </div>
                                     </div>
-                                    <svg class="w-4 h-4 sm:w-5 sm:h-5 {{ $isLocked ? 'text-slate-300' : 'text-slate-400' }} transition-transform duration-200 shrink-0 mt-1 sm:mt-0"
-                                        :class="{ 'rotate-180 text-[#13416B]': activeAccordion == id && !locked }"
-                                        viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2.5">
-                                        <path d="M6 9l6 6 6-6" />
-                                    </svg>
-                                </button>
 
-                                <div x-show="activeAccordion == id && !locked" x-collapse x-cloak>
-                                    <div
-                                        class="p-3 sm:p-5 border-t border-slate-100 bg-slate-50/50 space-y-3 sm:space-y-4">
-
-                                        {{-- Looping Topik (berurutan: topik berikutnya terkunci sampai topik sebelumnya selesai) --}}
-                                        @php $isPreviousContentDone = true; @endphp
-
-                                        @forelse ($sectionContentsRaw as $content)
-                                            @php
-                                                $contentId = data_get($content, 'id', Str::random(5));
-                                                $contentName = data_get($content, 'name', 'Topik Tanpa Judul');
-                                                $videoUrlRaw = data_get($content, 'video_url');
-                                                $documentUrlRaw = data_get($content, 'document_url');
-                                                $isContentItemCompleted = data_get($content, 'is_completed', false);
-                                                // Terkunci jika topik sebelumnya belum selesai (kecuali topik ini sudah pernah diselesaikan atau mode ulas materi)
-                                                $isContentLocked = $canReviewAll ? false : ($isWaitingForStart || (!$isPreviousContentDone && !$isContentItemCompleted));
-                                            @endphp
-
-                                            <div
-                                                class="flex flex-col sm:flex-row sm:items-center justify-between p-3.5 sm:p-4 rounded-md border border-slate-200 bg-white hover:border-slate-300 hover:shadow-sm transition-all duration-200 gap-3 sm:gap-4">
-                                                <div
-                                                    class="flex items-center gap-3 sm:gap-4 flex-1 min-w-0">
-                                                    @php
-                                                        if ($isContentLocked) {
-                                                            $contentIconBox = 'bg-slate-400 text-white border-slate-400';
-                                                            $contentIcon = 'fa-lock';
-                                                        } else {
-                                                            $contentIconBox = 'bg-[#547996] text-white border-[#446680]';
-                                                            $contentIcon = 'fa-file-alt';
-                                                        }
-                                                    @endphp
-                                                    <span
-                                                        class="flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-full {{ $contentIconBox }} shrink-0 border">
-                                                        <i class="fas {{ $contentIcon }} {{ $contentIcon === 'fa-lock' ? 'text-xs' : 'text-xs sm:text-sm' }}"></i>
-                                                    </span>
-
-                                                    <div class="flex-1 min-w-0">
-                                                        <div class="flex items-center gap-1.5">
-                                                            <p
-                                                                class="font-bold text-slate-800 text-sm leading-snug break-words line-clamp-2"
-                                                                title="{{ $contentName }}">
-                                                                {{ $contentName }}
-                                                            </p>
-                                                            @if ($isContentItemCompleted)
-                                                                <i class="fas fa-check-circle text-emerald-600 text-xs sm:text-sm shrink-0" title="Selesai Dipelajari"></i>
-                                                            @endif
-                                                        </div>
-                                                    </div>
-                                                </div>
-
-                                                @if (!$isContentLocked)
-                                                    <a href="{{ route('user.course.content.show', ['slug' => $courseSlug, 'content' => $contentId]) }}"
-                                                        class="w-full sm:w-auto mt-2 sm:mt-0 px-4 py-2.5 sm:py-2 {{ $isContentItemCompleted ? 'bg-slate-100 border border-slate-200 text-slate-700 hover:bg-slate-200' : 'bg-[#13416B] hover:bg-[#0f3354] text-white shadow-sm' }} rounded-md text-xs font-bold transition-all text-center shrink-0 flex items-center justify-center gap-2">
-                                                        <i
-                                                            class="fas {{ $isContentItemCompleted ? 'fa-eye' : 'fa-play' }}"></i>
-                                                        {{ $isContentItemCompleted ? 'Lihat Kembali' : 'Pelajari Topik' }}
-                                                    </a>
-                                                @else
-                                                    <button type="button" disabled
-                                                        class="w-full sm:w-auto mt-2 sm:mt-0 px-4 py-2 sm:py-2 bg-slate-100 text-slate-400 border border-slate-200 rounded-md text-xs font-bold text-center shrink-0 flex items-center justify-center gap-1.5 cursor-not-allowed select-none">
-                                                        <i class="fas fa-lock text-[10px]"></i> Terkunci
-                                                    </button>
-                                                @endif
-                                            </div>
-
-                                            @php $isPreviousContentDone = $isContentItemCompleted; @endphp
-                                        @empty
-                                            <div
-                                                class="p-4 text-center text-slate-500 text-sm bg-white rounded-md border border-dashed border-slate-200">
-                                                <i class="fas fa-folder-open mb-2 text-slate-300 text-xl block"></i>
-                                                Topik sedang disiapkan.
-                                            </div>
-                                        @endforelse
-
-                                        {{-- Evaluasi per Modul (terkunci sampai semua topik selesai) --}}
-                                        @if ($postTestBab)
-                                            @php
-                                                $isPostTestBabLocked = $canReviewAll ? false : ($isWaitingForStart || (!$isContentCompleted && !$isPostTestBabCompleted));
-                                                if ($isPostTestBabLocked) {
-                                                    $postTestIconBox = 'bg-slate-400 text-white border-slate-400';
-                                                    $postTestIcon = 'fa-lock';
-                                                } else {
-                                                    $postTestIconBox = 'bg-[#1E62D0] text-white border-[#1752b0]';
-                                                    $postTestIcon = 'fa-file-signature';
-                                                }
-                                            @endphp
-                                            <div class="mt-4 pt-4 border-t border-slate-200/80">
-                                                <div
-                                                    class="flex flex-col sm:flex-row sm:items-center justify-between p-3.5 sm:p-4 rounded-md border border-slate-200 bg-white hover:border-slate-300 hover:shadow-sm transition-all duration-200 gap-3 sm:gap-4">
-                                                    <div
-                                                        class="flex items-start sm:items-center gap-3 sm:gap-4 flex-1 min-w-0">
-                                                        <span
-                                                            class="flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-md {{ $postTestIconBox }} shrink-0 border mt-0.5 sm:mt-0">
-                                                            <i
-                                                                class="fas {{ $postTestIcon }} text-xs sm:text-sm"></i>
-                                                        </span>
-                                                        <div class="flex-1 min-w-0">
-                                                            <div class="flex items-center gap-1.5">
-                                                                <p
-                                                                    class="font-bold text-slate-800 text-sm leading-tight break-words">
-                                                                    {{ data_get($postTestBab, 'title', 'Post Test: ' . $sectionName) }}
-                                                                </p>
-                                                                @if ($isPostTestBabCompleted)
-                                                                    <i class="fas fa-check-circle text-emerald-600 text-xs sm:text-sm shrink-0" title="Evaluasi Selesai"></i>
-                                                                @endif
-                                                            </div>
-
-                                                            <!-- Info Evaluasi Topik: Cukup Text Saja (Jumlah Soal & Durasi) -->
-                                                            <div class="mt-1 flex flex-wrap items-center gap-x-2.5 gap-y-1 text-xs text-slate-500">
-                                                                <span class="inline-flex items-center gap-1">
-                                                                    <i class="fas fa-list-ol text-slate-400 text-xs"></i>
-                                                                    {{ data_get($postTestBab, 'questions', collect())->count() ?? 0 }} Soal
-                                                                </span>
-                                                                <span class="text-slate-300">•</span>
-                                                                <span class="inline-flex items-center gap-1">
-                                                                    <i class="fas fa-stopwatch text-slate-400 text-xs"></i>
-                                                                    {{ data_get($postTestBab, 'duration', 0) }} Menit
-                                                                </span>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-
-                                                    @if ($isPostTestBabLocked)
-                                                        <button type="button" disabled
-                                                            class="w-full sm:w-auto mt-2 sm:mt-0 px-4 py-2 sm:py-2 bg-slate-100 text-slate-400 border border-slate-200 rounded-md text-xs font-bold text-center shrink-0 flex items-center justify-center gap-1.5 cursor-not-allowed select-none">
-                                                            <i class="fas fa-lock text-[10px]"></i> Terkunci
-                                                        </button>
-                                                    @else
-                                                        <a href="{{ route('user.course.test.show', ['slug' => $courseSlug, 'postTestId' => $postTestBab->id]) }}"
-                                                            class="w-full sm:w-auto mt-2 sm:mt-0 px-4 py-2 sm:py-2 {{ $isPostTestBabCompleted ? 'bg-slate-100 border border-slate-200 text-slate-700 hover:bg-slate-200' : 'bg-[#13416B] hover:bg-[#0f3354] text-white shadow-sm' }} rounded-md text-xs font-bold transition-all text-center shrink-0 flex items-center justify-center gap-2">
-                                                            <i
-                                                                class="fas {{ $isPostTestBabCompleted ? 'fa-eye' : 'fa-pencil-alt' }}"></i>
-                                                            {{ $isPostTestBabCompleted ? 'Lihat Hasil' : 'Kerjakan Evaluasi' }}
-                                                        </a>
-                                                    @endif
-                                                </div>
-                                            </div>
+                                    {{-- Kolom Kanan: Tombol Masuk ke Isi Modul (Brand Primary Navy #13416B) --}}
+                                    <div class="shrink-0 self-end md:self-center w-full md:w-auto">
+                                        @if ($isWaitingForStart)
+                                            <button type="button" disabled
+                                                title="Modul dibuka saat periode pelaksanaan pelatihan resmi dimulai"
+                                                class="w-full md:w-auto inline-flex items-center justify-center px-5 py-2.5 rounded-md text-xs sm:text-sm font-bold bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed select-none whitespace-nowrap">
+                                                <span>Terkunci</span>
+                                            </button>
+                                        @elseif ($isLocked)
+                                            <button type="button" disabled
+                                                title="Selesaikan agenda hari sebelumnya terlebih dahulu"
+                                                class="w-full md:w-auto inline-flex items-center justify-center px-5 py-2.5 rounded-md text-xs sm:text-sm font-bold bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed select-none whitespace-nowrap">
+                                                <span>Terkunci</span>
+                                            </button>
+                                        @else
+                                            <a href="{{ route('user.course.section.show', ['slug' => $courseSlug, 'sectionId' => $sectionId]) }}"
+                                                class="w-full md:w-auto inline-flex items-center justify-center px-5 py-2.5 rounded-md text-xs sm:text-sm font-bold bg-[#13416B] hover:bg-[#0f3354] text-white shadow-sm transition-all whitespace-nowrap">
+                                                <span>Masuk</span>
+                                            </a>
                                         @endif
                                     </div>
                                 </div>
@@ -595,251 +349,12 @@
                         @empty
                             <div
                                 class="p-8 text-center text-slate-500 bg-slate-50 rounded-md border border-dashed border-slate-200">
-                                <i class="fas fa-layer-group mb-3 text-slate-300 text-3xl block"></i>
-                                <p class="font-semibold text-sm">Belum ada modul pembelajaran.</p>
+                                <i class="fas fa-calendar-times mb-3 text-slate-300 text-3xl block"></i>
+                                <p class="font-semibold text-sm">Belum ada agenda pelaksanaan.</p>
                             </div>
                         @endforelse
                     </div>
                 </div>
-
-                {{-- Card Sesi Live Zoom Bimtek Online --}}
-                @if ($activeBimtek && $activeBimtek->zoom_url)
-                    <div data-tour="zoom"
-                        x-data="{ hasJoinedZoom: {{ $hasJoinedZoom ? 'true' : 'false' }}, showZoomModal: false }"
-                        @keydown.escape.window="showZoomModal = false"
-                        class="bg-white rounded-none sm:rounded-md shadow-sm border-y border-x-0 sm:border sm:border-x border-slate-200 p-4 sm:p-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
-                        
-                        <div class="space-y-3">
-                            {{-- Baris Atas: 2 Kolom (Kiri: Badge Icon Zoom, Kanan: Judul & Status Presensi di bawahnya) --}}
-                            <div class="flex items-center gap-3.5">
-                                <div class="w-12 h-12 rounded-md bg-[#1E62D0] text-white flex items-center justify-center shrink-0 text-2xl shadow-xs">
-                                    <i class="fas fa-video"></i>
-                                </div>
-                                <div class="space-y-1 min-w-0">
-                                    <h3 class="text-base font-bold text-slate-800 leading-tight">Tatap Muka Online</h3>
-                                    @if ($isWaitingForStart)
-                                        <div>
-                                            <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded text-[10px] font-bold bg-[#0B5CFF] text-white shadow-xs">
-                                                <i class="far fa-clock"></i> Menunggu Jadwal
-                                            </span>
-                                        </div>
-                                    @elseif ($isZoomUnlocked)
-                                        <div>
-                                            @if ($isZoomAttended)
-                                                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded text-[10px] font-bold bg-emerald-600 text-white shadow-xs">
-                                                    <i class="fas fa-check-circle"></i> Presensi Kehadiran Terverifikasi
-                                                </span>
-                                            @else
-                                                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded text-[10px] font-bold bg-amber-500 text-white shadow-xs">
-                                                    <i class="fas fa-clock"></i> Belum Konfirmasi Hadir
-                                                </span>
-                                            @endif
-                                        </div>
-                                    @endif
-                                </div>
-                            </div>
-
-                            {{-- Baris Bawah: Jadwal, Meeting ID, dan Passcode di bawah 2 kolom sebelumnya --}}
-                            <div class="space-y-1">
-                                @if ($isWaitingForStart || $isZoomUnlocked)
-                                    <p class="text-xs text-slate-600 font-medium">
-                                        <i class="far fa-calendar-alt mr-1 text-slate-400"></i> Jadwal: <span class="font-bold text-slate-800">{{ $activeBimtek->zoom_schedule_formatted }}</span>
-                                    </p>
-                                    @if ($activeBimtek->zoom_meeting_id)
-                                        <div class="flex flex-wrap items-center gap-x-2.5 gap-y-1 pt-0.5 text-[11px] text-slate-500 font-mono">
-                                            <span>Meeting ID: <strong class="text-slate-700 font-bold">{{ $activeBimtek->zoom_meeting_id }}</strong></span>
-                                            @if ($activeBimtek->zoom_passcode)
-                                                <span>•</span>
-                                                <span>Passcode: <strong class="text-slate-700 font-bold">{{ $activeBimtek->zoom_passcode }}</strong></span>
-                                            @endif
-                                        </div>
-                                    @endif
-                                @else
-                                    <p class="text-xs text-slate-500 leading-relaxed font-medium">
-                                        Selesaikan seluruh materi topik pembelajaran mandiri untuk membuka tautan Sesi Live Zoom.
-                                    </p>
-                                    <p class="text-[11px] text-slate-500 font-bold pt-0.5">
-                                        <i class="far fa-calendar-alt mr-1 text-slate-400"></i> Jadwal: <span class="text-slate-700">{{ $activeBimtek->zoom_schedule_formatted }}</span>
-                                    </p>
-                                @endif
-                            </div>
-                        </div>
-
-                        <div class="relative z-10 shrink-0 flex flex-col sm:items-end gap-2 self-start md:self-center w-full md:w-auto">
-                            @if ($isWaitingForStart)
-                                <div class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-md text-xs font-semibold bg-slate-100 text-slate-500 border border-slate-200">
-                                    <i class="fas fa-lock text-slate-400"></i>
-                                    <span>Terkunci</span>
-                                </div>
-                            @elseif ($isEventEnded && !$isZoomAttended)
-                                <div class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-md text-xs font-semibold bg-slate-100 text-slate-500 border border-slate-200">
-                                    <i class="fas fa-history text-slate-400"></i>
-                                    <span>Sesi Zoom Telah Berakhir</span>
-                                </div>
-                            @elseif ($isZoomUnlocked)
-                                <div class="flex items-center gap-2 flex-wrap sm:justify-end w-full md:w-auto">
-                                    <a href="{{ route('user.course.my-course.join-zoom', $courseSlug) }}" target="_blank"
-                                       @click="hasJoinedZoom = true"
-                                       class="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-md font-bold text-xs sm:text-sm bg-[#13416B] text-white hover:bg-[#0f3354] transition-all shadow-sm">
-                                        <i class="fas fa-arrow-up-right-from-square text-xs"></i>
-                                        <span>Masuk Ruang Zoom</span>
-                                    </a>
-                                    @if (!$isZoomAttended)
-                                        <button type="button"
-                                                @click="showZoomModal = true; if (hasJoinedZoom) { $nextTick(() => $refs.zoomCodeInput?.focus()) }"
-                                                :class="hasJoinedZoom
-                                                    ? 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm'
-                                                    : 'bg-slate-100 hover:bg-slate-200 text-slate-600 border border-slate-200'"
-                                                class="inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-md font-bold text-xs sm:text-sm transition-all">
-                                            <i class="fas text-xs" :class="hasJoinedZoom ? 'fa-check-circle' : 'fa-lock text-slate-400'"></i>
-                                            <span>Konfirmasi Hadir</span>
-                                        </button>
-                                    @endif
-                                </div>
-                                @if (!$isZoomAttended)
-                                    <span x-show="!hasJoinedZoom" class="text-[10px] text-slate-500 font-medium">
-                                        <i class="fas fa-lock text-slate-400 mr-1"></i>Klik <strong>Masuk Ruang Zoom</strong> terlebih dahulu untuk membuka input Kode Presensi
-                                    </span>
-                                    <span x-show="hasJoinedZoom" x-cloak class="text-[10px] text-slate-500 font-medium">
-                                        <i class="fas fa-key text-slate-400 mr-1"></i>Klik <strong>Konfirmasi Hadir</strong> untuk memasukkan Kode Presensi sesi Zoom
-                                    </span>
-                                @endif
-
-                                {{-- Modal (Desktop) & Bottom Sheet (Mobile) untuk Kode Presensi / Info Presensi Zoom --}}
-                                @if (!$isZoomAttended)
-                                    <div x-show="showZoomModal"
-                                         x-cloak
-                                         class="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-0 sm:p-4"
-                                         role="dialog"
-                                         aria-modal="true">
-                                        {{-- Backdrop --}}
-                                        <div x-show="showZoomModal"
-                                             x-transition:enter="transition ease-out duration-200"
-                                             x-transition:enter-start="opacity-0"
-                                             x-transition:enter-end="opacity-100"
-                                             x-transition:leave="transition ease-in duration-150"
-                                             x-transition:leave-start="opacity-100"
-                                             x-transition:leave-end="opacity-0"
-                                             @click="showZoomModal = false"
-                                             class="fixed inset-0 bg-slate-900/50 backdrop-blur-[1px]"></div>
-
-                                        {{-- Panel Modal (Desktop) / Bottom Sheet (Mobile) --}}
-                                        <div x-show="showZoomModal"
-                                             x-transition:enter="transition ease-out duration-200"
-                                             x-transition:enter-start="translate-y-full sm:translate-y-4 sm:scale-95 opacity-0"
-                                             x-transition:enter-end="translate-y-0 sm:scale-100 opacity-100"
-                                             x-transition:leave="transition ease-in duration-150"
-                                             x-transition:leave-start="translate-y-0 sm:scale-100 opacity-100"
-                                             x-transition:leave-end="translate-y-full sm:translate-y-4 sm:scale-95 opacity-0"
-                                             @click.stop
-                                             class="relative z-10 w-full sm:max-w-md bg-white rounded-t-2xl sm:rounded-xl shadow-2xl border-t sm:border border-slate-200 overflow-hidden">
-
-                                            {{-- Handle Bar khusus Bottom Sheet Mobile --}}
-                                            <div class="sm:hidden pt-2.5 pb-1 flex justify-center">
-                                                <div class="w-10 h-1 rounded-full bg-slate-300"></div>
-                                            </div>
-
-                                            {{-- Header Modal --}}
-                                            <div class="flex items-center justify-between gap-3 px-5 py-3.5 sm:py-4 border-b border-slate-100">
-                                                <div class="flex items-center gap-2.5">
-                                                    <div class="w-8 h-8 rounded-md flex items-center justify-center text-sm shrink-0"
-                                                         :class="hasJoinedZoom ? 'bg-[#13416B] text-white' : 'bg-slate-100 text-slate-500'">
-                                                        <i class="fas" :class="hasJoinedZoom ? 'fa-key' : 'fa-lock'"></i>
-                                                    </div>
-                                                    <div>
-                                                        <h4 class="text-sm sm:text-base font-bold text-slate-800 leading-snug"
-                                                            x-text="hasJoinedZoom ? 'Konfirmasi Kehadiran Zoom' : 'Presensi Belum Terbuka'"></h4>
-                                                        <p class="text-[11px] text-slate-500">Tatap Muka Online</p>
-                                                    </div>
-                                                </div>
-                                                <button type="button"
-                                                        @click="showZoomModal = false"
-                                                        class="w-7 h-7 rounded-md text-slate-400 hover:text-slate-600 hover:bg-slate-100 flex items-center justify-center transition-colors">
-                                                    <i class="fas fa-times text-xs"></i>
-                                                </button>
-                                            </div>
-
-                                            {{-- Isi Modal State 1: Belum Klik Masuk Ruang Zoom (Info Modal) --}}
-                                            <div x-show="!hasJoinedZoom" class="p-5 space-y-4">
-                                                <div class="p-3.5 rounded-lg bg-slate-50 border border-slate-200 flex items-start gap-3">
-                                                    <i class="fas fa-lock text-slate-400 mt-0.5 text-sm shrink-0"></i>
-                                                    <div class="space-y-1 text-xs text-slate-600 leading-relaxed">
-                                                        <p class="font-semibold text-slate-800">Masuk ke Ruang Zoom Terlebih Dahulu</p>
-                                                        <p>Untuk menjaga validitas kehadiran, silakan klik tombol <strong>Masuk Ruang Zoom</strong> terlebih dahulu sebelum menginput Kode Presensi.</p>
-                                                    </div>
-                                                </div>
-
-                                                <div class="text-xs text-slate-500 flex items-center gap-2 px-1">
-                                                    <i class="far fa-calendar-alt text-slate-400"></i>
-                                                    <span>Jadwal Sesi: <strong class="text-slate-700">{{ $activeBimtek->zoom_schedule_formatted }}</strong></span>
-                                                </div>
-
-                                                <div class="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
-                                                    <button type="button"
-                                                            @click="showZoomModal = false"
-                                                            class="px-3.5 py-2 rounded-md text-xs font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-colors">
-                                                        Tutup
-                                                    </button>
-                                                    <a href="{{ route('user.course.my-course.join-zoom', $courseSlug) }}" target="_blank"
-                                                       @click="hasJoinedZoom = true; $nextTick(() => $refs.zoomCodeInput?.focus())"
-                                                       class="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-md text-xs font-bold bg-[#13416B] hover:bg-[#0f3354] text-white transition-all shadow-xs">
-                                                        <i class="fas fa-arrow-up-right-from-square text-[11px]"></i>
-                                                        <span>Masuk Ruang Zoom</span>
-                                                    </a>
-                                                </div>
-                                            </div>
-
-                                            {{-- Isi Modal State 2: Sudah Klik Masuk Ruang Zoom (Form Input Kode Presensi) --}}
-                                            <form x-show="hasJoinedZoom"
-                                                  action="{{ route('user.course.my-course.attend-zoom', $courseSlug) }}"
-                                                  method="POST"
-                                                  class="p-5 space-y-4">
-                                                @csrf
-                                                <div class="p-3 rounded-lg bg-slate-50 border border-slate-200 text-xs text-slate-600 leading-relaxed">
-                                                    Masukkan <strong>Kode Presensi</strong> yang dibagikan oleh panitia atau narasumber saat sesi Live Zoom berlangsung.
-                                                </div>
-
-                                                <div>
-                                                    <label for="zoom_attendance_code_input" class="block text-xs font-bold text-slate-700 mb-1.5">
-                                                        Kode Presensi Zoom
-                                                    </label>
-                                                    <input type="text"
-                                                           id="zoom_attendance_code_input"
-                                                           name="attendance_code"
-                                                           x-ref="zoomCodeInput"
-                                                           placeholder="Contoh: HADIR-AKPK2026"
-                                                           required
-                                                           autocomplete="off"
-                                                           class="w-full px-3.5 py-2.5 rounded-md border border-slate-300 text-sm font-mono uppercase tracking-wider text-slate-800 placeholder:text-slate-400 placeholder:normal-case placeholder:tracking-normal placeholder:font-sans focus:outline-none focus:ring-2 focus:ring-[#13416B]/20 focus:border-[#13416B]" />
-                                                </div>
-
-                                                <div class="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
-                                                    <button type="button"
-                                                            @click="showZoomModal = false"
-                                                            class="px-3.5 py-2.5 rounded-md text-xs font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-colors">
-                                                        Batal
-                                                    </button>
-                                                    <button type="submit"
-                                                            class="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-md text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white transition-all shadow-sm">
-                                                        <i class="fas fa-check-circle"></i>
-                                                        <span>Verifikasi & Konfirmasi Hadir</span>
-                                                    </button>
-                                                </div>
-                                            </form>
-                                        </div>
-                                    </div>
-                                @endif
-                            @else
-                                <button type="button" disabled
-                                   class="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-md font-bold text-xs sm:text-sm bg-slate-400 text-white border border-slate-400 cursor-not-allowed shadow-none">
-                                    <i class="fas fa-lock text-xs"></i>
-                                    <span>Ruang Zoom Terkunci</span>
-                                </button>
-                                <span class="text-[10px] text-slate-400 font-medium">Tuntaskan materi mandiri terlebih dahulu</span>
-                            @endif
-                        </div>
-                    </div>
-                @endif
 
                 {{-- CARD EVALUASI AKHIR --}}
                 @php
@@ -854,13 +369,18 @@
                 @if ($evaluasiAkhir)
                     <!-- PERBAIKAN: rounded-none border-x-0 di mobile -->
                     <div data-tour="evaluasi"
-                        class="bg-white rounded-none sm:rounded-md shadow-sm border-y border-x-0 sm:border sm:border-x border-slate-200 p-4 sm:px-6 sm:py-3.5 lg:px-7 lg:py-4 transition-all relative overflow-hidden">
+                        class="bg-white rounded-none sm:rounded-md shadow-sm border-y border-x-0 sm:border sm:border-x border-slate-200 p-4 sm:px-6 sm:py-5 lg:px-7 lg:py-6 transition-all relative overflow-hidden">
                         <div class="flex flex-row items-end justify-between gap-6 lg:gap-8">
                             {{-- Kolom Kiri: Informasi Evaluasi & Tombol Aksi --}}
                             <div class="flex-1 min-w-0 sm:py-1">
                                 <h3 class="text-base sm:text-lg lg:text-xl font-bold text-slate-800 leading-snug max-w-full lg:max-w-[85%]">
                                     {{ $evaluasiAkhirTitle }}
                                 </h3>
+
+                                {{-- Deskripsi Statis Informatif Mengenai Evaluasi Akhir --}}
+                                <p class="text-xs sm:text-sm text-slate-600 mt-1.5 leading-relaxed max-w-full lg:max-w-[90%]">
+                                    Ujian evaluasi komprehensif seluruh materi sebagai syarat kelulusan dan penerbitan sertifikat.
+                                </p>
 
                                 <div class="mt-3 sm:mt-4 flex flex-wrap items-center gap-2">
                                     <span
@@ -921,13 +441,222 @@
                         </div>
                     </div>
                 @endif
+
+                {{-- CARD EVALUASI NARASUMBER / PEMATERI --}}
+                @php
+                    $isEvaluasiNarasumberLocked = $isWaitingForStart;
+                @endphp
+                <div data-tour="evaluasi-narasumber"
+                    x-data="{
+                        showModal: false,
+                        submitted: localStorage.getItem('eval_narasumber_{{ $courseSlug }}_{{ auth()->id() }}') === 'true',
+                        ratingMateri: parseInt(localStorage.getItem('eval_narasumber_r1_{{ $courseSlug }}_{{ auth()->id() }}')) || 5,
+                        ratingPenyampaian: parseInt(localStorage.getItem('eval_narasumber_r2_{{ $courseSlug }}_{{ auth()->id() }}')) || 5,
+                        ratingFasilitasi: parseInt(localStorage.getItem('eval_narasumber_r3_{{ $courseSlug }}_{{ auth()->id() }}')) || 5,
+                        feedback: localStorage.getItem('eval_narasumber_fb_{{ $courseSlug }}_{{ auth()->id() }}') || '',
+                        showSuccessToast: false,
+                        saveEvaluation() {
+                            localStorage.setItem('eval_narasumber_{{ $courseSlug }}_{{ auth()->id() }}', 'true');
+                            localStorage.setItem('eval_narasumber_fb_{{ $courseSlug }}_{{ auth()->id() }}', this.feedback);
+                            localStorage.setItem('eval_narasumber_r1_{{ $courseSlug }}_{{ auth()->id() }}', this.ratingMateri);
+                            localStorage.setItem('eval_narasumber_r2_{{ $courseSlug }}_{{ auth()->id() }}', this.ratingPenyampaian);
+                            localStorage.setItem('eval_narasumber_r3_{{ $courseSlug }}_{{ auth()->id() }}', this.ratingFasilitasi);
+                            this.submitted = true;
+                            this.showModal = false;
+                            this.showSuccessToast = true;
+                            setTimeout(() => this.showSuccessToast = false, 4000);
+                        }
+                    }"
+                    class="bg-white rounded-none sm:rounded-md shadow-sm border-y border-x-0 sm:border sm:border-x border-slate-200 p-4 sm:px-6 sm:py-5 lg:px-7 lg:py-6 transition-all relative overflow-hidden">
+                    
+                    {{-- Alert Notifikasi Sukses --}}
+                    <div x-show="showSuccessToast" x-cloak
+                        x-transition:enter="transition ease-out duration-300"
+                        x-transition:enter-start="opacity-0 -translate-y-2"
+                        x-transition:enter-end="opacity-100 translate-y-0"
+                        x-transition:leave="transition ease-in duration-200"
+                        x-transition:leave-start="opacity-100 translate-y-0"
+                        x-transition:leave-end="opacity-0 -translate-y-2"
+                        class="mb-4 p-3.5 rounded-md bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs sm:text-sm font-semibold flex items-center gap-2">
+                        <i class="fas fa-check-circle text-emerald-600 text-base shrink-0"></i>
+                        <span>Terima kasih! Evaluasi narasumber & fasilitas bimtek berhasil dikirimkan.</span>
+                    </div>
+
+                    <div class="flex flex-row items-end justify-between gap-6 lg:gap-8">
+                        {{-- Kolom Kiri: Informasi Evaluasi Narasumber & Tombol Aksi --}}
+                        <div class="flex-1 min-w-0 sm:py-1">
+                            <div class="flex items-center gap-2 flex-wrap">
+                                <h3 class="text-base sm:text-lg lg:text-xl font-bold text-slate-800 leading-snug">
+                                    Evaluasi Narasumber & Penyelenggaraan
+                                </h3>
+                                <template x-if="submitted">
+                                    <span class="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-md">
+                                        <i class="fas fa-check-circle text-emerald-600 text-xs"></i> Sudah Diisi
+                                    </span>
+                                </template>
+                            </div>
+
+                            <p class="text-xs sm:text-sm text-slate-600 mt-1.5 leading-relaxed max-w-full lg:max-w-[90%]">
+                                Penilaian objektif terhadap penyampaian materi oleh narasumber dan pelaksanaan bimbingan teknis.
+                            </p>
+
+                            {{-- Meta Badges (Sesuai Gaya Desain Evaluasi Akhir) --}}
+                            <div class="mt-3 sm:mt-4 flex flex-wrap items-center gap-2">
+                                <span
+                                    class="text-[11px] sm:text-xs font-semibold text-white bg-[#547996] px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-md border border-[#446680] flex items-center gap-1.5 shadow-xs">
+                                    <i class="fas fa-user-secret text-[10px] sm:text-xs text-white"></i> Anonim & Rahasia
+                                </span>
+                                <span
+                                    class="text-[11px] sm:text-xs font-semibold text-white bg-[#547996] px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-md border border-[#446680] flex items-center gap-1.5 shadow-xs">
+                                    <i class="far fa-clock text-[10px] sm:text-xs text-white"></i> ± 3 Menit
+                                </span>
+                                <span
+                                    class="text-[11px] sm:text-xs font-semibold text-white bg-[#547996] px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-md border border-[#446680] flex items-center gap-1.5 shadow-xs">
+                                    <i class="fas fa-star text-[10px] sm:text-xs text-amber-300"></i> Skala 1 - 5
+                                </span>
+                            </div>
+
+                            {{-- Tombol Aksi di Bawah Badges (Konsisten dengan Evaluasi Akhir) --}}
+                            <div class="mt-4 sm:mt-5">
+                                @if ($isWaitingForStart)
+                                    <button type="button" disabled
+                                        title="Evaluasi narasumber dibuka setelah sesi pelatihan dimulai"
+                                        class="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-5 py-2.5 rounded-md text-xs sm:text-sm font-bold bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed select-none">
+                                        <i class="fas fa-lock text-xs"></i> Evaluasi Terkunci
+                                    </button>
+                                @else
+                                    <button type="button" @click="showModal = true"
+                                        :class="submitted ? 'bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200' : 'bg-[#13416B] hover:bg-[#0f3354] text-white shadow-sm'"
+                                        class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-md text-xs sm:text-sm font-bold transition-all shadow-xs">
+                                        <i :class="submitted ? 'fas fa-eye' : 'fas fa-pen-alt'" class="text-xs"></i>
+                                        <span x-text="submitted ? 'Lihat / Edit Ulasan' : 'Mulai Evaluasi'"></span>
+                                    </button>
+                                @endif
+                            </div>
+                        </div>
+
+                        {{-- Kolom Kanan: Ilustrasi Narasumber khusus Layar Tablet/Desktop (sm ke atas) --}}
+                        <div class="hidden sm:flex sm:shrink-0 items-end justify-center self-end -mb-5 sm:-mb-5 lg:-mb-6">
+                            <img src="{{ asset('images/narasumber_ilustrasi.webp') }}"
+                                alt="Ilustrasi Narasumber"
+                                class="sm:h-44 md:h-48 lg:h-52 w-auto object-contain object-bottom select-none pointer-events-none {{ $isWaitingForStart ? 'opacity-70 grayscale' : '' }}" />
+                        </div>
+                    </div>
+
+                    {{-- Modal Kuesioner Evaluasi Narasumber (Popup Elegan) --}}
+                    <div x-show="showModal" x-cloak
+                        @keydown.escape.window="showModal = false"
+                        class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+                        
+                        <div @click.away="showModal = false"
+                            class="bg-white rounded-lg shadow-xl max-w-lg w-full p-5 sm:p-6 space-y-4 text-left border border-slate-200 relative animate-in fade-in zoom-in-95 duration-200">
+                            
+                            {{-- Header Modal --}}
+                            <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+                                <div class="flex items-center gap-2.5">
+                                    <div class="w-8 h-8 rounded-md bg-[#13416B]/10 text-[#13416B] flex items-center justify-center text-sm font-bold">
+                                        <i class="fas fa-chalkboard-teacher"></i>
+                                    </div>
+                                    <h4 class="text-base font-bold text-slate-800">Evaluasi & Feedback Narasumber</h4>
+                                </div>
+                                <button type="button" @click="showModal = false"
+                                    class="text-slate-400 hover:text-slate-600 p-1 rounded-md transition-colors">
+                                    <i class="fas fa-times text-sm"></i>
+                                </button>
+                            </div>
+
+                            <p class="text-xs text-slate-500 leading-relaxed">
+                                Mohon berikan penilaian secara objektif mengenai pelaksanaan bimbingan teknis dan narasumber. Data evaluasi ini bersifat anonim dan digunakan untuk peningkatan mutu.
+                            </p>
+
+                            <div class="space-y-4 py-1">
+                                {{-- 1. Penguasaan Materi --}}
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-700 mb-1.5">
+                                        1. Penguasaan Materi & Kejelasan Paparan Narasumber
+                                    </label>
+                                    <div class="flex items-center gap-2">
+                                        <template x-for="star in [1, 2, 3, 4, 5]" :key="star">
+                                            <button type="button" @click="ratingMateri = star"
+                                                class="text-xl sm:text-2xl transition-transform hover:scale-110 focus:outline-none"
+                                                :class="star <= ratingMateri ? 'text-amber-400' : 'text-slate-200'">
+                                                <i class="fas fa-star"></i>
+                                            </button>
+                                        </template>
+                                        <span class="text-xs font-semibold text-slate-600 ml-2" x-text="ratingMateri + ' / 5'"></span>
+                                    </div>
+                                </div>
+
+                                {{-- 2. Interaktivitas & Komunikasi --}}
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-700 mb-1.5">
+                                        2. Metode Penyampaian & Interaktivitas Sesi
+                                    </label>
+                                    <div class="flex items-center gap-2">
+                                        <template x-for="star in [1, 2, 3, 4, 5]" :key="star">
+                                            <button type="button" @click="ratingPenyampaian = star"
+                                                class="text-xl sm:text-2xl transition-transform hover:scale-110 focus:outline-none"
+                                                :class="star <= ratingPenyampaian ? 'text-amber-400' : 'text-slate-200'">
+                                                <i class="fas fa-star"></i>
+                                            </button>
+                                        </template>
+                                        <span class="text-xs font-semibold text-slate-600 ml-2" x-text="ratingPenyampaian + ' / 5'"></span>
+                                    </div>
+                                </div>
+
+                                {{-- 3. Ketepatan Waktu & Fasilitasi --}}
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-700 mb-1.5">
+                                        3. Ketepatan Waktu & Pengelolaan Diskusi
+                                    </label>
+                                    <div class="flex items-center gap-2">
+                                        <template x-for="star in [1, 2, 3, 4, 5]" :key="star">
+                                            <button type="button" @click="ratingFasilitasi = star"
+                                                class="text-xl sm:text-2xl transition-transform hover:scale-110 focus:outline-none"
+                                                :class="star <= ratingFasilitasi ? 'text-amber-400' : 'text-slate-200'">
+                                                <i class="fas fa-star"></i>
+                                            </button>
+                                        </template>
+                                        <span class="text-xs font-semibold text-slate-600 ml-2" x-text="ratingFasilitasi + ' / 5'"></span>
+                                    </div>
+                                </div>
+
+                                {{-- 4. Masukan & Saran --}}
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-700 mb-1.5">
+                                        Catatan / Masukan Tambahan untuk Narasumber & Panitia
+                                    </label>
+                                    <textarea x-model="feedback" rows="3"
+                                        placeholder="Tuliskan masukan atau hal yang perlu ditingkatkan untuk narasumber..."
+                                        class="w-full text-xs sm:text-sm rounded-md border border-slate-300 p-2.5 focus:border-[#13416B] focus:ring-1 focus:ring-[#13416B] outline-none transition-all placeholder:text-slate-400"></textarea>
+                                </div>
+                            </div>
+
+                            {{-- Footer Tombol Modal --}}
+                            <div class="flex items-center justify-end gap-2.5 pt-3 border-t border-slate-100">
+                                <button type="button" @click="showModal = false"
+                                    class="px-4 py-2 rounded-md text-xs font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-colors">
+                                    Batal
+                                </button>
+                                <button type="button" @click="saveEvaluation()"
+                                    class="px-5 py-2 rounded-md text-xs font-bold text-white bg-[#13416B] hover:bg-[#0f3354] transition-colors shadow-xs">
+                                    Simpan Evaluasi
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             {{-- Right Column: Side Widget (Sertifikat & Info) --}}
             <div class="space-y-0 lg:sticky lg:top-24 lg:self-start">
                 <!-- PERBAIKAN: rounded-none border-x-0 di mobile -->
                 <div data-tour="sertifikat"
-                    class="bg-white rounded-none sm:rounded-md shadow-sm border-y border-x-0 sm:border sm:border-x border-slate-200 p-4 sm:p-6 mb-0 md:mb-4">
+                    x-data="{
+                        showRequirementsModal: false,
+                        evalNarasumberDone: localStorage.getItem('eval_narasumber_{{ $courseSlug }}_{{ auth()->id() }}') === 'true'
+                    }"
+                    class="bg-white rounded-none sm:rounded-md shadow-sm border-y border-x-0 sm:border sm:border-x border-slate-200 p-4 sm:p-6 mb-0 md:mb-4 relative">
 
                     {{-- Header Widget --}}
                     <div class="flex items-center gap-3 mb-5 pb-4 border-b border-slate-100">
@@ -981,9 +710,10 @@
                                         class="w-full bg-[#13416B] hover:bg-[#0f3354] text-white py-3 rounded-md font-bold transition-all shadow-sm flex items-center justify-center gap-2 text-sm">
                                         <i class="fas fa-download"></i> Unduh e-Sertifikat Resmi
                                     </a>
-                                    <a href="{{ route('verify-certificate', data_get($course, 'certificate_code')) }}" target="_blank"
-                                        class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 py-2.5 rounded-md font-semibold transition-all flex items-center justify-center gap-1.5 text-xs">
-                                        <i class="fas fa-qrcode"></i> Cek Keabsahan Sertifikat
+                                    <a href="{{ route('user.profile') }}#certificates"
+                                        class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 py-2.5 rounded-md font-semibold transition-all flex items-center justify-center gap-1.5 text-xs border border-slate-200 shadow-2xs">
+                                        <i class="fas fa-award text-slate-500"></i>
+                                        <span>Lihat Sertifikat Lain</span>
                                     </a>
                                 </div>
                             </div>
@@ -1089,8 +819,214 @@
                                     sertifikat.
                                 @endif
                             </p>
+
+                            {{-- Tombol Lihat Detail Tahapan Syarat Kelulusan --}}
+                            <div class="mt-4 w-full">
+                                <button type="button" @click="showRequirementsModal = true"
+                                    class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-md text-xs font-bold text-[#13416B] bg-slate-100 hover:bg-slate-200 transition-all border border-slate-200 shadow-2xs">
+                                    <i class="fas fa-tasks text-xs"></i>
+                                    <span>Lihat Detail Syarat</span>
+                                </button>
+                            </div>
                         </div>
                     @endif
+
+                    {{-- MODAL / BOTTOM SHEET TAHAPAN SYARAT SERTIFIKAT --}}
+                    @php
+                        $hasZoom = (bool) ($activeBimtek && $activeBimtek->zoom_url);
+                        $hasProofUploaded = !empty($sectionProofs);
+                    @endphp
+                    <div x-show="showRequirementsModal" x-cloak
+                        @keydown.escape.window="showRequirementsModal = false"
+                        class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4">
+                        
+                        {{-- Overlay Click to Dismiss --}}
+                        <div class="fixed inset-0" @click="showRequirementsModal = false"></div>
+
+                        {{-- Panel Konten: Bottom Sheet di Mobile (items-end, rounded-t-2xl), Modal di Tablet/Desktop (rounded-lg) --}}
+                        <div
+                            x-show="showRequirementsModal"
+                            x-transition:enter="transition ease-out duration-300"
+                            x-transition:enter-start="opacity-0 translate-y-full sm:translate-y-4 sm:scale-95"
+                            x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
+                            x-transition:leave="transition ease-in duration-200"
+                            x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
+                            x-transition:leave-end="opacity-0 translate-y-full sm:translate-y-4 sm:scale-95"
+                            class="relative bg-white w-full sm:max-w-lg rounded-t-2xl sm:rounded-lg shadow-2xl border-t sm:border border-slate-200 p-5 sm:p-6 space-y-4 text-left max-h-[88vh] sm:max-h-[85vh] overflow-y-auto z-10">
+                            
+                            {{-- Drag Indicator Bar khusus Tampilan Mobile (Bottom Sheet UX) --}}
+                            <div class="sm:hidden w-12 h-1.5 bg-slate-300 rounded-full mx-auto -mt-2 mb-2"></div>
+
+                            {{-- Header Modal / Bottom Sheet --}}
+                            <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+                                <div class="flex items-center gap-2.5">
+                                    <div class="w-8 h-8 rounded-md bg-[#13416B]/10 text-[#13416B] flex items-center justify-center text-sm font-bold">
+                                        <i class="fas fa-award"></i>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-base font-bold text-slate-800 leading-tight">Syarat Penerbitan Sertifikat</h4>
+                                        <p class="text-[11px] text-slate-500 mt-0.5">Pantau tahapan yang perlu diraih untuk kelulusan</p>
+                                    </div>
+                                </div>
+                                <button type="button" @click="showRequirementsModal = false"
+                                    class="text-slate-400 hover:text-slate-600 p-1.5 rounded-md transition-colors">
+                                    <i class="fas fa-times text-base"></i>
+                                </button>
+                            </div>
+
+                            {{-- Mini Overview Progress Bar --}}
+                            <div class="p-3.5 bg-slate-50 rounded-md border border-slate-200/80 space-y-2">
+                                <div class="flex justify-between items-center text-xs">
+                                    <span class="font-semibold text-slate-600">Progres Keseluruhan</span>
+                                    <span class="font-bold text-[#13416B]">{{ $currentProgress }}% Selesai</span>
+                                </div>
+                                <div class="w-full bg-slate-200 rounded-full h-2 overflow-hidden">
+                                    <div class="{{ $progressBarClass }} h-full rounded-full transition-all duration-500"
+                                        style="width: {{ $currentProgress }}%"></div>
+                                </div>
+                            </div>
+
+                            {{-- Daftar Tahapan Persyaratan Kelulusan --}}
+                            <div class="space-y-2.5 py-1">
+                                {{-- 1. Sesi Tatap Muka Online --}}
+                                @if ($hasZoom)
+                                    <div class="flex items-center justify-between gap-3 p-3 rounded-md border {{ $isZoomAttended ? 'bg-emerald-50/50 border-emerald-200' : 'bg-white border-slate-200' }} transition-all">
+                                        <div class="flex items-start gap-3 min-w-0">
+                                            <div class="w-7 h-7 rounded-md {{ $isZoomAttended ? 'bg-emerald-600 text-white' : 'bg-slate-100 text-slate-500' }} flex items-center justify-center shrink-0 text-xs mt-0.5">
+                                                <i class="fas fa-video"></i>
+                                            </div>
+                                            <div class="min-w-0">
+                                                <p class="text-xs font-bold {{ $isZoomAttended ? 'text-emerald-900' : 'text-slate-800' }}">Sesi Tatap Muka (Zoom)</p>
+                                                <p class="text-[11px] text-slate-500 leading-tight mt-0.5">Hadir & isi presensi kehadiran sesi Zoom</p>
+                                            </div>
+                                        </div>
+                                        <div class="shrink-0">
+                                            @if ($isZoomAttended)
+                                                <span class="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-700 bg-emerald-100/70 border border-emerald-200 px-2 py-0.5 rounded">
+                                                    <i class="fas fa-check text-[9px]"></i> Tuntas
+                                                </span>
+                                            @else
+                                                <span class="inline-flex items-center gap-1 text-[11px] font-medium text-slate-500 bg-slate-100 border border-slate-200 px-2 py-0.5 rounded">
+                                                    <i class="far fa-circle text-[9px]"></i> Belum
+                                                </span>
+                                            @endif
+                                        </div>
+                                    </div>
+                                @endif
+
+                                {{-- 2. Materi Pembelajaran Mandiri --}}
+                                <div class="flex items-center justify-between gap-3 p-3 rounded-md border {{ $areAllTopicsCompleted ? 'bg-emerald-50/50 border-emerald-200' : 'bg-white border-slate-200' }} transition-all">
+                                    <div class="flex items-start gap-3 min-w-0">
+                                        <div class="w-7 h-7 rounded-md {{ $areAllTopicsCompleted ? 'bg-emerald-600 text-white' : 'bg-slate-100 text-slate-500' }} flex items-center justify-center shrink-0 text-xs mt-0.5">
+                                            <i class="fas fa-book-reader"></i>
+                                        </div>
+                                        <div class="min-w-0">
+                                            <p class="text-xs font-bold {{ $areAllTopicsCompleted ? 'text-emerald-900' : 'text-slate-800' }}">Materi Pembelajaran Mandiri</p>
+                                            <p class="text-[11px] text-slate-500 leading-tight mt-0.5">Tuntaskan seluruh materi ({{ $completedContents }}/{{ $totalContents }} topik)</p>
+                                        </div>
+                                    </div>
+                                    <div class="shrink-0">
+                                        @if ($areAllTopicsCompleted)
+                                            <span class="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-700 bg-emerald-100/70 border border-emerald-200 px-2 py-0.5 rounded">
+                                                <i class="fas fa-check text-[9px]"></i> Tuntas
+                                            </span>
+                                        @else
+                                            <span class="inline-flex items-center gap-1 text-[11px] font-semibold text-[#13416B] bg-[#13416B]/10 border border-[#13416B]/20 px-2 py-0.5 rounded">
+                                                {{ $completedContents }}/{{ $totalContents }}
+                                            </span>
+                                        @endif
+                                    </div>
+                                </div>
+
+                                {{-- 3. Unggah Bukti Pelengkap Pelaksanaan --}}
+                                @if ($hasZoom)
+                                    <div class="flex items-center justify-between gap-3 p-3 rounded-md border {{ $hasProofUploaded ? 'bg-emerald-50/50 border-emerald-200' : 'bg-white border-slate-200' }} transition-all">
+                                        <div class="flex items-start gap-3 min-w-0">
+                                            <div class="w-7 h-7 rounded-md {{ $hasProofUploaded ? 'bg-emerald-600 text-white' : 'bg-slate-100 text-slate-500' }} flex items-center justify-center shrink-0 text-xs mt-0.5">
+                                                <i class="fas fa-file-upload"></i>
+                                            </div>
+                                            <div class="min-w-0">
+                                                <p class="text-xs font-bold {{ $hasProofUploaded ? 'text-emerald-900' : 'text-slate-800' }}">Bukti Pelengkap Pelaksanaan</p>
+                                                <p class="text-[11px] text-slate-500 leading-tight mt-0.5">Unggah bukti keikutsertaan atau surat tugas</p>
+                                            </div>
+                                        </div>
+                                        <div class="shrink-0">
+                                            @if ($hasProofUploaded)
+                                                <span class="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-700 bg-emerald-100/70 border border-emerald-200 px-2 py-0.5 rounded">
+                                                    <i class="fas fa-check text-[9px]"></i> Tuntas
+                                                </span>
+                                            @else
+                                                <span class="inline-flex items-center gap-1 text-[11px] font-medium text-slate-500 bg-slate-100 border border-slate-200 px-2 py-0.5 rounded">
+                                                    <i class="far fa-circle text-[9px]"></i> Belum
+                                                </span>
+                                            @endif
+                                        </div>
+                                    </div>
+                                @endif
+
+                                {{-- 4. Evaluasi Akhir Materi (Post-Test) --}}
+                                @if ($evaluasiAkhir)
+                                    <div class="flex items-center justify-between gap-3 p-3 rounded-md border {{ $isEvaluasiAkhirCompleted ? 'bg-emerald-50/50 border-emerald-200' : 'bg-white border-slate-200' }} transition-all">
+                                        <div class="flex items-start gap-3 min-w-0">
+                                            <div class="w-7 h-7 rounded-md {{ $isEvaluasiAkhirCompleted ? 'bg-emerald-600 text-white' : 'bg-slate-100 text-slate-500' }} flex items-center justify-center shrink-0 text-xs mt-0.5">
+                                                <i class="fas fa-file-signature"></i>
+                                            </div>
+                                            <div class="min-w-0">
+                                                <p class="text-xs font-bold {{ $isEvaluasiAkhirCompleted ? 'text-emerald-900' : 'text-slate-800' }}">Evaluasi Akhir Komprehensif</p>
+                                                <p class="text-[11px] text-slate-500 leading-tight mt-0.5">Lulus nilai minimal KKM ({{ data_get($evaluasiAkhir, 'passing_score', 0) }})</p>
+                                            </div>
+                                        </div>
+                                        <div class="shrink-0">
+                                            @if ($isEvaluasiAkhirCompleted)
+                                                <span class="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-700 bg-emerald-100/70 border border-emerald-200 px-2 py-0.5 rounded">
+                                                    <i class="fas fa-check text-[9px]"></i> Lulus
+                                                </span>
+                                            @else
+                                                <span class="inline-flex items-center gap-1 text-[11px] font-medium text-slate-500 bg-slate-100 border border-slate-200 px-2 py-0.5 rounded">
+                                                    <i class="far fa-circle text-[9px]"></i> Belum
+                                                </span>
+                                            @endif
+                                        </div>
+                                    </div>
+                                @endif
+
+                                {{-- 5. Evaluasi Narasumber & Penyelenggara --}}
+                                <div class="flex items-center justify-between gap-3 p-3 rounded-md border transition-all"
+                                    :class="evalNarasumberDone ? 'bg-emerald-50/50 border-emerald-200' : 'bg-white border-slate-200'">
+                                    <div class="flex items-start gap-3 min-w-0">
+                                        <div class="w-7 h-7 rounded-md flex items-center justify-center shrink-0 text-xs mt-0.5"
+                                            :class="evalNarasumberDone ? 'bg-emerald-600 text-white' : 'bg-slate-100 text-slate-500'">
+                                            <i class="fas fa-chalkboard-teacher"></i>
+                                        </div>
+                                        <div class="min-w-0">
+                                            <p class="text-xs font-bold" :class="evalNarasumberDone ? 'text-emerald-900' : 'text-slate-800'">Evaluasi Narasumber & Bimtek</p>
+                                            <p class="text-[11px] text-slate-500 leading-tight mt-0.5">Kuesioner evaluasi narasumber & fasilitas bimtek</p>
+                                        </div>
+                                    </div>
+                                    <div class="shrink-0">
+                                        <template x-if="evalNarasumberDone">
+                                            <span class="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-700 bg-emerald-100/70 border border-emerald-200 px-2 py-0.5 rounded">
+                                                <i class="fas fa-check text-[9px]"></i> Tuntas
+                                            </span>
+                                        </template>
+                                        <template x-if="!evalNarasumberDone">
+                                            <span class="inline-flex items-center gap-1 text-[11px] font-medium text-slate-500 bg-slate-100 border border-slate-200 px-2 py-0.5 rounded">
+                                                <i class="far fa-circle text-[9px]"></i> Belum
+                                            </span>
+                                        </template>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {{-- Footer Modal / Bottom Sheet --}}
+                            <div class="pt-3 border-t border-slate-100 flex items-center justify-end">
+                                <button type="button" @click="showRequirementsModal = false"
+                                    class="w-full sm:w-auto px-5 py-2.5 rounded-md text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 transition-colors">
+                                    Tutup
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
 

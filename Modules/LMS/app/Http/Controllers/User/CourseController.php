@@ -7,10 +7,12 @@ use Devrabiul\ToastMagic\Facades\ToastMagic;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 use Modules\LMS\Models\CourseSection;
 use Modules\LMS\Models\PostTest;
 use Modules\LMS\Models\SectionContent;
+use Modules\LMS\Models\SectionZoomProof;
 use Modules\LMS\Models\StudentContentProgress;
 use Modules\LMS\Services\Api\CourseProgressService;
 use Modules\LMS\Services\CertificateService;
@@ -89,11 +91,127 @@ class CourseController extends Controller
             abort(404, 'Course tidak ditemukan');
         }
 
+        $userId = auth()->id();
+        $sectionProofs = [];
+        if ($userId) {
+            $sectionProofs = SectionZoomProof::where('user_id', $userId)
+                ->pluck('status', 'course_section_id')
+                ->toArray();
+        }
+
         return view('lms::user.course.my-course-detail', [
-            'course'  => $course,
-            'success' => $result['success'],
-            'message' => $result['message'],
+            'course'         => $course,
+            'sectionProofs'  => $sectionProofs,
+            'success'        => $result['success'],
+            'message'        => $result['message'],
         ]);
+    }
+
+    public function showSection(Request $request, string $slug, string $sectionId): View|RedirectResponse
+    {
+        $result = $this->courseService->getCourseDetailSlug($slug);
+        $course = $result['data'] ?? null;
+
+        if (!$course) {
+            abort(404, 'Course tidak ditemukan');
+        }
+
+        $sections = collect(data_get($course, 'sections', []));
+        $section = $sections->first(function ($s) use ($sectionId) {
+            return (string) (data_get($s, 'id') ?? data_get($s, 'section_id')) === (string) $sectionId;
+        });
+
+        if (!$section) {
+            abort(404, 'Modul tidak ditemukan');
+        }
+
+        $sectionIndex = $sections->search(function ($s) use ($sectionId) {
+            return (string) (data_get($s, 'id') ?? data_get($s, 'section_id')) === (string) $sectionId;
+        });
+
+        $isLocked = data_get($section, 'is_locked', false);
+        $isWaitingForStart = data_get($course, 'is_waiting_for_start', false);
+
+        if ($isWaitingForStart) {
+            ToastMagic::error('Kelas pelatihan belum dimulai. Modul akan terbuka sesuai jadwal pelaksanaan.');
+            return redirect()->route('user.course.my-course.detail', $slug);
+        }
+
+        if ($isLocked) {
+            ToastMagic::error('Modul ini masih terkunci. Selesaikan modul sebelumnya terlebih dahulu.');
+            return redirect()->route('user.course.my-course.detail', $slug);
+        }
+
+        $activeBimtek = null;
+        $enrollment = $request->user() ? $course->students()->wherePivot('user_id', $request->user()->id)->first() : null;
+        if ($enrollment && !empty($enrollment->pivot->bimtek_event_id)) {
+            $activeBimtek = \Modules\LMS\Models\BimtekEvent::find($enrollment->pivot->bimtek_event_id);
+        }
+        if (!$activeBimtek) {
+            $activeBimtek = \Modules\LMS\Models\BimtekEvent::where('course_id', $course->id)->latest()->first();
+        }
+
+        $zoomProof = SectionZoomProof::where('course_section_id', $sectionId)
+            ->where('user_id', $request->user()->id)
+            ->first();
+
+        return view('lms::user.course.section-show', [
+            'course'         => $course,
+            'section'        => $section,
+            'sectionIndex'   => $sectionIndex !== false ? $sectionIndex : 0,
+            'slug'           => $slug,
+            'activeBimtek'   => $activeBimtek,
+            'zoomProof'      => $zoomProof,
+            'hasJoinedZoom'  => (bool) ($enrollment?->pivot?->zoom_joined_at),
+            'isZoomAttended' => (bool) ($enrollment?->pivot?->zoom_attended),
+        ]);
+    }
+
+    public function uploadZoomProof(Request $request, string $slug, string $sectionId): RedirectResponse
+    {
+        $request->validate([
+            'proof_file' => 'nullable|file|mimes:jpeg,png,jpg,pdf,webp|max:5120',
+            'drive_link' => 'nullable|url|max:1000',
+            'notes'      => 'nullable|string|max:500',
+        ], [
+            'proof_file.mimes' => 'Format berkas bukti harus berupa JPG, PNG, WEBP, atau PDF.',
+            'proof_file.max'   => 'Ukuran berkas bukti maksimal 5 MB.',
+            'drive_link.url'   => 'Format tautan Google Drive harus berupa URL yang valid (diawali https://).',
+        ]);
+
+        if (!$request->hasFile('proof_file') && empty(trim((string) $request->input('drive_link')))) {
+            ToastMagic::error('Harap unggah berkas bukti kehadiran atau cantumkan tautan Google Drive.');
+            return redirect()->back();
+        }
+
+        $userId = $request->user()->id;
+        $zoomProof = SectionZoomProof::firstOrNew([
+            'course_section_id' => $sectionId,
+            'user_id'           => $userId,
+        ]);
+
+        if ($request->hasFile('proof_file')) {
+            if ($zoomProof->file_path && Storage::disk('public')->exists($zoomProof->file_path)) {
+                Storage::disk('public')->delete($zoomProof->file_path);
+            }
+            $filePath = $request->file('proof_file')->store("zoom-proofs/{$userId}", 'public');
+            $zoomProof->file_path = $filePath;
+        }
+
+        if ($request->filled('drive_link')) {
+            $zoomProof->drive_link = trim((string) $request->input('drive_link'));
+        }
+
+        if ($request->has('notes')) {
+            $zoomProof->notes = $request->input('notes');
+        }
+
+        $zoomProof->status = 'submitted';
+        $zoomProof->submitted_at = now();
+        $zoomProof->save();
+
+        ToastMagic::success('Bukti kehadiran Sesi Live Zoom berhasil disimpan!');
+        return redirect()->back();
     }
 
     public function joinZoom(Request $request, string $slug): RedirectResponse
