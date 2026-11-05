@@ -113,12 +113,12 @@
                 
                 {{-- Tombol Panduan di Resolusi Mobile & Tablet (Pojok Kiri Atas Thumbnail agar tidak menumpuk/sejajar dengan title event) --}}
                 <button type="button" onclick="window.startCoursePlayerTour && window.startCoursePlayerTour()"
-                    class="lg:hidden absolute top-2.5 left-2.5 z-10 inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1 sm:py-1.5 text-[10px] sm:text-xs font-bold text-white bg-slate-900/70 backdrop-blur-xs border border-white/20 rounded-md shadow-sm hover:bg-slate-900 transition-colors">
+                    class="lg:hidden absolute top-2.5 left-2.5 z-[1] inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1 sm:py-1.5 text-[10px] sm:text-xs font-bold text-white bg-slate-900/70 backdrop-blur-xs border border-white/20 rounded-md shadow-sm hover:bg-slate-900 transition-colors">
                     <i class="fas fa-route"></i> Panduan
                 </button>
 
                 {{-- Badge Status di Pojok Kanan Atas Thumbnail (Desain Card Kursus) --}}
-                <span class="absolute top-0 right-0 z-10 {{ $isFullyCompleted ? 'px-3 sm:px-3.5 py-1 sm:py-1.5 text-[10px] sm:text-[11px]' : 'px-2.5 sm:px-3 py-1 text-[9px] sm:text-[10px]' }} font-bold uppercase tracking-wider {{ $badgeBg }} shadow-xs rounded-none rounded-bl-md rounded-tr-md">
+                <span class="absolute top-0 right-0 z-[1] {{ $isFullyCompleted ? 'px-3 sm:px-3.5 py-1 sm:py-1.5 text-[10px] sm:text-[11px]' : 'px-2.5 sm:px-3 py-1 text-[9px] sm:text-[10px]' }} font-bold uppercase tracking-wider {{ $badgeBg }} shadow-xs rounded-none rounded-bl-md rounded-tr-md">
                     {{ $badgeText }}
                 </span>
             </div>
@@ -234,7 +234,7 @@
 
                             <div class="relative flex items-start gap-3 sm:gap-4 group">
                                 {{-- Node Timeline: Badge Hari seperti Kalender dengan rounded-md, border-b, dan border-r --}}
-                                <div class="flex flex-col items-center justify-center w-12 h-12 sm:w-14 sm:h-14 rounded-md {{ $isLocked ? 'bg-slate-100 text-slate-400 border border-slate-300 border-r-2 border-b-2 border-r-slate-400 border-b-slate-400' : 'bg-[#13416B] text-white border border-[#13416B] border-r-2 border-b-2 border-r-[#092035] border-b-[#092035] shadow-2xs' }} shrink-0 z-10 relative transition-transform group-hover:scale-105">
+                                <div class="flex flex-col items-center justify-center w-12 h-12 sm:w-14 sm:h-14 rounded-md {{ $isLocked ? 'bg-slate-100 text-slate-400 border border-slate-300 border-r-2 border-b-2 border-r-slate-400 border-b-slate-400' : 'bg-[#13416B] text-white border border-[#13416B] border-r-2 border-b-2 border-r-[#092035] border-b-[#092035] shadow-2xs' }} shrink-0 z-[1] relative transition-transform group-hover:scale-105">
                                     <span class="text-[9px] font-bold uppercase tracking-wider {{ $isLocked ? 'text-slate-400' : 'text-slate-300' }} leading-none">HARI</span>
                                     <span class="text-base sm:text-lg font-black leading-tight mt-0.5">{{ $index + 1 }}</span>
                                 </div>
@@ -447,6 +447,8 @@
                     $isEvaluasiNarasumberLocked = $isWaitingForStart;
                 @endphp
                 <div data-tour="evaluasi-narasumber"
+                    id="card-evaluasi-narasumber"
+                    @open-evaluasi-narasumber.window="showModal = true; $el.scrollIntoView({ behavior: 'smooth' })"
                     x-data="{
                         showModal: false,
                         submitted: localStorage.getItem('eval_narasumber_{{ $courseSlug }}_{{ auth()->id() }}') === 'true',
@@ -544,12 +546,13 @@
                     </div>
 
                     {{-- Modal Kuesioner Evaluasi Narasumber (Popup Elegan) --}}
-                    <div x-show="showModal" x-cloak
-                        @keydown.escape.window="showModal = false"
-                        class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
-                        
-                        <div @click.away="showModal = false"
-                            class="bg-white rounded-lg shadow-xl max-w-lg w-full p-5 sm:p-6 space-y-4 text-left border border-slate-200 relative animate-in fade-in zoom-in-95 duration-200">
+                    <template x-teleport="body">
+                        <div x-show="showModal" x-cloak
+                            @keydown.escape.window="showModal = false"
+                            class="fixed inset-0 z-[100] overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+                            
+                            <div @click.away="showModal = false"
+                                class="bg-white rounded-lg shadow-xl max-w-lg w-full p-5 sm:p-6 space-y-4 text-left border border-slate-200 relative animate-in fade-in zoom-in-95 duration-200">
                             
                             {{-- Header Modal --}}
                             <div class="flex items-center justify-between pb-3 border-b border-slate-100">
@@ -645,8 +648,9 @@
                             </div>
                         </div>
                     </div>
-                </div>
+                </template>
             </div>
+        </div>
 
             {{-- Right Column: Side Widget (Sertifikat & Info) --}}
             <div class="space-y-0 lg:sticky lg:top-24 lg:self-start">
@@ -835,13 +839,30 @@
                     @php
                         $hasZoom = (bool) ($activeBimtek && $activeBimtek->zoom_url);
                         $hasProofUploaded = !empty($sectionProofs);
-                    @endphp
-                    <div x-show="showRequirementsModal" x-cloak
-                        @keydown.escape.window="showRequirementsModal = false"
-                        class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4">
                         
-                        {{-- Overlay Click to Dismiss --}}
-                        <div class="fixed inset-0" @click="showRequirementsModal = false"></div>
+                        // Cari modul/section pertama yang belum selesai dan tidak terkunci agar button langsung mengarahkan ke sana
+                        $sectionsList = data_get($course, 'sections', []);
+                        $firstIncompleteSectionId = null;
+                        foreach ($sectionsList as $s) {
+                            $sId = data_get($s, 'id') ?? data_get($s, 'section_id');
+                            $isSecComp = data_get($s, 'is_section_completed', false);
+                            $isSecLock = data_get($s, 'is_locked', false);
+                            if (!$isSecComp && !$isSecLock) {
+                                $firstIncompleteSectionId = $sId;
+                                break;
+                            }
+                        }
+                        if (!$firstIncompleteSectionId && count($sectionsList) > 0) {
+                            $firstIncompleteSectionId = data_get($sectionsList[0], 'id') ?? data_get($sectionsList[0], 'section_id');
+                        }
+                    @endphp
+                    <template x-teleport="body">
+                        <div x-show="showRequirementsModal" x-cloak
+                            @keydown.escape.window="showRequirementsModal = false"
+                            class="fixed inset-0 z-[100] overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4">
+                            
+                            {{-- Overlay Click to Dismiss --}}
+                            <div class="fixed inset-0" @click="showRequirementsModal = false"></div>
 
                         {{-- Panel Konten: Bottom Sheet di Mobile (items-end, rounded-t-2xl), Modal di Tablet/Desktop (rounded-lg) --}}
                         <div
@@ -886,79 +907,127 @@
                                 </div>
                             </div>
 
-                            {{-- Daftar Tahapan Persyaratan Kelulusan --}}
-                            <div class="space-y-2.5 py-1">
+                            {{-- Daftar Tahapan Persyaratan: Desain Bersih & Elegan (Bukan Box Bertumpuk) --}}
+                            <div class="divide-y divide-slate-100 py-1">
                                 {{-- 1. Sesi Tatap Muka Online --}}
                                 @if ($hasZoom)
-                                    <div class="flex items-center justify-between gap-3 p-3 rounded-md border {{ $isZoomAttended ? 'bg-emerald-50/50 border-emerald-200' : 'bg-white border-slate-200' }} transition-all">
+                                    <div class="py-3.5 first:pt-1 last:pb-1 flex items-center justify-between gap-3">
                                         <div class="flex items-start gap-3 min-w-0">
-                                            <div class="w-7 h-7 rounded-md {{ $isZoomAttended ? 'bg-emerald-600 text-white' : 'bg-slate-100 text-slate-500' }} flex items-center justify-center shrink-0 text-xs mt-0.5">
-                                                <i class="fas fa-video"></i>
-                                            </div>
+                                            @if ($isZoomAttended)
+                                                <span class="w-6 h-6 rounded-full bg-emerald-600 text-white flex items-center justify-center shrink-0 text-[10px] mt-0.5 shadow-2xs">
+                                                    <i class="fas fa-check"></i>
+                                                </span>
+                                            @elseif ($isWaitingForStart)
+                                                <span class="w-6 h-6 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center shrink-0 text-[10px] mt-0.5 border border-slate-200">
+                                                    <i class="fas fa-lock text-[9px]"></i>
+                                                </span>
+                                            @else
+                                                <span class="w-6 h-6 rounded-full bg-[#13416B]/10 text-[#13416B] border border-[#13416B]/20 flex items-center justify-center shrink-0 text-[10px] font-bold mt-0.5">
+                                                    <i class="fas fa-video text-[9px]"></i>
+                                                </span>
+                                            @endif
                                             <div class="min-w-0">
-                                                <p class="text-xs font-bold {{ $isZoomAttended ? 'text-emerald-900' : 'text-slate-800' }}">Sesi Tatap Muka (Zoom)</p>
-                                                <p class="text-[11px] text-slate-500 leading-tight mt-0.5">Hadir & isi presensi kehadiran sesi Zoom</p>
+                                                <p class="text-xs sm:text-sm font-bold text-slate-800 leading-snug">Sesi Tatap Muka (Zoom)</p>
+                                                <p class="text-[11px] text-slate-500 leading-tight mt-0.5">Hadir & isi presensi tatap muka daring</p>
                                             </div>
                                         </div>
                                         <div class="shrink-0">
                                             @if ($isZoomAttended)
-                                                <span class="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-700 bg-emerald-100/70 border border-emerald-200 px-2 py-0.5 rounded">
-                                                    <i class="fas fa-check text-[9px]"></i> Tuntas
+                                                <span class="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-md">
+                                                    <i class="fas fa-check text-[9px]"></i> Selesai
+                                                </span>
+                                            @elseif ($isWaitingForStart)
+                                                <span class="inline-flex items-center gap-1 text-[11px] font-medium text-slate-400 bg-slate-100 px-2.5 py-1 rounded-md">
+                                                    <i class="fas fa-lock text-[9px]"></i> Terkunci
                                                 </span>
                                             @else
-                                                <span class="inline-flex items-center gap-1 text-[11px] font-medium text-slate-500 bg-slate-100 border border-slate-200 px-2 py-0.5 rounded">
-                                                    <i class="far fa-circle text-[9px]"></i> Belum
-                                                </span>
+                                                <a href="{{ route('user.course.section.show', ['slug' => $courseSlug, 'sectionId' => $firstIncompleteSectionId]) }}#sesi-zoom"
+                                                    class="inline-flex items-center gap-1 px-3 py-1.5 rounded-md text-xs font-bold text-white bg-[#13416B] hover:bg-[#0f3354] transition-colors shadow-2xs whitespace-nowrap">
+                                                    <span>Masuk</span>
+                                                    <i class="fas fa-arrow-right text-[9px]"></i>
+                                                </a>
                                             @endif
                                         </div>
                                     </div>
                                 @endif
 
                                 {{-- 2. Materi Pembelajaran Mandiri --}}
-                                <div class="flex items-center justify-between gap-3 p-3 rounded-md border {{ $areAllTopicsCompleted ? 'bg-emerald-50/50 border-emerald-200' : 'bg-white border-slate-200' }} transition-all">
+                                <div class="py-3.5 first:pt-1 last:pb-1 flex items-center justify-between gap-3">
                                     <div class="flex items-start gap-3 min-w-0">
-                                        <div class="w-7 h-7 rounded-md {{ $areAllTopicsCompleted ? 'bg-emerald-600 text-white' : 'bg-slate-100 text-slate-500' }} flex items-center justify-center shrink-0 text-xs mt-0.5">
-                                            <i class="fas fa-book-reader"></i>
-                                        </div>
+                                        @if ($areAllTopicsCompleted)
+                                            <span class="w-6 h-6 rounded-full bg-emerald-600 text-white flex items-center justify-center shrink-0 text-[10px] mt-0.5 shadow-2xs">
+                                                <i class="fas fa-check"></i>
+                                            </span>
+                                        @elseif ($isWaitingForStart)
+                                            <span class="w-6 h-6 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center shrink-0 text-[10px] mt-0.5 border border-slate-200">
+                                                <i class="fas fa-lock text-[9px]"></i>
+                                            </span>
+                                        @else
+                                            <span class="w-6 h-6 rounded-full bg-[#13416B]/10 text-[#13416B] border border-[#13416B]/20 flex items-center justify-center shrink-0 text-[10px] font-bold mt-0.5">
+                                                <i class="fas fa-book-reader text-[9px]"></i>
+                                            </span>
+                                        @endif
                                         <div class="min-w-0">
-                                            <p class="text-xs font-bold {{ $areAllTopicsCompleted ? 'text-emerald-900' : 'text-slate-800' }}">Materi Pembelajaran Mandiri</p>
-                                            <p class="text-[11px] text-slate-500 leading-tight mt-0.5">Tuntaskan seluruh materi ({{ $completedContents }}/{{ $totalContents }} topik)</p>
+                                            <p class="text-xs sm:text-sm font-bold text-slate-800 leading-snug">Materi Pembelajaran Mandiri</p>
+                                            <p class="text-[11px] text-slate-500 leading-tight mt-0.5">Tuntaskan seluruh topik ({{ $completedContents }}/{{ $totalContents }} selesai)</p>
                                         </div>
                                     </div>
                                     <div class="shrink-0">
                                         @if ($areAllTopicsCompleted)
-                                            <span class="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-700 bg-emerald-100/70 border border-emerald-200 px-2 py-0.5 rounded">
-                                                <i class="fas fa-check text-[9px]"></i> Tuntas
+                                            <span class="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-md">
+                                                <i class="fas fa-check text-[9px]"></i> Selesai
+                                            </span>
+                                        @elseif ($isWaitingForStart)
+                                            <span class="inline-flex items-center gap-1 text-[11px] font-medium text-slate-400 bg-slate-100 px-2.5 py-1 rounded-md">
+                                                <i class="fas fa-lock text-[9px]"></i> Terkunci
                                             </span>
                                         @else
-                                            <span class="inline-flex items-center gap-1 text-[11px] font-semibold text-[#13416B] bg-[#13416B]/10 border border-[#13416B]/20 px-2 py-0.5 rounded">
-                                                {{ $completedContents }}/{{ $totalContents }}
-                                            </span>
+                                            <a href="{{ route('user.course.section.show', ['slug' => $courseSlug, 'sectionId' => $firstIncompleteSectionId]) }}"
+                                                class="inline-flex items-center gap-1 px-3 py-1.5 rounded-md text-xs font-bold text-white bg-[#13416B] hover:bg-[#0f3354] transition-colors shadow-2xs whitespace-nowrap">
+                                                <span>Pelajari</span>
+                                                <i class="fas fa-arrow-right text-[9px]"></i>
+                                            </a>
                                         @endif
                                     </div>
                                 </div>
 
                                 {{-- 3. Unggah Bukti Pelengkap Pelaksanaan --}}
                                 @if ($hasZoom)
-                                    <div class="flex items-center justify-between gap-3 p-3 rounded-md border {{ $hasProofUploaded ? 'bg-emerald-50/50 border-emerald-200' : 'bg-white border-slate-200' }} transition-all">
+                                    <div class="py-3.5 first:pt-1 last:pb-1 flex items-center justify-between gap-3">
                                         <div class="flex items-start gap-3 min-w-0">
-                                            <div class="w-7 h-7 rounded-md {{ $hasProofUploaded ? 'bg-emerald-600 text-white' : 'bg-slate-100 text-slate-500' }} flex items-center justify-center shrink-0 text-xs mt-0.5">
-                                                <i class="fas fa-file-upload"></i>
-                                            </div>
+                                            @if ($hasProofUploaded)
+                                                <span class="w-6 h-6 rounded-full bg-emerald-600 text-white flex items-center justify-center shrink-0 text-[10px] mt-0.5 shadow-2xs">
+                                                    <i class="fas fa-check"></i>
+                                                </span>
+                                            @elseif ($isWaitingForStart)
+                                                <span class="w-6 h-6 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center shrink-0 text-[10px] mt-0.5 border border-slate-200">
+                                                    <i class="fas fa-lock text-[9px]"></i>
+                                                </span>
+                                            @else
+                                                <span class="w-6 h-6 rounded-full bg-[#13416B]/10 text-[#13416B] border border-[#13416B]/20 flex items-center justify-center shrink-0 text-[10px] font-bold mt-0.5">
+                                                    <i class="fas fa-file-upload text-[9px]"></i>
+                                                </span>
+                                            @endif
                                             <div class="min-w-0">
-                                                <p class="text-xs font-bold {{ $hasProofUploaded ? 'text-emerald-900' : 'text-slate-800' }}">Bukti Pelengkap Pelaksanaan</p>
+                                                <p class="text-xs sm:text-sm font-bold text-slate-800 leading-snug">Bukti Pelengkap Pelaksanaan</p>
                                                 <p class="text-[11px] text-slate-500 leading-tight mt-0.5">Unggah bukti keikutsertaan atau surat tugas</p>
                                             </div>
                                         </div>
                                         <div class="shrink-0">
                                             @if ($hasProofUploaded)
-                                                <span class="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-700 bg-emerald-100/70 border border-emerald-200 px-2 py-0.5 rounded">
-                                                    <i class="fas fa-check text-[9px]"></i> Tuntas
+                                                <span class="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-md">
+                                                    <i class="fas fa-check text-[9px]"></i> Selesai
+                                                </span>
+                                            @elseif ($isWaitingForStart)
+                                                <span class="inline-flex items-center gap-1 text-[11px] font-medium text-slate-400 bg-slate-100 px-2.5 py-1 rounded-md">
+                                                    <i class="fas fa-lock text-[9px]"></i> Terkunci
                                                 </span>
                                             @else
-                                                <span class="inline-flex items-center gap-1 text-[11px] font-medium text-slate-500 bg-slate-100 border border-slate-200 px-2 py-0.5 rounded">
-                                                    <i class="far fa-circle text-[9px]"></i> Belum
-                                                </span>
+                                                <a href="{{ route('user.course.section.show', ['slug' => $courseSlug, 'sectionId' => $firstIncompleteSectionId]) }}#bukti-zoom"
+                                                    class="inline-flex items-center gap-1 px-3 py-1.5 rounded-md text-xs font-bold text-white bg-[#13416B] hover:bg-[#0f3354] transition-colors shadow-2xs whitespace-nowrap">
+                                                    <span>Unggah</span>
+                                                    <i class="fas fa-arrow-right text-[9px]"></i>
+                                                </a>
                                             @endif
                                         </div>
                                     </div>
@@ -966,68 +1035,88 @@
 
                                 {{-- 4. Evaluasi Akhir Materi (Post-Test) --}}
                                 @if ($evaluasiAkhir)
-                                    <div class="flex items-center justify-between gap-3 p-3 rounded-md border {{ $isEvaluasiAkhirCompleted ? 'bg-emerald-50/50 border-emerald-200' : 'bg-white border-slate-200' }} transition-all">
+                                    <div class="py-3.5 first:pt-1 last:pb-1 flex items-center justify-between gap-3">
                                         <div class="flex items-start gap-3 min-w-0">
-                                            <div class="w-7 h-7 rounded-md {{ $isEvaluasiAkhirCompleted ? 'bg-emerald-600 text-white' : 'bg-slate-100 text-slate-500' }} flex items-center justify-center shrink-0 text-xs mt-0.5">
-                                                <i class="fas fa-file-signature"></i>
-                                            </div>
+                                            @if ($isEvaluasiAkhirCompleted)
+                                                <span class="w-6 h-6 rounded-full bg-emerald-600 text-white flex items-center justify-center shrink-0 text-[10px] mt-0.5 shadow-2xs">
+                                                    <i class="fas fa-check"></i>
+                                                </span>
+                                            @elseif ($isEvaluasiAkhirLocked || $isWaitingForStart || $isEventEnded)
+                                                <span class="w-6 h-6 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center shrink-0 text-[10px] mt-0.5 border border-slate-200">
+                                                    <i class="fas fa-lock text-[9px]"></i>
+                                                </span>
+                                            @else
+                                                <span class="w-6 h-6 rounded-full bg-[#13416B]/10 text-[#13416B] border border-[#13416B]/20 flex items-center justify-center shrink-0 text-[10px] font-bold mt-0.5">
+                                                    <i class="fas fa-file-signature text-[9px]"></i>
+                                                </span>
+                                            @endif
                                             <div class="min-w-0">
-                                                <p class="text-xs font-bold {{ $isEvaluasiAkhirCompleted ? 'text-emerald-900' : 'text-slate-800' }}">Evaluasi Akhir Komprehensif</p>
-                                                <p class="text-[11px] text-slate-500 leading-tight mt-0.5">Lulus nilai minimal KKM ({{ data_get($evaluasiAkhir, 'passing_score', 0) }})</p>
+                                                <p class="text-xs sm:text-sm font-bold text-slate-800 leading-snug">Evaluasi Akhir Komprehensif</p>
+                                                <p class="text-[11px] text-slate-500 leading-tight mt-0.5">Lulus nilai minimal KKM: {{ data_get($evaluasiAkhir, 'passing_score', 0) }}</p>
                                             </div>
                                         </div>
                                         <div class="shrink-0">
                                             @if ($isEvaluasiAkhirCompleted)
-                                                <span class="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-700 bg-emerald-100/70 border border-emerald-200 px-2 py-0.5 rounded">
+                                                <span class="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-md">
                                                     <i class="fas fa-check text-[9px]"></i> Lulus
                                                 </span>
-                                            @else
-                                                <span class="inline-flex items-center gap-1 text-[11px] font-medium text-slate-500 bg-slate-100 border border-slate-200 px-2 py-0.5 rounded">
-                                                    <i class="far fa-circle text-[9px]"></i> Belum
+                                            @elseif ($isEvaluasiAkhirLocked || $isWaitingForStart || $isEventEnded)
+                                                <span class="inline-flex items-center gap-1 text-[11px] font-medium text-slate-400 bg-slate-100 px-2.5 py-1 rounded-md" title="Selesaikan materi harian terlebih dahulu">
+                                                    <i class="fas fa-lock text-[9px]"></i> Terkunci
                                                 </span>
+                                            @else
+                                                <a href="{{ route('user.course.test.show', ['slug' => $courseSlug, 'postTestId' => $evaluasiAkhir->id]) }}"
+                                                    class="inline-flex items-center gap-1 px-3 py-1.5 rounded-md text-xs font-bold text-white bg-[#13416B] hover:bg-[#0f3354] transition-colors shadow-2xs whitespace-nowrap">
+                                                    <span>Kerjakan</span>
+                                                    <i class="fas fa-arrow-right text-[9px]"></i>
+                                                </a>
                                             @endif
                                         </div>
                                     </div>
                                 @endif
 
                                 {{-- 5. Evaluasi Narasumber & Penyelenggara --}}
-                                <div class="flex items-center justify-between gap-3 p-3 rounded-md border transition-all"
-                                    :class="evalNarasumberDone ? 'bg-emerald-50/50 border-emerald-200' : 'bg-white border-slate-200'">
+                                <div class="py-3.5 first:pt-1 last:pb-1 flex items-center justify-between gap-3">
                                     <div class="flex items-start gap-3 min-w-0">
-                                        <div class="w-7 h-7 rounded-md flex items-center justify-center shrink-0 text-xs mt-0.5"
-                                            :class="evalNarasumberDone ? 'bg-emerald-600 text-white' : 'bg-slate-100 text-slate-500'">
-                                            <i class="fas fa-chalkboard-teacher"></i>
-                                        </div>
+                                        <span x-show="evalNarasumberDone" class="w-6 h-6 rounded-full bg-emerald-600 text-white flex items-center justify-center shrink-0 text-[10px] mt-0.5 shadow-2xs">
+                                            <i class="fas fa-check"></i>
+                                        </span>
+                                        <span x-show="!evalNarasumberDone && {{ $isWaitingForStart ? 'true' : 'false' }}" class="w-6 h-6 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center shrink-0 text-[10px] mt-0.5 border border-slate-200">
+                                            <i class="fas fa-lock text-[9px]"></i>
+                                        </span>
+                                        <span x-show="!evalNarasumberDone && !{{ $isWaitingForStart ? 'true' : 'false' }}" class="w-6 h-6 rounded-full bg-[#13416B]/10 text-[#13416B] border border-[#13416B]/20 flex items-center justify-center shrink-0 text-[10px] font-bold mt-0.5">
+                                            <i class="fas fa-chalkboard-teacher text-[9px]"></i>
+                                        </span>
                                         <div class="min-w-0">
-                                            <p class="text-xs font-bold" :class="evalNarasumberDone ? 'text-emerald-900' : 'text-slate-800'">Evaluasi Narasumber & Bimtek</p>
-                                            <p class="text-[11px] text-slate-500 leading-tight mt-0.5">Kuesioner evaluasi narasumber & fasilitas bimtek</p>
+                                            <p class="text-xs sm:text-sm font-bold text-slate-800 leading-snug">Evaluasi Narasumber & Bimtek</p>
+                                            <p class="text-[11px] text-slate-500 leading-tight mt-0.5">Penilaian kualitas pengajar & fasilitas bimtek</p>
                                         </div>
                                     </div>
                                     <div class="shrink-0">
                                         <template x-if="evalNarasumberDone">
-                                            <span class="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-700 bg-emerald-100/70 border border-emerald-200 px-2 py-0.5 rounded">
-                                                <i class="fas fa-check text-[9px]"></i> Tuntas
+                                            <span class="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-md">
+                                                <i class="fas fa-check text-[9px]"></i> Selesai
                                             </span>
                                         </template>
-                                        <template x-if="!evalNarasumberDone">
-                                            <span class="inline-flex items-center gap-1 text-[11px] font-medium text-slate-500 bg-slate-100 border border-slate-200 px-2 py-0.5 rounded">
-                                                <i class="far fa-circle text-[9px]"></i> Belum
+                                        <template x-if="!evalNarasumberDone && {{ $isWaitingForStart ? 'true' : 'false' }}">
+                                            <span class="inline-flex items-center gap-1 text-[11px] font-medium text-slate-400 bg-slate-100 px-2.5 py-1 rounded-md">
+                                                <i class="fas fa-lock text-[9px]"></i> Terkunci
                                             </span>
+                                        </template>
+                                        <template x-if="!evalNarasumberDone && !{{ $isWaitingForStart ? 'true' : 'false' }}">
+                                            <button type="button" @click="showRequirementsModal = false; $dispatch('open-evaluasi-narasumber')"
+                                                class="inline-flex items-center gap-1 px-3 py-1.5 rounded-md text-xs font-bold text-white bg-[#13416B] hover:bg-[#0f3354] transition-colors shadow-2xs whitespace-nowrap">
+                                                <span>Isi</span>
+                                                <i class="fas fa-arrow-right text-[9px]"></i>
+                                            </button>
                                         </template>
                                     </div>
                                 </div>
                             </div>
-
-                            {{-- Footer Modal / Bottom Sheet --}}
-                            <div class="pt-3 border-t border-slate-100 flex items-center justify-end">
-                                <button type="button" @click="showRequirementsModal = false"
-                                    class="w-full sm:w-auto px-5 py-2.5 rounded-md text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 transition-colors">
-                                    Tutup
-                                </button>
-                            </div>
                         </div>
                     </div>
-                </div>
+                </template>
+            </div>
 
 
 
