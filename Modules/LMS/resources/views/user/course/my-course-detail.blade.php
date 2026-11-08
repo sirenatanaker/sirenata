@@ -90,84 +90,93 @@
                 $thumbnailUrl = "https://ui-avatars.com/api/?name={$encodedName}&background=eff6ff&color=1e3a8a&size=512&font-size=0.33&bold=true";
             }
 
-            if ($isFullyCompleted) {
-                $badgeText = 'Selesai';
-                $badgeBg = 'bg-emerald-600 text-white';
-            } elseif ($isWaitingForStart) {
-                $badgeText = 'Menunggu Pelaksanaan';
-                $badgeBg = 'bg-[#0B5CFF] text-white';
-            } else {
-                $badgeText = 'Sedang Berjalan';
-                $badgeBg = 'bg-amber-500 text-white';
-            }
         @endphp
 
         {{-- Header Card --}}
         <!-- PERBAIKAN: rounded-none border-x-0 di mobile -->
         <div
-            class="bg-white rounded-none sm:rounded-md shadow-sm border-y border-x-0 sm:border sm:border-x border-slate-200 p-4 sm:p-6 lg:p-7 mb-6 flex flex-col md:flex-row gap-5 lg:gap-7 items-start md:items-stretch transition-all">
-            {{-- Bagian Kiri: Thumbnail --}}
-            <div
-                class="w-full md:w-[38%] lg:w-[28%] shrink-0 rounded-md overflow-hidden bg-slate-100 aspect-[16/10] relative border border-slate-200 shadow-xs">
-                <img src="{{ $thumbnailUrl }}" alt="{{ $courseName }}" class="w-full h-full object-cover" />
-                
-                {{-- Tombol Panduan di Resolusi Mobile & Tablet (Pojok Kiri Atas Thumbnail agar tidak menumpuk/sejajar dengan title event) --}}
-                <button type="button" onclick="window.startCoursePlayerTour && window.startCoursePlayerTour()"
-                    class="lg:hidden absolute top-2.5 left-2.5 z-[1] inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1 sm:py-1.5 text-[10px] sm:text-xs font-bold text-white bg-slate-900/70 backdrop-blur-xs border border-white/20 rounded-md shadow-sm hover:bg-slate-900 transition-colors">
-                    <i class="fas fa-route"></i> Panduan
-                </button>
+            class="bg-white rounded-none sm:rounded-md shadow-sm border-y border-x-0 sm:border border-slate-200 p-4 sm:p-5 lg:p-6 mb-6 transition-all">
+            
+            <div class="flex flex-col md:flex-row gap-4 sm:gap-5 lg:gap-6 items-start">
+                {{-- Thumbnail Bersih & Proporsional (rounded-md) --}}
+                <div class="w-full md:w-52 lg:w-64 shrink-0 rounded-md overflow-hidden bg-slate-100 aspect-video md:aspect-[16/10] border border-slate-200 shadow-2xs relative">
+                    <img src="{{ $thumbnailUrl }}" alt="{{ $courseName }}" class="w-full h-full object-cover" />
+                </div>
 
-                {{-- Badge Status di Pojok Kanan Atas Thumbnail (Desain Card Kursus) --}}
-                <span class="absolute top-0 right-0 z-[1] {{ $isFullyCompleted ? 'px-3 sm:px-3.5 py-1 sm:py-1.5 text-[10px] sm:text-[11px]' : 'px-2.5 sm:px-3 py-1 text-[9px] sm:text-[10px]' }} font-bold uppercase tracking-wider {{ $badgeBg }} shadow-xs rounded-none rounded-bl-md rounded-tr-md">
-                    {{ $badgeText }}
-                </span>
-            </div>
+                {{-- Detail Informasi & Progress --}}
+                <div class="flex-1 min-w-0 w-full flex flex-col justify-between gap-3.5 sm:gap-4.5">
+                    <div>
+                        {{-- Baris Judul & Tombol Panduan --}}
+                        <div class="flex items-start justify-between gap-3">
+                            <h1 class="text-base sm:text-xl lg:text-2xl font-extrabold text-slate-900 tracking-tight leading-snug">
+                                {{ $courseName }}
+                            </h1>
 
-            {{-- Bagian Kanan: Informasi Kursus --}}
-            <div class="flex-1 flex flex-col w-full justify-between">
-                <div>
-                    <div class="flex flex-wrap items-center justify-between gap-2.5 mb-3">
-                        {{-- Gelombang / Nama Batch Bimtek --}}
-                        @if ($activeBimtek && $activeBimtek->batch_name)
-                            <div class="inline-flex items-center gap-1.5 text-[11px] sm:text-xs font-bold text-[#13416B] max-w-full min-w-0">
-                                <i class="fas fa-satellite-dish text-[10px] sm:text-[11px] text-[#13416B] shrink-0"></i>
-                                <span class="truncate md:line-clamp-1 lg:line-clamp-none leading-snug" title="{{ $activeBimtek->batch_name }}">{{ $activeBimtek->batch_name }}</span>
+                            <button type="button" onclick="window.startCoursePlayerTour && window.startCoursePlayerTour()"
+                                class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-slate-700 bg-slate-50 hover:bg-slate-100 hover:text-[#13416B] border border-slate-200 rounded-md transition-all shadow-2xs cursor-pointer shrink-0">
+                                <i class="fas fa-route text-[#13416B]"></i>
+                                <span>Panduan</span>
+                            </button>
+                        </div>
+
+                        {{-- Info Event: Nama Event & Periode Pelaksanaan (Mini Cards Terstruktur) --}}
+                        @php
+                            $formattedPeriod = null;
+                            if ($activeBimtek && $activeBimtek->start_date && $activeBimtek->end_date) {
+                                $startDate = \Carbon\Carbon::parse($activeBimtek->start_date);
+                                $endDate = \Carbon\Carbon::parse($activeBimtek->end_date);
+                                
+                                if ($startDate->format('Y-m') === $endDate->format('Y-m')) {
+                                    $formattedPeriod = $startDate->translatedFormat('d') . ' - ' . $endDate->translatedFormat('d F Y');
+                                } elseif ($startDate->format('Y') === $endDate->format('Y')) {
+                                    $formattedPeriod = $startDate->translatedFormat('d M') . ' - ' . $endDate->translatedFormat('d M Y');
+                                } else {
+                                    $formattedPeriod = $startDate->translatedFormat('d M Y') . ' - ' . $endDate->translatedFormat('d M Y');
+                                }
+                            }
+                        @endphp
+
+                        @if ($activeBimtek && ($activeBimtek->batch_name || $formattedPeriod))
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-3.5 mt-3.5 sm:mt-4 max-w-2xl">
+                                @if ($activeBimtek->batch_name)
+                                    <div class="flex items-center gap-3 px-3.5 py-2.5 rounded-md bg-slate-50/80 border border-slate-200/80 text-xs text-slate-700 min-w-0">
+                                        <div class="w-8 h-8 rounded-md bg-blue-50 text-[#13416B] border border-blue-100 flex items-center justify-center shrink-0">
+                                            <i class="fas fa-satellite-dish text-xs"></i>
+                                        </div>
+                                        <div class="min-w-0 flex-1 flex flex-col gap-1">
+                                            <span class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider leading-none">Gelombang / Batch</span>
+                                            <span class="font-bold text-slate-800 truncate text-xs sm:text-[13px] leading-tight" title="{{ $activeBimtek->batch_name }}">{{ $activeBimtek->batch_name }}</span>
+                                        </div>
+                                    </div>
+                                @endif
+
+                                @if ($formattedPeriod)
+                                    <div class="flex items-center gap-3 px-3.5 py-2.5 rounded-md bg-slate-50/80 border border-slate-200/80 text-xs text-slate-700 min-w-0">
+                                        <div class="w-8 h-8 rounded-md bg-blue-50 text-[#13416B] border border-blue-100 flex items-center justify-center shrink-0">
+                                            <i class="far fa-calendar-alt text-xs"></i>
+                                        </div>
+                                        <div class="min-w-0 flex-1 flex flex-col gap-1">
+                                            <span class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider leading-none">Periode Pelaksanaan</span>
+                                            <span class="font-bold text-slate-800 truncate text-xs sm:text-[13px] leading-tight">{{ $formattedPeriod }}</span>
+                                        </div>
+                                    </div>
+                                @endif
                             </div>
-                        @else
-                            <div></div>
                         @endif
-
-                        {{-- Tombol Panduan Desktop (Layar Lebar) --}}
-                        <button type="button" onclick="window.startCoursePlayerTour && window.startCoursePlayerTour()"
-                            class="hidden lg:inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-bold text-white bg-[#13416B] border border-[#13416B] rounded-lg hover:bg-[#0f3354] transition-all ml-auto shadow-2xs cursor-pointer">
-                            <i class="fas fa-route"></i> Panduan
-                        </button>
                     </div>
 
-                    {{-- Judul --}}
-                    <h1 class="text-xl sm:text-2xl lg:text-3xl font-extrabold text-slate-900 mb-2 tracking-tight leading-snug">
-                        {{ $courseName }}
-                    </h1>
-
-                    {{-- Deskripsi Kursus Saja (Timeline Dihapus) --}}
-                    @if (!empty(data_get($course, 'description')))
-                        <div class="prose prose-sm max-w-none text-slate-600 mb-4 pt-1">
-                            <p class="text-xs sm:text-sm leading-relaxed line-clamp-3 sm:line-clamp-4">
-                                {{ data_get($course, 'description') }}
-                            </p>
-                        </div>
-                    @endif
-
-                    {{-- Progress Bar (Benar-benar di Bawah Deskripsi Tanpa Garis Pemisah) --}}
-                    <div class="max-w-md w-full pt-1">
-                        <div class="flex justify-between items-center mb-1.5">
-                            <span class="text-xs font-semibold text-slate-500">{{ $isWaitingForStart ? 'Status Pelatihan' : 'Progres Belajar' }}</span>
-                            <span class="text-xs sm:text-sm font-bold {{ $progressTextClass }}">
+                    {{-- Progress Bar (Tanpa Icon Progres) --}}
+                    <div class="w-full max-w-2xl pt-2.5 sm:pt-3.5 border-t border-slate-100">
+                        <div class="flex justify-between items-center mb-1.5 text-xs">
+                            <span class="font-semibold text-slate-600">
+                                {{ $isWaitingForStart ? 'Status Pelatihan' : 'Progres Pembelajaran' }}
+                            </span>
+                            <span class="font-bold text-xs sm:text-sm {{ $isFullyCompleted ? 'text-emerald-600' : 'text-[#13416B]' }}">
                                 {{ $isWaitingForStart ? 'Menunggu Pelaksanaan' : $currentProgress . '%' }}
                             </span>
                         </div>
-                        <div class="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
-                            <div class="{{ $progressBarClass }} h-full rounded-full transition-all duration-700"
+                        <div class="w-full bg-slate-100 rounded-full h-2 overflow-hidden border border-slate-200/50">
+                            <div class="{{ $progressBarClass }} h-full rounded-full transition-all duration-700 shadow-2xs"
                                 style="width: {{ $isWaitingForStart ? 0 : $currentProgress }}%"></div>
                         </div>
                     </div>
@@ -187,9 +196,12 @@
 
                     <div
                         class="flex items-center justify-between mb-5 sm:mb-6 pb-4 border-b border-slate-100 gap-3 sm:gap-4">
-                        <div>
-                            <h2 class="text-base sm:text-lg font-extrabold text-slate-800 leading-tight">Timeline & Agenda Pelaksanaan</h2>
-                            <p class="text-[11px] sm:text-xs text-slate-500 mt-0.5">Alur tahapan harian: sesi tatap muka (Zoom), pembelajaran materi, dan evaluasi harian</p>
+                        <div class="flex items-start gap-3 sm:gap-3.5">
+                            <i class="fas fa-calendar-alt text-[#13416B] text-xl sm:text-2xl mt-0.5 shrink-0"></i>
+                            <div>
+                                <h2 class="text-base sm:text-lg font-extrabold text-slate-800 leading-tight">Timeline & Agenda Pelaksanaan</h2>
+                                <p class="text-[11px] sm:text-xs text-slate-500 mt-1">Alur tahapan harian: sesi tatap muka (Zoom), pembelajaran materi, dan evaluasi harian</p>
+                            </div>
                         </div>
                     </div>
 
@@ -369,7 +381,7 @@
                 @if ($evaluasiAkhir)
                     <!-- PERBAIKAN: rounded-none border-x-0 di mobile -->
                     <div data-tour="evaluasi"
-                        class="bg-white rounded-none sm:rounded-md shadow-sm border-y border-x-0 sm:border sm:border-x border-slate-200 p-4 sm:px-6 sm:py-5 lg:px-7 lg:py-6 transition-all relative overflow-hidden">
+                        class="bg-white rounded-none sm:rounded-md shadow-sm border-y border-x-0 sm:border sm:border-x border-slate-200 p-4 sm:px-6 sm:py-5 lg:px-7 lg:py-6 transition-all">
                         <div class="flex flex-row items-end justify-between gap-6 lg:gap-8">
                             {{-- Kolom Kiri: Informasi Evaluasi & Tombol Aksi --}}
                             <div class="flex-1 min-w-0 sm:py-1">
@@ -382,7 +394,7 @@
                                     Ujian evaluasi komprehensif seluruh materi sebagai syarat kelulusan dan penerbitan sertifikat.
                                 </p>
 
-                                <div class="mt-3 sm:mt-4 flex flex-wrap items-center gap-2">
+                                <div class="mt-3 sm:mt-4 flex flex-wrap items-center gap-2.5 sm:gap-3">
                                     <span
                                         class="text-[11px] sm:text-xs font-semibold text-white bg-[#547996] px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-md border border-[#446680] flex items-center gap-1.5 shadow-xs">
                                         <i class="fas fa-list-ol text-[10px] sm:text-xs text-white"></i>
@@ -400,21 +412,21 @@
                                     </span>
                                 </div>
 
-                                <div class="mt-4 sm:mt-5">
+                                <div class="mt-4 sm:mt-5 flex justify-start">
                                     @if ($isEvaluasiAkhirCompleted)
                                         <a href="{{ route('user.course.test.show', ['slug' => $courseSlug, 'postTestId' => $evaluasiAkhir->id]) }}"
-                                            class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-md text-xs sm:text-sm font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 transition-all shadow-xs">
+                                            class="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-md text-xs sm:text-sm font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 transition-all shadow-xs">
                                             <i class="fas fa-eye text-xs"></i> Lihat Hasil
                                         </a>
                                     @elseif ($isWaitingForStart)
                                         <button type="button" disabled
                                             title="Evaluasi dibuka saat periode pelaksanaan pelatihan resmi dimulai"
-                                            class="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-5 py-2.5 rounded-md text-xs sm:text-sm font-bold bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed select-none">
+                                            class="inline-flex items-center justify-center gap-1.5 px-5 py-2.5 rounded-md text-xs sm:text-sm font-bold bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed select-none">
                                             <i class="fas fa-lock text-xs"></i> Evaluasi Terkunci
                                         </button>
                                     @elseif (!$isEvaluasiAkhirLocked && !$isEventEnded)
                                         <a href="{{ route('user.course.test.show', ['slug' => $courseSlug, 'postTestId' => $evaluasiAkhir->id]) }}"
-                                            class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-md text-xs sm:text-sm font-bold bg-[#13416B] hover:bg-[#0f3354] text-white shadow-sm transition-all">
+                                            class="inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-md text-xs sm:text-sm font-bold bg-[#13416B] hover:bg-[#0f3354] text-white shadow-sm transition-all">
                                             <i class="fas fa-play text-xs"></i> Mulai Evaluasi
                                         </a>
                                     @elseif ($isEventEnded && !$isEvaluasiAkhirCompleted)
@@ -425,7 +437,7 @@
                                     @else
                                         <button type="button" disabled
                                             title="Selesaikan materi mandiri{{ $activeBimtek && $activeBimtek->zoom_url ? ' & presensi Zoom' : '' }} terlebih dahulu"
-                                            class="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-5 py-2.5 rounded-md text-xs sm:text-sm font-bold bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed select-none">
+                                            class="inline-flex items-center justify-center gap-1.5 px-5 py-2.5 rounded-md text-xs sm:text-sm font-bold bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed select-none">
                                             <i class="fas fa-lock text-xs"></i> Evaluasi Terkunci
                                         </button>
                                     @endif
@@ -436,7 +448,7 @@
                             <div class="hidden sm:flex sm:shrink-0 items-end justify-center self-end -mb-3.5 lg:-mb-4">
                                 <img src="{{ asset('images/modul_ilustrasi.webp') }}"
                                     alt="Ilustrasi Evaluasi Akhir"
-                                    class="sm:h-44 md:h-48 lg:h-52 w-auto object-contain object-bottom select-none pointer-events-none {{ $isEvaluasiAkhirLocked ? 'opacity-70 grayscale' : '' }}" />
+                                    class="sm:h-44 md:h-48 lg:h-52 w-auto object-contain object-bottom select-none pointer-events-none" />
                             </div>
                         </div>
                     </div>
@@ -469,8 +481,8 @@
                             setTimeout(() => this.showSuccessToast = false, 4000);
                         }
                     }"
-                    class="bg-white rounded-none sm:rounded-md shadow-sm border-y border-x-0 sm:border sm:border-x border-slate-200 p-4 sm:px-6 sm:py-5 lg:px-7 lg:py-6 transition-all relative overflow-hidden">
-                    
+                    class="bg-white rounded-none sm:rounded-md shadow-sm border-y border-x-0 sm:border sm:border-x border-slate-200 p-4 sm:px-6 sm:py-5 lg:px-7 lg:py-6 transition-all">
+
                     {{-- Alert Notifikasi Sukses --}}
                     <div x-show="showSuccessToast" x-cloak
                         x-transition:enter="transition ease-out duration-300"
@@ -503,7 +515,7 @@
                             </p>
 
                             {{-- Meta Badges (Sesuai Gaya Desain Evaluasi Akhir) --}}
-                            <div class="mt-3 sm:mt-4 flex flex-wrap items-center gap-2">
+                            <div class="mt-3 sm:mt-4 flex flex-wrap items-center gap-2.5 sm:gap-3">
                                 <span
                                     class="text-[11px] sm:text-xs font-semibold text-white bg-[#547996] px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-md border border-[#446680] flex items-center gap-1.5 shadow-xs">
                                     <i class="fas fa-user-secret text-[10px] sm:text-xs text-white"></i> Anonim & Rahasia
@@ -519,17 +531,17 @@
                             </div>
 
                             {{-- Tombol Aksi di Bawah Badges (Konsisten dengan Evaluasi Akhir) --}}
-                            <div class="mt-4 sm:mt-5">
+                            <div class="mt-4 sm:mt-5 flex justify-start">
                                 @if ($isWaitingForStart)
                                     <button type="button" disabled
                                         title="Evaluasi narasumber dibuka setelah sesi pelatihan dimulai"
-                                        class="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-5 py-2.5 rounded-md text-xs sm:text-sm font-bold bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed select-none">
+                                        class="inline-flex items-center justify-center gap-1.5 px-5 py-2.5 rounded-md text-xs sm:text-sm font-bold bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed select-none">
                                         <i class="fas fa-lock text-xs"></i> Evaluasi Terkunci
                                     </button>
                                 @else
                                     <button type="button" @click="showModal = true"
                                         :class="submitted ? 'bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200' : 'bg-[#13416B] hover:bg-[#0f3354] text-white shadow-sm'"
-                                        class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-md text-xs sm:text-sm font-bold transition-all shadow-xs">
+                                        class="inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-md text-xs sm:text-sm font-bold transition-all shadow-xs">
                                         <i :class="submitted ? 'fas fa-eye' : 'fas fa-pen-alt'" class="text-xs"></i>
                                         <span x-text="submitted ? 'Lihat / Edit Ulasan' : 'Mulai Evaluasi'"></span>
                                     </button>
@@ -541,7 +553,7 @@
                         <div class="hidden sm:flex sm:shrink-0 items-end justify-center self-end -mb-5 sm:-mb-5 lg:-mb-6">
                             <img src="{{ asset('images/narasumber_ilustrasi.webp') }}"
                                 alt="Ilustrasi Narasumber"
-                                class="sm:h-44 md:h-48 lg:h-52 w-auto object-contain object-bottom select-none pointer-events-none {{ $isWaitingForStart ? 'opacity-70 grayscale' : '' }}" />
+                                class="sm:h-44 md:h-48 lg:h-52 w-auto object-contain object-bottom select-none pointer-events-none" />
                         </div>
                     </div>
 
