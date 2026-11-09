@@ -210,7 +210,7 @@ class CourseController extends Controller
         $zoomProof->submitted_at = now();
         $zoomProof->save();
 
-        ToastMagic::success('Bukti presensi / penugasan berhasil disimpan!');
+        ToastMagic::success('Bukti pendukung presensi berhasil disimpan!');
         return redirect()->back();
     }
 
@@ -250,33 +250,27 @@ class CourseController extends Controller
             ->where('user_id', $request->user()->id)
             ->first();
 
-        // Opsi 2a: Wajib klik "Masuk Ruang Zoom" terlebih dahulu
-        if (empty($enrollment?->zoom_joined_at)) {
-            ToastMagic::error('Silakan klik tombol "Masuk Ruang Zoom" terlebih dahulu untuk mengikuti sesi sebelum konfirmasi hadir.');
+        // Cek rentang waktu pembukaan presensi Zoom yang ditentukan admin pusat
+        $now = now();
+        $zoomStart = $activeBimtek?->zoom_scheduled_at ?? $activeBimtek?->start_date;
+        $zoomEnd = $activeBimtek?->zoom_end_at;
+
+        if ($zoomStart && $now->lessThan($zoomStart)) {
+            $formattedStart = $activeBimtek->zoom_schedule_formatted ?? $zoomStart->translatedFormat('d F Y, H:i') . ' WIB';
+            ToastMagic::error('Presensi belum dibuka. Konfirmasi kehadiran dibuka pada jadwal sesi tatap muka (' . $formattedStart . ').');
             return redirect()->back();
         }
 
-        // Opsi 2b: Penguncian berdasarkan jadwal waktu Zoom dimulai
-        if ($activeBimtek && $activeBimtek->zoom_scheduled_at && now()->lessThan($activeBimtek->zoom_scheduled_at)) {
-            ToastMagic::error('Presensi belum dibuka. Konfirmasi kehadiran hanya dapat dilakukan saat jadwal Sesi Live Zoom dimulai (' . $activeBimtek->zoom_schedule_formatted . ').');
+        if ($zoomEnd && $now->greaterThan($zoomEnd)) {
+            ToastMagic::error('Waktu presensi tatap muka telah berakhir pada ' . $zoomEnd->translatedFormat('d F Y, H:i') . ' WIB.');
             return redirect()->back();
-        }
-
-        // Opsi 1: Validasi Kode Presensi / Token Zoom
-        if ($activeBimtek && !empty($activeBimtek->zoom_attendance_code)) {
-            $inputCode = strtoupper(trim((string) $request->input('attendance_code')));
-            $expectedCode = strtoupper(trim((string) $activeBimtek->zoom_attendance_code));
-
-            if ($inputCode === '' || $inputCode !== $expectedCode) {
-                ToastMagic::error('Kode Presensi Zoom tidak sesuai. Masukkan kode presensi yang dibagikan panitia/narasumber saat sesi Zoom berlangsung.');
-                return redirect()->back();
-            }
         }
 
         DB::table('course_student')
             ->where('course_id', $course->id)
             ->where('user_id', $request->user()->id)
             ->update([
+                'zoom_joined_at'   => $enrollment?->zoom_joined_at ?: now(),
                 'zoom_attended'    => true,
                 'zoom_attended_at' => now(),
             ]);
@@ -295,8 +289,8 @@ class CourseController extends Controller
 
         ToastMagic::success(
             $canTakeFinalTest
-                ? 'Presensi Sesi Live Zoom berhasil dikonfirmasi! Tahap Evaluasi Akhir kini telah terbuka.'
-                : 'Presensi Sesi Live Zoom berhasil dikonfirmasi! Selesaikan seluruh modul pembelajaran mandiri untuk membuka Evaluasi Akhir.'
+                ? 'Presensi sesi tatap muka berhasil dikonfirmasi! Tahap Evaluasi Akhir kini telah terbuka.'
+                : 'Presensi sesi tatap muka berhasil dikonfirmasi!'
         );
 
         return redirect()->back();
