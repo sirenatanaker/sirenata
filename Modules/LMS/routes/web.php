@@ -110,6 +110,8 @@ Route::prefix('user')->middleware(['auth', 'role:user'])->name('user.')->group(f
         Route::get('/my-course/{slug}', 'myCourseDetail')->name('my-course.detail');
         Route::get('/my-course/{slug}/section/{sectionId}', 'showSection')->name('section.show');
         Route::post('/my-course/{slug}/section/{sectionId}/upload-zoom-proof', 'uploadZoomProof')->name('section.upload-zoom-proof');
+        Route::post('/my-course/{slug}/section/{sectionId}/submit-assignment', 'submitAssignment')->name('section.submit-assignment');
+        Route::post('/my-course/{slug}/section/{sectionId}/submit-essay', 'submitEssay')->name('section.submit-essay');
         Route::get('/my-course/{slug}/join-zoom', 'joinZoom')->name('my-course.join-zoom');
         Route::post('/my-course/{slug}/attend-zoom', 'attendZoom')->name('my-course.attend-zoom');
         Route::post('/my-course/{slug}/generate-certificate', 'generateCertificate')->name('my-course.generate-certificate');

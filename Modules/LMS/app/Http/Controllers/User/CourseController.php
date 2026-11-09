@@ -151,9 +151,19 @@ class CourseController extends Controller
             $activeBimtek = \Modules\LMS\Models\BimtekEvent::where('course_id', $course->id)->latest()->first();
         }
 
+        $userId = $request->user()?->id ?? 'guest';
         $zoomProof = SectionZoomProof::where('course_section_id', $sectionId)
-            ->where('user_id', $request->user()->id)
+            ->where('user_id', $userId)
             ->first();
+
+        // Ambil hasil / penyerahan evaluasi siswa dari tabel post_test_results
+        $postTestBab = data_get($section, 'post_test_bab') ?: \Modules\LMS\Models\PostTest::where('course_section_id', $sectionId)->first();
+        $evalResult = null;
+        if ($postTestBab && $request->user()) {
+            $evalResult = \Modules\LMS\Models\PostTestResult::where('post_test_id', $postTestBab->id)
+                ->where('user_id', $request->user()->id)
+                ->first();
+        }
 
         return view('lms::user.course.section-show', [
             'course'         => $course,
@@ -164,7 +174,93 @@ class CourseController extends Controller
             'zoomProof'      => $zoomProof,
             'hasJoinedZoom'  => (bool) ($enrollment?->pivot?->zoom_joined_at),
             'isZoomAttended' => (bool) ($enrollment?->pivot?->zoom_attended),
+            'evalResult'     => $evalResult,
+            'postTestBab'    => $postTestBab,
         ]);
+    }
+
+    public function submitAssignment(Request $request, string $slug, string $sectionId): RedirectResponse
+    {
+        $request->validate([
+            'assignment_file' => 'required|file|mimes:pdf,docx,doc,zip,rar,jpg,png|max:10240',
+            'notes'           => 'nullable|string|max:500',
+        ], [
+            'assignment_file.required' => 'Harap pilih berkas jawaban tugas yang ingin diunggah.',
+            'assignment_file.mimes'    => 'Format berkas jawaban harus berupa PDF, DOCX, DOC, atau ZIP.',
+            'assignment_file.max'      => 'Ukuran berkas jawaban maksimal 10 MB.',
+        ]);
+
+        $userId = $request->user()?->id;
+        $file = $request->file('assignment_file');
+        $originalName = $file->getClientOriginalName();
+        $path = $file->store("assignments/{$userId}", 'public');
+
+        $postTest = PostTest::where('course_section_id', $sectionId)->first();
+        if ($postTest && $userId) {
+            \Modules\LMS\Models\PostTestResult::updateOrCreate(
+                [
+                    'post_test_id' => $postTest->id,
+                    'user_id'      => $userId,
+                ],
+                [
+                    'file_path'    => $path,
+                    'file_name'    => $originalName,
+                    'notes'        => $request->input('notes'),
+                    'status'       => 'submitted',
+                    'is_passed'    => true,
+                    'score'        => 100,
+                    'completed_at' => now(),
+                ]
+            );
+        }
+
+        ToastMagic::success('Berkas tugas evaluasi berhasil dikumpulkan!');
+        return redirect()->back();
+    }
+
+    public function submitEssay(Request $request, string $slug, string $sectionId): RedirectResponse
+    {
+        $request->validate([
+            'essay_answers'   => 'required|array|min:1',
+            'essay_answers.*' => 'required|string|min:5',
+        ], [
+            'essay_answers.required'   => 'Harap isi seluruh jawaban uraian.',
+            'essay_answers.*.required' => 'Setiap soal uraian wajib dijawab.',
+            'essay_answers.*.min'      => 'Jawaban uraian minimal 5 karakter.',
+        ]);
+
+        $userId = $request->user()?->id;
+        $postTest = PostTest::where('course_section_id', $sectionId)->first();
+        if ($postTest && $userId) {
+            \Modules\LMS\Models\PostTestResult::updateOrCreate(
+                [
+                    'post_test_id' => $postTest->id,
+                    'user_id'      => $userId,
+                ],
+                [
+                    'answers'      => $request->input('essay_answers'),
+                    'status'       => 'submitted',
+                    'is_passed'    => true,
+                    'score'        => 85,
+                    'completed_at' => now(),
+                ]
+            );
+
+            $course = \Modules\LMS\Models\Course::where('slug', $slug)->first();
+            if ($course) {
+                $newProgress = $this->courseService->calculateDynamicProgress($course, $userId);
+                DB::table('course_student')
+                    ->where('course_id', $course->id)
+                    ->where('user_id', $userId)
+                    ->update([
+                        'progress' => $newProgress,
+                        'status'   => $newProgress >= 100 ? 'completed' : 'in_progress',
+                    ]);
+            }
+        }
+
+        ToastMagic::success('Jawaban uraian evaluasi berhasil dikirim dan menunggu penilaian pengajar!');
+        return redirect()->back();
     }
 
     public function uploadZoomProof(Request $request, string $slug, string $sectionId): RedirectResponse
@@ -469,7 +565,98 @@ class CourseController extends Controller
             return redirect()->route('user.course.my-course.detail', $slug);
         }
 
-        $result = $this->postTestService->submitStudentTest($postTest, $slug, $request->user()->id, $request->input('answers', []));
+        $userId = $request->user()->id;
+
+        // 1. Submit Tipe Upload File / Penugasan Berkas
+        if ($postTest->is_file_upload || $request->hasFile('assignment_file')) {
+            $request->validate([
+                'assignment_file' => 'required|file|mimes:pdf,docx,doc,zip,rar,jpg,png|max:10240',
+                'notes'           => 'nullable|string|max:500',
+            ], [
+                'assignment_file.required' => 'Harap pilih berkas jawaban tugas yang ingin diunggah.',
+                'assignment_file.mimes'    => 'Format berkas jawaban harus berupa PDF, DOCX, DOC, atau ZIP.',
+                'assignment_file.max'      => 'Ukuran berkas jawaban maksimal 10 MB.',
+            ]);
+
+            $file = $request->file('assignment_file');
+            $originalName = $file->getClientOriginalName();
+            $path = $file->store("assignments/{$userId}", 'public');
+
+            \Modules\LMS\Models\PostTestResult::updateOrCreate(
+                [
+                    'post_test_id' => $postTest->id,
+                    'user_id'      => $userId,
+                ],
+                [
+                    'file_path'    => $path,
+                    'file_name'    => $originalName,
+                    'notes'        => $request->input('notes'),
+                    'status'       => 'submitted',
+                    'is_passed'    => true,
+                    'score'        => 100,
+                    'completed_at' => now(),
+                ]
+            );
+
+            $course = \Modules\LMS\Models\Course::where('slug', $slug)->first();
+            if ($course) {
+                $newProgress = $this->courseService->calculateDynamicProgress($course, $userId);
+                DB::table('course_student')
+                    ->where('course_id', $course->id)
+                    ->where('user_id', $userId)
+                    ->update([
+                        'progress' => $newProgress,
+                        'status'   => $newProgress >= 100 ? 'completed' : 'in_progress',
+                    ]);
+            }
+
+            ToastMagic::success('Berkas tugas evaluasi berhasil dikumpulkan!');
+            return redirect()->route('user.course.test.show', ['slug' => $slug, 'postTestId' => $postTest->id]);
+        }
+
+        // 2. Submit Tipe Uraian / Essay
+        if ($postTest->is_essay || $request->has('essay_answers')) {
+            $request->validate([
+                'essay_answers'   => 'required|array|min:1',
+                'essay_answers.*' => 'required|string|min:5',
+            ], [
+                'essay_answers.required'   => 'Harap isi seluruh jawaban uraian.',
+                'essay_answers.*.required' => 'Setiap soal uraian wajib dijawab.',
+                'essay_answers.*.min'      => 'Jawaban uraian minimal 5 karakter.',
+            ]);
+
+            \Modules\LMS\Models\PostTestResult::updateOrCreate(
+                [
+                    'post_test_id' => $postTest->id,
+                    'user_id'      => $userId,
+                ],
+                [
+                    'answers'      => $request->input('essay_answers'),
+                    'status'       => 'submitted',
+                    'is_passed'    => true,
+                    'score'        => 85,
+                    'completed_at' => now(),
+                ]
+            );
+
+            $course = \Modules\LMS\Models\Course::where('slug', $slug)->first();
+            if ($course) {
+                $newProgress = $this->courseService->calculateDynamicProgress($course, $userId);
+                DB::table('course_student')
+                    ->where('course_id', $course->id)
+                    ->where('user_id', $userId)
+                    ->update([
+                        'progress' => $newProgress,
+                        'status'   => $newProgress >= 100 ? 'completed' : 'in_progress',
+                    ]);
+            }
+
+            ToastMagic::success('Jawaban uraian evaluasi berhasil dikirim dan menunggu penilaian pengajar!');
+            return redirect()->route('user.course.test.show', ['slug' => $slug, 'postTestId' => $postTest->id]);
+        }
+
+        // 3. Submit Tipe CBT Pilihan Ganda Standar
+        $result = $this->postTestService->submitStudentTest($postTest, $slug, $userId, $request->input('answers', []));
 
         if (!$result['has_questions']) {
             ToastMagic::error($result['message']);
@@ -503,11 +690,28 @@ class CourseController extends Controller
             return redirect()->route('user.course.my-course.detail', $slug);
         }
 
+        $userId = $request->user()?->id;
+        $evalResult = null;
+        if ($userId) {
+            $evalResult = \Modules\LMS\Models\PostTestResult::where('post_test_id', $postTest->id)
+                ->where('user_id', $userId)
+                ->first();
+        }
+
+        // Tentukan tipe evaluasi: 'essay' / 'uraian', 'file_upload' / 'upload', atau 'multiple_choice' / 'pilgan'
+        $evalType = match ($postTest->type) {
+            'essay'       => 'uraian',
+            'file_upload' => 'upload',
+            default       => 'pilgan',
+        };
+
         return view('lms::user.course.test-show', [
-            'course'   => $resultData['data'] ?? null,
-            'slug'     => $slug,
-            'postTest' => $postTest,
-            'result'   => $this->postTestService->getStudentTestResult($request->user()->id, $postTestId, (bool) $request->query('retake')),
+            'course'     => $resultData['data'] ?? null,
+            'slug'       => $slug,
+            'postTest'   => $postTest,
+            'evalResult' => $evalResult,
+            'evalType'   => $evalType,
+            'result'     => $postTest->is_multiple_choice ? $this->postTestService->getStudentTestResult($userId, $postTestId, (bool) $request->query('retake')) : null,
         ]);
     }
 }

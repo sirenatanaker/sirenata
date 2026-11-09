@@ -15,7 +15,7 @@
         $sectionContents = data_get($section, 'section_contents', []) ?: data_get($section, 'contents', []);
         $totalCount = count($sectionContents);
         $completedCount = data_get($section, 'completed_count', 0);
-        $postTestBab = data_get($section, 'post_test_bab');
+        $postTestBab = $postTestBab ?? (data_get($section, 'post_test_bab') ?: \Modules\LMS\Models\PostTest::where('course_section_id', $sectionId)->first());
         $isPostTestBabCompleted = data_get($section, 'is_post_test_bab_completed', false);
         $isContentCompleted = data_get($section, 'is_content_completed', false);
         $isSectionCompleted = data_get($section, 'is_section_completed', false);
@@ -93,7 +93,16 @@
                 $isMateriDone = $totalCount > 0 ? ($completedContentsCount >= $totalCount) : (bool)$isContentCompleted;
                 $isZoomDone = (bool)$isZoomAttended;
                 $isBuktiDone = (bool)($zoomProof && ($zoomProof->file_path || $zoomProof->notes));
-                $isEvaluasiDone = (bool)$isPostTestBabCompleted;
+
+                $currentEvalType = match ($postTestBab?->type) {
+                    'essay'       => 'uraian',
+                    'file_upload' => 'upload',
+                    default       => ($sectionIndex % 2 === 0 ? 'uraian' : 'upload'),
+                };
+                $isAssignmentDone = (bool) ($evalResult && ($evalResult->file_path || $evalResult->status === 'submitted' || $evalResult->completed_at));
+                $isEssayDone = (bool) ($evalResult && ($evalResult->answers || $evalResult->status === 'submitted' || $evalResult->completed_at));
+
+                $isEvaluasiDone = (bool) ($isPostTestBabCompleted || ($evalResult && $evalResult->completed_at));
 
                 $now = now();
                 $zoomStart = $activeBimtek?->zoom_scheduled_at ?? $activeBimtek?->start_date;
@@ -461,7 +470,7 @@
                 </div>
                 @endif
 
-                {{-- 4. CARD EVALUASI HARIAN / MODUL (DESAIN SEPERTI EVALUASI AKHIR & FLEKSIBEL) --}}
+                {{-- 4. CARD EVALUASI HARIAN / MODUL (MENDUKUNG PILGAN, URAIAN, & UPLOAD FILE SOAL-JAWABAN) --}}
                 @php
                     $postTestQuestionsCount = $postTestBab ? data_get($postTestBab, 'questions', collect())->count() : 0;
                     $hasPostTestQuestions = $postTestQuestionsCount > 0;
@@ -469,16 +478,16 @@
                     $postTestTitle = data_get($postTestBab, 'title', ($isBimtekEvent ? 'Evaluasi Hari ke-' : 'Evaluasi Modul ') . ($sectionIndex + 1) . ': ' . $sectionName);
                 @endphp
 
-                <div id="evaluasi-modul" class="scroll-mt-6 rounded-md border border-slate-200 bg-slate-50/40 p-4 sm:px-6 sm:pt-6 sm:pb-0 lg:px-7 lg:pt-7 lg:pb-0 shadow-2xs transition-all relative overflow-hidden">
+                <div id="evaluasi-modul" class="scroll-mt-6 rounded-md border border-slate-200 bg-slate-50/40 p-4 sm:px-6 sm:py-5 lg:px-7 lg:py-6 shadow-2xs transition-all relative overflow-hidden">
                     <div class="flex flex-row items-end justify-between gap-6 lg:gap-8">
                         {{-- Kolom Kiri: Informasi Evaluasi & Aksi --}}
-                        <div class="flex-1 min-w-0 sm:py-1 pb-4 sm:pb-6 lg:pb-7 space-y-4">
+                        <div class="flex-1 min-w-0 sm:py-1 space-y-4">
                             <div>
                                 <div class="flex items-center gap-2 mb-1">
                                     <span class="text-xs font-bold text-[#13416B]">
                                         {{ $isBimtekEvent ? 'Evaluasi & Penugasan Hari ke-' . ($sectionIndex + 1) : 'Evaluasi Modul ' . ($sectionIndex + 1) }}
                                     </span>
-                                    @if ($isPostTestBabCompleted)
+                                    @if ($isEvaluasiDone)
                                         <span class="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded">
                                             <i class="fas fa-check-circle text-xs text-emerald-600"></i> Selesai
                                         </span>
@@ -486,78 +495,253 @@
                                 </div>
 
                                 <h3 class="text-base sm:text-lg lg:text-xl font-bold text-slate-800 leading-snug max-w-full lg:max-w-[85%]">
-                                    {{ $postTestTitle }}
+                                    @if ($currentEvalType === 'uraian')
+                                        {{ $isBimtekEvent ? 'Evaluasi Uraian Hari ke-' . ($sectionIndex + 1) : 'Evaluasi Uraian Modul ' . ($sectionIndex + 1) }}: {{ $sectionName }}
+                                    @elseif ($currentEvalType === 'upload')
+                                        {{ $isBimtekEvent ? 'Penugasan Berkas Hari ke-' . ($sectionIndex + 1) : 'Penugasan Berkas Modul ' . ($sectionIndex + 1) }}: {{ $sectionName }}
+                                    @else
+                                        {{ $postTestTitle }}
+                                    @endif
                                 </h3>
 
                                 <p class="text-sm sm:text-[15px] text-slate-700 mt-1.5 leading-relaxed max-w-full lg:max-w-[90%]">
-                                    @if ($hasPostTestQuestions)
-                                        Selesaikan evaluasi {{ $isBimtekEvent ? 'hari ini' : 'modul ini' }} untuk mengukur pemahaman dan capaian pembelajaran Anda.
-                                    @elseif ($adminDriveLink)
-                                        Akses berkas penugasan dan kumpulkan lembar tugas Anda melalui folder Google Drive panitia di bawah.
+                                    @if ($currentEvalType === 'uraian')
+                                        Jawab pertanyaan studi kasus dan pemahaman konsep secara mendalam melalui lembar evaluasi uraian.
+                                    @elseif ($currentEvalType === 'upload')
+                                        Unduh berkas soal dari penyelenggara, kerjakan sesuai panduan, lalu unggah dokumen jawaban Anda di bawah ini.
                                     @else
-                                        Selesaikan evaluasi atau penugasan yang disiapkan oleh instruktur untuk modul ini.
+                                        Ujian evaluasi materi pada {{ $isBimtekEvent ? 'hari ini' : 'modul ini' }} untuk menguji pemahaman dan capaian pembelajaran Anda.
                                     @endif
                                 </p>
 
-                                {{-- Badges Spesifikasi Evaluasi (Pilihan Ganda / Uraian / Tugas Drive) --}}
+                                {{-- Badges Spesifikasi Sesuai Tipe Evaluasi --}}
                                 <div class="mt-3 flex flex-wrap items-center gap-2.5 sm:gap-3">
-                                    @if ($hasPostTestQuestions)
+                                    @if ($currentEvalType === 'uraian')
                                         <span class="text-xs sm:text-sm font-semibold text-white bg-[#547996] px-3 py-1.5 rounded-md border border-[#446680] flex items-center gap-1.5 shadow-xs">
-                                            <i class="fas fa-list-ol text-xs text-white"></i>
-                                            {{ $postTestQuestionsCount }} Soal Pilihan Ganda
+                                            <i class="fas fa-feather-alt text-xs text-white"></i>
+                                            {{ $postTestQuestionsCount ?: 2 }} Soal Uraian / Esai
                                         </span>
                                         <span class="text-xs sm:text-sm font-semibold text-white bg-[#547996] px-3 py-1.5 rounded-md border border-[#446680] flex items-center gap-1.5 shadow-xs">
-                                            <i class="fas fa-stopwatch text-xs text-white"></i>
-                                            {{ data_get($postTestBab, 'duration', 0) }} Menit
+                                            <i class="fas fa-user-check text-xs text-white"></i>
+                                            Penilaian Instruktur
+                                        </span>
+                                    @elseif ($currentEvalType === 'upload')
+                                        <span class="text-xs sm:text-sm font-semibold text-white bg-[#547996] px-3 py-1.5 rounded-md border border-[#446680] flex items-center gap-1.5 shadow-xs">
+                                            <i class="fas fa-file-upload text-xs text-white"></i>
+                                            Penugasan Berkas Mandiri
                                         </span>
                                         <span class="text-xs sm:text-sm font-semibold text-white bg-[#547996] px-3 py-1.5 rounded-md border border-[#446680] flex items-center gap-1.5 shadow-xs">
-                                            <i class="fas fa-bullseye text-xs text-white"></i>
-                                            KKM: {{ data_get($postTestBab, 'passing_score', 0) }}
-                                        </span>
-                                    @elseif ($adminDriveLink)
-                                        <span class="text-xs sm:text-sm font-semibold text-white bg-[#547996] px-3 py-1.5 rounded-md border border-[#446680] flex items-center gap-1.5 shadow-xs">
-                                            <i class="fab fa-google-drive text-xs text-white"></i>
-                                            Tugas Google Drive Penyelenggara
+                                            <i class="fas fa-cloud-download-alt text-xs text-white"></i>
+                                            Unduh Soal & Upload Jawaban
                                         </span>
                                         <span class="text-xs sm:text-sm font-semibold text-white bg-[#547996] px-3 py-1.5 rounded-md border border-[#446680] flex items-center gap-1.5 shadow-xs">
-                                            <i class="fas fa-file-alt text-xs text-white"></i>
-                                            Penugasan Berkas / Uraian
+                                            <i class="fas fa-file-pdf text-xs text-white"></i>
+                                            PDF / DOCX / ZIP (Maks. 10 MB)
                                         </span>
                                     @else
                                         <span class="text-xs sm:text-sm font-semibold text-white bg-[#547996] px-3 py-1.5 rounded-md border border-[#446680] flex items-center gap-1.5 shadow-xs">
-                                            <i class="fas fa-file-signature text-xs text-white"></i>
-                                            Evaluasi & Penugasan Modul
+                                            <i class="fas fa-question-circle text-xs text-white"></i>
+                                            {{ $postTestQuestionsCount }} Butir Pilihan Ganda
+                                        </span>
+                                        <span class="text-xs sm:text-sm font-semibold text-white bg-[#547996] px-3 py-1.5 rounded-md border border-[#446680] flex items-center gap-1.5 shadow-xs">
+                                            <i class="fas fa-clock text-xs text-white"></i>
+                                            {{ data_get($postTestBab, 'duration', 15) }} Menit
+                                        </span>
+                                        <span class="text-xs sm:text-sm font-semibold text-white bg-[#547996] px-3 py-1.5 rounded-md border border-[#446680] flex items-center gap-1.5 shadow-xs">
+                                            <i class="fas fa-award text-xs text-white"></i>
+                                            KKM: {{ data_get($postTestBab, 'passing_score', 0) }}
                                         </span>
                                     @endif
                                 </div>
                             </div>
 
-                            {{-- Tautan Folder Google Drive Penyelenggara untuk Penugasan --}}
-                            @if ($adminDriveLink)
-                                <div class="p-4 rounded-md bg-white border border-blue-200/90 shadow-2xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3.5">
+                            {{-- ======================================================== --}}
+                            {{-- TAMPILAN KHUSUS TIPE 3: UPLOAD FILE PENUGASAN BERKAS    --}}
+                            {{-- (Admin Upload File Soal -> User Download & Upload Tugas) --}}
+                            {{-- ======================================================== --}}
+                            @if ($currentEvalType === 'upload')
+                                @php
+                                    $adminFileName = data_get($postTestBab, 'admin_file_name', 'Soal_Tugas_Hari_' . ($sectionIndex + 1) . '.pdf');
+                                    $adminFileSize = data_get($postTestBab, 'admin_file_size', '2.4 MB');
+                                    $adminFileUrl = data_get($postTestBab, 'admin_file_url') ?: asset('storage/' . data_get($postTestBab, 'admin_file_path', 'assignments/soal/Soal_Tugas_Studi_Kasus.pdf'));
+                                    $instructions = data_get($postTestBab, 'instructions', 'Disediakan oleh Panitia Penyelenggara sebagai panduan pengerjaan studi kasus dan lembar kerja modul.');
+                                @endphp
+                                <div class="space-y-3.5">
+                                    {{-- 1. Berkas Soal dari Admin/Penyelenggara --}}
+                                    <div class="p-4 rounded-md bg-blue-50/70 border border-blue-200/90 shadow-2xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3.5">
+                                        <div class="flex items-center gap-3">
+                                            <div class="w-11 h-11 rounded-md bg-white text-red-500 border border-blue-200 flex items-center justify-center shrink-0 shadow-2xs">
+                                                <i class="fas fa-file-pdf text-2xl"></i>
+                                            </div>
+                                            <div class="space-y-0.5">
+                                                <div class="flex items-center gap-2 flex-wrap">
+                                                    <span class="text-[10px] font-bold uppercase tracking-wider text-blue-800 bg-blue-100 px-2 py-0.5 rounded">
+                                                        Berkas Soal dari Admin
+                                                    </span>
+                                                    <span class="text-[11px] text-slate-500 font-medium">{{ $adminFileSize }} • PDF Document</span>
+                                                </div>
+                                                <p class="text-xs sm:text-sm font-bold text-slate-800">
+                                                    {{ $adminFileName }}
+                                                </p>
+                                                <p class="text-xs text-slate-600">
+                                                    {{ $instructions }}
+                                                </p>
+                                            </div>
+                                        </div>
+
+                                        <a href="{{ $adminFileUrl }}" download="{{ $adminFileName }}" target="_blank"
+                                            class="inline-flex items-center gap-2 px-4 py-2.5 rounded-md text-xs sm:text-sm font-bold text-white bg-[#0B5CFF] hover:bg-blue-700 transition-all shadow-2xs shrink-0 whitespace-nowrap cursor-pointer">
+                                            <i class="fas fa-download text-xs"></i>
+                                            <span>Unduh Berkas Soal</span>
+                                        </a>
+                                    </div>
+
+                                    {{-- 2. Formulir / Status Penyerahan Berkas Jawaban dari User --}}
+                                    <div x-data="{ isReuploading: false }">
+                                        @if ($isAssignmentDone && (!isset($errors) || !$errors->any()))
+                                            <div x-show="!isReuploading" class="p-4 rounded-md bg-white border border-emerald-200/90 shadow-2xs space-y-3">
+                                                <div class="flex flex-wrap items-center justify-between gap-3">
+                                                    <div class="flex items-center gap-3">
+                                                        <div class="w-10 h-10 rounded bg-emerald-50 text-emerald-600 flex items-center justify-center border border-emerald-100 shrink-0">
+                                                            <i class="fas fa-check-circle text-xl"></i>
+                                                        </div>
+                                                        <div>
+                                                            <div class="flex items-center gap-2">
+                                                                <p class="text-xs sm:text-sm font-bold text-slate-800">Tugas Berhasil Dikumpulkan</p>
+                                                                <span class="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">Diserahkan</span>
+                                                            </div>
+                                                            <p class="text-xs text-slate-600 mt-0.5">
+                                                                Berkas: <span class="font-semibold text-slate-800">{{ $evalResult?->file_name ?? 'Dokumen_Tugas.pdf' }}</span>
+                                                                • {{ $evalResult?->completed_at ? $evalResult->completed_at->translatedFormat('d M Y, H:i') . ' WIB' : 'Hari ini' }}
+                                                            </p>
+                                                            @if (!empty($evalResult?->notes))
+                                                                <p class="text-xs text-slate-500 italic mt-0.5">"{{ $evalResult->notes }}"</p>
+                                                            @endif
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="flex items-center gap-2">
+                                                        @if (!empty($evalResult?->file_url))
+                                                            <a href="{{ $evalResult->file_url }}" target="_blank"
+                                                                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-bold text-[#13416B] bg-slate-50 hover:bg-slate-100 border border-slate-200 shadow-2xs">
+                                                                <i class="fas fa-eye text-xs"></i>
+                                                                <span>Lihat Berkas Saya</span>
+                                                            </a>
+                                                        @endif
+                                                        <button type="button" @click="isReuploading = true"
+                                                            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-bold text-slate-600 hover:bg-slate-100 border border-slate-200 cursor-pointer">
+                                                            <i class="fas fa-redo text-xs"></i>
+                                                            <span>Unggah Ulang (Revisi)</span>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        @endif
+
+                                        <div x-show="{{ ($isAssignmentDone && (!isset($errors) || !$errors->any())) ? 'isReuploading' : 'true' }}"
+                                            class="{{ ($isAssignmentDone && (!isset($errors) || !$errors->any())) ? 'pt-2' : '' }}">
+                                            <form action="{{ route('user.course.section.submit-assignment', ['slug' => $courseSlug, 'sectionId' => $sectionId]) }}"
+                                                method="POST"
+                                                enctype="multipart/form-data"
+                                                class="p-4 rounded-md bg-white border border-slate-200 shadow-2xs space-y-3">
+                                                @csrf
+                                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                                    <div>
+                                                        <label class="block text-xs font-bold text-slate-700 mb-1.5">
+                                                            Unggah Berkas Jawaban / Laporan Tugas <span class="text-red-500">*</span>
+                                                        </label>
+                                                        <input type="file"
+                                                            name="assignment_file"
+                                                            required
+                                                            accept=".pdf,.docx,.doc,.zip,.rar"
+                                                            class="block w-full text-xs text-slate-500 file:mr-2 file:py-2 file:px-3 file:rounded file:border-0 file:text-xs file:font-bold file:bg-[#13416B] file:text-white hover:file:bg-[#0f3354] file:cursor-pointer border border-slate-200 rounded bg-slate-50 p-1" />
+                                                        <span class="block text-[11px] text-slate-400 mt-1">Format: PDF, DOCX, ZIP (Maks. 10 MB)</span>
+                                                    </div>
+                                                    <div>
+                                                        <label class="block text-xs font-bold text-slate-700 mb-1.5">
+                                                            Catatan Penyerahan Tugas (Opsional)
+                                                        </label>
+                                                        <input type="text"
+                                                            name="notes"
+                                                            value="{{ old('notes', $evalResult?->notes ?? '') }}"
+                                                            placeholder="Contoh: Berkas lembar kerja tugas studi kasus kelompok/peserta"
+                                                            class="w-full px-3 py-2 text-xs rounded border border-slate-300 text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-[#13416B]" />
+                                                    </div>
+                                                </div>
+
+                                                <div class="flex items-center justify-between pt-2 border-t border-slate-100 flex-wrap gap-2">
+                                                    <span class="text-xs text-slate-500">
+                                                        <i class="fas fa-info-circle text-blue-500 mr-1"></i> Pastikan dokumen sesuai instruksi soal admin sebelum mengirim.
+                                                    </span>
+                                                    <div class="flex items-center gap-2">
+                                                        @if ($isAssignmentDone)
+                                                            <button type="button" @click="isReuploading = false"
+                                                                class="px-3.5 py-1.5 rounded text-xs font-bold text-slate-600 hover:bg-slate-100 border border-slate-200 cursor-pointer">
+                                                                Batal
+                                                            </button>
+                                                        @endif
+                                                        <button type="submit"
+                                                            class="inline-flex items-center gap-1.5 px-4 py-2 rounded text-xs font-bold text-white bg-[#13416B] hover:bg-[#0f3354] shadow-xs cursor-pointer">
+                                                            <i class="fas fa-paper-plane text-xs"></i>
+                                                            <span>Kirim Berkas Jawaban</span>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            @endif
+
+                            {{-- Folder Drive Tambahan dari Penyelenggara (Jika Dikonfigurasi) --}}
+                            @if ($adminDriveLink && $currentEvalType !== 'upload')
+                                <div class="p-3.5 rounded-md bg-white border border-blue-200/90 shadow-2xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                                     <div class="flex items-center gap-3">
-                                        <div class="w-10 h-10 rounded-md bg-blue-50 text-[#0B5CFF] border border-blue-200 flex items-center justify-center shrink-0 shadow-2xs">
-                                            <i class="fab fa-google-drive text-xl"></i>
+                                        <div class="w-9 h-9 rounded-md bg-blue-50 text-[#0B5CFF] border border-blue-200 flex items-center justify-center shrink-0 shadow-2xs">
+                                            <i class="fab fa-google-drive text-lg"></i>
                                         </div>
                                         <div>
                                             <p class="text-xs sm:text-sm font-bold text-slate-800">Folder Google Drive Tugas dari Penyelenggara</p>
-                                            <p class="text-xs text-slate-600 mt-0.5">Kumpulkan berkas lembar tugas Anda ke folder Google Drive panitia berikut.</p>
+                                            <p class="text-xs text-slate-600 mt-0.5">Akses folder Drive panitia untuk unduh lembar kerja atau kumpulkan berkas tambahan.</p>
                                         </div>
                                     </div>
 
                                     <a href="{{ $adminDriveLink }}" target="_blank" rel="noopener noreferrer"
-                                        class="inline-flex items-center gap-2 px-4 py-2.5 rounded-md text-xs sm:text-sm font-bold text-white bg-[#0B5CFF] hover:bg-blue-700 transition-all shadow-2xs shrink-0 whitespace-nowrap">
+                                        class="inline-flex items-center gap-2 px-3.5 py-2 rounded-md text-xs font-bold text-white bg-[#0B5CFF] hover:bg-blue-700 transition-all shadow-2xs shrink-0 whitespace-nowrap">
                                         <i class="fab fa-google-drive"></i>
-                                        <span>Buka Folder Drive Tugas</span>
+                                        <span>Buka Folder Drive</span>
                                         <i class="fas fa-external-link-alt text-[10px] ml-0.5"></i>
                                     </a>
                                 </div>
                             @endif
 
-                            {{-- Tombol Aksi untuk Membuka Halaman Evaluasi --}}
-                            @if ($postTestBab)
+                            {{-- Tombol Aksi untuk Membuka Lembar Evaluasi / Ujian (Konsep Sama untuk Uraian & Pilgan) --}}
+                            @if ($postTestBab && $currentEvalType === 'uraian')
                                 <div class="pt-1 flex flex-wrap items-center gap-3">
-                                    @if ($isPostTestBabCompleted)
+                                    @if ($isEvaluasiDone)
+                                        <a href="{{ route('user.course.test.show', ['slug' => $courseSlug, 'postTestId' => $postTestBab->id]) }}"
+                                            class="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-md text-xs sm:text-sm font-bold bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 transition-all shadow-xs">
+                                            <i class="fas fa-eye text-xs"></i>
+                                            <span>Lihat Lembar Jawaban Uraian</span>
+                                        </a>
+                                    @elseif ($isPostTestBabLocked)
+                                        <button type="button" disabled
+                                            title="Tuntaskan semua materi pada modul ini terlebih dahulu"
+                                            class="inline-flex items-center justify-center gap-1.5 px-5 py-2.5 rounded-md text-xs sm:text-sm font-bold bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed select-none">
+                                            <i class="fas fa-lock text-xs"></i>
+                                            <span>Evaluasi Terkunci</span>
+                                        </button>
+                                    @else
+                                        <a href="{{ route('user.course.test.show', ['slug' => $courseSlug, 'postTestId' => $postTestBab->id]) }}"
+                                            class="inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-md text-xs sm:text-sm font-bold bg-[#13416B] hover:bg-[#0f3354] text-white shadow-sm transition-all">
+                                            <i class="fas fa-play text-xs"></i>
+                                            <span>Mulai Kerjakan Uraian</span>
+                                        </a>
+                                    @endif
+                                </div>
+                            @elseif ($postTestBab && $currentEvalType === 'pilgan')
+                                <div class="pt-1 flex flex-wrap items-center gap-3">
+                                    @if ($isEvaluasiDone)
                                         <a href="{{ route('user.course.test.show', ['slug' => $courseSlug, 'postTestId' => $postTestBab->id]) }}"
                                             class="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-md text-xs sm:text-sm font-bold bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 transition-all shadow-xs">
                                             <i class="fas fa-eye text-xs"></i>
@@ -582,10 +766,10 @@
                         </div>
 
                         {{-- Kolom Kanan: Ilustrasi Gambar nempel bawah --}}
-                        <div class="hidden sm:flex shrink-0 items-end justify-center self-end">
+                        <div class="hidden sm:flex sm:shrink-0 items-end justify-center self-end -mb-3.5 lg:-mb-4">
                             <img src="{{ asset('images/modul_ilustrasi.webp') }}"
                                 alt="Ilustrasi Evaluasi Modul"
-                                class="block sm:h-40 md:h-44 lg:h-48 xl:h-52 w-auto object-contain object-bottom select-none pointer-events-none" />
+                                class="sm:h-36 md:h-40 lg:h-44 w-auto object-contain object-bottom select-none pointer-events-none" />
                         </div>
                     </div>
                 </div>
@@ -710,7 +894,7 @@
                             </div>
                             <div class="min-w-0 flex-1">
                                 <p class="font-bold text-xs text-slate-800 group-hover:text-[#13416B] transition-colors leading-snug">
-                                    {{ $isBimtekEvent ? 'Evaluasi Hari ke-' . ($sectionIndex + 1) : 'Evaluasi Modul ' . ($sectionIndex + 1) }}
+                                    {{ $isBimtekEvent ? 'Evaluasi Hari ke-' . ($sectionIndex + 1) : 'Evaluasi Modul ' . ($sectionIndex + 1) }} ({{ $currentEvalType === 'uraian' ? 'Uraian' : ($currentEvalType === 'upload' ? 'Penugasan Berkas' : 'Pilihan Ganda') }})
                                 </p>
                                 <p class="text-[11px] {{ $isEvaluasiDone ? 'text-emerald-600 font-semibold' : 'text-slate-500' }} mt-0.5">
                                     {{ $isEvaluasiDone ? 'Selesai dikerjakan' : 'Belum selesai' }}
