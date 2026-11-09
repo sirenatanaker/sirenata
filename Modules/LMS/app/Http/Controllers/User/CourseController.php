@@ -170,17 +170,17 @@ class CourseController extends Controller
     public function uploadZoomProof(Request $request, string $slug, string $sectionId): RedirectResponse
     {
         $request->validate([
-            'proof_file' => 'nullable|file|mimes:jpeg,png,jpg,pdf,webp|max:5120',
+            'proof_file' => 'nullable|file|mimes:jpeg,png,jpg,pdf,webp,docx,doc,zip,rar|max:10240',
             'drive_link' => 'nullable|url|max:1000',
             'notes'      => 'nullable|string|max:500',
         ], [
-            'proof_file.mimes' => 'Format berkas bukti harus berupa JPG, PNG, WEBP, atau PDF.',
-            'proof_file.max'   => 'Ukuran berkas bukti maksimal 5 MB.',
+            'proof_file.mimes' => 'Format berkas harus berupa JPG, PNG, WEBP, PDF, DOCX, atau ZIP.',
+            'proof_file.max'   => 'Ukuran berkas maksimal 10 MB.',
             'drive_link.url'   => 'Format tautan Google Drive harus berupa URL yang valid (diawali https://).',
         ]);
 
-        if (!$request->hasFile('proof_file') && empty(trim((string) $request->input('drive_link')))) {
-            ToastMagic::error('Harap unggah berkas bukti kehadiran atau cantumkan tautan Google Drive.');
+        if (!$request->hasFile('proof_file') && empty(trim((string) $request->input('drive_link'))) && empty(trim((string) $request->input('notes')))) {
+            ToastMagic::error('Harap unggah berkas bukti atau isi keterangan konfirmasi.');
             return redirect()->back();
         }
 
@@ -210,7 +210,7 @@ class CourseController extends Controller
         $zoomProof->submitted_at = now();
         $zoomProof->save();
 
-        ToastMagic::success('Bukti kehadiran Sesi Live Zoom berhasil disimpan!');
+        ToastMagic::success('Bukti presensi / penugasan berhasil disimpan!');
         return redirect()->back();
     }
 
