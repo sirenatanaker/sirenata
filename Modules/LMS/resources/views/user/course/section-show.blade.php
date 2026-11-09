@@ -162,7 +162,7 @@
                     </div>
                 </div>
 
-                {{-- 2. CARD SESI LIVE ZOOM DILENGKAPI BUKTI PENDUKUNG GAMBAR --}}
+                {{-- 2. CARD SESI LIVE ZOOM (DILENGKAPI PRESENSI GOOGLE DRIVE & FOTO SCREENSHOT) --}}
                 @if ($hasZoom)
                     @php
                         $isZoomAttendanceLocked = false;
@@ -242,45 +242,76 @@
                             </div>
                         </div>
 
-                        {{-- Bukti Pendukung Presensi (Unggah Gambar Screenshot Kehadiran Zoom) --}}
-                        <div class="mt-5 pt-4 border-t border-slate-200/80 space-y-3">
+                        {{-- Bukti Pendukung Presensi (Google Drive Penyelenggara & Upload Screenshot) --}}
+                        <div class="mt-5 pt-4 border-t border-slate-200/80 space-y-3.5">
                             <div class="flex items-center justify-between gap-3">
                                 <div class="flex items-center gap-2">
                                     <i class="fas fa-camera text-slate-600 text-xs sm:text-sm"></i>
-                                    <h4 class="text-xs sm:text-sm font-bold text-slate-800">Bukti Pendukung Presensi (Upload Gambar / Screenshot)</h4>
+                                    <h4 class="text-xs sm:text-sm font-bold text-slate-800">Bukti Pendukung Presensi (Google Drive Penyelenggara & Foto Screenshot)</h4>
                                 </div>
-                                @if ($zoomProof && $zoomProof->file_path)
+                                @if ($zoomProof && ($zoomProof->file_path || $zoomProof->notes))
                                     <span class="inline-flex items-center gap-1 text-[10px] sm:text-[11px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded">
-                                        <i class="fas fa-check-circle text-emerald-600"></i> Gambar Terunggah
+                                        <i class="fas fa-check-circle text-emerald-600"></i> Bukti Presensi Tersimpan
                                     </span>
                                 @endif
                             </div>
+
                             <p class="text-[11px] sm:text-xs text-slate-500">
-                                Unggah tangkapan layar (screenshot) ruang pertemuan daring atau foto kehadiran Anda sebagai bukti pendukung presensi tatap muka.
+                                Penyelenggara menyediakan folder Google Drive untuk pengumpulan bukti kehadiran tatap muka. Anda dapat mengunggah tangkapan layar (screenshot) sesi Zoom langsung ke folder Drive panitia tersebut atau mengunggah berkas foto di bawah.
                             </p>
 
-                            @if ($zoomProof && $zoomProof->file_path && !$errors->any())
+                            {{-- Banner Folder Google Drive Presensi dari Penyelenggara --}}
+                            @if ($adminDriveLink)
+                                <div class="p-3.5 rounded-md bg-white border border-blue-200/90 shadow-2xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-9 h-9 rounded-md bg-blue-50 text-[#0B5CFF] border border-blue-200 flex items-center justify-center shrink-0 shadow-2xs">
+                                            <i class="fab fa-google-drive text-lg"></i>
+                                        </div>
+                                        <div>
+                                            <p class="text-xs font-bold text-slate-800">Folder Google Drive Presensi Penyelenggara</p>
+                                            <p class="text-[11px] text-slate-500">Kumpulkan bukti foto/screenshot kehadiran sesi Zoom Anda ke folder Drive panitia berikut.</p>
+                                        </div>
+                                    </div>
+
+                                    <a href="{{ $adminDriveLink }}" target="_blank" rel="noopener noreferrer"
+                                        class="inline-flex items-center gap-2 px-3.5 py-2 rounded-md text-xs font-bold text-white bg-[#0B5CFF] hover:bg-blue-700 transition-all shadow-2xs shrink-0 whitespace-nowrap">
+                                        <i class="fab fa-google-drive"></i>
+                                        <span>Buka Drive Presensi</span>
+                                        <i class="fas fa-external-link-alt text-[10px] ml-0.5"></i>
+                                    </a>
+                                </div>
+                            @endif
+
+                            {{-- Form & Status Bukti Presensi --}}
+                            @if ($zoomProof && ($zoomProof->file_path || $zoomProof->notes) && !$errors->any())
                                 <div x-data="{ isEditingPhoto: false }" class="space-y-2">
                                     <div x-show="!isEditingPhoto" class="flex flex-wrap items-center justify-between gap-3 p-3.5 rounded-md bg-white border border-emerald-200/90 shadow-2xs">
                                         <div class="flex items-center gap-2.5">
                                             <div class="w-8 h-8 rounded bg-emerald-50 text-emerald-600 flex items-center justify-center border border-emerald-100 shrink-0">
-                                                <i class="fas fa-image text-sm"></i>
+                                                <i class="fas fa-check-circle text-sm"></i>
                                             </div>
                                             <div class="space-y-0.5">
-                                                <p class="text-xs font-bold text-slate-800">Foto Bukti Presensi Tersimpan</p>
-                                                <p class="text-[10px] text-slate-500">{{ $zoomProof->submitted_at ? $zoomProof->submitted_at->translatedFormat('d M Y, H:i') . ' WIB' : 'Tersimpan' }}</p>
+                                                <p class="text-xs font-bold text-slate-800">Bukti Presensi Telah Dikonfirmasi</p>
+                                                <p class="text-[10px] text-slate-500">
+                                                    {{ $zoomProof->submitted_at ? $zoomProof->submitted_at->translatedFormat('d M Y, H:i') . ' WIB' : 'Tersimpan' }}
+                                                    @if ($zoomProof->notes)
+                                                        • <span class="italic text-slate-600">"{{ $zoomProof->notes }}"</span>
+                                                    @endif
+                                                </p>
                                             </div>
                                         </div>
                                         <div class="flex items-center gap-2">
-                                            <a href="{{ $zoomProof->file_url }}" target="_blank" rel="noopener noreferrer"
-                                                class="inline-flex items-center gap-1 px-3 py-1.5 rounded text-xs font-bold text-[#13416B] bg-slate-50 hover:bg-slate-100 border border-slate-200 shadow-2xs">
-                                                <i class="fas fa-eye text-[11px]"></i>
-                                                <span>Lihat Foto</span>
-                                            </a>
+                                            @if ($zoomProof->file_path)
+                                                <a href="{{ $zoomProof->file_url }}" target="_blank" rel="noopener noreferrer"
+                                                    class="inline-flex items-center gap-1 px-3 py-1.5 rounded text-xs font-bold text-[#13416B] bg-slate-50 hover:bg-slate-100 border border-slate-200 shadow-2xs">
+                                                    <i class="fas fa-eye text-[11px]"></i>
+                                                    <span>Lihat Foto</span>
+                                                </a>
+                                            @endif
                                             <button type="button" @click="isEditingPhoto = true"
                                                 class="inline-flex items-center gap-1 px-3 py-1.5 rounded text-xs font-bold text-slate-600 hover:bg-slate-100 border border-slate-200">
                                                 <i class="fas fa-redo text-[11px]"></i>
-                                                <span>Ganti Foto</span>
+                                                <span>Perbarui Bukti</span>
                                             </button>
                                         </div>
                                     </div>
@@ -289,22 +320,38 @@
                                         <form action="{{ route('user.course.section.upload-zoom-proof', ['slug' => $courseSlug, 'sectionId' => $sectionId]) }}"
                                             method="POST"
                                             enctype="multipart/form-data"
-                                            class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
+                                            class="space-y-2.5 p-3 rounded-md bg-white border border-slate-200">
                                             @csrf
-                                            <input type="file"
-                                                name="proof_file"
-                                                required
-                                                accept=".jpg,.jpeg,.png,.webp"
-                                                class="block w-full text-xs text-slate-500 file:mr-3 file:py-1.5 file:px-3 file:rounded file:border-0 file:text-xs file:font-bold file:bg-[#13416B] file:text-white hover:file:bg-[#0f3354] file:cursor-pointer border border-slate-200 rounded-md bg-white p-1" />
-                                            <div class="flex items-center gap-2 shrink-0">
+                                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                                                <div>
+                                                    <label class="block text-[11px] font-bold text-slate-700 mb-1">
+                                                        Unggah Foto / Screenshot (Opsional)
+                                                    </label>
+                                                    <input type="file"
+                                                        name="proof_file"
+                                                        accept=".jpg,.jpeg,.png,.webp"
+                                                        class="block w-full text-xs text-slate-500 file:mr-2 file:py-1.5 file:px-3 file:rounded file:border-0 file:text-xs file:font-bold file:bg-[#13416B] file:text-white hover:file:bg-[#0f3354] file:cursor-pointer border border-slate-200 rounded bg-slate-50 p-1" />
+                                                </div>
+                                                <div>
+                                                    <label class="block text-[11px] font-bold text-slate-700 mb-1">
+                                                        Catatan Presensi / Nama Berkas di Drive Panitia
+                                                    </label>
+                                                    <input type="text"
+                                                        name="notes"
+                                                        value="{{ old('notes', $zoomProof->notes ?? '') }}"
+                                                        placeholder="Contoh: Bukti hadir diunggah ke Drive panitia nama Budi_Presensi.png"
+                                                        class="w-full px-3 py-1.5 text-xs rounded border border-slate-300 text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-[#13416B]" />
+                                                </div>
+                                            </div>
+                                            <div class="flex items-center justify-end gap-2 pt-1">
                                                 <button type="button" @click="isEditingPhoto = false"
                                                     class="px-3 py-1.5 rounded text-xs font-bold text-slate-600 hover:bg-slate-100 border border-slate-200">
                                                     Batal
                                                 </button>
                                                 <button type="submit"
                                                     class="inline-flex items-center gap-1.5 px-4 py-1.5 rounded text-xs font-bold text-white bg-[#13416B] hover:bg-[#0f3354] shadow-xs">
-                                                    <i class="fas fa-upload text-[11px]"></i>
-                                                    <span>Simpan Foto</span>
+                                                    <i class="fas fa-save text-[11px]"></i>
+                                                    <span>Simpan Bukti</span>
                                                 </button>
                                             </div>
                                         </form>
@@ -314,20 +361,37 @@
                                 <form action="{{ route('user.course.section.upload-zoom-proof', ['slug' => $courseSlug, 'sectionId' => $sectionId]) }}"
                                     method="POST"
                                     enctype="multipart/form-data"
-                                    class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 pt-1">
+                                    class="space-y-2.5 p-3 rounded-md bg-white border border-slate-200">
                                     @csrf
-                                    <input type="file"
-                                        name="proof_file"
-                                        required
-                                        accept=".jpg,.jpeg,.png,.webp"
-                                        class="block w-full text-xs text-slate-500 file:mr-3 file:py-1.5 file:px-3 file:rounded file:border-0 file:text-xs file:font-bold file:bg-[#13416B] file:text-white hover:file:bg-[#0f3354] file:cursor-pointer border border-slate-200 rounded-md bg-white p-1" />
-                                    <button type="submit"
-                                        class="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded text-xs font-bold text-white bg-[#13416B] hover:bg-[#0f3354] shadow-xs shrink-0">
-                                        <i class="fas fa-upload text-[11px]"></i>
-                                        <span>Unggah Bukti Gambar</span>
-                                    </button>
+                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                                        <div>
+                                            <label class="block text-[11px] font-bold text-slate-700 mb-1">
+                                                Unggah Foto / Screenshot (Opsional)
+                                            </label>
+                                            <input type="file"
+                                                name="proof_file"
+                                                accept=".jpg,.jpeg,.png,.webp"
+                                                class="block w-full text-xs text-slate-500 file:mr-2 file:py-1.5 file:px-3 file:rounded file:border-0 file:text-xs file:font-bold file:bg-[#13416B] file:text-white hover:file:bg-[#0f3354] file:cursor-pointer border border-slate-200 rounded bg-slate-50 p-1" />
+                                        </div>
+                                        <div>
+                                            <label class="block text-[11px] font-bold text-slate-700 mb-1">
+                                                Catatan Presensi / Nama Berkas di Drive Panitia
+                                            </label>
+                                            <input type="text"
+                                                name="notes"
+                                                value="{{ old('notes', $zoomProof->notes ?? '') }}"
+                                                placeholder="Contoh: Bukti hadir diunggah ke Drive panitia nama Budi_Presensi.png"
+                                                class="w-full px-3 py-1.5 text-xs rounded border border-slate-300 text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-[#13416B]" />
+                                        </div>
+                                    </div>
+                                    <div class="flex justify-end pt-1">
+                                        <button type="submit"
+                                            class="inline-flex items-center gap-1.5 px-4 py-2 rounded text-xs font-bold text-white bg-[#13416B] hover:bg-[#0f3354] shadow-xs">
+                                            <i class="fas fa-check text-[11px]"></i>
+                                            <span>Konfirmasi Bukti Presensi</span>
+                                        </button>
+                                    </div>
                                 </form>
-                                <p class="text-[10px] text-slate-400 mt-1">Format gambar: JPG, PNG, atau WEBP (Maks. 5 MB).</p>
                             @endif
                         </div>
 
@@ -466,7 +530,7 @@
                                                 <i class="fab fa-google-drive text-xl"></i>
                                             </div>
                                             <div>
-                                                <p class="text-xs sm:text-sm font-bold text-slate-800">Folder Google Drive dari Penyelenggara</p>
+                                                <p class="text-xs sm:text-sm font-bold text-slate-800">Folder Google Drive Tugas dari Penyelenggara</p>
                                                 <p class="text-[11px] text-slate-500">Folder pengumpulan tugas telah disiapkan oleh panitia. Kumpulkan tugas Anda ke tautan Drive di bawah.</p>
                                             </div>
                                         </div>
@@ -475,7 +539,7 @@
                                             <a href="{{ $adminDriveLink }}" target="_blank" rel="noopener noreferrer"
                                                 class="inline-flex items-center gap-2 px-4 py-2 rounded-md text-xs font-bold text-white bg-[#0B5CFF] hover:bg-blue-700 transition-all shadow-2xs shrink-0 whitespace-nowrap">
                                                 <i class="fab fa-google-drive"></i>
-                                                <span>Buka Folder Drive Penyelenggara</span>
+                                                <span>Buka Folder Drive Tugas</span>
                                                 <i class="fas fa-external-link-alt text-[10px] ml-0.5"></i>
                                             </a>
                                         @endif
