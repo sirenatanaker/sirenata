@@ -102,19 +102,19 @@
             {{-- Seluruh Card Bagian Agenda di dalam Card Utama --}}
             <div class="mt-5 sm:mt-6 space-y-5 sm:space-y-6">
 
-                {{-- 1. CARD PEMBELAJARAN MANDIRI --}}
+                {{-- 1. CARD PEMBELAJARAN MANDIRI (DILENGKAPI TIMELINE BERUPA ANGKA) --}}
                 <div class="rounded-md border border-slate-200 bg-slate-50/40 p-4 sm:p-5 lg:p-6 shadow-2xs transition-all">
                     <div class="flex items-center justify-between pb-4 mb-4 border-b border-slate-200/80">
                         <div>
                             <h2 class="text-base sm:text-lg font-extrabold text-slate-800 leading-tight">Pembelajaran Mandiri</h2>
-                            <p class="text-[11px] sm:text-xs text-slate-500 mt-0.5">Pelajari materi secara berurutan dan tandai selesai</p>
+                            <p class="text-xs sm:text-sm text-slate-500 mt-0.5">Pelajari materi secara berurutan dan tandai selesai</p>
                         </div>
                         <span class="text-xs font-bold text-slate-600 bg-white border border-slate-200 px-2.5 py-1 rounded-md shadow-2xs">
                             {{ $totalCount }} Materi
                         </span>
                     </div>
 
-                    <div class="space-y-3">
+                    <div class="relative space-y-3.5 before:absolute before:left-3.5 sm:before:left-4 before:top-4 before:bottom-4 before:w-0.5 before:bg-slate-200">
                         @php $isPreviousContentDone = true; @endphp
                         @forelse ($sectionContents as $content)
                             @php
@@ -124,29 +124,39 @@
                                 $isContentLocked = $canReviewAll ? false : ($isWaitingForStart || (!$isPreviousContentDone && !$isContentItemCompleted));
                             @endphp
 
-                            <div class="flex flex-col sm:flex-row sm:items-center justify-between p-3.5 sm:p-4 rounded-md border border-slate-200 bg-white hover:border-slate-300 hover:shadow-xs transition-all gap-3 sm:gap-4">
-                                <div class="flex items-center gap-2.5 flex-1 min-w-0">
-                                    <p class="font-bold text-slate-800 text-sm leading-snug break-words line-clamp-2" title="{{ $contentName }}">
-                                        {{ $contentName }}
-                                    </p>
-                                    @if ($isContentItemCompleted)
-                                        <i class="fas fa-check-circle text-emerald-600 text-xs sm:text-sm shrink-0" title="Selesai Dipelajari"></i>
-                                    @endif
+                            <div class="relative flex items-center gap-3 sm:gap-4">
+                                {{-- Timeline Node Badge Berupa Angka --}}
+                                <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-xs sm:text-sm font-black shrink-0 z-10 transition-all select-none {{ $isContentItemCompleted ? 'bg-emerald-600 text-white shadow-xs ring-4 ring-slate-50' : ($isContentLocked ? 'bg-slate-100 text-slate-400 border border-slate-300 ring-4 ring-slate-50' : 'bg-[#13416B] text-white shadow-xs ring-4 ring-slate-50') }}">
+                                    {{ $loop->iteration }}
                                 </div>
 
-                                <div class="shrink-0 self-start sm:self-center w-full sm:w-auto">
-                                    @if ($isContentLocked)
-                                        <button type="button" disabled
-                                            title="Pelajari materi sebelumnya terlebih dahulu"
-                                            class="w-full sm:w-auto inline-flex items-center justify-center px-4 py-2 bg-slate-100 text-slate-400 border border-slate-200 rounded-md text-xs font-semibold cursor-not-allowed select-none">
-                                            <span>Terkunci</span>
-                                        </button>
-                                    @else
-                                        <a href="{{ route('user.course.content.show', ['slug' => $courseSlug, 'content' => $contentId]) }}"
-                                            class="w-full sm:w-auto inline-flex items-center justify-center px-4 py-2 {{ $isContentItemCompleted ? 'bg-slate-100 border border-slate-200 text-slate-700 hover:bg-slate-200' : 'bg-[#13416B] text-white hover:bg-[#0f3354] shadow-2xs' }} rounded-md text-xs font-bold transition-all text-center">
-                                            <span>{{ $isContentItemCompleted ? 'Pelajari Lagi' : 'Mulai Belajar' }}</span>
-                                        </a>
-                                    @endif
+                                {{-- Card Konten Materi --}}
+                                <div class="flex-1 min-w-0 flex flex-col sm:flex-row sm:items-center justify-between p-3.5 sm:p-4 rounded-md border border-slate-200 bg-white hover:border-slate-300 hover:shadow-xs transition-all gap-3 sm:gap-4">
+                                    <div class="flex items-center gap-2.5 flex-1 min-w-0">
+                                        <p class="font-bold text-slate-800 text-sm sm:text-[15px] leading-snug break-words line-clamp-2" title="{{ $contentName }}">
+                                            {{ $contentName }}
+                                        </p>
+                                        @if ($isContentItemCompleted)
+                                            <span class="inline-flex items-center gap-1 text-[10px] sm:text-[11px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded shrink-0">
+                                                <i class="fas fa-check text-[9px]"></i> Selesai
+                                            </span>
+                                        @endif
+                                    </div>
+
+                                    <div class="shrink-0 self-start sm:self-center w-full sm:w-auto">
+                                        @if ($isContentLocked)
+                                            <button type="button" disabled
+                                                title="Pelajari materi sebelumnya terlebih dahulu"
+                                                class="w-full sm:w-auto inline-flex items-center justify-center px-4 py-2 bg-slate-100 text-slate-400 border border-slate-200 rounded-md text-xs font-semibold cursor-not-allowed select-none">
+                                                <span>Terkunci</span>
+                                            </button>
+                                        @else
+                                            <a href="{{ route('user.course.content.show', ['slug' => $courseSlug, 'content' => $contentId]) }}"
+                                                class="w-full sm:w-auto inline-flex items-center justify-center px-4 py-2 {{ $isContentItemCompleted ? 'bg-slate-100 border border-slate-200 text-slate-700 hover:bg-slate-200' : 'bg-[#13416B] text-white hover:bg-[#0f3354] shadow-2xs' }} rounded-md text-xs font-bold transition-all text-center">
+                                                <span>{{ $isContentItemCompleted ? 'Pelajari Lagi' : 'Mulai Belajar' }}</span>
+                                            </a>
+                                        @endif
+                                    </div>
                                 </div>
                             </div>
 
@@ -162,7 +172,7 @@
                     </div>
                 </div>
 
-                {{-- 2. CARD SESI LIVE ZOOM (DILENGKAPI PRESENSI GOOGLE DRIVE & FOTO SCREENSHOT) --}}
+                {{-- 2. CARD SESI LIVE ZOOM (SISTEM TAB & DESKRIPSI LEBIH BESAR & JELAS) --}}
                 @if ($hasZoom)
                     @php
                         $isZoomAttendanceLocked = false;
@@ -171,112 +181,153 @@
                             $isZoomAttendanceLocked = true;
                         }
                     @endphp
-                    <div x-data="{ hasJoinedZoom: {{ $hasJoinedZoom ? 'true' : 'false' }}, showZoomModal: false }"
+                    <div x-data="{ activeZoomTab: 'sesi', hasJoinedZoom: {{ $hasJoinedZoom ? 'true' : 'false' }}, showZoomModal: false }"
                         @keydown.escape.window="showZoomModal = false"
                         class="rounded-md border border-slate-200 bg-slate-50/40 p-4 sm:p-5 lg:p-6 shadow-2xs transition-all">
                         
-                        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                            <div class="space-y-3 flex-1 min-w-0">
-                                <div class="flex items-center gap-3.5">
-                                    <div class="w-11 h-11 sm:w-12 sm:h-12 rounded-md bg-[#1E62D0] text-white flex items-center justify-center shrink-0 text-xl sm:text-2xl shadow-xs">
-                                        <i class="fas fa-video"></i>
+                        {{-- Tab Switcher Sesi vs Bukti Pendukung Presensi --}}
+                        <div class="flex items-center gap-2 border-b border-slate-200 pb-3 mb-5 overflow-x-auto">
+                            <button type="button"
+                                @click="activeZoomTab = 'sesi'"
+                                :class="activeZoomTab === 'sesi' 
+                                    ? 'bg-[#13416B] text-white shadow-xs font-bold' 
+                                    : 'bg-white text-slate-600 hover:text-slate-900 hover:bg-slate-100 border border-slate-200 font-semibold'"
+                                class="inline-flex items-center gap-2 px-3.5 sm:px-4 py-2 rounded-md text-xs sm:text-sm transition-all cursor-pointer whitespace-nowrap">
+                                <i class="fas fa-video text-xs"></i>
+                                <span>Sesi Tatap Muka & Presensi</span>
+                                @if ($isZoomAttended)
+                                    <span class="inline-flex items-center justify-center w-4 h-4 rounded-full bg-emerald-500 text-white text-[9px]">
+                                        <i class="fas fa-check"></i>
+                                    </span>
+                                @endif
+                            </button>
+
+                            <button type="button"
+                                @click="activeZoomTab = 'bukti'"
+                                :class="activeZoomTab === 'bukti' 
+                                    ? 'bg-[#13416B] text-white shadow-xs font-bold' 
+                                    : 'bg-white text-slate-600 hover:text-slate-900 hover:bg-slate-100 border border-slate-200 font-semibold'"
+                                class="inline-flex items-center gap-2 px-3.5 sm:px-4 py-2 rounded-md text-xs sm:text-sm transition-all cursor-pointer whitespace-nowrap">
+                                <i class="fas fa-camera text-xs"></i>
+                                <span>Bukti Pendukung Kehadiran</span>
+                                @if ($zoomProof && ($zoomProof->file_path || $zoomProof->notes))
+                                    <span class="inline-flex items-center justify-center w-4 h-4 rounded-full bg-emerald-500 text-white text-[9px]" title="Sudah dikumpulkan">
+                                        <i class="fas fa-check"></i>
+                                    </span>
+                                @endif
+                            </button>
+                        </div>
+
+                        {{-- TAB 1: Sesi Tatap Muka & Presensi --}}
+                        <div x-show="activeZoomTab === 'sesi'" x-transition:enter="transition ease-out duration-150" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100">
+                            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                                <div class="space-y-3 flex-1 min-w-0">
+                                    <div class="flex items-center gap-3.5">
+                                        <div class="w-11 h-11 sm:w-12 sm:h-12 rounded-md bg-[#1E62D0] text-white flex items-center justify-center shrink-0 text-xl sm:text-2xl shadow-xs">
+                                            <i class="fas fa-video"></i>
+                                        </div>
+                                        <div class="space-y-1 min-w-0">
+                                            <h3 class="text-base sm:text-lg font-bold text-slate-800 leading-tight">Sesi Pertemuan Online</h3>
+                                            @if ($isZoomAttended)
+                                                <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded text-xs font-bold bg-emerald-600 text-white shadow-xs">
+                                                    <i class="fas fa-check-circle"></i> Presensi Kehadiran Terverifikasi
+                                                </span>
+                                            @else
+                                                <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded text-xs font-bold bg-amber-500 text-white shadow-xs">
+                                                    <i class="fas fa-clock"></i> Belum Konfirmasi Hadir
+                                                </span>
+                                            @endif
+                                        </div>
                                     </div>
-                                    <div class="space-y-1 min-w-0">
-                                        <h3 class="text-base sm:text-lg font-bold text-slate-800 leading-tight">Sesi Tatap Muka Online</h3>
-                                        @if ($isZoomAttended)
-                                            <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded text-[10px] sm:text-xs font-bold bg-emerald-600 text-white shadow-xs">
-                                                <i class="fas fa-check-circle"></i> Presensi Kehadiran Terverifikasi
+
+                                    <p class="text-sm sm:text-[15px] text-slate-700 leading-relaxed pt-1">
+                                        Ikuti sesi tatap muka online bersama narasumber sesuai jadwal. Klik tombol <span class="font-bold text-[#13416B]">Masuk Tatap Muka</span> untuk langsung bergabung ke ruang pertemuan daring, kemudian lakukan konfirmasi kehadiran menggunakan kode presensi yang dibagikan narasumber/panitia.
+                                    </p>
+
+                                    {{-- Info Sesi Tatap Muka --}}
+                                    <div class="flex flex-wrap items-center gap-2 sm:gap-3 pt-1">
+                                        @if ($activeBimtek->zoom_scheduled_at)
+                                            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs sm:text-sm font-semibold bg-white text-slate-700 border border-slate-200 shadow-2xs">
+                                                <i class="fas fa-calendar-alt text-[#1E62D0]"></i>
+                                                {{ $zoomScheduleFormatted ?? $activeBimtek->zoom_scheduled_at->translatedFormat('d F Y, H:i') . ' WIB' }}
                                             </span>
-                                        @else
-                                            <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded text-[10px] sm:text-xs font-bold bg-amber-500 text-white shadow-xs">
-                                                <i class="fas fa-clock"></i> Belum Konfirmasi Hadir
+                                        @endif
+                                        @if ($activeBimtek->zoom_meeting_id)
+                                            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs sm:text-sm font-mono font-bold bg-white text-slate-700 border border-slate-200 shadow-2xs">
+                                                <i class="fas fa-hashtag text-slate-400"></i> ID: {{ $activeBimtek->zoom_meeting_id }}
+                                            </span>
+                                        @endif
+                                        @if ($activeBimtek->zoom_passcode)
+                                            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs sm:text-sm font-mono font-bold bg-white text-slate-700 border border-slate-200 shadow-2xs">
+                                                <i class="fas fa-key text-slate-400"></i> Passcode: {{ $activeBimtek->zoom_passcode }}
                                             </span>
                                         @endif
                                     </div>
                                 </div>
 
-                                <p class="text-xs sm:text-sm text-slate-600 leading-relaxed">
-                                    Ikuti sesi tatap muka online bersama narasumber. Klik tautan di bawah untuk bergabung ke ruang pertemuan daring dan lakukan konfirmasi kehadiran menggunakan kode presensi.
-                                </p>
+                                {{-- Tombol Aksi Tatap Muka --}}
+                                <div class="shrink-0 flex flex-col sm:flex-row md:flex-col gap-2.5 self-start md:self-center w-full md:w-auto">
+                                    <a href="{{ route('user.course.my-course.join-zoom', $courseSlug) }}"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        @click="hasJoinedZoom = true"
+                                        class="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-md font-bold text-xs sm:text-sm bg-[#13416B] text-white hover:bg-[#0f3354] transition-all shadow-sm">
+                                        <i class="fas fa-external-link-alt text-xs"></i>
+                                        <span>Masuk Tatap Muka</span>
+                                    </a>
 
-                                {{-- Info Sesi Tatap Muka --}}
-                                <div class="flex flex-wrap items-center gap-2 sm:gap-3 pt-1">
-                                    @if ($activeBimtek->zoom_scheduled_at)
-                                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-semibold bg-white text-slate-700 border border-slate-200 shadow-2xs">
-                                            <i class="fas fa-calendar-alt text-[#1E62D0]"></i>
-                                            {{ $zoomScheduleFormatted ?? $activeBimtek->zoom_scheduled_at->translatedFormat('d F Y, H:i') . ' WIB' }}
-                                        </span>
-                                    @endif
-                                    @if ($activeBimtek->zoom_meeting_id)
-                                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-mono font-bold bg-white text-slate-700 border border-slate-200 shadow-2xs">
-                                            <i class="fas fa-hashtag text-slate-400"></i> ID: {{ $activeBimtek->zoom_meeting_id }}
-                                        </span>
-                                    @endif
-                                    @if ($activeBimtek->zoom_passcode)
-                                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-mono font-bold bg-white text-slate-700 border border-slate-200 shadow-2xs">
-                                            <i class="fas fa-key text-slate-400"></i> Passcode: {{ $activeBimtek->zoom_passcode }}
-                                        </span>
+                                    @if (!$isZoomAttended)
+                                        <button type="button"
+                                            @click="showZoomModal = true"
+                                            class="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-md font-bold text-xs sm:text-sm border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 transition-all shadow-2xs">
+                                            <i class="fas fa-clipboard-check text-xs text-[#13416B]"></i>
+                                            <span>Konfirmasi Presensi</span>
+                                        </button>
                                     @endif
                                 </div>
-                            </div>
-
-                            {{-- Tombol Aksi Tatap Muka --}}
-                            <div class="shrink-0 flex flex-col sm:flex-row md:flex-col gap-2 self-start md:self-center w-full md:w-auto">
-                                <a href="{{ route('user.course.my-course.join-zoom', $courseSlug) }}"
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    @click="hasJoinedZoom = true"
-                                    class="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-md font-bold text-xs sm:text-sm bg-[#13416B] text-white hover:bg-[#0f3354] transition-all shadow-sm">
-                                    <i class="fas fa-external-link-alt text-xs"></i>
-                                    <span>Masuk Tatap Muka</span>
-                                </a>
-
-                                @if (!$isZoomAttended)
-                                    <button type="button"
-                                        @click="showZoomModal = true"
-                                        class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-md font-bold text-xs border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 transition-all shadow-2xs">
-                                        <i class="fas fa-clipboard-check text-xs text-[#13416B]"></i>
-                                        <span>Konfirmasi Presensi</span>
-                                    </button>
-                                @endif
                             </div>
                         </div>
 
-                        {{-- Bukti Pendukung Presensi (Google Drive Penyelenggara & Upload Screenshot) --}}
-                        <div class="mt-5 pt-4 border-t border-slate-200/80 space-y-3.5">
-                            <div class="flex items-center justify-between gap-3">
-                                <div class="flex items-center gap-2">
-                                    <i class="fas fa-camera text-slate-600 text-xs sm:text-sm"></i>
-                                    <h4 class="text-xs sm:text-sm font-bold text-slate-800">Bukti Pendukung Presensi (Google Drive Penyelenggara & Foto Screenshot)</h4>
+                        {{-- TAB 2: Bukti Pendukung Presensi (Folder Drive Panitia & Upload Foto) --}}
+                        <div x-show="activeZoomTab === 'bukti'" x-cloak x-transition:enter="transition ease-out duration-150" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" class="space-y-4">
+                            <div class="flex items-start sm:items-center justify-between gap-3 flex-wrap">
+                                <div class="flex items-center gap-2.5">
+                                    <div class="w-9 h-9 rounded-md bg-[#13416B]/10 text-[#13416B] flex items-center justify-center shrink-0">
+                                        <i class="fas fa-camera text-base"></i>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-sm sm:text-base font-bold text-slate-800">Bukti Kehadiran Tatap Muka Daring</h4>
+                                        <p class="text-xs text-slate-500">Google Drive Penyelenggara & Unggah Tangkapan Layar (Screenshot)</p>
+                                    </div>
                                 </div>
                                 @if ($zoomProof && ($zoomProof->file_path || $zoomProof->notes))
-                                    <span class="inline-flex items-center gap-1 text-[10px] sm:text-[11px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded">
+                                    <span class="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-3 py-1 rounded">
                                         <i class="fas fa-check-circle text-emerald-600"></i> Bukti Presensi Tersimpan
                                     </span>
                                 @endif
                             </div>
 
-                            <p class="text-[11px] sm:text-xs text-slate-500">
-                                Penyelenggara menyediakan folder Google Drive untuk pengumpulan bukti kehadiran tatap muka. Anda dapat mengunggah tangkapan layar (screenshot) sesi Zoom langsung ke folder Drive panitia tersebut atau mengunggah berkas foto di bawah.
+                            <p class="text-sm sm:text-[15px] text-slate-700 leading-relaxed">
+                                Penyelenggara menyediakan folder Google Drive untuk pengumpulan bukti kehadiran tatap muka daring. Anda dapat mengunggah tangkapan layar (screenshot) sesi Zoom langsung ke folder Google Drive panitia di bawah, atau mengunggah berkas foto secara langsung dan mencatatkan konfirmasi bukti di bawah.
                             </p>
 
                             {{-- Banner Folder Google Drive Presensi dari Penyelenggara --}}
                             @if ($adminDriveLink)
-                                <div class="p-3.5 rounded-md bg-white border border-blue-200/90 shadow-2xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                                <div class="p-4 rounded-md bg-white border border-blue-200/90 shadow-2xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3.5">
                                     <div class="flex items-center gap-3">
-                                        <div class="w-9 h-9 rounded-md bg-blue-50 text-[#0B5CFF] border border-blue-200 flex items-center justify-center shrink-0 shadow-2xs">
-                                            <i class="fab fa-google-drive text-lg"></i>
+                                        <div class="w-10 h-10 rounded-md bg-blue-50 text-[#0B5CFF] border border-blue-200 flex items-center justify-center shrink-0 shadow-2xs">
+                                            <i class="fab fa-google-drive text-xl"></i>
                                         </div>
                                         <div>
-                                            <p class="text-xs font-bold text-slate-800">Folder Google Drive Presensi Penyelenggara</p>
-                                            <p class="text-[11px] text-slate-500">Kumpulkan bukti foto/screenshot kehadiran sesi Zoom Anda ke folder Drive panitia berikut.</p>
+                                            <p class="text-xs sm:text-sm font-bold text-slate-800">Folder Google Drive Presensi Penyelenggara</p>
+                                            <p class="text-xs text-slate-600 mt-0.5">Kumpulkan bukti foto/screenshot kehadiran sesi Zoom Anda ke folder Drive panitia berikut.</p>
                                         </div>
                                     </div>
 
                                     <a href="{{ $adminDriveLink }}" target="_blank" rel="noopener noreferrer"
-                                        class="inline-flex items-center gap-2 px-3.5 py-2 rounded-md text-xs font-bold text-white bg-[#0B5CFF] hover:bg-blue-700 transition-all shadow-2xs shrink-0 whitespace-nowrap">
+                                        class="inline-flex items-center gap-2 px-4 py-2.5 rounded-md text-xs sm:text-sm font-bold text-white bg-[#0B5CFF] hover:bg-blue-700 transition-all shadow-2xs shrink-0 whitespace-nowrap">
                                         <i class="fab fa-google-drive"></i>
-                                        <span>Buka Drive Presensi</span>
+                                        <span>Buka Drive Presensi Panitia</span>
                                         <i class="fas fa-external-link-alt text-[10px] ml-0.5"></i>
                                     </a>
                                 </div>
@@ -284,15 +335,15 @@
 
                             {{-- Form & Status Bukti Presensi --}}
                             @if ($zoomProof && ($zoomProof->file_path || $zoomProof->notes) && !$errors->any())
-                                <div x-data="{ isEditingPhoto: false }" class="space-y-2">
-                                    <div x-show="!isEditingPhoto" class="flex flex-wrap items-center justify-between gap-3 p-3.5 rounded-md bg-white border border-emerald-200/90 shadow-2xs">
-                                        <div class="flex items-center gap-2.5">
-                                            <div class="w-8 h-8 rounded bg-emerald-50 text-emerald-600 flex items-center justify-center border border-emerald-100 shrink-0">
-                                                <i class="fas fa-check-circle text-sm"></i>
+                                <div x-data="{ isEditingPhoto: false }" class="space-y-3">
+                                    <div x-show="!isEditingPhoto" class="flex flex-wrap items-center justify-between gap-3 p-4 rounded-md bg-white border border-emerald-200/90 shadow-2xs">
+                                        <div class="flex items-center gap-3">
+                                            <div class="w-9 h-9 rounded bg-emerald-50 text-emerald-600 flex items-center justify-center border border-emerald-100 shrink-0">
+                                                <i class="fas fa-check-circle text-base"></i>
                                             </div>
                                             <div class="space-y-0.5">
-                                                <p class="text-xs font-bold text-slate-800">Bukti Presensi Telah Dikonfirmasi</p>
-                                                <p class="text-[10px] text-slate-500">
+                                                <p class="text-xs sm:text-sm font-bold text-slate-800">Bukti Presensi Telah Dikonfirmasi</p>
+                                                <p class="text-xs text-slate-500">
                                                     {{ $zoomProof->submitted_at ? $zoomProof->submitted_at->translatedFormat('d M Y, H:i') . ' WIB' : 'Tersimpan' }}
                                                     @if ($zoomProof->notes)
                                                         • <span class="italic text-slate-600">"{{ $zoomProof->notes }}"</span>
@@ -303,14 +354,14 @@
                                         <div class="flex items-center gap-2">
                                             @if ($zoomProof->file_path)
                                                 <a href="{{ $zoomProof->file_url }}" target="_blank" rel="noopener noreferrer"
-                                                    class="inline-flex items-center gap-1 px-3 py-1.5 rounded text-xs font-bold text-[#13416B] bg-slate-50 hover:bg-slate-100 border border-slate-200 shadow-2xs">
-                                                    <i class="fas fa-eye text-[11px]"></i>
+                                                    class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-bold text-[#13416B] bg-slate-50 hover:bg-slate-100 border border-slate-200 shadow-2xs">
+                                                    <i class="fas fa-eye text-xs"></i>
                                                     <span>Lihat Foto</span>
                                                 </a>
                                             @endif
                                             <button type="button" @click="isEditingPhoto = true"
-                                                class="inline-flex items-center gap-1 px-3 py-1.5 rounded text-xs font-bold text-slate-600 hover:bg-slate-100 border border-slate-200">
-                                                <i class="fas fa-redo text-[11px]"></i>
+                                                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-bold text-slate-600 hover:bg-slate-100 border border-slate-200 cursor-pointer">
+                                                <i class="fas fa-redo text-xs"></i>
                                                 <span>Perbarui Bukti</span>
                                             </button>
                                         </div>
@@ -320,37 +371,37 @@
                                         <form action="{{ route('user.course.section.upload-zoom-proof', ['slug' => $courseSlug, 'sectionId' => $sectionId]) }}"
                                             method="POST"
                                             enctype="multipart/form-data"
-                                            class="space-y-2.5 p-3 rounded-md bg-white border border-slate-200">
+                                            class="space-y-3 p-4 rounded-md bg-white border border-slate-200 shadow-2xs">
                                             @csrf
-                                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                                 <div>
-                                                    <label class="block text-[11px] font-bold text-slate-700 mb-1">
+                                                    <label class="block text-xs font-bold text-slate-700 mb-1.5">
                                                         Unggah Foto / Screenshot (Opsional)
                                                     </label>
                                                     <input type="file"
                                                         name="proof_file"
                                                         accept=".jpg,.jpeg,.png,.webp"
-                                                        class="block w-full text-xs text-slate-500 file:mr-2 file:py-1.5 file:px-3 file:rounded file:border-0 file:text-xs file:font-bold file:bg-[#13416B] file:text-white hover:file:bg-[#0f3354] file:cursor-pointer border border-slate-200 rounded bg-slate-50 p-1" />
+                                                        class="block w-full text-xs text-slate-500 file:mr-2 file:py-2 file:px-3 file:rounded file:border-0 file:text-xs file:font-bold file:bg-[#13416B] file:text-white hover:file:bg-[#0f3354] file:cursor-pointer border border-slate-200 rounded bg-slate-50 p-1" />
                                                 </div>
                                                 <div>
-                                                    <label class="block text-[11px] font-bold text-slate-700 mb-1">
+                                                    <label class="block text-xs font-bold text-slate-700 mb-1.5">
                                                         Catatan Presensi / Nama Berkas di Drive Panitia
                                                     </label>
                                                     <input type="text"
                                                         name="notes"
                                                         value="{{ old('notes', $zoomProof->notes ?? '') }}"
                                                         placeholder="Contoh: Bukti hadir diunggah ke Drive panitia nama Budi_Presensi.png"
-                                                        class="w-full px-3 py-1.5 text-xs rounded border border-slate-300 text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-[#13416B]" />
+                                                        class="w-full px-3 py-2 text-xs rounded border border-slate-300 text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-[#13416B]" />
                                                 </div>
                                             </div>
-                                            <div class="flex items-center justify-end gap-2 pt-1">
+                                            <div class="flex items-center justify-end gap-2 pt-1 border-t border-slate-100">
                                                 <button type="button" @click="isEditingPhoto = false"
-                                                    class="px-3 py-1.5 rounded text-xs font-bold text-slate-600 hover:bg-slate-100 border border-slate-200">
+                                                    class="px-3.5 py-1.5 rounded text-xs font-bold text-slate-600 hover:bg-slate-100 border border-slate-200 cursor-pointer">
                                                     Batal
                                                 </button>
                                                 <button type="submit"
-                                                    class="inline-flex items-center gap-1.5 px-4 py-1.5 rounded text-xs font-bold text-white bg-[#13416B] hover:bg-[#0f3354] shadow-xs">
-                                                    <i class="fas fa-save text-[11px]"></i>
+                                                    class="inline-flex items-center gap-1.5 px-4 py-2 rounded text-xs font-bold text-white bg-[#13416B] hover:bg-[#0f3354] shadow-xs cursor-pointer">
+                                                    <i class="fas fa-save text-xs"></i>
                                                     <span>Simpan Bukti</span>
                                                 </button>
                                             </div>
@@ -361,33 +412,33 @@
                                 <form action="{{ route('user.course.section.upload-zoom-proof', ['slug' => $courseSlug, 'sectionId' => $sectionId]) }}"
                                     method="POST"
                                     enctype="multipart/form-data"
-                                    class="space-y-2.5 p-3 rounded-md bg-white border border-slate-200">
+                                    class="space-y-3 p-4 rounded-md bg-white border border-slate-200 shadow-2xs">
                                     @csrf
-                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                         <div>
-                                            <label class="block text-[11px] font-bold text-slate-700 mb-1">
+                                            <label class="block text-xs font-bold text-slate-700 mb-1.5">
                                                 Unggah Foto / Screenshot (Opsional)
                                             </label>
                                             <input type="file"
                                                 name="proof_file"
                                                 accept=".jpg,.jpeg,.png,.webp"
-                                                class="block w-full text-xs text-slate-500 file:mr-2 file:py-1.5 file:px-3 file:rounded file:border-0 file:text-xs file:font-bold file:bg-[#13416B] file:text-white hover:file:bg-[#0f3354] file:cursor-pointer border border-slate-200 rounded bg-slate-50 p-1" />
+                                                class="block w-full text-xs text-slate-500 file:mr-2 file:py-2 file:px-3 file:rounded file:border-0 file:text-xs file:font-bold file:bg-[#13416B] file:text-white hover:file:bg-[#0f3354] file:cursor-pointer border border-slate-200 rounded bg-slate-50 p-1" />
                                         </div>
                                         <div>
-                                            <label class="block text-[11px] font-bold text-slate-700 mb-1">
+                                            <label class="block text-xs font-bold text-slate-700 mb-1.5">
                                                 Catatan Presensi / Nama Berkas di Drive Panitia
                                             </label>
                                             <input type="text"
                                                 name="notes"
                                                 value="{{ old('notes', $zoomProof->notes ?? '') }}"
                                                 placeholder="Contoh: Bukti hadir diunggah ke Drive panitia nama Budi_Presensi.png"
-                                                class="w-full px-3 py-1.5 text-xs rounded border border-slate-300 text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-[#13416B]" />
+                                                class="w-full px-3 py-2 text-xs rounded border border-slate-300 text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-[#13416B]" />
                                         </div>
                                     </div>
-                                    <div class="flex justify-end pt-1">
+                                    <div class="flex justify-end pt-1 border-t border-slate-100">
                                         <button type="submit"
-                                            class="inline-flex items-center gap-1.5 px-4 py-2 rounded text-xs font-bold text-white bg-[#13416B] hover:bg-[#0f3354] shadow-xs">
-                                            <i class="fas fa-check text-[11px]"></i>
+                                            class="inline-flex items-center gap-1.5 px-4 py-2 rounded text-xs font-bold text-white bg-[#13416B] hover:bg-[#0f3354] shadow-xs cursor-pointer">
+                                            <i class="fas fa-check text-xs"></i>
                                             <span>Konfirmasi Bukti Presensi</span>
                                         </button>
                                     </div>
@@ -485,7 +536,7 @@
                                     {{ $postTestTitle }}
                                 </h3>
 
-                                <p class="text-xs sm:text-sm text-slate-600 mt-1.5 leading-relaxed max-w-full lg:max-w-[90%]">
+                                <p class="text-sm sm:text-[15px] text-slate-700 mt-1.5 leading-relaxed max-w-full lg:max-w-[90%]">
                                     @if ($hasPostTestQuestions)
                                         Ujian evaluasi materi pada {{ $isBimtekEvent ? 'hari ini' : 'modul ini' }} untuk menguji pemahaman dan capaian pembelajaran Anda.
                                     @else
@@ -496,25 +547,25 @@
                                 {{-- Badges Spesifikasi Evaluasi (Pilihan Ganda / Uraian / Tugas Drive) --}}
                                 <div class="mt-3 flex flex-wrap items-center gap-2.5 sm:gap-3">
                                     @if ($hasPostTestQuestions)
-                                        <span class="text-[11px] sm:text-xs font-semibold text-white bg-[#547996] px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-md border border-[#446680] flex items-center gap-1.5 shadow-xs">
-                                            <i class="fas fa-list-ol text-[10px] sm:text-xs text-white"></i>
+                                        <span class="text-xs sm:text-sm font-semibold text-white bg-[#547996] px-3 py-1.5 rounded-md border border-[#446680] flex items-center gap-1.5 shadow-xs">
+                                            <i class="fas fa-list-ol text-xs text-white"></i>
                                             {{ $postTestQuestionsCount }} Soal Pilihan Ganda
                                         </span>
-                                        <span class="text-[11px] sm:text-xs font-semibold text-white bg-[#547996] px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-md border border-[#446680] flex items-center gap-1.5 shadow-xs">
-                                            <i class="fas fa-stopwatch text-[10px] sm:text-xs text-white"></i>
+                                        <span class="text-xs sm:text-sm font-semibold text-white bg-[#547996] px-3 py-1.5 rounded-md border border-[#446680] flex items-center gap-1.5 shadow-xs">
+                                            <i class="fas fa-stopwatch text-xs text-white"></i>
                                             {{ data_get($postTestBab, 'duration', 0) }} Menit
                                         </span>
-                                        <span class="text-[11px] sm:text-xs font-semibold text-white bg-[#547996] px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-md border border-[#446680] flex items-center gap-1.5 shadow-xs">
-                                            <i class="fas fa-bullseye text-[10px] sm:text-xs text-white"></i>
+                                        <span class="text-xs sm:text-sm font-semibold text-white bg-[#547996] px-3 py-1.5 rounded-md border border-[#446680] flex items-center gap-1.5 shadow-xs">
+                                            <i class="fas fa-bullseye text-xs text-white"></i>
                                             KKM: {{ data_get($postTestBab, 'passing_score', 0) }}
                                         </span>
                                     @else
-                                        <span class="text-[11px] sm:text-xs font-semibold text-white bg-[#547996] px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-md border border-[#446680] flex items-center gap-1.5 shadow-xs">
-                                            <i class="fab fa-google-drive text-[10px] sm:text-xs text-white"></i>
+                                        <span class="text-xs sm:text-sm font-semibold text-white bg-[#547996] px-3 py-1.5 rounded-md border border-[#446680] flex items-center gap-1.5 shadow-xs">
+                                            <i class="fab fa-google-drive text-xs text-white"></i>
                                             Tugas Google Drive Penyelenggara
                                         </span>
-                                        <span class="text-[11px] sm:text-xs font-semibold text-white bg-[#547996] px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-md border border-[#446680] flex items-center gap-1.5 shadow-xs">
-                                            <i class="fas fa-file-alt text-[10px] sm:text-xs text-white"></i>
+                                        <span class="text-xs sm:text-sm font-semibold text-white bg-[#547996] px-3 py-1.5 rounded-md border border-[#446680] flex items-center gap-1.5 shadow-xs">
+                                            <i class="fas fa-file-alt text-xs text-white"></i>
                                             Penugasan Berkas / Uraian
                                         </span>
                                     @endif
@@ -523,21 +574,21 @@
 
                             {{-- Mode Penugasan Google Drive Penyelenggara --}}
                             @if ($hasDriveAssignment || $adminDriveLink)
-                                <div class="p-3.5 sm:p-4 rounded-md bg-white border border-blue-200/90 shadow-2xs space-y-3">
-                                    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                                <div class="p-4 rounded-md bg-white border border-blue-200/90 shadow-2xs space-y-3">
+                                    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3.5">
                                         <div class="flex items-center gap-3">
                                             <div class="w-10 h-10 rounded-md bg-blue-50 text-[#0B5CFF] border border-blue-200 flex items-center justify-center shrink-0 shadow-2xs">
                                                 <i class="fab fa-google-drive text-xl"></i>
                                             </div>
                                             <div>
                                                 <p class="text-xs sm:text-sm font-bold text-slate-800">Folder Google Drive Tugas dari Penyelenggara</p>
-                                                <p class="text-[11px] text-slate-500">Folder pengumpulan tugas telah disiapkan oleh panitia. Kumpulkan tugas Anda ke tautan Drive di bawah.</p>
+                                                <p class="text-xs text-slate-600 mt-0.5">Folder pengumpulan tugas telah disiapkan oleh panitia. Kumpulkan tugas Anda ke tautan Drive di bawah.</p>
                                             </div>
                                         </div>
 
                                         @if ($adminDriveLink)
                                             <a href="{{ $adminDriveLink }}" target="_blank" rel="noopener noreferrer"
-                                                class="inline-flex items-center gap-2 px-4 py-2 rounded-md text-xs font-bold text-white bg-[#0B5CFF] hover:bg-blue-700 transition-all shadow-2xs shrink-0 whitespace-nowrap">
+                                                class="inline-flex items-center gap-2 px-4 py-2.5 rounded-md text-xs sm:text-sm font-bold text-white bg-[#0B5CFF] hover:bg-blue-700 transition-all shadow-2xs shrink-0 whitespace-nowrap">
                                                 <i class="fab fa-google-drive"></i>
                                                 <span>Buka Folder Drive Tugas</span>
                                                 <i class="fas fa-external-link-alt text-[10px] ml-0.5"></i>
@@ -547,7 +598,7 @@
 
                                     {{-- Status Penyerahan Tugas & Form Konfirmasi --}}
                                     @if ($zoomProof && $zoomProof->status === 'submitted')
-                                        <div class="pt-2 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2 text-xs">
+                                        <div class="pt-2 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2 text-xs sm:text-sm">
                                             <div class="flex items-center gap-1.5 text-emerald-700 font-bold">
                                                 <i class="fas fa-check-circle text-emerald-600"></i>
                                                 <span>Tugas Telah Dikonfirmasi / Dikumpulkan</span>
@@ -556,40 +607,40 @@
                                                 @endif
                                             </div>
                                             @if ($zoomProof->notes)
-                                                <p class="text-slate-600 text-[11px] w-full"><span class="font-bold">Keterangan:</span> {{ $zoomProof->notes }}</p>
+                                                <p class="text-slate-600 text-xs w-full"><span class="font-bold">Keterangan:</span> {{ $zoomProof->notes }}</p>
                                             @endif
                                         </div>
                                     @else
                                         <form action="{{ route('user.course.section.upload-zoom-proof', ['slug' => $courseSlug, 'sectionId' => $sectionId]) }}"
                                             method="POST"
                                             enctype="multipart/form-data"
-                                            class="pt-2 border-t border-slate-100 space-y-2.5">
+                                            class="pt-2 border-t border-slate-100 space-y-3">
                                             @csrf
-                                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                                 <div>
-                                                    <label class="block text-[11px] font-bold text-slate-700 mb-1">
+                                                    <label class="block text-xs font-bold text-slate-700 mb-1.5">
                                                         Unggah Dokumen Tugas (PDF/DOCX/ZIP, Opsional)
                                                     </label>
                                                     <input type="file"
                                                         name="proof_file"
                                                         accept=".pdf,.docx,.doc,.zip,.jpg,.png"
-                                                        class="block w-full text-xs text-slate-500 file:mr-2 file:py-1.5 file:px-3 file:rounded file:border-0 file:text-xs file:font-bold file:bg-[#13416B] file:text-white hover:file:bg-[#0f3354] file:cursor-pointer border border-slate-200 rounded bg-slate-50 p-1" />
+                                                        class="block w-full text-xs text-slate-500 file:mr-2 file:py-2 file:px-3 file:rounded file:border-0 file:text-xs file:font-bold file:bg-[#13416B] file:text-white hover:file:bg-[#0f3354] file:cursor-pointer border border-slate-200 rounded bg-slate-50 p-1" />
                                                 </div>
                                                 <div>
-                                                    <label class="block text-[11px] font-bold text-slate-700 mb-1">
+                                                    <label class="block text-xs font-bold text-slate-700 mb-1.5">
                                                         Catatan / Keterangan Penyerahan Tugas
                                                     </label>
                                                     <input type="text"
                                                         name="notes"
                                                         value="{{ old('notes', $zoomProof->notes ?? '') }}"
                                                         placeholder="Contoh: Berkas telah diunggah ke Drive panitia dengan nama Tugas_SPBE.docx"
-                                                        class="w-full px-3 py-1.5 text-xs rounded border border-slate-300 text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-[#13416B]" />
+                                                        class="w-full px-3 py-2 text-xs rounded border border-slate-300 text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-[#13416B]" />
                                                 </div>
                                             </div>
-                                            <div class="flex justify-end">
+                                            <div class="flex justify-end pt-1">
                                                 <button type="submit"
-                                                    class="inline-flex items-center gap-1.5 px-4 py-2 rounded text-xs font-bold text-white bg-[#13416B] hover:bg-[#0f3354] shadow-xs">
-                                                    <i class="fas fa-paper-plane text-[10px]"></i>
+                                                    class="inline-flex items-center gap-1.5 px-4 py-2 rounded text-xs font-bold text-white bg-[#13416B] hover:bg-[#0f3354] shadow-xs cursor-pointer">
+                                                    <i class="fas fa-paper-plane text-xs"></i>
                                                     <span>Konfirmasi Pengumpulan Tugas</span>
                                                 </button>
                                             </div>
