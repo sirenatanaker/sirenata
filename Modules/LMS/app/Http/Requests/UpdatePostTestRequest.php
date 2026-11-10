@@ -4,6 +4,7 @@ namespace Modules\LMS\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Modules\LMS\Models\Course;
+use Modules\LMS\Models\CourseSection;
 
 class UpdatePostTestRequest extends FormRequest
 {
@@ -17,25 +18,67 @@ class UpdatePostTestRequest extends FormRequest
         if (empty($this->title)) {
             $course = Course::where('slug', $this->course_slug)->first();
             $courseName = $course ? ($course->course_name ?? $course->name) : 'Pelatihan';
+            $section = !empty($this->course_section_id) ? CourseSection::find($this->course_section_id) : null;
+
+            if ($section) {
+                $type = $this->input('type', 'multiple_choice');
+                $title = match ($type) {
+                    'essay'       => 'Evaluasi Uraian: ' . $section->name,
+                    'file_upload' => 'Penugasan Berkas: ' . $section->name,
+                    default       => 'Evaluasi: ' . $section->name,
+                };
+            } else {
+                $title = 'Evaluasi Akhir : ' . $courseName;
+            }
+
             $this->merge([
-                'title' => 'Evaluasi Akhir : ' . $courseName,
+                'title' => $title,
             ]);
         }
     }
 
     public function rules(): array
     {
+        $type = $this->input('type', 'multiple_choice');
+
+        $rules = [
+            'type'              => ['required', 'string', 'in:multiple_choice,essay,file_upload'],
+            'course_slug'       => ['required', 'string'],
+            'course_section_id' => ['nullable', 'uuid'],
+            'course_id'         => ['nullable', 'uuid'],
+            'title'             => ['nullable', 'string', 'max:255'],
+            'passing_score'     => ['required', 'integer', 'min:0', 'max:100'],
+            'duration'          => ['required', 'integer', 'min:1'],
+            'description'       => ['nullable', 'string'],
+        ];
+
+        if ($type === 'file_upload') {
+            $rules['admin_file']   = ['nullable', 'file', 'mimes:pdf,docx,doc,zip,rar', 'max:10240'];
+            $rules['instructions'] = ['nullable', 'string', 'max:2000'];
+        } elseif ($type === 'essay') {
+            $rules['essay_questions']            = ['required', 'array', 'min:1'];
+            $rules['essay_questions.*.question'] = ['required', 'string'];
+        } else {
+            $rules['questions']                  = ['required', 'array', 'min:1'];
+            $rules['questions.*.question']       = ['required', 'string'];
+            $rules['questions.*.choices']        = ['required', 'array', 'min:2'];
+            $rules['questions.*.choices.*']      = ['required', 'string'];
+            $rules['questions.*.correct_choice'] = ['required', 'integer'];
+        }
+
+        return $rules;
+    }
+
+    public function messages(): array
+    {
         return [
-            'course_slug'                => ['required', 'string'],
-            'title'                      => ['nullable', 'string', 'max:255'],
-            'passing_score'              => ['required', 'integer', 'min:0', 'max:100'],
-            'duration'                   => ['required', 'integer', 'min:1'],
-            'description'                => ['nullable', 'string'],
-            'questions'                  => ['required', 'array', 'min:1'],
-            'questions.*.question'       => ['required', 'string'],
-            'questions.*.choices'        => ['required', 'array', 'min:2'],
-            'questions.*.choices.*'      => ['required', 'string'],
-            'questions.*.correct_choice' => ['required', 'integer'],
+            'admin_file.mimes'                    => 'Format berkas soal harus berupa PDF, DOCX, DOC, atau ZIP.',
+            'admin_file.max'                      => 'Ukuran berkas soal maksimal 10 MB.',
+            'essay_questions.required'            => 'Harap tambahkan minimal 1 butir pertanyaan uraian.',
+            'essay_questions.min'                 => 'Harap tambahkan minimal 1 butir pertanyaan uraian.',
+            'essay_questions.*.question.required' => 'Setiap butir pertanyaan uraian wajib diisi.',
+            'questions.required'                  => 'Harap tambahkan minimal 1 butir pertanyaan pilihan ganda.',
+            'questions.*.choices.min'             => 'Setiap pertanyaan pilihan ganda harus memiliki minimal 2 pilihan jawaban.',
         ];
     }
 }

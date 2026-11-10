@@ -261,6 +261,17 @@
                                                 <!-- Footer Section: Tambah Materi & Post Test -->
                                                 @php
                                                     $existingPostTest = $section->existing_post_test ?? null;
+                                                    $postTestType = data_get($existingPostTest, 'type', 'multiple_choice');
+                                                    $postTestTypeLabel = match($postTestType) {
+                                                        'essay' => 'Uraian',
+                                                        'file_upload' => 'Upload Berkas',
+                                                        default => 'Pilihan Ganda',
+                                                    };
+                                                    $postTestTypeIcon = match($postTestType) {
+                                                        'essay' => 'fa-file-pen',
+                                                        'file_upload' => 'fa-cloud-arrow-up',
+                                                        default => 'fa-list-check',
+                                                    };
                                                 @endphp
                                                 <div class="mt-4 pt-4 border-t border-slate-200/80 flex flex-col sm:flex-row gap-3">
                                                     
@@ -270,14 +281,14 @@
                                                     </a>
                                                     
                                                     @if ($existingPostTest)
-                                                        <a href="{{ route('admin-pusat.management-course.post-tests.edit', $existingPostTest->id) }}?course_slug={{ $course->slug }}"
+                                                        <a href="{{ route('admin-pusat.management-course.post-tests.edit', data_get($existingPostTest, 'id')) }}?course_slug={{ $course->slug }}"
                                                             class="flex-1 px-4 py-3 rounded-xl text-sm font-bold text-white bg-amber-500 hover:bg-amber-600 transition-colors flex items-center justify-center gap-2 shadow-sm">
-                                                            <i class="fas fa-edit"></i> Edit Post Test
+                                                            <i class="fas {{ $postTestTypeIcon }}"></i> Edit Evaluasi ({{ $postTestTypeLabel }})
                                                         </a>
                                                     @else
                                                         <a href="{{ route('admin-pusat.management-course.post-tests.create', ['course_slug' => $course->slug, 'section_id' => $section->id]) }}"
                                                             class="flex-1 px-4 py-3 border border-emerald-200 rounded-xl text-sm font-bold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 transition-colors flex items-center justify-center gap-2 shadow-sm">
-                                                            <i class="fas fa-clipboard-check"></i> Buat Post Test
+                                                            <i class="fas fa-clipboard-check"></i> Buat Evaluasi
                                                         </a>
                                                     @endif
                                                 </div>
@@ -291,6 +302,17 @@
                                 <!-- ============================================== -->
                                 @php
                                     $existingFinalTest = $course->existing_final_test ?? null;
+                                    $finalType = data_get($existingFinalTest, 'type', 'multiple_choice');
+                                    $finalTypeLabel = match($finalType) {
+                                        'essay' => 'Uraian',
+                                        'file_upload' => 'Upload Berkas',
+                                        default => 'Pilihan Ganda',
+                                    };
+                                    $finalTypeIcon = match($finalType) {
+                                        'essay' => 'fa-file-pen',
+                                        'file_upload' => 'fa-cloud-arrow-up',
+                                        default => 'fa-list-check',
+                                    };
                                 @endphp
                                 <div class="bg-gradient-to-r from-[#13416B] to-[#0f3354] rounded-md overflow-hidden shadow-md mt-8 relative" data-tour="evaluasi">
                                     <div class="p-5 sm:p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5">
@@ -305,9 +327,9 @@
                                         </div>
 
                                         @if ($existingFinalTest)
-                                            <a href="{{ route('admin-pusat.management-course.post-tests.edit', $existingFinalTest->id) }}?course_slug={{ $course->slug }}"
+                                            <a href="{{ route('admin-pusat.management-course.post-tests.edit', data_get($existingFinalTest, 'id')) }}?course_slug={{ $course->slug }}"
                                                 class="w-full sm:w-auto px-4 sm:px-5 py-2.5 bg-amber-500 text-white text-xs sm:text-sm font-bold rounded-xl hover:bg-amber-600 transition-all shadow-sm flex items-center justify-center gap-2 shrink-0">
-                                                <i class="fas fa-edit"></i> Edit Evaluasi
+                                                <i class="fas {{ $finalTypeIcon }}"></i> Edit Evaluasi ({{ $finalTypeLabel }})
                                             </a>
                                         @else
                                             <a href="{{ route('admin-pusat.management-course.post-tests.create', ['course_slug' => $course->slug, 'course_id' => $course->id]) }}"

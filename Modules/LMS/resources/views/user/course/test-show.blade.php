@@ -135,7 +135,7 @@
                                                 {{ $qIdx + 1 }}
                                             </span>
                                             <p class="text-sm sm:text-base font-bold text-slate-800 leading-snug">
-                                                {{ $question->question }}
+                                                {!! strip_tags($question->question) === $question->question ? nl2br(e($question->question)) : $question->question !!}
                                             </p>
                                         </div>
                                         <div class="pl-0 sm:pl-10">
@@ -151,11 +151,7 @@
                                 @endforeach
                             </div>
 
-                            <div class="flex items-center justify-between pt-6 border-t border-slate-100 flex-wrap gap-3">
-                                <a href="{{ $backToUrl }}" class="px-5 py-2.5 rounded-lg text-xs sm:text-sm font-bold bg-white text-slate-700 hover:bg-slate-50 border border-slate-200 transition-colors inline-flex items-center gap-2 shadow-2xs">
-                                    <i class="fas fa-arrow-left text-xs"></i>
-                                    <span>Kembali ke Modul</span>
-                                </a>
+                            <div class="flex items-center justify-end pt-6 border-t border-slate-100">
                                 <a href="?retake=1" class="px-5 py-2.5 rounded-lg text-xs sm:text-sm font-bold bg-[#13416B] text-white hover:bg-[#0f3354] transition-colors inline-flex items-center gap-2 shadow-sm">
                                     <i class="fas fa-edit text-xs"></i>
                                     <span>Edit Jawaban Uraian</span>
@@ -169,17 +165,6 @@
                                 @csrf
                                 <input type="hidden" name="type" value="uraian">
 
-                                <div class="flex items-center justify-between pb-4 border-b border-slate-100">
-                                    <div class="flex items-center gap-2">
-                                        <span class="text-xs sm:text-sm font-bold text-slate-800">
-                                            Daftar Pertanyaan Evaluasi ({{ count($postTest->questions) }} Butir)
-                                        </span>
-                                    </div>
-                                    <span class="text-xs text-slate-400">
-                                        Uraikan jawaban secara komprehensif
-                                    </span>
-                                </div>
-
                                 @forelse ($postTest->questions as $qIdx => $question)
                                     <div class="space-y-3 text-left" x-data="{ text: '{{ old('essay_answers.' . $qIdx, $evalResult?->answers[$qIdx] ?? '') }}' }">
                                         <div class="flex items-start gap-3">
@@ -188,7 +173,7 @@
                                             </span>
                                             <div class="flex-1 min-w-0">
                                                 <label class="block text-sm sm:text-base font-bold text-slate-800 leading-snug">
-                                                    {{ $question->question }}
+                                                    {!! strip_tags($question->question) === $question->question ? nl2br(e($question->question)) : $question->question !!}
                                                 </label>
                                             </div>
                                         </div>
@@ -201,8 +186,7 @@
                                                 placeholder="Tuliskan uraian jawaban Anda di sini..."
                                                 class="w-full p-3.5 text-xs sm:text-sm rounded-lg border border-slate-300 text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-[#13416B] focus:border-[#13416B] leading-relaxed shadow-2xs"></textarea>
 
-                                            <div class="flex justify-between items-center text-[11px] text-slate-400">
-                                                <span>Gunakan kalimat yang jelas dan sertakan analisis serta rekomendasi Anda.</span>
+                                            <div class="flex justify-end items-center text-[11px] text-slate-400">
                                                 <span class="font-medium text-slate-500" x-text="`${text.trim() ? text.trim().split(/\s+/).filter(Boolean).length : 0} kata`"></span>
                                             </div>
                                         </div>
@@ -217,11 +201,7 @@
                                     </div>
                                 @endforelse
 
-                                <div class="flex items-center justify-between pt-6 border-t border-slate-100 flex-wrap gap-3">
-                                    <a href="{{ $backToUrl }}" class="px-5 py-2.5 rounded-lg text-xs sm:text-sm font-bold bg-white text-slate-700 hover:bg-slate-50 border border-slate-200 transition-colors inline-flex items-center gap-2 shadow-2xs">
-                                        <i class="fas fa-arrow-left text-xs"></i>
-                                        <span>Kembali ke Modul</span>
-                                    </a>
+                                <div class="flex items-center justify-end pt-6 border-t border-slate-100">
                                     <button type="submit" class="px-6 py-2.5 rounded-lg text-xs sm:text-sm font-bold text-white bg-[#13416B] hover:bg-[#0f3354] transition-colors shadow-sm inline-flex items-center gap-2 cursor-pointer">
                                         <i class="fas fa-paper-plane text-xs"></i>
                                         <span>{{ $isEssayDone ? 'Simpan Perubahan Jawaban' : 'Kirim Jawaban Uraian' }}</span>

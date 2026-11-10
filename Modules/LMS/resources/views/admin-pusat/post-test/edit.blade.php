@@ -357,11 +357,24 @@
         </div>
 
         <form action="{{ route('admin-pusat.management-course.post-tests.update', $postTest->id) }}" method="POST"
-            class="max-w-full mx-auto">
+            enctype="multipart/form-data" class="max-w-full mx-auto">
             @csrf
             @method('PUT')
             <!-- Hidden Inputs -->
             <input type="hidden" name="course_slug" value="{{ $course->slug }}" />
+
+            @if (isset($errors) && $errors->any())
+                <div class="mb-6 p-4 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm">
+                    <div class="flex items-center gap-2 font-bold mb-1">
+                        <i class="fas fa-exclamation-circle text-red-600"></i> Terjadi Kesalahan Input:
+                    </div>
+                    <ul class="list-disc list-inside space-y-1 text-xs">
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
 
             <!-- Layout Grid: Kiri (Form) Kanan (Navigasi Sticky) -->
             <div class="flex flex-col lg:flex-row gap-6 items-start">
@@ -369,24 +382,78 @@
                 <!-- KOLOM KIRI: FORM UTAMA -->
                 <div class="flex-1 w-full space-y-6">
                     <!-- CARD 1: INFORMASI UTAMA POST TEST -->
+                    @php
+                        $evalTitle = $section ? 'Evaluasi Agenda : ' . $section->title : 'Evaluasi Akhir : ' . ($course->course_name ?? $course->name);
+                        $cardHeader = $section ? '1. Pengaturan Evaluasi Agenda' : '1. Pengaturan Evaluasi Akhir';
+                    @endphp
                     <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden scroll-mt-24"
                         id="section-pengaturan">
                         <div class="px-6 py-4 border-b border-slate-200 bg-slate-50 flex items-center justify-between">
-                            <h2 class="text-base font-bold text-slate-800">1. Pengaturan Evaluasi Akhir</h2>
+                            <h2 class="text-base font-bold text-slate-800">{{ $cardHeader }}</h2>
                             <span class="text-xs font-semibold px-2.5 py-1 bg-slate-100 text-slate-600 rounded-md border border-slate-200">Format Otomatis</span>
                         </div>
-                        <div class="p-6 space-y-4">
+                        <div class="p-6 space-y-5">
                             {{-- Field Hidden untuk title & description yang digenerate otomatis --}}
-                            <input type="hidden" name="title" value="Evaluasi Akhir : {{ $course->course_name ?? $course->name }}" />
+                            <input type="hidden" name="title" value="{{ $evalTitle }}" />
 
                             <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                                 <div>
                                     <span class="text-[10px] font-bold uppercase tracking-wider text-slate-500 block mb-0.5">Judul Evaluasi (Statis/Otomatis)</span>
-                                    <p class="text-sm font-extrabold text-slate-800">Evaluasi Akhir : {{ $course->course_name ?? $course->name }}</p>
+                                    <p class="text-sm font-extrabold text-slate-800">{{ $evalTitle }}</p>
                                 </div>
                                 <span class="self-start sm:self-auto text-[11px] font-bold text-[#13416B] bg-blue-50 px-3 py-1 rounded-md border border-blue-200">
                                     <i class="fas fa-magic mr-1"></i> Template Kursus
                                 </span>
+                            </div>
+
+                            <!-- Pemilihan Tipe Evaluasi -->
+                            <div>
+                                <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2.5">
+                                    Pilih Tipe Evaluasi <span class="text-red-500">*</span>
+                                </label>
+                                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                    <!-- PILIHAN GANDA (CBT) -->
+                                    <label class="relative flex flex-col p-4 rounded-xl border-2 cursor-pointer transition-all duration-200"
+                                        :class="evalType === 'multiple_choice' ? 'border-[#13416B] bg-blue-50/50 shadow-xs' : 'border-slate-200 hover:border-slate-300 bg-white'">
+                                        <div class="flex items-center justify-between mb-2">
+                                            <span class="w-8 h-8 rounded-lg flex items-center justify-center text-sm"
+                                                :class="evalType === 'multiple_choice' ? 'bg-[#13416B] text-white' : 'bg-slate-100 text-slate-600'">
+                                                <i class="fas fa-list-check"></i>
+                                            </span>
+                                            <input type="radio" name="type" value="multiple_choice" x-model="evalType" class="text-[#13416B] focus:ring-[#13416B] h-4 w-4 border-slate-300">
+                                        </div>
+                                        <span class="text-sm font-bold text-slate-800">Pilihan Ganda</span>
+                                        <p class="text-[11px] text-slate-500 mt-1 leading-relaxed">Pertanyaan objektif opsi A-D dengan penilaian sistem otomatis.</p>
+                                    </label>
+
+                                    <!-- URAIAN / ESAI -->
+                                    <label class="relative flex flex-col p-4 rounded-xl border-2 cursor-pointer transition-all duration-200"
+                                        :class="evalType === 'essay' ? 'border-[#13416B] bg-blue-50/50 shadow-xs' : 'border-slate-200 hover:border-slate-300 bg-white'">
+                                        <div class="flex items-center justify-between mb-2">
+                                            <span class="w-8 h-8 rounded-lg flex items-center justify-center text-sm"
+                                                :class="evalType === 'essay' ? 'bg-[#13416B] text-white' : 'bg-slate-100 text-slate-600'">
+                                                <i class="fas fa-file-pen"></i>
+                                            </span>
+                                            <input type="radio" name="type" value="essay" x-model="evalType" class="text-[#13416B] focus:ring-[#13416B] h-4 w-4 border-slate-300">
+                                        </div>
+                                        <span class="text-sm font-bold text-slate-800">Uraian / Esai</span>
+                                        <p class="text-[11px] text-slate-500 mt-1 leading-relaxed">Pertanyaan terbuka yang dijawab peserta dalam bentuk uraian bebas.</p>
+                                    </label>
+
+                                    <!-- PENUGASAN BERKAS / UPLOAD FILE -->
+                                    <label class="relative flex flex-col p-4 rounded-xl border-2 cursor-pointer transition-all duration-200"
+                                        :class="evalType === 'file_upload' ? 'border-[#13416B] bg-blue-50/50 shadow-xs' : 'border-slate-200 hover:border-slate-300 bg-white'">
+                                        <div class="flex items-center justify-between mb-2">
+                                            <span class="w-8 h-8 rounded-lg flex items-center justify-center text-sm"
+                                                :class="evalType === 'file_upload' ? 'bg-[#13416B] text-white' : 'bg-slate-100 text-slate-600'">
+                                                <i class="fas fa-cloud-arrow-up"></i>
+                                            </span>
+                                            <input type="radio" name="type" value="file_upload" x-model="evalType" class="text-[#13416B] focus:ring-[#13416B] h-4 w-4 border-slate-300">
+                                        </div>
+                                        <span class="text-sm font-bold text-slate-800">Unggah Berkas</span>
+                                        <p class="text-[11px] text-slate-500 mt-1 leading-relaxed">Admin unggah berkas tugas/soal dan peserta mengunggah dokumen jawaban.</p>
+                                    </label>
+                                </div>
                             </div>
 
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -398,8 +465,10 @@
                                         class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-[#13416B] focus:ring-1 focus:ring-[#13416B]" />
                                 </div>
                                 <div>
-                                    <label class="block text-sm font-medium text-slate-700 mb-1">Durasi (Menit) <span
-                                            class="text-red-500">*</span></label>
+                                    <label class="block text-sm font-medium text-slate-700 mb-1">
+                                        <span x-text="evalType === 'file_upload' ? 'Estimasi Waktu Pengerjaan (Menit)' : 'Durasi Pengerjaan (Menit)'"></span>
+                                        <span class="text-red-500">*</span>
+                                    </label>
                                     <input type="number" name="duration" required min="1"
                                         value="{{ old('duration', $postTest->duration) }}"
                                         class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-[#13416B] focus:ring-1 focus:ring-[#13416B]" />
@@ -409,9 +478,15 @@
                     </div>
 
                     <!-- CARD 2: DAFTAR SOAL PILIHAN GANDA DENGAN FULL TEXT EDITOR -->
-                    <div class="space-y-4">
+                    <div x-show="evalType === 'multiple_choice'" x-cloak class="space-y-4">
                         <div class="flex items-center justify-between">
-                            <h2 class="text-base font-bold text-slate-800">2. Daftar Pertanyaan Pilihan Ganda</h2>
+                            <div>
+                                <h2 class="text-base font-bold text-slate-800">2. Daftar Pertanyaan Pilihan Ganda</h2>
+                                <p class="text-xs text-slate-500 mt-0.5">Edit butir soal pilihan ganda dengan kunci jawaban otomatis</p>
+                            </div>
+                            <span class="text-xs font-bold text-[#13416B] bg-blue-50 px-3 py-1 rounded-md border border-blue-200">
+                                <i class="fas fa-list-check mr-1"></i> Mode Pilihan Ganda
+                            </span>
                         </div>
 
                         <template x-for="(q, qIndex) in questions" :key="qIndex">
@@ -422,7 +497,7 @@
                                     <span class="text-xs font-bold text-slate-600 uppercase tracking-wider"
                                         x-text="'Pertanyaan Nomor ' + (qIndex + 1)"></span>
                                     <button type="button" @click="removeQuestion(qIndex)" x-show="questions.length > 1"
-                                        class="text-red-500 hover:text-red-700 text-xs font-medium flex items-center gap-1">
+                                        class="text-red-500 hover:text-red-700 text-xs font-medium flex items-center gap-1 cursor-pointer">
                                         <i class="fas fa-trash-alt"></i> Hapus Soal
                                     </button>
                                 </div>
@@ -441,7 +516,7 @@
                                         }" x-init="initEditor()">
                                             <div x-ref="editor_q" class="bg-white quill-question"></div>
                                             <input type="hidden" :name="'questions[' + qIndex + '][question]'"
-                                                :value="q.question">
+                                                :value="q.question" :disabled="evalType !== 'multiple_choice'">
                                         </div>
                                     </div>
 
@@ -456,7 +531,9 @@
                                                 class="flex items-start gap-3 bg-slate-50/50 p-3 rounded-xl border border-slate-200">
                                                 <input type="radio"
                                                     :name="'questions[' + qIndex + '][correct_choice]'"
-                                                    :value="cIndex" x-model="q.correct_choice" required
+                                                    :value="cIndex" x-model="q.correct_choice"
+                                                    :required="evalType === 'multiple_choice'"
+                                                    :disabled="evalType !== 'multiple_choice'"
                                                     class="w-4 h-4 text-[#13416B] focus:ring-[#13416B] border-slate-300 mt-3.5 shrink-0"
                                                     title="Tandai sebagai jawaban benar">
 
@@ -471,7 +548,7 @@
                                                         <div x-ref="editor_c" class="bg-white quill-choice"></div>
                                                         <input type="hidden"
                                                             :name="'questions[' + qIndex + '][choices][' + cIndex + ']'"
-                                                            :value="q.choices[cIndex]">
+                                                            :value="q.choices[cIndex]" :disabled="evalType !== 'multiple_choice'">
                                                     </div>
                                                 </div>
 
@@ -494,10 +571,143 @@
 
                         <div class="pt-2">
                             <button type="button"
-                                @click="addQuestion(); setTimeout(() => document.getElementById('question-' + (questions.length - 1)).scrollIntoView({ behavior: 'smooth', block: 'start' }), 150)"
-                                class="w-full py-3 border-2 border-dashed border-[#13416B]/30 text-[#13416B] bg-[#13416B]/5 hover:bg-[#13416B]/10 text-sm font-bold rounded-xl transition flex items-center justify-center gap-2 shadow-sm">
+                                @click="addQuestion(); setTimeout(() => document.getElementById('question-' + (questions.length - 1))?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 150)"
+                                class="w-full py-3 border-2 border-dashed border-[#13416B]/30 text-[#13416B] bg-[#13416B]/5 hover:bg-[#13416B]/10 text-sm font-bold rounded-xl transition flex items-center justify-center gap-2 shadow-sm cursor-pointer">
                                 <i class="fas fa-plus-circle text-lg"></i> Tambah Pertanyaan Baru
                             </button>
+                        </div>
+                    </div>
+
+                    <!-- CARD 2: DAFTAR SOAL URAIAN / ESAI -->
+                    <div x-show="evalType === 'essay'" x-cloak class="space-y-4">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h2 class="text-base font-bold text-slate-800">2. Daftar Pertanyaan Uraian / Esai</h2>
+                                <p class="text-xs text-slate-500 mt-0.5">Tuliskan butir soal uraian atau studi kasus untuk dijawab oleh peserta</p>
+                            </div>
+                            <span class="text-xs font-bold text-[#13416B] bg-blue-50 px-3 py-1 rounded-md border border-blue-200">
+                                <i class="fas fa-file-pen mr-1"></i> Mode Uraian
+                            </span>
+                        </div>
+
+                        <template x-for="(eq, eqIndex) in essayQuestions" :key="eqIndex">
+                            <div :id="'essay-question-' + eqIndex"
+                                class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden relative group scroll-mt-24 transition-all duration-300">
+                                <div
+                                    class="px-6 py-3 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
+                                    <span class="text-xs font-bold text-slate-600 uppercase tracking-wider"
+                                        x-text="'Pertanyaan Uraian Nomor ' + (eqIndex + 1)"></span>
+                                    <button type="button" @click="removeEssayQuestion(eqIndex)" x-show="essayQuestions.length > 1"
+                                        class="text-red-500 hover:text-red-700 text-xs font-medium flex items-center gap-1 cursor-pointer">
+                                        <i class="fas fa-trash-alt"></i> Hapus Soal
+                                    </button>
+                                </div>
+
+                                <div class="p-6 space-y-4">
+                                    <div>
+                                        <label class="block text-xs font-medium text-slate-700 mb-1.5">
+                                            Teks Pertanyaan / Studi Kasus <span class="text-red-500">*</span>
+                                        </label>
+                                        <textarea
+                                            :name="'essay_questions[' + eqIndex + '][question]'"
+                                            :disabled="evalType !== 'essay'"
+                                            x-model="eq.question"
+                                            rows="4"
+                                            :required="evalType === 'essay'"
+                                            placeholder="Tuliskan pertanyaan uraian secara jelas di sini..."
+                                            class="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm focus:border-[#13416B] focus:ring-1 focus:ring-[#13416B] leading-relaxed transition shadow-2xs"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
+
+                        <div class="pt-2">
+                            <button type="button"
+                                @click="addEssayQuestion(); setTimeout(() => document.getElementById('essay-question-' + (essayQuestions.length - 1))?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 150)"
+                                class="w-full py-3 border-2 border-dashed border-[#13416B]/30 text-[#13416B] bg-[#13416B]/5 hover:bg-[#13416B]/10 text-sm font-bold rounded-xl transition flex items-center justify-center gap-2 shadow-sm cursor-pointer">
+                                <i class="fas fa-plus-circle text-lg"></i> Tambah Pertanyaan Uraian
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- CARD 2: BERKAS SOAL & PETUNJUK PENUGASAN (FILE UPLOAD) -->
+                    <div x-show="evalType === 'file_upload'" x-cloak class="space-y-4">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h2 class="text-base font-bold text-slate-800">2. Berkas Panduan & Instruksi Penugasan</h2>
+                                <p class="text-xs text-slate-500 mt-0.5">Unggah dokumen lembar kerja / studi kasus yang wajib diunduh peserta</p>
+                            </div>
+                            <span class="text-xs font-bold text-amber-700 bg-amber-50 px-3 py-1 rounded-md border border-amber-200">
+                                <i class="fas fa-cloud-arrow-up mr-1"></i> Penugasan Berkas
+                            </span>
+                        </div>
+
+                        <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden p-6 space-y-6">
+                            <!-- UNGGAH BERKAS SOAL -->
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-2">
+                                    Berkas Dokumen Soal / Studi Kasus <span class="text-red-500">*</span>
+                                </label>
+
+                                @if (!empty($postTest->admin_file_path))
+                                    <div class="mb-3.5 p-3.5 bg-blue-50/70 border border-blue-200 rounded-xl flex items-center justify-between gap-3">
+                                        <div class="flex items-center gap-3 min-w-0">
+                                            <div class="w-10 h-10 rounded-lg bg-[#13416B] text-white flex items-center justify-center shrink-0">
+                                                <i class="fas fa-file-alt text-lg"></i>
+                                            </div>
+                                            <div class="min-w-0">
+                                                <p class="text-xs font-bold text-slate-800 truncate">{{ $postTest->admin_file_name ?? 'Berkas Soal Penugasan' }}</p>
+                                                <p class="text-[11px] text-slate-500">{{ $postTest->admin_file_size ?? 'Tersimpan' }} &bull; Sudah terunggah di sistem</p>
+                                            </div>
+                                        </div>
+                                        <a href="{{ Storage::url($postTest->admin_file_path) }}" target="_blank"
+                                            class="px-3.5 py-1.5 rounded-lg bg-white border border-blue-200 text-xs font-bold text-[#13416B] hover:bg-blue-50 transition shrink-0 flex items-center gap-1.5 shadow-2xs">
+                                            <i class="fas fa-download text-[11px]"></i> Unduh Berkas
+                                        </a>
+                                    </div>
+                                @endif
+
+                                <div x-data="{ fileName: '', fileSize: '' }" class="space-y-2">
+                                    <label class="flex flex-col items-center justify-center w-full h-44 border-2 border-dashed border-slate-300 rounded-2xl cursor-pointer bg-slate-50/60 hover:bg-slate-50 hover:border-[#13416B] transition-all group">
+                                        <div class="flex flex-col items-center justify-center pt-5 pb-6 text-center px-4">
+                                            <div class="w-12 h-12 rounded-full bg-slate-100 group-hover:bg-[#13416B]/10 text-slate-400 group-hover:text-[#13416B] flex items-center justify-center mb-3 transition-colors">
+                                                <i class="fas fa-cloud-arrow-up text-xl"></i>
+                                            </div>
+                                            <p class="text-xs font-bold text-slate-700 group-hover:text-[#13416B] transition-colors mb-1" x-text="fileName ? fileName : '{{ !empty($postTest->admin_file_path) ? 'Pilih dokumen baru jika ingin mengganti berkas di atas' : 'Pilih dokumen dari komputer / perangkat Anda' }}'"></p>
+                                            <p class="text-[11px] text-slate-400" x-text="fileSize ? fileSize : 'Format yang didukung: PDF, Word (DOCX/DOC), atau ZIP (Maks. 10MB)'"></p>
+                                        </div>
+                                        <input type="file"
+                                            name="admin_file"
+                                            :disabled="evalType !== 'file_upload'"
+                                            @if (empty($postTest->admin_file_path)) :required="evalType === 'file_upload'" @endif
+                                            accept=".pdf,.docx,.doc,.zip,.rar"
+                                            class="hidden"
+                                            @change="
+                                                if ($event.target.files.length > 0) {
+                                                    fileName = $event.target.files[0].name;
+                                                    let size = $event.target.files[0].size;
+                                                    fileSize = size >= 1048576 ? (size / 1048576).toFixed(1) + ' MB' : Math.round(size / 1024) + ' KB';
+                                                }
+                                            " />
+                                    </label>
+                                    @if (!empty($postTest->admin_file_path))
+                                        <p class="text-[11px] text-slate-400 italic">* Kosongkan pilihan file jika tidak ingin mengganti berkas yang sudah ada.</p>
+                                    @endif
+                                </div>
+                            </div>
+
+                            <!-- INSTRUKSI / PETUNJUK -->
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-1.5">
+                                    Petunjuk / Instruksi Pengerjaan Tugas <span class="text-slate-400 font-normal">(Opsional)</span>
+                                </label>
+                                <textarea
+                                    name="instructions"
+                                    :disabled="evalType !== 'file_upload'"
+                                    rows="4"
+                                    placeholder="Tuliskan petunjuk pengerjaan tugas, kriteria penulisan, atau format dokumen yang wajib diserahkan oleh peserta..."
+                                    class="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm focus:border-[#13416B] focus:ring-1 focus:ring-[#13416B] leading-relaxed transition shadow-2xs">{{ old('instructions', $postTest->instructions ?? '') }}</textarea>
+                            </div>
                         </div>
                     </div>
 
@@ -516,7 +726,8 @@
 
                 <!-- KOLOM KANAN: WIDGET NAVIGASI CEPAT (DESKTOP) -->
                 <div class="hidden lg:block lg:w-80 xl:w-[340px] shrink-0 lg:sticky lg:top-24 mb-0">
-                    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 sm:p-6">
+                    <!-- Navigasi Soal Pilihan Ganda -->
+                    <div x-show="evalType === 'multiple_choice'" class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 sm:p-6">
                         <div class="flex items-center gap-3 mb-4 pb-3 border-b border-slate-100">
                             <div
                                 class="w-9 h-9 flex items-center justify-center bg-[#13416B] text-white rounded-xl shadow-sm border border-[#0f3354] shrink-0">
@@ -541,13 +752,68 @@
                             </template>
                         </div>
                     </div>
+
+                    <!-- Navigasi Soal Uraian -->
+                    <div x-show="evalType === 'essay'" x-cloak class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 sm:p-6">
+                        <div class="flex items-center gap-3 mb-4 pb-3 border-b border-slate-100">
+                            <div
+                                class="w-9 h-9 flex items-center justify-center bg-[#13416B] text-white rounded-xl shadow-sm border border-[#0f3354] shrink-0">
+                                <i class="fas fa-file-pen text-sm"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-sm font-bold text-slate-800">Navigasi Soal Uraian</h3>
+                                <p class="text-[11px] text-slate-400 font-medium" x-text="essayQuestions.length + ' Butir Pertanyaan'"></p>
+                            </div>
+                        </div>
+
+                        <p class="text-[11px] text-slate-500 mb-3.5">Klik nomor di bawah untuk menuju ke butir soal uraian.</p>
+
+                        <div class="grid grid-cols-5 gap-2.5 max-h-[60vh] overflow-y-auto p-1 custom-scrollbar">
+                            <template x-for="(eq, index) in essayQuestions" :key="index">
+                                <button type="button"
+                                    @click="document.getElementById('essay-question-' + index).scrollIntoView({ behavior: 'smooth', block: 'start' })"
+                                    class="aspect-square w-full rounded-full text-xs font-bold transition-all flex items-center justify-center border border-slate-200 bg-slate-50 text-slate-700 hover:bg-[#13416B] hover:text-white hover:border-[#13416B] hover:shadow-md cursor-pointer">
+                                    <span x-text="index + 1"></span>
+                                </button>
+                            </template>
+                        </div>
+                    </div>
+
+                    <!-- Info Penugasan Berkas -->
+                    <div x-show="evalType === 'file_upload'" x-cloak class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 sm:p-6 space-y-4">
+                        <div class="flex items-center gap-3 pb-3 border-b border-slate-100">
+                            <div
+                                class="w-9 h-9 flex items-center justify-center bg-amber-500 text-white rounded-xl shadow-sm shrink-0">
+                                <i class="fas fa-info-circle text-sm"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-sm font-bold text-slate-800">Informasi Penugasan</h3>
+                                <p class="text-[11px] text-slate-400 font-medium">Unggah Berkas Tugas</p>
+                            </div>
+                        </div>
+
+                        <div class="space-y-3 text-xs text-slate-600 leading-relaxed">
+                            <div class="flex items-start gap-2.5">
+                                <i class="fas fa-check-circle text-emerald-500 mt-0.5 shrink-0"></i>
+                                <span>Admin mengunggah dokumen panduan materi/studi kasus (PDF, DOCX, ZIP).</span>
+                            </div>
+                            <div class="flex items-start gap-2.5">
+                                <i class="fas fa-check-circle text-emerald-500 mt-0.5 shrink-0"></i>
+                                <span>Peserta mengunduh berkas tersebut, menyelesaikan tugas di perangkat masing-masing.</span>
+                            </div>
+                            <div class="flex items-start gap-2.5">
+                                <i class="fas fa-check-circle text-emerald-500 mt-0.5 shrink-0"></i>
+                                <span>Peserta mengunggah kembali dokumen hasil tugas untuk dinilai instruktur.</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
             </div>
         </form>
 
         <!-- KUMPULAN TOMBOL MENGAMBANG DI MOBILE/TABLET (BOTTOM RIGHT) -->
-        <div class="fixed bottom-6 right-6 z-40 flex flex-col gap-3 lg:hidden">
+        <div class="fixed bottom-6 right-6 z-40 flex flex-col gap-3 lg:hidden" x-show="evalType !== 'file_upload'">
             <!-- TOMBOL BUKA BOTTOM SHEET NAVIGASI -->
             <button type="button" @click="showMobileNav = true"
                 class="w-12 h-12 shrink-0 aspect-square rounded-full bg-[#13416B] text-white shadow-xl hover:bg-[#0f3354] transition-all flex items-center justify-center focus:outline-none border border-[#0f3354]">
@@ -593,10 +859,23 @@
 
                 <div class="p-5 overflow-y-auto">
                     <p class="text-xs text-slate-500 mb-4">Pilih nomor untuk langsung menuju ke soal.</p>
-                    <div class="grid grid-cols-5 sm:grid-cols-8 gap-3 pb-4">
+                    
+                    <!-- Pilihan Ganda Numbers -->
+                    <div x-show="evalType === 'multiple_choice'" class="grid grid-cols-5 sm:grid-cols-8 gap-3 pb-4">
                         <template x-for="(q, index) in questions" :key="index">
                             <button type="button"
                                 @click="document.getElementById('question-' + index).scrollIntoView({ behavior: 'smooth', block: 'start' }); showMobileNav = false;"
+                                class="aspect-square w-full rounded-full text-sm font-bold transition-all flex items-center justify-center border border-slate-200 bg-slate-50 text-slate-700 hover:bg-[#13416B] hover:text-white hover:border-[#13416B] shadow-sm cursor-pointer">
+                                <span x-text="index + 1"></span>
+                            </button>
+                        </template>
+                    </div>
+
+                    <!-- Essay Numbers -->
+                    <div x-show="evalType === 'essay'" class="grid grid-cols-5 sm:grid-cols-8 gap-3 pb-4">
+                        <template x-for="(eq, index) in essayQuestions" :key="index">
+                            <button type="button"
+                                @click="document.getElementById('essay-question-' + index).scrollIntoView({ behavior: 'smooth', block: 'start' }); showMobileNav = false;"
                                 class="aspect-square w-full rounded-full text-sm font-bold transition-all flex items-center justify-center border border-slate-200 bg-slate-50 text-slate-700 hover:bg-[#13416B] hover:text-white hover:border-[#13416B] shadow-sm cursor-pointer">
                                 <span x-text="index + 1"></span>
                             </button>
@@ -2050,7 +2329,9 @@
             function postTestEditForm() {
                 return {
                     showMobileNav: false,
+                    evalType: '{{ old('type', $postTest->type ?? 'multiple_choice') }}',
                     questions: @json($formattedQuestions),
+                    essayQuestions: @json($formattedEssayQuestions),
                     addQuestion() {
                         this.questions.push({
                             question: '',
@@ -2060,6 +2341,14 @@
                     },
                     removeQuestion(index) {
                         this.questions.splice(index, 1);
+                    },
+                    addEssayQuestion() {
+                        this.essayQuestions.push({
+                            question: ''
+                        });
+                    },
+                    removeEssayQuestion(index) {
+                        this.essayQuestions.splice(index, 1);
                     }
                 }
             }

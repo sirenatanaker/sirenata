@@ -2,8 +2,10 @@
 
 namespace Modules\LMS\Services;
 
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Modules\LMS\Models\Course;
 use Modules\LMS\Models\CourseSection;
@@ -47,12 +49,32 @@ class PostTestService
 
             return [
                 'question'       => $q->question,
-                'choices'        => $choices,
+                'choices'        => $choices->isNotEmpty() ? $choices->all() : ['', '', '', ''],
                 'correct_choice' => $correctIndex,
             ];
         });
 
-        return compact('course', 'section', 'postTest', 'formattedQuestions');
+        $formattedEssayQuestions = $postTest->questions->map(function ($q) {
+            return [
+                'question' => $q->question,
+            ];
+        });
+
+        if ($formattedQuestions->isEmpty()) {
+            $formattedQuestions = collect([[
+                'question'       => '',
+                'choices'        => ['', '', '', ''],
+                'correct_choice' => 0,
+            ]]);
+        }
+
+        if ($formattedEssayQuestions->isEmpty()) {
+            $formattedEssayQuestions = collect([[
+                'question' => '',
+            ]]);
+        }
+
+        return compact('course', 'section', 'postTest', 'formattedQuestions', 'formattedEssayQuestions');
     }
 
     public function uploadEditorImage($imageFile): string
@@ -146,7 +168,7 @@ class PostTestService
         ];
     }
 
-    public function storePostTestWithQuestions(array $data): array
+    public function storePostTestWithQuestions(array $data, ?UploadedFile $adminFile = null): array
     {
         DB::beginTransaction();
         try {
@@ -158,6 +180,20 @@ class PostTestService
             }
             $courseName = $course ? ($course->course_name ?? $course->name) : 'Pelatihan';
             $title = !empty(trim($data['title'] ?? '')) ? $data['title'] : ('Evaluasi Akhir : ' . $courseName);
+            $type = $data['type'] ?? 'multiple_choice';
+
+            $adminFilePath = null;
+            $adminFileName = null;
+            $adminFileSize = null;
+
+            if ($type === 'file_upload' && $adminFile) {
+                $adminFileName = $adminFile->getClientOriginalName();
+                $sizeBytes = $adminFile->getSize();
+                $adminFileSize = $sizeBytes >= 1048576 
+                    ? round($sizeBytes / 1048576, 1) . ' MB' 
+                    : round($sizeBytes / 1024, 0) . ' KB';
+                $adminFilePath = $adminFile->store('assignments/soal', 'public');
+            }
 
             $postTest = PostTest::create([
                 'course_section_id' => $data['course_section_id'] ?? null,
@@ -166,9 +202,15 @@ class PostTestService
                 'description'       => $data['description'] ?? null,
                 'passing_score'     => $data['passing_score'] ?? 70,
                 'duration'          => $data['duration'] ?? 30,
+                'type'              => $type,
+                'admin_file_path'   => $adminFilePath,
+                'admin_file_name'   => $adminFileName,
+                'admin_file_size'   => $adminFileSize,
+                'instructions'      => ($type === 'file_upload') ? ($data['instructions'] ?? null) : null,
+                'max_words'         => ($type === 'essay') ? ($data['max_words'] ?? 500) : null,
             ]);
 
-            if (!empty($data['questions'])) {
+            if ($type === 'multiple_choice' && !empty($data['questions'])) {
                 foreach ($data['questions'] as $qData) {
                     $question = $postTest->questions()->create([
                         'question' => $qData['question'],
@@ -184,13 +226,22 @@ class PostTestService
                         }
                     }
                 }
+            } elseif ($type === 'essay' && (!empty($data['essay_questions']) || !empty($data['questions']))) {
+                $essayItems = $data['essay_questions'] ?? $data['questions'];
+                foreach ($essayItems as $qData) {
+                    if (!empty(trim($qData['question'] ?? ''))) {
+                        $postTest->questions()->create([
+                            'question' => $qData['question'],
+                        ]);
+                    }
+                }
             }
 
             DB::commit();
 
             return [
                 'success' => true,
-                'message' => 'Post Test beserta soal berhasil disimpan',
+                'message' => 'Evaluasi beserta soal berhasil disimpan',
             ];
         } catch (\Exception $e) {
             DB::rollBack();
@@ -203,7 +254,7 @@ class PostTestService
         }
     }
 
-    public function updatePostTestWithQuestions(PostTest $postTest, array $data): array
+    public function updatePostTestWithQuestions(PostTest $postTest, array $data, ?UploadedFile $adminFile = null): array
     {
         DB::beginTransaction();
         try {
@@ -215,20 +266,53 @@ class PostTestService
             }
             $courseName = $course ? ($course->course_name ?? $course->name) : 'Pelatihan';
             $title = !empty(trim($data['title'] ?? '')) ? $data['title'] : ('Evaluasi Akhir : ' . $courseName);
+            $type = $data['type'] ?? $postTest->type ?? 'multiple_choice';
+
+            $adminFilePath = $postTest->admin_file_path;
+            $adminFileName = $postTest->admin_file_name;
+            $adminFileSize = $postTest->admin_file_size;
+
+            if ($type === 'file_upload') {
+                if ($adminFile) {
+                    if ($postTest->admin_file_path && Storage::disk('public')->exists($postTest->admin_file_path)) {
+                        Storage::disk('public')->delete($postTest->admin_file_path);
+                    }
+                    $adminFileName = $adminFile->getClientOriginalName();
+                    $sizeBytes = $adminFile->getSize();
+                    $adminFileSize = $sizeBytes >= 1048576 
+                        ? round($sizeBytes / 1048576, 1) . ' MB' 
+                        : round($sizeBytes / 1024, 0) . ' KB';
+                    $adminFilePath = $adminFile->store('assignments/soal', 'public');
+                }
+            } else {
+                if ($postTest->admin_file_path && Storage::disk('public')->exists($postTest->admin_file_path)) {
+                    Storage::disk('public')->delete($postTest->admin_file_path);
+                }
+                $adminFilePath = null;
+                $adminFileName = null;
+                $adminFileSize = null;
+            }
 
             $postTest->update([
-                'title'         => $title,
-                'description'   => $data['description'] ?? null,
-                'passing_score' => $data['passing_score'] ?? 70,
-                'duration'      => $data['duration'] ?? 30,
+                'title'           => $title,
+                'description'     => $data['description'] ?? null,
+                'passing_score'   => $data['passing_score'] ?? 70,
+                'duration'        => $data['duration'] ?? 30,
+                'type'            => $type,
+                'admin_file_path' => $adminFilePath,
+                'admin_file_name' => $adminFileName,
+                'admin_file_size' => $adminFileSize,
+                'instructions'    => ($type === 'file_upload') ? ($data['instructions'] ?? null) : null,
+                'max_words'       => ($type === 'essay') ? ($data['max_words'] ?? 500) : null,
             ]);
 
+            // Hapus pertanyaan & pilihan lama
             foreach ($postTest->questions as $question) {
                 $question->choices()->delete();
                 $question->delete();
             }
 
-            if (!empty($data['questions'])) {
+            if ($type === 'multiple_choice' && !empty($data['questions'])) {
                 foreach ($data['questions'] as $qData) {
                     $question = $postTest->questions()->create([
                         'question' => $qData['question'],
@@ -244,13 +328,22 @@ class PostTestService
                         }
                     }
                 }
+            } elseif ($type === 'essay' && (!empty($data['essay_questions']) || !empty($data['questions']))) {
+                $essayItems = $data['essay_questions'] ?? $data['questions'];
+                foreach ($essayItems as $qData) {
+                    if (!empty(trim($qData['question'] ?? ''))) {
+                        $postTest->questions()->create([
+                            'question' => $qData['question'],
+                        ]);
+                    }
+                }
             }
 
             DB::commit();
 
             return [
                 'success' => true,
-                'message' => 'Post Test berhasil diperbarui',
+                'message' => 'Evaluasi berhasil diperbarui',
             ];
         } catch (\Exception $e) {
             DB::rollBack();
