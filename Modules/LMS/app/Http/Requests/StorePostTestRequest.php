@@ -15,6 +15,13 @@ class StorePostTestRequest extends FormRequest
 
     protected function prepareForValidation(): void
     {
+        if ($this->input('type') === 'file_upload') {
+            $this->merge([
+                'passing_score' => $this->input('passing_score') ?: 0,
+                'duration'      => $this->input('duration') ?: 0,
+            ]);
+        }
+
         if (empty($this->title)) {
             $course = Course::where('slug', $this->course_slug)->first();
             $courseName = $course ? ($course->course_name ?? $course->name) : 'Pelatihan';
@@ -47,18 +54,22 @@ class StorePostTestRequest extends FormRequest
             'course_section_id' => ['nullable', 'uuid'],
             'course_id'         => ['nullable', 'uuid'],
             'title'             => ['nullable', 'string', 'max:255'],
-            'passing_score'     => ['required', 'integer', 'min:0', 'max:100'],
-            'duration'          => ['required', 'integer', 'min:1'],
             'description'       => ['nullable', 'string'],
         ];
 
         if ($type === 'file_upload') {
-            $rules['admin_file']   = ['required', 'file', 'mimes:pdf,docx,doc,zip,rar', 'max:10240'];
-            $rules['instructions'] = ['nullable', 'string', 'max:2000'];
+            $rules['passing_score'] = ['nullable', 'integer', 'min:0', 'max:100'];
+            $rules['duration']      = ['nullable', 'integer', 'min:0'];
+            $rules['admin_file']    = ['required', 'file', 'mimes:pdf,docx,doc,zip,rar', 'max:10240'];
+            $rules['instructions']  = ['nullable', 'string', 'max:2000'];
         } elseif ($type === 'essay') {
+            $rules['passing_score']              = ['required', 'integer', 'min:0', 'max:100'];
+            $rules['duration']                   = ['required', 'integer', 'min:1'];
             $rules['essay_questions']            = ['required', 'array', 'min:1'];
             $rules['essay_questions.*.question'] = ['required', 'string'];
         } else {
+            $rules['passing_score']              = ['required', 'integer', 'min:0', 'max:100'];
+            $rules['duration']                   = ['required', 'integer', 'min:1'];
             $rules['questions']                  = ['required', 'array', 'min:1'];
             $rules['questions.*.question']       = ['required', 'string'];
             $rules['questions.*.choices']        = ['required', 'array', 'min:2'];

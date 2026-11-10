@@ -456,20 +456,20 @@
                                 </div>
                             </div>
 
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <!-- PENGATURAN KKM & DURASI (HANYA UNTUK PILIHAN GANDA & URAIAN) -->
+                            <div x-show="evalType !== 'file_upload'" x-cloak class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
                                     <label class="block text-sm font-medium text-slate-700 mb-1">Passing Score (KKM)
                                         <span class="text-red-500">*</span></label>
-                                    <input type="number" name="passing_score" required min="0" max="100"
+                                    <input type="number" name="passing_score" :required="evalType !== 'file_upload'" :disabled="evalType === 'file_upload'" min="0" max="100"
                                         value="{{ old('passing_score', $postTest->passing_score) }}"
                                         class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-[#13416B] focus:ring-1 focus:ring-[#13416B]" />
                                 </div>
                                 <div>
                                     <label class="block text-sm font-medium text-slate-700 mb-1">
-                                        <span x-text="evalType === 'file_upload' ? 'Estimasi Waktu Pengerjaan (Menit)' : 'Durasi Pengerjaan (Menit)'"></span>
-                                        <span class="text-red-500">*</span>
+                                        Durasi Pengerjaan (Menit) <span class="text-red-500">*</span>
                                     </label>
-                                    <input type="number" name="duration" required min="1"
+                                    <input type="number" name="duration" :required="evalType !== 'file_upload'" :disabled="evalType === 'file_upload'" min="1"
                                         value="{{ old('duration', $postTest->duration) }}"
                                         class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-[#13416B] focus:ring-1 focus:ring-[#13416B]" />
                                 </div>
@@ -603,19 +603,22 @@
                                     </button>
                                 </div>
 
-                                <div class="p-6 space-y-4">
+                                <div class="p-6 space-y-5">
+                                    <!-- TEXT EDITOR: Soal Uraian -->
                                     <div>
-                                        <label class="block text-xs font-medium text-slate-700 mb-1.5">
-                                            Teks Pertanyaan / Studi Kasus <span class="text-red-500">*</span>
-                                        </label>
-                                        <textarea
-                                            :name="'essay_questions[' + eqIndex + '][question]'"
-                                            :disabled="evalType !== 'essay'"
-                                            x-model="eq.question"
-                                            rows="4"
-                                            :required="evalType === 'essay'"
-                                            placeholder="Tuliskan pertanyaan uraian secara jelas di sini..."
-                                            class="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm focus:border-[#13416B] focus:ring-1 focus:ring-[#13416B] leading-relaxed transition shadow-2xs"></textarea>
+                                        <label class="block text-xs font-medium text-slate-500 mb-1.5">Tulis Pertanyaan / Studi Kasus
+                                            <span class="text-red-500">*</span></label>
+                                        <div x-data="{
+                                            initEssayEditor() {
+                                                createQuestionEditor(this.$refs.editor_eq, (html) => {
+                                                    eq.question = html;
+                                                }, eq.question);
+                                            }
+                                        }" x-init="initEssayEditor()">
+                                            <div x-ref="editor_eq" class="bg-white quill-question"></div>
+                                            <input type="hidden" :name="'essay_questions[' + eqIndex + '][question]'"
+                                                :value="eq.question" :disabled="evalType !== 'essay'">
+                                        </div>
                                     </div>
                                 </div>
                             </div>

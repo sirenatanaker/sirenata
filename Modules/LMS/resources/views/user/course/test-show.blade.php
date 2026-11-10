@@ -134,9 +134,9 @@
                                             <span class="w-7 h-7 rounded-lg bg-[#13416B] text-white flex items-center justify-center text-xs font-extrabold shrink-0 mt-0.5 border border-[#0f3354] shadow-xs">
                                                 {{ $qIdx + 1 }}
                                             </span>
-                                            <p class="text-sm sm:text-base font-bold text-slate-800 leading-snug">
+                                            <div class="flex-1 min-w-0 prose max-w-none text-slate-800 text-sm sm:text-base font-bold leading-snug">
                                                 {!! strip_tags($question->question) === $question->question ? nl2br(e($question->question)) : $question->question !!}
-                                            </p>
+                                            </div>
                                         </div>
                                         <div class="pl-0 sm:pl-10">
                                             <div class="p-4 rounded-lg bg-slate-50 border border-slate-200 text-xs sm:text-sm text-slate-800 leading-relaxed whitespace-pre-wrap">
@@ -171,10 +171,8 @@
                                             <span class="w-7 h-7 rounded-lg bg-[#13416B] text-white flex items-center justify-center text-xs font-extrabold shrink-0 mt-0.5 border border-[#0f3354] shadow-xs">
                                                 {{ $qIdx + 1 }}
                                             </span>
-                                            <div class="flex-1 min-w-0">
-                                                <label class="block text-sm sm:text-base font-bold text-slate-800 leading-snug">
-                                                    {!! strip_tags($question->question) === $question->question ? nl2br(e($question->question)) : $question->question !!}
-                                                </label>
+                                            <div class="flex-1 min-w-0 prose max-w-none text-slate-800 text-sm sm:text-base font-bold leading-snug">
+                                                {!! strip_tags($question->question) === $question->question ? nl2br(e($question->question)) : $question->question !!}
                                             </div>
                                         </div>
 
