@@ -326,6 +326,12 @@ class CourseController extends Controller
             return redirect()->back();
         }
 
+        // Cek jika jadwal sesi Zoom telah berakhir
+        if ($activeBimtek->zoom_end_at && now()->greaterThan($activeBimtek->zoom_end_at)) {
+            ToastMagic::error('Sesi Live Zoom telah berakhir pada ' . $activeBimtek->zoom_end_at->translatedFormat('d F Y, H:i') . ' WIB.');
+            return redirect()->back();
+        }
+
         DB::table('course_student')
             ->where('course_id', $course->id)
             ->where('user_id', $request->user()->id)

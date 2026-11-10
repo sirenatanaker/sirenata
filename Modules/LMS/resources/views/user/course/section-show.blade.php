@@ -210,264 +210,251 @@
                         $zoomEnd = $activeBimtek->zoom_end_at;
                         $zoomScheduleFormatted = $activeBimtek->zoom_schedule_formatted ?? null;
 
+                        $isZoomEnded = $zoomEnd ? $now->greaterThan($zoomEnd) : ($zoomStart ? $now->greaterThan($zoomStart->copy()->endOfDay()) : false);
+
                         $isPresensiOpen = true;
                         $presensiLockReason = null;
 
                         if ($zoomStart && $now->lessThan($zoomStart)) {
                             $isPresensiOpen = false;
                             $presensiLockReason = 'Presensi dibuka saat jadwal sesi tatap muka (' . ($zoomScheduleFormatted ?? $zoomStart->translatedFormat('d M Y, H:i') . ' WIB') . ')';
-                        } elseif ($zoomEnd && $now->greaterThan($zoomEnd)) {
+                        } elseif ($isZoomEnded) {
                             $isPresensiOpen = false;
-                            $presensiLockReason = 'Waktu presensi tatap muka telah berakhir pada ' . $zoomEnd->translatedFormat('d M Y, H:i') . ' WIB';
+                            $presensiLockReason = 'Waktu presensi tatap muka telah berakhir' . ($zoomEnd ? ' pada ' . $zoomEnd->translatedFormat('d M Y, H:i') . ' WIB' : '');
                         }
                     @endphp
                     <div id="sesi-zoom"
-                        class="scroll-mt-6 rounded-md border border-slate-200 bg-slate-50/40 p-4 sm:p-5 lg:p-6 shadow-2xs transition-all">
-                        
-                        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                            <div class="space-y-3 flex-1 min-w-0">
-                                <div class="flex items-center gap-3.5">
-                                    <div class="w-11 h-11 sm:w-12 sm:h-12 rounded-md bg-[#1E62D0] text-white flex items-center justify-center shrink-0 text-xl sm:text-2xl shadow-xs">
-                                        <i class="fas fa-video"></i>
-                                    </div>
-                                    <div class="space-y-1 min-w-0">
-                                        <h3 class="text-base sm:text-lg font-bold text-slate-800 leading-tight">Sesi Tatap Muka Online</h3>
-                                        @if ($isZoomAttended)
-                                            <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded text-xs font-bold bg-emerald-600 text-white shadow-xs">
-                                                <i class="fas fa-check-circle"></i> Presensi Kehadiran Terverifikasi
-                                            </span>
-                                        @elseif ($isPresensiOpen)
-                                            <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded text-xs font-bold bg-[#0B5CFF] text-white shadow-xs">
-                                                <i class="fas fa-door-open"></i> Presensi Dibuka
-                                            </span>
-                                        @elseif ($zoomEnd && $now->greaterThan($zoomEnd))
-                                            <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded text-xs font-bold bg-slate-600 text-white shadow-xs">
-                                                <i class="fas fa-times-circle"></i> Waktu Presensi Berakhir
-                                            </span>
-                                        @else
-                                            <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded text-xs font-bold bg-amber-500 text-white shadow-xs">
-                                                <i class="fas fa-clock"></i> Presensi Belum Dibuka
-                                            </span>
-                                        @endif
-                                    </div>
-                                </div>
-
-                                <p class="text-sm sm:text-[15px] text-slate-700 leading-relaxed pt-1">
-                                    @if ($isZoomAttended)
-                                        Kehadiran Anda pada sesi tatap muka online telah terverifikasi.
-                                    @elseif ($isPresensiOpen)
-                                        Sesi tatap muka daring sedang dibuka. Silakan masuk ke ruang pertemuan dan klik tombol Konfirmasi Kehadiran di bawah.
-                                    @elseif ($zoomEnd && $now->greaterThan($zoomEnd))
-                                        Sesi tatap muka daring dan batas waktu konfirmasi kehadiran telah berakhir.
-                                    @else
-                                        Bergabunglah ke ruang pertemuan daring bersama pemateri sesuai jadwal. Tombol konfirmasi kehadiran akan aktif saat jam presensi dibuka oleh panitia.
-                                    @endif
-                                </p>
-
-                                {{-- Info Sesi Tatap Muka --}}
-                                <div class="flex flex-wrap items-center gap-2 sm:gap-3 pt-1">
-                                    @if ($activeBimtek->zoom_scheduled_at)
-                                        <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs sm:text-sm font-semibold bg-white text-slate-700 border border-slate-200 shadow-2xs">
-                                            <i class="fas fa-calendar-alt text-[#1E62D0]"></i>
-                                            {{ $zoomScheduleFormatted ?? $activeBimtek->zoom_scheduled_at->translatedFormat('d F Y, H:i') . ' WIB' }}
-                                        </span>
-                                    @endif
-                                    @if ($activeBimtek->zoom_meeting_id)
-                                        <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs sm:text-sm font-mono font-bold bg-white text-slate-700 border border-slate-200 shadow-2xs">
-                                            <i class="fas fa-hashtag text-slate-400"></i> ID: {{ $activeBimtek->zoom_meeting_id }}
-                                        </span>
-                                    @endif
-                                    @if ($activeBimtek->zoom_passcode)
-                                        <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs sm:text-sm font-mono font-bold bg-white text-slate-700 border border-slate-200 shadow-2xs">
-                                            <i class="fas fa-key text-slate-400"></i> Passcode: {{ $activeBimtek->zoom_passcode }}
-                                        </span>
-                                    @endif
-                                </div>
+                        class="scroll-mt-6 rounded-md border border-slate-200 bg-slate-50/40 p-4 sm:p-5 lg:p-6 shadow-2xs transition-all space-y-4">
+                        <div>
+                            <div class="mb-1">
+                                <span class="text-xs font-bold text-[#13416B]">Pertemuan Daring (Zoom)</span>
                             </div>
 
-                            {{-- Tombol Aksi Tatap Muka --}}
-                            <div class="shrink-0 flex flex-col sm:flex-row md:flex-col gap-2.5 self-start md:self-center w-full md:w-auto">
-                                <a href="{{ route('user.course.my-course.join-zoom', $courseSlug) }}"
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    class="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-md font-bold text-xs sm:text-sm bg-[#13416B] text-white hover:bg-[#0f3354] transition-all shadow-sm">
-                                    <i class="fas fa-external-link-alt text-xs"></i>
-                                    <span>Masuk Tatap Muka</span>
-                                </a>
+                            <h3 class="text-base sm:text-lg font-bold text-slate-800 leading-snug">
+                                Sesi Tatap Muka Online
+                            </h3>
 
-                                @if (!$isZoomAttended)
-                                    @if ($isPresensiOpen)
-                                        <form action="{{ route('user.course.my-course.attend-zoom', $courseSlug) }}" method="POST" class="inline w-full sm:w-auto md:w-full">
-                                            @csrf
-                                            <button type="submit"
-                                                class="w-full inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-md font-bold text-xs sm:text-sm bg-emerald-600 hover:bg-emerald-700 text-white transition-all shadow-sm cursor-pointer">
-                                                <i class="fas fa-clipboard-check text-xs"></i>
-                                                <span>Konfirmasi Kehadiran</span>
-                                            </button>
-                                        </form>
-                                    @else
-                                        <button type="button" disabled
-                                            title="{{ $presensiLockReason }}"
-                                            class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-md font-bold text-xs sm:text-sm border border-slate-300 bg-slate-100 text-slate-400 cursor-not-allowed select-none">
-                                            <i class="fas fa-lock text-xs"></i>
-                                            <span>{{ $zoomEnd && $now->greaterThan($zoomEnd) ? 'Presensi Berakhir' : 'Presensi Belum Dibuka' }}</span>
-                                        </button>
-                                    @endif
+                            <p class="text-sm sm:text-[15px] text-slate-600 mt-1 leading-relaxed">
+                                @if ($isZoomAttended)
+                                    Terima kasih, Anda telah mengisi presensi kehadiran sesi tatap muka online.
+                                @elseif ($isPresensiOpen)
+                                    Silakan masuk ke ruang tatap muka, lalu klik tombol Konfirmasi Kehadiran setelah Anda bergabung.
+                                @elseif ($isZoomEnded)
+                                    Sesi tatap muka online dan batas waktu konfirmasi kehadiran telah berakhir.
+                                @else
+                                    Bergabunglah ke ruang tatap muka sesuai jadwal. Tombol konfirmasi akan aktif saat presensi dibuka oleh panitia.
+                                @endif
+                            </p>
+                        </div>
+
+                        {{-- Info Sesi (Jadwal, Meeting ID, Passcode) --}}
+                        @if ($activeBimtek->zoom_scheduled_at || $activeBimtek->zoom_meeting_id || $activeBimtek->zoom_passcode)
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                                @if ($activeBimtek->zoom_scheduled_at)
+                                    <div class="flex items-center gap-2.5 p-2.5 rounded-md bg-white border border-slate-200 shadow-2xs">
+                                        <div class="w-8 h-8 rounded-md bg-slate-100 text-[#13416B] flex items-center justify-center shrink-0 text-sm">
+                                            <i class="fas fa-calendar-alt"></i>
+                                        </div>
+                                        <div class="min-w-0">
+                                            <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Jadwal</p>
+                                            <p class="text-xs font-bold text-slate-800 truncate" title="{{ $zoomScheduleFormatted ?? $activeBimtek->zoom_scheduled_at->translatedFormat('d F Y, H:i') . ' WIB' }}">
+                                                {{ $zoomScheduleFormatted ?? $activeBimtek->zoom_scheduled_at->translatedFormat('d M Y, H:i') . ' WIB' }}
+                                            </p>
+                                        </div>
+                                    </div>
+                                @endif
+                                @if ($activeBimtek->zoom_meeting_id)
+                                    <div class="flex items-center gap-2.5 p-2.5 rounded-md bg-white border border-slate-200 shadow-2xs">
+                                        <div class="w-8 h-8 rounded-md bg-slate-100 text-[#13416B] flex items-center justify-center shrink-0 text-sm">
+                                            <i class="fas fa-hashtag"></i>
+                                        </div>
+                                        <div class="min-w-0">
+                                            <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Meeting ID</p>
+                                            <p class="text-xs font-mono font-bold text-slate-800 truncate">{{ $activeBimtek->zoom_meeting_id }}</p>
+                                        </div>
+                                    </div>
+                                @endif
+                                @if ($activeBimtek->zoom_passcode)
+                                    <div class="flex items-center gap-2.5 p-2.5 rounded-md bg-white border border-slate-200 shadow-2xs">
+                                        <div class="w-8 h-8 rounded-md bg-slate-100 text-[#13416B] flex items-center justify-center shrink-0 text-sm">
+                                            <i class="fas fa-key"></i>
+                                        </div>
+                                        <div class="min-w-0">
+                                            <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Passcode</p>
+                                            <p class="text-xs font-mono font-bold text-slate-800 truncate">{{ $activeBimtek->zoom_passcode }}</p>
+                                        </div>
+                                    </div>
                                 @endif
                             </div>
+                        @endif
+
+                        {{-- Tombol Aksi: Masuk Tatap Muka & Presensi Berdampingan --}}
+                        <div class="flex flex-wrap items-center gap-2.5 pt-1">
+                            {{-- 1. Tombol Masuk Tatap Muka --}}
+                            @if ($isZoomEnded)
+                                <button type="button" disabled title="Jadwal sesi tatap muka telah berakhir"
+                                    class="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-md font-bold text-xs sm:text-sm border border-slate-300 bg-slate-100 text-slate-400 cursor-not-allowed select-none">
+                                    <i class="fas fa-video-slash text-xs"></i>
+                                    <span>Sesi Tatap Muka Berakhir</span>
+                                </button>
+                            @else
+                                <a href="{{ route('user.course.my-course.join-zoom', $courseSlug) }}"
+                                    target="_blank" rel="noopener noreferrer"
+                                    class="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-md font-bold text-xs sm:text-sm bg-[#13416B] hover:bg-[#0f3354] text-white shadow-sm transition-all">
+                                    <i class="fas fa-video text-xs"></i>
+                                    <span>Masuk Tatap Muka</span>
+                                    <i class="fas fa-external-link-alt text-[10px] opacity-75"></i>
+                                </a>
+                            @endif
+
+                            {{-- 2. Tombol Presensi Kehadiran --}}
+                            @if ($isZoomAttended)
+                                <button type="button" disabled
+                                    class="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-md font-bold text-xs sm:text-sm bg-emerald-600 text-white shadow-sm select-none cursor-default">
+                                    <i class="fas fa-check-circle text-xs"></i>
+                                    <span>Sudah Presensi</span>
+                                </button>
+                            @elseif ($isPresensiOpen)
+                                <form action="{{ route('user.course.my-course.attend-zoom', $courseSlug) }}" method="POST" class="inline">
+                                    @csrf
+                                    <button type="submit"
+                                        class="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-md font-bold text-xs sm:text-sm bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm transition-all cursor-pointer">
+                                        <i class="fas fa-clipboard-check text-xs"></i>
+                                        <span>Konfirmasi Kehadiran</span>
+                                    </button>
+                                </form>
+                            @else
+                                <button type="button" disabled title="{{ $presensiLockReason }}"
+                                    class="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-md font-bold text-xs sm:text-sm border border-slate-300 bg-slate-100 text-slate-400 cursor-not-allowed select-none">
+                                    <i class="fas fa-lock text-xs"></i>
+                                    <span>{{ $isZoomEnded ? 'Presensi Berakhir' : 'Presensi Belum Dibuka' }}</span>
+                                </button>
+                            @endif
                         </div>
                     </div>
 
                     {{-- 3. CARD BUKTI PENDUKUNG PRESENSI (DIBAWAH CARD ZOOM) --}}
-                    <div id="bukti-presensi" class="scroll-mt-6 rounded-md border border-slate-200 bg-slate-50/40 p-4 sm:p-5 lg:p-6 shadow-2xs transition-all space-y-4">
-                        <div class="flex items-center gap-3 pb-3 border-b border-slate-200/80">
-                            <div class="w-10 h-10 rounded-md bg-[#13416B] text-white flex items-center justify-center shrink-0 text-lg shadow-xs">
-                                <i class="fas fa-camera"></i>
+                    @php
+                        $hasProofSaved = $zoomProof && ($zoomProof->file_path || $zoomProof->notes) && (!isset($errors) || !$errors->any());
+                    @endphp
+                    <div id="bukti-presensi" x-data="{ editing: {{ $hasProofSaved ? 'false' : 'true' }} }"
+                        class="scroll-mt-6 rounded-md border border-slate-200 bg-slate-50/40 p-4 sm:p-5 lg:p-6 shadow-2xs transition-all space-y-4">
+                        <div>
+                            <div class="mb-1">
+                                <span class="text-xs font-bold text-[#13416B]">Unggah Dokumen / Foto</span>
                             </div>
-                            <div>
-                                <h3 class="text-base sm:text-lg font-bold text-slate-800 leading-tight">Bukti Pendukung Presensi</h3>
-                                <p class="text-xs text-slate-500 mt-0.5">Google Drive Penyelenggara & Unggah Tangkapan Layar</p>
-                            </div>
+
+                            <h3 class="text-base sm:text-lg font-bold text-slate-800 leading-snug">
+                                Bukti Pendukung Presensi
+                            </h3>
+
+                            <p class="text-sm sm:text-[15px] text-slate-600 mt-1 leading-relaxed">
+                                Unggah tangkapan layar (screenshot) sesi Zoom atau tautkan catatan presensi Anda untuk diverifikasi oleh panitia.
+                            </p>
                         </div>
 
-                        <p class="text-sm sm:text-[15px] text-slate-700 leading-relaxed">
-                            Unggah tangkapan layar sesi Zoom ke Google Drive panitia atau lampirkan berkas foto langsung di sini sebagai bukti kehadiran.
-                        </p>
-
-                        {{-- Banner Folder Google Drive Presensi dari Penyelenggara --}}
-                        @if ($adminDriveLink)
-                            <div class="p-4 rounded-md bg-white border border-blue-200/90 shadow-2xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3.5">
-                                <div class="flex items-center gap-3">
-                                    <div class="w-10 h-10 rounded-md bg-blue-50 text-[#0B5CFF] border border-blue-200 flex items-center justify-center shrink-0 shadow-2xs">
-                                        <i class="fab fa-google-drive text-xl"></i>
-                                    </div>
-                                    <div>
-                                        <p class="text-xs sm:text-sm font-bold text-slate-800">Folder Google Drive Presensi Penyelenggara</p>
-                                        <p class="text-xs text-slate-600 mt-0.5">Kumpulkan bukti foto kehadiran sesi Zoom Anda ke folder Google Drive panitia berikut.</p>
-                                    </div>
-                                </div>
-
-                                <a href="{{ $adminDriveLink }}" target="_blank" rel="noopener noreferrer"
-                                    class="inline-flex items-center gap-2 px-4 py-2.5 rounded-md text-xs sm:text-sm font-bold text-white bg-[#0B5CFF] hover:bg-blue-700 transition-all shadow-2xs shrink-0 whitespace-nowrap">
-                                    <i class="fab fa-google-drive"></i>
-                                    <span>Buka Drive Presensi Panitia</span>
-                                    <i class="fas fa-external-link-alt text-[10px] ml-0.5"></i>
-                                </a>
-                            </div>
-                        @endif
-
-                        {{-- Form & Status Bukti Presensi --}}
-                        @if ($zoomProof && ($zoomProof->file_path || $zoomProof->notes) && (!isset($errors) || !$errors->any()))
-                            <div x-data="{ isEditingPhoto: false }" class="space-y-3">
-                                <div x-show="!isEditingPhoto" class="flex flex-wrap items-center justify-between gap-3 p-4 rounded-md bg-white border border-emerald-200/90 shadow-2xs">
-                                    <div class="flex items-center gap-3">
-                                        <div class="w-9 h-9 rounded bg-emerald-50 text-emerald-600 flex items-center justify-center border border-emerald-100 shrink-0">
-                                            <i class="fas fa-check-circle text-base"></i>
+                                {{-- Folder Google Drive Penyelenggara --}}
+                                @if ($adminDriveLink)
+                                    <div class="p-3.5 rounded-md bg-white border border-slate-200 shadow-2xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                                        <div class="flex items-center gap-3 min-w-0">
+                                            <div class="w-9 h-9 rounded-md bg-blue-50 text-[#0B5CFF] flex items-center justify-center shrink-0">
+                                                <i class="fab fa-google-drive text-lg"></i>
+                                            </div>
+                                            <div class="min-w-0">
+                                                <p class="text-xs sm:text-sm font-bold text-slate-800 truncate">Folder Google Drive Penyelenggara</p>
+                                                <p class="text-[11px] text-slate-500">Kumpulkan berkas/foto kehadiran langsung ke folder panitia.</p>
+                                            </div>
                                         </div>
-                                        <div class="space-y-0.5">
-                                            <p class="text-xs sm:text-sm font-bold text-slate-800">Bukti Presensi Telah Dikonfirmasi</p>
-                                            <p class="text-xs text-slate-500">
-                                                {{ $zoomProof->submitted_at ? $zoomProof->submitted_at->translatedFormat('d M Y, H:i') . ' WIB' : 'Tersimpan' }}
-                                                @if ($zoomProof->notes)
-                                                    • <span class="italic text-slate-600">"{{ $zoomProof->notes }}"</span>
-                                                @endif
-                                            </p>
-                                        </div>
-                                    </div>
-                                    <div class="flex items-center gap-2">
-                                        @if ($zoomProof->file_path)
-                                            <a href="{{ $zoomProof->file_url }}" target="_blank" rel="noopener noreferrer"
-                                                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-bold text-[#13416B] bg-slate-50 hover:bg-slate-100 border border-slate-200 shadow-2xs">
-                                            <i class="fas fa-eye text-xs"></i>
-                                            <span>Lihat Foto</span>
+                                        <a href="{{ $adminDriveLink }}" target="_blank" rel="noopener noreferrer"
+                                            class="inline-flex items-center gap-2 px-3.5 py-2 rounded-md text-xs font-bold text-white bg-[#0B5CFF] hover:bg-blue-700 transition-all shadow-2xs shrink-0 whitespace-nowrap">
+                                            <i class="fab fa-google-drive"></i>
+                                            <span>Buka Drive Panitia</span>
+                                            <i class="fas fa-external-link-alt text-[10px]"></i>
                                         </a>
-                                    @endif
-                                    <button type="button" @click="isEditingPhoto = true"
-                                        class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-bold text-slate-600 hover:bg-slate-100 border border-slate-200 cursor-pointer">
-                                        <i class="fas fa-redo text-xs"></i>
-                                        <span>Perbarui Bukti</span>
-                                    </button>
-                                </div>
-                            </div>
+                                    </div>
+                                @endif
 
-                            <div x-show="isEditingPhoto" class="pt-1">
-                                <form action="{{ route('user.course.section.upload-zoom-proof', ['slug' => $courseSlug, 'sectionId' => $sectionId]) }}"
-                                    method="POST"
-                                    enctype="multipart/form-data"
-                                    class="space-y-3 p-4 rounded-md bg-white border border-slate-200 shadow-2xs">
-                                    @csrf
-                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                        <div>
-                                            <label class="block text-xs font-bold text-slate-700 mb-1.5">
-                                                Unggah Foto / Screenshot (Opsional)
-                                            </label>
-                                            <input type="file"
-                                                name="proof_file"
-                                                accept=".jpg,.jpeg,.png,.webp"
-                                                class="block w-full text-xs text-slate-500 file:mr-2 file:py-2 file:px-3 file:rounded file:border-0 file:text-xs file:font-bold file:bg-[#13416B] file:text-white hover:file:bg-[#0f3354] file:cursor-pointer border border-slate-200 rounded bg-slate-50 p-1" />
+                                {{-- Ringkasan Bukti Tersimpan --}}
+                                @if ($hasProofSaved)
+                                    <div x-show="!editing" class="flex flex-wrap items-center justify-between gap-3 p-3.5 rounded-md bg-white border border-emerald-200/80 shadow-2xs">
+                                        <div class="flex items-center gap-3 min-w-0">
+                                            <div class="w-9 h-9 rounded-md bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
+                                                <i class="fas fa-check-circle text-base"></i>
+                                            </div>
+                                            <div class="min-w-0 space-y-0.5">
+                                                <p class="text-xs sm:text-sm font-bold text-slate-800">Bukti Presensi Telah Dikonfirmasi</p>
+                                                <p class="text-[11px] text-slate-500">
+                                                    {{ $zoomProof->submitted_at ? $zoomProof->submitted_at->translatedFormat('d M Y, H:i') . ' WIB' : 'Tersimpan' }}
+                                                    @if ($zoomProof->notes)
+                                                        &bull; <span class="italic text-slate-600">"{{ $zoomProof->notes }}"</span>
+                                                    @endif
+                                                </p>
+                                            </div>
                                         </div>
-                                        <div>
-                                            <label class="block text-xs font-bold text-slate-700 mb-1.5">
-                                                Catatan Presensi / Nama Berkas di Drive Panitia
-                                            </label>
-                                            <input type="text"
-                                                name="notes"
-                                                value="{{ old('notes', $zoomProof->notes ?? '') }}"
-                                                placeholder="Contoh: Bukti hadir diunggah ke Drive panitia nama Budi_Presensi.png"
-                                                class="w-full px-3 py-2 text-xs rounded border border-slate-300 text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-[#13416B]" />
+                                        <div class="flex items-center gap-2">
+                                            @if ($zoomProof->file_path)
+                                                <a href="{{ $zoomProof->file_url }}" target="_blank" rel="noopener noreferrer"
+                                                    class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-bold text-[#13416B] bg-slate-50 hover:bg-slate-100 border border-slate-200 shadow-2xs transition-all">
+                                                    <i class="fas fa-eye text-xs"></i> <span>Lihat Foto</span>
+                                                </a>
+                                            @endif
+                                            <button type="button" @click="editing = true"
+                                                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-bold text-slate-600 bg-white hover:bg-slate-50 border border-slate-200 cursor-pointer shadow-2xs transition-all">
+                                                <i class="fas fa-redo text-xs"></i> <span>Perbarui</span>
+                                            </button>
                                         </div>
                                     </div>
-                                    <div class="flex items-center justify-end gap-2 pt-1 border-t border-slate-100">
-                                        <button type="button" @click="isEditingPhoto = false"
-                                            class="px-3.5 py-1.5 rounded text-xs font-bold text-slate-600 hover:bg-slate-100 border border-slate-200 cursor-pointer">
-                                            Batal
-                                        </button>
+                                @endif
+
+                                {{-- Form Unggah Bukti --}}
+                                <form x-show="editing" @if ($hasProofSaved) x-cloak @endif
+                                    action="{{ route('user.course.section.upload-zoom-proof', ['slug' => $courseSlug, 'sectionId' => $sectionId]) }}"
+                                    method="POST" enctype="multipart/form-data"
+                                    x-data="{ fileName: '' }"
+                                    class="space-y-3 pt-1">
+                                    @csrf
+                                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-3">
+                                        <div>
+                                            <label class="block text-xs font-bold text-slate-700 mb-1">
+                                                Foto / Screenshot <span class="font-normal text-slate-400">(Opsional)</span>
+                                            </label>
+                                            <label class="flex items-center gap-2.5 px-3.5 py-2.5 rounded-md border border-dashed border-slate-300 bg-white hover:bg-slate-50 cursor-pointer transition-colors shadow-2xs">
+                                                <div class="w-8 h-8 rounded-md bg-slate-100 text-[#13416B] flex items-center justify-center shrink-0 text-sm">
+                                                    <i class="fas fa-cloud-arrow-up"></i>
+                                                </div>
+                                                <div class="min-w-0 flex-1">
+                                                    <p class="text-xs font-bold text-slate-700 truncate" x-text="fileName || 'Pilih berkas foto/screenshot'"></p>
+                                                    <p class="text-[10px] text-slate-400">Format: JPG, PNG, atau WEBP</p>
+                                                </div>
+                                                <input type="file" name="proof_file" accept=".jpg,.jpeg,.png,.webp" class="hidden"
+                                                    @change="fileName = $event.target.files[0]?.name || ''" />
+                                            </label>
+                                        </div>
+                                        <div>
+                                            <label class="block text-xs font-bold text-slate-700 mb-1">
+                                                Catatan / Nama Berkas di Drive Panitia
+                                            </label>
+                                            <input type="text" name="notes"
+                                                value="{{ old('notes', $zoomProof->notes ?? '') }}"
+                                                placeholder="Contoh: Bukti hadir nama Budi_Presensi.png"
+                                                class="w-full px-3 py-2.5 text-xs sm:text-sm rounded-md border border-slate-300 bg-white text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-[#13416B] focus:border-[#13416B]" />
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center justify-end gap-2 pt-1">
+                                        @if ($hasProofSaved)
+                                            <button type="button" @click="editing = false"
+                                                class="px-3.5 py-2 rounded-md text-xs font-bold text-slate-600 bg-white hover:bg-slate-50 border border-slate-200 cursor-pointer shadow-2xs">
+                                                Batal
+                                            </button>
+                                        @endif
                                         <button type="submit"
-                                            class="inline-flex items-center gap-1.5 px-4 py-2 rounded text-xs font-bold text-white bg-[#13416B] hover:bg-[#0f3354] shadow-xs cursor-pointer">
-                                            <i class="fas fa-save text-xs"></i>
-                                            <span>Simpan Bukti</span>
+                                            class="inline-flex items-center gap-1.5 px-5 py-2 rounded-md text-xs sm:text-sm font-bold text-white bg-[#13416B] hover:bg-[#0f3354] shadow-sm cursor-pointer transition-all">
+                                            <i class="fas fa-check text-xs"></i>
+                                            <span>{{ $hasProofSaved ? 'Simpan Bukti' : 'Konfirmasi Bukti Presensi' }}</span>
                                         </button>
                                     </div>
                                 </form>
-                            </div>
-                        </div>
-                    @else
-                        <form action="{{ route('user.course.section.upload-zoom-proof', ['slug' => $courseSlug, 'sectionId' => $sectionId]) }}"
-                            method="POST"
-                            enctype="multipart/form-data"
-                            class="space-y-3 p-4 rounded-md bg-white border border-slate-200 shadow-2xs">
-                            @csrf
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                <div>
-                                    <label class="block text-xs font-bold text-slate-700 mb-1.5">
-                                        Unggah Foto / Screenshot (Opsional)
-                                    </label>
-                                    <input type="file"
-                                        name="proof_file"
-                                        accept=".jpg,.jpeg,.png,.webp"
-                                        class="block w-full text-xs text-slate-500 file:mr-2 file:py-2 file:px-3 file:rounded file:border-0 file:text-xs file:font-bold file:bg-[#13416B] file:text-white hover:file:bg-[#0f3354] file:cursor-pointer border border-slate-200 rounded bg-slate-50 p-1" />
-                                </div>
-                                <div>
-                                    <label class="block text-xs font-bold text-slate-700 mb-1.5">
-                                        Catatan Presensi / Nama Berkas di Drive Panitia
-                                    </label>
-                                    <input type="text"
-                                        name="notes"
-                                        value="{{ old('notes', $zoomProof->notes ?? '') }}"
-                                        placeholder="Contoh: Bukti hadir diunggah ke Drive panitia nama Budi_Presensi.png"
-                                        class="w-full px-3 py-2 text-xs rounded border border-slate-300 text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-[#13416B]" />
-                                </div>
-                            </div>
-                            <div class="flex justify-end pt-1 border-t border-slate-100">
-                                <button type="submit"
-                                    class="inline-flex items-center gap-1.5 px-4 py-2 rounded text-xs font-bold text-white bg-[#13416B] hover:bg-[#0f3354] shadow-xs cursor-pointer">
-                                    <i class="fas fa-check text-xs"></i>
-                                    <span>Konfirmasi Bukti Presensi</span>
-                                </button>
-                            </div>
-                        </form>
-                    @endif
-                </div>
+                    </div>
                 @endif
 
                 {{-- 4. CARD EVALUASI HARIAN / MODUL (MENDUKUNG PILGAN, URAIAN, & UPLOAD FILE SOAL-JAWABAN) --}}
@@ -769,7 +756,7 @@
                         <div class="hidden sm:flex sm:shrink-0 items-end justify-center self-end -mb-3.5 lg:-mb-4">
                             <img src="{{ asset('images/modul_ilustrasi.webp') }}"
                                 alt="Ilustrasi Evaluasi Modul"
-                                class="sm:h-36 md:h-40 lg:h-44 w-auto object-contain object-bottom select-none pointer-events-none" />
+                                class="sm:h-48 md:h-56 lg:h-64 w-auto object-contain object-bottom select-none pointer-events-none" />
                         </div>
                     </div>
                 </div>
