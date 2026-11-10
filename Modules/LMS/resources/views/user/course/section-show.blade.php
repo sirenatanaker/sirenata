@@ -66,24 +66,35 @@
         <div class="bg-white rounded-none sm:rounded-md shadow-sm border-y border-x-0 sm:border border-slate-200 p-4 sm:p-6 lg:p-7 transition-all">
             
             {{-- Header Agenda Modul / Hari --}}
-            <div class="flex items-start gap-3.5 sm:gap-4 min-w-0 pb-5 sm:pb-6 border-b border-slate-100">
-                {{-- Badge Hari / Modul seperti Kalender --}}
-                <div class="flex flex-col items-center justify-center w-12 h-12 sm:w-14 sm:h-14 rounded-md bg-[#13416B] text-white border border-[#13416B] border-r-2 border-b-2 border-r-[#092035] border-b-[#092035] shadow-2xs shrink-0">
-                    <span class="text-[9px] font-bold uppercase tracking-wider text-slate-300 leading-none">
-                        {{ $isBimtekEvent ? 'HARI' : 'MODUL' }}
-                    </span>
-                    <span class="text-base sm:text-lg font-black leading-tight mt-0.5">{{ $sectionIndex + 1 }}</span>
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3.5 sm:gap-4 pb-5 sm:pb-6 border-b border-slate-100">
+                <div class="flex items-start gap-3.5 sm:gap-4 min-w-0 flex-1">
+                    {{-- Badge Hari / Modul seperti Kalender --}}
+                    <div class="flex flex-col items-center justify-center w-12 h-12 sm:w-14 sm:h-14 rounded-md bg-[#13416B] text-white border border-[#13416B] border-r-2 border-b-2 border-r-[#092035] border-b-[#092035] shadow-2xs shrink-0">
+                        <span class="text-[9px] font-bold uppercase tracking-wider text-slate-300 leading-none">
+                            {{ $isBimtekEvent ? 'HARI' : 'MODUL' }}
+                        </span>
+                        <span class="text-base sm:text-lg font-black leading-tight mt-0.5">{{ $sectionIndex + 1 }}</span>
+                    </div>
+
+                    <div class="space-y-1 min-w-0 flex-1">
+                        <div>
+                            <span class="text-xs font-bold text-[#13416B]">
+                                {{ $isBimtekEvent ? 'Agenda Hari ke-' . ($sectionIndex + 1) : 'Modul Pembelajaran ' . ($sectionIndex + 1) }}
+                            </span>
+                        </div>
+                        <h1 class="text-lg sm:text-xl lg:text-2xl font-extrabold text-slate-800 leading-tight break-words">
+                            {{ $sectionName }}
+                        </h1>
+                    </div>
                 </div>
 
-                <div class="space-y-1 min-w-0 flex-1">
-                    <div>
-                        <span class="text-xs font-bold text-[#13416B]">
-                            {{ $isBimtekEvent ? 'Agenda Hari ke-' . ($sectionIndex + 1) : 'Modul Pembelajaran ' . ($sectionIndex + 1) }}
-                        </span>
-                    </div>
-                    <h1 class="text-lg sm:text-xl lg:text-2xl font-extrabold text-slate-800 leading-tight break-words">
-                        {{ $sectionName }}
-                    </h1>
+                {{-- Tombol Panduan di Kanan Header --}}
+                <div class="shrink-0 self-start sm:self-center">
+                    <button type="button" onclick="window.startSectionTour && window.startSectionTour()"
+                        class="inline-flex items-center gap-1.5 sm:gap-2 px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm font-bold text-slate-700 bg-slate-50 hover:bg-slate-100 hover:text-[#13416B] border border-slate-200 rounded-md transition-all shadow-2xs cursor-pointer shrink-0">
+                        <i class="fas fa-route text-[#13416B] text-xs sm:text-sm"></i>
+                        <span>Panduan</span>
+                    </button>
                 </div>
             </div>
 
@@ -131,19 +142,14 @@
                 {{-- Kolom Kiri: Seluruh Card Konten Agenda --}}
                 <div class="flex-1 min-w-0 space-y-5 sm:space-y-6 w-full">
 
-                    {{-- 1. CARD PEMBELAJARAN MANDIRI (DILENGKAPI TIMELINE BERUPA ANGKA) --}}
-                    <div id="pembelajaran-mandiri" class="scroll-mt-6 rounded-md border border-slate-200 bg-slate-50/40 p-4 sm:p-5 lg:p-6 shadow-2xs transition-all">
-                    <div class="flex items-center justify-between pb-4 mb-4 border-b border-slate-200/80">
-                        <div>
-                            <h2 class="text-base sm:text-lg font-extrabold text-slate-800 leading-tight">Pembelajaran Mandiri</h2>
-                            <p class="text-xs sm:text-sm text-slate-500 mt-0.5">Pelajari seluruh materi secara mandiri dan bertahap hingga selesai.</p>
-                        </div>
-                        <span class="text-xs font-bold text-slate-600 bg-white border border-slate-200 px-2.5 py-1 rounded-md shadow-2xs">
-                            {{ $totalCount }} Materi
-                        </span>
+                    {{-- 1. CARD PEMBELAJARAN MANDIRI --}}
+                    <div id="pembelajaran-mandiri" data-tour="pembelajaran-mandiri" class="scroll-mt-6 rounded-md border border-slate-200 bg-slate-50/40 p-4 sm:p-5 lg:p-6 shadow-2xs transition-all">
+                    <div class="pb-4 mb-4 border-b border-slate-200/80">
+                        <h2 class="text-base sm:text-lg font-extrabold text-slate-800 leading-tight">Pembelajaran Mandiri</h2>
+                        <p class="text-xs sm:text-sm text-slate-500 mt-0.5">Pelajari seluruh materi secara mandiri dan bertahap hingga selesai.</p>
                     </div>
 
-                    <div class="relative space-y-3.5 before:absolute before:left-3.5 sm:before:left-4 before:top-4 before:bottom-4 before:w-0.5 before:bg-slate-200">
+                    <div class="space-y-3">
                         @php $isPreviousContentDone = true; @endphp
                         @forelse ($sectionContents as $content)
                             @php
@@ -153,39 +159,39 @@
                                 $isContentLocked = $canReviewAll ? false : ($isWaitingForStart || (!$isPreviousContentDone && !$isContentItemCompleted));
                             @endphp
 
-                            <div class="relative flex items-center gap-3 sm:gap-4">
-                                {{-- Timeline Node Badge Berupa Angka --}}
-                                <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-xs sm:text-sm font-black shrink-0 z-10 transition-all select-none {{ $isContentItemCompleted ? 'bg-emerald-600 text-white shadow-xs ring-4 ring-slate-50' : ($isContentLocked ? 'bg-slate-100 text-slate-400 border border-slate-300 ring-4 ring-slate-50' : 'bg-[#13416B] text-white shadow-xs ring-4 ring-slate-50') }}">
-                                    {{ $loop->iteration }}
-                                </div>
+                            {{-- Card Konten Materi --}}
+                            <div class="flex flex-col sm:flex-row sm:items-center justify-between p-3.5 sm:p-4 rounded-md border border-slate-200 bg-white hover:border-slate-300 hover:shadow-xs transition-all gap-3 sm:gap-4">
+                                <div class="flex items-center gap-3 flex-1 min-w-0">
+                                    {{-- Badge Bulatan Nomor --}}
+                                    <div class="w-6 h-6 sm:w-7 sm:h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0 select-none {{ $isContentItemCompleted ? 'bg-emerald-600 text-white' : ($isContentLocked ? 'bg-slate-100 text-slate-400 border border-slate-200' : 'bg-[#13416B] text-white shadow-2xs') }}">
+                                        {{ $loop->iteration }}
+                                    </div>
 
-                                {{-- Card Konten Materi --}}
-                                <div class="flex-1 min-w-0 flex flex-col sm:flex-row sm:items-center justify-between p-3.5 sm:p-4 rounded-md border border-slate-200 bg-white hover:border-slate-300 hover:shadow-xs transition-all gap-3 sm:gap-4">
-                                    <div class="flex items-center gap-2.5 flex-1 min-w-0">
+                                    <div class="flex items-center gap-2 flex-1 min-w-0">
                                         <p class="font-bold text-slate-800 text-sm sm:text-[15px] leading-snug break-words line-clamp-2" title="{{ $contentName }}">
                                             {{ $contentName }}
                                         </p>
                                         @if ($isContentItemCompleted)
-                                            <span class="inline-flex items-center gap-1 text-[10px] sm:text-[11px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded shrink-0">
-                                                <i class="fas fa-check text-[9px]"></i> Selesai
-                                            </span>
+                                            <div class="w-5 h-5 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center text-[10px] font-bold shrink-0" title="Selesai">
+                                                <i class="fas fa-check"></i>
+                                            </div>
                                         @endif
                                     </div>
+                                </div>
 
-                                    <div class="shrink-0 self-start sm:self-center w-full sm:w-auto">
-                                        @if ($isContentLocked)
-                                            <button type="button" disabled
-                                                title="Pelajari materi sebelumnya terlebih dahulu"
-                                                class="w-full sm:w-auto inline-flex items-center justify-center px-4 py-2 bg-slate-100 text-slate-400 border border-slate-200 rounded-md text-xs font-semibold cursor-not-allowed select-none">
-                                                <span>Terkunci</span>
-                                            </button>
-                                        @else
-                                            <a href="{{ route('user.course.content.show', ['slug' => $courseSlug, 'content' => $contentId]) }}"
-                                                class="w-full sm:w-auto inline-flex items-center justify-center px-4 py-2 {{ $isContentItemCompleted ? 'bg-slate-100 border border-slate-200 text-slate-700 hover:bg-slate-200' : 'bg-[#13416B] text-white hover:bg-[#0f3354] shadow-2xs' }} rounded-md text-xs font-bold transition-all text-center">
-                                                <span>{{ $isContentItemCompleted ? 'Pelajari Lagi' : 'Mulai Belajar' }}</span>
-                                            </a>
-                                        @endif
-                                    </div>
+                                <div class="shrink-0 self-start sm:self-center w-full sm:w-auto">
+                                    @if ($isContentLocked)
+                                        <button type="button" disabled
+                                            title="Pelajari materi sebelumnya terlebih dahulu"
+                                            class="w-full sm:w-auto inline-flex items-center justify-center px-4 py-2 bg-slate-100 text-slate-400 border border-slate-200 rounded-md text-xs font-semibold cursor-not-allowed select-none">
+                                            <span>Terkunci</span>
+                                        </button>
+                                    @else
+                                        <a href="{{ route('user.course.content.show', ['slug' => $courseSlug, 'content' => $contentId]) }}"
+                                            class="w-full sm:w-auto inline-flex items-center justify-center px-4 py-2 {{ $isContentItemCompleted ? 'bg-slate-100 border border-slate-200 text-slate-700 hover:bg-slate-200' : 'bg-[#13416B] text-white hover:bg-[#0f3354] shadow-2xs' }} rounded-md text-xs font-bold transition-all text-center">
+                                            <span>{{ $isContentItemCompleted ? 'Pelajari Lagi' : 'Mulai Belajar' }}</span>
+                                        </a>
+                                    @endif
                                 </div>
                             </div>
 
@@ -222,7 +228,7 @@
                             $presensiLockReason = 'Waktu presensi tatap muka telah berakhir' . ($zoomEnd ? ' pada ' . $zoomEnd->translatedFormat('d M Y, H:i') . ' WIB' : '');
                         }
                     @endphp
-                    <div id="sesi-zoom"
+                    <div id="sesi-zoom" data-tour="zoom"
                         class="scroll-mt-6 rounded-md border border-slate-200 bg-slate-50/40 p-4 sm:p-5 lg:p-6 shadow-2xs transition-all space-y-4">
                         <div>
                             <div class="mb-1">
@@ -333,7 +339,7 @@
                     </div>
 
                     {{-- 3. CARD BUKTI PENDUKUNG PRESENSI (DIBAWAH CARD ZOOM) --}}
-                    <div id="bukti-presensi"
+                    <div id="bukti-presensi" data-tour="bukti-presensi"
                         class="scroll-mt-6 rounded-md border border-slate-200 bg-slate-50/40 p-4 sm:p-5 lg:p-6 shadow-2xs transition-all space-y-4">
                         <div>
                             <div class="mb-1">
@@ -345,7 +351,7 @@
                             </h3>
 
                             <p class="text-sm sm:text-[15px] text-slate-600 mt-1 leading-relaxed">
-                                Bukti kehadiran berupa foto atau tangkapan layar (screenshot) sesi tatap muka online dikumpulkan langsung ke folder resmi Google Drive panitia penyelenggara.
+                                Kumpulkan bukti kehadiran (screenshot sesi tatap muka) langsung ke folder Google Drive panitia.
                             </p>
                         </div>
 
@@ -394,7 +400,7 @@
                     $postTestTitle = data_get($postTestBab, 'title', ($isBimtekEvent ? 'Evaluasi Hari ke-' : 'Evaluasi Modul ') . ($sectionIndex + 1) . ': ' . $sectionName);
                 @endphp
 
-                <div id="evaluasi-modul" class="scroll-mt-6 rounded-md border border-slate-200 bg-slate-50/40 p-4 sm:px-6 sm:py-5 lg:px-7 lg:py-6 shadow-2xs transition-all relative overflow-hidden">
+                <div id="evaluasi-modul" data-tour="evaluasi" class="scroll-mt-6 rounded-md border border-slate-200 bg-slate-50/40 p-4 sm:px-6 sm:py-5 lg:px-7 lg:py-6 shadow-2xs transition-all relative overflow-hidden">
                     <div class="flex flex-row items-end justify-between gap-6 lg:gap-8">
                         {{-- Kolom Kiri: Informasi Evaluasi & Aksi --}}
                         <div class="flex-1 min-w-0 sm:py-1 space-y-4">
@@ -819,5 +825,67 @@
         </div>
 
     </div>
+
+    @push('scripts')
+        @include('lms::user.course.partials.guide-assets')
+        <script>
+            (function () {
+                const PAGE = 'section_agenda_{{ $sectionId }}';
+                const STEPS = [
+                    {
+                        element: '[data-tour="pembelajaran-mandiri"]',
+                        popover: {
+                            title: 'Tahap 1: Pembelajaran Mandiri',
+                            description: 'Pelajari seluruh materi pembelajaran secara mandiri dan bertahap hingga selesai. Tuntaskan semua materi untuk membuka akses tahap berikutnya.',
+                            side: 'bottom',
+                            align: 'start',
+                        },
+                    },
+                    @if ($hasZoom)
+                    {
+                        element: '[data-tour="zoom"]',
+                        popover: {
+                            title: 'Tahap 2: Sesi Tatap Muka Online',
+                            description: 'Ikuti sesi Zoom interaktif sesuai jadwal dengan menekan <strong>Masuk Tatap Muka</strong>, lalu tekan <strong>Konfirmasi Kehadiran</strong> untuk mencatat presensi Anda.',
+                            side: 'bottom',
+                            align: 'start',
+                        },
+                    },
+                    {
+                        element: '[data-tour="bukti-presensi"]',
+                        popover: {
+                            title: 'Tahap 3: Bukti Pendukung Presensi',
+                            description: 'Ambil screenshot saat mengikuti sesi tatap muka dan tekan <strong>Buka Google Drive</strong> untuk mengunggah berkas bukti kehadiran langsung ke folder Google Drive panitia.',
+                            side: 'bottom',
+                            align: 'start',
+                        },
+                    },
+                    @endif
+                    {
+                        element: '[data-tour="evaluasi"]',
+                        popover: {
+                            title: '{{ $hasZoom ? "Tahap 4: Evaluasi & Penugasan" : "Tahap 2: Evaluasi & Penugasan" }}',
+                            description: '{!! addslashes($currentEvalType === "uraian"
+                                ? "Jawab pertanyaan studi kasus uraian pada formulir jawaban yang disediakan. Evaluasi terbuka otomatis setelah seluruh materi mandiri tuntas."
+                                : ($currentEvalType === "upload"
+                                    ? "Unduh lembar soal penugasan, kerjakan studi kasus, lalu unggah dokumen jawaban Anda (PDF/DOCX/ZIP) sebelum batas waktu."
+                                    : "Kerjakan butir soal pilihan ganda berbatas waktu dan raih nilai di atas KKM kelulusan untuk menuntaskan evaluasi ini.")) !!}',
+                            side: 'top',
+                            align: 'start',
+                        },
+                    },
+                ];
+
+                window.startSectionTour = function () {
+                    window.dispatchEvent(new CustomEvent('guide-start', { detail: { page: PAGE } }));
+                    window.SirenataTour.start(PAGE, STEPS);
+                };
+
+                document.addEventListener('DOMContentLoaded', function () {
+                    window.SirenataTour.autoStart(PAGE, STEPS);
+                });
+            })();
+        </script>
+    @endpush
 
 </x-dashboard::layouts.dashboard>
