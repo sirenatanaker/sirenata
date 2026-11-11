@@ -2,32 +2,10 @@
     title="{{ ($activeBimtek && ($activeBimtek->batch_name || $activeBimtek->start_date)) ? 'Hari ' : 'Modul ' }}{{ $sectionIndex + 1 }}: {{ data_get($section, 'name') }} | {{ data_get($course, 'course_name') ?? data_get($course, 'name') }} | SIRENATA">
 
     @php
-        $courseName = data_get($course, 'course_name') ?? data_get($course, 'name', 'Course');
+        $courseName = $courseName ?? data_get($course, 'course_name') ?? data_get($course, 'name', 'Course');
         $courseSlug = $slug ?? data_get($course, 'slug');
-        $sectionId = data_get($section, 'id') ?? data_get($section, 'section_id');
-        $rawSectionName = data_get($section, 'name', '');
-        $cleanSectionName = preg_replace('/^(modul|hari)\s*\d+\s*[:\-–]\s*/i', '', $rawSectionName);
-        $isBimtekEvent = (bool) ($activeBimtek && ($activeBimtek->batch_name || $activeBimtek->start_date));
-        $hasZoom = (bool) ($activeBimtek && $activeBimtek->zoom_url);
-        $adminDriveLink = $activeBimtek?->submission_drive_link ?? null;
-        $defaultPrefix = $isBimtekEvent ? 'Hari ' : 'Modul ';
-        $sectionName = !empty(trim($cleanSectionName)) ? trim($cleanSectionName) : ($rawSectionName ?: $defaultPrefix . ($sectionIndex + 1));
-        $sectionContents = data_get($section, 'section_contents', []) ?: data_get($section, 'contents', []);
-        $totalCount = count($sectionContents);
-        $completedCount = data_get($section, 'completed_count', 0);
-        $postTestBab = $postTestBab ?? (data_get($section, 'post_test_bab') ?: \Modules\LMS\Models\PostTest::where('course_section_id', $sectionId)->first());
-        $isPostTestBabCompleted = data_get($section, 'is_post_test_bab_completed', false);
-        $isContentCompleted = data_get($section, 'is_content_completed', false);
-        $isSectionCompleted = data_get($section, 'is_section_completed', false);
         $canReviewAll = data_get($course, 'can_review_all', false);
         $isWaitingForStart = data_get($course, 'is_waiting_for_start', false);
-
-        $dayDate = null;
-        try {
-            if ($activeBimtek && $activeBimtek->start_date) {
-                $dayDate = \Carbon\Carbon::parse($activeBimtek->start_date)->addDays($sectionIndex);
-            }
-        } catch (\Exception $e) {}
     @endphp
 
     <div class="px-0 py-2 sm:p-6 max-w-full mx-auto scroll-smooth">
@@ -97,44 +75,6 @@
                     </button>
                 </div>
             </div>
-
-            @php
-                // Perhitungan status dan progres aktivitas pada halaman ini
-                $completedContentsCount = collect($sectionContents)->filter(fn($c) => (bool)data_get($c, 'is_completed', false))->count();
-                $isMateriDone = $totalCount > 0 ? ($completedContentsCount >= $totalCount) : (bool)$isContentCompleted;
-                $isZoomDone = (bool)$isZoomAttended;
-
-                $currentEvalType = match ($postTestBab?->type) {
-                    'essay'       => 'uraian',
-                    'file_upload' => 'upload',
-                    default       => ($sectionIndex % 2 === 0 ? 'uraian' : 'upload'),
-                };
-                $isAssignmentDone = (bool) ($evalResult && ($evalResult->file_path || $evalResult->status === 'submitted' || $evalResult->completed_at));
-                $isEssayDone = (bool) ($evalResult && ($evalResult->answers || $evalResult->status === 'submitted' || $evalResult->completed_at));
-
-                $isEvaluasiDone = (bool) ($isPostTestBabCompleted || ($evalResult && $evalResult->completed_at));
-
-                $now = now();
-                $zoomStart = $activeBimtek?->zoom_scheduled_at ?? $activeBimtek?->start_date;
-                $zoomEnd = $activeBimtek?->zoom_end_at;
-                $zoomScheduleFormatted = $activeBimtek?->zoom_schedule_formatted ?? null;
-
-                $isPresensiOpen = true;
-                $presensiLockReason = null;
-                if ($zoomStart && $now->lessThan($zoomStart)) {
-                    $isPresensiOpen = false;
-                    $presensiLockReason = 'Presensi dibuka saat jadwal sesi tatap muka (' . ($zoomScheduleFormatted ?? $zoomStart->translatedFormat('d M Y, H:i') . ' WIB') . ')';
-                } elseif ($zoomEnd && $now->greaterThan($zoomEnd)) {
-                    $isPresensiOpen = false;
-                    $presensiLockReason = 'Waktu presensi tatap muka telah berakhir pada ' . $zoomEnd->translatedFormat('d M Y, H:i') . ' WIB';
-                }
-
-                $totalActivities = 2 + ($hasZoom ? 1 : 0);
-                $completedActivities = ($isMateriDone ? 1 : 0)
-                    + ($hasZoom ? ($isZoomDone ? 1 : 0) : 0)
-                    + ($isEvaluasiDone ? 1 : 0);
-                $progressPercent = $totalActivities > 0 ? round(($completedActivities / $totalActivities) * 100) : 0;
-            @endphp
 
             {{-- Layout Kiri Kanan: Konten Aktivitas (Kiri) & On This Page (Kanan) --}}
             <div class="mt-5 sm:mt-6 flex flex-col lg:flex-row items-start gap-6 lg:gap-7">
@@ -527,12 +467,6 @@
                             {{-- (Admin Upload File Soal -> User Download & Upload Tugas) --}}
                             {{-- ======================================================== --}}
                             @if ($currentEvalType === 'upload')
-                                @php
-                                    $adminFileName = data_get($postTestBab, 'admin_file_name', 'Soal_Tugas_Hari_' . ($sectionIndex + 1) . '.pdf');
-                                    $adminFileSize = data_get($postTestBab, 'admin_file_size', '2.4 MB');
-                                    $adminFileUrl = data_get($postTestBab, 'admin_file_url') ?: asset('storage/' . data_get($postTestBab, 'admin_file_path', 'assignments/soal/Soal_Tugas_Studi_Kasus.pdf'));
-                                    $instructions = data_get($postTestBab, 'instructions', 'Disediakan oleh Panitia Penyelenggara sebagai panduan pengerjaan studi kasus dan lembar kerja modul.');
-                                @endphp
                                 <div class="space-y-3.5">
                                     {{-- 1. Berkas Soal dari Admin/Penyelenggara --}}
                                     <div class="p-4 rounded-md bg-blue-50/70 border border-blue-200/90 shadow-2xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3.5">

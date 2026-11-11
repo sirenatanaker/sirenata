@@ -24,90 +24,19 @@
             </ol>
         </nav>
 
-        {{-- KALKULASI PROGRESS REAL (Disiapkan dari CourseService) --}}
+        {{-- PROPERTI DASAR TAMPILAN (Disiapkan dari CourseService) --}}
         @php
             $thumbnailUrl = data_get($course, 'thumbnail_url');
             $courseName = data_get($course, 'course_name') ?? data_get($course, 'name', 'Course');
             $courseSlug = data_get($course, 'slug') ?? request()->route('slug');
             $courseId = data_get($course, 'id') ?? data_get($course, 'course_id');
-
-            $totalContents = data_get($course, 'total_contents', 0);
-            $completedContents = data_get($course, 'completed_count', 0);
-            $totalTests = data_get($course, 'total_tests', 0);
-            $passedTests = data_get($course, 'passed_tests', 0);
-            $evaluasiAkhir = data_get($course, 'evaluasi_akhir');
-            $isEvaluasiAkhirCompleted = data_get($course, 'is_evaluasi_akhir_completed', false);
-            $totalItems = data_get($course, 'total_items', 0);
-            $completedItems = data_get($course, 'completed_items', 0);
-            $currentProgress = data_get($course, 'current_progress', 0);
-            $isFullyCompleted = data_get($course, 'is_fully_completed', false);
-
-            $activeBimtek = null;
-            $enrollmentData = \DB::table('course_student')
-                ->where('course_id', data_get($course, 'id'))
-                ->where('user_id', auth()->id())
-                ->first();
-
-            if ($enrollmentData && !empty($enrollmentData->bimtek_event_id)) {
-                $activeBimtek = \Modules\LMS\Models\BimtekEvent::find($enrollmentData->bimtek_event_id);
-            }
-            if (!$activeBimtek) {
-                $activeBimtek = data_get($course, 'active_bimtek') ?? \Modules\LMS\Models\BimtekEvent::where('course_id', data_get($course, 'id'))->latest()->first();
-            }
-
-            $isEventEnded = (bool) (data_get($course, 'is_event_ended') ?? ($activeBimtek && in_array($activeBimtek->status, ['closed', 'completed'])));
-            $isCourseAlreadyFinished = ($currentProgress >= 100) || ($enrollmentData && $enrollmentData->status === 'completed');
-            $canReviewAll = (bool) (data_get($course, 'can_review_all') || $isCourseAlreadyFinished || $isEventEnded);
-
-            $isWaitingForStart = (bool) (data_get($course, 'is_waiting_for_start', false));
-            if (!$isWaitingForStart && $activeBimtek && !$isCourseAlreadyFinished) {
-                $curPhase = $activeBimtek->current_timeline_phase ?? [];
-                $phaseKey = $curPhase['phase'] ?? 'learning';
-                $isWaitingForStart = ($phaseKey === 'registration' || $activeBimtek->status === 'open_registration' || ($activeBimtek->start_date && now()->lessThan($activeBimtek->start_date)));
-            }
-
-            $areAllTopicsCompleted = ($totalContents > 0 && $completedContents >= $totalContents);
-            $isZoomUnlocked = true;
-            $isZoomAttended = (bool) ($enrollmentData?->zoom_attended);
-            $hasJoinedZoom = !empty($enrollmentData?->zoom_joined_at);
-            $isZoomStarted = !$activeBimtek?->zoom_scheduled_at || now()->greaterThanOrEqualTo($activeBimtek->zoom_scheduled_at);
-            $curBimtekPhase = $activeBimtek?->current_timeline_phase;
-
-            $formattedPeriod = null;
-            if ($activeBimtek && $activeBimtek->start_date && $activeBimtek->end_date) {
-                $startDate = \Carbon\Carbon::parse($activeBimtek->start_date);
-                $endDate = \Carbon\Carbon::parse($activeBimtek->end_date);
-                
-                if ($startDate->format('Y-m') === $endDate->format('Y-m')) {
-                    $formattedPeriod = $startDate->translatedFormat('d') . ' - ' . $endDate->translatedFormat('d F Y');
-                } elseif ($startDate->format('Y') === $endDate->format('Y')) {
-                    $formattedPeriod = $startDate->translatedFormat('d M') . ' - ' . $endDate->translatedFormat('d M Y');
-                } else {
-                    $formattedPeriod = $startDate->translatedFormat('d M Y') . ' - ' . $endDate->translatedFormat('d M Y');
-                }
-            }
-            $isBimtekEvent = (bool) ($activeBimtek && ($activeBimtek->batch_name || $formattedPeriod));
-
             $sectionsList = data_get($course, 'sections', []);
             $totalSections = count($sectionsList);
-
-            // Warna progress: 100% hijau, sedang berprogress amber, waiting blue; teks persen slate/gray
-            if ($currentProgress >= 100) {
-                $progressBarClass = 'bg-emerald-500';
-                $progressTextClass = 'text-slate-600';
-            } elseif ($isWaitingForStart) {
-                $progressBarClass = 'bg-[#0B5CFF]';
-                $progressTextClass = 'text-slate-600';
-            } else {
-                $progressBarClass = 'bg-amber-500';
-                $progressTextClass = 'text-slate-600';
-            }
 
             if (empty($thumbnailUrl)) {
                 $encodedName = urlencode($courseName);
                 $thumbnailUrl = "https://ui-avatars.com/api/?name={$encodedName}&background=eff6ff&color=1e3a8a&size=512&font-size=0.33&bold=true";
             }
-
         @endphp
 
         {{-- Header Card --}}
@@ -400,11 +329,6 @@
 
                 {{-- CARD EVALUASI AKHIR (FLEKSIBEL: PILIHAN GANDA CBT / PENUGASAN GOOGLE DRIVE) --}}
                 @php
-                    $isEvaluasiAkhirLocked = !$isPreviousSectionDone;
-                    if ($activeBimtek && $activeBimtek->zoom_url) {
-                        $isEvaluasiAkhirLocked = $isEvaluasiAkhirLocked || !$isZoomAttended;
-                    }
-
                     $evaluasiAkhirTitle = 'Evaluasi Akhir : ' . $courseName;
                     $evaluasiQuestionsCount = $evaluasiAkhir ? data_get($evaluasiAkhir, 'questions', collect())->count() : 0;
                     $isCbtPostTest = $evaluasiAkhir && $evaluasiQuestionsCount > 0;
@@ -529,39 +453,6 @@
 
                 @if ($isBimtekEvent)
                 {{-- CARD EVALUASI NARASUMBER / PEMATERI (KHUSUS BIMTEK) --}}
-                @php
-                    // Cek apakah peserta sudah mencapai hari terakhir (seluruh hari sebelum hari terakhir tuntas)
-                    $isLastDayReached = true;
-                    if ($totalSections > 1) {
-                        $priorSections = collect($sectionsList)->slice(0, $totalSections - 1);
-                        foreach ($priorSections as $priorSec) {
-                            $pContents = data_get($priorSec, 'section_contents', []) ?: data_get($priorSec, 'contents', []);
-                            $pTotal = count($pContents);
-                            $pDone = data_get($priorSec, 'completed_count', 0);
-                            $pContentCompleted = data_get($priorSec, 'is_content_completed', $pTotal === 0 || $pDone === $pTotal);
-                            $pPostTestBab = data_get($priorSec, 'post_test_bab');
-                            $pPostTestDone = data_get($priorSec, 'is_post_test_bab_completed', true);
-                            if (!$pContentCompleted || !$pPostTestDone) {
-                                $isLastDayReached = false;
-                                break;
-                            }
-                        }
-                    }
-
-                    // Opsi 1: Terkunci sampai hari terakhir tercapai DAN sesi Zoom hari terakhir diikuti
-                    $isEvaluasiNarasumberLocked = $canReviewAll 
-                        ? false 
-                        : ($isWaitingForStart || !$isLastDayReached || ($activeBimtek && $activeBimtek->zoom_url && !$isZoomAttended));
-
-                    $evaluasiNarasumberLockReason = 'Evaluasi narasumber dibuka pada hari terakhir setelah sesi tatap muka (Zoom) dihadiri.';
-                    if ($isWaitingForStart) {
-                        $evaluasiNarasumberLockReason = 'Evaluasi narasumber dibuka setelah periode pelaksanaan pelatihan resmi dimulai.';
-                    } elseif (!$isLastDayReached) {
-                        $evaluasiNarasumberLockReason = 'Evaluasi narasumber dibuka pada hari terakhir (Hari ke-' . $totalSections . ') setelah sesi tatap muka (Zoom) dihadiri.';
-                    } elseif ($activeBimtek && $activeBimtek->zoom_url && !$isZoomAttended) {
-                        $evaluasiNarasumberLockReason = 'Silakan ikuti dan konfirmasi kehadiran sesi tatap muka (Zoom) hari terakhir untuk membuka evaluasi ini.';
-                    }
-                @endphp
                 <div data-tour="evaluasi-narasumber"
                     id="card-evaluasi-narasumber"
                     @open-evaluasi-narasumber.window="showModal = true; $el.scrollIntoView({ behavior: 'smooth' })"
@@ -840,14 +731,6 @@
                             </div>
                         @else
                             {{-- STATE 2: SELESAI, TAPI CEK APAKAH SEDANG DIAJUKAN KE PPSDM --}}
-                            @php
-                                $enrollmentData = \DB::table('course_student')
-                                    ->where('course_id', data_get($course, 'id'))
-                                    ->where('user_id', auth()->id())
-                                    ->first();
-                                $isSubmittedToPPSDM = ($enrollmentData?->cert_submission_status === 'diajukan_ke_ppsdm');
-                            @endphp
-
                             <div class="space-y-4">
                                 @if ($isSubmittedToPPSDM)
                                     <div class="bg-amber-500 border border-amber-600 rounded-md p-5 text-center text-white shadow-xs">
@@ -926,14 +809,10 @@
                                 Sertifikat Terkunci
                             </p>
 
-                            @php
-                                $remaining = $totalItems - $completedItems;
-                            @endphp
-
                             <p class="text-xs text-slate-500 leading-relaxed max-w-[220px]">
-                                @if ($remaining > 0)
+                                @if (($remainingItems ?? 0) > 0)
                                     Akses akan terbuka secara otomatis setelah Anda menyelesaikan <span
-                                        class="font-bold text-slate-800">{{ $remaining }} tahapan</span> yang
+                                        class="font-bold text-slate-800">{{ $remainingItems }} tahapan</span> yang
                                     tersisa.
                                 @else
                                     Selesaikan seluruh tahapan hingga progress mencapai 100% untuk mengunduh dokumen
@@ -956,22 +835,6 @@
                     @php
                         $hasZoom = (bool) ($activeBimtek && $activeBimtek->zoom_url);
                         $hasProofUploaded = !empty($sectionProofs);
-                        
-                        // Cari modul/section pertama yang belum selesai dan tidak terkunci agar button langsung mengarahkan ke sana
-                        $sectionsList = data_get($course, 'sections', []);
-                        $firstIncompleteSectionId = null;
-                        foreach ($sectionsList as $s) {
-                            $sId = data_get($s, 'id') ?? data_get($s, 'section_id');
-                            $isSecComp = data_get($s, 'is_section_completed', false);
-                            $isSecLock = data_get($s, 'is_locked', false);
-                            if (!$isSecComp && !$isSecLock) {
-                                $firstIncompleteSectionId = $sId;
-                                break;
-                            }
-                        }
-                        if (!$firstIncompleteSectionId && count($sectionsList) > 0) {
-                            $firstIncompleteSectionId = data_get($sectionsList[0], 'id') ?? data_get($sectionsList[0], 'section_id');
-                        }
                     @endphp
                     <template x-teleport="body">
                         <div x-show="showRequirementsModal" x-cloak

@@ -3,6 +3,7 @@
 namespace Modules\LMS\Services;
 
 use App\Models\User;
+use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -12,7 +13,9 @@ use Modules\LMS\Models\BimtekEvent;
 use Modules\LMS\Models\Course;
 use Modules\LMS\Models\CourseSection;
 use Modules\LMS\Models\PostTest;
+use Modules\LMS\Models\PostTestResult;
 use Modules\LMS\Models\SectionContent;
+use Modules\LMS\Models\SectionZoomProof;
 use Modules\LMS\Models\StudentContentProgress;
 use Modules\User\Enums\InstitutionType;
 
@@ -566,6 +569,7 @@ class CourseService
                 $course->official_cert_number = $enrollment->pivot->official_cert_number;
                 $course->cert_submission_status = $enrollment->pivot->cert_submission_status;
                 $course->zoom_attended = $enrollment->pivot->zoom_attended;
+                $course->zoom_joined_at = $enrollment->pivot->zoom_joined_at;
             }
 
             // Cari event Bimtek yang relevan: prioritaskan event yang diikuti user
@@ -672,22 +676,121 @@ class CourseService
             $currentProgress = $totalItems > 0 ? (int) round(($completedItems / $totalItems) * 100) : 0;
             $isFullyCompleted = $isCourseAlreadyFinished || ($currentProgress >= 100 && (!$evaluasiAkhir || $isEvaluasiAkhirCompleted) && (!$hasZoom || !empty($course->zoom_attended)));
 
-            $course->sections = collect($mappedSections);
-            $course->course_sections = collect($mappedSections);
+            $sectionsList = collect($mappedSections);
+            $totalSections = $sectionsList->count();
+
+            // Cek apakah peserta sudah mencapai hari terakhir (seluruh hari sebelum hari terakhir tuntas)
+            $isLastDayReached = true;
+            if ($totalSections > 1) {
+                $priorSections = $sectionsList->slice(0, $totalSections - 1);
+                foreach ($priorSections as $priorSec) {
+                    $pContentCompleted = data_get($priorSec, 'is_content_completed', false);
+                    $pPostTestDone = data_get($priorSec, 'is_post_test_bab_completed', true);
+                    if (!$pContentCompleted || !$pPostTestDone) {
+                        $isLastDayReached = false;
+                        break;
+                    }
+                }
+            }
+
+            // Opsi 1: Terkunci sampai hari terakhir tercapai DAN sesi Zoom hari terakhir diikuti
+            $isZoomAttended = (bool) (!empty($course->zoom_attended));
+            $isEvaluasiNarasumberLocked = $canReviewAll 
+                ? false 
+                : ($isWaitingForStart || !$isLastDayReached || ($hasZoom && !$isZoomAttended));
+
+            $evaluasiNarasumberLockReason = 'Evaluasi narasumber dibuka pada hari terakhir setelah sesi tatap muka (Zoom) dihadiri.';
+            if ($isWaitingForStart) {
+                $evaluasiNarasumberLockReason = 'Evaluasi narasumber dibuka setelah periode pelaksanaan pelatihan resmi dimulai.';
+            } elseif (!$isLastDayReached) {
+                $evaluasiNarasumberLockReason = 'Evaluasi narasumber dibuka pada hari terakhir (Hari ke-' . $totalSections . ') setelah sesi tatap muka (Zoom) dihadiri.';
+            } elseif ($hasZoom && !$isZoomAttended) {
+                $evaluasiNarasumberLockReason = 'Silakan ikuti dan konfirmasi kehadiran sesi tatap muka (Zoom) hari terakhir untuk membuka evaluasi ini.';
+            }
+
+            $isEvaluasiAkhirLocked = $canReviewAll 
+                ? false 
+                : ($isWaitingForStart || !$isPreviousSectionDone || ($hasZoom && !$isZoomAttended));
+
+            // Format tanggal periode bimtek
+            $formattedPeriod = null;
+            if ($activeBimtek && $activeBimtek->start_date && $activeBimtek->end_date) {
+                $startDate = \Carbon\Carbon::parse($activeBimtek->start_date);
+                $endDate = \Carbon\Carbon::parse($activeBimtek->end_date);
+                if ($startDate->format('Y-m') === $endDate->format('Y-m')) {
+                    $formattedPeriod = $startDate->translatedFormat('d') . ' - ' . $endDate->translatedFormat('d F Y');
+                } elseif ($startDate->format('Y') === $endDate->format('Y')) {
+                    $formattedPeriod = $startDate->translatedFormat('d M') . ' - ' . $endDate->translatedFormat('d M Y');
+                } else {
+                    $formattedPeriod = $startDate->translatedFormat('d M Y') . ' - ' . $endDate->translatedFormat('d M Y');
+                }
+            }
+            $isBimtekEvent = (bool) ($activeBimtek && ($activeBimtek->batch_name || $formattedPeriod));
+
+            // Cari modul pertama yang belum selesai dan tidak terkunci agar aksi 'Lanjutkan Belajar' langsung terarah
+            $firstIncompleteSectionId = null;
+            foreach ($sectionsList as $s) {
+                $sId = data_get($s, 'id') ?? data_get($s, 'section_id');
+                $sDone = data_get($s, 'is_section_completed', false);
+                $sLocked = data_get($s, 'is_locked', false);
+                if (!$sDone && !$sLocked) {
+                    $firstIncompleteSectionId = $sId;
+                    break;
+                }
+            }
+            if (!$firstIncompleteSectionId && $totalSections > 0) {
+                $firstIncompleteSectionId = data_get($sectionsList->first(), 'id') ?? data_get($sectionsList->first(), 'section_id');
+            }
+
+            $remainingItems = max(0, $totalItems - $completedItems);
+            $hasJoinedZoom = !empty($course->zoom_joined_at);
+            $isZoomStarted = !$activeBimtek?->zoom_scheduled_at || now()->greaterThanOrEqualTo($activeBimtek->zoom_scheduled_at);
+            $isSubmittedToPPSDM = ($course->cert_submission_status === 'diajukan_ke_ppsdm');
+
+            if ($currentProgress >= 100) {
+                $progressBarClass = 'bg-emerald-500';
+                $progressTextClass = 'text-slate-600';
+            } elseif ($isWaitingForStart) {
+                $progressBarClass = 'bg-[#0B5CFF]';
+                $progressTextClass = 'text-slate-600';
+            } else {
+                $progressBarClass = 'bg-amber-500';
+                $progressTextClass = 'text-slate-600';
+            }
+
+            $course->sections = $sectionsList;
+            $course->course_sections = $sectionsList;
             $course->evaluasi_akhir = $evaluasiAkhir;
             $course->is_evaluasi_akhir_completed = $isEvaluasiAkhirCompleted;
-            $course->is_evaluasi_akhir_locked = $canReviewAll ? false : ($isWaitingForStart || !$isPreviousSectionDone);
+            $course->is_evaluasi_akhir_locked = $isEvaluasiAkhirLocked;
             $course->total_contents = $totalContents;
             $course->total_tests = $totalTests;
             $course->passed_tests = $passedTests;
+            $course->are_all_topics_completed = ($totalContents > 0 && $totalCompletedCount >= $totalContents);
             $course->total_items = $totalItems;
             $course->completed_items = $completedItems;
+            $course->remaining_items = $remainingItems;
             $course->current_progress = $currentProgress;
             $course->is_fully_completed = $isFullyCompleted;
             $course->can_review_all = $canReviewAll;
+            $course->is_course_already_finished = $isCourseAlreadyFinished;
             $course->is_event_ended = $isEventEnded;
             $course->active_bimtek = $activeBimtek;
             $course->is_waiting_for_start = $isWaitingForStart;
+            $course->formatted_period = $formattedPeriod;
+            $course->is_bimtek_event = $isBimtekEvent;
+            $course->is_zoom_unlocked = true;
+            $course->is_zoom_attended = $isZoomAttended;
+            $course->has_joined_zoom = $hasJoinedZoom;
+            $course->is_zoom_started = $isZoomStarted;
+            $course->is_submitted_to_ppsdm = $isSubmittedToPPSDM;
+            $course->is_last_day_reached = $isLastDayReached;
+            $course->is_evaluasi_narasumber_locked = $isEvaluasiNarasumberLocked;
+            $course->evaluasi_narasumber_lock_reason = $evaluasiNarasumberLockReason;
+            $course->first_incomplete_section_id = $firstIncompleteSectionId;
+            $course->progress_bar_class = $progressBarClass;
+            $course->progress_text_class = $progressTextClass;
+            $course->enrollment = $enrollment;
 
             return [
                 'success' => true,
@@ -703,6 +806,155 @@ class CourseService
                 'data'    => null,
             ];
         }
+    }
+
+    /**
+     * Hitung detail section dan status progres aktivitas per section (untuk view section-show)
+     */
+    public function getSectionDetailForUser(Course $course, object|array $section, ?BimtekEvent $activeBimtek, ?Authenticatable $user, int $sectionIndex): array
+    {
+        $sectionId = data_get($section, 'id') ?? data_get($section, 'section_id');
+        $rawSectionName = data_get($section, 'name', '');
+        $cleanSectionName = preg_replace('/^(modul|hari)\s*\d+\s*[:\-–]\s*/i', '', $rawSectionName);
+        $isBimtekEvent = (bool) ($activeBimtek && ($activeBimtek->batch_name || $activeBimtek->start_date));
+        $hasZoom = (bool) ($activeBimtek && $activeBimtek->zoom_url);
+        $adminDriveLink = $activeBimtek?->submission_drive_link ?? null;
+        $defaultPrefix = $isBimtekEvent ? 'Hari ' : 'Modul ';
+        $sectionName = !empty(trim($cleanSectionName)) ? trim($cleanSectionName) : ($rawSectionName ?: $defaultPrefix . ($sectionIndex + 1));
+
+        $sectionContents = data_get($section, 'section_contents', []) ?: data_get($section, 'contents', []);
+        $totalCount = count($sectionContents);
+        $completedCount = data_get($section, 'completed_count', 0);
+
+        $completedContentsCount = collect($sectionContents)->filter(fn($c) => (bool) data_get($c, 'is_completed', false))->count();
+        $isContentCompleted = data_get($section, 'is_content_completed', $totalCount === 0 || $completedCount === $totalCount);
+        $isMateriDone = $totalCount > 0 ? ($completedContentsCount >= $totalCount) : (bool) $isContentCompleted;
+
+        $enrollment = $user ? $course->students()->wherePivot('user_id', $user->id)->first() : null;
+        $isZoomAttended = (bool) ($enrollment?->pivot?->zoom_attended);
+        $hasJoinedZoom = (bool) ($enrollment?->pivot?->zoom_joined_at);
+        $isZoomDone = $isZoomAttended;
+
+        $zoomProof = null;
+        if ($user) {
+            $zoomProof = SectionZoomProof::where('course_section_id', $sectionId)
+                ->where('user_id', $user->id)
+                ->first();
+        }
+        $hasProof = !empty($zoomProof);
+
+        $postTestBab = data_get($section, 'post_test_bab') ?: PostTest::where('course_section_id', $sectionId)->first();
+        $isPostTestBabCompleted = data_get($section, 'is_post_test_bab_completed', false);
+
+        $evalResult = null;
+        if ($postTestBab && $user) {
+            $evalResult = PostTestResult::where('post_test_id', $postTestBab->id)
+                ->where('user_id', $user->id)
+                ->first();
+        }
+
+        $currentEvalType = match ($postTestBab?->type) {
+            'essay'       => 'uraian',
+            'file_upload' => 'upload',
+            default       => ($sectionIndex % 2 === 0 ? 'uraian' : 'upload'),
+        };
+
+        $isAssignmentDone = (bool) ($evalResult && ($evalResult->file_path || $evalResult->status === 'submitted' || $evalResult->completed_at));
+        $isEssayDone = (bool) ($evalResult && ($evalResult->answers || $evalResult->status === 'submitted' || $evalResult->completed_at));
+        $isEvaluasiDone = (bool) ($isPostTestBabCompleted || ($evalResult && $evalResult->completed_at));
+        $isEvaluasiLocked = !$isMateriDone || ($hasZoom && !$isZoomDone);
+        $isSectionDone = $isMateriDone && (!$hasZoom || ($isZoomDone && $hasProof)) && (!$postTestBab || $isEvaluasiDone);
+
+        $now = now();
+        $zoomStart = $activeBimtek?->zoom_scheduled_at ?? $activeBimtek?->start_date;
+        $zoomEnd = $activeBimtek?->zoom_end_at;
+        $zoomScheduleFormatted = $activeBimtek?->zoom_schedule_formatted ?? null;
+
+        $isPresensiOpen = true;
+        $presensiLockReason = null;
+        if ($zoomStart && $now->lessThan($zoomStart)) {
+            $isPresensiOpen = false;
+            $presensiLockReason = 'Presensi dibuka saat jadwal sesi tatap muka (' . ($zoomScheduleFormatted ?? $zoomStart->translatedFormat('d M Y, H:i') . ' WIB') . ')';
+        } elseif ($zoomEnd && $now->greaterThan($zoomEnd)) {
+            $isPresensiOpen = false;
+            $presensiLockReason = 'Waktu presensi tatap muka telah berakhir pada ' . $zoomEnd->translatedFormat('d M Y, H:i') . ' WIB';
+        }
+
+        $totalActivities = 2 + ($hasZoom ? 1 : 0);
+        $completedActivities = ($isMateriDone ? 1 : 0)
+            + ($hasZoom ? ($isZoomDone ? 1 : 0) : 0)
+            + ($isEvaluasiDone ? 1 : 0);
+        $progressPercent = $totalActivities > 0 ? (int) round(($completedActivities / $totalActivities) * 100) : 0;
+
+        $dayDate = null;
+        try {
+            if ($activeBimtek && $activeBimtek->start_date) {
+                $dayDate = \Carbon\Carbon::parse($activeBimtek->start_date)->addDays($sectionIndex);
+            }
+        } catch (\Exception $e) {}
+
+        // Bobot progres section
+        $totalSectionSteps = 1; // materi
+        $completedSectionSteps = $isMateriDone ? 1 : 0;
+        if ($hasZoom) {
+            $totalSectionSteps += 2; // zoom + bukti
+            if ($isZoomDone) $completedSectionSteps++;
+            if ($hasProof) $completedSectionSteps++;
+        }
+        if ($postTestBab) {
+            $totalSectionSteps += 1;
+            if ($isEvaluasiDone) $completedSectionSteps++;
+        }
+        $progressPct = (int) round(($completedSectionSteps / $totalSectionSteps) * 100);
+
+        $adminFileName = data_get($postTestBab, 'admin_file_name', 'Soal_Tugas_Hari_' . ($sectionIndex + 1) . '.pdf');
+        $adminFileSize = data_get($postTestBab, 'admin_file_size', '2.4 MB');
+        $adminFileUrl = data_get($postTestBab, 'admin_file_url') ?: asset('storage/' . data_get($postTestBab, 'admin_file_path', 'assignments/soal/Soal_Tugas_Studi_Kasus.pdf'));
+        $instructions = data_get($postTestBab, 'instructions', 'Disediakan oleh Panitia Penyelenggara sebagai panduan pengerjaan studi kasus dan lembar kerja modul.');
+
+        return compact(
+            'sectionId',
+            'rawSectionName',
+            'cleanSectionName',
+            'sectionName',
+            'isBimtekEvent',
+            'hasZoom',
+            'adminDriveLink',
+            'defaultPrefix',
+            'sectionContents',
+            'totalCount',
+            'completedCount',
+            'completedContentsCount',
+            'isContentCompleted',
+            'isMateriDone',
+            'isZoomAttended',
+            'hasJoinedZoom',
+            'isZoomDone',
+            'zoomProof',
+            'hasProof',
+            'postTestBab',
+            'isPostTestBabCompleted',
+            'evalResult',
+            'currentEvalType',
+            'isAssignmentDone',
+            'isEssayDone',
+            'isEvaluasiDone',
+            'isEvaluasiLocked',
+            'isSectionDone',
+            'isPresensiOpen',
+            'presensiLockReason',
+            'totalActivities',
+            'completedActivities',
+            'progressPercent',
+            'dayDate',
+            'totalSectionSteps',
+            'completedSectionSteps',
+            'progressPct',
+            'adminFileName',
+            'adminFileSize',
+            'adminFileUrl',
+            'instructions'
+        );
     }
 
     /**

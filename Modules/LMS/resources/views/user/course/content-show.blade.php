@@ -1,9 +1,4 @@
 <x-dashboard::layouts.dashboard title="{{ data_get($content, 'name', 'Detail Topik') }} | SIRENATA">
-    @php
-        $backToSectionUrl = !empty(data_get($content, 'course_section_id'))
-            ? route('user.course.section.show', ['slug' => $slug ?? data_get($course, 'slug', ''), 'sectionId' => data_get($content, 'course_section_id')])
-            : route('user.course.my-course.detail', $slug ?? data_get($course, 'slug', ''));
-    @endphp
     <div class="p-0 sm:p-4 md:p-6 lg:p-8 max-w-full mx-auto min-h-screen" x-data="{
         reachedEnd: {{ data_get($content, 'is_completed') ? 'true' : 'false' }},
         videoCompleted: {{ data_get($content, 'is_completed') ? 'true' : 'false' }},

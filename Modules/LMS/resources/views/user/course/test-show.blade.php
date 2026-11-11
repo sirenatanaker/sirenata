@@ -1,17 +1,4 @@
 <x-dashboard::layouts.dashboard title="Evaluasi : {{ data_get($course, 'course_name') ?? data_get($course, 'name') }} | SIRENATA">
-    @php
-        $backToUrl = !empty(data_get($postTest, 'course_section_id'))
-            ? route('user.course.section.show', ['slug' => $slug, 'sectionId' => data_get($postTest, 'course_section_id')])
-            : route('user.course.my-course.detail', $slug);
-
-        $evalType = $evalType ?? match ($postTest->type ?? 'multiple_choice') {
-            'essay'       => 'uraian',
-            'file_upload' => 'upload',
-            default       => 'pilgan',
-        };
-        $isAssignmentDone = (bool) ($evalResult && ($evalResult->file_path || $evalResult->status === 'submitted' || $evalResult->completed_at));
-        $isEssayDone = (bool) ($evalResult && ($evalResult->answers || $evalResult->status === 'submitted' || $evalResult->completed_at));
-    @endphp
     {{-- PERBAIKAN RESPONSIVE: Hilangkan padding luar di HP (p-0) agar mepet --}}
     <div class="p-0 sm:p-6 lg:p-8 max-w-full mx-auto font-sans min-h-screen bg-slate-50 sm:bg-transparent">
 

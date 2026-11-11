@@ -100,10 +100,40 @@ class CourseController extends Controller
         }
 
         return view('lms::user.course.my-course-detail', [
-            'course'         => $course,
-            'sectionProofs'  => $sectionProofs,
-            'success'        => $result['success'],
-            'message'        => $result['message'],
+            'course'                       => $course,
+            'activeBimtek'                 => $course->active_bimtek,
+            'isBimtekEvent'                => $course->is_bimtek_event,
+            'formattedPeriod'              => $course->formatted_period,
+            'isWaitingForStart'            => $course->is_waiting_for_start,
+            'canReviewAll'                 => $course->can_review_all,
+            'isCourseAlreadyFinished'      => $course->is_course_already_finished,
+            'isEventEnded'                 => $course->is_event_ended,
+            'isZoomAttended'               => $course->is_zoom_attended,
+            'hasJoinedZoom'                => $course->has_joined_zoom,
+            'isZoomStarted'                => $course->is_zoom_started,
+            'isSubmittedToPPSDM'           => $course->is_submitted_to_ppsdm,
+            'isLastDayReached'             => $course->is_last_day_reached,
+            'isEvaluasiNarasumberLocked'   => $course->is_evaluasi_narasumber_locked,
+            'evaluasiNarasumberLockReason' => $course->evaluasi_narasumber_lock_reason,
+            'isEvaluasiAkhirLocked'        => $course->is_evaluasi_akhir_locked,
+            'firstIncompleteSectionId'     => $course->first_incomplete_section_id,
+            'remainingItems'               => $course->remaining_items,
+            'progressBarClass'             => $course->progress_bar_class,
+            'progressTextClass'            => $course->progress_text_class,
+            'totalContents'                => $course->total_contents,
+            'completedContents'            => $course->completed_count,
+            'areAllTopicsCompleted'        => $course->are_all_topics_completed,
+            'totalTests'                   => $course->total_tests,
+            'passedTests'                  => $course->passed_tests,
+            'totalItems'                   => $course->total_items,
+            'completedItems'               => $course->completed_items,
+            'currentProgress'              => $course->current_progress,
+            'isFullyCompleted'             => $course->is_fully_completed,
+            'evaluasiAkhir'                => $course->evaluasi_akhir,
+            'isEvaluasiAkhirCompleted'     => $course->is_evaluasi_akhir_completed,
+            'sectionProofs'                => $sectionProofs,
+            'success'                      => $result['success'],
+            'message'                      => $result['message'],
         ]);
     }
 
@@ -142,41 +172,21 @@ class CourseController extends Controller
             return redirect()->route('user.course.my-course.detail', $slug);
         }
 
-        $activeBimtek = null;
-        $enrollment = $request->user() ? $course->students()->wherePivot('user_id', $request->user()->id)->first() : null;
-        if ($enrollment && !empty($enrollment->pivot->bimtek_event_id)) {
-            $activeBimtek = \Modules\LMS\Models\BimtekEvent::find($enrollment->pivot->bimtek_event_id);
-        }
-        if (!$activeBimtek) {
-            $activeBimtek = \Modules\LMS\Models\BimtekEvent::where('course_id', $course->id)->latest()->first();
-        }
+        $sectionDetail = $this->courseService->getSectionDetailForUser(
+            $course,
+            $section,
+            $course->active_bimtek,
+            $request->user(),
+            $sectionIndex !== false ? (int) $sectionIndex : 0
+        );
 
-        $userId = $request->user()?->id ?? 'guest';
-        $zoomProof = SectionZoomProof::where('course_section_id', $sectionId)
-            ->where('user_id', $userId)
-            ->first();
-
-        // Ambil hasil / penyerahan evaluasi siswa dari tabel post_test_results
-        $postTestBab = data_get($section, 'post_test_bab') ?: \Modules\LMS\Models\PostTest::where('course_section_id', $sectionId)->first();
-        $evalResult = null;
-        if ($postTestBab && $request->user()) {
-            $evalResult = \Modules\LMS\Models\PostTestResult::where('post_test_id', $postTestBab->id)
-                ->where('user_id', $request->user()->id)
-                ->first();
-        }
-
-        return view('lms::user.course.section-show', [
-            'course'         => $course,
-            'section'        => $section,
-            'sectionIndex'   => $sectionIndex !== false ? $sectionIndex : 0,
-            'slug'           => $slug,
-            'activeBimtek'   => $activeBimtek,
-            'zoomProof'      => $zoomProof,
-            'hasJoinedZoom'  => (bool) ($enrollment?->pivot?->zoom_joined_at),
-            'isZoomAttended' => (bool) ($enrollment?->pivot?->zoom_attended),
-            'evalResult'     => $evalResult,
-            'postTestBab'    => $postTestBab,
-        ]);
+        return view('lms::user.course.section-show', array_merge([
+            'course'       => $course,
+            'section'      => $section,
+            'sectionIndex' => $sectionIndex !== false ? (int) $sectionIndex : 0,
+            'slug'         => $slug,
+            'activeBimtek' => $course->active_bimtek,
+        ], $sectionDetail));
     }
 
     public function submitAssignment(Request $request, string $slug, string $sectionId): RedirectResponse
@@ -459,11 +469,16 @@ class CourseController extends Controller
 
         $nextUrl = $this->getNextItemRoute($content, (string) auth()->id());
 
+        $backToSectionUrl = !empty(data_get($content, 'course_section_id'))
+            ? route('user.course.section.show', ['slug' => $slug ?? data_get($courseData, 'slug', ''), 'sectionId' => data_get($content, 'course_section_id')])
+            : route('user.course.my-course.detail', $slug ?? data_get($courseData, 'slug', ''));
+
         return view('lms::user.course.content-show', [
-            'course'  => $result['data'] ?? null,
-            'content' => $content,
-            'slug'    => $slug,
-            'nextUrl' => $nextUrl,
+            'course'           => $result['data'] ?? null,
+            'content'          => $content,
+            'slug'             => $slug,
+            'nextUrl'          => $nextUrl,
+            'backToSectionUrl' => $backToSectionUrl,
         ]);
     }
 
@@ -711,13 +726,23 @@ class CourseController extends Controller
             default       => 'pilgan',
         };
 
+        $backToUrl = !empty(data_get($postTest, 'course_section_id'))
+            ? route('user.course.section.show', ['slug' => $slug, 'sectionId' => data_get($postTest, 'course_section_id')])
+            : route('user.course.my-course.detail', $slug);
+
+        $isAssignmentDone = (bool) ($evalResult && ($evalResult->file_path || $evalResult->status === 'submitted' || $evalResult->completed_at));
+        $isEssayDone = (bool) ($evalResult && ($evalResult->answers || $evalResult->status === 'submitted' || $evalResult->completed_at));
+
         return view('lms::user.course.test-show', [
-            'course'     => $resultData['data'] ?? null,
-            'slug'       => $slug,
-            'postTest'   => $postTest,
-            'evalResult' => $evalResult,
-            'evalType'   => $evalType,
-            'result'     => $postTest->is_multiple_choice ? $this->postTestService->getStudentTestResult($userId, $postTestId, (bool) $request->query('retake')) : null,
+            'course'           => $resultData['data'] ?? null,
+            'slug'             => $slug,
+            'postTest'         => $postTest,
+            'evalResult'       => $evalResult,
+            'evalType'         => $evalType,
+            'result'           => $postTest->is_multiple_choice ? $this->postTestService->getStudentTestResult($userId, $postTestId, (bool) $request->query('retake')) : null,
+            'backToUrl'        => $backToUrl,
+            'isAssignmentDone' => $isAssignmentDone,
+            'isEssayDone'      => $isEssayDone,
         ]);
     }
 }
