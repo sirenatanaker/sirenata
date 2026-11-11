@@ -2,7 +2,7 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/driver.js@1/dist/driver.css" />
 <style>
     .driver-popover {
-        border-radius: 14px !important;
+        border-radius: 6px !important;
         padding: 14px 16px !important;
         box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.15), 0 8px 10px -6px rgba(0, 0, 0, 0.1) !important;
         width: calc(100vw - 32px) !important;
@@ -65,11 +65,11 @@
     }
     .driver-popover-description {
         font-size: 13px !important;
-        line-height: 1.6 !important;
+        line-height: 1.65 !important;
         color: #334155 !important;
     }
     .driver-popover-description strong {
-        color: #13416B !important;
+        color: #0B5CFF !important;
         font-weight: 700 !important;
     }
     .driver-popover-footer {
@@ -80,7 +80,7 @@
     .driver-popover-next-btn {
         background-color: #13416B !important;
         color: #ffffff !important;
-        border-radius: 8px !important;
+        border-radius: 6px !important;
         font-weight: 700 !important;
         font-size: 12px !important;
         padding: 6px 16px !important;
@@ -92,7 +92,7 @@
         background-color: #0f3354 !important;
     }
     .driver-popover-prev-btn {
-        border-radius: 8px !important;
+        border-radius: 6px !important;
         font-size: 12px !important;
         font-weight: 600 !important;
         color: #64748b !important;
@@ -207,8 +207,10 @@
             const checkAndApplyMascot = (element, step) => {
                 const popoverTitle = document.querySelector('.driver-popover-title')?.textContent || '';
                 const isEvaluasi = (step?.element === '[data-tour="evaluasi"]') ||
+                                   (step?.element === '[data-tour="evaluasi-narasumber"]') ||
                                    (element?.getAttribute?.('data-tour') === 'evaluasi') ||
-                                   (element?.matches && element.matches('[data-tour="evaluasi"]')) ||
+                                   (element?.getAttribute?.('data-tour') === 'evaluasi-narasumber') ||
+                                   (element?.matches && element.matches('[data-tour="evaluasi"], [data-tour="evaluasi-narasumber"]')) ||
                                    popoverTitle.toLowerCase().includes('evaluasi');
                 self.currentStepIsEvaluasi = !!isEvaluasi;
                 if (window.innerWidth >= 640) {

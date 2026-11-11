@@ -809,14 +809,11 @@
                                 Sertifikat Terkunci
                             </p>
 
-                            <p class="text-xs text-slate-500 leading-relaxed max-w-[220px]">
-                                @if (($remainingItems ?? 0) > 0)
-                                    Akses akan terbuka secara otomatis setelah Anda menyelesaikan <span
-                                        class="font-bold text-slate-800">{{ $remainingItems }} tahapan</span> yang
-                                    tersisa.
+                            <p class="text-xs text-slate-500 leading-relaxed max-w-[240px]">
+                                @if ($isBimtekEvent)
+                                    Akses sertifikat terbuka otomatis setelah menyelesaikan seluruh agenda hari, evaluasi akhir, dan evaluasi narasumber.
                                 @else
-                                    Selesaikan seluruh tahapan hingga progress mencapai 100% untuk mengunduh dokumen
-                                    sertifikat.
+                                    Akses sertifikat terbuka otomatis setelah menyelesaikan seluruh materi modul dan evaluasi akhir.
                                 @endif
                             </p>
 
@@ -1115,37 +1112,37 @@
                     {
                         element: '[data-tour="modul"]',
                         popover: {
-                            title: 'Tahap 1: Modul Pembelajaran Mandiri',
-                            description: 'Pelajari materi topik secara berurutan & tekan <strong>Tandai Selesai</strong>. Tuntaskan kuis bab untuk membuka modul berikutnya.',
+                            title: '{{ $isBimtekEvent ? "Tahap 1: Agenda Pelaksanaan Harian" : "Tahap 1: Modul Pembelajaran Mandiri" }}',
+                            description: '{!! addslashes($isBimtekEvent ? "Ikuti agenda pelatihan bertahap dari <strong>Hari 1 hingga hari terakhir</strong>. Pelajari <strong>materi mandiri</strong>, hadiri <strong>Zoom</strong>, dan selesaikan <strong>evaluasi harian</strong>." : "Pelajari materi topik secara berurutan & tekan <strong>Tandai Selesai</strong>. Tuntaskan <strong>kuis bab</strong> untuk membuka modul berikutnya.") !!}',
                             side: 'bottom',
                             align: 'start',
                         },
                     },
-                    @if ($activeBimtek && $activeBimtek->zoom_url)
                     {
-                        element: '[data-tour="zoom"]',
+                        element: '[data-tour="evaluasi"]',
                         popover: {
-                            title: 'Tahap 2: Sesi Tatap Muka Online (Zoom)',
-                            description: 'Ikuti sesi Zoom sesuai jadwal. Tekan <strong>Masuk Ruang Zoom</strong> dan masukkan <strong>Kode Presensi</strong> agar Evaluasi Akhir terbuka.',
-                            side: 'bottom',
+                            title: 'Tahap 2: Evaluasi Akhir Pelatihan',
+                            description: '{!! addslashes($isBimtekEvent ? "Ujian penentu kelulusan. Terbuka setelah seluruh <strong>materi mandiri tuntas</strong> dan <strong>presensi Zoom hari terakhir</strong> terverifikasi." : "Ujian penentu kelulusan. Terbuka otomatis setelah seluruh <strong>modul diselesaikan</strong>. Capai <strong>nilai KKM</strong> untuk lulus.") !!}',
+                            side: 'top',
+                            align: 'start',
+                        },
+                    },
+                    @if ($isBimtekEvent)
+                    {
+                        element: '[data-tour="evaluasi-narasumber"]',
+                        popover: {
+                            title: 'Tahap 3: Evaluasi Narasumber & Penyelenggaraan',
+                            description: 'Berikan penilaian dan umpan balik untuk <strong>narasumber pelatihan</strong>. Terbuka pada <strong>hari terakhir</strong> setelah sesi tatap muka (<strong>Zoom</strong>) dihadiri.',
+                            side: 'top',
                             align: 'start',
                         },
                     },
                     @endif
                     {
-                        element: '[data-tour="evaluasi"]',
-                        popover: {
-                            title: '{{ $activeBimtek && $activeBimtek->zoom_url ? "Tahap 3: Evaluasi Akhir Pelatihan" : "Tahap 2: Evaluasi Akhir Pelatihan" }}',
-                            description: '{{ $activeBimtek && $activeBimtek->zoom_url ? "Ujian penentu kelulusan. Terbuka setelah materi mandiri tuntas dan presensi Zoom terverifikasi. Capai nilai KKM untuk lulus." : "Ujian penentu kelulusan. Terbuka otomatis setelah seluruh modul diselesaikan. Capai nilai KKM untuk lulus." }}',
-                            side: 'top',
-                            align: 'start',
-                        },
-                    },
-                    {
                         element: '[data-tour="sertifikat"]',
                         popover: {
-                            title: '{{ $activeBimtek && $activeBimtek->zoom_url ? "Tahap 4: Penerbitan Sertifikat Kelulusan" : "Tahap 3: Penerbitan Sertifikat Kelulusan" }}',
-                            description: 'Dokumen resmi bukti kelulusan. Setelah progres mencapai 100% dan lulus ujian, terbitkan serta unduh e-sertifikat resmi di sini.',
+                            title: '{{ $isBimtekEvent ? "Tahap 4: Penerbitan Sertifikat Kelulusan" : "Tahap 3: Penerbitan Sertifikat Kelulusan" }}',
+                            description: 'Dokumen resmi bukti kelulusan. Setelah <strong>seluruh tahapan tuntas</strong> dan <strong>lulus evaluasi</strong>, terbitkan serta unduh <strong>e-sertifikat resmi</strong> di sini.',
                             side: 'bottom',
                             align: 'start',
                         },

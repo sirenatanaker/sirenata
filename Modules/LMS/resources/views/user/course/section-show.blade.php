@@ -816,7 +816,7 @@
                         element: '[data-tour="pembelajaran-mandiri"]',
                         popover: {
                             title: 'Tahap 1: Pembelajaran Mandiri',
-                            description: 'Pelajari seluruh materi pembelajaran secara mandiri dan bertahap hingga selesai. Tuntaskan semua materi untuk membuka akses tahap berikutnya.',
+                            description: 'Pelajari seluruh <strong>materi pembelajaran</strong> secara mandiri hingga selesai. Tuntaskan semua materi untuk membuka akses <strong>tahap berikutnya</strong>.',
                             side: 'bottom',
                             align: 'start',
                         },
@@ -826,7 +826,7 @@
                         element: '[data-tour="zoom"]',
                         popover: {
                             title: 'Tahap 2: Sesi Tatap Muka Online',
-                            description: 'Ikuti sesi Zoom interaktif sesuai jadwal dengan menekan <strong>Masuk Tatap Muka</strong>, lalu tekan <strong>Konfirmasi Kehadiran</strong> untuk mencatat presensi Anda.',
+                            description: 'Ikuti <strong>sesi Zoom interaktif</strong> sesuai jadwal dengan menekan <strong>Masuk Tatap Muka</strong>, lalu tekan <strong>Konfirmasi Kehadiran</strong> untuk mencatat presensi Anda.',
                             side: 'bottom',
                             align: 'start',
                         },
@@ -835,7 +835,7 @@
                         element: '[data-tour="bukti-presensi"]',
                         popover: {
                             title: 'Tahap 3: Bukti Pendukung Presensi',
-                            description: 'Ambil screenshot saat mengikuti sesi tatap muka dan tekan <strong>Buka Google Drive</strong> untuk mengunggah berkas bukti kehadiran langsung ke folder Google Drive panitia.',
+                            description: 'Ambil <strong>screenshot sesi Zoom</strong> dan tekan <strong>Buka Google Drive</strong> untuk mengunggah <strong>bukti kehadiran</strong> ke folder Google Drive panitia.',
                             side: 'bottom',
                             align: 'start',
                         },
@@ -846,10 +846,10 @@
                         popover: {
                             title: '{{ $hasZoom ? "Tahap 4: " : "Tahap 2: " }}{{ $isBimtekEvent ? "Evaluasi Hari ke-" . ($sectionIndex + 1) : "Evaluasi Modul " . ($sectionIndex + 1) }}',
                             description: '{!! addslashes($currentEvalType === "uraian"
-                                ? "Jawab pertanyaan studi kasus uraian pada formulir jawaban yang disediakan. Evaluasi terbuka otomatis setelah seluruh materi mandiri tuntas."
+                                ? "Jawab <strong>pertanyaan studi kasus</strong> pada formulir jawaban. Evaluasi terbuka otomatis setelah seluruh <strong>materi mandiri tuntas</strong>."
                                 : ($currentEvalType === "upload"
-                                    ? "Unduh lembar soal penugasan, kerjakan studi kasus, lalu unggah dokumen jawaban Anda (PDF/DOCX/ZIP) sebelum batas waktu."
-                                    : "Kerjakan butir soal pilihan ganda berbatas waktu dan raih nilai di atas KKM kelulusan untuk menuntaskan evaluasi ini.")) !!}',
+                                    ? "Unduh <strong>lembar soal penugasan</strong>, kerjakan studi kasus, lalu unggah <strong>dokumen jawaban</strong> (PDF/DOCX/ZIP) sebelum batas waktu."
+                                    : "Kerjakan butir soal <strong>pilihan ganda</strong> dan raih nilai di atas <strong>KKM kelulusan</strong> untuk menuntaskan evaluasi ini.")) !!}',
                             side: 'top',
                             align: 'start',
                         },
