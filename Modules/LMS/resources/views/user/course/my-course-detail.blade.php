@@ -530,7 +530,37 @@
                 @if ($isBimtekEvent)
                 {{-- CARD EVALUASI NARASUMBER / PEMATERI (KHUSUS BIMTEK) --}}
                 @php
-                    $isEvaluasiNarasumberLocked = $isWaitingForStart;
+                    // Cek apakah peserta sudah mencapai hari terakhir (seluruh hari sebelum hari terakhir tuntas)
+                    $isLastDayReached = true;
+                    if ($totalSections > 1) {
+                        $priorSections = collect($sectionsList)->slice(0, $totalSections - 1);
+                        foreach ($priorSections as $priorSec) {
+                            $pContents = data_get($priorSec, 'section_contents', []) ?: data_get($priorSec, 'contents', []);
+                            $pTotal = count($pContents);
+                            $pDone = data_get($priorSec, 'completed_count', 0);
+                            $pContentCompleted = data_get($priorSec, 'is_content_completed', $pTotal === 0 || $pDone === $pTotal);
+                            $pPostTestBab = data_get($priorSec, 'post_test_bab');
+                            $pPostTestDone = data_get($priorSec, 'is_post_test_bab_completed', true);
+                            if (!$pContentCompleted || !$pPostTestDone) {
+                                $isLastDayReached = false;
+                                break;
+                            }
+                        }
+                    }
+
+                    // Opsi 1: Terkunci sampai hari terakhir tercapai DAN sesi Zoom hari terakhir diikuti
+                    $isEvaluasiNarasumberLocked = $canReviewAll 
+                        ? false 
+                        : ($isWaitingForStart || !$isLastDayReached || ($activeBimtek && $activeBimtek->zoom_url && !$isZoomAttended));
+
+                    $evaluasiNarasumberLockReason = 'Evaluasi narasumber dibuka pada hari terakhir setelah sesi tatap muka (Zoom) dihadiri.';
+                    if ($isWaitingForStart) {
+                        $evaluasiNarasumberLockReason = 'Evaluasi narasumber dibuka setelah periode pelaksanaan pelatihan resmi dimulai.';
+                    } elseif (!$isLastDayReached) {
+                        $evaluasiNarasumberLockReason = 'Evaluasi narasumber dibuka pada hari terakhir (Hari ke-' . $totalSections . ') setelah sesi tatap muka (Zoom) dihadiri.';
+                    } elseif ($activeBimtek && $activeBimtek->zoom_url && !$isZoomAttended) {
+                        $evaluasiNarasumberLockReason = 'Silakan ikuti dan konfirmasi kehadiran sesi tatap muka (Zoom) hari terakhir untuk membuka evaluasi ini.';
+                    }
                 @endphp
                 <div data-tour="evaluasi-narasumber"
                     id="card-evaluasi-narasumber"
@@ -606,9 +636,9 @@
 
                             {{-- Tombol Aksi di Bawah Badges (Konsisten dengan Evaluasi Akhir) --}}
                             <div class="mt-4 sm:mt-5 flex justify-start">
-                                @if ($isWaitingForStart)
+                                @if ($isEvaluasiNarasumberLocked)
                                     <button type="button" disabled
-                                        title="Evaluasi narasumber dibuka setelah sesi pelatihan dimulai"
+                                        title="{{ $evaluasiNarasumberLockReason }}"
                                         class="inline-flex items-center justify-center gap-1.5 px-5 py-2.5 rounded-md text-xs sm:text-sm font-bold bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed select-none">
                                         <i class="fas fa-lock text-xs"></i> Evaluasi Terkunci
                                     </button>
@@ -1169,10 +1199,12 @@
                                             <span x-show="evalNarasumberDone" class="w-6 h-6 rounded-full bg-emerald-600 text-white flex items-center justify-center shrink-0 text-[10px] mt-0.5 shadow-2xs">
                                                 <i class="fas fa-check"></i>
                                             </span>
-                                            <span x-show="!evalNarasumberDone && {{ $isWaitingForStart ? 'true' : 'false' }}" class="w-6 h-6 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center shrink-0 text-[10px] mt-0.5 border border-slate-200">
+                                            <span x-show="!evalNarasumberDone && {{ $isEvaluasiNarasumberLocked ? 'true' : 'false' }}"
+                                                title="{{ $evaluasiNarasumberLockReason }}"
+                                                class="w-6 h-6 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center shrink-0 text-[10px] mt-0.5 border border-slate-200">
                                                 <i class="fas fa-lock text-[9px]"></i>
                                             </span>
-                                            <span x-show="!evalNarasumberDone && !{{ $isWaitingForStart ? 'true' : 'false' }}" class="w-6 h-6 rounded-full bg-[#13416B]/10 text-[#13416B] border border-[#13416B]/20 flex items-center justify-center shrink-0 text-[10px] font-bold mt-0.5">
+                                            <span x-show="!evalNarasumberDone && !{{ $isEvaluasiNarasumberLocked ? 'true' : 'false' }}" class="w-6 h-6 rounded-full bg-[#13416B]/10 text-[#13416B] border border-[#13416B]/20 flex items-center justify-center shrink-0 text-[10px] font-bold mt-0.5">
                                                 <i class="fas fa-chalkboard-teacher text-[9px]"></i>
                                             </span>
                                             <div class="min-w-0">
@@ -1186,12 +1218,13 @@
                                                     <i class="fas fa-check text-[9px]"></i> Selesai
                                                 </span>
                                             </template>
-                                            <template x-if="!evalNarasumberDone && {{ $isWaitingForStart ? 'true' : 'false' }}">
-                                                <span class="inline-flex items-center gap-1 text-[11px] font-medium text-slate-400 bg-slate-100 px-2.5 py-1 rounded-md">
+                                            <template x-if="!evalNarasumberDone && {{ $isEvaluasiNarasumberLocked ? 'true' : 'false' }}">
+                                                <span class="inline-flex items-center gap-1 text-[11px] font-medium text-slate-400 bg-slate-100 px-2.5 py-1 rounded-md"
+                                                    title="{{ $evaluasiNarasumberLockReason }}">
                                                     <i class="fas fa-lock text-[9px]"></i> Terkunci
                                                 </span>
                                             </template>
-                                            <template x-if="!evalNarasumberDone && !{{ $isWaitingForStart ? 'true' : 'false' }}">
+                                            <template x-if="!evalNarasumberDone && !{{ $isEvaluasiNarasumberLocked ? 'true' : 'false' }}">
                                                 <button type="button" @click="showRequirementsModal = false; $dispatch('open-evaluasi-narasumber')"
                                                     class="inline-flex items-center gap-1 px-3 py-1.5 rounded-md text-xs font-bold text-white bg-[#13416B] hover:bg-[#0f3354] transition-colors shadow-2xs whitespace-nowrap">
                                                     <span>Isi</span>
