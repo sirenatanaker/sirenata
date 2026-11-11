@@ -141,11 +141,11 @@
                         @if ($isBimtekEvent)
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-3.5 mt-3.5 sm:mt-4 max-w-2xl">
                                 @if ($activeBimtek->batch_name)
-                                    <div class="flex items-center gap-3 px-3.5 py-2.5 rounded-md bg-slate-50/80 border border-slate-200/80 text-xs text-slate-700 min-w-0">
+                                    <div class="flex items-center gap-3 px-3.5 py-2.5 sm:py-3 rounded-md bg-slate-50/80 border border-slate-200/80 text-xs text-slate-700 min-w-0">
                                         <div class="w-8 h-8 rounded-md bg-blue-50 text-[#13416B] border border-blue-100 flex items-center justify-center shrink-0">
                                             <i class="fas fa-satellite-dish text-xs"></i>
                                         </div>
-                                        <div class="min-w-0 flex-1 flex flex-col gap-1">
+                                        <div class="min-w-0 flex-1 flex flex-col gap-1.5 sm:gap-2">
                                             <span class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider leading-none">Gelombang / Batch</span>
                                             <span class="font-bold text-slate-800 truncate text-xs sm:text-[13px] leading-tight" title="{{ $activeBimtek->batch_name }}">{{ $activeBimtek->batch_name }}</span>
                                         </div>
@@ -153,11 +153,11 @@
                                 @endif
 
                                 @if ($formattedPeriod)
-                                    <div class="flex items-center gap-3 px-3.5 py-2.5 rounded-md bg-slate-50/80 border border-slate-200/80 text-xs text-slate-700 min-w-0">
+                                    <div class="flex items-center gap-3 px-3.5 py-2.5 sm:py-3 rounded-md bg-slate-50/80 border border-slate-200/80 text-xs text-slate-700 min-w-0">
                                         <div class="w-8 h-8 rounded-md bg-blue-50 text-[#13416B] border border-blue-100 flex items-center justify-center shrink-0">
                                             <i class="far fa-calendar-alt text-xs"></i>
                                         </div>
-                                        <div class="min-w-0 flex-1 flex flex-col gap-1">
+                                        <div class="min-w-0 flex-1 flex flex-col gap-1.5 sm:gap-2">
                                             <span class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider leading-none">Periode Pelaksanaan</span>
                                             <span class="font-bold text-slate-800 truncate text-xs sm:text-[13px] leading-tight">{{ $formattedPeriod }}</span>
                                         </div>
@@ -166,21 +166,21 @@
                             </div>
                         @else
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-3.5 mt-3.5 sm:mt-4 max-w-2xl">
-                                <div class="flex items-center gap-3 px-3.5 py-2.5 rounded-md bg-slate-50/80 border border-slate-200/80 text-xs text-slate-700 min-w-0">
+                                <div class="flex items-center gap-3 px-3.5 py-2.5 sm:py-3 rounded-md bg-slate-50/80 border border-slate-200/80 text-xs text-slate-700 min-w-0">
                                     <div class="w-8 h-8 rounded-md bg-blue-50 text-[#13416B] border border-blue-100 flex items-center justify-center shrink-0">
                                         <i class="fas fa-laptop-code text-xs"></i>
                                     </div>
-                                    <div class="min-w-0 flex-1 flex flex-col gap-1">
+                                    <div class="min-w-0 flex-1 flex flex-col gap-1.5 sm:gap-2">
                                         <span class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider leading-none">Tipe Pelatihan</span>
                                         <span class="font-bold text-slate-800 truncate text-xs sm:text-[13px] leading-tight">Kursus Mandiri (Self-Paced)</span>
                                     </div>
                                 </div>
 
-                                <div class="flex items-center gap-3 px-3.5 py-2.5 rounded-md bg-slate-50/80 border border-slate-200/80 text-xs text-slate-700 min-w-0">
+                                <div class="flex items-center gap-3 px-3.5 py-2.5 sm:py-3 rounded-md bg-slate-50/80 border border-slate-200/80 text-xs text-slate-700 min-w-0">
                                     <div class="w-8 h-8 rounded-md bg-blue-50 text-[#13416B] border border-blue-100 flex items-center justify-center shrink-0">
                                         <i class="far fa-clock text-xs"></i>
                                     </div>
-                                    <div class="min-w-0 flex-1 flex flex-col gap-1">
+                                    <div class="min-w-0 flex-1 flex flex-col gap-1.5 sm:gap-2">
                                         <span class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider leading-none">Akses Belajar</span>
                                         <span class="font-bold text-slate-800 truncate text-xs sm:text-[13px] leading-tight">Fleksibel (Kapan Saja)</span>
                                     </div>
@@ -223,7 +223,7 @@
                         <div class="flex items-start gap-3 sm:gap-3.5">
                             <i class="fas {{ $isBimtekEvent ? 'fa-calendar-alt' : 'fa-layer-group' }} text-[#13416B] text-xl sm:text-2xl mt-0.5 shrink-0"></i>
                             <div>
-                                <h2 class="text-base sm:text-lg font-extrabold text-slate-800 leading-tight">
+                                <h2 class="text-base sm:text-lg font-bold text-slate-700 leading-tight">
                                     {{ $isBimtekEvent ? 'Timeline & Agenda Pelaksanaan' : 'Daftar Modul Pembelajaran' }}
                                 </h2>
                                 <p class="text-[11px] sm:text-xs text-slate-500 mt-1">
@@ -419,7 +419,7 @@
                         <div class="flex flex-row items-end justify-between gap-6 lg:gap-8">
                             {{-- Kolom Kiri: Informasi Evaluasi & Tombol Aksi --}}
                             <div class="flex-1 min-w-0 sm:py-1">
-                                <h3 class="text-base sm:text-lg lg:text-xl font-bold text-slate-800 leading-snug max-w-full lg:max-w-[85%]">
+                                <h3 class="text-base sm:text-lg lg:text-xl font-bold text-slate-700 leading-snug max-w-full lg:max-w-[85%]">
                                     {{ $evaluasiAkhirTitle }}
                                 </h3>
 
@@ -574,7 +574,7 @@
                         {{-- Kolom Kiri: Informasi Evaluasi Narasumber & Tombol Aksi --}}
                         <div class="flex-1 min-w-0 sm:py-1">
                             <div class="flex items-center gap-2 flex-wrap">
-                                <h3 class="text-base sm:text-lg lg:text-xl font-bold text-slate-800 leading-snug">
+                                <h3 class="text-base sm:text-lg lg:text-xl font-bold text-slate-700 leading-snug">
                                     Evaluasi Narasumber & Penyelenggaraan
                                 </h3>
                                 <template x-if="submitted">
@@ -756,7 +756,7 @@
                             <i class="fas fa-award"></i>
                         </div>
                         <div>
-                            <h3 class="text-base md:text-lg font-extrabold text-slate-800">Sertifikat Kelulusan</h3>
+                            <h3 class="text-base md:text-lg font-bold text-slate-700">Sertifikat Kelulusan</h3>
                             <p class="text-[11px] text-slate-500 mt-0.5">Dokumen resmi bukti penyelesaian kursus</p>
                         </div>
                     </div>

@@ -161,7 +161,7 @@
                         {{-- Card Konten Tahap 1 --}}
                         <div id="pembelajaran-mandiri" data-tour="pembelajaran-mandiri" class="flex-1 min-w-0 scroll-mt-6 rounded-md border border-slate-200 bg-slate-50/40 p-4 sm:p-5 lg:p-6 shadow-2xs transition-all">
                             <div class="pb-3.5 mb-4 border-b border-slate-200/80">
-                                <h2 class="text-base sm:text-lg lg:text-xl font-extrabold text-slate-800 tracking-tight leading-tight">Pembelajaran Mandiri</h2>
+                                <h2 class="text-base sm:text-lg lg:text-xl font-bold text-slate-700 tracking-tight leading-tight">Pembelajaran Mandiri</h2>
                                 <p class="text-xs sm:text-sm text-slate-500 mt-0.5">Pelajari seluruh materi secara mandiri dan bertahap hingga selesai.</p>
                             </div>
 
@@ -268,7 +268,7 @@
                         <div id="sesi-zoom" data-tour="zoom"
                             class="flex-1 min-w-0 scroll-mt-6 rounded-md border border-slate-200 bg-slate-50/40 p-4 sm:p-5 lg:p-6 shadow-2xs transition-all space-y-4">
                             <div>
-                                <h2 class="text-base sm:text-lg lg:text-xl font-extrabold text-slate-800 tracking-tight leading-tight">
+                                <h2 class="text-base sm:text-lg lg:text-xl font-bold text-slate-700 tracking-tight leading-tight">
                                     Sesi Tatap Muka Online
                                 </h2>
 
@@ -396,7 +396,7 @@
                         <div id="bukti-presensi" data-tour="bukti-presensi"
                             class="flex-1 min-w-0 scroll-mt-6 rounded-md border border-slate-200 bg-slate-50/40 p-4 sm:p-5 lg:p-6 shadow-2xs transition-all space-y-4">
                             <div>
-                                <h2 class="text-base sm:text-lg lg:text-xl font-extrabold text-slate-800 tracking-tight leading-tight">
+                                <h2 class="text-base sm:text-lg lg:text-xl font-bold text-slate-700 tracking-tight leading-tight">
                                     Bukti Pendukung Presensi
                                 </h2>
 
@@ -473,24 +473,12 @@
                             {{-- Kolom Kiri: Informasi Evaluasi & Aksi --}}
                             <div class="flex-1 min-w-0 sm:py-1 space-y-4">
                                 <div>
-                                <h2 class="text-base sm:text-lg lg:text-xl font-extrabold text-slate-800 tracking-tight leading-tight max-w-full lg:max-w-[85%]">
-                                    @if ($currentEvalType === 'uraian')
-                                        {{ $isBimtekEvent ? 'Evaluasi Uraian Hari ke-' . ($sectionIndex + 1) : 'Evaluasi Uraian Modul ' . ($sectionIndex + 1) }}: {{ $sectionName }}
-                                    @elseif ($currentEvalType === 'upload')
-                                        {{ $isBimtekEvent ? 'Penugasan Berkas Hari ke-' . ($sectionIndex + 1) : 'Penugasan Berkas Modul ' . ($sectionIndex + 1) }}: {{ $sectionName }}
-                                    @else
-                                        {{ $postTestTitle }}
-                                    @endif
+                                <h2 class="text-base sm:text-lg lg:text-xl font-bold text-slate-700 tracking-tight leading-tight max-w-full lg:max-w-[85%]">
+                                    {{ $isBimtekEvent ? 'Evaluasi Hari ke-' . ($sectionIndex + 1) : 'Evaluasi Modul ' . ($sectionIndex + 1) }}
                                 </h2>
 
-                                <p class="text-sm sm:text-[15px] text-slate-700 mt-1.5 leading-relaxed max-w-full lg:max-w-[90%]">
-                                    @if ($currentEvalType === 'uraian')
-                                        Jawab pertanyaan studi kasus dan pemahaman konsep secara mendalam melalui lembar evaluasi uraian.
-                                    @elseif ($currentEvalType === 'upload')
-                                        Unduh berkas soal dari penyelenggara, kerjakan sesuai panduan, lalu unggah dokumen jawaban Anda di bawah ini.
-                                    @else
-                                        Ujian evaluasi materi pada {{ $isBimtekEvent ? 'hari ini' : 'modul ini' }} untuk menguji pemahaman dan capaian pembelajaran Anda.
-                                    @endif
+                                <p class="text-sm sm:text-[15px] text-slate-600 mt-1.5 leading-relaxed max-w-full lg:max-w-[90%]">
+                                    Selesaikan evaluasi pembelajaran pada {{ $isBimtekEvent ? 'hari ini' : 'modul ini' }} untuk menguji pemahaman dan capaian pembelajaran Anda.
                                 </p>
 
                                 {{-- Badges Spesifikasi Sesuai Tipe Evaluasi --}}
@@ -745,10 +733,10 @@
                         </div>
 
                         {{-- Kolom Kanan: Ilustrasi Gambar nempel bawah --}}
-                        <div class="hidden sm:flex sm:shrink-0 items-end justify-center self-end -mb-3.5 lg:-mb-4">
+                        <div class="hidden sm:flex sm:shrink-0 items-end justify-center self-end -mb-5 lg:-mb-6">
                             <img src="{{ asset('images/modul_ilustrasi.webp') }}"
                                 alt="Ilustrasi Evaluasi Modul"
-                                class="sm:h-48 md:h-56 lg:h-64 w-auto object-contain object-bottom select-none pointer-events-none" />
+                                class="sm:h-40 md:h-46 lg:h-52 w-auto object-contain object-bottom select-none pointer-events-none" />
                         </div>
                     </div>
                 </div>
@@ -763,7 +751,7 @@
                     <div class="flex items-center justify-between pb-3 border-b border-slate-200/90">
                         <div class="flex items-center gap-2">
                             <i class="fas fa-list-check text-[#13416B] text-xs"></i>
-                            <span class="text-xs font-extrabold uppercase tracking-wider text-slate-800">On This Page</span>
+                            <span class="text-xs font-bold uppercase tracking-wider text-slate-700">On This Page</span>
                         </div>
                         <span class="text-[11px] font-bold {{ $progressPercent === 100 ? 'text-emerald-700 bg-emerald-50 border-emerald-200' : 'text-slate-600 bg-white border-slate-200' }} border px-2 py-0.5 rounded shadow-2xs">
                             {{ $completedActivities }}/{{ $totalActivities }} Selesai
@@ -922,7 +910,7 @@
                     {
                         element: '[data-tour="evaluasi"]',
                         popover: {
-                            title: '{{ $hasZoom ? "Tahap 4: Evaluasi & Penugasan" : "Tahap 2: Evaluasi & Penugasan" }}',
+                            title: '{{ $hasZoom ? "Tahap 4: " : "Tahap 2: " }}{{ $isBimtekEvent ? "Evaluasi Hari ke-" . ($sectionIndex + 1) : "Evaluasi Modul " . ($sectionIndex + 1) }}',
                             description: '{!! addslashes($currentEvalType === "uraian"
                                 ? "Jawab pertanyaan studi kasus uraian pada formulir jawaban yang disediakan. Evaluasi terbuka otomatis setelah seluruh materi mandiri tuntas."
                                 : ($currentEvalType === "upload"
