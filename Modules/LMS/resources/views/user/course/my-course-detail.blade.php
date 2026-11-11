@@ -190,7 +190,7 @@
                     </div>
 
                     {{-- Progress Bar (Tanpa Icon Progres) --}}
-                    <div class="w-full max-w-2xl pt-2.5 sm:pt-3.5 border-t border-slate-100">
+                    <div data-tour="progres" class="w-full max-w-2xl pt-2.5 sm:pt-3.5 border-t border-slate-100">
                         <div class="flex justify-between items-center mb-1.5 text-xs">
                             <span class="font-semibold text-slate-600">
                                 {{ $isWaitingForStart ? 'Status Pelatihan' : 'Progres Pembelajaran' }}
