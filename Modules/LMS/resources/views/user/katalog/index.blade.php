@@ -449,7 +449,7 @@
                                                                 <template x-if="step.step === 1">
                                                                     <span class="inline-flex items-center gap-1.5 text-slate-500">
                                                                         <i class="fas fa-users text-slate-400"></i>
-                                                                        <span>Kuota: <strong x-text="selected.bimtekQuota + ' Peserta'"></strong></span>
+                                                                        <span>Kuota: <strong x-text="selected.bimtekQuota > 0 ? selected.bimtekQuota + ' Peserta' : 'Tanpa Batasan Kuota'"></strong></span>
                                                                     </span>
                                                                 </template>
                                                             </div>
@@ -672,7 +672,7 @@
                                         </div>
                                         <div>
                                             <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Kuota</span>
-                                            <p class="font-bold text-slate-800 mt-0.5" x-text="selected.bimtekQuota + ' Peserta'"></p>
+                                            <p class="font-bold text-slate-800 mt-0.5" x-text="selected.bimtekQuota > 0 ? selected.bimtekQuota + ' Peserta' : 'Tanpa Batasan'"></p>
                                         </div>
                                     </div>
                                     <div class="pt-2 border-t border-slate-200/80">

@@ -74,16 +74,34 @@
                             @enderror
                         </div>
 
-                        {{-- Kuota Peserta --}}
-                        <div class="md:col-span-1">
-                            <label for="quota" class="block text-xs font-semibold text-slate-700 mb-1.5">
-                                Kapasitas Kuota (Peserta) <span class="text-rose-500">*</span>
-                            </label>
-                            <input type="number" id="quota" name="quota" value="{{ old('quota', $event->quota) }}" min="1" required
-                                   class="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 text-sm focus:ring-1 focus:ring-slate-900 focus:border-slate-900">
-                            @error('quota')
-                                <p class="text-xs text-rose-500 mt-1">{{ $message }}</p>
-                            @enderror
+                        {{-- Kuota Peserta dengan Opsi Tanpa Batasan --}}
+                        <div class="md:col-span-1" x-data="{ isUnlimited: {{ old('is_unlimited_quota', is_null($event->quota) || $event->quota <= 0 ? 'true' : 'false') }} }">
+                            <div class="flex items-center justify-between mb-1.5">
+                                <label for="quota" class="block text-xs font-semibold text-slate-700">
+                                    Kapasitas Kuota <span class="text-rose-500" x-show="!isUnlimited">*</span>
+                                </label>
+                                <label class="inline-flex items-center gap-1.5 cursor-pointer select-none">
+                                    <input type="checkbox" name="is_unlimited_quota" value="1"
+                                           x-model="isUnlimited"
+                                           class="rounded border-slate-300 text-[#13416B] focus:ring-[#13416B] h-3.5 w-3.5">
+                                    <span class="text-xs text-slate-600 font-medium">Tanpa Batas</span>
+                                </label>
+                            </div>
+                            <div x-show="!isUnlimited">
+                                <input type="number" id="quota" name="quota"
+                                       value="{{ old('quota', $event->quota ?: 100) }}" min="1"
+                                       :required="!isUnlimited"
+                                       placeholder="Contoh: 100"
+                                       class="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 text-sm focus:ring-1 focus:ring-slate-900 focus:border-slate-900">
+                                @error('quota')
+                                    <p class="text-xs text-rose-500 mt-1">{{ $message }}</p>
+                                @enderror
+                            </div>
+                            <div x-show="isUnlimited" x-cloak
+                                 class="px-3 py-2 bg-slate-50 border border-dashed border-slate-300 rounded-lg text-xs text-slate-600 flex items-center gap-2">
+                                <i class="fas fa-infinity text-[#0B5CFF] text-sm"></i>
+                                <span>Kapasitas peserta terbuka <strong>tanpa batasan kuota</strong>.</span>
+                            </div>
                         </div>
                     </div>
                 </div>

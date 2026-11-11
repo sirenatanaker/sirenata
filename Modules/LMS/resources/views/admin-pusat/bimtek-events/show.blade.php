@@ -1,49 +1,23 @@
 <x-dashboard::layouts.dashboard title="Monitoring Gelombang Bimtek - Admin Pusat">
     <div class="w-full p-8 space-y-6">
 
-        {{-- Top Navigasi & Aksi Utama --}}
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-            <div>
-                {{-- Breadcrumb Navigation (2 Teks) --}}
-                <nav class="flex mb-2" aria-label="Breadcrumb">
-                    <ol class="inline-flex items-center space-x-1 sm:space-x-2">
-                        <li>
-                            <a href="{{ route('admin-pusat.management-course.bimtek-events.index') }}"
-                               class="text-xs sm:text-sm font-medium text-slate-500 hover:text-[#13416B] transition-colors">
-                                Periode Event
-                            </a>
-                        </li>
-                        <li class="inline-flex items-center">
-                            <i class="fas fa-chevron-right text-[10px] text-slate-300 mx-1.5"></i>
-                            <span class="text-xs sm:text-sm font-bold text-slate-900">
-                                Detail & Monitoring
-                            </span>
-                        </li>
-                    </ol>
-                </nav>
-                <div class="flex items-center gap-2.5 flex-wrap">
-                    <h1 class="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">{{ $event->batch_name }}</h1>
-                    @php $badge = $event->status_badge; @endphp
-                    <span class="inline-flex px-2.5 py-0.5 rounded-md text-xs font-semibold {{ $badge['class'] }}">
-                        {{ $badge['label'] }}
+        {{-- Breadcrumb Navigation (2 Teks) --}}
+        <nav class="flex" aria-label="Breadcrumb">
+            <ol class="inline-flex items-center space-x-1 sm:space-x-2">
+                <li>
+                    <a href="{{ route('admin-pusat.management-course.bimtek-events.index') }}"
+                       class="text-xs sm:text-sm font-medium text-slate-500 hover:text-[#13416B] transition-colors">
+                        Periode Event
+                    </a>
+                </li>
+                <li class="inline-flex items-center">
+                    <i class="fas fa-chevron-right text-[10px] text-slate-300 mx-1.5"></i>
+                    <span class="text-xs sm:text-sm font-bold text-slate-900">
+                        Detail & Monitoring
                     </span>
-                </div>
-                <p class="text-xs sm:text-sm text-slate-500 mt-0.5">
-                    Kode Gelombang: <strong class="font-mono text-slate-700">{{ $event->batch_code }}</strong> | Master Kursus: <strong class="text-slate-800">{{ $event->course?->name }}</strong>
-                </p>
-            </div>
-
-            <div class="flex items-center gap-2 self-start sm:self-auto flex-wrap">
-                <a href="{{ route('admin-pusat.management-course.bimtek-events.edit', $event->id) }}"
-                   class="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors shadow-2xs">
-                    <span>Edit Linimasa & Kuota</span>
-                </a>
-                <a href="{{ route('admin-pusat.management-course.certificate-submissions.create', ['bimtek_event_id' => $event->id]) }}"
-                   class="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-bold text-white bg-[#13416B] hover:bg-[#0e2c48] rounded-lg transition-colors shadow-2xs">
-                    <span>Ajukan Sertifikat ke PPSDM</span>
-                </a>
-            </div>
-        </div>
+                </li>
+            </ol>
+        </nav>
 
         {{-- ======================================================== --}}
         {{-- STRUKTUR TIMELINE KESELURUHAN & RINCIAN 3 PERIODE BIMTEK --}}
@@ -60,44 +34,78 @@
             $overallStart = $event->overall_start_at;
             $overallEnd = $event->overall_end_at;
             $totalDays = ($overallStart && $overallEnd) ? max(1, $overallStart->diffInDays($overallEnd)) : 0;
-            $quotaPercent = $event->quota > 0 ? min(100, round(($totalRegistered / $event->quota) * 100)) : 0;
+            $isUnlimitedQuota = is_null($event->quota) || $event->quota <= 0;
+            $quotaPercent = (!$isUnlimitedQuota && $event->quota > 0) ? min(100, round(($totalRegistered / $event->quota) * 100)) : 0;
+            $badge = $event->status_badge;
         @endphp
 
-        {{-- Ringkasan Linimasa Keseluruhan (Desain Sirenata) --}}
+        {{-- Header Banner Utama Linimasa Program (Desain Sirenata Terpadu) --}}
         <div class="p-5 sm:p-6 rounded-md bg-[#13416B] text-white shadow-sm space-y-4">
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/15 pb-3">
-                <div>
-                    <span class="text-[11px] font-bold uppercase tracking-wider text-slate-300">Linimasa Pelatihan</span>
-                    <h2 class="text-base sm:text-lg font-bold text-white mt-0.5">Timeline Keseluruhan Program</h2>
+            {{-- Baris Atas: Info Gelombang Bimtek & Tombol Aksi Rata Kiri --}}
+            <div class="border-b border-white/15 pb-4 space-y-3">
+                <div class="space-y-1.5">
+                    <div class="flex items-center gap-2.5 flex-wrap">
+                        <h1 class="text-xl sm:text-2xl font-bold text-white tracking-tight">{{ $event->batch_name }}</h1>
+                        <span class="inline-flex px-2.5 py-0.5 rounded-md text-xs font-semibold {{ $badge['class'] }}">
+                            {{ $badge['label'] }}
+                        </span>
+                    </div>
+                    <p class="text-xs sm:text-sm text-slate-200">
+                        Kode Gelombang: <strong class="font-mono text-white">{{ $event->batch_code }}</strong> | Master Kursus: <strong class="text-white">{{ $event->course?->name }}</strong>
+                    </p>
                 </div>
 
-                <div class="flex items-center gap-2 flex-wrap">
-                    @if ($totalDays > 0)
-                        <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-semibold bg-white/15 border border-white/20 text-white">
-                            Durasi Program: {{ $totalDays }} Hari
-                        </span>
-                    @endif
-                    <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-semibold bg-white/15 border border-white/20 text-white">
-                        Kapasitas Terisi: {{ $totalRegistered }} / {{ $event->quota }} Peserta ({{ $quotaPercent }}%)
-                    </span>
+                <div class="flex items-center gap-2.5 flex-wrap pt-0.5">
+                    <a href="{{ route('admin-pusat.management-course.bimtek-events.edit', $event->id) }}"
+                       class="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-white bg-white/10 hover:bg-white/20 border border-white/20 rounded-md transition-colors shadow-2xs">
+                        <i class="fas fa-pen text-[10px]"></i>
+                        <span>Edit Linimasa & Kuota</span>
+                    </a>
+                    <a href="{{ route('admin-pusat.management-course.certificate-submissions.create', ['bimtek_event_id' => $event->id]) }}"
+                       class="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-bold text-[#13416B] bg-white hover:bg-slate-100 rounded-md transition-colors shadow-2xs">
+                        <i class="fas fa-file-signature text-xs"></i>
+                        <span>Ajukan Sertifikat ke PPSDM</span>
+                    </a>
                 </div>
             </div>
 
-            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            {{-- Baris Bawah: Rentang Waktu Keseluruhan & Keterisian Kuota --}}
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pt-1">
                 <div>
-                    <p class="text-xs text-slate-200">Rentang Waktu Penuh (Dari Buka Pendaftaran s/d Batas Akhir Sertifikasi):</p>
-                    <p class="text-base sm:text-xl font-extrabold text-white mt-1">
+                    <div class="flex items-center gap-2 flex-wrap mb-1">
+                        <span class="text-[11px] font-bold uppercase tracking-wider text-slate-300">Linimasa Keseluruhan Program</span>
+                        @if ($totalDays > 0)
+                            <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold bg-white/15 border border-white/20 text-white">
+                                Durasi: {{ $totalDays }} Hari
+                            </span>
+                        @endif
+                    </div>
+                    <p class="text-base sm:text-xl font-extrabold text-white">
                         {{ $event->overall_timeline_formatted }}
                     </p>
                 </div>
-                <div class="w-full md:w-64 space-y-1.5">
-                    <div class="flex justify-between text-xs text-slate-200">
-                        <span>Keterisian Kuota</span>
-                        <span class="font-bold text-amber-300">{{ $quotaPercent }}%</span>
-                    </div>
-                    <div class="w-full bg-white/20 rounded-full h-2 overflow-hidden">
-                        <div class="bg-amber-400 h-2 rounded-full transition-all" style="width: {{ $quotaPercent }}%"></div>
-                    </div>
+
+                <div class="w-full md:w-72 space-y-1.5">
+                    @if ($isUnlimitedQuota)
+                        <div class="flex items-center justify-between text-xs text-slate-200">
+                            <span>Kapasitas Pendaftaran</span>
+                            <span class="font-bold text-amber-300 flex items-center gap-1">
+                                <i class="fas fa-infinity text-xs"></i> Tanpa Batas
+                            </span>
+                        </div>
+                        <div class="px-3 py-1.5 rounded-md bg-white/10 border border-white/15 text-xs text-white flex items-center justify-between">
+                            <span class="text-slate-300">Pendaftar Terdaftar:</span>
+                            <strong class="font-bold text-white">{{ $totalRegistered }} Peserta</strong>
+                        </div>
+                    @else
+                        <div class="flex justify-between text-xs text-slate-200">
+                            <span>Keterisian Kuota ({{ $totalRegistered }} / {{ $event->quota }} Peserta)</span>
+                            <span class="font-bold text-amber-300">{{ $quotaPercent }}%</span>
+                        </div>
+                        <div class="w-full bg-white/20 rounded-full h-2 overflow-hidden">
+                            <div class="bg-amber-400 h-2 rounded-full transition-all" style="width: {{ $quotaPercent }}%"></div>
+                        </div>
+                    @endif
                 </div>
             </div>
         </div>
@@ -148,7 +156,13 @@
 
                 <div class="pt-2 border-t border-slate-100 flex items-center justify-between text-xs">
                     <span class="text-slate-500">Pendaftar Terdaftar:</span>
-                    <strong class="text-slate-900 font-bold">{{ $totalRegistered }} Peserta</strong>
+                    <strong class="text-slate-900 font-bold">
+                        @if ($event->quota && $event->quota > 0)
+                            {{ $totalRegistered }} / {{ $event->quota }} Peserta
+                        @else
+                            {{ $totalRegistered }} Peserta (Tanpa Batas)
+                        @endif
+                    </strong>
                 </div>
             </div>
 
@@ -280,45 +294,6 @@
 
         </div>
 
-        {{-- 4 Indikator Progres Peserta --}}
-        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
-            <div class="bg-white p-3.5 rounded-md border border-slate-200 flex items-center justify-between">
-                <div>
-                    <p class="text-[11px] font-medium text-slate-500">Total Peserta</p>
-                    <p class="text-xl font-bold text-slate-800">{{ $totalRegistered }}</p>
-                </div>
-                <span class="w-8 h-8 rounded-md bg-slate-100 text-slate-600 flex items-center justify-center text-xs">
-                    <i class="fas fa-users"></i>
-                </span>
-            </div>
-            <div class="bg-white p-3.5 rounded-md border border-slate-200 flex items-center justify-between">
-                <div>
-                    <p class="text-[11px] font-medium text-slate-500">Tuntas Modul</p>
-                    <p class="text-xl font-bold text-emerald-600">{{ $totalCompleted }}</p>
-                </div>
-                <span class="w-8 h-8 rounded-md bg-emerald-50 text-emerald-600 flex items-center justify-center text-xs">
-                    <i class="fas fa-check-circle"></i>
-                </span>
-            </div>
-            <div class="bg-white p-3.5 rounded-md border border-slate-200 flex items-center justify-between">
-                <div>
-                    <p class="text-[11px] font-medium text-slate-500">Hadir Live Zoom</p>
-                    <p class="text-xl font-bold text-blue-600">{{ $totalAttendedZoom }}</p>
-                </div>
-                <span class="w-8 h-8 rounded-md bg-blue-50 text-blue-600 flex items-center justify-center text-xs">
-                    <i class="fas fa-video"></i>
-                </span>
-            </div>
-            <div class="bg-white p-3.5 rounded-md border border-slate-200 flex items-center justify-between">
-                <div>
-                    <p class="text-[11px] font-medium text-slate-500">Nomor PPSDM Terbit</p>
-                    <p class="text-xl font-bold text-[#13416B]">{{ $totalCertified }}</p>
-                </div>
-                <span class="w-8 h-8 rounded-md bg-[#13416B]/10 text-[#13416B] flex items-center justify-center text-xs">
-                    <i class="fas fa-certificate"></i>
-                </span>
-            </div>
-        </div>
 
         {{-- Tabel Monitoring Peserta --}}
         <div class="bg-white rounded-md border border-slate-200 shadow-2xs overflow-hidden">

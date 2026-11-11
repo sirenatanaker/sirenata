@@ -52,6 +52,11 @@ class BimtekEvent extends Model
         'quota'                 => 'integer',
     ];
 
+    public function getIsUnlimitedQuotaAttribute(): bool
+    {
+        return is_null($this->quota) || $this->quota <= 0;
+    }
+
     public function course(): BelongsTo
     {
         return $this->belongsTo(Course::class, 'course_id');

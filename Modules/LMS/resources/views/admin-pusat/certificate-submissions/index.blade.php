@@ -1,61 +1,6 @@
 <x-dashboard::layouts.dashboard title="Pengajuan Sertifikat PPSDM - Admin Pusat">
     <div class="p-3 sm:p-6 max-w-[1600px] mx-auto space-y-4 sm:space-y-6">
 
-        {{-- 4 Indikator Tata Kelola Sertifikasi --}}
-        <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
-            <div class="bg-white rounded-xl border border-slate-200 p-4 flex items-center justify-between shadow-2xs">
-                <div>
-                    <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Total Berkas Pengajuan</p>
-                    <p class="text-2xl font-extrabold text-slate-900 mt-1 tabular-nums">
-                        {{ number_format($totalSubmissions, 0, ',', '.') }}
-                    </p>
-                    <p class="text-[11px] text-slate-400 mt-0.5">Nota dinas ke PPSDM</p>
-                </div>
-                <div class="w-11 h-11 rounded-xl bg-[#13416B]/10 text-[#13416B] flex items-center justify-center shrink-0">
-                    <i class="fas fa-file-invoice text-lg"></i>
-                </div>
-            </div>
-
-            <div class="bg-white rounded-xl border border-slate-200 p-4 flex items-center justify-between shadow-2xs">
-                <div>
-                    <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Diajukan ke PPSDM</p>
-                    <p class="text-2xl font-extrabold text-amber-600 mt-1 tabular-nums">
-                        {{ number_format($pendingSubmissions, 0, ',', '.') }}
-                    </p>
-                    <p class="text-[11px] text-slate-400 mt-0.5">Menunggu nomor registrasi</p>
-                </div>
-                <div class="w-11 h-11 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
-                    <i class="fas fa-hourglass-half text-lg"></i>
-                </div>
-            </div>
-
-            <div class="bg-white rounded-xl border border-slate-200 p-4 flex items-center justify-between shadow-2xs">
-                <div>
-                    <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Sertifikat Selesai</p>
-                    <p class="text-2xl font-extrabold text-emerald-600 mt-1 tabular-nums">
-                        {{ number_format($completedSubmissions, 0, ',', '.') }}
-                    </p>
-                    <p class="text-[11px] text-slate-400 mt-0.5">Sudah diterbitkan resmi</p>
-                </div>
-                <div class="w-11 h-11 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
-                    <i class="fas fa-check-double text-lg"></i>
-                </div>
-            </div>
-
-            <div class="bg-white rounded-xl border border-slate-200 p-4 flex items-center justify-between shadow-2xs">
-                <div>
-                    <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Total ASN Bersertifikat</p>
-                    <p class="text-2xl font-extrabold text-[#547996] mt-1 tabular-nums">
-                        {{ number_format($totalCertifiedASN, 0, ',', '.') }}
-                    </p>
-                    <p class="text-[11px] text-slate-400 mt-0.5">Memiliki nomor resmi PPSDM</p>
-                </div>
-                <div class="w-11 h-11 rounded-xl bg-[#547996]/10 text-[#547996] flex items-center justify-center shrink-0">
-                    <i class="fas fa-certificate text-lg"></i>
-                </div>
-            </div>
-        </div>
-
         {{-- Filter Card & Tabel --}}
         <x-dashboard::filter-card
             title="Daftar Pengajuan Sertifikat ke PPSDM"

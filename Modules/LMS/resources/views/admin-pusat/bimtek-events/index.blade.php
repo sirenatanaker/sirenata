@@ -89,9 +89,16 @@
                                     @endif
                                 </td>
                                 <td class="py-3 px-3.5">
-                                    <span class="font-semibold text-slate-800 tabular-nums">
-                                        {{ number_format($item->quota, 0, ',', '.') }} Peserta
-                                    </span>
+                                    @if ($item->quota && $item->quota > 0)
+                                        <span class="font-semibold text-slate-800 tabular-nums">
+                                            {{ number_format($item->quota, 0, ',', '.') }} Peserta
+                                        </span>
+                                    @else
+                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-semibold bg-slate-100 text-slate-700">
+                                            <i class="fas fa-infinity text-[10px] text-blue-600"></i>
+                                            <span>Tanpa Batas</span>
+                                        </span>
+                                    @endif
                                 </td>
                                 <td class="py-3 px-3.5 text-center">
                                     @php

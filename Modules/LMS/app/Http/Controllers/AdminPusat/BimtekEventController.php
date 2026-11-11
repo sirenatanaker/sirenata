@@ -55,6 +55,11 @@ class BimtekEventController extends Controller
      */
     public function store(Request $request)
     {
+        $isUnlimitedQuota = $request->boolean('is_unlimited_quota');
+        if ($isUnlimitedQuota) {
+            $request->merge(['quota' => null]);
+        }
+
         $hasRegStart = $request->filled('registration_start_at');
         $hasRegEnd = $request->filled('registration_end_at');
         $hasAssessmentStart = $request->filled('assessment_start_at');
@@ -63,7 +68,7 @@ class BimtekEventController extends Controller
             'course_id'             => 'required|exists:courses,id',
             'batch_name'            => 'required|string|max:255',
             'batch_code'            => 'nullable|string|max:100|unique:bimtek_events,batch_code',
-            'quota'                 => 'required|integer|min:1',
+            'quota'                 => $isUnlimitedQuota ? 'nullable' : 'required|integer|min:1',
 
             // 1. Periode Pendaftaran
             'registration_start_at' => 'nullable|date',
@@ -104,6 +109,8 @@ class BimtekEventController extends Controller
             $slugPrefix = strtoupper(substr(Str::slug($course->name), 0, 8));
             $validated['batch_code'] = 'BIMTEK-' . $slugPrefix . '-' . date('Y') . '-' . strtoupper(Str::random(4));
         }
+
+        $validated['quota'] = $isUnlimitedQuota ? null : (int) $request->input('quota');
 
         // Metode pelaksanaan default online (Zoom)
         $validated['execution_type'] = $request->input('execution_type', 'online');
@@ -194,6 +201,11 @@ class BimtekEventController extends Controller
     {
         $event = BimtekEvent::findOrFail($id);
 
+        $isUnlimitedQuota = $request->boolean('is_unlimited_quota');
+        if ($isUnlimitedQuota) {
+            $request->merge(['quota' => null]);
+        }
+
         $hasRegStart = $request->filled('registration_start_at');
         $hasRegEnd = $request->filled('registration_end_at');
         $hasAssessmentStart = $request->filled('assessment_start_at');
@@ -202,7 +214,7 @@ class BimtekEventController extends Controller
             'course_id'             => 'required|exists:courses,id',
             'batch_name'            => 'required|string|max:255',
             'batch_code'            => 'required|string|max:100|unique:bimtek_events,batch_code,' . $event->id,
-            'quota'                 => 'required|integer|min:1',
+            'quota'                 => $isUnlimitedQuota ? 'nullable' : 'required|integer|min:1',
 
             // 1. Periode Pendaftaran
             'registration_start_at' => 'nullable|date',
@@ -240,6 +252,8 @@ class BimtekEventController extends Controller
 
         // Metode pelaksanaan dipertahankan atau default online
         $validated['execution_type'] = $request->input('execution_type', $event->execution_type ?: 'online');
+
+        $validated['quota'] = $isUnlimitedQuota ? null : (int) $request->input('quota');
 
         // Status dihitung otomatis sesuai rentang periode tanggal
         $validated['status'] = BimtekEvent::determineStatusFromDates(
