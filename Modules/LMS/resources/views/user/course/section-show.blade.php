@@ -168,9 +168,9 @@
                 @if ($hasZoom)
                     @php
                         $activeSession = $currentSession ?? null;
-                        $sessionZoomUrl = $activeSession?->effective_zoom_url ?? $activeBimtek->zoom_url;
-                        $sessionMeetingId = $activeSession?->zoom_meeting_id ?: $activeBimtek->zoom_meeting_id;
-                        $sessionPasscode = $activeSession?->zoom_passcode ?: $activeBimtek->zoom_passcode;
+                        $sessionZoomUrl = $activeSession?->effective_zoom_url ?? $activeBimtek?->zoom_url;
+                        $sessionMeetingId = $activeSession?->zoom_meeting_id ?: $activeBimtek?->zoom_meeting_id;
+                        $sessionPasscode = $activeSession?->zoom_passcode ?: $activeBimtek?->zoom_passcode;
                         $sessionSchedule = $activeSession?->schedule_formatted ?? $zoomScheduleFormatted;
                         $sessionAttendanceSchedule = $activeSession?->attendance_schedule_formatted ?? $attendanceScheduleFormatted;
                     @endphp
@@ -265,54 +265,54 @@
                                 </div>
                             @endif
 
-                            {{-- Info Sesi (Jadwal, Meeting ID, Passcode) --}}
+                            {{-- Info Sesi (Jadwal, Meeting ID, Passcode) - 2 Kolom Soft Solid Setema --}}
                             @if ($sessionSchedule || $sessionMeetingId || $sessionPasscode || $sessionAttendanceSchedule)
-                                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3">
                                     @if ($sessionSchedule)
-                                        <div class="flex items-center gap-2.5 p-2.5 rounded-md bg-white border border-slate-200 shadow-2xs">
-                                            <div class="w-8 h-8 rounded-md bg-slate-100 text-[#13416B] flex items-center justify-center shrink-0 text-sm">
+                                        <div class="flex items-start sm:items-center gap-2.5 sm:gap-3 p-3 rounded-md bg-[#EBF3FA] border border-[#C5DBEE] shadow-2xs">
+                                            <div class="w-8 h-8 rounded-md bg-[#13416B] text-white flex items-center justify-center shrink-0 text-xs sm:text-sm mt-0.5 sm:mt-0 shadow-2xs">
                                                 <i class="fas fa-calendar-alt"></i>
                                             </div>
-                                            <div class="min-w-0">
-                                                <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Jadwal Zoom</p>
-                                                <p class="text-xs font-bold text-slate-800 truncate" title="{{ $sessionSchedule }}">
+                                            <div class="min-w-0 flex-1">
+                                                <p class="text-[10px] font-bold uppercase tracking-wider text-[#13416B]/75">Jadwal Zoom</p>
+                                                <p class="text-xs font-bold text-slate-800 leading-snug break-words mt-0.5" title="{{ $sessionSchedule }}">
                                                     {{ $sessionSchedule }}
                                                 </p>
                                             </div>
                                         </div>
                                     @endif
                                     @if ($sessionAttendanceSchedule)
-                                        <div class="flex items-center gap-2.5 p-2.5 rounded-md bg-amber-50/70 border border-amber-200 shadow-2xs">
-                                            <div class="w-8 h-8 rounded-md bg-amber-100 text-amber-800 flex items-center justify-center shrink-0 text-sm">
+                                        <div class="flex items-start sm:items-center gap-2.5 sm:gap-3 p-3 rounded-md bg-[#EBF3FA] border border-[#C5DBEE] shadow-2xs">
+                                            <div class="w-8 h-8 rounded-md bg-[#13416B] text-white flex items-center justify-center shrink-0 text-xs sm:text-sm mt-0.5 sm:mt-0 shadow-2xs">
                                                 <i class="fas fa-clock"></i>
                                             </div>
-                                            <div class="min-w-0">
-                                                <p class="text-[10px] font-bold uppercase tracking-wider text-amber-700">Waktu Presensi</p>
-                                                <p class="text-xs font-bold text-amber-900 truncate" title="{{ $sessionAttendanceSchedule }}">
+                                            <div class="min-w-0 flex-1">
+                                                <p class="text-[10px] font-bold uppercase tracking-wider text-[#13416B]/75">Waktu Presensi</p>
+                                                <p class="text-xs font-bold text-slate-800 leading-snug break-words mt-0.5" title="{{ $sessionAttendanceSchedule }}">
                                                     {{ $sessionAttendanceSchedule }}
                                                 </p>
                                             </div>
                                         </div>
                                     @endif
                                     @if ($sessionMeetingId)
-                                        <div class="flex items-center gap-2.5 p-2.5 rounded-md bg-white border border-slate-200 shadow-2xs">
-                                            <div class="w-8 h-8 rounded-md bg-slate-100 text-[#13416B] flex items-center justify-center shrink-0 text-sm">
+                                        <div class="flex items-center gap-2.5 sm:gap-3 p-3 rounded-md bg-[#EBF3FA] border border-[#C5DBEE] shadow-2xs">
+                                            <div class="w-8 h-8 rounded-md bg-[#13416B] text-white flex items-center justify-center shrink-0 text-xs sm:text-sm shadow-2xs">
                                                 <i class="fas fa-hashtag"></i>
                                             </div>
-                                            <div class="min-w-0">
-                                                <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Meeting ID</p>
-                                                <p class="text-xs font-mono font-bold text-slate-800 truncate">{{ $sessionMeetingId }}</p>
+                                            <div class="min-w-0 flex-1">
+                                                <p class="text-[10px] font-bold uppercase tracking-wider text-[#13416B]/75">Meeting ID</p>
+                                                <p class="text-xs font-mono font-bold text-slate-800 tracking-wide select-all break-all mt-0.5" title="{{ $sessionMeetingId }}">{{ $sessionMeetingId }}</p>
                                             </div>
                                         </div>
                                     @endif
                                     @if ($sessionPasscode)
-                                        <div class="flex items-center gap-2.5 p-2.5 rounded-md bg-white border border-slate-200 shadow-2xs">
-                                            <div class="w-8 h-8 rounded-md bg-slate-100 text-[#13416B] flex items-center justify-center shrink-0 text-sm">
+                                        <div class="flex items-center gap-2.5 sm:gap-3 p-3 rounded-md bg-[#EBF3FA] border border-[#C5DBEE] shadow-2xs">
+                                            <div class="w-8 h-8 rounded-md bg-[#13416B] text-white flex items-center justify-center shrink-0 text-xs sm:text-sm shadow-2xs">
                                                 <i class="fas fa-key"></i>
                                             </div>
-                                            <div class="min-w-0">
-                                                <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Passcode</p>
-                                                <p class="text-xs font-mono font-bold text-slate-800 truncate">{{ $sessionPasscode }}</p>
+                                            <div class="min-w-0 flex-1">
+                                                <p class="text-[10px] font-bold uppercase tracking-wider text-[#13416B]/75">Passcode</p>
+                                                <p class="text-xs font-mono font-bold text-slate-800 tracking-wide select-all break-all mt-0.5" title="{{ $sessionPasscode }}">{{ $sessionPasscode }}</p>
                                             </div>
                                         </div>
                                     @endif
@@ -320,18 +320,18 @@
                             @endif
 
                             {{-- Tombol Aksi: Masuk Tatap Muka & Presensi Berdampingan --}}
-                            <div class="flex flex-wrap items-center gap-2.5 pt-1">
+                            <div class="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-2.5 pt-1">
                                 {{-- 1. Tombol Masuk Tatap Muka --}}
                                 @if ($isZoomEnded)
                                     <button type="button" disabled title="Jadwal sesi tatap muka telah berakhir"
-                                        class="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-md font-bold text-xs sm:text-sm border border-slate-300 bg-slate-100 text-slate-400 cursor-not-allowed select-none">
+                                        class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-md font-bold text-xs sm:text-sm border border-slate-300 bg-slate-100 text-slate-400 cursor-not-allowed select-none text-center">
                                         <i class="fas fa-video-slash text-xs"></i>
                                         <span>Sesi Tatap Muka Berakhir</span>
                                     </button>
                                 @else
-                                    <a href="{{ route('user.course.my-course.join-zoom', array_filter(['course' => $courseSlug, 'session_id' => $activeSession?->id])) }}"
+                                    <a href="{{ route('user.course.my-course.join-zoom', array_filter(['slug' => $courseSlug, 'session_id' => $activeSession?->id])) }}"
                                         target="_blank" rel="noopener noreferrer"
-                                        class="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-md font-bold text-xs sm:text-sm bg-[#13416B] hover:bg-[#0f3354] text-white shadow-sm transition-all">
+                                        class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-md font-bold text-xs sm:text-sm bg-[#13416B] hover:bg-[#0f3354] text-white shadow-sm transition-all text-center">
                                         <i class="fas fa-video text-xs"></i>
                                         <span>Masuk Tatap Muka {{ $activeSession ? 'Hari ' . $activeSession->session_number : '' }}</span>
                                         <i class="fas fa-external-link-alt text-[10px] opacity-75"></i>
@@ -341,25 +341,25 @@
                                 {{-- 2. Tombol Presensi Kehadiran --}}
                                 @if ($isZoomAttended)
                                     <button type="button" disabled
-                                        class="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-md font-bold text-xs sm:text-sm bg-emerald-600 text-white shadow-sm select-none cursor-default">
+                                        class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-md font-bold text-xs sm:text-sm bg-emerald-600 text-white shadow-sm select-none cursor-default text-center">
                                         <i class="fas fa-check-circle text-xs"></i>
                                         <span>Sudah Presensi {{ $activeSession ? 'Hari ' . $activeSession->session_number : '' }}</span>
                                     </button>
                                 @elseif ($isPresensiOpen)
-                                    <form action="{{ route('user.course.my-course.attend-zoom', $courseSlug) }}" method="POST" class="inline">
+                                    <form action="{{ route('user.course.my-course.attend-zoom', $courseSlug) }}" method="POST" class="w-full sm:w-auto inline-flex">
                                         @csrf
                                         @if ($activeSession)
                                             <input type="hidden" name="session_id" value="{{ $activeSession->id }}">
                                         @endif
                                         <button type="submit"
-                                            class="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-md font-bold text-xs sm:text-sm bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm transition-all cursor-pointer animate-pulse">
+                                            class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-md font-bold text-xs sm:text-sm bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm transition-all cursor-pointer animate-pulse text-center">
                                             <i class="fas fa-clipboard-check text-xs"></i>
                                             <span>Konfirmasi Kehadiran {{ $activeSession ? 'Hari ' . $activeSession->session_number : '' }}</span>
                                         </button>
                                     </form>
                                 @else
                                     <button type="button" disabled title="{{ $presensiLockReason }}"
-                                        class="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-md font-bold text-xs sm:text-sm border border-slate-300 bg-slate-100 text-slate-400 cursor-not-allowed select-none">
+                                        class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-md font-bold text-xs sm:text-sm border border-slate-300 bg-slate-100 text-slate-400 cursor-not-allowed select-none text-center">
                                         <i class="fas fa-lock text-xs"></i>
                                         <span>{{ ($isPresensiEnded ?? $isZoomEnded) ? 'Presensi Berakhir' : 'Presensi Belum Dibuka' }}</span>
                                     </button>
@@ -401,35 +401,35 @@
                                 </p>
                             </div>
 
-                            {{-- Akses Folder Google Drive Penyelenggara --}}
+                            {{-- Akses Folder Google Drive Penyelenggara (Soft Solid Setema) --}}
                             @if ($adminDriveLink)
-                                <div class="p-4 sm:p-5 rounded-md bg-white border border-slate-200 shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                                <div class="p-4 sm:p-5 rounded-md bg-[#EBF3FA] border border-[#C5DBEE] shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                                     <div class="flex items-start sm:items-center gap-3.5 min-w-0">
-                                        <div class="w-11 h-11 rounded-md bg-blue-50 text-[#0B5CFF] flex items-center justify-center shrink-0 text-xl shadow-xs">
+                                        <div class="w-11 h-11 rounded-md bg-[#13416B] text-white flex items-center justify-center shrink-0 text-xl shadow-2xs">
                                             <i class="fab fa-google-drive"></i>
                                         </div>
                                         <div class="min-w-0 space-y-0.5">
-                                            <h4 class="text-sm sm:text-base font-bold text-slate-800">Folder Google Drive Panitia</h4>
-                                            <p class="text-xs sm:text-[13px] text-slate-500 leading-snug">
+                                            <h4 class="text-sm sm:text-base font-bold text-[#13416B]">Folder Google Drive Panitia</h4>
+                                            <p class="text-xs sm:text-[13px] text-slate-600 leading-snug">
                                                 Kumpulkan berkas foto atau tangkapan layar sesi tatap muka Anda ke folder Google Drive panitia berikut.
                                             </p>
                                         </div>
                                     </div>
                                     <a href="{{ $adminDriveLink }}" target="_blank" rel="noopener noreferrer"
-                                        class="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-md text-xs sm:text-sm font-bold text-white bg-[#0B5CFF] hover:bg-blue-700 shadow-sm transition-all shrink-0 whitespace-nowrap">
+                                        class="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-md text-xs sm:text-sm font-bold text-white bg-[#13416B] hover:bg-[#0f3354] shadow-xs transition-all shrink-0 whitespace-nowrap cursor-pointer">
                                         <i class="fab fa-google-drive text-sm"></i>
                                         <span>Buka Google Drive</span>
                                         <i class="fas fa-external-link-alt text-[10px] ml-0.5 opacity-80"></i>
                                     </a>
                                 </div>
                             @else
-                                <div class="p-4 rounded-md bg-white border border-slate-200 shadow-2xs flex items-center gap-3.5 text-slate-500">
-                                    <div class="w-10 h-10 rounded-md bg-slate-100 text-slate-400 flex items-center justify-center shrink-0 text-lg">
+                                <div class="p-4 rounded-md bg-slate-100 text-slate-700 border border-slate-200 shadow-2xs flex items-center gap-3.5">
+                                    <div class="w-10 h-10 rounded-md bg-slate-200 text-slate-500 flex items-center justify-center shrink-0 text-lg">
                                         <i class="fab fa-google-drive"></i>
                                     </div>
                                     <div>
                                         <p class="text-xs sm:text-sm font-bold text-slate-700">Tautan Google Drive Belum Tersedia</p>
-                                        <p class="text-xs text-slate-500">Tautan folder Google Drive untuk pengumpulan bukti presensi belum diatur oleh penyelenggara.</p>
+                                        <p class="text-xs text-slate-500 mt-0.5">Tautan folder Google Drive untuk pengumpulan bukti presensi belum diatur oleh penyelenggara.</p>
                                     </div>
                                 </div>
                             @endif
@@ -652,19 +652,19 @@
 
                             {{-- Folder Drive Tambahan dari Penyelenggara (Jika Dikonfigurasi) --}}
                             @if ($adminDriveLink && $currentEvalType !== 'upload')
-                                <div class="p-3.5 rounded-md bg-white border border-blue-200/90 shadow-2xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                                <div class="p-3.5 rounded-md bg-[#EBF3FA] border border-[#C5DBEE] shadow-2xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                                     <div class="flex items-center gap-3">
-                                        <div class="w-9 h-9 rounded-md bg-blue-50 text-[#0B5CFF] border border-blue-200 flex items-center justify-center shrink-0 shadow-2xs">
-                                            <i class="fab fa-google-drive text-lg"></i>
+                                        <div class="w-9 h-9 rounded-md bg-[#13416B] text-white flex items-center justify-center shrink-0 shadow-2xs text-base">
+                                            <i class="fab fa-google-drive"></i>
                                         </div>
                                         <div>
-                                            <p class="text-xs sm:text-sm font-bold text-slate-800">Folder Google Drive Tugas dari Penyelenggara</p>
+                                            <p class="text-xs sm:text-sm font-bold text-[#13416B]">Folder Google Drive Tugas dari Penyelenggara</p>
                                             <p class="text-xs text-slate-600 mt-0.5">Akses folder Drive panitia untuk unduh lembar kerja atau kumpulkan berkas tambahan.</p>
                                         </div>
                                     </div>
 
                                     <a href="{{ $adminDriveLink }}" target="_blank" rel="noopener noreferrer"
-                                        class="inline-flex items-center gap-2 px-3.5 py-2 rounded-md text-xs font-bold text-white bg-[#0B5CFF] hover:bg-blue-700 transition-all shadow-2xs shrink-0 whitespace-nowrap">
+                                        class="inline-flex items-center gap-2 px-3.5 py-2 rounded-md text-xs font-bold text-white bg-[#13416B] hover:bg-[#0f3354] transition-all shadow-xs shrink-0 whitespace-nowrap cursor-pointer">
                                         <i class="fab fa-google-drive"></i>
                                         <span>Buka Folder Drive</span>
                                         <i class="fas fa-external-link-alt text-[10px] ml-0.5"></i>
@@ -806,7 +806,7 @@
                                         Sesi Tatap Muka Online
                                     </p>
                                     <p class="text-[11px] {{ $isZoomDone ? 'text-emerald-600 font-semibold' : ($isPresensiOpen ? 'text-blue-600 font-semibold' : 'text-slate-500') }} mt-0.5">
-                                        {{ $isZoomDone ? 'Presensi terverifikasi' : ($isPresensiOpen ? 'Presensi dibuka' : ($zoomEnd && $now->greaterThan($zoomEnd) ? 'Presensi berakhir' : 'Belum dibuka')) }}
+                                        {{ $isZoomDone ? 'Presensi terverifikasi' : ($isPresensiOpen ? 'Presensi dibuka' : (($isPresensiEnded ?? $isZoomEnded) ? 'Presensi berakhir' : 'Belum dibuka')) }}
                                     </p>
                                 </div>
                             </a>

@@ -1,7 +1,7 @@
 <x-dashboard::layouts.dashboard title="Edit Gelombang Bimtek - Admin Pusat">
     <div class="w-full p-8 space-y-6">
 
-        {{-- Breadcrumb Navigation (2 Teks) --}}
+        {{-- Breadcrumb Navigation (Minimal) --}}
         <nav class="flex" aria-label="Breadcrumb">
             <ol class="inline-flex items-center space-x-1 sm:space-x-2">
                 <li>
@@ -11,7 +11,7 @@
                     </a>
                 </li>
                 <li class="inline-flex items-center">
-                    <i class="fas fa-chevron-right text-[10px] text-slate-300 mx-1.5"></i>
+                    <span class="text-xs text-slate-300 mx-1.5">/</span>
                     <span class="text-sm font-bold text-slate-900">
                         Edit Gelombang
                     </span>
@@ -19,17 +19,83 @@
             </ol>
         </nav>
 
-        {{-- Form Card --}}
-        <div class="bg-white rounded-md border border-slate-200 shadow-2xs p-6 sm:p-8">
-            <form action="{{ route('admin-pusat.management-course.bimtek-events.update', $event->id) }}" method="POST" id="bimtekForm" class="space-y-6">
+        @php
+            $initialStep = 1;
+            if ($errors->has('assessment_start_at') || $errors->has('assessment_end_at')) {
+                $initialStep = 3;
+            } elseif ($errors->has('start_date') || $errors->has('end_date') || $errors->has('zoom_url') || $errors->has('sessions') || $errors->has('sessions.*')) {
+                $initialStep = 2;
+            }
+        @endphp
+
+        {{-- Form Card dengan Stepper Wizard Minimalis --}}
+        <div class="bg-white rounded-md border border-slate-200 shadow-2xs p-6 sm:p-8"
+             x-data="bimtekFormWizard({
+                 initialStep: {{ $initialStep }},
+                 isUnlimitedQuota: {{ old('is_unlimited_quota', is_null($event->quota) || $event->quota <= 0 ? 'true' : 'false') }},
+                 isEdit: true
+             })">
+
+            {{-- Stepper (Mirip Super Admin & Minim Icon) --}}
+            <div class="mb-8 flex items-center gap-2 sm:gap-3">
+                <div class="flex items-center gap-2 cursor-pointer" @click="goToStep(1)">
+                    <div class="flex h-8 w-8 items-center justify-center rounded-full text-sm font-bold"
+                         :class="step === 1 ? 'bg-indigo-600 text-white' : (step > 1 ? 'bg-emerald-500 text-white' : 'bg-slate-200 text-slate-500')">
+                        1
+                    </div>
+                    <span class="text-sm font-semibold"
+                          :class="step === 1 ? 'text-slate-900' : 'text-slate-500'">
+                        Pendaftaran
+                    </span>
+                </div>
+
+                <div class="h-0.5 flex-1 rounded-full"
+                     :class="step >= 2 ? 'bg-emerald-500' : 'bg-slate-200'"></div>
+
+                <div class="flex items-center gap-2 cursor-pointer" @click="goToStep(2)">
+                    <div class="flex h-8 w-8 items-center justify-center rounded-full text-sm font-bold"
+                         :class="step === 2 ? 'bg-indigo-600 text-white' : (step > 2 ? 'bg-emerald-500 text-white' : 'bg-slate-200 text-slate-500')">
+                        2
+                    </div>
+                    <span class="text-sm font-semibold"
+                          :class="step === 2 ? 'text-slate-900' : 'text-slate-500'">
+                        Pelaksanaan & Zoom
+                    </span>
+                </div>
+
+                <div class="h-0.5 flex-1 rounded-full"
+                     :class="step >= 3 ? 'bg-emerald-500' : 'bg-slate-200'"></div>
+
+                <div class="flex items-center gap-2 cursor-pointer" @click="goToStep(3)">
+                    <div class="flex h-8 w-8 items-center justify-center rounded-full text-sm font-bold"
+                         :class="step === 3 ? 'bg-indigo-600 text-white' : 'bg-slate-200 text-slate-500'">
+                        3
+                    </div>
+                    <span class="text-sm font-semibold"
+                          :class="step === 3 ? 'text-slate-900' : 'text-slate-500'">
+                        Evaluasi & Selesai
+                    </span>
+                </div>
+            </div>
+
+            <x-validation-errors />
+
+            <form action="{{ route('admin-pusat.management-course.bimtek-events.update', $event->id) }}" method="POST" id="bimtekForm" novalidate>
                 @csrf
                 @method('PUT')
 
-                {{-- Section: Informasi Pokok Gelombang --}}
-                <div class="space-y-4">
-                    <h2 class="text-xs font-bold text-slate-400 uppercase tracking-wider pb-2 border-b border-slate-100">
-                        Informasi Kursus & Kapasitas
-                    </h2>
+                {{-- ======================================================== --}}
+                {{-- LANGKAH 1: INFORMASI GELOMBANG & PERIODE PENDAFTARAN     --}}
+                {{-- ======================================================== --}}
+                <div x-show="step === 1" x-cloak class="space-y-6">
+                    <div class="border-b border-slate-100 pb-3">
+                        <h2 class="text-xs font-bold text-slate-800 uppercase tracking-wider">
+                            Langkah 1: Informasi Kursus, Gelombang & Pendaftaran
+                        </h2>
+                        <p class="text-xs text-slate-500 mt-1">
+                            Pilih master kursus yang dibuka, tentukan nama gelombang, kapasitas kuota, dan jadwal pendaftaran.
+                        </p>
+                    </div>
 
                     {{-- Pilih Master Kursus --}}
                     <div>
@@ -75,7 +141,7 @@
                         </div>
 
                         {{-- Kuota Peserta dengan Opsi Tanpa Batasan --}}
-                        <div class="md:col-span-1" x-data="{ isUnlimited: {{ old('is_unlimited_quota', is_null($event->quota) || $event->quota <= 0 ? 'true' : 'false') }} }">
+                        <div class="md:col-span-1">
                             <div class="flex items-center justify-between mb-1.5">
                                 <label for="quota" class="block text-xs font-semibold text-slate-700">
                                     Kapasitas Kuota <span class="text-rose-500" x-show="!isUnlimited">*</span>
@@ -90,7 +156,6 @@
                             <div x-show="!isUnlimited">
                                 <input type="number" id="quota" name="quota"
                                        value="{{ old('quota', $event->quota ?: 100) }}" min="1"
-                                       :required="!isUnlimited"
                                        placeholder="Contoh: 100"
                                        class="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 text-sm focus:ring-1 focus:ring-slate-900 focus:border-slate-900">
                                 @error('quota')
@@ -98,80 +163,18 @@
                                 @enderror
                             </div>
                             <div x-show="isUnlimited" x-cloak
-                                 class="px-3 py-2 bg-slate-50 border border-dashed border-slate-300 rounded-lg text-xs text-slate-600 flex items-center gap-2">
-                                <i class="fas fa-infinity text-[#0B5CFF] text-sm"></i>
-                                <span>Kapasitas peserta terbuka <strong>tanpa batasan kuota</strong>.</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                {{-- ======================================================== --}}
-                {{-- SEKSI PENGATURAN PERIODE & LINIMASA PROGRAM              --}}
-                {{-- ======================================================== --}}
-                <div class="space-y-4 pt-4 border-t border-slate-100">
-                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1 pb-1">
-                        <div>
-                            <h2 class="text-xs font-bold text-slate-400 uppercase tracking-wider">
-                                Pengaturan Periode Linimasa Pelatihan
-                            </h2>
-                            <p class="text-xs text-slate-500 mt-0.5">
-                                Pengisian wajib berurutan (Pendaftaran &rarr; Pelaksanaan & Zoom &rarr; Evaluasi) untuk mencegah kesalahan jadwal (anti human-error).
-                            </p>
-                        </div>
-                    </div>
-
-                    {{-- Ringkasan Linimasa & Estimasi Status Otomatis (Background Sirenata) --}}
-                    <div class="p-5 sm:p-6 rounded-md bg-[#13416B] text-white shadow-sm space-y-3.5">
-                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-white/15 pb-3">
-                            <div>
-                                <span class="text-[11px] font-semibold text-slate-200 block">Rentang Waktu Keseluruhan Program:</span>
-                                <p id="summary-timeline-text" class="text-sm sm:text-lg font-extrabold text-white mt-0.5">
-                                    {{ $event->overall_timeline_formatted }}
-                                </p>
-                            </div>
-                            <div class="flex items-center gap-2 flex-wrap">
-                                <span id="summary-duration-tag" class="hidden px-2.5 py-1 rounded-md text-xs font-semibold bg-white/15 border border-white/20 text-white">
-                                    <span id="summary-duration-text">-</span>
-                                </span>
-                                <span id="summary-status-tag" class="px-2.5 py-1 rounded-md text-xs font-semibold bg-white/15 border border-white/20 text-white">
-                                    Status Otomatis: <strong id="summary-status-text" class="text-white">{{ $event->status_badge['label'] }}</strong>
-                                </span>
-                            </div>
-                        </div>
-
-                        {{-- Step Flow Sederhana --}}
-                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-xs">
-                            <div class="bg-white/10 rounded-md p-2.5 border border-white/15 text-white">
-                                <span class="text-[11px] font-semibold text-slate-200 block">1. Periode Pendaftaran</span>
-                                <span id="flow-reg-text" class="font-bold text-white mt-0.5 block">
-                                    {{ $event->registration_start_at ? $event->registration_start_at->translatedFormat('d M') . ' - ' . ($event->registration_end_at ? $event->registration_end_at->translatedFormat('d M Y') : '-') : '-' }}
-                                </span>
-                            </div>
-                            <div class="bg-white/10 rounded-md p-2.5 border border-white/15 text-white">
-                                <span class="text-[11px] font-semibold text-slate-200 block">2. Periode Pelaksanaan & Zoom</span>
-                                <span id="flow-exec-text" class="font-bold text-white mt-0.5 block">
-                                    {{ $event->start_date ? $event->start_date->translatedFormat('d M') . ' - ' . ($event->end_date ? $event->end_date->translatedFormat('d M Y') : '-') : '-' }}
-                                </span>
-                            </div>
-                            <div class="bg-white/10 rounded-md p-2.5 border border-white/15 text-white">
-                                <span class="text-[11px] font-semibold text-slate-200 block">3. Evaluasi & Sertifikat</span>
-                                <span id="flow-eval-text" class="font-bold text-white mt-0.5 block">
-                                    {{ $event->assessment_start_at ? $event->assessment_start_at->translatedFormat('d M') . ' - ' . ($event->assessment_end_at ? $event->assessment_end_at->translatedFormat('d M Y') : '-') : '-' }}
-                                </span>
+                                 class="px-3 py-2 bg-slate-50 border border-dashed border-slate-300 rounded-lg text-xs text-slate-600">
+                                Kapasitas peserta terbuka <strong>tanpa batasan kuota</strong>.
                             </div>
                         </div>
                     </div>
 
-                    {{-- 1. PERIODE PENDAFTARAN --}}
-                    <div id="card-stage-1" class="p-4 rounded-md border border-slate-200 bg-white space-y-3 transition-all">
+                    {{-- Periode Pendaftaran Peserta (Clean, No Icon) --}}
+                    <div class="p-4 rounded-md border border-slate-200 bg-white space-y-3">
                         <div class="flex items-center justify-between border-b border-slate-100 pb-2">
-                            <div class="flex items-center gap-2">
-                                <span class="w-6 h-6 rounded-full bg-slate-900 text-white text-xs font-bold flex items-center justify-center shrink-0">1</span>
-                                <h3 class="text-xs font-bold text-slate-800 uppercase tracking-wider">Periode Pendaftaran</h3>
-                            </div>
-                            <span id="stage-1-badge" class="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-200">
-                                Langkah 1: Atur Pendaftaran
+                            <h3 class="text-xs font-bold text-slate-800 uppercase tracking-wider">Periode Pendaftaran Peserta</h3>
+                            <span class="text-[11px] text-slate-500 font-medium">
+                                Jadwal calon peserta mendaftar mandiri di katalog
                             </span>
                         </div>
 
@@ -201,15 +204,36 @@
                         </div>
                     </div>
 
-                    {{-- 2. PERIODE PELAKSANAAN & LIVE ZOOM --}}
-                    <div id="card-stage-2" class="p-4 rounded-md border border-slate-200 bg-white space-y-4 transition-all">
+                    {{-- Action Buttons Step 1 (Mirip Super Admin) --}}
+                    <div class="flex flex-wrap items-center justify-between gap-3 action-buttons form-section pt-6 border-t border-slate-100">
+                        <x-button :href="route('admin-pusat.management-course.bimtek-events.show', $event->id)" variant="secondary" size="lg" rounded="md">
+                            Batal
+                        </x-button>
+                        <x-button type="button" size="lg" rounded="md" @click="nextStep()">
+                            Lanjutkan
+                        </x-button>
+                    </div>
+                </div>
+
+                {{-- ======================================================== --}}
+                {{-- LANGKAH 2: PERIODE PELAKSANAAN & LIVE ZOOM MULTI-SESI     --}}
+                {{-- ======================================================== --}}
+                <div x-show="step === 2" x-cloak class="space-y-6">
+                    <div class="border-b border-slate-100 pb-3">
+                        <h2 class="text-xs font-bold text-slate-800 uppercase tracking-wider">
+                            Langkah 2: Periode Pelaksanaan & Live Zoom Harian
+                        </h2>
+                        <p class="text-xs text-slate-500 mt-1">
+                            Atur rentang tanggal pelaksanaan pelatihan, link ruang Zoom utama, dan jadwal sesi tatap muka harian beserta jam presensinya.
+                        </p>
+                    </div>
+
+                    {{-- Periode Pelaksanaan (Clean, No Icon) --}}
+                    <div class="p-4 rounded-md border border-slate-200 bg-white space-y-3">
                         <div class="flex items-center justify-between border-b border-slate-100 pb-2">
-                            <div class="flex items-center gap-2">
-                                <span id="stage-2-num" class="w-6 h-6 rounded-full bg-slate-900 text-white text-xs font-bold flex items-center justify-center shrink-0">2</span>
-                                <h3 class="text-xs font-bold text-slate-800 uppercase tracking-wider">Periode Pelaksanaan & Live Zoom</h3>
-                            </div>
-                            <span id="stage-2-badge" class="px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-100 text-slate-500 border border-slate-200">
-                                Langkah 2
+                            <h3 class="text-xs font-bold text-slate-800 uppercase tracking-wider">Rentang Tanggal Pelaksanaan</h3>
+                            <span class="text-[11px] text-slate-500 font-medium">
+                                Jadwal harus setelah periode pendaftaran
                             </span>
                         </div>
 
@@ -237,114 +261,132 @@
                                 @enderror
                             </div>
                         </div>
+                    </div>
 
-                        {{-- SUB-CARD: DETAIL SESI ZOOM & MULTI-SESI (Biru Sirenata Kalem & Teks White) --}}
-                        <div id="card-zoom" class="p-4 sm:p-5 rounded-md bg-[#1E40AF] text-white shadow-sm space-y-4 transition-all">
-                            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1 border-b border-white/20 pb-2.5">
-                                <div>
-                                    <span class="text-xs font-bold text-white uppercase tracking-wider block">
-                                        Pengaturan Sesi Live Zoom & Presensi Harian (Multi-Sesi)
-                                    </span>
-                                    <span class="text-[11px] text-blue-100 font-medium">
-                                        Setiap hari pelaksanaan dapat memiliki jadwal tatap muka Zoom dan jam presensi tersendiri
-                                    </span>
-                                </div>
-                                <span id="zoom-status-badge" class="text-[11px] text-blue-100 font-medium">
-                                    Jadwal harus di dalam rentang tanggal pelaksanaan
+                    {{-- SUB-CARD: DETAIL SESI ZOOM & MULTI-SESI (Biru Sirenata Kalem & Teks White) --}}
+                    <div id="card-zoom" class="p-4 sm:p-5 rounded-md bg-[#1E40AF] text-white shadow-sm space-y-4">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1 border-b border-white/20 pb-2.5">
+                            <div>
+                                <span class="text-xs font-bold text-white uppercase tracking-wider block">
+                                    Pengaturan Sesi Live Zoom & Presensi Harian (Multi-Sesi)
+                                </span>
+                                <span class="text-[11px] text-blue-100 font-medium">
+                                    Setiap hari pelaksanaan dapat memiliki jadwal tatap muka Zoom dan jam presensi tersendiri
                                 </span>
                             </div>
+                            <span id="zoom-status-badge" class="text-[11px] text-blue-100 font-medium">
+                                Jadwal berada di dalam rentang tanggal pelaksanaan
+                            </span>
+                        </div>
 
-                            {{-- Ruang Pertemuan Utama / Global Meeting Room --}}
-                            <div class="space-y-3 bg-black/15 p-3.5 rounded-lg border border-white/10">
-                                <span class="text-xs font-bold text-white uppercase tracking-wider block border-b border-white/10 pb-1.5">
-                                    Informasi Ruang Meeting Zoom Utama
-                                </span>
+                        {{-- Ruang Pertemuan Utama / Global Meeting Room --}}
+                        <div class="space-y-3 bg-black/15 p-3.5 rounded-lg border border-white/10">
+                            <span class="text-xs font-bold text-white uppercase tracking-wider block border-b border-white/10 pb-1.5">
+                                Informasi Ruang Meeting Zoom Utama
+                            </span>
 
+                            <div>
+                                <label for="zoom_url" class="block text-xs font-semibold text-white mb-1">
+                                    Link URL Meeting Zoom (Tautan Utama)
+                                </label>
+                                <input type="url" id="zoom_url" name="zoom_url" value="{{ old('zoom_url', $event->zoom_url) }}"
+                                       placeholder="https://zoom.us/j/1234567890?pwd=..."
+                                       class="w-full px-3 py-2 rounded-lg border-0 text-xs sm:text-sm bg-white text-slate-900 focus:ring-2 focus:ring-white transition-colors">
+                                @error('zoom_url')
+                                    <p class="text-xs text-rose-200 mt-1 font-semibold">{{ $message }}</p>
+                                @enderror
+                            </div>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                 <div>
-                                    <label for="zoom_url" class="block text-xs font-semibold text-white mb-1">
-                                        Link URL Meeting Zoom (Tautan Utama)
+                                    <label for="zoom_meeting_id" class="block text-xs font-semibold text-white mb-1">
+                                        Meeting ID (Opsional)
                                     </label>
-                                    <input type="url" id="zoom_url" name="zoom_url" value="{{ old('zoom_url', $event->zoom_url) }}"
-                                           placeholder="https://zoom.us/j/1234567890?pwd=..."
-                                           class="w-full px-3 py-2 rounded-lg border-0 text-xs sm:text-sm bg-white text-slate-900 focus:ring-2 focus:ring-white transition-colors">
-                                    @error('zoom_url')
-                                        <p class="text-xs text-rose-200 mt-1 font-semibold">{{ $message }}</p>
-                                    @enderror
+                                    <input type="text" id="zoom_meeting_id" name="zoom_meeting_id" value="{{ old('zoom_meeting_id', $event->zoom_meeting_id) }}"
+                                           placeholder="Contoh: 839 2039 1234"
+                                           class="w-full px-3 py-2 rounded-lg border-0 text-xs sm:text-sm bg-white text-slate-900 focus:ring-2 focus:ring-white">
+                                </div>
+                                <div>
+                                    <label for="zoom_passcode" class="block text-xs font-semibold text-white mb-1">
+                                        Passcode Zoom (Opsional)
+                                    </label>
+                                    <input type="text" id="zoom_passcode" name="zoom_passcode" value="{{ old('zoom_passcode', $event->zoom_passcode) }}"
+                                           placeholder="Contoh: SPBE2026"
+                                           class="w-full px-3 py-2 rounded-lg border-0 text-xs sm:text-sm bg-white text-slate-900 focus:ring-2 focus:ring-white">
+                                </div>
+                            </div>
+                        </div>
+
+                        {{-- SEKSI MULTI-SESI ZOOM & PRESENSI PER HARI --}}
+                        <div class="space-y-3 pt-1">
+                            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-white/20 pb-2">
+                                <div class="flex items-center gap-2">
+                                    <span class="text-xs font-bold text-white uppercase tracking-wider">
+                                        Daftar Sesi Zoom & Presensi Per Hari
+                                    </span>
+                                    <span id="sessions-count-badge" class="px-2 py-0.5 rounded text-[10px] font-bold bg-white/20 text-white">
+                                        0 Sesi
+                                    </span>
                                 </div>
 
-                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                    <div>
-                                        <label for="zoom_meeting_id" class="block text-xs font-semibold text-white mb-1">
-                                            Meeting ID (Opsional)
-                                        </label>
-                                        <input type="text" id="zoom_meeting_id" name="zoom_meeting_id" value="{{ old('zoom_meeting_id', $event->zoom_meeting_id) }}"
-                                               placeholder="Contoh: 839 2039 1234"
-                                               class="w-full px-3 py-2 rounded-lg border-0 text-xs sm:text-sm bg-white text-slate-900 focus:ring-2 focus:ring-white">
-                                    </div>
-                                    <div>
-                                        <label for="zoom_passcode" class="block text-xs font-semibold text-white mb-1">
-                                            Passcode Zoom (Opsional)
-                                        </label>
-                                        <input type="text" id="zoom_passcode" name="zoom_passcode" value="{{ old('zoom_passcode', $event->zoom_passcode) }}"
-                                               placeholder="Contoh: SPBE2026"
-                                               class="w-full px-3 py-2 rounded-lg border-0 text-xs sm:text-sm bg-white text-slate-900 focus:ring-2 focus:ring-white">
-                                    </div>
+                                <div class="flex items-center gap-2 flex-wrap">
+                                    <x-button type="button" id="btn-auto-generate-sessions"
+                                              title="Buat sesi Zoom dan presensi otomatis per hari berdasarkan rentang tanggal pelaksanaan"
+                                              variant="warning" size="sm" rounded="md">
+                                        Generate Sesi Otomatis
+                                    </x-button>
+                                    <x-button type="button" id="btn-add-session"
+                                              variant="white" size="sm" rounded="md">
+                                        Tambah Sesi
+                                    </x-button>
                                 </div>
                             </div>
 
-                            {{-- SEKSI MULTI-SESI ZOOM & PRESENSI PER HARI (SKENARIO 1) --}}
-                            <div class="space-y-3 pt-1">
-                                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-white/20 pb-2">
-                                    <div class="flex items-center gap-2">
-                                        <i class="fas fa-calendar-check text-amber-300"></i>
-                                        <span class="text-xs font-bold text-white uppercase tracking-wider">
-                                            Daftar Sesi Zoom & Presensi Per Hari
-                                        </span>
-                                        <span id="sessions-count-badge" class="px-2 py-0.5 rounded text-[10px] font-bold bg-white/20 text-white">
-                                            0 Sesi
-                                        </span>
-                                    </div>
-
-                                    <div class="flex items-center gap-2 flex-wrap">
-                                        <button type="button" id="btn-auto-generate-sessions"
-                                                title="Buat sesi Zoom dan presensi otomatis per hari berdasarkan rentang tanggal pelaksanaan"
-                                                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-bold text-[#13416B] bg-amber-300 hover:bg-amber-200 shadow-2xs transition-all active:scale-95">
-                                            <i class="fas fa-bolt text-xs"></i>
-                                            <span>Generate Sesi Otomatis (Sesuai Hari)</span>
-                                        </button>
-                                        <button type="button" id="btn-add-session"
-                                                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-bold text-[#1E40AF] bg-white hover:bg-blue-50 shadow-2xs transition-all active:scale-95">
-                                            <i class="fas fa-plus text-xs"></i>
-                                            <span>Tambah Sesi</span>
-                                        </button>
-                                    </div>
-                                </div>
-
-                                {{-- Container Daftar Sesi Dinamis --}}
-                                <div id="sessions-container" class="space-y-3">
-                                    {{-- Empty State jika belum ada sesi --}}
-                                    <div id="sessions-empty-state" class="p-4 rounded-md border border-dashed border-white/30 text-center space-y-1.5 bg-black/10">
-                                        <p class="text-xs text-white/90 font-medium">
-                                            Belum ada sesi harian yang ditambahkan.
-                                        </p>
-                                        <p class="text-[11px] text-blue-100/80">
-                                            Klik <strong>"Generate Sesi Otomatis"</strong> di atas untuk membuat jadwal Zoom & presensi secara otomatis sesuai rentang hari pelaksanaan bimtek.
-                                        </p>
-                                    </div>
+                            {{-- Container Daftar Sesi Dinamis --}}
+                            <div id="sessions-container" class="space-y-3">
+                                {{-- Empty State jika belum ada sesi --}}
+                                <div id="sessions-empty-state" class="p-4 rounded-md border border-dashed border-white/30 text-center space-y-1.5 bg-black/10">
+                                    <p class="text-xs text-white/90 font-medium">
+                                        Belum ada sesi harian yang ditambahkan.
+                                    </p>
+                                    <p class="text-[11px] text-blue-100/80">
+                                        Klik <strong>"Generate Sesi Otomatis"</strong> di atas untuk membuat jadwal Zoom & presensi secara otomatis sesuai rentang hari pelaksanaan bimtek.
+                                    </p>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    {{-- 3. PERIODE EVALUASI & SERTIFIKAT --}}
-                    <div id="card-stage-3" class="p-4 rounded-md border border-slate-200 bg-white space-y-3 transition-all">
+                    {{-- Action Buttons Step 2 (Mirip Super Admin) --}}
+                    <div class="flex flex-wrap items-center justify-between gap-3 action-buttons form-section pt-6 border-t border-slate-100">
+                        <x-button type="button" variant="secondary" size="lg" rounded="md" @click="prevStep()">
+                            Kembali
+                        </x-button>
+                        <x-button type="button" size="lg" rounded="md" @click="nextStep()">
+                            Lanjutkan
+                        </x-button>
+                    </div>
+                </div>
+
+                {{-- ======================================================== --}}
+                {{-- LANGKAH 3: EVALUASI, SERTIFIKAT & KONFIRMASI AKHIR       --}}
+                {{-- ======================================================== --}}
+                <div x-show="step === 3" x-cloak class="space-y-6">
+                    <div class="border-b border-slate-100 pb-3">
+                        <h2 class="text-xs font-bold text-slate-800 uppercase tracking-wider">
+                            Langkah 3: Periode Evaluasi, Sertifikat & Ringkasan Akhir
+                        </h2>
+                        <p class="text-xs text-slate-500 mt-1">
+                            Atur batas waktu pengerjaan evaluasi peserta dan tinjau linimasa gelombang secara keseluruhan sebelum menyimpan data.
+                        </p>
+                    </div>
+
+                    {{-- Periode Evaluasi & Sertifikat (Clean, No Icon) --}}
+                    <div class="p-4 rounded-md border border-slate-200 bg-white space-y-3">
                         <div class="flex items-center justify-between border-b border-slate-100 pb-2">
-                            <div class="flex items-center gap-2">
-                                <span id="stage-3-num" class="w-6 h-6 rounded-full bg-slate-900 text-white text-xs font-bold flex items-center justify-center shrink-0">3</span>
-                                <h3 class="text-xs font-bold text-slate-800 uppercase tracking-wider">Periode Evaluasi & Sertifikat</h3>
-                            </div>
-                            <span id="stage-3-badge" class="px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-100 text-slate-500 border border-slate-200">
-                                Langkah 3
+                            <h3 class="text-xs font-bold text-slate-800 uppercase tracking-wider">Periode Evaluasi & Batas Kelulusan</h3>
+                            <span class="text-[11px] text-slate-500 font-medium">
+                                Jadwal pengerjaan ujian dan penerbitan sertifikat
                             </span>
                         </div>
 
@@ -374,47 +416,263 @@
                         </div>
                     </div>
 
+                    {{-- Ringkasan Linimasa & Estimasi Status Otomatis (Biru Sirenata #13416B) --}}
+                    <div class="p-5 sm:p-6 rounded-md bg-[#13416B] text-white shadow-sm space-y-3.5">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-white/15 pb-3">
+                            <div>
+                                <span class="text-[11px] font-semibold text-slate-200 block">Rentang Waktu Keseluruhan Program:</span>
+                                <p id="summary-timeline-text" class="text-sm sm:text-lg font-extrabold text-white mt-0.5">
+                                    {{ $event->overall_timeline_formatted }}
+                                </p>
+                            </div>
+                            <div class="flex items-center gap-2 flex-wrap">
+                                <span id="summary-duration-tag" class="hidden px-2.5 py-1 rounded-md text-xs font-semibold bg-white/15 border border-white/20 text-white">
+                                    <span id="summary-duration-text">-</span>
+                                </span>
+                                <span id="summary-status-tag" class="px-2.5 py-1 rounded-md text-xs font-semibold bg-white/15 border border-white/20 text-white">
+                                    Status Otomatis: <strong id="summary-status-text" class="text-white">{{ $event->status_badge['label'] }}</strong>
+                                </span>
+                            </div>
+                        </div>
+
+                        {{-- Step Flow Review --}}
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-xs">
+                            <div class="bg-white/10 rounded-md p-2.5 border border-white/15 text-white">
+                                <span class="text-[11px] font-semibold text-slate-200 block">1. Periode Pendaftaran</span>
+                                <span id="flow-reg-text" class="font-bold text-white mt-0.5 block">
+                                    {{ $event->registration_start_at ? $event->registration_start_at->translatedFormat('d M') . ' - ' . ($event->registration_end_at ? $event->registration_end_at->translatedFormat('d M Y') : '-') : '-' }}
+                                </span>
+                            </div>
+                            <div class="bg-white/10 rounded-md p-2.5 border border-white/15 text-white">
+                                <span class="text-[11px] font-semibold text-slate-200 block">2. Periode Pelaksanaan & Zoom</span>
+                                <span id="flow-exec-text" class="font-bold text-white mt-0.5 block">
+                                    {{ $event->start_date ? $event->start_date->translatedFormat('d M') . ' - ' . ($event->end_date ? $event->end_date->translatedFormat('d M Y') : '-') : '-' }}
+                                </span>
+                            </div>
+                            <div class="bg-white/10 rounded-md p-2.5 border border-white/15 text-white">
+                                <span class="text-[11px] font-semibold text-slate-200 block">3. Evaluasi & Sertifikat</span>
+                                <span id="flow-eval-text" class="font-bold text-white mt-0.5 block">
+                                    {{ $event->assessment_start_at ? $event->assessment_start_at->translatedFormat('d M') . ' - ' . ($event->assessment_end_at ? $event->assessment_end_at->translatedFormat('d M Y') : '-') : '-' }}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- Action Buttons Step 3 (Mirip Super Admin) --}}
+                    <div class="flex flex-wrap items-center justify-between gap-3 action-buttons form-section pt-6 border-t border-slate-100">
+                        <x-button type="button" variant="secondary" size="lg" rounded="md" @click="prevStep()">
+                            Kembali
+                        </x-button>
+                        <x-button type="submit" id="btn-submit" size="lg" rounded="md">
+                            Perbarui Gelombang
+                        </x-button>
+                    </div>
                 </div>
 
-                {{-- Action Buttons --}}
-                <div class="flex items-center justify-end gap-3 pt-4 border-t border-slate-100">
-                    <a href="{{ route('admin-pusat.management-course.bimtek-events.show', $event->id) }}"
-                       class="px-5 py-2.5 sm:px-6 sm:py-3 text-xs sm:text-sm font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors">
-                        Batal
-                    </a>
-                    <button type="submit"
-                            class="px-6 py-2.5 sm:px-8 sm:py-3.5 text-xs sm:text-sm font-bold text-white bg-[#13416B] hover:bg-[#0e2c48] rounded-xl transition-all shadow-sm active:scale-95">
-                        Perbarui Gelombang
-                    </button>
-                </div>
             </form>
         </div>
 
     </div>
 
+    {{-- Modal Alert Validasi (Menggantikan Alert Bawaan Browser) --}}
+    <x-modal name="bimtek-alert-modal" title="Perhatian" maxWidth="sm:max-w-md">
+        <div x-data="{ message: '' }"
+             x-on:set-bimtek-alert.window="message = $event.detail.message"
+             class="space-y-4">
+            <div class="flex items-start gap-3.5 py-1">
+                <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-amber-100 text-amber-600">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                    </svg>
+                </div>
+                <div class="flex-1 pt-0.5">
+                    <p id="bimtek-alert-message" class="text-sm font-medium text-slate-700 leading-relaxed" x-text="message"></p>
+                </div>
+            </div>
+
+            <div class="flex justify-end pt-3 border-t border-slate-100">
+                <x-button type="button" variant="primary" size="md" rounded="md" onclick="onBimtekAlertClose()">
+                    Mengerti
+                </x-button>
+            </div>
+        </div>
+    </x-modal>
+
     @push('scripts')
         <script>
+            let currentFocusTarget = null;
+            function showBimtekAlert(message, title = 'Perhatian', focusTarget = null) {
+                currentFocusTarget = focusTarget;
+                const msgEl = document.getElementById('bimtek-alert-message');
+                if (msgEl) {
+                    msgEl.textContent = message;
+                }
+                window.dispatchEvent(new CustomEvent('set-bimtek-alert', {
+                    detail: { message, title }
+                }));
+                window.dispatchEvent(new CustomEvent('open-modal', {
+                    detail: 'bimtek-alert-modal'
+                }));
+            }
+
+            function onBimtekAlertClose() {
+                window.dispatchEvent(new CustomEvent('close-modal', {
+                    detail: 'bimtek-alert-modal'
+                }));
+                if (currentFocusTarget) {
+                    const target = currentFocusTarget;
+                    currentFocusTarget = null;
+                    setTimeout(() => {
+                        try { target.focus(); } catch (err) {}
+                    }, 150);
+                }
+            }
+
+            window.addEventListener('close-modal', function(e) {
+                if (e.detail === 'bimtek-alert-modal' && currentFocusTarget) {
+                    const target = currentFocusTarget;
+                    currentFocusTarget = null;
+                    setTimeout(() => {
+                        try { target.focus(); } catch (err) {}
+                    }, 150);
+                }
+            });
+
+            function bimtekFormWizard(config = {}) {
+                return {
+                    step: config.initialStep || 1,
+                    maxStepReached: config.isEdit ? 3 : (config.initialStep || 1),
+                    isUnlimited: config.isUnlimitedQuota || false,
+
+                    goToStep(targetStep) {
+                        if (targetStep < this.step) {
+                            this.step = targetStep;
+                            this.scrollToTop();
+                            return;
+                        }
+                        if (targetStep === this.step) return;
+
+                        if (this.validateStep(this.step)) {
+                            if (targetStep > this.step + 1 && !config.isEdit) {
+                                if (this.step === 1 && !this.validateStep(2)) return;
+                            }
+                            this.step = targetStep;
+                            if (targetStep > this.maxStepReached) {
+                                this.maxStepReached = targetStep;
+                            }
+                            this.scrollToTop();
+                        }
+                    },
+
+                    nextStep() {
+                        if (this.validateStep(this.step)) {
+                            if (this.step < 3) {
+                                this.step++;
+                                if (this.step > this.maxStepReached) {
+                                    this.maxStepReached = this.step;
+                                }
+                                this.scrollToTop();
+                            }
+                        }
+                    },
+
+                    prevStep() {
+                        if (this.step > 1) {
+                            this.step--;
+                            this.scrollToTop();
+                        }
+                    },
+
+                    scrollToTop() {
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                    },
+
+                    validateStep(currentStepNum) {
+                        if (currentStepNum === 1) {
+                            const courseId = document.getElementById('course_id');
+                            const batchName = document.getElementById('batch_name');
+                            const quota = document.getElementById('quota');
+                            const regStart = document.getElementById('registration_start_at');
+                            const regEnd = document.getElementById('registration_end_at');
+
+                            if (courseId && !courseId.value) {
+                                showBimtekAlert('Silakan pilih Master Kursus / Kurikulum terlebih dahulu.', 'Peringatan', courseId);
+                                return false;
+                            }
+                            if (batchName && !batchName.value.trim()) {
+                                showBimtekAlert('Silakan isi Nama Gelombang / Angkatan.', 'Peringatan', batchName);
+                                return false;
+                            }
+                            if (!this.isUnlimited && quota && (!quota.value || parseInt(quota.value) < 1)) {
+                                showBimtekAlert('Silakan tentukan kuota peserta (minimal 1) atau centang Tanpa Batas.', 'Peringatan', quota);
+                                return false;
+                            }
+                            if (regStart?.value && regEnd?.value) {
+                                if (regEnd.value < regStart.value) {
+                                    showBimtekAlert('Tanggal tutup pendaftaran tidak boleh sebelum tanggal buka pendaftaran.', 'Peringatan', regEnd);
+                                    return false;
+                                }
+                            }
+                            return true;
+                        }
+
+                        if (currentStepNum === 2) {
+                            const execStart = document.getElementById('start_date');
+                            const execEnd = document.getElementById('end_date');
+                            const regEnd = document.getElementById('registration_end_at');
+
+                            if (!execStart?.value) {
+                                showBimtekAlert('Silakan tentukan Tanggal Mulai Pelaksanaan.', 'Peringatan', execStart);
+                                return false;
+                            }
+                            if (!execEnd?.value) {
+                                showBimtekAlert('Silakan tentukan Tanggal Selesai Pelaksanaan.', 'Peringatan', execEnd);
+                                return false;
+                            }
+                            if (execEnd.value < execStart.value) {
+                                showBimtekAlert('Tanggal selesai pelaksanaan harus sama atau setelah tanggal mulai pelaksanaan.', 'Peringatan', execEnd);
+                                return false;
+                            }
+                            if (regEnd?.value && execStart.value < regEnd.value) {
+                                showBimtekAlert('Tanggal mulai pelaksanaan harus setelah atau sama dengan tanggal tutup pendaftaran (' + regEnd.value + ').', 'Peringatan', execStart);
+                                return false;
+                            }
+
+                            const sessionCards = document.querySelectorAll('#sessions-container .session-card');
+                            for (let card of sessionCards) {
+                                const titleInput = card.querySelector('.session-title-input');
+                                const dateInput = card.querySelector('.session-date-input');
+                                const startInput = card.querySelector('.session-start-input');
+
+                                if (!titleInput?.value.trim()) {
+                                    showBimtekAlert('Judul sesi tidak boleh kosong.', 'Peringatan', titleInput);
+                                    return false;
+                                }
+                                if (!dateInput?.value) {
+                                    showBimtekAlert('Tanggal sesi tidak boleh kosong.', 'Peringatan', dateInput);
+                                    return false;
+                                }
+                                if (!startInput?.value) {
+                                    showBimtekAlert('Jam mulai Zoom sesi tidak boleh kosong.', 'Peringatan', startInput);
+                                    return false;
+                                }
+                            }
+
+                            return true;
+                        }
+
+                        return true;
+                    }
+                };
+            }
+
             document.addEventListener('DOMContentLoaded', function () {
                 const regStart = document.getElementById('registration_start_at');
                 const regEnd = document.getElementById('registration_end_at');
                 const execStart = document.getElementById('start_date');
                 const execEnd = document.getElementById('end_date');
-                const zoomUrl = document.getElementById('zoom_url');
-                const zoomMeetingId = document.getElementById('zoom_meeting_id');
-                const zoomPasscode = document.getElementById('zoom_passcode');
                 const evalStart = document.getElementById('assessment_start_at');
                 const evalEnd = document.getElementById('assessment_end_at');
-
-                const cardStage1 = document.getElementById('card-stage-1');
-                const stage1Badge = document.getElementById('stage-1-badge');
-                const cardStage2 = document.getElementById('card-stage-2');
-                const stage2Num = document.getElementById('stage-2-num');
-                const stage2Badge = document.getElementById('stage-2-badge');
-                const cardZoom = document.getElementById('card-zoom');
-                const zoomBadge = document.getElementById('zoom-status-badge');
-                const cardStage3 = document.getElementById('card-stage-3');
-                const stage3Num = document.getElementById('stage-3-num');
-                const stage3Badge = document.getElementById('stage-3-badge');
 
                 const summaryText = document.getElementById('summary-timeline-text');
                 const durationTag = document.getElementById('summary-duration-tag');
@@ -482,7 +740,6 @@
                         const badge = card.querySelector('.session-num-badge');
                         if (badge) badge.textContent = `Sesi Hari ${index + 1}`;
 
-                        // Re-index all name attributes
                         card.querySelectorAll('input').forEach(input => {
                             if (input.name) {
                                 input.name = input.name.replace(/sessions\[\d*\]/, `sessions[${index}]`);
@@ -514,8 +771,7 @@
                                 <input type="text" name="sessions[${index}][title]" value="${titleVal}" placeholder="Judul Sesi (contoh: Sesi Hari ${index + 1})" required
                                        class="session-title-input px-2.5 py-1 text-xs font-semibold rounded bg-white text-slate-900 border-0 focus:ring-2 focus:ring-white w-48 sm:w-64">
                             </div>
-                            <button type="button" class="btn-remove-session text-[11px] font-semibold text-rose-300 hover:text-rose-100 flex items-center gap-1 transition-colors">
-                                <i class="fas fa-trash-alt text-[10px]"></i>
+                            <button type="button" class="btn-remove-session text-[11px] font-semibold text-rose-300 hover:text-rose-100 transition-colors cursor-pointer">
                                 <span>Hapus Sesi</span>
                             </button>
                         </div>
@@ -547,8 +803,8 @@
                         {{-- Rentang Jam Pembukaan Presensi Sesi Ini --}}
                         <div class="p-2.5 rounded bg-black/20 border border-white/10 space-y-2">
                             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1 text-[11px]">
-                                <span class="font-bold text-amber-300 flex items-center gap-1">
-                                    <i class="fas fa-clock text-[10px]"></i> Jadwal Presensi Sesi Ini
+                                <span class="font-bold text-amber-300">
+                                    Jadwal Presensi Sesi Ini
                                 </span>
                                 <span class="text-blue-100 text-[10px]">Terkunci di dalam jam Zoom sesi ini</span>
                             </div>
@@ -567,14 +823,12 @@
                         </div>
                     `;
 
-                    // Remove button handler
                     card.querySelector('.btn-remove-session')?.addEventListener('click', function () {
                         card.remove();
                         updateSessionNumbersAndBadges();
                         updateTimelineSummary();
                     });
 
-                    // Sync date constraints inside this card
                     const dateInput = card.querySelector('.session-date-input');
                     const startInput = card.querySelector('.session-start-input');
                     const endInput = card.querySelector('.session-end-input');
@@ -619,7 +873,6 @@
                     });
 
                     syncCardBounds();
-
                     return card;
                 }
 
@@ -631,21 +884,17 @@
                     updateTimelineSummary();
                 }
 
-                // Event listener tombol tambah sesi manual
                 btnAddSession?.addEventListener('click', function () {
                     if (!execStart?.value || !execEnd?.value) {
-                        alert('Silakan tentukan tanggal mulai dan tanggal selesai pelaksanaan terlebih dahulu.');
-                        execStart?.focus();
+                        showBimtekAlert('Silakan tentukan tanggal mulai dan tanggal selesai pelaksanaan terlebih dahulu.', 'Peringatan', execStart);
                         return;
                     }
                     addSession();
                 });
 
-                // Event listener tombol generate sesi otomatis sesuai rentang hari
                 btnAutoGenerate?.addEventListener('click', function () {
                     if (!execStart?.value || !execEnd?.value) {
-                        alert('Silakan tentukan tanggal mulai dan tanggal selesai pelaksanaan terlebih dahulu sebelum membuat sesi otomatis.');
-                        execStart?.focus();
+                        showBimtekAlert('Silakan tentukan tanggal mulai dan tanggal selesai pelaksanaan terlebih dahulu sebelum membuat sesi otomatis.', 'Peringatan', execStart);
                         return;
                     }
 
@@ -655,11 +904,10 @@
                     const dEnd = new Date(dEndParts[0], dEndParts[1] - 1, dEndParts[2]);
 
                     if (isNaN(dStart.getTime()) || isNaN(dEnd.getTime()) || dStart > dEnd) {
-                        alert('Format rentang tanggal pelaksanaan tidak valid.');
+                        showBimtekAlert('Format rentang tanggal pelaksanaan tidak valid.', 'Peringatan');
                         return;
                     }
 
-                    // Bersihkan card sebelumnya
                     sessionsContainer.querySelectorAll('.session-card').forEach(el => el.remove());
 
                     let count = 0;
@@ -691,7 +939,6 @@
                     }
                 });
 
-                // Load initial sessions jika ada
                 if (Array.isArray(initialSessions) && initialSessions.length > 0) {
                     initialSessions.forEach((s, idx) => {
                         addSession(s);
@@ -713,190 +960,28 @@
                     return d.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
                 }
 
-                // Fungsi sinkronisasi constraint min/max & pengisian berurutan (Strict Sequential Gating)
-                function syncDateConstraints() {
-                    // ==========================================
-                    // 1. TAHAP 1: PENDAFTARAN
-                    // ==========================================
-                    if (regStart?.value) {
-                        regEnd.disabled = false;
-                        regEnd.classList.remove('bg-slate-100', 'cursor-not-allowed');
+                function syncDateBounds() {
+                    if (regStart?.value && regEnd) {
                         regEnd.min = regStart.value;
-                        if (regEnd.value && regEnd.value <= regStart.value) {
-                            regEnd.value = '';
-                        }
-                    } else {
-                        regEnd.disabled = true;
-                        regEnd.classList.add('bg-slate-100', 'cursor-not-allowed');
-                        regEnd.value = '';
-                        regEnd.removeAttribute('min');
                     }
-
-                    const isStage1Complete = Boolean(regStart?.value && regEnd?.value);
-
-                    if (stage1Badge) {
-                        if (isStage1Complete) {
-                            stage1Badge.className = 'px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center gap-1';
-                            stage1Badge.innerHTML = '<i class="fas fa-check-circle text-[10px]"></i> Tahap 1 Selesai';
-                        } else if (regStart?.value) {
-                            stage1Badge.className = 'px-2 py-0.5 rounded text-[10px] font-semibold bg-amber-50 text-amber-700 border border-amber-200 flex items-center gap-1';
-                            stage1Badge.innerHTML = '<i class="fas fa-clock text-[10px]"></i> Isi Tutup Pendaftaran';
-                        } else {
-                            stage1Badge.className = 'px-2 py-0.5 rounded text-[10px] font-semibold bg-blue-50 text-blue-700 border border-blue-200 flex items-center gap-1';
-                            stage1Badge.innerHTML = 'Langkah 1: Mulai Pendaftaran';
-                        }
-                    }
-
-                    // ==========================================
-                    // 2. TAHAP 2: PELAKSANAAN & LIVE ZOOM
-                    // ==========================================
-                    if (!isStage1Complete) {
-                        // Kunci Tahap 2 jika Tahap 1 belum lengkap
-                        execStart.disabled = true;
-                        execStart.classList.add('bg-slate-100', 'cursor-not-allowed');
-                        execStart.value = '';
-                        execEnd.disabled = true;
-                        execEnd.classList.add('bg-slate-100', 'cursor-not-allowed');
-                        execEnd.value = '';
-
-                        if (cardStage2) cardStage2.classList.add('opacity-60');
-                        if (stage2Num) {
-                            stage2Num.className = 'w-6 h-6 rounded-full bg-slate-300 text-slate-600 text-xs font-bold flex items-center justify-center shrink-0';
-                        }
-                        if (stage2Badge) {
-                            stage2Badge.className = 'px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-100 text-slate-500 border border-slate-200 flex items-center gap-1';
-                            stage2Badge.innerHTML = '<i class="fas fa-lock text-[9px]"></i> Lengkapi Tahap 1 Terlebih Dahulu';
-                        }
-                    } else {
-                        // Buka Tahap 2
-                        if (cardStage2) cardStage2.classList.remove('opacity-60');
-                        if (stage2Num) {
-                            stage2Num.className = 'w-6 h-6 rounded-full bg-slate-900 text-white text-xs font-bold flex items-center justify-center shrink-0';
-                        }
-
-                        execStart.disabled = false;
-                        execStart.classList.remove('bg-slate-100', 'cursor-not-allowed');
+                    if (regEnd?.value && execStart) {
                         execStart.min = regEnd.value;
-                        if (execStart.value && execStart.value <= regEnd.value) {
-                            execStart.value = '';
-                        }
-
-                        if (execStart.value) {
-                            execEnd.disabled = false;
-                            execEnd.classList.remove('bg-slate-100', 'cursor-not-allowed');
-                            execEnd.min = execStart.value;
-                            if (execEnd.value && execEnd.value <= execStart.value) {
-                                execEnd.value = '';
-                            }
-                        } else {
-                            execEnd.disabled = true;
-                            execEnd.classList.add('bg-slate-100', 'cursor-not-allowed');
-                            execEnd.value = '';
-                            execEnd.removeAttribute('min');
-                        }
-
-                        if (stage2Badge) {
-                            if (execStart.value && execEnd.value) {
-                                stage2Badge.className = 'px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center gap-1';
-                                stage2Badge.innerHTML = '<i class="fas fa-check-circle text-[10px]"></i> Pelaksanaan Ditentukan';
-                            } else if (execStart.value) {
-                                stage2Badge.className = 'px-2 py-0.5 rounded text-[10px] font-semibold bg-amber-50 text-amber-700 border border-amber-200 flex items-center gap-1';
-                                stage2Badge.innerHTML = '<i class="fas fa-clock text-[10px]"></i> Isi Selesai Pelaksanaan';
-                            } else {
-                                stage2Badge.className = 'px-2 py-0.5 rounded text-[10px] font-semibold bg-blue-50 text-blue-700 border border-blue-200 flex items-center gap-1';
-                                stage2Badge.innerHTML = 'Langkah 2: Isi Mulai Pelaksanaan';
-                            }
-                        }
+                    } else if (regStart?.value && execStart) {
+                        execStart.min = regStart.value;
                     }
-
-                    const isExecComplete = Boolean(isStage1Complete && execStart?.value && execEnd?.value);
-
-                    // ==========================================
-                    // 2B. DETAIL SESI LIVE ZOOM & MULTI-SESI
-                    // ==========================================
-                    const zoomInputs = [zoomUrl, zoomMeetingId, zoomPasscode];
-                    if (!isExecComplete) {
-                        zoomInputs.forEach(el => {
-                            if (el) {
-                                el.disabled = true;
-                                el.classList.add('opacity-50', 'cursor-not-allowed');
-                            }
-                        });
-                        if (cardZoom) cardZoom.classList.add('opacity-60');
-                        if (zoomBadge) zoomBadge.innerHTML = '<i class="fas fa-lock mr-1"></i> Buka setelah tanggal pelaksanaan diisi';
-                    } else {
-                        if (cardZoom) cardZoom.classList.remove('opacity-60');
-                        zoomInputs.forEach(el => {
-                            if (el) {
-                                el.disabled = false;
-                                el.classList.remove('opacity-50', 'cursor-not-allowed');
-                            }
-                        });
-                        if (zoomBadge) zoomBadge.textContent = 'Jadwal sesi Zoom aktif di rentang pelaksanaan';
+                    if (execStart?.value && execEnd) {
+                        execEnd.min = execStart.value;
                     }
-
-                    // ==========================================
-                    // 3. TAHAP 3: EVALUASI & SERTIFIKAT
-                    // ==========================================
-                    if (!isExecComplete) {
-                        evalStart.disabled = true;
-                        evalStart.classList.add('bg-slate-100', 'cursor-not-allowed');
-                        evalStart.value = '';
-                        evalEnd.disabled = true;
-                        evalEnd.classList.add('bg-slate-100', 'cursor-not-allowed');
-                        evalEnd.value = '';
-
-                        if (cardStage3) cardStage3.classList.add('opacity-60');
-                        if (stage3Num) {
-                            stage3Num.className = 'w-6 h-6 rounded-full bg-slate-300 text-slate-600 text-xs font-bold flex items-center justify-center shrink-0';
-                        }
-                        if (stage3Badge) {
-                            stage3Badge.className = 'px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-100 text-slate-500 border border-slate-200 flex items-center gap-1';
-                            stage3Badge.innerHTML = '<i class="fas fa-lock text-[9px]"></i> Lengkapi Tahap 2 Terlebih Dahulu';
-                        }
-                    } else {
-                        if (cardStage3) cardStage3.classList.remove('opacity-60');
-                        if (stage3Num) {
-                            stage3Num.className = 'w-6 h-6 rounded-full bg-slate-900 text-white text-xs font-bold flex items-center justify-center shrink-0';
-                        }
-
-                        evalStart.disabled = false;
-                        evalStart.classList.remove('bg-slate-100', 'cursor-not-allowed');
+                    if (execEnd?.value && evalStart) {
                         evalStart.min = execEnd.value;
-                        if (evalStart.value && evalStart.value < execEnd.value) {
-                            evalStart.value = '';
-                        }
-
-                        if (evalStart.value) {
-                            evalEnd.disabled = false;
-                            evalEnd.classList.remove('bg-slate-100', 'cursor-not-allowed');
-                            evalEnd.min = evalStart.value;
-                            if (evalEnd.value && evalEnd.value < evalStart.value) {
-                                evalEnd.value = '';
-                            }
-                        } else {
-                            evalEnd.disabled = true;
-                            evalEnd.classList.add('bg-slate-100', 'cursor-not-allowed');
-                            evalEnd.value = '';
-                            evalEnd.removeAttribute('min');
-                        }
-
-                        if (stage3Badge) {
-                            if (evalStart.value && evalEnd.value) {
-                                stage3Badge.className = 'px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center gap-1';
-                                stage3Badge.innerHTML = '<i class="fas fa-check-circle text-[10px]"></i> Evaluasi Terjadwal';
-                            } else if (evalStart.value) {
-                                stage3Badge.className = 'px-2 py-0.5 rounded text-[10px] font-semibold bg-amber-50 text-amber-700 border border-amber-200 flex items-center gap-1';
-                                stage3Badge.innerHTML = '<i class="fas fa-clock text-[10px]"></i> Isi Batas Akhir Evaluasi';
-                            } else {
-                                stage3Badge.className = 'px-2 py-0.5 rounded text-[10px] font-semibold bg-blue-50 text-blue-700 border border-blue-200 flex items-center gap-1';
-                                stage3Badge.innerHTML = 'Langkah 3: Atur Evaluasi';
-                            }
-                        }
+                    }
+                    if (evalStart?.value && evalEnd) {
+                        evalEnd.min = evalStart.value;
+                    } else if (execEnd?.value && evalEnd) {
+                        evalEnd.min = execEnd.value;
                     }
                 }
 
-                // Fungsi hitung estimasi status otomatis secara real-time
                 function calculateEstimatedStatus(rStartVal, rEndVal, eStartVal, eEndVal, evEndVal) {
                     const now = new Date();
                     const eStart = eStartVal ? new Date(`${eStartVal}T00:00:00`) : null;
@@ -924,7 +1009,7 @@
                 }
 
                 function updateTimelineSummary() {
-                    syncDateConstraints();
+                    syncDateBounds();
 
                     const overallStartVal = regStart?.value || execStart?.value;
                     const overallEndVal = evalEnd?.value || execEnd?.value || evalStart?.value;
@@ -949,11 +1034,10 @@
                         summaryText.textContent = `Mulai: ${formatDateShort(overallStartVal)}`;
                         if (durationTag) durationTag.classList.add('hidden');
                     } else {
-                        summaryText.textContent = 'Silakan atur tanggal periode di bawah...';
+                        summaryText.textContent = 'Silakan atur tanggal periode di atas...';
                         if (durationTag) durationTag.classList.add('hidden');
                     }
 
-                    // Tampilkan estimasi status
                     if (execStart?.value && execEnd?.value) {
                         const est = calculateEstimatedStatus(regStart?.value, regEnd?.value, execStart.value, execEnd.value, evalEnd?.value);
                         if (statusText) statusText.textContent = est;
@@ -961,7 +1045,6 @@
                         if (statusText) statusText.textContent = 'Menyesuaikan Tanggal';
                     }
 
-                    // Update mini flow text
                     if (flowReg) {
                         flowReg.textContent = (regStart?.value && regEnd?.value)
                             ? `${formatDateShort(regStart.value)} - ${formatDateShort(regEnd.value)}`
@@ -979,20 +1062,10 @@
                     }
                 }
 
-                [regStart, regEnd, execStart, execEnd, zoomUrl, zoomMeetingId, zoomPasscode, evalStart, evalEnd].forEach(el => {
+                [regStart, regEnd, execStart, execEnd, evalStart, evalEnd].forEach(el => {
                     el?.addEventListener('change', updateTimelineSummary);
                     el?.addEventListener('input', updateTimelineSummary);
                 });
-
-                // Form submit handler: un-disable all inputs to ensure full POST payload
-                const form = document.querySelector('form');
-                if (form) {
-                    form.addEventListener('submit', function () {
-                        form.querySelectorAll('input:disabled, select:disabled').forEach(function (el) {
-                            el.disabled = false;
-                        });
-                    });
-                }
 
                 updateTimelineSummary();
             });

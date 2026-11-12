@@ -890,6 +890,36 @@ class CourseService
 
         $isZoomDone = $isZoomAttended;
 
+        $zoomProof = null;
+        if ($user) {
+            $zoomProof = SectionZoomProof::where('course_section_id', $sectionId)
+                ->where('user_id', $user->id)
+                ->first();
+        }
+        $hasProof = !empty($zoomProof);
+
+        $postTestBab = data_get($section, 'post_test_bab') ?: PostTest::where('course_section_id', $sectionId)->first();
+        $isPostTestBabCompleted = data_get($section, 'is_post_test_bab_completed', false);
+
+        $evalResult = null;
+        if ($postTestBab && $user) {
+            $evalResult = PostTestResult::where('post_test_id', $postTestBab->id)
+                ->where('user_id', $user->id)
+                ->first();
+        }
+
+        $currentEvalType = match ($postTestBab?->type) {
+            'essay'       => 'uraian',
+            'file_upload' => 'upload',
+            default       => ($sectionIndex % 2 === 0 ? 'uraian' : 'upload'),
+        };
+
+        $isAssignmentDone = (bool) ($evalResult && ($evalResult->file_path || $evalResult->status === 'submitted' || $evalResult->completed_at));
+        $isEssayDone = (bool) ($evalResult && ($evalResult->answers || $evalResult->status === 'submitted' || $evalResult->completed_at));
+        $isEvaluasiDone = (bool) ($isPostTestBabCompleted || ($evalResult && $evalResult->completed_at));
+        $isEvaluasiLocked = !$isMateriDone || ($hasZoom && !$isZoomDone);
+        $isSectionDone = $isMateriDone && (!$hasZoom || ($isZoomDone && $hasProof)) && (!$postTestBab || $isEvaluasiDone);
+
         $totalActivities = 2 + ($hasZoom ? 1 : 0);
         $completedActivities = ($isMateriDone ? 1 : 0)
             + ($hasZoom ? ($isZoomDone ? 1 : 0) : 0)

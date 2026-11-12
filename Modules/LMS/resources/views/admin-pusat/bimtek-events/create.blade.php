@@ -1,7 +1,7 @@
 <x-dashboard::layouts.dashboard title="Buka Gelombang Bimtek Baru - Admin Pusat">
     <div class="w-full p-8 space-y-6">
 
-        {{-- Breadcrumb Navigation (2 Teks) --}}
+        {{-- Breadcrumb Navigation (Minimal) --}}
         <nav class="flex" aria-label="Breadcrumb">
             <ol class="inline-flex items-center space-x-1 sm:space-x-2">
                 <li>
@@ -11,7 +11,7 @@
                     </a>
                 </li>
                 <li class="inline-flex items-center">
-                    <i class="fas fa-chevron-right text-[10px] text-slate-300 mx-1.5"></i>
+                    <span class="text-xs text-slate-300 mx-1.5">/</span>
                     <span class="text-sm font-bold text-slate-900">
                         Buka Gelombang Baru
                     </span>
@@ -28,7 +28,7 @@
             }
         @endphp
 
-        {{-- Form Card dengan Stepper Wizard (Bertahap Tanpa Disable Aneh) --}}
+        {{-- Form Card dengan Stepper Wizard Minimalis --}}
         <div class="bg-white rounded-md border border-slate-200 shadow-2xs p-6 sm:p-8"
              x-data="bimtekFormWizard({
                  initialStep: {{ $initialStep }},
@@ -36,71 +36,45 @@
                  isEdit: false
              })">
 
-            {{-- Stepper Progress Bar (Identik dengan Super Admin) --}}
-            <div class="mb-8 border-b border-slate-100 pb-6">
-                <div class="flex items-center justify-between gap-2 sm:gap-4 max-w-2xl mx-auto">
-                    <!-- Step 1 Button -->
-                    <button type="button" @click="goToStep(1)"
-                            class="flex items-center gap-2.5 text-left group cursor-pointer focus:outline-hidden">
-                        <div class="flex h-9 w-9 items-center justify-center rounded-full text-xs font-bold transition-all shadow-xs"
-                             :class="step === 1 ? 'bg-[#13416B] text-white ring-4 ring-blue-100' : (step > 1 ? 'bg-emerald-600 text-white' : 'bg-slate-200 text-slate-600')">
-                            <template x-if="step > 1">
-                                <i class="fas fa-check text-xs"></i>
-                            </template>
-                            <template x-if="step <= 1">
-                                <span>1</span>
-                            </template>
-                        </div>
-                        <div class="hidden sm:block">
-                            <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Langkah 1</p>
-                            <p class="text-xs font-bold" :class="step === 1 ? 'text-[#13416B]' : (step > 1 ? 'text-slate-800' : 'text-slate-400')">
-                                Info & Pendaftaran
-                            </p>
-                        </div>
-                    </button>
+            {{-- Stepper (Mirip Super Admin & Minim Icon) --}}
+            <div class="mb-8 flex items-center gap-2 sm:gap-3">
+                <div class="flex items-center gap-2 cursor-pointer" @click="goToStep(1)">
+                    <div class="flex h-8 w-8 items-center justify-center rounded-full text-sm font-bold"
+                         :class="step === 1 ? 'bg-indigo-600 text-white' : (step > 1 ? 'bg-emerald-500 text-white' : 'bg-slate-200 text-slate-500')">
+                        1
+                    </div>
+                    <span class="text-sm font-semibold"
+                          :class="step === 1 ? 'text-slate-900' : 'text-slate-500'">
+                        Pendaftaran
+                    </span>
+                </div>
 
-                    <!-- Connector Line 1-2 -->
-                    <div class="h-0.5 flex-1 rounded-full transition-all"
-                         :class="step > 1 ? 'bg-emerald-500' : 'bg-slate-200'"></div>
+                <div class="h-0.5 flex-1 rounded-full"
+                     :class="step >= 2 ? 'bg-emerald-500' : 'bg-slate-200'"></div>
 
-                    <!-- Step 2 Button -->
-                    <button type="button" @click="goToStep(2)"
-                            class="flex items-center gap-2.5 text-left group cursor-pointer focus:outline-hidden">
-                        <div class="flex h-9 w-9 items-center justify-center rounded-full text-xs font-bold transition-all shadow-xs"
-                             :class="step === 2 ? 'bg-[#13416B] text-white ring-4 ring-blue-100' : (step > 2 ? 'bg-emerald-600 text-white' : 'bg-slate-200 text-slate-600')">
-                            <template x-if="step > 2">
-                                <i class="fas fa-check text-xs"></i>
-                            </template>
-                            <template x-if="step <= 2">
-                                <span>2</span>
-                            </template>
-                        </div>
-                        <div class="hidden sm:block">
-                            <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Langkah 2</p>
-                            <p class="text-xs font-bold" :class="step === 2 ? 'text-[#13416B]' : (step > 2 ? 'text-slate-800' : 'text-slate-400')">
-                                Pelaksanaan & Zoom
-                            </p>
-                        </div>
-                    </button>
+                <div class="flex items-center gap-2 cursor-pointer" @click="goToStep(2)">
+                    <div class="flex h-8 w-8 items-center justify-center rounded-full text-sm font-bold"
+                         :class="step === 2 ? 'bg-indigo-600 text-white' : (step > 2 ? 'bg-emerald-500 text-white' : 'bg-slate-200 text-slate-500')">
+                        2
+                    </div>
+                    <span class="text-sm font-semibold"
+                          :class="step === 2 ? 'text-slate-900' : 'text-slate-500'">
+                        Pelaksanaan & Zoom
+                    </span>
+                </div>
 
-                    <!-- Connector Line 2-3 -->
-                    <div class="h-0.5 flex-1 rounded-full transition-all"
-                         :class="step > 2 ? 'bg-emerald-500' : 'bg-slate-200'"></div>
+                <div class="h-0.5 flex-1 rounded-full"
+                     :class="step >= 3 ? 'bg-emerald-500' : 'bg-slate-200'"></div>
 
-                    <!-- Step 3 Button -->
-                    <button type="button" @click="goToStep(3)"
-                            class="flex items-center gap-2.5 text-left group cursor-pointer focus:outline-hidden">
-                        <div class="flex h-9 w-9 items-center justify-center rounded-full text-xs font-bold transition-all shadow-xs"
-                             :class="step === 3 ? 'bg-[#13416B] text-white ring-4 ring-blue-100' : 'bg-slate-200 text-slate-600'">
-                            <span>3</span>
-                        </div>
-                        <div class="hidden sm:block">
-                            <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Langkah 3</p>
-                            <p class="text-xs font-bold" :class="step === 3 ? 'text-[#13416B]' : 'text-slate-400'">
-                                Evaluasi & Selesai
-                            </p>
-                        </div>
-                    </button>
+                <div class="flex items-center gap-2 cursor-pointer" @click="goToStep(3)">
+                    <div class="flex h-8 w-8 items-center justify-center rounded-full text-sm font-bold"
+                         :class="step === 3 ? 'bg-indigo-600 text-white' : 'bg-slate-200 text-slate-500'">
+                        3
+                    </div>
+                    <span class="text-sm font-semibold"
+                          :class="step === 3 ? 'text-slate-900' : 'text-slate-500'">
+                        Evaluasi & Selesai
+                    </span>
                 </div>
             </div>
 
@@ -188,20 +162,16 @@
                                 @enderror
                             </div>
                             <div x-show="isUnlimited" x-cloak
-                                 class="px-3 py-2 bg-slate-50 border border-dashed border-slate-300 rounded-lg text-xs text-slate-600 flex items-center gap-2">
-                                <i class="fas fa-infinity text-[#0B5CFF] text-sm"></i>
-                                <span>Kapasitas peserta terbuka <strong>tanpa batasan kuota</strong>.</span>
+                                 class="px-3 py-2 bg-slate-50 border border-dashed border-slate-300 rounded-lg text-xs text-slate-600">
+                                Kapasitas peserta terbuka <strong>tanpa batasan kuota</strong>.
                             </div>
                         </div>
                     </div>
 
-                    {{-- Periode Pendaftaran Peserta --}}
+                    {{-- Periode Pendaftaran Peserta (Clean, No Icon) --}}
                     <div class="p-4 rounded-md border border-slate-200 bg-white space-y-3">
                         <div class="flex items-center justify-between border-b border-slate-100 pb-2">
-                            <div class="flex items-center gap-2">
-                                <i class="fas fa-user-plus text-[#13416B] text-xs"></i>
-                                <h3 class="text-xs font-bold text-slate-800 uppercase tracking-wider">Periode Pendaftaran Peserta</h3>
-                            </div>
+                            <h3 class="text-xs font-bold text-slate-800 uppercase tracking-wider">Periode Pendaftaran Peserta</h3>
                             <span class="text-[11px] text-slate-500 font-medium">
                                 Jadwal calon peserta mendaftar mandiri di katalog
                             </span>
@@ -233,17 +203,14 @@
                         </div>
                     </div>
 
-                    {{-- Navigation Footer Step 1 --}}
-                    <div class="flex items-center justify-between pt-4 border-t border-slate-100">
-                        <a href="{{ route('admin-pusat.management-course.bimtek-events.index') }}"
-                           class="px-5 py-2.5 text-xs sm:text-sm font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors">
+                    {{-- Action Buttons Step 1 (Mirip Super Admin) --}}
+                    <div class="flex flex-wrap items-center justify-between gap-3 action-buttons form-section pt-6 border-t border-slate-100">
+                        <x-button :href="route('admin-pusat.management-course.bimtek-events.index')" variant="secondary" size="lg" rounded="md">
                             Batal
-                        </a>
-                        <button type="button" @click="nextStep()"
-                                class="inline-flex items-center gap-2 px-6 py-2.5 sm:px-8 sm:py-3.5 text-xs sm:text-sm font-bold text-white bg-[#13416B] hover:bg-[#0e2c48] rounded-xl transition-all shadow-sm active:scale-95 cursor-pointer">
-                            <span>Lanjutkan ke Pelaksanaan & Zoom</span>
-                            <i class="fas fa-arrow-right text-xs"></i>
-                        </button>
+                        </x-button>
+                        <x-button type="button" size="lg" rounded="md" @click="nextStep()">
+                            Lanjutkan
+                        </x-button>
                     </div>
                 </div>
 
@@ -260,13 +227,10 @@
                         </p>
                     </div>
 
-                    {{-- Periode Pelaksanaan --}}
+                    {{-- Periode Pelaksanaan (Clean, No Icon) --}}
                     <div class="p-4 rounded-md border border-slate-200 bg-white space-y-3">
                         <div class="flex items-center justify-between border-b border-slate-100 pb-2">
-                            <div class="flex items-center gap-2">
-                                <i class="fas fa-calendar-alt text-[#13416B] text-xs"></i>
-                                <h3 class="text-xs font-bold text-slate-800 uppercase tracking-wider">Rentang Tanggal Pelaksanaan</h3>
-                            </div>
+                            <h3 class="text-xs font-bold text-slate-800 uppercase tracking-wider">Rentang Tanggal Pelaksanaan</h3>
                             <span class="text-[11px] text-slate-500 font-medium">
                                 Jadwal harus setelah periode pendaftaran
                             </span>
@@ -296,7 +260,7 @@
                         </div>
                     </div>
 
-                    {{-- SUB-CARD: DETAIL SESI ZOOM & MULTI-SESI (Biru Sirenata Kalem & Teks White - 100% Vibrant, Normal) --}}
+                    {{-- SUB-CARD: DETAIL SESI ZOOM & MULTI-SESI (Biru Sirenata Kalem & Teks White) --}}
                     <div id="card-zoom" class="p-4 sm:p-5 rounded-md bg-[#1E40AF] text-white shadow-sm space-y-4">
                         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1 border-b border-white/20 pb-2.5">
                             <div>
@@ -354,7 +318,6 @@
                         <div class="space-y-3 pt-1">
                             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-white/20 pb-2">
                                 <div class="flex items-center gap-2">
-                                    <i class="fas fa-calendar-check text-amber-300"></i>
                                     <span class="text-xs font-bold text-white uppercase tracking-wider">
                                         Daftar Sesi Zoom & Presensi Per Hari
                                     </span>
@@ -364,17 +327,15 @@
                                 </div>
 
                                 <div class="flex items-center gap-2 flex-wrap">
-                                    <button type="button" id="btn-auto-generate-sessions"
-                                            title="Buat sesi Zoom dan presensi otomatis per hari berdasarkan rentang tanggal pelaksanaan"
-                                            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-bold text-[#13416B] bg-amber-300 hover:bg-amber-200 shadow-2xs transition-all active:scale-95 cursor-pointer">
-                                        <i class="fas fa-bolt text-xs"></i>
-                                        <span>Generate Sesi Otomatis (Sesuai Hari)</span>
-                                    </button>
-                                    <button type="button" id="btn-add-session"
-                                            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-bold text-[#1E40AF] bg-white hover:bg-blue-50 shadow-2xs transition-all active:scale-95 cursor-pointer">
-                                        <i class="fas fa-plus text-xs"></i>
-                                        <span>Tambah Sesi</span>
-                                    </button>
+                                    <x-button type="button" id="btn-auto-generate-sessions"
+                                              title="Buat sesi Zoom dan presensi otomatis per hari berdasarkan rentang tanggal pelaksanaan"
+                                              variant="warning" size="sm" rounded="md">
+                                        Generate Sesi Otomatis
+                                    </x-button>
+                                    <x-button type="button" id="btn-add-session"
+                                              variant="white" size="sm" rounded="md">
+                                        Tambah Sesi
+                                    </x-button>
                                 </div>
                             </div>
 
@@ -393,18 +354,14 @@
                         </div>
                     </div>
 
-                    {{-- Navigation Footer Step 2 --}}
-                    <div class="flex items-center justify-between pt-4 border-t border-slate-100">
-                        <button type="button" @click="prevStep()"
-                                class="inline-flex items-center gap-2 px-5 py-2.5 text-xs sm:text-sm font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors cursor-pointer">
-                            <i class="fas fa-arrow-left text-xs"></i>
-                            <span>Kembali ke Langkah 1</span>
-                        </button>
-                        <button type="button" @click="nextStep()"
-                                class="inline-flex items-center gap-2 px-6 py-2.5 sm:px-8 sm:py-3.5 text-xs sm:text-sm font-bold text-white bg-[#13416B] hover:bg-[#0e2c48] rounded-xl transition-all shadow-sm active:scale-95 cursor-pointer">
-                            <span>Lanjutkan ke Evaluasi & Konfirmasi</span>
-                            <i class="fas fa-arrow-right text-xs"></i>
-                        </button>
+                    {{-- Action Buttons Step 2 (Mirip Super Admin) --}}
+                    <div class="flex flex-wrap items-center justify-between gap-3 action-buttons form-section pt-6 border-t border-slate-100">
+                        <x-button type="button" variant="secondary" size="lg" rounded="md" @click="prevStep()">
+                            Kembali
+                        </x-button>
+                        <x-button type="button" size="lg" rounded="md" @click="nextStep()">
+                            Lanjutkan
+                        </x-button>
                     </div>
                 </div>
 
@@ -421,13 +378,10 @@
                         </p>
                     </div>
 
-                    {{-- Periode Evaluasi & Sertifikat --}}
+                    {{-- Periode Evaluasi & Sertifikat (Clean, No Icon) --}}
                     <div class="p-4 rounded-md border border-slate-200 bg-white space-y-3">
                         <div class="flex items-center justify-between border-b border-slate-100 pb-2">
-                            <div class="flex items-center gap-2">
-                                <i class="fas fa-certificate text-[#13416B] text-xs"></i>
-                                <h3 class="text-xs font-bold text-slate-800 uppercase tracking-wider">Periode Evaluasi & Batas Kelulusan</h3>
-                            </div>
+                            <h3 class="text-xs font-bold text-slate-800 uppercase tracking-wider">Periode Evaluasi & Batas Kelulusan</h3>
                             <span class="text-[11px] text-slate-500 font-medium">
                                 Jadwal pengerjaan ujian dan penerbitan sertifikat
                             </span>
@@ -459,13 +413,13 @@
                         </div>
                     </div>
 
-                    {{-- Ringkasan Linimasa & Estimasi Status Otomatis (Background Biru Sirenata #13416B) --}}
+                    {{-- Ringkasan Linimasa & Estimasi Status Otomatis (Biru Sirenata #13416B) --}}
                     <div class="p-5 sm:p-6 rounded-md bg-[#13416B] text-white shadow-sm space-y-3.5">
                         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-white/15 pb-3">
                             <div>
                                 <span class="text-[11px] font-semibold text-slate-200 block">Rentang Waktu Keseluruhan Program:</span>
                                 <p id="summary-timeline-text" class="text-sm sm:text-lg font-extrabold text-white mt-0.5">
-                                    Silakan atur tanggal periode di bawah...
+                                    Silakan atur tanggal periode di atas...
                                 </p>
                             </div>
                             <div class="flex items-center gap-2 flex-wrap">
@@ -495,18 +449,14 @@
                         </div>
                     </div>
 
-                    {{-- Navigation Footer Step 3 --}}
-                    <div class="flex items-center justify-between pt-4 border-t border-slate-100">
-                        <button type="button" @click="prevStep()"
-                                class="inline-flex items-center gap-2 px-5 py-2.5 text-xs sm:text-sm font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors cursor-pointer">
-                            <i class="fas fa-arrow-left text-xs"></i>
-                            <span>Kembali ke Langkah 2</span>
-                        </button>
-                        <button type="submit"
-                                class="inline-flex items-center gap-2 px-7 py-3 text-xs sm:text-sm font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl transition-all shadow-sm active:scale-95 cursor-pointer">
-                            <i class="fas fa-check-circle text-xs"></i>
-                            <span>Simpan Gelombang Baru</span>
-                        </button>
+                    {{-- Action Buttons Step 3 (Mirip Super Admin) --}}
+                    <div class="flex flex-wrap items-center justify-between gap-3 action-buttons form-section pt-6 border-t border-slate-100">
+                        <x-button type="button" variant="secondary" size="lg" rounded="md" @click="prevStep()">
+                            Kembali
+                        </x-button>
+                        <x-button type="submit" id="btn-submit" size="lg" rounded="md">
+                            Simpan Gelombang Baru
+                        </x-button>
                     </div>
                 </div>
 
@@ -515,8 +465,70 @@
 
     </div>
 
+    {{-- Modal Alert Validasi (Menggantikan Alert Bawaan Browser) --}}
+    <x-modal name="bimtek-alert-modal" title="Perhatian" maxWidth="sm:max-w-md">
+        <div x-data="{ message: '' }"
+             x-on:set-bimtek-alert.window="message = $event.detail.message"
+             class="space-y-4">
+            <div class="flex items-start gap-3.5 py-1">
+                <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-amber-100 text-amber-600">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                    </svg>
+                </div>
+                <div class="flex-1 pt-0.5">
+                    <p id="bimtek-alert-message" class="text-sm font-medium text-slate-700 leading-relaxed" x-text="message"></p>
+                </div>
+            </div>
+
+            <div class="flex justify-end pt-3 border-t border-slate-100">
+                <x-button type="button" variant="primary" size="md" rounded="md" onclick="onBimtekAlertClose()">
+                    Mengerti
+                </x-button>
+            </div>
+        </div>
+    </x-modal>
+
     @push('scripts')
         <script>
+            let currentFocusTarget = null;
+            function showBimtekAlert(message, title = 'Perhatian', focusTarget = null) {
+                currentFocusTarget = focusTarget;
+                const msgEl = document.getElementById('bimtek-alert-message');
+                if (msgEl) {
+                    msgEl.textContent = message;
+                }
+                window.dispatchEvent(new CustomEvent('set-bimtek-alert', {
+                    detail: { message, title }
+                }));
+                window.dispatchEvent(new CustomEvent('open-modal', {
+                    detail: 'bimtek-alert-modal'
+                }));
+            }
+
+            function onBimtekAlertClose() {
+                window.dispatchEvent(new CustomEvent('close-modal', {
+                    detail: 'bimtek-alert-modal'
+                }));
+                if (currentFocusTarget) {
+                    const target = currentFocusTarget;
+                    currentFocusTarget = null;
+                    setTimeout(() => {
+                        try { target.focus(); } catch (err) {}
+                    }, 150);
+                }
+            }
+
+            window.addEventListener('close-modal', function(e) {
+                if (e.detail === 'bimtek-alert-modal' && currentFocusTarget) {
+                    const target = currentFocusTarget;
+                    currentFocusTarget = null;
+                    setTimeout(() => {
+                        try { target.focus(); } catch (err) {}
+                    }, 150);
+                }
+            });
+
             function bimtekFormWizard(config = {}) {
                 return {
                     step: config.initialStep || 1,
@@ -575,24 +587,20 @@
                             const regEnd = document.getElementById('registration_end_at');
 
                             if (courseId && !courseId.value) {
-                                alert('Silakan pilih Master Kursus / Kurikulum terlebih dahulu.');
-                                courseId.focus();
+                                showBimtekAlert('Silakan pilih Master Kursus / Kurikulum terlebih dahulu.', 'Peringatan', courseId);
                                 return false;
                             }
                             if (batchName && !batchName.value.trim()) {
-                                alert('Silakan isi Nama Gelombang / Angkatan.');
-                                batchName.focus();
+                                showBimtekAlert('Silakan isi Nama Gelombang / Angkatan.', 'Peringatan', batchName);
                                 return false;
                             }
                             if (!this.isUnlimited && quota && (!quota.value || parseInt(quota.value) < 1)) {
-                                alert('Silakan tentukan kuota peserta (minimal 1) atau centang Tanpa Batas.');
-                                quota.focus();
+                                showBimtekAlert('Silakan tentukan kuota peserta (minimal 1) atau centang Tanpa Batas.', 'Peringatan', quota);
                                 return false;
                             }
                             if (regStart?.value && regEnd?.value) {
                                 if (regEnd.value < regStart.value) {
-                                    alert('Tanggal tutup pendaftaran tidak boleh sebelum tanggal buka pendaftaran.');
-                                    regEnd.focus();
+                                    showBimtekAlert('Tanggal tutup pendaftaran tidak boleh sebelum tanggal buka pendaftaran.', 'Peringatan', regEnd);
                                     return false;
                                 }
                             }
@@ -605,27 +613,22 @@
                             const regEnd = document.getElementById('registration_end_at');
 
                             if (!execStart?.value) {
-                                alert('Silakan tentukan Tanggal Mulai Pelaksanaan.');
-                                execStart?.focus();
+                                showBimtekAlert('Silakan tentukan Tanggal Mulai Pelaksanaan.', 'Peringatan', execStart);
                                 return false;
                             }
                             if (!execEnd?.value) {
-                                alert('Silakan tentukan Tanggal Selesai Pelaksanaan.');
-                                execEnd?.focus();
+                                showBimtekAlert('Silakan tentukan Tanggal Selesai Pelaksanaan.', 'Peringatan', execEnd);
                                 return false;
                             }
                             if (execEnd.value < execStart.value) {
-                                alert('Tanggal selesai pelaksanaan harus sama atau setelah tanggal mulai pelaksanaan.');
-                                execEnd.focus();
+                                showBimtekAlert('Tanggal selesai pelaksanaan harus sama atau setelah tanggal mulai pelaksanaan.', 'Peringatan', execEnd);
                                 return false;
                             }
                             if (regEnd?.value && execStart.value < regEnd.value) {
-                                alert('Tanggal mulai pelaksanaan harus setelah atau sama dengan tanggal tutup pendaftaran (' + regEnd.value + ').');
-                                execStart.focus();
+                                showBimtekAlert('Tanggal mulai pelaksanaan harus setelah atau sama dengan tanggal tutup pendaftaran (' + regEnd.value + ').', 'Peringatan', execStart);
                                 return false;
                             }
 
-                            // Cek sesi harian jika ada
                             const sessionCards = document.querySelectorAll('#sessions-container .session-card');
                             for (let card of sessionCards) {
                                 const titleInput = card.querySelector('.session-title-input');
@@ -633,18 +636,15 @@
                                 const startInput = card.querySelector('.session-start-input');
 
                                 if (!titleInput?.value.trim()) {
-                                    alert('Judul sesi tidak boleh kosong.');
-                                    titleInput?.focus();
+                                    showBimtekAlert('Judul sesi tidak boleh kosong.', 'Peringatan', titleInput);
                                     return false;
                                 }
                                 if (!dateInput?.value) {
-                                    alert('Tanggal sesi tidak boleh kosong.');
-                                    dateInput?.focus();
+                                    showBimtekAlert('Tanggal sesi tidak boleh kosong.', 'Peringatan', dateInput);
                                     return false;
                                 }
                                 if (!startInput?.value) {
-                                    alert('Jam mulai Zoom sesi tidak boleh kosong.');
-                                    startInput?.focus();
+                                    showBimtekAlert('Jam mulai Zoom sesi tidak boleh kosong.', 'Peringatan', startInput);
                                     return false;
                                 }
                             }
@@ -731,8 +731,7 @@
                                 <input type="text" name="sessions[${index}][title]" value="${titleVal}" placeholder="Judul Sesi (contoh: Sesi Hari ${index + 1})" required
                                        class="session-title-input px-2.5 py-1 text-xs font-semibold rounded bg-white text-slate-900 border-0 focus:ring-2 focus:ring-white w-48 sm:w-64">
                             </div>
-                            <button type="button" class="btn-remove-session text-[11px] font-semibold text-rose-300 hover:text-rose-100 flex items-center gap-1 transition-colors cursor-pointer">
-                                <i class="fas fa-trash-alt text-[10px]"></i>
+                            <button type="button" class="btn-remove-session text-[11px] font-semibold text-rose-300 hover:text-rose-100 transition-colors cursor-pointer">
                                 <span>Hapus Sesi</span>
                             </button>
                         </div>
@@ -764,8 +763,8 @@
                         {{-- Rentang Jam Pembukaan Presensi Sesi Ini --}}
                         <div class="p-2.5 rounded bg-black/20 border border-white/10 space-y-2">
                             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1 text-[11px]">
-                                <span class="font-bold text-amber-300 flex items-center gap-1">
-                                    <i class="fas fa-clock text-[10px]"></i> Jadwal Presensi Sesi Ini
+                                <span class="font-bold text-amber-300">
+                                    Jadwal Presensi Sesi Ini
                                 </span>
                                 <span class="text-blue-100 text-[10px]">Terkunci di dalam jam Zoom sesi ini</span>
                             </div>
@@ -847,8 +846,7 @@
 
                 btnAddSession?.addEventListener('click', function () {
                     if (!execStart?.value || !execEnd?.value) {
-                        alert('Silakan tentukan tanggal mulai dan tanggal selesai pelaksanaan terlebih dahulu.');
-                        execStart?.focus();
+                        showBimtekAlert('Silakan tentukan tanggal mulai dan tanggal selesai pelaksanaan terlebih dahulu.', 'Peringatan', execStart);
                         return;
                     }
                     addSession();
@@ -856,8 +854,7 @@
 
                 btnAutoGenerate?.addEventListener('click', function () {
                     if (!execStart?.value || !execEnd?.value) {
-                        alert('Silakan tentukan tanggal mulai dan tanggal selesai pelaksanaan terlebih dahulu sebelum membuat sesi otomatis.');
-                        execStart?.focus();
+                        showBimtekAlert('Silakan tentukan tanggal mulai dan tanggal selesai pelaksanaan terlebih dahulu sebelum membuat sesi otomatis.', 'Peringatan', execStart);
                         return;
                     }
 
@@ -867,7 +864,7 @@
                     const dEnd = new Date(dEndParts[0], dEndParts[1] - 1, dEndParts[2]);
 
                     if (isNaN(dStart.getTime()) || isNaN(dEnd.getTime()) || dStart > dEnd) {
-                        alert('Format rentang tanggal pelaksanaan tidak valid.');
+                        showBimtekAlert('Format rentang tanggal pelaksanaan tidak valid.', 'Peringatan');
                         return;
                     }
 
@@ -923,7 +920,6 @@
                     return d.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
                 }
 
-                // Sinkronisasi batas tanggal min/max secara natural (tanpa disable aneh)
                 function syncDateBounds() {
                     if (regStart?.value && regEnd) {
                         regEnd.min = regStart.value;
