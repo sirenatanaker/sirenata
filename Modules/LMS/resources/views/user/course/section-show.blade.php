@@ -44,7 +44,7 @@
         <div class="bg-white rounded-none sm:rounded-md shadow-sm border-y border-x-0 sm:border border-slate-200 p-4 sm:p-6 lg:p-7 transition-all">
             
             {{-- Header Agenda Modul / Hari --}}
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3.5 sm:gap-4 pb-5 sm:pb-6 border-b border-slate-100">
+            <div class="flex items-center justify-between gap-3.5 sm:gap-4 pb-5 sm:pb-6 border-b border-slate-100">
                 <div class="flex items-start gap-3.5 sm:gap-4 min-w-0 flex-1">
                     {{-- Badge Hari / Modul seperti Kalender --}}
                     <div class="flex flex-col items-center justify-center w-12 h-12 sm:w-14 sm:h-14 rounded-md bg-[#13416B] text-white border border-[#13416B] border-r-2 border-b-2 border-r-[#092035] border-b-[#092035] shadow-2xs shrink-0">
@@ -65,22 +65,13 @@
                         </h1>
                     </div>
                 </div>
-
-                {{-- Tombol Panduan di Kanan Header --}}
-                <div class="shrink-0 self-start sm:self-center">
-                    <button type="button" onclick="window.startSectionTour && window.startSectionTour()"
-                        class="inline-flex items-center gap-1.5 sm:gap-2 px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm font-bold text-slate-700 bg-slate-50 hover:bg-slate-100 hover:text-[#13416B] border border-slate-200 rounded-md transition-all shadow-2xs cursor-pointer shrink-0">
-                        <i class="fas fa-route text-[#13416B] text-xs sm:text-sm"></i>
-                        <span>Panduan</span>
-                    </button>
-                </div>
             </div>
 
-            {{-- Layout Kiri Kanan: Konten Aktivitas (Kiri) & On This Page (Kanan) --}}
+            {{-- Layout Kiri Kanan: Konten Aktivitas (Kiri di Desktop / Bawah di Mobile) & On This Page (Kanan di Desktop / Atas di Mobile) --}}
             <div class="mt-5 sm:mt-6 flex flex-col lg:flex-row items-start gap-6 lg:gap-7">
 
                 {{-- Kolom Kiri: Seluruh Card Konten Agenda dengan Timeline Alur Kegiatan --}}
-                <div class="flex-1 min-w-0 w-full">
+                <div class="flex-1 min-w-0 w-full order-2 lg:order-1">
 
                     {{-- 1. TAHAP: PEMBELAJARAN MANDIRI --}}
                     <div class="relative flex items-stretch gap-3.5 sm:gap-5 pb-6 sm:pb-8">
@@ -734,18 +725,20 @@
 
             </div>
 
-            {{-- Kolom Kanan: Widget "On This Page" / Daftar Aktivitas --}}
-            <div class="w-full lg:w-72 xl:w-80 shrink-0">
-                <div class="sticky top-6 rounded-md border border-slate-200 bg-slate-50/70 p-4 sm:p-5 shadow-2xs">
+            {{-- Widget "On This Page" / Daftar Aktivitas (Atas di Mobile, Kanan di Desktop) --}}
+            <div class="w-full lg:w-72 xl:w-80 shrink-0 order-1 lg:order-2">
+                <div class="lg:sticky lg:top-6 rounded-md border border-slate-200 bg-slate-50/70 p-4 sm:p-5 shadow-2xs">
                     {{-- Header Widget --}}
                     <div class="flex items-center justify-between pb-3 border-b border-slate-200/90">
                         <div class="flex items-center gap-2">
                             <i class="fas fa-list-check text-[#13416B] text-xs"></i>
                             <span class="text-xs font-bold uppercase tracking-wider text-slate-700">On This Page</span>
                         </div>
-                        <span class="text-[11px] font-bold {{ $progressPercent === 100 ? 'text-emerald-700 bg-emerald-50 border-emerald-200' : 'text-slate-600 bg-white border-slate-200' }} border px-2 py-0.5 rounded shadow-2xs">
-                            {{ $completedActivities }}/{{ $totalActivities }} Selesai
-                        </span>
+                        <button type="button" onclick="window.startSectionTour && window.startSectionTour()"
+                            class="inline-flex items-center gap-1.5 px-2.5 py-1 text-[11px] font-bold text-slate-700 bg-white hover:bg-slate-100 hover:text-[#13416B] border border-slate-200 rounded-md transition-all shadow-2xs cursor-pointer shrink-0">
+                            <i class="fas fa-route text-[#13416B] text-xs"></i>
+                            <span>Panduan</span>
+                        </button>
                     </div>
 
                     {{-- Bar Progres Singkat --}}
