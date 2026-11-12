@@ -140,9 +140,9 @@
                         <p class="text-[11px] text-slate-400 font-medium">Jadwal Buka & Tutup Pendaftaran:</p>
                         <p class="text-xs sm:text-sm font-semibold text-slate-800 mt-0.5">
                             @if ($event->registration_start_at && $event->registration_end_at)
-                                {{ $event->registration_start_at->translatedFormat('d M Y, H:i') }} s/d {{ $event->registration_end_at->translatedFormat('d M Y, H:i') }} WIB
+                                {{ $event->registration_start_at->translatedFormat('d M Y') }} s/d {{ $event->registration_end_at->translatedFormat('d M Y') }}
                             @elseif ($event->registration_start_at)
-                                Mulai {{ $event->registration_start_at->translatedFormat('d M Y, H:i') }} WIB
+                                Mulai {{ $event->registration_start_at->translatedFormat('d M Y') }}
                             @else
                                 <span class="text-slate-400 italic">Otomatis H-7 sebelum pelaksanaan</span>
                             @endif
@@ -192,7 +192,7 @@
                     <div>
                         <p class="text-[11px] text-slate-400 font-medium">Rentang Waktu Pelatihan:</p>
                         <p class="text-xs sm:text-sm font-semibold text-slate-800 mt-0.5">
-                            {{ $event->start_date ? $event->start_date->translatedFormat('d M Y, H:i') : '-' }} s/d {{ $event->end_date ? $event->end_date->translatedFormat('d M Y, H:i') : '-' }} WIB
+                            {{ $event->start_date ? $event->start_date->translatedFormat('d M Y') : '-' }} s/d {{ $event->end_date ? $event->end_date->translatedFormat('d M Y') : '-' }}
                         </p>
                     </div>
 
@@ -272,9 +272,9 @@
                         <p class="text-[11px] text-slate-400 font-medium">Batas Evaluasi & Sertifikasi:</p>
                         <p class="text-xs sm:text-sm font-semibold text-slate-800 mt-0.5">
                             @if ($event->assessment_start_at && $event->assessment_end_at)
-                                {{ $event->assessment_start_at->translatedFormat('d M Y, H:i') }} s/d {{ $event->assessment_end_at->translatedFormat('d M Y, H:i') }} WIB
+                                {{ $event->assessment_start_at->translatedFormat('d M Y') }} s/d {{ $event->assessment_end_at->translatedFormat('d M Y') }}
                             @elseif ($event->assessment_start_at)
-                                Mulai {{ $event->assessment_start_at->translatedFormat('d M Y, H:i') }} WIB
+                                Mulai {{ $event->assessment_start_at->translatedFormat('d M Y') }}
                             @else
                                 <span class="text-slate-400 italic">Setelah periode pelaksanaan selesai</span>
                             @endif

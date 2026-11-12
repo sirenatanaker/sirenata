@@ -115,7 +115,7 @@
                                 Pengaturan Periode Linimasa Pelatihan
                             </h2>
                             <p class="text-xs text-slate-500 mt-0.5">
-                                Periode harus berurutan. Setiap periode berikutnya tidak dapat memilih tanggal kurang dari atau sama dengan periode sebelumnya.
+                                Pengisian wajib berurutan (Pendaftaran &rarr; Pelaksanaan & Zoom &rarr; Evaluasi) untuk mencegah kesalahan jadwal (anti human-error).
                             </p>
                         </div>
                     </div>
@@ -157,34 +157,36 @@
                     </div>
 
                     {{-- 1. PERIODE PENDAFTARAN --}}
-                    <div class="p-4 rounded-md border border-slate-200 bg-white space-y-3">
+                    <div id="card-stage-1" class="p-4 rounded-md border border-slate-200 bg-white space-y-3 transition-all">
                         <div class="flex items-center justify-between border-b border-slate-100 pb-2">
                             <div class="flex items-center gap-2">
                                 <span class="w-6 h-6 rounded-full bg-slate-900 text-white text-xs font-bold flex items-center justify-center shrink-0">1</span>
                                 <h3 class="text-xs font-bold text-slate-800 uppercase tracking-wider">Periode Pendaftaran</h3>
                             </div>
-                            <span class="text-[11px] text-slate-400">Jadwal pembukaan dan penutupan pendaftaran peserta</span>
+                            <span id="stage-1-badge" class="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-200">
+                                Langkah 1: Atur Pendaftaran
+                            </span>
                         </div>
 
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
                                 <label for="registration_start_at" class="block text-xs font-semibold text-slate-700 mb-1">
-                                    Tanggal & Jam Buka Pendaftaran
+                                    Tanggal Buka Pendaftaran
                                 </label>
-                                <input type="datetime-local" id="registration_start_at" name="registration_start_at"
+                                <input type="date" id="registration_start_at" name="registration_start_at"
                                        value="{{ old('registration_start_at') }}"
-                                       class="w-full px-3 py-2 rounded-lg border border-slate-300 text-xs sm:text-sm focus:ring-1 focus:ring-slate-900 focus:border-slate-900 bg-white">
+                                       class="w-full px-3 py-2 rounded-lg border border-slate-300 text-xs sm:text-sm focus:ring-1 focus:ring-slate-900 focus:border-slate-900 bg-white transition-colors">
                                 @error('registration_start_at')
                                     <p class="text-xs text-rose-500 mt-1">{{ $message }}</p>
                                 @enderror
                             </div>
                             <div>
                                 <label for="registration_end_at" class="block text-xs font-semibold text-slate-700 mb-1">
-                                    Tanggal & Jam Tutup Pendaftaran
+                                    Tanggal Tutup Pendaftaran
                                 </label>
-                                <input type="datetime-local" id="registration_end_at" name="registration_end_at"
+                                <input type="date" id="registration_end_at" name="registration_end_at"
                                        value="{{ old('registration_end_at') }}"
-                                       class="w-full px-3 py-2 rounded-lg border border-slate-300 text-xs sm:text-sm focus:ring-1 focus:ring-slate-900 focus:border-slate-900 bg-white">
+                                       class="w-full px-3 py-2 rounded-lg border border-slate-300 text-xs sm:text-sm focus:ring-1 focus:ring-slate-900 focus:border-slate-900 bg-white transition-colors">
                                 @error('registration_end_at')
                                     <p class="text-xs text-rose-500 mt-1">{{ $message }}</p>
                                 @enderror
@@ -193,46 +195,48 @@
                     </div>
 
                     {{-- 2. PERIODE PELAKSANAAN & LIVE ZOOM --}}
-                    <div class="p-4 rounded-md border border-slate-200 bg-white space-y-4">
+                    <div id="card-stage-2" class="p-4 rounded-md border border-slate-200 bg-white space-y-4 transition-all">
                         <div class="flex items-center justify-between border-b border-slate-100 pb-2">
                             <div class="flex items-center gap-2">
-                                <span class="w-6 h-6 rounded-full bg-slate-900 text-white text-xs font-bold flex items-center justify-center shrink-0">2</span>
+                                <span id="stage-2-num" class="w-6 h-6 rounded-full bg-slate-900 text-white text-xs font-bold flex items-center justify-center shrink-0">2</span>
                                 <h3 class="text-xs font-bold text-slate-800 uppercase tracking-wider">Periode Pelaksanaan & Live Zoom</h3>
                             </div>
-                            <span class="text-[11px] text-slate-400">Harus setelah periode pendaftaran berakhir</span>
+                            <span id="stage-2-badge" class="px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-100 text-slate-500 border border-slate-200">
+                                Langkah 2
+                            </span>
                         </div>
 
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
                                 <label for="start_date" class="block text-xs font-semibold text-slate-700 mb-1">
-                                    Tanggal & Jam Mulai Pelaksanaan <span class="text-rose-500">*</span>
+                                    Tanggal Mulai Pelaksanaan <span class="text-rose-500">*</span>
                                 </label>
-                                <input type="datetime-local" id="start_date" name="start_date" value="{{ old('start_date') }}" required
-                                       class="w-full px-3 py-2 rounded-lg border border-slate-300 text-xs sm:text-sm focus:ring-1 focus:ring-slate-900 focus:border-slate-900 bg-white">
+                                <input type="date" id="start_date" name="start_date" value="{{ old('start_date') }}" required
+                                       class="w-full px-3 py-2 rounded-lg border border-slate-300 text-xs sm:text-sm focus:ring-1 focus:ring-slate-900 focus:border-slate-900 bg-white transition-colors">
                                 @error('start_date')
                                     <p class="text-xs text-rose-500 mt-1">{{ $message }}</p>
                                 @enderror
                             </div>
                             <div>
                                 <label for="end_date" class="block text-xs font-semibold text-slate-700 mb-1">
-                                    Tanggal & Jam Selesai Pelaksanaan <span class="text-rose-500">*</span>
+                                    Tanggal Selesai Pelaksanaan <span class="text-rose-500">*</span>
                                 </label>
-                                <input type="datetime-local" id="end_date" name="end_date" value="{{ old('end_date') }}" required
-                                       class="w-full px-3 py-2 rounded-lg border border-slate-300 text-xs sm:text-sm focus:ring-1 focus:ring-slate-900 focus:border-slate-900 bg-white">
+                                <input type="date" id="end_date" name="end_date" value="{{ old('end_date') }}" required
+                                       class="w-full px-3 py-2 rounded-lg border border-slate-300 text-xs sm:text-sm focus:ring-1 focus:ring-slate-900 focus:border-slate-900 bg-white transition-colors">
                                 @error('end_date')
                                     <p class="text-xs text-rose-500 mt-1">{{ $message }}</p>
                                 @enderror
                             </div>
                         </div>
 
-                        {{-- SUB-CARD: DETAIL SESI ZOOM (Biru Kalem & Teks White) --}}
-                        <div class="p-4 sm:p-5 rounded-md bg-[#1E40AF] text-white shadow-sm space-y-3.5">
+                        {{-- SUB-CARD: DETAIL SESI ZOOM (Biru Kalem & Teks White, Wajib Mengatur Jam) --}}
+                        <div id="card-zoom" class="p-4 sm:p-5 rounded-md bg-[#1E40AF] text-white shadow-sm space-y-3.5 transition-all">
                             <div class="flex items-center justify-between border-b border-white/20 pb-2.5">
                                 <span class="text-xs font-bold text-white uppercase tracking-wider">
-                                    Detail Sesi Live Zoom
+                                    Detail Sesi Live Zoom (Wajib Disertai Jam)
                                 </span>
-                                <span class="text-[11px] text-blue-100 font-medium">
-                                    Jadwal harus di dalam rentang waktu pelaksanaan
+                                <span id="zoom-status-badge" class="text-[11px] text-blue-100 font-medium">
+                                    Jadwal harus di dalam rentang tanggal pelaksanaan
                                 </span>
                             </div>
 
@@ -242,7 +246,7 @@
                                 </label>
                                 <input type="url" id="zoom_url" name="zoom_url" value="{{ old('zoom_url') }}"
                                        placeholder="https://zoom.us/j/1234567890?pwd=..."
-                                       class="w-full px-3 py-2 rounded-lg border-0 text-xs sm:text-sm bg-white text-slate-900 focus:ring-2 focus:ring-white">
+                                       class="w-full px-3 py-2 rounded-lg border-0 text-xs sm:text-sm bg-white text-slate-900 focus:ring-2 focus:ring-white transition-colors">
                                 @error('zoom_url')
                                     <p class="text-xs text-rose-200 mt-1 font-semibold">{{ $message }}</p>
                                 @enderror
@@ -254,7 +258,7 @@
                                         Tanggal & Jam Mulai Sesi Zoom
                                     </label>
                                     <input type="datetime-local" id="zoom_scheduled_at" name="zoom_scheduled_at" value="{{ old('zoom_scheduled_at') }}"
-                                           class="w-full px-3 py-2 rounded-lg border-0 text-xs sm:text-sm bg-white text-slate-900 focus:ring-2 focus:ring-white">
+                                           class="w-full px-3 py-2 rounded-lg border-0 text-xs sm:text-sm bg-white text-slate-900 focus:ring-2 focus:ring-white transition-colors">
                                     @error('zoom_scheduled_at')
                                         <p class="text-xs text-rose-200 mt-1 font-semibold">{{ $message }}</p>
                                     @enderror
@@ -264,44 +268,44 @@
                                         Tanggal & Jam Selesai Sesi Zoom (Opsional)
                                     </label>
                                     <input type="datetime-local" id="zoom_end_at" name="zoom_end_at" value="{{ old('zoom_end_at') }}"
-                                           class="w-full px-3 py-2 rounded-lg border-0 text-xs sm:text-sm bg-white text-slate-900 focus:ring-2 focus:ring-white">
+                                           class="w-full px-3 py-2 rounded-lg border-0 text-xs sm:text-sm bg-white text-slate-900 focus:ring-2 focus:ring-white transition-colors">
                                     @error('zoom_end_at')
                                         <p class="text-xs text-rose-200 mt-1 font-semibold">{{ $message }}</p>
                                     @enderror
                                 </div>
                             </div>
 
-                            {{-- Pengaturan Rentang Jam Pembukaan Presensi (Otomatis Buka di User) --}}
-                            <div class="p-3 rounded-lg bg-black/20 border border-white/15 space-y-2 mt-2">
+                            {{-- Pengaturan Rentang Jam Pembukaan Presensi (Terkunci Ketat di Rentang Zoom) --}}
+                            <div id="card-attendance" class="p-3 rounded-lg bg-black/20 border border-white/15 space-y-2 mt-2 transition-all">
                                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
                                     <div class="flex items-center gap-1.5 text-xs font-bold text-amber-300">
                                         <i class="fas fa-clock"></i>
                                         <span>Jadwal Buka & Tutup Presensi Peserta</span>
                                     </div>
-                                    <span class="text-[11px] text-blue-100">
-                                        Wajib berada di dalam rentang sesi Zoom
+                                    <span id="attendance-status-badge" class="text-[11px] text-blue-100">
+                                        Terkunci ketat di dalam rentang sesi Zoom
                                     </span>
                                 </div>
                                 <p class="text-[11px] text-blue-100/90 leading-relaxed">
-                                    Tombol presensi di akun peserta akan <strong>otomatis terbuka</strong> saat jam buka tiba dan terkunci kembali setelah jam tutup. Jika dikosongkan, presensi mengikuti durasi sesi Zoom.
+                                    Tombol presensi di akun peserta akan <strong>otomatis terbuka</strong> saat jam buka tiba dan terkunci kembali setelah jam tutup. Pilihan waktu dibatasi strictly di dalam jadwal sesi Zoom.
                                 </p>
                                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
                                     <div>
                                         <label for="zoom_attendance_start_at" class="block text-xs font-medium text-white mb-1">
-                                            Jam Buka Presensi
+                                            Tanggal & Jam Buka Presensi
                                         </label>
                                         <input type="datetime-local" id="zoom_attendance_start_at" name="zoom_attendance_start_at" value="{{ old('zoom_attendance_start_at') }}"
-                                               class="w-full px-3 py-2 rounded-lg border-0 text-xs sm:text-sm bg-white text-slate-900 focus:ring-2 focus:ring-white">
+                                               class="w-full px-3 py-2 rounded-lg border-0 text-xs sm:text-sm bg-white text-slate-900 focus:ring-2 focus:ring-white transition-colors">
                                         @error('zoom_attendance_start_at')
                                             <p class="text-xs text-rose-200 mt-1 font-semibold">{{ $message }}</p>
                                         @enderror
                                     </div>
                                     <div>
                                         <label for="zoom_attendance_end_at" class="block text-xs font-medium text-white mb-1">
-                                            Jam Tutup Presensi
+                                            Tanggal & Jam Tutup Presensi
                                         </label>
                                         <input type="datetime-local" id="zoom_attendance_end_at" name="zoom_attendance_end_at" value="{{ old('zoom_attendance_end_at') }}"
-                                               class="w-full px-3 py-2 rounded-lg border-0 text-xs sm:text-sm bg-white text-slate-900 focus:ring-2 focus:ring-white">
+                                               class="w-full px-3 py-2 rounded-lg border-0 text-xs sm:text-sm bg-white text-slate-900 focus:ring-2 focus:ring-white transition-colors">
                                         @error('zoom_attendance_end_at')
                                             <p class="text-xs text-rose-200 mt-1 font-semibold">{{ $message }}</p>
                                         @enderror
@@ -331,34 +335,36 @@
                     </div>
 
                     {{-- 3. PERIODE EVALUASI & SERTIFIKAT --}}
-                    <div class="p-4 rounded-md border border-slate-200 bg-white space-y-3">
+                    <div id="card-stage-3" class="p-4 rounded-md border border-slate-200 bg-white space-y-3 transition-all">
                         <div class="flex items-center justify-between border-b border-slate-100 pb-2">
                             <div class="flex items-center gap-2">
-                                <span class="w-6 h-6 rounded-full bg-slate-900 text-white text-xs font-bold flex items-center justify-center shrink-0">3</span>
+                                <span id="stage-3-num" class="w-6 h-6 rounded-full bg-slate-900 text-white text-xs font-bold flex items-center justify-center shrink-0">3</span>
                                 <h3 class="text-xs font-bold text-slate-800 uppercase tracking-wider">Periode Evaluasi & Sertifikat</h3>
                             </div>
-                            <span class="text-[11px] text-slate-400">Harus dijadwalkan setelah pelaksanaan selesai</span>
+                            <span id="stage-3-badge" class="px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-100 text-slate-500 border border-slate-200">
+                                Langkah 3
+                            </span>
                         </div>
 
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
                                 <label for="assessment_start_at" class="block text-xs font-semibold text-slate-700 mb-1">
-                                    Tanggal & Jam Mulai Evaluasi
+                                    Tanggal Mulai Evaluasi
                                 </label>
-                                <input type="datetime-local" id="assessment_start_at" name="assessment_start_at"
+                                <input type="date" id="assessment_start_at" name="assessment_start_at"
                                        value="{{ old('assessment_start_at') }}"
-                                       class="w-full px-3 py-2 rounded-lg border border-slate-300 text-xs sm:text-sm focus:ring-1 focus:ring-slate-900 focus:border-slate-900 bg-white">
+                                       class="w-full px-3 py-2 rounded-lg border border-slate-300 text-xs sm:text-sm focus:ring-1 focus:ring-slate-900 focus:border-slate-900 bg-white transition-colors">
                                 @error('assessment_start_at')
                                     <p class="text-xs text-rose-500 mt-1">{{ $message }}</p>
                                 @enderror
                             </div>
                             <div>
                                 <label for="assessment_end_at" class="block text-xs font-semibold text-slate-700 mb-1">
-                                    Tanggal & Jam Batas Akhir Evaluasi / Sertifikat
+                                    Tanggal Batas Akhir Evaluasi / Sertifikat
                                 </label>
-                                <input type="datetime-local" id="assessment_end_at" name="assessment_end_at"
+                                <input type="date" id="assessment_end_at" name="assessment_end_at"
                                        value="{{ old('assessment_end_at') }}"
-                                       class="w-full px-3 py-2 rounded-lg border border-slate-300 text-xs sm:text-sm focus:ring-1 focus:ring-slate-900 focus:border-slate-900 bg-white">
+                                       class="w-full px-3 py-2 rounded-lg border border-slate-300 text-xs sm:text-sm focus:ring-1 focus:ring-slate-900 focus:border-slate-900 bg-white transition-colors">
                                 @error('assessment_end_at')
                                     <p class="text-xs text-rose-500 mt-1">{{ $message }}</p>
                                 @enderror
@@ -391,12 +397,28 @@
                 const regEnd = document.getElementById('registration_end_at');
                 const execStart = document.getElementById('start_date');
                 const execEnd = document.getElementById('end_date');
+                const zoomUrl = document.getElementById('zoom_url');
                 const zoomStart = document.getElementById('zoom_scheduled_at');
                 const zoomEnd = document.getElementById('zoom_end_at');
+                const zoomMeetingId = document.getElementById('zoom_meeting_id');
+                const zoomPasscode = document.getElementById('zoom_passcode');
                 const attStart = document.getElementById('zoom_attendance_start_at');
                 const attEnd = document.getElementById('zoom_attendance_end_at');
                 const evalStart = document.getElementById('assessment_start_at');
                 const evalEnd = document.getElementById('assessment_end_at');
+
+                const cardStage1 = document.getElementById('card-stage-1');
+                const stage1Badge = document.getElementById('stage-1-badge');
+                const cardStage2 = document.getElementById('card-stage-2');
+                const stage2Num = document.getElementById('stage-2-num');
+                const stage2Badge = document.getElementById('stage-2-badge');
+                const cardZoom = document.getElementById('card-zoom');
+                const zoomBadge = document.getElementById('zoom-status-badge');
+                const cardAtt = document.getElementById('card-attendance');
+                const attBadge = document.getElementById('attendance-status-badge');
+                const cardStage3 = document.getElementById('card-stage-3');
+                const stage3Num = document.getElementById('stage-3-num');
+                const stage3Badge = document.getElementById('stage-3-badge');
 
                 const summaryText = document.getElementById('summary-timeline-text');
                 const durationTag = document.getElementById('summary-duration-tag');
@@ -408,129 +430,307 @@
 
                 function formatDateShort(val) {
                     if (!val) return null;
+                    const datePart = val.split('T')[0];
+                    const parts = datePart.split('-');
+                    if (parts.length === 3) {
+                        const d = new Date(parts[0], parts[1] - 1, parts[2]);
+                        if (!isNaN(d.getTime())) {
+                            return d.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
+                        }
+                    }
                     const d = new Date(val);
                     if (isNaN(d.getTime())) return null;
                     return d.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
                 }
 
-                // Fungsi sinkronisasi constraint min/max berurutan (Strict Chronological Order)
+                // Fungsi sinkronisasi constraint min/max & pengisian berurutan (Strict Sequential Gating)
                 function syncDateConstraints() {
-                    // 1. regEnd tidak boleh <= regStart
+                    // ==========================================
+                    // 1. TAHAP 1: PENDAFTARAN
+                    // ==========================================
                     if (regStart?.value) {
+                        regEnd.disabled = false;
+                        regEnd.classList.remove('bg-slate-100', 'cursor-not-allowed');
                         regEnd.min = regStart.value;
                         if (regEnd.value && regEnd.value <= regStart.value) {
                             regEnd.value = '';
                         }
                     } else {
+                        regEnd.disabled = true;
+                        regEnd.classList.add('bg-slate-100', 'cursor-not-allowed');
+                        regEnd.value = '';
                         regEnd.removeAttribute('min');
                     }
 
-                    // 2. execStart tidak boleh <= regEnd (atau regStart)
-                    const regLimit = regEnd?.value || regStart?.value;
-                    if (regLimit) {
-                        execStart.min = regLimit;
-                        if (execStart.value && execStart.value <= regLimit) {
+                    const isStage1Complete = Boolean(regStart?.value && regEnd?.value);
+
+                    if (stage1Badge) {
+                        if (isStage1Complete) {
+                            stage1Badge.className = 'px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center gap-1';
+                            stage1Badge.innerHTML = '<i class="fas fa-check-circle text-[10px]"></i> Tahap 1 Selesai';
+                        } else if (regStart?.value) {
+                            stage1Badge.className = 'px-2 py-0.5 rounded text-[10px] font-semibold bg-amber-50 text-amber-700 border border-amber-200 flex items-center gap-1';
+                            stage1Badge.innerHTML = '<i class="fas fa-clock text-[10px]"></i> Isi Tutup Pendaftaran';
+                        } else {
+                            stage1Badge.className = 'px-2 py-0.5 rounded text-[10px] font-semibold bg-blue-50 text-blue-700 border border-blue-200 flex items-center gap-1';
+                            stage1Badge.innerHTML = 'Langkah 1: Mulai Pendaftaran';
+                        }
+                    }
+
+                    // ==========================================
+                    // 2. TAHAP 2: PELAKSANAAN & LIVE ZOOM
+                    // ==========================================
+                    if (!isStage1Complete) {
+                        // Kunci Tahap 2 jika Tahap 1 belum lengkap
+                        execStart.disabled = true;
+                        execStart.classList.add('bg-slate-100', 'cursor-not-allowed');
+                        execStart.value = '';
+                        execEnd.disabled = true;
+                        execEnd.classList.add('bg-slate-100', 'cursor-not-allowed');
+                        execEnd.value = '';
+
+                        if (cardStage2) cardStage2.classList.add('opacity-60');
+                        if (stage2Num) {
+                            stage2Num.className = 'w-6 h-6 rounded-full bg-slate-300 text-slate-600 text-xs font-bold flex items-center justify-center shrink-0';
+                        }
+                        if (stage2Badge) {
+                            stage2Badge.className = 'px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-100 text-slate-500 border border-slate-200 flex items-center gap-1';
+                            stage2Badge.innerHTML = '<i class="fas fa-lock text-[9px]"></i> Lengkapi Tahap 1 Terlebih Dahulu';
+                        }
+                    } else {
+                        // Buka Tahap 2
+                        if (cardStage2) cardStage2.classList.remove('opacity-60');
+                        if (stage2Num) {
+                            stage2Num.className = 'w-6 h-6 rounded-full bg-slate-900 text-white text-xs font-bold flex items-center justify-center shrink-0';
+                        }
+
+                        execStart.disabled = false;
+                        execStart.classList.remove('bg-slate-100', 'cursor-not-allowed');
+                        execStart.min = regEnd.value;
+                        if (execStart.value && execStart.value <= regEnd.value) {
                             execStart.value = '';
                         }
-                    } else {
-                        execStart.removeAttribute('min');
-                    }
 
-                    // 3. execEnd tidak boleh <= execStart
-                    if (execStart?.value) {
-                        execEnd.min = execStart.value;
-                        if (execEnd.value && execEnd.value <= execStart.value) {
+                        if (execStart.value) {
+                            execEnd.disabled = false;
+                            execEnd.classList.remove('bg-slate-100', 'cursor-not-allowed');
+                            execEnd.min = execStart.value;
+                            if (execEnd.value && execEnd.value <= execStart.value) {
+                                execEnd.value = '';
+                            }
+                        } else {
+                            execEnd.disabled = true;
+                            execEnd.classList.add('bg-slate-100', 'cursor-not-allowed');
                             execEnd.value = '';
+                            execEnd.removeAttribute('min');
                         }
 
-                        // Zoom min di dalam execStart
-                        if (zoomStart) zoomStart.min = execStart.value;
-                    } else {
-                        execEnd.removeAttribute('min');
-                        if (zoomStart) zoomStart.removeAttribute('min');
-                    }
-
-                    // 4. Zoom bounds di dalam execEnd
-                    if (execEnd?.value) {
-                        if (zoomStart) zoomStart.max = execEnd.value;
-                        if (zoomEnd) zoomEnd.max = execEnd.value;
-
-                        // evalStart tidak boleh < execEnd
-                        if (evalStart) {
-                            evalStart.min = execEnd.value;
-                            if (evalStart.value && evalStart.value < execEnd.value) {
-                                evalStart.value = '';
+                        if (stage2Badge) {
+                            if (execStart.value && execEnd.value) {
+                                stage2Badge.className = 'px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center gap-1';
+                                stage2Badge.innerHTML = '<i class="fas fa-check-circle text-[10px]"></i> Pelaksanaan Ditentukan';
+                            } else if (execStart.value) {
+                                stage2Badge.className = 'px-2 py-0.5 rounded text-[10px] font-semibold bg-amber-50 text-amber-700 border border-amber-200 flex items-center gap-1';
+                                stage2Badge.innerHTML = '<i class="fas fa-clock text-[10px]"></i> Isi Selesai Pelaksanaan';
+                            } else {
+                                stage2Badge.className = 'px-2 py-0.5 rounded text-[10px] font-semibold bg-blue-50 text-blue-700 border border-blue-200 flex items-center gap-1';
+                                stage2Badge.innerHTML = 'Langkah 2: Isi Mulai Pelaksanaan';
                             }
                         }
-                    } else {
-                        if (zoomStart) zoomStart.removeAttribute('max');
-                        if (zoomEnd) zoomEnd.removeAttribute('max');
-                        if (evalStart) evalStart.removeAttribute('min');
                     }
 
-                    // 5. zoomEnd tidak boleh <= zoomStart
-                    if (zoomStart?.value) {
-                        if (zoomEnd) {
+                    const isExecComplete = Boolean(isStage1Complete && execStart?.value && execEnd?.value);
+
+                    // ==========================================
+                    // 2B. DETAIL SESI LIVE ZOOM
+                    // ==========================================
+                    const zoomInputs = [zoomUrl, zoomStart, zoomEnd, zoomMeetingId, zoomPasscode];
+                    if (!isExecComplete) {
+                        zoomInputs.forEach(el => {
+                            if (el) {
+                                el.disabled = true;
+                                el.classList.add('opacity-50', 'cursor-not-allowed');
+                                if (el === zoomStart || el === zoomEnd) el.value = '';
+                            }
+                        });
+                        if (cardZoom) cardZoom.classList.add('opacity-60');
+                        if (zoomBadge) zoomBadge.innerHTML = '<i class="fas fa-lock mr-1"></i> Buka setelah tanggal pelaksanaan diisi';
+                    } else {
+                        if (cardZoom) cardZoom.classList.remove('opacity-60');
+                        [zoomUrl, zoomMeetingId, zoomPasscode, zoomStart].forEach(el => {
+                            if (el) {
+                                el.disabled = false;
+                                el.classList.remove('opacity-50', 'cursor-not-allowed');
+                            }
+                        });
+
+                        const minZoomTime = `${execStart.value}T00:00`;
+                        const maxZoomTime = `${execEnd.value}T23:59`;
+
+                        zoomStart.min = minZoomTime;
+                        zoomStart.max = maxZoomTime;
+
+                        if (zoomStart.value) {
+                            if (zoomStart.value < minZoomTime || zoomStart.value > maxZoomTime) {
+                                zoomStart.value = '';
+                            }
+                        }
+
+                        if (zoomStart.value) {
+                            zoomEnd.disabled = false;
+                            zoomEnd.classList.remove('opacity-50', 'cursor-not-allowed');
                             zoomEnd.min = zoomStart.value;
-                            if (zoomEnd.value && zoomEnd.value <= zoomStart.value) {
-                                zoomEnd.value = '';
+                            zoomEnd.max = maxZoomTime;
+                            if (zoomEnd.value) {
+                                if (zoomEnd.value <= zoomStart.value || zoomEnd.value > maxZoomTime) {
+                                    zoomEnd.value = '';
+                                }
+                            }
+                            if (zoomBadge) zoomBadge.textContent = 'Jadwal sesi Zoom aktif di rentang pelaksanaan';
+                        } else {
+                            zoomEnd.disabled = true;
+                            zoomEnd.classList.add('opacity-50', 'cursor-not-allowed');
+                            zoomEnd.value = '';
+                            zoomEnd.removeAttribute('min');
+                            zoomEnd.removeAttribute('max');
+                            if (zoomBadge) zoomBadge.textContent = 'Atur tanggal & jam mulai sesi Zoom';
+                        }
+                    }
+
+                    // ==========================================
+                    // 2C. DETAIL PRESENSI (Strictly dalam rentang Zoom)
+                    // ==========================================
+                    const isZoomConfigured = Boolean(isExecComplete && zoomStart?.value);
+                    const attMinLimit = zoomStart?.value || (execStart?.value ? `${execStart.value}T00:00` : null);
+                    const attMaxLimit = zoomEnd?.value || (execEnd?.value ? `${execEnd.value}T23:59` : null);
+
+                    if (!isZoomConfigured || !attMinLimit || !attMaxLimit) {
+                        if (attStart) {
+                            attStart.disabled = true;
+                            attStart.classList.add('opacity-50', 'cursor-not-allowed');
+                            attStart.value = '';
+                            attStart.removeAttribute('min');
+                            attStart.removeAttribute('max');
+                        }
+                        if (attEnd) {
+                            attEnd.disabled = true;
+                            attEnd.classList.add('opacity-50', 'cursor-not-allowed');
+                            attEnd.value = '';
+                            attEnd.removeAttribute('min');
+                            attEnd.removeAttribute('max');
+                        }
+                        if (cardAtt) cardAtt.classList.add('opacity-60');
+                        if (attBadge) attBadge.innerHTML = '<i class="fas fa-lock mr-1"></i> Buka setelah sesi Zoom diatur';
+                    } else {
+                        if (cardAtt) cardAtt.classList.remove('opacity-60');
+                        if (attStart) {
+                            attStart.disabled = false;
+                            attStart.classList.remove('opacity-50', 'cursor-not-allowed');
+                            attStart.min = attMinLimit;
+                            attStart.max = attMaxLimit;
+
+                            if (attStart.value) {
+                                if (attStart.value < attMinLimit || attStart.value > attMaxLimit) {
+                                    attStart.value = '';
+                                }
                             }
                         }
-                    } else if (execStart?.value && zoomEnd) {
-                        zoomEnd.min = execStart.value;
-                    }
 
-                    // 5b. Presensi: wajib berada di dalam rentang sesi Zoom
-                    const zoomLimitMin = zoomStart?.value || execStart?.value;
-                    const zoomLimitMax = zoomEnd?.value || execEnd?.value;
+                        if (attStart?.value) {
+                            if (attEnd) {
+                                attEnd.disabled = false;
+                                attEnd.classList.remove('opacity-50', 'cursor-not-allowed');
+                                attEnd.min = attStart.value;
+                                attEnd.max = attMaxLimit;
 
-                    if (attStart) {
-                        if (zoomLimitMin) attStart.min = zoomLimitMin;
-                        else attStart.removeAttribute('min');
-
-                        if (zoomLimitMax) attStart.max = zoomLimitMax;
-                        else attStart.removeAttribute('max');
-
-                        if (attStart.value) {
-                            if (zoomLimitMin && attStart.value < zoomLimitMin) attStart.value = '';
-                            if (zoomLimitMax && attStart.value > zoomLimitMax) attStart.value = '';
+                                if (attEnd.value) {
+                                    if (attEnd.value <= attStart.value || attEnd.value > attMaxLimit) {
+                                        attEnd.value = '';
+                                    }
+                                }
+                            }
+                            if (attBadge) attBadge.textContent = 'Rentang presensi terkunci ketat di dalam sesi Zoom';
+                        } else {
+                            if (attEnd) {
+                                attEnd.disabled = true;
+                                attEnd.classList.add('opacity-50', 'cursor-not-allowed');
+                                attEnd.value = '';
+                                attEnd.removeAttribute('min');
+                                attEnd.removeAttribute('max');
+                            }
+                            if (attBadge) attBadge.textContent = 'Atur jam buka presensi (terkunci di rentang Zoom)';
                         }
                     }
 
-                    if (attEnd) {
-                        const attEndMin = attStart?.value || zoomLimitMin;
-                        if (attEndMin) attEnd.min = attEndMin;
-                        else attEnd.removeAttribute('min');
+                    // ==========================================
+                    // 3. TAHAP 3: EVALUASI & SERTIFIKAT
+                    // ==========================================
+                    if (!isExecComplete) {
+                        evalStart.disabled = true;
+                        evalStart.classList.add('bg-slate-100', 'cursor-not-allowed');
+                        evalStart.value = '';
+                        evalEnd.disabled = true;
+                        evalEnd.classList.add('bg-slate-100', 'cursor-not-allowed');
+                        evalEnd.value = '';
 
-                        if (zoomLimitMax) attEnd.max = zoomLimitMax;
-                        else attEnd.removeAttribute('max');
-
-                        if (attEnd.value) {
-                            if (attEndMin && attEnd.value <= attEndMin) attEnd.value = '';
-                            if (zoomLimitMax && attEnd.value > zoomLimitMax) attEnd.value = '';
+                        if (cardStage3) cardStage3.classList.add('opacity-60');
+                        if (stage3Num) {
+                            stage3Num.className = 'w-6 h-6 rounded-full bg-slate-300 text-slate-600 text-xs font-bold flex items-center justify-center shrink-0';
                         }
-                    }
+                        if (stage3Badge) {
+                            stage3Badge.className = 'px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-100 text-slate-500 border border-slate-200 flex items-center gap-1';
+                            stage3Badge.innerHTML = '<i class="fas fa-lock text-[9px]"></i> Lengkapi Tahap 2 Terlebih Dahulu';
+                        }
+                    } else {
+                        if (cardStage3) cardStage3.classList.remove('opacity-60');
+                        if (stage3Num) {
+                            stage3Num.className = 'w-6 h-6 rounded-full bg-slate-900 text-white text-xs font-bold flex items-center justify-center shrink-0';
+                        }
 
-                    // 6. evalEnd tidak boleh <= evalStart
-                    const evalLimit = evalStart?.value || execEnd?.value;
-                    if (evalLimit && evalEnd) {
-                        evalEnd.min = evalLimit;
-                        if (evalEnd.value && evalEnd.value <= evalLimit) {
+                        evalStart.disabled = false;
+                        evalStart.classList.remove('bg-slate-100', 'cursor-not-allowed');
+                        evalStart.min = execEnd.value;
+                        if (evalStart.value && evalStart.value < execEnd.value) {
+                            evalStart.value = '';
+                        }
+
+                        if (evalStart.value) {
+                            evalEnd.disabled = false;
+                            evalEnd.classList.remove('bg-slate-100', 'cursor-not-allowed');
+                            evalEnd.min = evalStart.value;
+                            if (evalEnd.value && evalEnd.value < evalStart.value) {
+                                evalEnd.value = '';
+                            }
+                        } else {
+                            evalEnd.disabled = true;
+                            evalEnd.classList.add('bg-slate-100', 'cursor-not-allowed');
                             evalEnd.value = '';
+                            evalEnd.removeAttribute('min');
                         }
-                    } else if (evalEnd) {
-                        evalEnd.removeAttribute('min');
+
+                        if (stage3Badge) {
+                            if (evalStart.value && evalEnd.value) {
+                                stage3Badge.className = 'px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center gap-1';
+                                stage3Badge.innerHTML = '<i class="fas fa-check-circle text-[10px]"></i> Evaluasi Terjadwal';
+                            } else if (evalStart.value) {
+                                stage3Badge.className = 'px-2 py-0.5 rounded text-[10px] font-semibold bg-amber-50 text-amber-700 border border-amber-200 flex items-center gap-1';
+                                stage3Badge.innerHTML = '<i class="fas fa-clock text-[10px]"></i> Isi Batas Akhir Evaluasi';
+                            } else {
+                                stage3Badge.className = 'px-2 py-0.5 rounded text-[10px] font-semibold bg-blue-50 text-blue-700 border border-blue-200 flex items-center gap-1';
+                                stage3Badge.innerHTML = 'Langkah 3: Atur Evaluasi';
+                            }
+                        }
                     }
                 }
 
                 // Fungsi hitung estimasi status otomatis secara real-time
                 function calculateEstimatedStatus(rStartVal, rEndVal, eStartVal, eEndVal, evEndVal) {
                     const now = new Date();
-                    const eStart = eStartVal ? new Date(eStartVal) : null;
-                    const eEnd = eEndVal ? new Date(eEndVal) : null;
-                    const rStart = rStartVal ? new Date(rStartVal) : null;
-                    const rEnd = rEndVal ? new Date(rEndVal) : null;
-                    const evEnd = evEndVal ? new Date(evEndVal) : eEnd;
+                    const eStart = eStartVal ? new Date(`${eStartVal}T00:00:00`) : null;
+                    const eEnd = eEndVal ? new Date(`${eEndVal}T23:59:59`) : null;
+                    const rStart = rStartVal ? new Date(`${rStartVal}T00:00:00`) : null;
+                    const rEnd = rEndVal ? new Date(`${rEndVal}T23:59:59`) : null;
+                    const evEnd = evEndVal ? new Date(`${evEndVal}T23:59:59`) : eEnd;
 
                     if (evEnd && now > evEnd) {
                         return 'Selesai';
@@ -557,14 +757,16 @@
                     const overallEndVal = evalEnd?.value || execEnd?.value || evalStart?.value;
 
                     if (overallStartVal && overallEndVal) {
-                        const dStart = new Date(overallStartVal);
-                        const dEnd = new Date(overallEndVal);
+                        const dStartParts = overallStartVal.split('T')[0].split('-');
+                        const dEndParts = overallEndVal.split('T')[0].split('-');
+                        const dStart = new Date(dStartParts[0], dStartParts[1] - 1, dStartParts[2]);
+                        const dEnd = new Date(dEndParts[0], dEndParts[1] - 1, dEndParts[2]);
 
                         if (!isNaN(dStart.getTime()) && !isNaN(dEnd.getTime())) {
                             summaryText.textContent = `${formatDateShort(overallStartVal)} s/d ${formatDateShort(overallEndVal)}`;
 
                             const diffTime = dEnd - dStart;
-                            const diffDays = Math.max(1, Math.ceil(diffTime / (1000 * 60 * 60 * 24)));
+                            const diffDays = Math.max(1, Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1);
                             if (durationTag && durationText) {
                                 durationText.textContent = `${diffDays} Hari Program`;
                                 durationTag.classList.remove('hidden');
@@ -608,6 +810,16 @@
                     el?.addEventListener('change', updateTimelineSummary);
                     el?.addEventListener('input', updateTimelineSummary);
                 });
+
+                // Form submit handler: un-disable all inputs to ensure full POST payload
+                const form = document.querySelector('form');
+                if (form) {
+                    form.addEventListener('submit', function () {
+                        form.querySelectorAll('input:disabled, select:disabled').forEach(function (el) {
+                            el.disabled = false;
+                        });
+                    });
+                }
 
                 updateTimelineSummary();
             });
