@@ -196,47 +196,103 @@
                         </p>
                     </div>
 
-                    {{-- Detail Sesi Zoom Terpadu di Pelaksanaan (Biru Kalem & Teks White) --}}
-                    <div class="p-3.5 sm:p-4 rounded-md bg-[#1E40AF] text-white shadow-sm space-y-2.5">
-                        <div class="flex items-center justify-between gap-1 border-b border-white/20 pb-2">
-                            <span class="text-xs font-bold uppercase tracking-wider text-white">Sesi Live Zoom</span>
-                            @if ($event->zoom_url)
-                                <a href="{{ $event->zoom_url }}" target="_blank"
-                                   class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-bold text-[#1E40AF] bg-white hover:bg-blue-50 transition-colors shadow-2xs">
-                                    <span>Buka Zoom</span>
-                                    <i class="fas fa-external-link-alt text-[9px]"></i>
-                                </a>
-                            @endif
-                        </div>
-
-                        <div>
-                            <span class="text-[11px] text-blue-100 block">Jadwal Sesi Zoom:</span>
-                            <p class="text-xs sm:text-sm font-semibold text-white mt-0.5">
-                                {{ $event->zoom_schedule_formatted }}
-                            </p>
-                        </div>
-
-                        @if ($event->zoom_attendance_start_at || $event->zoom_attendance_end_at)
-                            <div class="pt-1.5 border-t border-white/15">
-                                <span class="text-[11px] text-amber-200 block font-semibold">Jadwal Presensi Dibuka:</span>
-                                <p class="text-xs sm:text-sm font-bold text-white mt-0.5">
-                                    {{ $event->attendance_schedule_formatted }}
-                                </p>
-                            </div>
-                        @endif
-
-                        @if ($event->zoom_meeting_id || $event->zoom_passcode || $event->zoom_attendance_code)
-                            <div class="text-[11px] text-blue-100 font-mono space-y-1 pt-2 border-t border-white/15">
-                                @if ($event->zoom_meeting_id) <p>Meeting ID: <strong class="text-white font-mono">{{ $event->zoom_meeting_id }}</strong></p> @endif
-                                @if ($event->zoom_passcode) <p>Passcode: <strong class="text-white font-mono">{{ $event->zoom_passcode }}</strong></p> @endif
-                                @if ($event->zoom_attendance_code)
-                                    <p class="pt-0.5 text-white font-sans">
-                                        Kode Presensi: <strong class="px-2 py-0.5 rounded-md bg-white text-[#1E40AF] font-mono text-xs font-bold ml-1">{{ $event->zoom_attendance_code }}</strong>
-                                    </p>
+                    {{-- Detail Sesi Zoom Terpadu di Pelaksanaan (Biru Sirenata Kalem & Teks White) --}}
+                    @if ($event->sessions->isNotEmpty())
+                        <div class="p-3.5 sm:p-4 rounded-md bg-[#1E40AF] text-white shadow-sm space-y-3">
+                            <div class="flex items-center justify-between gap-1 border-b border-white/20 pb-2">
+                                <div class="flex items-center gap-1.5">
+                                    <i class="fas fa-calendar-check text-amber-300 text-xs"></i>
+                                    <span class="text-xs font-bold uppercase tracking-wider text-white">
+                                        Daftar Sesi Harian ({{ $event->sessions->count() }} Sesi)
+                                    </span>
+                                </div>
+                                @if ($event->zoom_url)
+                                    <a href="{{ $event->zoom_url }}" target="_blank"
+                                       class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-bold text-[#1E40AF] bg-white hover:bg-blue-50 transition-colors shadow-2xs">
+                                        <span>Buka Zoom Utama</span>
+                                        <i class="fas fa-external-link-alt text-[9px]"></i>
+                                    </a>
                                 @endif
                             </div>
-                        @endif
-                    </div>
+
+                            <div class="space-y-2 max-h-72 overflow-y-auto pr-1">
+                                @foreach ($event->sessions as $s)
+                                    <div class="p-2.5 rounded bg-black/20 border border-white/10 space-y-1 text-xs">
+                                        <div class="flex items-center justify-between gap-2">
+                                            <div class="flex items-center gap-1.5">
+                                                <span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-400 text-slate-900">
+                                                    Hari {{ $s->session_number }}
+                                                </span>
+                                                <strong class="text-white">{{ $s->title }}</strong>
+                                            </div>
+                                            <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-white/20 text-white">
+                                                {{ $s->attendances->count() }} / {{ $totalRegistered }} Hadir
+                                            </span>
+                                        </div>
+
+                                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-1 text-[11px] text-blue-100">
+                                            <div>
+                                                <span class="text-slate-300">Zoom:</span>
+                                                <span class="text-white font-medium">{{ $s->schedule_formatted }}</span>
+                                            </div>
+                                            <div>
+                                                <span class="text-amber-200">Presensi:</span>
+                                                <span class="text-white font-medium">{{ $s->attendance_schedule_formatted }}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
+
+                            @if ($event->zoom_meeting_id || $event->zoom_passcode)
+                                <div class="text-[11px] text-blue-100 font-mono flex items-center gap-3 pt-2 border-t border-white/15">
+                                    @if ($event->zoom_meeting_id) <span>ID: <strong class="text-white">{{ $event->zoom_meeting_id }}</strong></span> @endif
+                                    @if ($event->zoom_passcode) <span>Passcode: <strong class="text-white">{{ $event->zoom_passcode }}</strong></span> @endif
+                                </div>
+                            @endif
+                        </div>
+                    @else
+                        <div class="p-3.5 sm:p-4 rounded-md bg-[#1E40AF] text-white shadow-sm space-y-2.5">
+                            <div class="flex items-center justify-between gap-1 border-b border-white/20 pb-2">
+                                <span class="text-xs font-bold uppercase tracking-wider text-white">Sesi Live Zoom</span>
+                                @if ($event->zoom_url)
+                                    <a href="{{ $event->zoom_url }}" target="_blank"
+                                       class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-bold text-[#1E40AF] bg-white hover:bg-blue-50 transition-colors shadow-2xs">
+                                        <span>Buka Zoom</span>
+                                        <i class="fas fa-external-link-alt text-[9px]"></i>
+                                    </a>
+                                @endif
+                            </div>
+
+                            <div>
+                                <span class="text-[11px] text-blue-100 block">Jadwal Sesi Zoom:</span>
+                                <p class="text-xs sm:text-sm font-semibold text-white mt-0.5">
+                                    {{ $event->zoom_schedule_formatted }}
+                                </p>
+                            </div>
+
+                            @if ($event->zoom_attendance_start_at || $event->zoom_attendance_end_at)
+                                <div class="pt-1.5 border-t border-white/15">
+                                    <span class="text-[11px] text-amber-200 block font-semibold">Jadwal Presensi Dibuka:</span>
+                                    <p class="text-xs sm:text-sm font-bold text-white mt-0.5">
+                                        {{ $event->attendance_schedule_formatted }}
+                                    </p>
+                                </div>
+                            @endif
+
+                            @if ($event->zoom_meeting_id || $event->zoom_passcode || $event->zoom_attendance_code)
+                                <div class="text-[11px] text-blue-100 font-mono space-y-1 pt-2 border-t border-white/15">
+                                    @if ($event->zoom_meeting_id) <p>Meeting ID: <strong class="text-white font-mono">{{ $event->zoom_meeting_id }}</strong></p> @endif
+                                    @if ($event->zoom_passcode) <p>Passcode: <strong class="text-white font-mono">{{ $event->zoom_passcode }}</strong></p> @endif
+                                    @if ($event->zoom_attendance_code)
+                                        <p class="pt-0.5 text-white font-sans">
+                                            Kode Presensi: <strong class="px-2 py-0.5 rounded-md bg-white text-[#1E40AF] font-mono text-xs font-bold ml-1">{{ $event->zoom_attendance_code }}</strong>
+                                        </p>
+                                    @endif
+                                </div>
+                            @endif
+                        </div>
+                    @endif
                 </div>
 
                 <div class="pt-2 border-t border-slate-100 flex items-center justify-between text-xs">
@@ -352,16 +408,34 @@
                                     @endif
                                 </td>
                                 <td class="py-3 px-3.5 text-center">
-                                    <form action="{{ route('admin-pusat.management-course.bimtek-events.toggle-attendance', [$event->id, $p->user_id]) }}" method="POST">
-                                        @csrf
-                                        <button type="submit"
-                                                title="Klik untuk ubah status kehadiran Zoom"
-                                                class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold transition-transform active:scale-95 cursor-pointer
-                                                {{ $p->zoom_attended ? 'bg-emerald-600 text-white' : 'bg-slate-200 text-slate-600 hover:bg-slate-300' }}">
-                                            <i class="fas {{ $p->zoom_attended ? 'fa-check' : 'fa-times' }} text-[10px]"></i>
-                                            <span>{{ $p->zoom_attended ? 'Hadir' : 'Belum Hadir' }}</span>
-                                        </button>
-                                    </form>
+                                    @if ($totalSessionsCount > 0)
+                                        <div class="inline-flex flex-col items-center gap-1">
+                                            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold
+                                                {{ $p->attended_sessions_count >= $totalSessionsCount ? 'bg-emerald-600 text-white' : ($p->attended_sessions_count > 0 ? 'bg-amber-500 text-white' : 'bg-slate-200 text-slate-700') }}">
+                                                <i class="fas {{ $p->attended_sessions_count >= $totalSessionsCount ? 'fa-check-double' : ($p->attended_sessions_count > 0 ? 'fa-check' : 'fa-times') }} text-[10px]"></i>
+                                                <span>{{ $p->attended_sessions_count }} / {{ $totalSessionsCount }} Sesi</span>
+                                            </span>
+                                            <form action="{{ route('admin-pusat.management-course.bimtek-events.toggle-attendance', [$event->id, $p->user_id]) }}" method="POST">
+                                                @csrf
+                                                <button type="submit"
+                                                        title="Override status presensi"
+                                                        class="text-[10px] text-slate-400 hover:text-slate-600 underline cursor-pointer">
+                                                    {{ $p->zoom_attended ? 'Tandai Belum' : 'Tandai Hadir' }}
+                                                </button>
+                                            </form>
+                                        </div>
+                                    @else
+                                        <form action="{{ route('admin-pusat.management-course.bimtek-events.toggle-attendance', [$event->id, $p->user_id]) }}" method="POST">
+                                            @csrf
+                                            <button type="submit"
+                                                    title="Klik untuk ubah status kehadiran Zoom"
+                                                    class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold transition-transform active:scale-95 cursor-pointer
+                                                    {{ $p->zoom_attended ? 'bg-emerald-600 text-white' : 'bg-slate-200 text-slate-600 hover:bg-slate-300' }}">
+                                                <i class="fas {{ $p->zoom_attended ? 'fa-check' : 'fa-times' }} text-[10px]"></i>
+                                                <span>{{ $p->zoom_attended ? 'Hadir' : 'Belum Hadir' }}</span>
+                                            </button>
+                                        </form>
+                                    @endif
                                 </td>
                                 <td class="py-3 px-3.5">
                                     @if ($p->official_cert_number)

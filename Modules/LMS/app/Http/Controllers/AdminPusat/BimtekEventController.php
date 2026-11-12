@@ -4,9 +4,13 @@ namespace Modules\LMS\Http\Controllers\AdminPusat;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Modules\LMS\Models\BimtekEvent;
+use Modules\LMS\Models\BimtekEventSession;
+use Modules\LMS\Models\BimtekSessionAttendance;
 use Modules\LMS\Models\Course;
 
 class BimtekEventController extends Controller
@@ -93,6 +97,19 @@ class BimtekEventController extends Controller
             'zoom_attendance_start_at' => 'nullable|date',
             'zoom_attendance_end_at'   => 'nullable|date',
 
+            // Multi-Sesi Zoom & Presensi Harian (Skenario 1)
+            'sessions'                         => 'nullable|array',
+            'sessions.*.id'                    => 'nullable|string',
+            'sessions.*.title'                 => 'required_with:sessions|string|max:255',
+            'sessions.*.session_date'          => 'required_with:sessions|date_format:Y-m-d',
+            'sessions.*.start_time'            => 'required_with:sessions|date',
+            'sessions.*.end_time'              => 'nullable|date',
+            'sessions.*.zoom_url'              => 'nullable|url',
+            'sessions.*.zoom_meeting_id'       => 'nullable|string|max:100',
+            'sessions.*.zoom_passcode'         => 'nullable|string|max:100',
+            'sessions.*.attendance_start_at'   => 'nullable|date',
+            'sessions.*.attendance_end_at'     => 'nullable|date',
+
             // 3. Periode Evaluasi & Sertifikat (Hanya Tanggal, setelah pelaksanaan)
             'assessment_start_at'      => 'nullable|date_format:Y-m-d|after_or_equal:end_date',
             'assessment_end_at'        => 'nullable|date_format:Y-m-d' . ($hasAssessmentStart ? '|after_or_equal:assessment_start_at' : '|after_or_equal:end_date'),
@@ -153,6 +170,61 @@ class BimtekEventController extends Controller
                 }
                 if ($zoomEnd && \Carbon\Carbon::parse($attEnd)->greaterThan(\Carbon\Carbon::parse($zoomEnd))) {
                     $v->errors()->add('zoom_attendance_end_at', 'Jam tutup presensi tidak boleh melewati jadwal selesai sesi Zoom.');
+                }
+            }
+
+            // 3. Validasi Multi-Sesi Zoom & Presensi Harian (Skenario 1)
+            $sessions = $request->input('sessions', []);
+            if (is_array($sessions)) {
+                foreach ($sessions as $i => $s) {
+                    $idx = $i + 1;
+                    $sTitle = !empty($s['title']) ? $s['title'] : "Sesi Hari {$idx}";
+                    $sDate = $s['session_date'] ?? null;
+                    $sStart = $s['start_time'] ?? null;
+                    $sEnd = $s['end_time'] ?? null;
+                    $sAttStart = $s['attendance_start_at'] ?? null;
+                    $sAttEnd = $s['attendance_end_at'] ?? null;
+
+                    if ($sDate && $execStart && $execEnd) {
+                        if ($sDate < $execStart || $sDate > $execEnd) {
+                            $v->errors()->add("sessions.{$i}.session_date", "Tanggal {$sTitle} harus berada di dalam rentang tanggal pelaksanaan ({$execStart} s/d {$execEnd}).");
+                        }
+                    }
+
+                    if ($sStart && $sDate) {
+                        $parsedDate = \Carbon\Carbon::parse($sStart)->toDateString();
+                        if ($parsedDate !== $sDate) {
+                            $v->errors()->add("sessions.{$i}.start_time", "Jam mulai {$sTitle} harus berada pada tanggal sesi yang sama ({$sDate}).");
+                        }
+                    }
+
+                    if ($sEnd && $sStart) {
+                        if (\Carbon\Carbon::parse($sEnd)->lessThanOrEqualTo(\Carbon\Carbon::parse($sStart))) {
+                            $v->errors()->add("sessions.{$i}.end_time", "Jam selesai {$sTitle} harus setelah jam mulai.");
+                        }
+                    }
+
+                    if ($sAttStart) {
+                        if (!$sStart) {
+                            $v->errors()->add("sessions.{$i}.attendance_start_at", "Tentukan jam mulai {$sTitle} terlebih dahulu sebelum jam buka presensi.");
+                        } elseif (\Carbon\Carbon::parse($sAttStart)->lessThan(\Carbon\Carbon::parse($sStart))) {
+                            $v->errors()->add("sessions.{$i}.attendance_start_at", "Jam buka presensi {$sTitle} tidak boleh lebih awal dari jam mulai sesi.");
+                        }
+                        if ($sEnd && \Carbon\Carbon::parse($sAttStart)->greaterThan(\Carbon\Carbon::parse($sEnd))) {
+                            $v->errors()->add("sessions.{$i}.attendance_start_at", "Jam buka presensi {$sTitle} tidak boleh melewati jam selesai sesi.");
+                        }
+                    }
+
+                    if ($sAttEnd) {
+                        if ($sAttStart && \Carbon\Carbon::parse($sAttEnd)->lessThanOrEqualTo(\Carbon\Carbon::parse($sAttStart))) {
+                            $v->errors()->add("sessions.{$i}.attendance_end_at", "Jam tutup presensi {$sTitle} harus setelah jam buka presensi.");
+                        } elseif ($sStart && \Carbon\Carbon::parse($sAttEnd)->lessThanOrEqualTo(\Carbon\Carbon::parse($sStart))) {
+                            $v->errors()->add("sessions.{$i}.attendance_end_at", "Jam tutup presensi {$sTitle} harus setelah jam mulai sesi.");
+                        }
+                        if ($sEnd && \Carbon\Carbon::parse($sAttEnd)->greaterThan(\Carbon\Carbon::parse($sEnd))) {
+                            $v->errors()->add("sessions.{$i}.attendance_end_at", "Jam tutup presensi {$sTitle} tidak boleh melewati jam selesai sesi.");
+                        }
+                    }
                 }
             }
         });
@@ -203,7 +275,57 @@ class BimtekEventController extends Controller
             $validated['zoom_attendance_code'] = 'HADIR-' . strtoupper(Str::random(4));
         }
 
+        // Ambil data sessions jika ada dan sinkronkan bounds utama
+        $sessionsData = $request->input('sessions', []);
+        if (!empty($sessionsData) && is_array($sessionsData)) {
+            usort($sessionsData, function ($a, $b) {
+                $da = ($a['session_date'] ?? '') . ' ' . ($a['start_time'] ?? '');
+                $db = ($b['session_date'] ?? '') . ' ' . ($b['start_time'] ?? '');
+                return strcmp($da, $db);
+            });
+
+            $firstSession = reset($sessionsData);
+            $lastSession = end($sessionsData);
+
+            if (empty($validated['zoom_scheduled_at']) && !empty($firstSession['start_time'])) {
+                $validated['zoom_scheduled_at'] = \Carbon\Carbon::parse($firstSession['start_time']);
+            }
+            if (empty($validated['zoom_end_at']) && !empty($lastSession['end_time'])) {
+                $validated['zoom_end_at'] = \Carbon\Carbon::parse($lastSession['end_time']);
+            }
+            if (empty($validated['zoom_attendance_start_at']) && !empty($firstSession['attendance_start_at'])) {
+                $validated['zoom_attendance_start_at'] = \Carbon\Carbon::parse($firstSession['attendance_start_at']);
+            }
+            if (empty($validated['zoom_attendance_end_at']) && !empty($lastSession['attendance_end_at'])) {
+                $validated['zoom_attendance_end_at'] = \Carbon\Carbon::parse($lastSession['attendance_end_at']);
+            }
+        }
+
+        unset($validated['sessions']);
+
         $event = BimtekEvent::create($validated);
+
+        // Simpan setiap sesi ke tabel bimtek_event_sessions
+        if (!empty($sessionsData)) {
+            foreach ($sessionsData as $index => $s) {
+                if (empty($s['session_date']) || empty($s['start_time'])) continue;
+
+                BimtekEventSession::create([
+                    'bimtek_event_id'     => $event->id,
+                    'session_number'      => $index + 1,
+                    'title'               => !empty($s['title']) ? $s['title'] : ('Sesi Hari ' . ($index + 1)),
+                    'session_date'        => $s['session_date'],
+                    'start_time'          => \Carbon\Carbon::parse($s['start_time']),
+                    'end_time'            => !empty($s['end_time']) ? \Carbon\Carbon::parse($s['end_time']) : null,
+                    'zoom_url'            => !empty($s['zoom_url']) ? $s['zoom_url'] : null,
+                    'zoom_meeting_id'     => !empty($s['zoom_meeting_id']) ? $s['zoom_meeting_id'] : null,
+                    'zoom_passcode'       => !empty($s['zoom_passcode']) ? $s['zoom_passcode'] : null,
+                    'attendance_code'     => 'HADIR-S' . ($index + 1) . '-' . strtoupper(Str::random(3)),
+                    'attendance_start_at' => !empty($s['attendance_start_at']) ? \Carbon\Carbon::parse($s['attendance_start_at']) : null,
+                    'attendance_end_at'   => !empty($s['attendance_end_at']) ? \Carbon\Carbon::parse($s['attendance_end_at']) : null,
+                ]);
+            }
+        }
 
         return redirect()->route('admin-pusat.management-course.bimtek-events.show', $event->id)
             ->with('success', 'Gelombang Bimtek Online berhasil dibuat!');
@@ -214,7 +336,7 @@ class BimtekEventController extends Controller
      */
     public function show($id)
     {
-        $event = BimtekEvent::with(['course.sections', 'certificateSubmissions'])->findOrFail($id);
+        $event = BimtekEvent::with(['course.sections', 'certificateSubmissions', 'sessions.attendances'])->findOrFail($id);
 
         // Ambil daftar peserta yang terdaftar pada batch ini atau kursus terkait
         $participants = \DB::table('course_student')
@@ -243,6 +365,19 @@ class BimtekEventController extends Controller
             ->orderBy('users.name')
             ->get();
 
+        // Hitung kehadiran multi-sesi per peserta
+        $sessionAttendances = BimtekSessionAttendance::where('bimtek_event_id', $event->id)
+            ->get()
+            ->groupBy('user_id');
+
+        $totalSessionsCount = $event->sessions->count();
+        foreach ($participants as $p) {
+            $attended = isset($sessionAttendances[$p->user_id])
+                ? $sessionAttendances[$p->user_id]->count()
+                : ($p->zoom_attended ? ($totalSessionsCount ?: 1) : 0);
+            $p->attended_sessions_count = $attended;
+        }
+
         // Hitung kelulusan
         $totalRegistered = $participants->count();
         $totalCompleted = $participants->where('status', 'completed')->count();
@@ -255,7 +390,8 @@ class BimtekEventController extends Controller
             'totalRegistered',
             'totalCompleted',
             'totalAttendedZoom',
-            'totalCertified'
+            'totalCertified',
+            'totalSessionsCount'
         ));
     }
 
@@ -264,7 +400,7 @@ class BimtekEventController extends Controller
      */
     public function edit($id)
     {
-        $event = BimtekEvent::findOrFail($id);
+        $event = BimtekEvent::with('sessions')->findOrFail($id);
         $courses = Course::orderBy('name')->get(['id', 'name', 'slug']);
         return view('lms::admin-pusat.bimtek-events.edit', compact('event', 'courses'));
     }
@@ -313,6 +449,19 @@ class BimtekEventController extends Controller
             // Rentang Waktu Pembukaan Presensi (Wajib Tanggal & Jam, harus di dalam rentang sesi Zoom)
             'zoom_attendance_start_at' => 'nullable|date',
             'zoom_attendance_end_at'   => 'nullable|date',
+
+            // Multi-Sesi Zoom & Presensi Harian (Skenario 1)
+            'sessions'                         => 'nullable|array',
+            'sessions.*.id'                    => 'nullable|string',
+            'sessions.*.title'                 => 'required_with:sessions|string|max:255',
+            'sessions.*.session_date'          => 'required_with:sessions|date_format:Y-m-d',
+            'sessions.*.start_time'            => 'required_with:sessions|date',
+            'sessions.*.end_time'              => 'nullable|date',
+            'sessions.*.zoom_url'              => 'nullable|url',
+            'sessions.*.zoom_meeting_id'       => 'nullable|string|max:100',
+            'sessions.*.zoom_passcode'         => 'nullable|string|max:100',
+            'sessions.*.attendance_start_at'   => 'nullable|date',
+            'sessions.*.attendance_end_at'     => 'nullable|date',
 
             // 3. Periode Evaluasi & Sertifikat (Hanya Tanggal, setelah pelaksanaan)
             'assessment_start_at'      => 'nullable|date_format:Y-m-d|after_or_equal:end_date',
@@ -376,6 +525,61 @@ class BimtekEventController extends Controller
                     $v->errors()->add('zoom_attendance_end_at', 'Jam tutup presensi tidak boleh melewati jadwal selesai sesi Zoom.');
                 }
             }
+
+            // 3. Validasi Multi-Sesi Zoom & Presensi Harian (Skenario 1)
+            $sessions = $request->input('sessions', []);
+            if (is_array($sessions)) {
+                foreach ($sessions as $i => $s) {
+                    $idx = $i + 1;
+                    $sTitle = !empty($s['title']) ? $s['title'] : "Sesi Hari {$idx}";
+                    $sDate = $s['session_date'] ?? null;
+                    $sStart = $s['start_time'] ?? null;
+                    $sEnd = $s['end_time'] ?? null;
+                    $sAttStart = $s['attendance_start_at'] ?? null;
+                    $sAttEnd = $s['attendance_end_at'] ?? null;
+
+                    if ($sDate && $execStart && $execEnd) {
+                        if ($sDate < $execStart || $sDate > $execEnd) {
+                            $v->errors()->add("sessions.{$i}.session_date", "Tanggal {$sTitle} harus berada di dalam rentang tanggal pelaksanaan ({$execStart} s/d {$execEnd}).");
+                        }
+                    }
+
+                    if ($sStart && $sDate) {
+                        $parsedDate = \Carbon\Carbon::parse($sStart)->toDateString();
+                        if ($parsedDate !== $sDate) {
+                            $v->errors()->add("sessions.{$i}.start_time", "Jam mulai {$sTitle} harus berada pada tanggal sesi yang sama ({$sDate}).");
+                        }
+                    }
+
+                    if ($sEnd && $sStart) {
+                        if (\Carbon\Carbon::parse($sEnd)->lessThanOrEqualTo(\Carbon\Carbon::parse($sStart))) {
+                            $v->errors()->add("sessions.{$i}.end_time", "Jam selesai {$sTitle} harus setelah jam mulai.");
+                        }
+                    }
+
+                    if ($sAttStart) {
+                        if (!$sStart) {
+                            $v->errors()->add("sessions.{$i}.attendance_start_at", "Tentukan jam mulai {$sTitle} terlebih dahulu sebelum jam buka presensi.");
+                        } elseif (\Carbon\Carbon::parse($sAttStart)->lessThan(\Carbon\Carbon::parse($sStart))) {
+                            $v->errors()->add("sessions.{$i}.attendance_start_at", "Jam buka presensi {$sTitle} tidak boleh lebih awal dari jam mulai sesi.");
+                        }
+                        if ($sEnd && \Carbon\Carbon::parse($sAttStart)->greaterThan(\Carbon\Carbon::parse($sEnd))) {
+                            $v->errors()->add("sessions.{$i}.attendance_start_at", "Jam buka presensi {$sTitle} tidak boleh melewati jam selesai sesi.");
+                        }
+                    }
+
+                    if ($sAttEnd) {
+                        if ($sAttStart && \Carbon\Carbon::parse($sAttEnd)->lessThanOrEqualTo(\Carbon\Carbon::parse($sAttStart))) {
+                            $v->errors()->add("sessions.{$i}.attendance_end_at", "Jam tutup presensi {$sTitle} harus setelah jam buka presensi.");
+                        } elseif ($sStart && \Carbon\Carbon::parse($sAttEnd)->lessThanOrEqualTo(\Carbon\Carbon::parse($sStart))) {
+                            $v->errors()->add("sessions.{$i}.attendance_end_at", "Jam tutup presensi {$sTitle} harus setelah jam mulai sesi.");
+                        }
+                        if ($sEnd && \Carbon\Carbon::parse($sAttEnd)->greaterThan(\Carbon\Carbon::parse($sEnd))) {
+                            $v->errors()->add("sessions.{$i}.attendance_end_at", "Jam tutup presensi {$sTitle} tidak boleh melewati jam selesai sesi.");
+                        }
+                    }
+                }
+            }
         });
 
         $validated = $validator->validate();
@@ -418,7 +622,77 @@ class BimtekEventController extends Controller
             $validated['zoom_attendance_code'] = $event->zoom_attendance_code ?: ('HADIR-' . strtoupper(Str::random(4)));
         }
 
+        // Ambil data sessions jika ada dan sinkronkan bounds utama
+        $sessionsData = $request->input('sessions', []);
+        if (!empty($sessionsData) && is_array($sessionsData)) {
+            usort($sessionsData, function ($a, $b) {
+                $da = ($a['session_date'] ?? '') . ' ' . ($a['start_time'] ?? '');
+                $db = ($b['session_date'] ?? '') . ' ' . ($b['start_time'] ?? '');
+                return strcmp($da, $db);
+            });
+
+            $firstSession = reset($sessionsData);
+            $lastSession = end($sessionsData);
+
+            if (!empty($firstSession['start_time'])) {
+                $validated['zoom_scheduled_at'] = \Carbon\Carbon::parse($firstSession['start_time']);
+            }
+            if (!empty($lastSession['end_time'])) {
+                $validated['zoom_end_at'] = \Carbon\Carbon::parse($lastSession['end_time']);
+            }
+            if (!empty($firstSession['attendance_start_at'])) {
+                $validated['zoom_attendance_start_at'] = \Carbon\Carbon::parse($firstSession['attendance_start_at']);
+            }
+            if (!empty($lastSession['attendance_end_at'])) {
+                $validated['zoom_attendance_end_at'] = \Carbon\Carbon::parse($lastSession['attendance_end_at']);
+            }
+        }
+
+        unset($validated['sessions']);
+
         $event->update($validated);
+
+        // Update/create/sync sessions
+        $keptSessionIds = [];
+        if (!empty($sessionsData)) {
+            foreach ($sessionsData as $index => $s) {
+                if (empty($s['session_date']) || empty($s['start_time'])) continue;
+
+                $sessionModel = null;
+                if (!empty($s['id'])) {
+                    $sessionModel = BimtekEventSession::where('bimtek_event_id', $event->id)->where('id', $s['id'])->first();
+                }
+
+                $sessionPayload = [
+                    'session_number'      => $index + 1,
+                    'title'               => !empty($s['title']) ? $s['title'] : ('Sesi Hari ' . ($index + 1)),
+                    'session_date'        => $s['session_date'],
+                    'start_time'          => \Carbon\Carbon::parse($s['start_time']),
+                    'end_time'            => !empty($s['end_time']) ? \Carbon\Carbon::parse($s['end_time']) : null,
+                    'zoom_url'            => !empty($s['zoom_url']) ? $s['zoom_url'] : null,
+                    'zoom_meeting_id'     => !empty($s['zoom_meeting_id']) ? $s['zoom_meeting_id'] : null,
+                    'zoom_passcode'       => !empty($s['zoom_passcode']) ? $s['zoom_passcode'] : null,
+                    'attendance_start_at' => !empty($s['attendance_start_at']) ? \Carbon\Carbon::parse($s['attendance_start_at']) : null,
+                    'attendance_end_at'   => !empty($s['attendance_end_at']) ? \Carbon\Carbon::parse($s['attendance_end_at']) : null,
+                ];
+
+                if ($sessionModel) {
+                    $sessionModel->update($sessionPayload);
+                } else {
+                    $sessionPayload['bimtek_event_id'] = $event->id;
+                    $sessionPayload['attendance_code'] = 'HADIR-S' . ($index + 1) . '-' . strtoupper(Str::random(3));
+                    $sessionModel = BimtekEventSession::create($sessionPayload);
+                }
+                $keptSessionIds[] = $sessionModel->id;
+            }
+
+            // Hapus sesi yang telah dihapus admin di form
+            BimtekEventSession::where('bimtek_event_id', $event->id)
+                ->whereNotIn('id', $keptSessionIds)
+                ->delete();
+        } else {
+            BimtekEventSession::where('bimtek_event_id', $event->id)->delete();
+        }
 
         return redirect()->route('admin-pusat.management-course.bimtek-events.show', $event->id)
             ->with('success', 'Gelombang Bimtek berhasil diperbarui!');

@@ -831,56 +831,64 @@ class CourseService
         $isMateriDone = $totalCount > 0 ? ($completedContentsCount >= $totalCount) : (bool) $isContentCompleted;
 
         $enrollment = $user ? $course->students()->wherePivot('user_id', $user->id)->first() : null;
-        $isZoomAttended = (bool) ($enrollment?->pivot?->zoom_attended);
         $hasJoinedZoom = (bool) ($enrollment?->pivot?->zoom_joined_at);
+
+        // Multi-Session Zoom & Presensi (Skenario 1)
+        $bimtekSessions = collect();
+        $currentSession = null;
+        $attendedSessionIds = collect();
+
+        if ($activeBimtek) {
+            $bimtekSessions = $activeBimtek->sessions()->orderBy('session_date')->orderBy('start_time')->get();
+            if ($user) {
+                $attendedSessionIds = \Modules\LMS\Models\BimtekSessionAttendance::where('bimtek_event_id', $activeBimtek->id)
+                    ->where('user_id', $user->id)
+                    ->pluck('bimtek_event_session_id');
+            }
+            if ($bimtekSessions->isNotEmpty()) {
+                // Prioritaskan sesi yang cocok dengan indeks hari/modul ini
+                $currentSession = $bimtekSessions->get($sectionIndex) ?: $bimtekSessions->first();
+            }
+        }
+
+        if ($currentSession) {
+            $isZoomAttended = $attendedSessionIds->contains($currentSession->id);
+            $isPresensiOpen = $currentSession->is_presensi_open;
+            $isPresensiEnded = $currentSession->is_presensi_ended;
+            $attendanceScheduleFormatted = $currentSession->attendance_schedule_formatted;
+            $zoomScheduleFormatted = $currentSession->schedule_formatted;
+            $isZoomEnded = $currentSession->is_zoom_ended;
+
+            $presensiLockReason = null;
+            if ($currentSession->is_presensi_upcoming) {
+                $presensiLockReason = 'Presensi dibuka pada jadwal sesi tatap muka (' . $currentSession->attendance_schedule_formatted . ')';
+            } elseif ($currentSession->is_presensi_ended) {
+                $presensiLockReason = 'Waktu presensi sesi ini telah berakhir pada ' . ($currentSession->effective_attendance_end_at ? $currentSession->effective_attendance_end_at->translatedFormat('d F Y, H:i') . ' WIB' : 'jadwal sesi');
+            }
+        } else {
+            $isZoomAttended = (bool) ($enrollment?->pivot?->zoom_attended);
+            $isZoomEnded = false;
+            $zoomScheduleFormatted = $activeBimtek?->zoom_schedule_formatted;
+
+            $now = now();
+            $presensiStart = $activeBimtek?->zoom_attendance_start_at ?? $activeBimtek?->zoom_scheduled_at ?? $activeBimtek?->start_date;
+            $presensiEnd = $activeBimtek?->zoom_attendance_end_at ?? $activeBimtek?->zoom_end_at;
+            $attendanceScheduleFormatted = $activeBimtek?->attendance_schedule_formatted ?? ($presensiStart ? $presensiStart->translatedFormat('d M Y, H:i') . ' WIB' : null);
+
+            $isPresensiOpen = true;
+            $isPresensiEnded = false;
+            $presensiLockReason = null;
+            if ($presensiStart && $now->lessThan($presensiStart)) {
+                $isPresensiOpen = false;
+                $presensiLockReason = 'Presensi dibuka pada jadwal sesi tatap muka (' . ($attendanceScheduleFormatted ?? $presensiStart->translatedFormat('d M Y, H:i') . ' WIB') . ')';
+            } elseif ($presensiEnd && $now->greaterThan($presensiEnd)) {
+                $isPresensiOpen = false;
+                $isPresensiEnded = true;
+                $presensiLockReason = 'Waktu presensi tatap muka telah berakhir pada ' . $presensiEnd->translatedFormat('d M Y, H:i') . ' WIB';
+            }
+        }
+
         $isZoomDone = $isZoomAttended;
-
-        $zoomProof = null;
-        if ($user) {
-            $zoomProof = SectionZoomProof::where('course_section_id', $sectionId)
-                ->where('user_id', $user->id)
-                ->first();
-        }
-        $hasProof = !empty($zoomProof);
-
-        $postTestBab = data_get($section, 'post_test_bab') ?: PostTest::where('course_section_id', $sectionId)->first();
-        $isPostTestBabCompleted = data_get($section, 'is_post_test_bab_completed', false);
-
-        $evalResult = null;
-        if ($postTestBab && $user) {
-            $evalResult = PostTestResult::where('post_test_id', $postTestBab->id)
-                ->where('user_id', $user->id)
-                ->first();
-        }
-
-        $currentEvalType = match ($postTestBab?->type) {
-            'essay'       => 'uraian',
-            'file_upload' => 'upload',
-            default       => ($sectionIndex % 2 === 0 ? 'uraian' : 'upload'),
-        };
-
-        $isAssignmentDone = (bool) ($evalResult && ($evalResult->file_path || $evalResult->status === 'submitted' || $evalResult->completed_at));
-        $isEssayDone = (bool) ($evalResult && ($evalResult->answers || $evalResult->status === 'submitted' || $evalResult->completed_at));
-        $isEvaluasiDone = (bool) ($isPostTestBabCompleted || ($evalResult && $evalResult->completed_at));
-        $isEvaluasiLocked = !$isMateriDone || ($hasZoom && !$isZoomDone);
-        $isSectionDone = $isMateriDone && (!$hasZoom || ($isZoomDone && $hasProof)) && (!$postTestBab || $isEvaluasiDone);
-
-        $now = now();
-        $presensiStart = $activeBimtek?->zoom_attendance_start_at ?? $activeBimtek?->zoom_scheduled_at ?? $activeBimtek?->start_date;
-        $presensiEnd = $activeBimtek?->zoom_attendance_end_at ?? $activeBimtek?->zoom_end_at;
-        $attendanceScheduleFormatted = $activeBimtek?->attendance_schedule_formatted ?? ($presensiStart ? $presensiStart->translatedFormat('d M Y, H:i') . ' WIB' : null);
-
-        $isPresensiOpen = true;
-        $isPresensiEnded = false;
-        $presensiLockReason = null;
-        if ($presensiStart && $now->lessThan($presensiStart)) {
-            $isPresensiOpen = false;
-            $presensiLockReason = 'Presensi dibuka pada jadwal sesi tatap muka (' . ($attendanceScheduleFormatted ?? $presensiStart->translatedFormat('d M Y, H:i') . ' WIB') . ')';
-        } elseif ($presensiEnd && $now->greaterThan($presensiEnd)) {
-            $isPresensiOpen = false;
-            $isPresensiEnded = true;
-            $presensiLockReason = 'Waktu presensi tatap muka telah berakhir pada ' . $presensiEnd->translatedFormat('d M Y, H:i') . ' WIB';
-        }
 
         $totalActivities = 2 + ($hasZoom ? 1 : 0);
         $completedActivities = ($isMateriDone ? 1 : 0)
@@ -957,7 +965,12 @@ class CourseService
             'adminFileName',
             'adminFileSize',
             'adminFileUrl',
-            'instructions'
+            'instructions',
+            'bimtekSessions',
+            'currentSession',
+            'attendedSessionIds',
+            'isZoomEnded',
+            'zoomScheduleFormatted'
         );
     }
 

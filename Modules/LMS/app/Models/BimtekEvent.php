@@ -72,6 +72,22 @@ class BimtekEvent extends Model
     }
 
     /**
+     * Sesi Zoom harian (Multi-Sesi Pelaksanaan)
+     */
+    public function sessions(): HasMany
+    {
+        return $this->hasMany(BimtekEventSession::class, 'bimtek_event_id')->orderBy('session_date')->orderBy('start_time');
+    }
+
+    /**
+     * Rekap riwayat presensi sesi
+     */
+    public function sessionAttendances(): HasMany
+    {
+        return $this->hasMany(BimtekSessionAttendance::class, 'bimtek_event_id');
+    }
+
+    /**
      * Peserta yang terdaftar pada batch bimtek ini lewat pivot course_student
      */
     public function participants(): BelongsToMany

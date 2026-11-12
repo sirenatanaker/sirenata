@@ -238,110 +238,99 @@
                             </div>
                         </div>
 
-                        {{-- SUB-CARD: DETAIL SESI ZOOM (Biru Kalem & Teks White, Wajib Mengatur Jam) --}}
-                        <div id="card-zoom" class="p-4 sm:p-5 rounded-md bg-[#1E40AF] text-white shadow-sm space-y-3.5 transition-all">
-                            <div class="flex items-center justify-between border-b border-white/20 pb-2.5">
-                                <span class="text-xs font-bold text-white uppercase tracking-wider">
-                                    Detail Sesi Live Zoom (Wajib Disertai Jam)
-                                </span>
+                        {{-- SUB-CARD: DETAIL SESI ZOOM & MULTI-SESI (Biru Sirenata Kalem & Teks White) --}}
+                        <div id="card-zoom" class="p-4 sm:p-5 rounded-md bg-[#1E40AF] text-white shadow-sm space-y-4 transition-all">
+                            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1 border-b border-white/20 pb-2.5">
+                                <div>
+                                    <span class="text-xs font-bold text-white uppercase tracking-wider block">
+                                        Pengaturan Sesi Live Zoom & Presensi Harian (Multi-Sesi)
+                                    </span>
+                                    <span class="text-[11px] text-blue-100 font-medium">
+                                        Setiap hari pelaksanaan dapat memiliki jadwal tatap muka Zoom dan jam presensi tersendiri
+                                    </span>
+                                </div>
                                 <span id="zoom-status-badge" class="text-[11px] text-blue-100 font-medium">
                                     Jadwal harus di dalam rentang tanggal pelaksanaan
                                 </span>
                             </div>
 
-                            <div>
-                                <label for="zoom_url" class="block text-xs font-semibold text-white mb-1">
-                                    Link URL Meeting Zoom
-                                </label>
-                                <input type="url" id="zoom_url" name="zoom_url" value="{{ old('zoom_url', $event->zoom_url) }}"
-                                       placeholder="https://zoom.us/j/1234567890?pwd=..."
-                                       class="w-full px-3 py-2 rounded-lg border-0 text-xs sm:text-sm bg-white text-slate-900 focus:ring-2 focus:ring-white transition-colors">
-                                @error('zoom_url')
-                                    <p class="text-xs text-rose-200 mt-1 font-semibold">{{ $message }}</p>
-                                @enderror
-                            </div>
+                            {{-- Ruang Pertemuan Utama / Global Meeting Room --}}
+                            <div class="space-y-3 bg-black/15 p-3.5 rounded-lg border border-white/10">
+                                <span class="text-xs font-bold text-white uppercase tracking-wider block border-b border-white/10 pb-1.5">
+                                    Informasi Ruang Meeting Zoom Utama
+                                </span>
 
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                 <div>
-                                    <label for="zoom_scheduled_at" class="block text-xs font-semibold text-white mb-1">
-                                        Tanggal & Jam Mulai Sesi Zoom
+                                    <label for="zoom_url" class="block text-xs font-semibold text-white mb-1">
+                                        Link URL Meeting Zoom (Tautan Utama)
                                     </label>
-                                    <input type="datetime-local" id="zoom_scheduled_at" name="zoom_scheduled_at"
-                                           value="{{ old('zoom_scheduled_at', $event->zoom_scheduled_at ? $event->zoom_scheduled_at->format('Y-m-d\TH:i') : '') }}"
+                                    <input type="url" id="zoom_url" name="zoom_url" value="{{ old('zoom_url', $event->zoom_url) }}"
+                                           placeholder="https://zoom.us/j/1234567890?pwd=..."
                                            class="w-full px-3 py-2 rounded-lg border-0 text-xs sm:text-sm bg-white text-slate-900 focus:ring-2 focus:ring-white transition-colors">
-                                    @error('zoom_scheduled_at')
+                                    @error('zoom_url')
                                         <p class="text-xs text-rose-200 mt-1 font-semibold">{{ $message }}</p>
                                     @enderror
                                 </div>
-                                <div>
-                                    <label for="zoom_end_at" class="block text-xs font-semibold text-white mb-1">
-                                        Tanggal & Jam Selesai Sesi Zoom (Opsional)
-                                    </label>
-                                    <input type="datetime-local" id="zoom_end_at" name="zoom_end_at"
-                                           value="{{ old('zoom_end_at', $event->zoom_end_at ? $event->zoom_end_at->format('Y-m-d\TH:i') : '') }}"
-                                           class="w-full px-3 py-2 rounded-lg border-0 text-xs sm:text-sm bg-white text-slate-900 focus:ring-2 focus:ring-white transition-colors">
-                                    @error('zoom_end_at')
-                                        <p class="text-xs text-rose-200 mt-1 font-semibold">{{ $message }}</p>
-                                    @enderror
-                                </div>
-                            </div>
 
-                            {{-- Pengaturan Rentang Jam Pembukaan Presensi (Terkunci Ketat di Rentang Zoom) --}}
-                            <div id="card-attendance" class="p-3 rounded-lg bg-black/20 border border-white/15 space-y-2 mt-2 transition-all">
-                                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
-                                    <div class="flex items-center gap-1.5 text-xs font-bold text-amber-300">
-                                        <i class="fas fa-clock"></i>
-                                        <span>Jadwal Buka & Tutup Presensi Peserta</span>
-                                    </div>
-                                    <span id="attendance-status-badge" class="text-[11px] text-blue-100">
-                                        Terkunci ketat di dalam rentang sesi Zoom
-                                    </span>
-                                </div>
-                                <p class="text-[11px] text-blue-100/90 leading-relaxed">
-                                    Tombol presensi di akun peserta akan <strong>otomatis terbuka</strong> saat jam buka tiba dan terkunci kembali setelah jam tutup. Pilihan waktu dibatasi strictly di dalam jadwal sesi Zoom.
-                                </p>
-                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                     <div>
-                                        <label for="zoom_attendance_start_at" class="block text-xs font-medium text-white mb-1">
-                                            Tanggal & Jam Buka Presensi
+                                        <label for="zoom_meeting_id" class="block text-xs font-semibold text-white mb-1">
+                                            Meeting ID (Opsional)
                                         </label>
-                                        <input type="datetime-local" id="zoom_attendance_start_at" name="zoom_attendance_start_at"
-                                               value="{{ old('zoom_attendance_start_at', $event->zoom_attendance_start_at ? $event->zoom_attendance_start_at->format('Y-m-d\TH:i') : '') }}"
-                                               class="w-full px-3 py-2 rounded-lg border-0 text-xs sm:text-sm bg-white text-slate-900 focus:ring-2 focus:ring-white transition-colors">
-                                        @error('zoom_attendance_start_at')
-                                            <p class="text-xs text-rose-200 mt-1 font-semibold">{{ $message }}</p>
-                                        @enderror
+                                        <input type="text" id="zoom_meeting_id" name="zoom_meeting_id" value="{{ old('zoom_meeting_id', $event->zoom_meeting_id) }}"
+                                               placeholder="Contoh: 839 2039 1234"
+                                               class="w-full px-3 py-2 rounded-lg border-0 text-xs sm:text-sm bg-white text-slate-900 focus:ring-2 focus:ring-white">
                                     </div>
                                     <div>
-                                        <label for="zoom_attendance_end_at" class="block text-xs font-medium text-white mb-1">
-                                            Tanggal & Jam Tutup Presensi
+                                        <label for="zoom_passcode" class="block text-xs font-semibold text-white mb-1">
+                                            Passcode Zoom (Opsional)
                                         </label>
-                                        <input type="datetime-local" id="zoom_attendance_end_at" name="zoom_attendance_end_at"
-                                               value="{{ old('zoom_attendance_end_at', $event->zoom_attendance_end_at ? $event->zoom_attendance_end_at->format('Y-m-d\TH:i') : '') }}"
-                                               class="w-full px-3 py-2 rounded-lg border-0 text-xs sm:text-sm bg-white text-slate-900 focus:ring-2 focus:ring-white transition-colors">
-                                        @error('zoom_attendance_end_at')
-                                            <p class="text-xs text-rose-200 mt-1 font-semibold">{{ $message }}</p>
-                                        @enderror
+                                        <input type="text" id="zoom_passcode" name="zoom_passcode" value="{{ old('zoom_passcode', $event->zoom_passcode) }}"
+                                               placeholder="Contoh: SPBE2026"
+                                               class="w-full px-3 py-2 rounded-lg border-0 text-xs sm:text-sm bg-white text-slate-900 focus:ring-2 focus:ring-white">
                                     </div>
                                 </div>
                             </div>
 
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
-                                <div>
-                                    <label for="zoom_meeting_id" class="block text-xs font-semibold text-white mb-1">
-                                        Meeting ID (Opsional)
-                                    </label>
-                                    <input type="text" id="zoom_meeting_id" name="zoom_meeting_id" value="{{ old('zoom_meeting_id', $event->zoom_meeting_id) }}"
-                                           placeholder="Contoh: 839 2039 1234"
-                                           class="w-full px-3 py-2 rounded-lg border-0 text-xs sm:text-sm bg-white text-slate-900 focus:ring-2 focus:ring-white transition-colors">
+                            {{-- SEKSI MULTI-SESI ZOOM & PRESENSI PER HARI (SKENARIO 1) --}}
+                            <div class="space-y-3 pt-1">
+                                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-white/20 pb-2">
+                                    <div class="flex items-center gap-2">
+                                        <i class="fas fa-calendar-check text-amber-300"></i>
+                                        <span class="text-xs font-bold text-white uppercase tracking-wider">
+                                            Daftar Sesi Zoom & Presensi Per Hari
+                                        </span>
+                                        <span id="sessions-count-badge" class="px-2 py-0.5 rounded text-[10px] font-bold bg-white/20 text-white">
+                                            0 Sesi
+                                        </span>
+                                    </div>
+
+                                    <div class="flex items-center gap-2 flex-wrap">
+                                        <button type="button" id="btn-auto-generate-sessions"
+                                                title="Buat sesi Zoom dan presensi otomatis per hari berdasarkan rentang tanggal pelaksanaan"
+                                                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-bold text-[#13416B] bg-amber-300 hover:bg-amber-200 shadow-2xs transition-all active:scale-95">
+                                            <i class="fas fa-bolt text-xs"></i>
+                                            <span>Generate Sesi Otomatis (Sesuai Hari)</span>
+                                        </button>
+                                        <button type="button" id="btn-add-session"
+                                                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-bold text-[#1E40AF] bg-white hover:bg-blue-50 shadow-2xs transition-all active:scale-95">
+                                            <i class="fas fa-plus text-xs"></i>
+                                            <span>Tambah Sesi</span>
+                                        </button>
+                                    </div>
                                 </div>
-                                <div>
-                                    <label for="zoom_passcode" class="block text-xs font-semibold text-white mb-1">
-                                        Passcode Zoom (Opsional)
-                                    </label>
-                                    <input type="text" id="zoom_passcode" name="zoom_passcode" value="{{ old('zoom_passcode', $event->zoom_passcode) }}"
-                                           placeholder="Contoh: SPBE2026"
-                                           class="w-full px-3 py-2 rounded-lg border-0 text-xs sm:text-sm bg-white text-slate-900 focus:ring-2 focus:ring-white transition-colors">
+
+                                {{-- Container Daftar Sesi Dinamis --}}
+                                <div id="sessions-container" class="space-y-3">
+                                    {{-- Empty State jika belum ada sesi --}}
+                                    <div id="sessions-empty-state" class="p-4 rounded-md border border-dashed border-white/30 text-center space-y-1.5 bg-black/10">
+                                        <p class="text-xs text-white/90 font-medium">
+                                            Belum ada sesi harian yang ditambahkan.
+                                        </p>
+                                        <p class="text-[11px] text-blue-100/80">
+                                            Klik <strong>"Generate Sesi Otomatis"</strong> di atas untuk membuat jadwal Zoom & presensi secara otomatis sesuai rentang hari pelaksanaan bimtek.
+                                        </p>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -411,12 +400,8 @@
                 const execStart = document.getElementById('start_date');
                 const execEnd = document.getElementById('end_date');
                 const zoomUrl = document.getElementById('zoom_url');
-                const zoomStart = document.getElementById('zoom_scheduled_at');
-                const zoomEnd = document.getElementById('zoom_end_at');
                 const zoomMeetingId = document.getElementById('zoom_meeting_id');
                 const zoomPasscode = document.getElementById('zoom_passcode');
-                const attStart = document.getElementById('zoom_attendance_start_at');
-                const attEnd = document.getElementById('zoom_attendance_end_at');
                 const evalStart = document.getElementById('assessment_start_at');
                 const evalEnd = document.getElementById('assessment_end_at');
 
@@ -427,8 +412,6 @@
                 const stage2Badge = document.getElementById('stage-2-badge');
                 const cardZoom = document.getElementById('card-zoom');
                 const zoomBadge = document.getElementById('zoom-status-badge');
-                const cardAtt = document.getElementById('card-attendance');
-                const attBadge = document.getElementById('attendance-status-badge');
                 const cardStage3 = document.getElementById('card-stage-3');
                 const stage3Num = document.getElementById('stage-3-num');
                 const stage3Badge = document.getElementById('stage-3-badge');
@@ -440,6 +423,280 @@
                 const flowReg = document.getElementById('flow-reg-text');
                 const flowExec = document.getElementById('flow-exec-text');
                 const flowEval = document.getElementById('flow-eval-text');
+
+                // ==========================================
+                // MULTI-SESI ZOOM & PRESENSI (SKENARIO 1)
+                // ==========================================
+                const sessionsContainer = document.getElementById('sessions-container');
+                const sessionsEmptyState = document.getElementById('sessions-empty-state');
+                const sessionsCountBadge = document.getElementById('sessions-count-badge');
+                const btnAutoGenerate = document.getElementById('btn-auto-generate-sessions');
+                const btnAddSession = document.getElementById('btn-add-session');
+
+                @php
+                    $initialSessionsData = old('sessions');
+                    if ($initialSessionsData === null) {
+                        if ($event->sessions && $event->sessions->isNotEmpty()) {
+                            $initialSessionsData = $event->sessions->map(function ($s) {
+                                return [
+                                    'id' => $s->id,
+                                    'title' => $s->title,
+                                    'session_date' => $s->session_date ? $s->session_date->format('Y-m-d') : '',
+                                    'start_time' => $s->start_time ? $s->start_time->format('Y-m-d\TH:i') : '',
+                                    'end_time' => $s->end_time ? $s->end_time->format('Y-m-d\TH:i') : '',
+                                    'attendance_start_at' => $s->attendance_start_at ? $s->attendance_start_at->format('Y-m-d\TH:i') : '',
+                                    'attendance_end_at' => $s->attendance_end_at ? $s->attendance_end_at->format('Y-m-d\TH:i') : '',
+                                ];
+                            })->values()->toArray();
+                        } elseif ($event->zoom_scheduled_at) {
+                            $initialSessionsData = [[
+                                'id' => '',
+                                'title' => 'Sesi Hari 1',
+                                'session_date' => $event->zoom_scheduled_at->format('Y-m-d'),
+                                'start_time' => $event->zoom_scheduled_at->format('Y-m-d\TH:i'),
+                                'end_time' => $event->zoom_end_at ? $event->zoom_end_at->format('Y-m-d\TH:i') : '',
+                                'attendance_start_at' => $event->zoom_attendance_start_at ? $event->zoom_attendance_start_at->format('Y-m-d\TH:i') : '',
+                                'attendance_end_at' => $event->zoom_attendance_end_at ? $event->zoom_attendance_end_at->format('Y-m-d\TH:i') : '',
+                            ]];
+                        } else {
+                            $initialSessionsData = [];
+                        }
+                    }
+                @endphp
+                const initialSessions = @json($initialSessionsData);
+
+                function updateSessionNumbersAndBadges() {
+                    const cards = sessionsContainer.querySelectorAll('.session-card');
+                    if (sessionsCountBadge) {
+                        sessionsCountBadge.textContent = `${cards.length} Sesi`;
+                    }
+
+                    if (cards.length === 0) {
+                        if (sessionsEmptyState) sessionsEmptyState.style.display = 'block';
+                    } else {
+                        if (sessionsEmptyState) sessionsEmptyState.style.display = 'none';
+                    }
+
+                    cards.forEach((card, index) => {
+                        card.dataset.index = index;
+                        const badge = card.querySelector('.session-num-badge');
+                        if (badge) badge.textContent = `Sesi Hari ${index + 1}`;
+
+                        // Re-index all name attributes
+                        card.querySelectorAll('input').forEach(input => {
+                            if (input.name) {
+                                input.name = input.name.replace(/sessions\[\d*\]/, `sessions[${index}]`);
+                            }
+                        });
+                    });
+                }
+
+                function createSessionCard(data = {}, index = 0) {
+                    const card = document.createElement('div');
+                    card.className = 'session-card p-3.5 sm:p-4 rounded-lg bg-black/25 border border-white/20 space-y-3 transition-all';
+                    card.dataset.index = index;
+
+                    const titleVal = data.title || `Sesi Hari ${index + 1}`;
+                    const dateVal = data.session_date || (execStart?.value || '');
+                    const startVal = data.start_time || (dateVal ? `${dateVal}T09:00` : '');
+                    const endVal = data.end_time || (dateVal ? `${dateVal}T12:00` : '');
+                    const attStartVal = data.attendance_start_at || (dateVal ? `${dateVal}T09:15` : '');
+                    const attEndVal = data.attendance_end_at || (dateVal ? `${dateVal}T10:00` : '');
+                    const sessionId = data.id || '';
+
+                    card.innerHTML = `
+                        ${sessionId ? `<input type="hidden" name="sessions[${index}][id]" value="${sessionId}">` : ''}
+                        <div class="flex items-center justify-between border-b border-white/15 pb-2">
+                            <div class="flex items-center gap-2 flex-wrap">
+                                <span class="session-num-badge px-2 py-0.5 rounded text-[10px] font-bold bg-amber-400 text-slate-900">
+                                    Sesi Hari ${index + 1}
+                                </span>
+                                <input type="text" name="sessions[${index}][title]" value="${titleVal}" placeholder="Judul Sesi (contoh: Sesi Hari ${index + 1})" required
+                                       class="session-title-input px-2.5 py-1 text-xs font-semibold rounded bg-white text-slate-900 border-0 focus:ring-2 focus:ring-white w-48 sm:w-64">
+                            </div>
+                            <button type="button" class="btn-remove-session text-[11px] font-semibold text-rose-300 hover:text-rose-100 flex items-center gap-1 transition-colors">
+                                <i class="fas fa-trash-alt text-[10px]"></i>
+                                <span>Hapus Sesi</span>
+                            </button>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                            <div>
+                                <label class="block text-[11px] font-medium text-blue-100 mb-1">
+                                    Tanggal Sesi <span class="text-amber-300">*</span>
+                                </label>
+                                <input type="date" name="sessions[${index}][session_date]" value="${dateVal}" required
+                                       class="session-date-input w-full px-2.5 py-1.5 text-xs rounded bg-white text-slate-900 border-0 focus:ring-2 focus:ring-white">
+                            </div>
+                            <div>
+                                <label class="block text-[11px] font-medium text-blue-100 mb-1">
+                                    Mulai Zoom <span class="text-amber-300">*</span>
+                                </label>
+                                <input type="datetime-local" name="sessions[${index}][start_time]" value="${startVal}" required
+                                       class="session-start-input w-full px-2.5 py-1.5 text-xs rounded bg-white text-slate-900 border-0 focus:ring-2 focus:ring-white">
+                            </div>
+                            <div>
+                                <label class="block text-[11px] font-medium text-blue-100 mb-1">
+                                    Selesai Zoom (Opsional)
+                                </label>
+                                <input type="datetime-local" name="sessions[${index}][end_time]" value="${endVal}"
+                                       class="session-end-input w-full px-2.5 py-1.5 text-xs rounded bg-white text-slate-900 border-0 focus:ring-2 focus:ring-white">
+                            </div>
+                        </div>
+
+                        {{-- Rentang Jam Pembukaan Presensi Sesi Ini --}}
+                        <div class="p-2.5 rounded bg-black/20 border border-white/10 space-y-2">
+                            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1 text-[11px]">
+                                <span class="font-bold text-amber-300 flex items-center gap-1">
+                                    <i class="fas fa-clock text-[10px]"></i> Jadwal Presensi Sesi Ini
+                                </span>
+                                <span class="text-blue-100 text-[10px]">Terkunci di dalam jam Zoom sesi ini</span>
+                            </div>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-[10px] text-blue-100 mb-0.5">Buka Presensi</label>
+                                    <input type="datetime-local" name="sessions[${index}][attendance_start_at]" value="${attStartVal}"
+                                           class="session-att-start w-full px-2 py-1 text-xs rounded bg-white text-slate-900 border-0 focus:ring-2 focus:ring-white">
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] text-blue-100 mb-0.5">Tutup Presensi</label>
+                                    <input type="datetime-local" name="sessions[${index}][attendance_end_at]" value="${attEndVal}"
+                                           class="session-att-end w-full px-2 py-1 text-xs rounded bg-white text-slate-900 border-0 focus:ring-2 focus:ring-white">
+                                </div>
+                            </div>
+                        </div>
+                    `;
+
+                    // Remove button handler
+                    card.querySelector('.btn-remove-session')?.addEventListener('click', function () {
+                        card.remove();
+                        updateSessionNumbersAndBadges();
+                        updateTimelineSummary();
+                    });
+
+                    // Sync date constraints inside this card
+                    const dateInput = card.querySelector('.session-date-input');
+                    const startInput = card.querySelector('.session-start-input');
+                    const endInput = card.querySelector('.session-end-input');
+                    const attStartInput = card.querySelector('.session-att-start');
+                    const attEndInput = card.querySelector('.session-att-end');
+
+                    function syncCardBounds() {
+                        if (execStart?.value && dateInput) {
+                            dateInput.min = execStart.value;
+                        }
+                        if (execEnd?.value && dateInput) {
+                            dateInput.max = execEnd.value;
+                        }
+
+                        const dVal = dateInput?.value;
+                        if (dVal) {
+                            const minStart = `${dVal}T00:00`;
+                            const maxEnd = `${dVal}T23:59`;
+
+                            if (startInput) {
+                                startInput.min = minStart;
+                                startInput.max = maxEnd;
+                            }
+                            if (endInput) {
+                                endInput.min = startInput?.value || minStart;
+                                endInput.max = maxEnd;
+                            }
+                            if (attStartInput) {
+                                attStartInput.min = startInput?.value || minStart;
+                                attStartInput.max = endInput?.value || maxEnd;
+                            }
+                            if (attEndInput) {
+                                attEndInput.min = attStartInput?.value || startInput?.value || minStart;
+                                attEndInput.max = endInput?.value || maxEnd;
+                            }
+                        }
+                    }
+
+                    [dateInput, startInput, endInput, attStartInput, attEndInput].forEach(el => {
+                        el?.addEventListener('change', syncCardBounds);
+                        el?.addEventListener('input', syncCardBounds);
+                    });
+
+                    syncCardBounds();
+
+                    return card;
+                }
+
+                function addSession(data = {}) {
+                    const cards = sessionsContainer.querySelectorAll('.session-card');
+                    const newCard = createSessionCard(data, cards.length);
+                    sessionsContainer.appendChild(newCard);
+                    updateSessionNumbersAndBadges();
+                    updateTimelineSummary();
+                }
+
+                // Event listener tombol tambah sesi manual
+                btnAddSession?.addEventListener('click', function () {
+                    if (!execStart?.value || !execEnd?.value) {
+                        alert('Silakan tentukan tanggal mulai dan tanggal selesai pelaksanaan terlebih dahulu.');
+                        execStart?.focus();
+                        return;
+                    }
+                    addSession();
+                });
+
+                // Event listener tombol generate sesi otomatis sesuai rentang hari
+                btnAutoGenerate?.addEventListener('click', function () {
+                    if (!execStart?.value || !execEnd?.value) {
+                        alert('Silakan tentukan tanggal mulai dan tanggal selesai pelaksanaan terlebih dahulu sebelum membuat sesi otomatis.');
+                        execStart?.focus();
+                        return;
+                    }
+
+                    const dStartParts = execStart.value.split('-');
+                    const dEndParts = execEnd.value.split('-');
+                    const dStart = new Date(dStartParts[0], dStartParts[1] - 1, dStartParts[2]);
+                    const dEnd = new Date(dEndParts[0], dEndParts[1] - 1, dEndParts[2]);
+
+                    if (isNaN(dStart.getTime()) || isNaN(dEnd.getTime()) || dStart > dEnd) {
+                        alert('Format rentang tanggal pelaksanaan tidak valid.');
+                        return;
+                    }
+
+                    // Bersihkan card sebelumnya
+                    sessionsContainer.querySelectorAll('.session-card').forEach(el => el.remove());
+
+                    let count = 0;
+                    const cur = new Date(dStart.getTime());
+                    while (cur <= dEnd) {
+                        count++;
+                        const y = cur.getFullYear();
+                        const m = String(cur.getMonth() + 1).padStart(2, '0');
+                        const d = String(cur.getDate()).padStart(2, '0');
+                        const dateStr = `${y}-${m}-${d}`;
+
+                        const isLast = (cur.getTime() === dEnd.getTime());
+                        const title = `Sesi Hari ${count}`;
+                        const start = `${dateStr}T09:00`;
+                        const end = (isLast && count > 1) ? `${dateStr}T11:30` : `${dateStr}T12:00`;
+                        const aStart = `${dateStr}T09:15`;
+                        const aEnd = `${dateStr}T10:00`;
+
+                        addSession({
+                            title: title,
+                            session_date: dateStr,
+                            start_time: start,
+                            end_time: end,
+                            attendance_start_at: aStart,
+                            attendance_end_at: aEnd,
+                        });
+
+                        cur.setDate(cur.getDate() + 1);
+                    }
+                });
+
+                // Load initial sessions jika ada
+                if (Array.isArray(initialSessions) && initialSessions.length > 0) {
+                    initialSessions.forEach((s, idx) => {
+                        addSession(s);
+                    });
+                }
 
                 function formatDateShort(val) {
                     if (!val) return null;
@@ -555,124 +812,27 @@
                     const isExecComplete = Boolean(isStage1Complete && execStart?.value && execEnd?.value);
 
                     // ==========================================
-                    // 2B. DETAIL SESI LIVE ZOOM
+                    // 2B. DETAIL SESI LIVE ZOOM & MULTI-SESI
                     // ==========================================
-                    const zoomInputs = [zoomUrl, zoomStart, zoomEnd, zoomMeetingId, zoomPasscode];
+                    const zoomInputs = [zoomUrl, zoomMeetingId, zoomPasscode];
                     if (!isExecComplete) {
                         zoomInputs.forEach(el => {
                             if (el) {
                                 el.disabled = true;
                                 el.classList.add('opacity-50', 'cursor-not-allowed');
-                                if (el === zoomStart || el === zoomEnd) el.value = '';
                             }
                         });
                         if (cardZoom) cardZoom.classList.add('opacity-60');
                         if (zoomBadge) zoomBadge.innerHTML = '<i class="fas fa-lock mr-1"></i> Buka setelah tanggal pelaksanaan diisi';
                     } else {
                         if (cardZoom) cardZoom.classList.remove('opacity-60');
-                        [zoomUrl, zoomMeetingId, zoomPasscode, zoomStart].forEach(el => {
+                        zoomInputs.forEach(el => {
                             if (el) {
                                 el.disabled = false;
                                 el.classList.remove('opacity-50', 'cursor-not-allowed');
                             }
                         });
-
-                        const minZoomTime = `${execStart.value}T00:00`;
-                        const maxZoomTime = `${execEnd.value}T23:59`;
-
-                        zoomStart.min = minZoomTime;
-                        zoomStart.max = maxZoomTime;
-
-                        if (zoomStart.value) {
-                            if (zoomStart.value < minZoomTime || zoomStart.value > maxZoomTime) {
-                                zoomStart.value = '';
-                            }
-                        }
-
-                        if (zoomStart.value) {
-                            zoomEnd.disabled = false;
-                            zoomEnd.classList.remove('opacity-50', 'cursor-not-allowed');
-                            zoomEnd.min = zoomStart.value;
-                            zoomEnd.max = maxZoomTime;
-                            if (zoomEnd.value) {
-                                if (zoomEnd.value <= zoomStart.value || zoomEnd.value > maxZoomTime) {
-                                    zoomEnd.value = '';
-                                }
-                            }
-                            if (zoomBadge) zoomBadge.textContent = 'Jadwal sesi Zoom aktif di rentang pelaksanaan';
-                        } else {
-                            zoomEnd.disabled = true;
-                            zoomEnd.classList.add('opacity-50', 'cursor-not-allowed');
-                            zoomEnd.value = '';
-                            zoomEnd.removeAttribute('min');
-                            zoomEnd.removeAttribute('max');
-                            if (zoomBadge) zoomBadge.textContent = 'Atur tanggal & jam mulai sesi Zoom';
-                        }
-                    }
-
-                    // ==========================================
-                    // 2C. DETAIL PRESENSI (Strictly dalam rentang Zoom)
-                    // ==========================================
-                    const isZoomConfigured = Boolean(isExecComplete && zoomStart?.value);
-                    const attMinLimit = zoomStart?.value || (execStart?.value ? `${execStart.value}T00:00` : null);
-                    const attMaxLimit = zoomEnd?.value || (execEnd?.value ? `${execEnd.value}T23:59` : null);
-
-                    if (!isZoomConfigured || !attMinLimit || !attMaxLimit) {
-                        if (attStart) {
-                            attStart.disabled = true;
-                            attStart.classList.add('opacity-50', 'cursor-not-allowed');
-                            attStart.value = '';
-                            attStart.removeAttribute('min');
-                            attStart.removeAttribute('max');
-                        }
-                        if (attEnd) {
-                            attEnd.disabled = true;
-                            attEnd.classList.add('opacity-50', 'cursor-not-allowed');
-                            attEnd.value = '';
-                            attEnd.removeAttribute('min');
-                            attEnd.removeAttribute('max');
-                        }
-                        if (cardAtt) cardAtt.classList.add('opacity-60');
-                        if (attBadge) attBadge.innerHTML = '<i class="fas fa-lock mr-1"></i> Buka setelah sesi Zoom diatur';
-                    } else {
-                        if (cardAtt) cardAtt.classList.remove('opacity-60');
-                        if (attStart) {
-                            attStart.disabled = false;
-                            attStart.classList.remove('opacity-50', 'cursor-not-allowed');
-                            attStart.min = attMinLimit;
-                            attStart.max = attMaxLimit;
-
-                            if (attStart.value) {
-                                if (attStart.value < attMinLimit || attStart.value > attMaxLimit) {
-                                    attStart.value = '';
-                                }
-                            }
-                        }
-
-                        if (attStart?.value) {
-                            if (attEnd) {
-                                attEnd.disabled = false;
-                                attEnd.classList.remove('opacity-50', 'cursor-not-allowed');
-                                attEnd.min = attStart.value;
-                                attEnd.max = attMaxLimit;
-
-                                if (attEnd.value) {
-                                    if (attEnd.value <= attStart.value || attEnd.value > attMaxLimit) {
-                                        attEnd.value = '';
-                                    }
-                                }
-                            }
-                            if (attBadge) attBadge.textContent = 'Rentang presensi terkunci ketat di dalam sesi Zoom';
-                        } else {
-                            if (attEnd) {
-                                attEnd.disabled = true;
-                                attEnd.classList.add('opacity-50', 'cursor-not-allowed');
-                                attEnd.value = '';
-                                attEnd.removeAttribute('min');
-                                attEnd.removeAttribute('max');
-                            }
-                            if (attBadge) attBadge.textContent = 'Atur jam buka presensi (terkunci di rentang Zoom)';
-                        }
+                        if (zoomBadge) zoomBadge.textContent = 'Jadwal sesi Zoom aktif di rentang pelaksanaan';
                     }
 
                     // ==========================================
@@ -819,7 +979,7 @@
                     }
                 }
 
-                [regStart, regEnd, execStart, execEnd, zoomStart, zoomEnd, attStart, attEnd, evalStart, evalEnd].forEach(el => {
+                [regStart, regEnd, execStart, execEnd, zoomUrl, zoomMeetingId, zoomPasscode, evalStart, evalEnd].forEach(el => {
                     el?.addEventListener('change', updateTimelineSummary);
                     el?.addEventListener('input', updateTimelineSummary);
                 });

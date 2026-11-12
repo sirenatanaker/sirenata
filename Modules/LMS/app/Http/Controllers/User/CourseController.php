@@ -323,9 +323,17 @@ class CourseController extends Controller
     public function joinZoom(Request $request, string $slug): RedirectResponse
     {
         $course = \Modules\LMS\Models\Course::where('slug', $slug)->firstOrFail();
-        $activeBimtek = \Modules\LMS\Models\BimtekEvent::where('course_id', $course->id)->latest()->first();
+        $activeBimtek = \Modules\LMS\Models\BimtekEvent::with('sessions')->where('course_id', $course->id)->latest()->first();
 
-        if (!$activeBimtek || empty($activeBimtek->zoom_url)) {
+        $sessionId = $request->query('session_id');
+        $targetSession = null;
+        if ($sessionId && $activeBimtek) {
+            $targetSession = $activeBimtek->sessions->firstWhere('id', $sessionId);
+        }
+
+        $zoomUrl = $targetSession?->effective_zoom_url ?: $activeBimtek?->zoom_url;
+
+        if (!$activeBimtek || empty($zoomUrl)) {
             ToastMagic::error('Tautan ruang Zoom belum tersedia.');
             return redirect()->back();
         }
@@ -336,9 +344,9 @@ class CourseController extends Controller
             return redirect()->back();
         }
 
-        // Cek jika jadwal sesi Zoom telah berakhir
-        if ($activeBimtek->zoom_end_at && now()->greaterThan($activeBimtek->zoom_end_at)) {
-            ToastMagic::error('Sesi Live Zoom telah berakhir pada ' . $activeBimtek->zoom_end_at->translatedFormat('d F Y, H:i') . ' WIB.');
+        $zoomEnd = $targetSession?->end_time ?: $activeBimtek->zoom_end_at;
+        if ($zoomEnd && now()->greaterThan($zoomEnd)) {
+            ToastMagic::error('Sesi Live Zoom telah berakhir pada ' . $zoomEnd->translatedFormat('d F Y, H:i') . ' WIB.');
             return redirect()->back();
         }
 
@@ -349,35 +357,72 @@ class CourseController extends Controller
                 'zoom_joined_at' => now(),
             ]);
 
-        return redirect()->away($activeBimtek->zoom_url);
+        return redirect()->away($zoomUrl);
     }
 
     public function attendZoom(Request $request, string $slug): RedirectResponse
     {
         $course = \Modules\LMS\Models\Course::where('slug', $slug)->firstOrFail();
-        $activeBimtek = \Modules\LMS\Models\BimtekEvent::where('course_id', $course->id)->latest()->first();
+        $activeBimtek = \Modules\LMS\Models\BimtekEvent::with('sessions')->where('course_id', $course->id)->latest()->first();
 
         $enrollment = DB::table('course_student')
             ->where('course_id', $course->id)
             ->where('user_id', $request->user()->id)
             ->first();
 
-        // Cek rentang waktu pembukaan presensi Zoom yang ditentukan admin pusat
         $now = now();
-        $presensiStart = $activeBimtek?->zoom_attendance_start_at ?? $activeBimtek?->zoom_scheduled_at ?? $activeBimtek?->start_date;
-        $presensiEnd = $activeBimtek?->zoom_attendance_end_at ?? $activeBimtek?->zoom_end_at;
-
-        if ($presensiStart && $now->lessThan($presensiStart)) {
-            $formattedStart = $activeBimtek?->attendance_schedule_formatted ?? $presensiStart->translatedFormat('d F Y, H:i') . ' WIB';
-            ToastMagic::error('Presensi belum dibuka. Konfirmasi kehadiran dibuka pada jadwal presensi (' . $formattedStart . ').');
-            return redirect()->back();
+        $sessionId = $request->input('session_id');
+        $targetSession = null;
+        if ($sessionId && $activeBimtek) {
+            $targetSession = $activeBimtek->sessions->firstWhere('id', $sessionId);
         }
 
-        if ($presensiEnd && $now->greaterThan($presensiEnd)) {
-            ToastMagic::error('Waktu presensi tatap muka telah berakhir pada ' . $presensiEnd->translatedFormat('d F Y, H:i') . ' WIB.');
-            return redirect()->back();
+        if ($targetSession) {
+            // Validasi waktu presensi sesi harian tertentu
+            $presensiStart = $targetSession->effective_attendance_start_at;
+            $presensiEnd = $targetSession->effective_attendance_end_at;
+            $sessionTitle = $targetSession->title ?: 'Sesi Zoom';
+
+            if ($presensiStart && $now->lessThan($presensiStart)) {
+                $formattedStart = $targetSession->attendance_schedule_formatted;
+                ToastMagic::error("Presensi {$sessionTitle} belum dibuka. Konfirmasi dibuka pada {$formattedStart}.");
+                return redirect()->back();
+            }
+
+            if ($presensiEnd && $now->greaterThan($presensiEnd)) {
+                ToastMagic::error("Waktu presensi {$sessionTitle} telah berakhir pada " . $presensiEnd->translatedFormat('d F Y, H:i') . " WIB.");
+                return redirect()->back();
+            }
+
+            // Catat kehadiran di tabel bimtek_session_attendances
+            \Modules\LMS\Models\BimtekSessionAttendance::firstOrCreate([
+                'bimtek_event_session_id' => $targetSession->id,
+                'user_id'                 => $request->user()->id,
+            ], [
+                'bimtek_event_id'         => $activeBimtek->id,
+                'course_id'               => $course->id,
+                'attended_at'             => now(),
+                'ip_address'              => $request->ip(),
+                'user_agent'              => $request->userAgent(),
+            ]);
+        } else {
+            // Fallback: Event level single-session
+            $presensiStart = $activeBimtek?->zoom_attendance_start_at ?? $activeBimtek?->zoom_scheduled_at ?? $activeBimtek?->start_date;
+            $presensiEnd = $activeBimtek?->zoom_attendance_end_at ?? $activeBimtek?->zoom_end_at;
+
+            if ($presensiStart && $now->lessThan($presensiStart)) {
+                $formattedStart = $activeBimtek?->attendance_schedule_formatted ?? $presensiStart->translatedFormat('d F Y, H:i') . ' WIB';
+                ToastMagic::error('Presensi belum dibuka. Konfirmasi kehadiran dibuka pada jadwal presensi (' . $formattedStart . ').');
+                return redirect()->back();
+            }
+
+            if ($presensiEnd && $now->greaterThan($presensiEnd)) {
+                ToastMagic::error('Waktu presensi tatap muka telah berakhir pada ' . $presensiEnd->translatedFormat('d F Y, H:i') . ' WIB.');
+                return redirect()->back();
+            }
         }
 
+        // Update status umum kehadiran Zoom pada pivot course_student
         DB::table('course_student')
             ->where('course_id', $course->id)
             ->where('user_id', $request->user()->id)
@@ -399,11 +444,15 @@ class CourseController extends Controller
         $evaluasiAkhir = PostTest::where('course_id', $course->id)->whereNull('course_section_id')->first();
         $canTakeFinalTest = $evaluasiAkhir && $this->courseService->canAccessTest($evaluasiAkhir);
 
-        ToastMagic::success(
-            $canTakeFinalTest
-                ? 'Presensi sesi tatap muka berhasil dikonfirmasi! Tahap Evaluasi Akhir kini telah terbuka.'
-                : 'Presensi sesi tatap muka berhasil dikonfirmasi!'
-        );
+        $successMsg = $targetSession
+            ? "Presensi {$targetSession->title} berhasil dikonfirmasi!"
+            : "Presensi sesi tatap muka berhasil dikonfirmasi!";
+
+        if ($canTakeFinalTest) {
+            $successMsg .= " Tahap Evaluasi Akhir kini telah terbuka.";
+        }
+
+        ToastMagic::success($successMsg);
 
         return redirect()->back();
     }

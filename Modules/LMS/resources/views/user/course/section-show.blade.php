@@ -167,23 +167,12 @@
                 {{-- 2. CARD SESI LIVE ZOOM --}}
                 @if ($hasZoom)
                     @php
-                        $now = now();
-                        $zoomStart = $activeBimtek->zoom_scheduled_at ?? $activeBimtek->start_date;
-                        $zoomEnd = $activeBimtek->zoom_end_at;
-                        $zoomScheduleFormatted = $activeBimtek->zoom_schedule_formatted ?? null;
-
-                        $isZoomEnded = $zoomEnd ? $now->greaterThan($zoomEnd) : ($zoomStart ? $now->greaterThan($zoomStart->copy()->endOfDay()) : false);
-
-                        $isPresensiOpen = true;
-                        $presensiLockReason = null;
-
-                        if ($zoomStart && $now->lessThan($zoomStart)) {
-                            $isPresensiOpen = false;
-                            $presensiLockReason = 'Presensi dibuka saat jadwal sesi tatap muka (' . ($zoomScheduleFormatted ?? $zoomStart->translatedFormat('d M Y, H:i') . ' WIB') . ')';
-                        } elseif ($isZoomEnded) {
-                            $isPresensiOpen = false;
-                            $presensiLockReason = 'Waktu presensi tatap muka telah berakhir' . ($zoomEnd ? ' pada ' . $zoomEnd->translatedFormat('d M Y, H:i') . ' WIB' : '');
-                        }
+                        $activeSession = $currentSession ?? null;
+                        $sessionZoomUrl = $activeSession?->effective_zoom_url ?? $activeBimtek->zoom_url;
+                        $sessionMeetingId = $activeSession?->zoom_meeting_id ?: $activeBimtek->zoom_meeting_id;
+                        $sessionPasscode = $activeSession?->zoom_passcode ?: $activeBimtek->zoom_passcode;
+                        $sessionSchedule = $activeSession?->schedule_formatted ?? $zoomScheduleFormatted;
+                        $sessionAttendanceSchedule = $activeSession?->attendance_schedule_formatted ?? $attendanceScheduleFormatted;
                     @endphp
                     <div class="relative flex items-stretch gap-3.5 sm:gap-5 pb-6 sm:pb-8">
                         {{-- Node Timeline Tahap 2 & Garis Penghubung --}}
@@ -209,12 +198,12 @@
                             class="flex-1 min-w-0 scroll-mt-6 rounded-md border border-slate-200 bg-slate-50/40 p-4 sm:p-5 lg:p-6 shadow-2xs transition-all space-y-4">
                             <div>
                                 <h2 class="text-base sm:text-lg lg:text-xl font-bold text-slate-700 tracking-tight leading-tight">
-                                    Sesi Tatap Muka Online
+                                    Sesi Tatap Muka Online {{ $activeSession ? '— ' . $activeSession->title : '' }}
                                 </h2>
 
                                 <p class="text-sm sm:text-[15px] text-slate-600 mt-1 leading-relaxed">
                                     @if ($isZoomAttended)
-                                        Terima kasih, Anda telah mengisi presensi kehadiran sesi tatap muka online.
+                                        Terima kasih, Anda telah mengisi presensi kehadiran sesi {{ $activeSession ? $activeSession->title : 'tatap muka online' }}.
                                     @elseif ($isPresensiOpen)
                                         Silakan masuk ke ruang tatap muka, lalu klik tombol Konfirmasi Kehadiran setelah Anda bergabung.
                                     @elseif ($isZoomEnded)
@@ -225,54 +214,105 @@
                                 </p>
                             </div>
 
+                            {{-- Agenda Multi-Sesi Harian jika terdapat lebih dari 1 sesi --}}
+                            @if (isset($bimtekSessions) && $bimtekSessions->count() > 1)
+                                <div class="p-3 sm:p-3.5 rounded-md bg-white border border-slate-200 shadow-2xs space-y-2">
+                                    <div class="flex items-center justify-between text-xs">
+                                        <span class="font-bold text-slate-700 flex items-center gap-1.5">
+                                            <i class="fas fa-calendar-check text-[#13416B]"></i>
+                                            Agenda Multi-Sesi Harian ({{ $bimtekSessions->count() }} Hari)
+                                        </span>
+                                        <span class="text-[11px] font-semibold text-slate-500">
+                                            {{ $attendedSessionIds->count() }} / {{ $bimtekSessions->count() }} Sesi Terkonfirmasi
+                                        </span>
+                                    </div>
+                                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
+                                        @foreach ($bimtekSessions as $sIdx => $sessionItem)
+                                            @php
+                                                $isItemAttended = $attendedSessionIds->contains($sessionItem->id);
+                                                $isCurrent = $activeSession && $activeSession->id === $sessionItem->id;
+                                            @endphp
+                                            <div class="flex items-center justify-between p-2 rounded-md border text-xs {{ $isCurrent ? 'border-blue-400 bg-blue-50/60 ring-1 ring-blue-300' : 'border-slate-200 bg-slate-50/50' }}">
+                                                <div class="min-w-0 pr-1">
+                                                    <p class="font-bold text-slate-800 truncate text-[11px]">
+                                                        {{ $sessionItem->title }}
+                                                        @if ($isCurrent)
+                                                            <span class="ml-1 text-[9px] font-bold text-blue-700 uppercase">(Hari Ini)</span>
+                                                        @endif
+                                                    </p>
+                                                    <p class="text-[10px] text-slate-500 truncate">{{ $sessionItem->schedule_formatted }}</p>
+                                                </div>
+                                                @if ($isItemAttended)
+                                                    <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-700 shrink-0">
+                                                        <i class="fas fa-check"></i> Hadir
+                                                    </span>
+                                                @elseif ($sessionItem->is_presensi_open)
+                                                    <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800 shrink-0 animate-pulse">
+                                                        <i class="fas fa-clock"></i> Buka
+                                                    </span>
+                                                @elseif ($sessionItem->is_zoom_ended)
+                                                    <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-slate-200 text-slate-600 shrink-0">
+                                                        Lewat
+                                                    </span>
+                                                @else
+                                                    <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-slate-100 text-slate-400 shrink-0">
+                                                        Nanti
+                                                    </span>
+                                                @endif
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                </div>
+                            @endif
+
                             {{-- Info Sesi (Jadwal, Meeting ID, Passcode) --}}
-                            @if ($activeBimtek->zoom_scheduled_at || $activeBimtek->zoom_meeting_id || $activeBimtek->zoom_passcode)
+                            @if ($sessionSchedule || $sessionMeetingId || $sessionPasscode || $sessionAttendanceSchedule)
                                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
-                                    @if ($activeBimtek->zoom_scheduled_at)
+                                    @if ($sessionSchedule)
                                         <div class="flex items-center gap-2.5 p-2.5 rounded-md bg-white border border-slate-200 shadow-2xs">
                                             <div class="w-8 h-8 rounded-md bg-slate-100 text-[#13416B] flex items-center justify-center shrink-0 text-sm">
                                                 <i class="fas fa-calendar-alt"></i>
                                             </div>
                                             <div class="min-w-0">
                                                 <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Jadwal Zoom</p>
-                                                <p class="text-xs font-bold text-slate-800 truncate" title="{{ $zoomScheduleFormatted ?? $activeBimtek->zoom_scheduled_at->translatedFormat('d F Y, H:i') . ' WIB' }}">
-                                                    {{ $zoomScheduleFormatted ?? $activeBimtek->zoom_scheduled_at->translatedFormat('d M Y, H:i') . ' WIB' }}
+                                                <p class="text-xs font-bold text-slate-800 truncate" title="{{ $sessionSchedule }}">
+                                                    {{ $sessionSchedule }}
                                                 </p>
                                             </div>
                                         </div>
                                     @endif
-                                    @if ($activeBimtek->zoom_attendance_start_at || $activeBimtek->zoom_attendance_end_at)
+                                    @if ($sessionAttendanceSchedule)
                                         <div class="flex items-center gap-2.5 p-2.5 rounded-md bg-amber-50/70 border border-amber-200 shadow-2xs">
                                             <div class="w-8 h-8 rounded-md bg-amber-100 text-amber-800 flex items-center justify-center shrink-0 text-sm">
                                                 <i class="fas fa-clock"></i>
                                             </div>
                                             <div class="min-w-0">
                                                 <p class="text-[10px] font-bold uppercase tracking-wider text-amber-700">Waktu Presensi</p>
-                                                <p class="text-xs font-bold text-amber-900 truncate" title="{{ $activeBimtek->attendance_schedule_formatted }}">
-                                                    {{ $activeBimtek->attendance_schedule_formatted }}
+                                                <p class="text-xs font-bold text-amber-900 truncate" title="{{ $sessionAttendanceSchedule }}">
+                                                    {{ $sessionAttendanceSchedule }}
                                                 </p>
                                             </div>
                                         </div>
                                     @endif
-                                    @if ($activeBimtek->zoom_meeting_id)
+                                    @if ($sessionMeetingId)
                                         <div class="flex items-center gap-2.5 p-2.5 rounded-md bg-white border border-slate-200 shadow-2xs">
                                             <div class="w-8 h-8 rounded-md bg-slate-100 text-[#13416B] flex items-center justify-center shrink-0 text-sm">
                                                 <i class="fas fa-hashtag"></i>
                                             </div>
                                             <div class="min-w-0">
                                                 <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Meeting ID</p>
-                                                <p class="text-xs font-mono font-bold text-slate-800 truncate">{{ $activeBimtek->zoom_meeting_id }}</p>
+                                                <p class="text-xs font-mono font-bold text-slate-800 truncate">{{ $sessionMeetingId }}</p>
                                             </div>
                                         </div>
                                     @endif
-                                    @if ($activeBimtek->zoom_passcode)
+                                    @if ($sessionPasscode)
                                         <div class="flex items-center gap-2.5 p-2.5 rounded-md bg-white border border-slate-200 shadow-2xs">
                                             <div class="w-8 h-8 rounded-md bg-slate-100 text-[#13416B] flex items-center justify-center shrink-0 text-sm">
                                                 <i class="fas fa-key"></i>
                                             </div>
                                             <div class="min-w-0">
                                                 <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Passcode</p>
-                                                <p class="text-xs font-mono font-bold text-slate-800 truncate">{{ $activeBimtek->zoom_passcode }}</p>
+                                                <p class="text-xs font-mono font-bold text-slate-800 truncate">{{ $sessionPasscode }}</p>
                                             </div>
                                         </div>
                                     @endif
@@ -289,11 +329,11 @@
                                         <span>Sesi Tatap Muka Berakhir</span>
                                     </button>
                                 @else
-                                    <a href="{{ route('user.course.my-course.join-zoom', $courseSlug) }}"
+                                    <a href="{{ route('user.course.my-course.join-zoom', array_filter(['course' => $courseSlug, 'session_id' => $activeSession?->id])) }}"
                                         target="_blank" rel="noopener noreferrer"
                                         class="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-md font-bold text-xs sm:text-sm bg-[#13416B] hover:bg-[#0f3354] text-white shadow-sm transition-all">
                                         <i class="fas fa-video text-xs"></i>
-                                        <span>Masuk Tatap Muka</span>
+                                        <span>Masuk Tatap Muka {{ $activeSession ? 'Hari ' . $activeSession->session_number : '' }}</span>
                                         <i class="fas fa-external-link-alt text-[10px] opacity-75"></i>
                                     </a>
                                 @endif
@@ -303,15 +343,18 @@
                                     <button type="button" disabled
                                         class="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-md font-bold text-xs sm:text-sm bg-emerald-600 text-white shadow-sm select-none cursor-default">
                                         <i class="fas fa-check-circle text-xs"></i>
-                                        <span>Sudah Presensi</span>
+                                        <span>Sudah Presensi {{ $activeSession ? 'Hari ' . $activeSession->session_number : '' }}</span>
                                     </button>
                                 @elseif ($isPresensiOpen)
                                     <form action="{{ route('user.course.my-course.attend-zoom', $courseSlug) }}" method="POST" class="inline">
                                         @csrf
+                                        @if ($activeSession)
+                                            <input type="hidden" name="session_id" value="{{ $activeSession->id }}">
+                                        @endif
                                         <button type="submit"
                                             class="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-md font-bold text-xs sm:text-sm bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm transition-all cursor-pointer animate-pulse">
                                             <i class="fas fa-clipboard-check text-xs"></i>
-                                            <span>Konfirmasi Kehadiran</span>
+                                            <span>Konfirmasi Kehadiran {{ $activeSession ? 'Hari ' . $activeSession->session_number : '' }}</span>
                                         </button>
                                     </form>
                                 @else
