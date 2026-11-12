@@ -364,17 +364,17 @@ class CourseController extends Controller
 
         // Cek rentang waktu pembukaan presensi Zoom yang ditentukan admin pusat
         $now = now();
-        $zoomStart = $activeBimtek?->zoom_scheduled_at ?? $activeBimtek?->start_date;
-        $zoomEnd = $activeBimtek?->zoom_end_at;
+        $presensiStart = $activeBimtek?->zoom_attendance_start_at ?? $activeBimtek?->zoom_scheduled_at ?? $activeBimtek?->start_date;
+        $presensiEnd = $activeBimtek?->zoom_attendance_end_at ?? $activeBimtek?->zoom_end_at;
 
-        if ($zoomStart && $now->lessThan($zoomStart)) {
-            $formattedStart = $activeBimtek->zoom_schedule_formatted ?? $zoomStart->translatedFormat('d F Y, H:i') . ' WIB';
-            ToastMagic::error('Presensi belum dibuka. Konfirmasi kehadiran dibuka pada jadwal sesi tatap muka (' . $formattedStart . ').');
+        if ($presensiStart && $now->lessThan($presensiStart)) {
+            $formattedStart = $activeBimtek?->attendance_schedule_formatted ?? $presensiStart->translatedFormat('d F Y, H:i') . ' WIB';
+            ToastMagic::error('Presensi belum dibuka. Konfirmasi kehadiran dibuka pada jadwal presensi (' . $formattedStart . ').');
             return redirect()->back();
         }
 
-        if ($zoomEnd && $now->greaterThan($zoomEnd)) {
-            ToastMagic::error('Waktu presensi tatap muka telah berakhir pada ' . $zoomEnd->translatedFormat('d F Y, H:i') . ' WIB.');
+        if ($presensiEnd && $now->greaterThan($presensiEnd)) {
+            ToastMagic::error('Waktu presensi tatap muka telah berakhir pada ' . $presensiEnd->translatedFormat('d F Y, H:i') . ' WIB.');
             return redirect()->back();
         }
 

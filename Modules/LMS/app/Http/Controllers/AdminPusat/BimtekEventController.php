@@ -63,45 +63,56 @@ class BimtekEventController extends Controller
         $hasRegStart = $request->filled('registration_start_at');
         $hasRegEnd = $request->filled('registration_end_at');
         $hasAssessmentStart = $request->filled('assessment_start_at');
+        $hasZoomStart = $request->filled('zoom_scheduled_at');
+        $hasZoomEnd = $request->filled('zoom_end_at');
+        $hasAttendanceStart = $request->filled('zoom_attendance_start_at');
 
         $validated = $request->validate([
-            'course_id'             => 'required|exists:courses,id',
-            'batch_name'            => 'required|string|max:255',
-            'batch_code'            => 'nullable|string|max:100|unique:bimtek_events,batch_code',
-            'quota'                 => $isUnlimitedQuota ? 'nullable' : 'required|integer|min:1',
+            'course_id'                => 'required|exists:courses,id',
+            'batch_name'               => 'required|string|max:255',
+            'batch_code'               => 'nullable|string|max:100|unique:bimtek_events,batch_code',
+            'quota'                    => $isUnlimitedQuota ? 'nullable' : 'required|integer|min:1',
 
             // 1. Periode Pendaftaran
-            'registration_start_at' => 'nullable|date',
-            'registration_end_at'   => 'nullable|date' . ($hasRegStart ? '|after:registration_start_at' : ''),
+            'registration_start_at'    => 'nullable|date',
+            'registration_end_at'      => 'nullable|date' . ($hasRegStart ? '|after:registration_start_at' : ''),
 
             // 2. Periode Pelaksanaan (harus setelah pendaftaran)
-            'start_date'            => 'required|date' . ($hasRegEnd ? '|after:registration_end_at' : ($hasRegStart ? '|after:registration_start_at' : '')),
-            'end_date'              => 'required|date|after:start_date',
+            'start_date'               => 'required|date' . ($hasRegEnd ? '|after:registration_end_at' : ($hasRegStart ? '|after:registration_start_at' : '')),
+            'end_date'                 => 'required|date|after:start_date',
 
             // Detail Sesi Zoom (dalam Pelaksanaan)
-            'zoom_url'              => 'nullable|url',
-            'zoom_meeting_id'       => 'nullable|string|max:100',
-            'zoom_passcode'         => 'nullable|string|max:100',
-            'zoom_attendance_code'  => 'nullable|string|max:50',
-            'zoom_scheduled_at'     => 'nullable|date|after_or_equal:start_date|before_or_equal:end_date',
-            'zoom_end_at'           => 'nullable|date|after:zoom_scheduled_at|before_or_equal:end_date',
+            'zoom_url'                 => 'nullable|url',
+            'zoom_meeting_id'          => 'nullable|string|max:100',
+            'zoom_passcode'            => 'nullable|string|max:100',
+            'zoom_attendance_code'     => 'nullable|string|max:50',
+            'zoom_scheduled_at'        => 'nullable|date|after_or_equal:start_date|before_or_equal:end_date',
+            'zoom_end_at'              => 'nullable|date|after:zoom_scheduled_at|before_or_equal:end_date',
+
+            // Rentang Waktu Pembukaan Presensi (harus di dalam rentang sesi Zoom)
+            'zoom_attendance_start_at' => 'nullable|date' . ($hasZoomStart ? '|after_or_equal:zoom_scheduled_at' : '') . ($hasZoomEnd ? '|before_or_equal:zoom_end_at' : ''),
+            'zoom_attendance_end_at'   => 'nullable|date' . ($hasAttendanceStart ? '|after:zoom_attendance_start_at' : ($hasZoomStart ? '|after:zoom_scheduled_at' : '')) . ($hasZoomEnd ? '|before_or_equal:zoom_end_at' : ''),
 
             // 3. Periode Evaluasi & Sertifikat (setelah pelaksanaan)
-            'assessment_start_at'   => 'nullable|date|after_or_equal:end_date',
-            'assessment_end_at'     => 'nullable|date' . ($hasAssessmentStart ? '|after:assessment_start_at' : '|after:end_date'),
+            'assessment_start_at'      => 'nullable|date|after_or_equal:end_date',
+            'assessment_end_at'        => 'nullable|date' . ($hasAssessmentStart ? '|after:assessment_start_at' : '|after:end_date'),
 
-            'location_name'         => 'nullable|string|max:255',
-            'location_address'      => 'nullable|string',
+            'location_name'            => 'nullable|string|max:255',
+            'location_address'         => 'nullable|string',
         ], [
-            'registration_end_at.after'          => 'Tanggal & waktu selesai pendaftaran harus setelah tanggal mulai pendaftaran.',
-            'start_date.after'                   => 'Tanggal & waktu mulai pelaksanaan harus setelah periode pendaftaran selesai.',
-            'end_date.after'                     => 'Tanggal & waktu selesai pelaksanaan harus setelah tanggal mulai pelaksanaan.',
-            'zoom_scheduled_at.after_or_equal'   => 'Jadwal mulai Sesi Zoom harus berada di dalam rentang waktu pelaksanaan.',
-            'zoom_scheduled_at.before_or_equal'  => 'Jadwal mulai Sesi Zoom tidak boleh melewati tanggal selesai pelaksanaan.',
-            'zoom_end_at.after'                  => 'Jadwal selesai Sesi Zoom harus setelah jadwal mulai Sesi Zoom.',
-            'zoom_end_at.before_or_equal'        => 'Jadwal selesai Sesi Zoom tidak boleh melewati tanggal selesai pelaksanaan.',
-            'assessment_start_at.after_or_equal' => 'Tanggal mulai masa evaluasi tidak boleh sebelum tanggal selesai pelaksanaan.',
-            'assessment_end_at.after'            => 'Tanggal batas akhir evaluasi & sertifikat harus setelah tanggal mulai evaluasi.',
+            'registration_end_at.after'              => 'Tanggal & waktu selesai pendaftaran harus setelah tanggal mulai pendaftaran.',
+            'start_date.after'                       => 'Tanggal & waktu mulai pelaksanaan harus setelah periode pendaftaran selesai.',
+            'end_date.after'                         => 'Tanggal & waktu selesai pelaksanaan harus setelah tanggal mulai pelaksanaan.',
+            'zoom_scheduled_at.after_or_equal'       => 'Jadwal mulai Sesi Zoom harus berada di dalam rentang waktu pelaksanaan.',
+            'zoom_scheduled_at.before_or_equal'      => 'Jadwal mulai Sesi Zoom tidak boleh melewati tanggal selesai pelaksanaan.',
+            'zoom_end_at.after'                      => 'Jadwal selesai Sesi Zoom harus setelah jadwal mulai Sesi Zoom.',
+            'zoom_end_at.before_or_equal'            => 'Jadwal selesai Sesi Zoom tidak boleh melewati tanggal selesai pelaksanaan.',
+            'zoom_attendance_start_at.after_or_equal' => 'Jam buka presensi tidak boleh lebih awal dari jadwal mulai sesi Zoom.',
+            'zoom_attendance_start_at.before_or_equal' => 'Jam buka presensi tidak boleh melewati jadwal selesai sesi Zoom.',
+            'zoom_attendance_end_at.after'           => 'Jam tutup presensi harus setelah jam buka presensi.',
+            'zoom_attendance_end_at.before_or_equal'  => 'Jam tutup presensi tidak boleh melewati jadwal selesai sesi Zoom.',
+            'assessment_start_at.after_or_equal'     => 'Tanggal mulai masa evaluasi tidak boleh sebelum tanggal selesai pelaksanaan.',
+            'assessment_end_at.after'                => 'Tanggal batas akhir evaluasi & sertifikat harus setelah tanggal mulai evaluasi.',
         ]);
 
         if (empty($validated['batch_code'])) {
@@ -209,45 +220,56 @@ class BimtekEventController extends Controller
         $hasRegStart = $request->filled('registration_start_at');
         $hasRegEnd = $request->filled('registration_end_at');
         $hasAssessmentStart = $request->filled('assessment_start_at');
+        $hasZoomStart = $request->filled('zoom_scheduled_at');
+        $hasZoomEnd = $request->filled('zoom_end_at');
+        $hasAttendanceStart = $request->filled('zoom_attendance_start_at');
 
         $validated = $request->validate([
-            'course_id'             => 'required|exists:courses,id',
-            'batch_name'            => 'required|string|max:255',
-            'batch_code'            => 'required|string|max:100|unique:bimtek_events,batch_code,' . $event->id,
-            'quota'                 => $isUnlimitedQuota ? 'nullable' : 'required|integer|min:1',
+            'course_id'                => 'required|exists:courses,id',
+            'batch_name'               => 'required|string|max:255',
+            'batch_code'               => 'required|string|max:100|unique:bimtek_events,batch_code,' . $event->id,
+            'quota'                    => $isUnlimitedQuota ? 'nullable' : 'required|integer|min:1',
 
             // 1. Periode Pendaftaran
-            'registration_start_at' => 'nullable|date',
-            'registration_end_at'   => 'nullable|date' . ($hasRegStart ? '|after:registration_start_at' : ''),
+            'registration_start_at'    => 'nullable|date',
+            'registration_end_at'      => 'nullable|date' . ($hasRegStart ? '|after:registration_start_at' : ''),
 
             // 2. Periode Pelaksanaan (harus setelah pendaftaran)
-            'start_date'            => 'required|date' . ($hasRegEnd ? '|after:registration_end_at' : ($hasRegStart ? '|after:registration_start_at' : '')),
-            'end_date'              => 'required|date|after:start_date',
+            'start_date'               => 'required|date' . ($hasRegEnd ? '|after:registration_end_at' : ($hasRegStart ? '|after:registration_start_at' : '')),
+            'end_date'                 => 'required|date|after:start_date',
 
             // Detail Sesi Zoom (dalam Pelaksanaan)
-            'zoom_url'              => 'nullable|url',
-            'zoom_meeting_id'       => 'nullable|string|max:100',
-            'zoom_passcode'         => 'nullable|string|max:100',
-            'zoom_attendance_code'  => 'nullable|string|max:50',
-            'zoom_scheduled_at'     => 'nullable|date|after_or_equal:start_date|before_or_equal:end_date',
-            'zoom_end_at'           => 'nullable|date|after:zoom_scheduled_at|before_or_equal:end_date',
+            'zoom_url'                 => 'nullable|url',
+            'zoom_meeting_id'          => 'nullable|string|max:100',
+            'zoom_passcode'            => 'nullable|string|max:100',
+            'zoom_attendance_code'     => 'nullable|string|max:50',
+            'zoom_scheduled_at'        => 'nullable|date|after_or_equal:start_date|before_or_equal:end_date',
+            'zoom_end_at'              => 'nullable|date|after:zoom_scheduled_at|before_or_equal:end_date',
+
+            // Rentang Waktu Pembukaan Presensi (harus di dalam rentang sesi Zoom)
+            'zoom_attendance_start_at' => 'nullable|date' . ($hasZoomStart ? '|after_or_equal:zoom_scheduled_at' : '') . ($hasZoomEnd ? '|before_or_equal:zoom_end_at' : ''),
+            'zoom_attendance_end_at'   => 'nullable|date' . ($hasAttendanceStart ? '|after:zoom_attendance_start_at' : ($hasZoomStart ? '|after:zoom_scheduled_at' : '')) . ($hasZoomEnd ? '|before_or_equal:zoom_end_at' : ''),
 
             // 3. Periode Evaluasi & Sertifikat (setelah pelaksanaan)
-            'assessment_start_at'   => 'nullable|date|after_or_equal:end_date',
-            'assessment_end_at'     => 'nullable|date' . ($hasAssessmentStart ? '|after:assessment_start_at' : '|after:end_date'),
+            'assessment_start_at'      => 'nullable|date|after_or_equal:end_date',
+            'assessment_end_at'        => 'nullable|date' . ($hasAssessmentStart ? '|after:assessment_start_at' : '|after:end_date'),
 
-            'location_name'         => 'nullable|string|max:255',
-            'location_address'      => 'nullable|string',
+            'location_name'            => 'nullable|string|max:255',
+            'location_address'         => 'nullable|string',
         ], [
-            'registration_end_at.after'          => 'Tanggal & waktu selesai pendaftaran harus setelah tanggal mulai pendaftaran.',
-            'start_date.after'                   => 'Tanggal & waktu mulai pelaksanaan harus setelah periode pendaftaran selesai.',
-            'end_date.after'                     => 'Tanggal & waktu selesai pelaksanaan harus setelah tanggal mulai pelaksanaan.',
-            'zoom_scheduled_at.after_or_equal'   => 'Jadwal mulai Sesi Zoom harus berada di dalam rentang waktu pelaksanaan.',
-            'zoom_scheduled_at.before_or_equal'  => 'Jadwal mulai Sesi Zoom tidak boleh melewati tanggal selesai pelaksanaan.',
-            'zoom_end_at.after'                  => 'Jadwal selesai Sesi Zoom harus setelah jadwal mulai Sesi Zoom.',
-            'zoom_end_at.before_or_equal'        => 'Jadwal selesai Sesi Zoom tidak boleh melewati tanggal selesai pelaksanaan.',
-            'assessment_start_at.after_or_equal' => 'Tanggal mulai masa evaluasi tidak boleh sebelum tanggal selesai pelaksanaan.',
-            'assessment_end_at.after'            => 'Tanggal batas akhir evaluasi & sertifikat harus setelah tanggal mulai evaluasi.',
+            'registration_end_at.after'              => 'Tanggal & waktu selesai pendaftaran harus setelah tanggal mulai pendaftaran.',
+            'start_date.after'                       => 'Tanggal & waktu mulai pelaksanaan harus setelah periode pendaftaran selesai.',
+            'end_date.after'                         => 'Tanggal & waktu selesai pelaksanaan harus setelah tanggal mulai pelaksanaan.',
+            'zoom_scheduled_at.after_or_equal'       => 'Jadwal mulai Sesi Zoom harus berada di dalam rentang waktu pelaksanaan.',
+            'zoom_scheduled_at.before_or_equal'      => 'Jadwal mulai Sesi Zoom tidak boleh melewati tanggal selesai pelaksanaan.',
+            'zoom_end_at.after'                      => 'Jadwal selesai Sesi Zoom harus setelah jadwal mulai Sesi Zoom.',
+            'zoom_end_at.before_or_equal'            => 'Jadwal selesai Sesi Zoom tidak boleh melewati tanggal selesai pelaksanaan.',
+            'zoom_attendance_start_at.after_or_equal' => 'Jam buka presensi tidak boleh lebih awal dari jadwal mulai sesi Zoom.',
+            'zoom_attendance_start_at.before_or_equal' => 'Jam buka presensi tidak boleh melewati jadwal selesai sesi Zoom.',
+            'zoom_attendance_end_at.after'           => 'Jam tutup presensi harus setelah jam buka presensi.',
+            'zoom_attendance_end_at.before_or_equal'  => 'Jam tutup presensi tidak boleh melewati jadwal selesai sesi Zoom.',
+            'assessment_start_at.after_or_equal'     => 'Tanggal mulai masa evaluasi tidak boleh sebelum tanggal selesai pelaksanaan.',
+            'assessment_end_at.after'                => 'Tanggal batas akhir evaluasi & sertifikat harus setelah tanggal mulai evaluasi.',
         ]);
 
         // Metode pelaksanaan dipertahankan atau default online

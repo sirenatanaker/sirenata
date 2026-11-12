@@ -32,6 +32,8 @@ class BimtekEvent extends Model
         'zoom_attendance_code',
         'zoom_scheduled_at',
         'zoom_end_at',
+        'zoom_attendance_start_at',
+        'zoom_attendance_end_at',
         'assessment_start_at',
         'assessment_end_at',
         'location_name',
@@ -45,9 +47,11 @@ class BimtekEvent extends Model
         'end_date'              => 'datetime',
         'registration_start_at' => 'datetime',
         'registration_end_at'   => 'datetime',
-        'zoom_scheduled_at'     => 'datetime',
-        'zoom_end_at'           => 'datetime',
-        'assessment_start_at'   => 'datetime',
+        'zoom_scheduled_at'        => 'datetime',
+        'zoom_end_at'              => 'datetime',
+        'zoom_attendance_start_at' => 'datetime',
+        'zoom_attendance_end_at'   => 'datetime',
+        'assessment_start_at'      => 'datetime',
         'assessment_end_at'     => 'datetime',
         'quota'                 => 'integer',
     ];
@@ -306,6 +310,44 @@ class BimtekEvent extends Model
         }
 
         return $start->translatedFormat('d M Y, H:i') . ' WIB s/d ' . $end->translatedFormat('d M Y, H:i') . ' WIB';
+    }
+
+    /**
+     * Waktu mulai presensi efektif (menggunakan jam presensi khusus jika ditentukan)
+     */
+    public function getEffectiveAttendanceStartAtAttribute()
+    {
+        return $this->zoom_attendance_start_at ?? $this->zoom_scheduled_at ?? $this->start_date;
+    }
+
+    /**
+     * Waktu selesai presensi efektif
+     */
+    public function getEffectiveAttendanceEndAtAttribute()
+    {
+        return $this->zoom_attendance_end_at ?? $this->zoom_end_at;
+    }
+
+    /**
+     * Format rentang waktu pembukaan presensi
+     */
+    public function getAttendanceScheduleFormattedAttribute(): string
+    {
+        $start = $this->effective_attendance_start_at;
+        $end = $this->effective_attendance_end_at;
+
+        if (!$start && !$end) {
+            return 'Mengikuti jadwal sesi Zoom';
+        }
+
+        if ($start && $end) {
+            if ($start->isSameDay($end)) {
+                return $start->translatedFormat('d M Y, H:i') . ' - ' . $end->format('H:i') . ' WIB';
+            }
+            return $start->translatedFormat('d M Y, H:i') . ' WIB s/d ' . $end->translatedFormat('d M Y, H:i') . ' WIB';
+        }
+
+        return ($start ?? $end)->translatedFormat('d M Y, H:i') . ' WIB';
     }
 
     /**

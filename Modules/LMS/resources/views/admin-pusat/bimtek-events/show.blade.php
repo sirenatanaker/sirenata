@@ -216,6 +216,15 @@
                             </p>
                         </div>
 
+                        @if ($event->zoom_attendance_start_at || $event->zoom_attendance_end_at)
+                            <div class="pt-1.5 border-t border-white/15">
+                                <span class="text-[11px] text-amber-200 block font-semibold">Jadwal Presensi Dibuka:</span>
+                                <p class="text-xs sm:text-sm font-bold text-white mt-0.5">
+                                    {{ $event->attendance_schedule_formatted }}
+                                </p>
+                            </div>
+                        @endif
+
                         @if ($event->zoom_meeting_id || $event->zoom_passcode || $event->zoom_attendance_code)
                             <div class="text-[11px] text-blue-100 font-mono space-y-1 pt-2 border-t border-white/15">
                                 @if ($event->zoom_meeting_id) <p>Meeting ID: <strong class="text-white font-mono">{{ $event->zoom_meeting_id }}</strong></p> @endif

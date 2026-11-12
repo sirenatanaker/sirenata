@@ -271,7 +271,45 @@
                                 </div>
                             </div>
 
-                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
+                            {{-- Pengaturan Rentang Jam Pembukaan Presensi (Otomatis Buka di User) --}}
+                            <div class="p-3 rounded-lg bg-black/20 border border-white/15 space-y-2 mt-2">
+                                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+                                    <div class="flex items-center gap-1.5 text-xs font-bold text-amber-300">
+                                        <i class="fas fa-clock"></i>
+                                        <span>Jadwal Buka & Tutup Presensi Peserta</span>
+                                    </div>
+                                    <span class="text-[11px] text-blue-100">
+                                        Wajib berada di dalam rentang sesi Zoom
+                                    </span>
+                                </div>
+                                <p class="text-[11px] text-blue-100/90 leading-relaxed">
+                                    Tombol presensi di akun peserta akan <strong>otomatis terbuka</strong> saat jam buka tiba dan terkunci kembali setelah jam tutup. Jika dikosongkan, presensi mengikuti durasi sesi Zoom.
+                                </p>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                                    <div>
+                                        <label for="zoom_attendance_start_at" class="block text-xs font-medium text-white mb-1">
+                                            Jam Buka Presensi
+                                        </label>
+                                        <input type="datetime-local" id="zoom_attendance_start_at" name="zoom_attendance_start_at" value="{{ old('zoom_attendance_start_at') }}"
+                                               class="w-full px-3 py-2 rounded-lg border-0 text-xs sm:text-sm bg-white text-slate-900 focus:ring-2 focus:ring-white">
+                                        @error('zoom_attendance_start_at')
+                                            <p class="text-xs text-rose-200 mt-1 font-semibold">{{ $message }}</p>
+                                        @enderror
+                                    </div>
+                                    <div>
+                                        <label for="zoom_attendance_end_at" class="block text-xs font-medium text-white mb-1">
+                                            Jam Tutup Presensi
+                                        </label>
+                                        <input type="datetime-local" id="zoom_attendance_end_at" name="zoom_attendance_end_at" value="{{ old('zoom_attendance_end_at') }}"
+                                               class="w-full px-3 py-2 rounded-lg border-0 text-xs sm:text-sm bg-white text-slate-900 focus:ring-2 focus:ring-white">
+                                        @error('zoom_attendance_end_at')
+                                            <p class="text-xs text-rose-200 mt-1 font-semibold">{{ $message }}</p>
+                                        @enderror
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
                                 <div>
                                     <label for="zoom_meeting_id" class="block text-xs font-semibold text-white mb-1">
                                         Meeting ID (Opsional)
@@ -287,14 +325,6 @@
                                     <input type="text" id="zoom_passcode" name="zoom_passcode" value="{{ old('zoom_passcode') }}"
                                            placeholder="Contoh: SPBE2026"
                                            class="w-full px-3 py-2 rounded-lg border-0 text-xs sm:text-sm bg-white text-slate-900 focus:ring-2 focus:ring-white">
-                                </div>
-                                <div>
-                                    <label for="zoom_attendance_code" class="block text-xs font-semibold text-white mb-1">
-                                        Kode Presensi Zoom
-                                    </label>
-                                    <input type="text" id="zoom_attendance_code" name="zoom_attendance_code" value="{{ old('zoom_attendance_code') }}"
-                                           placeholder="Kosongkan = otomatis (HADIR-XXXX)"
-                                           class="w-full px-3 py-2 rounded-lg border-0 text-xs sm:text-sm bg-white text-slate-900 uppercase font-mono focus:ring-2 focus:ring-white">
                                 </div>
                             </div>
                         </div>
@@ -363,6 +393,8 @@
                 const execEnd = document.getElementById('end_date');
                 const zoomStart = document.getElementById('zoom_scheduled_at');
                 const zoomEnd = document.getElementById('zoom_end_at');
+                const attStart = document.getElementById('zoom_attendance_start_at');
+                const attEnd = document.getElementById('zoom_attendance_end_at');
                 const evalStart = document.getElementById('assessment_start_at');
                 const evalEnd = document.getElementById('assessment_end_at');
 
@@ -446,6 +478,37 @@
                         }
                     } else if (execStart?.value && zoomEnd) {
                         zoomEnd.min = execStart.value;
+                    }
+
+                    // 5b. Presensi: wajib berada di dalam rentang sesi Zoom
+                    const zoomLimitMin = zoomStart?.value || execStart?.value;
+                    const zoomLimitMax = zoomEnd?.value || execEnd?.value;
+
+                    if (attStart) {
+                        if (zoomLimitMin) attStart.min = zoomLimitMin;
+                        else attStart.removeAttribute('min');
+
+                        if (zoomLimitMax) attStart.max = zoomLimitMax;
+                        else attStart.removeAttribute('max');
+
+                        if (attStart.value) {
+                            if (zoomLimitMin && attStart.value < zoomLimitMin) attStart.value = '';
+                            if (zoomLimitMax && attStart.value > zoomLimitMax) attStart.value = '';
+                        }
+                    }
+
+                    if (attEnd) {
+                        const attEndMin = attStart?.value || zoomLimitMin;
+                        if (attEndMin) attEnd.min = attEndMin;
+                        else attEnd.removeAttribute('min');
+
+                        if (zoomLimitMax) attEnd.max = zoomLimitMax;
+                        else attEnd.removeAttribute('max');
+
+                        if (attEnd.value) {
+                            if (attEndMin && attEnd.value <= attEndMin) attEnd.value = '';
+                            if (zoomLimitMax && attEnd.value > zoomLimitMax) attEnd.value = '';
+                        }
                     }
 
                     // 6. evalEnd tidak boleh <= evalStart
@@ -541,7 +604,7 @@
                     }
                 }
 
-                [regStart, regEnd, execStart, execEnd, zoomStart, zoomEnd, evalStart, evalEnd].forEach(el => {
+                [regStart, regEnd, execStart, execEnd, zoomStart, zoomEnd, attStart, attEnd, evalStart, evalEnd].forEach(el => {
                     el?.addEventListener('change', updateTimelineSummary);
                     el?.addEventListener('input', updateTimelineSummary);
                 });

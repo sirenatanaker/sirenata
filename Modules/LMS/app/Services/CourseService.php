@@ -866,18 +866,20 @@ class CourseService
         $isSectionDone = $isMateriDone && (!$hasZoom || ($isZoomDone && $hasProof)) && (!$postTestBab || $isEvaluasiDone);
 
         $now = now();
-        $zoomStart = $activeBimtek?->zoom_scheduled_at ?? $activeBimtek?->start_date;
-        $zoomEnd = $activeBimtek?->zoom_end_at;
-        $zoomScheduleFormatted = $activeBimtek?->zoom_schedule_formatted ?? null;
+        $presensiStart = $activeBimtek?->zoom_attendance_start_at ?? $activeBimtek?->zoom_scheduled_at ?? $activeBimtek?->start_date;
+        $presensiEnd = $activeBimtek?->zoom_attendance_end_at ?? $activeBimtek?->zoom_end_at;
+        $attendanceScheduleFormatted = $activeBimtek?->attendance_schedule_formatted ?? ($presensiStart ? $presensiStart->translatedFormat('d M Y, H:i') . ' WIB' : null);
 
         $isPresensiOpen = true;
+        $isPresensiEnded = false;
         $presensiLockReason = null;
-        if ($zoomStart && $now->lessThan($zoomStart)) {
+        if ($presensiStart && $now->lessThan($presensiStart)) {
             $isPresensiOpen = false;
-            $presensiLockReason = 'Presensi dibuka saat jadwal sesi tatap muka (' . ($zoomScheduleFormatted ?? $zoomStart->translatedFormat('d M Y, H:i') . ' WIB') . ')';
-        } elseif ($zoomEnd && $now->greaterThan($zoomEnd)) {
+            $presensiLockReason = 'Presensi dibuka pada jadwal sesi tatap muka (' . ($attendanceScheduleFormatted ?? $presensiStart->translatedFormat('d M Y, H:i') . ' WIB') . ')';
+        } elseif ($presensiEnd && $now->greaterThan($presensiEnd)) {
             $isPresensiOpen = false;
-            $presensiLockReason = 'Waktu presensi tatap muka telah berakhir pada ' . $zoomEnd->translatedFormat('d M Y, H:i') . ' WIB';
+            $isPresensiEnded = true;
+            $presensiLockReason = 'Waktu presensi tatap muka telah berakhir pada ' . $presensiEnd->translatedFormat('d M Y, H:i') . ' WIB';
         }
 
         $totalActivities = 2 + ($hasZoom ? 1 : 0);
@@ -942,6 +944,8 @@ class CourseService
             'isEvaluasiLocked',
             'isSectionDone',
             'isPresensiOpen',
+            'isPresensiEnded',
+            'attendanceScheduleFormatted',
             'presensiLockReason',
             'totalActivities',
             'completedActivities',

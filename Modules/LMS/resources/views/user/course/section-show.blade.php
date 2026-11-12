@@ -227,16 +227,29 @@
 
                             {{-- Info Sesi (Jadwal, Meeting ID, Passcode) --}}
                             @if ($activeBimtek->zoom_scheduled_at || $activeBimtek->zoom_meeting_id || $activeBimtek->zoom_passcode)
-                                <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
                                     @if ($activeBimtek->zoom_scheduled_at)
                                         <div class="flex items-center gap-2.5 p-2.5 rounded-md bg-white border border-slate-200 shadow-2xs">
                                             <div class="w-8 h-8 rounded-md bg-slate-100 text-[#13416B] flex items-center justify-center shrink-0 text-sm">
                                                 <i class="fas fa-calendar-alt"></i>
                                             </div>
                                             <div class="min-w-0">
-                                                <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Jadwal</p>
+                                                <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Jadwal Zoom</p>
                                                 <p class="text-xs font-bold text-slate-800 truncate" title="{{ $zoomScheduleFormatted ?? $activeBimtek->zoom_scheduled_at->translatedFormat('d F Y, H:i') . ' WIB' }}">
                                                     {{ $zoomScheduleFormatted ?? $activeBimtek->zoom_scheduled_at->translatedFormat('d M Y, H:i') . ' WIB' }}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    @endif
+                                    @if ($activeBimtek->zoom_attendance_start_at || $activeBimtek->zoom_attendance_end_at)
+                                        <div class="flex items-center gap-2.5 p-2.5 rounded-md bg-amber-50/70 border border-amber-200 shadow-2xs">
+                                            <div class="w-8 h-8 rounded-md bg-amber-100 text-amber-800 flex items-center justify-center shrink-0 text-sm">
+                                                <i class="fas fa-clock"></i>
+                                            </div>
+                                            <div class="min-w-0">
+                                                <p class="text-[10px] font-bold uppercase tracking-wider text-amber-700">Waktu Presensi</p>
+                                                <p class="text-xs font-bold text-amber-900 truncate" title="{{ $activeBimtek->attendance_schedule_formatted }}">
+                                                    {{ $activeBimtek->attendance_schedule_formatted }}
                                                 </p>
                                             </div>
                                         </div>
@@ -296,7 +309,7 @@
                                     <form action="{{ route('user.course.my-course.attend-zoom', $courseSlug) }}" method="POST" class="inline">
                                         @csrf
                                         <button type="submit"
-                                            class="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-md font-bold text-xs sm:text-sm bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm transition-all cursor-pointer">
+                                            class="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-md font-bold text-xs sm:text-sm bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm transition-all cursor-pointer animate-pulse">
                                             <i class="fas fa-clipboard-check text-xs"></i>
                                             <span>Konfirmasi Kehadiran</span>
                                         </button>
@@ -305,7 +318,7 @@
                                     <button type="button" disabled title="{{ $presensiLockReason }}"
                                         class="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-md font-bold text-xs sm:text-sm border border-slate-300 bg-slate-100 text-slate-400 cursor-not-allowed select-none">
                                         <i class="fas fa-lock text-xs"></i>
-                                        <span>{{ $isZoomEnded ? 'Presensi Berakhir' : 'Presensi Belum Dibuka' }}</span>
+                                        <span>{{ ($isPresensiEnded ?? $isZoomEnded) ? 'Presensi Berakhir' : 'Presensi Belum Dibuka' }}</span>
                                     </button>
                                 @endif
                             </div>
