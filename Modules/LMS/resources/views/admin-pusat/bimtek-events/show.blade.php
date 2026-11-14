@@ -514,11 +514,16 @@
                         </p>
                     </div>
                 </div>
-                <div class="flex items-center gap-2">
+                <div class="flex items-center gap-2 flex-wrap">
                     <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-bold bg-blue-50 text-[#13416B] border border-blue-200">
                         <i class="fas fa-users text-xs"></i>
                         <span>{{ $evaluationsCount }} dari {{ $totalRegistered }} Responden</span>
                     </span>
+                    <a href="{{ route('admin-pusat.management-course.evaluation-questions.index') }}"
+                       class="inline-flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-semibold text-[#13416B] bg-slate-100 hover:bg-slate-200 border border-slate-200 transition-colors">
+                        <i class="fas fa-sliders-h text-xs"></i>
+                        <span>Kelola Kuesioner</span>
+                    </a>
                 </div>
             </div>
 

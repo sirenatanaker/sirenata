@@ -352,7 +352,8 @@
             'admin-pusat.management-course.post-tests.*'
         );
         $isBimtekActive = request()->routeIs('admin-pusat.management-course.bimtek-events.*');
-        $isCourseOpen = $isCourseActive || $isBimtekActive;
+        $isEvaluationQuestionsActive = request()->routeIs('admin-pusat.management-course.evaluation-questions.*');
+        $isCourseOpen = $isCourseActive || $isBimtekActive || $isEvaluationQuestionsActive;
     @endphp
     <li x-data="{ open: {{ $isCourseOpen ? 'true' : 'false' }}, flyout: false }" @mouseleave="flyout = false" class="relative">
         <button @click="sidebarOpen ? open = !open : flyout = !flyout"
@@ -406,6 +407,15 @@
                     Periode Event
                 </a>
             </li>
+            <li>
+                <a href="{{ route('admin-pusat.management-course.evaluation-questions.index') }}"
+                    class="flex items-center px-3.5 py-2.5 rounded-lg transition-colors text-sm leading-snug break-words font-semibold
+                    {{ $isEvaluationQuestionsActive
+                        ? 'text-[#13416B] bg-[#13416B]/10 font-bold'
+                        : 'text-slate-500 hover:bg-slate-100 hover:text-[#13416B]' }}">
+                    Kuesioner Evaluasi
+                </a>
+            </li>
         </ul>
 
         <!-- Submenu Flyout (Collapsed Mini Mode) -->
@@ -428,6 +438,13 @@
                         class="block px-3.5 py-2.5 rounded-lg text-sm leading-snug break-words font-semibold transition-colors
                         {{ $isBimtekActive ? 'text-[#13416B] bg-[#13416B]/10 font-bold' : 'text-slate-600 hover:bg-slate-100 hover:text-[#13416B]' }}">
                         Periode Event
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ route('admin-pusat.management-course.evaluation-questions.index') }}"
+                        class="block px-3.5 py-2.5 rounded-lg text-sm leading-snug break-words font-semibold transition-colors
+                        {{ $isEvaluationQuestionsActive ? 'text-[#13416B] bg-[#13416B]/10 font-bold' : 'text-slate-600 hover:bg-slate-100 hover:text-[#13416B]' }}">
+                        Kuesioner Evaluasi
                     </a>
                 </li>
             </ul>

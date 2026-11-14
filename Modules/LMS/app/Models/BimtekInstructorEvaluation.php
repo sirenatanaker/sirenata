@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class BimtekInstructorEvaluation extends Model
 {
@@ -21,14 +22,21 @@ class BimtekInstructorEvaluation extends Model
         'rating_materi',
         'rating_penyampaian',
         'rating_fasilitasi',
+        'overall_score',
         'feedback',
     ];
 
     protected $casts = [
-        'rating_materi' => 'integer',
+        'rating_materi'      => 'integer',
         'rating_penyampaian' => 'integer',
-        'rating_fasilitasi' => 'integer',
+        'rating_fasilitasi'  => 'integer',
+        'overall_score'      => 'float',
     ];
+
+    public function answers(): HasMany
+    {
+        return $this->hasMany(BimtekEvaluationAnswer::class, 'evaluation_id');
+    }
 
     public function bimtekEvent(): BelongsTo
     {
@@ -50,6 +58,21 @@ class BimtekInstructorEvaluation extends Model
      */
     public function getAverageRatingAttribute(): float
     {
-        return round(($this->rating_materi + $this->rating_penyampaian + $this->rating_fasilitasi) / 3, 1);
+        if (!is_null($this->overall_score) && $this->overall_score > 0) {
+            return round((float) $this->overall_score, 1);
+        }
+
+        // Cek jika ada jawaban di tabel answers
+        $scaleAnswers = $this->relationLoaded('answers')
+            ? $this->answers->whereNotNull('rating')
+            : $this->answers()->whereNotNull('rating')->get();
+
+        if ($scaleAnswers->isNotEmpty()) {
+            return round((float) $scaleAnswers->avg('rating'), 1);
+        }
+
+        // Fallback ke kolom statis
+        $legacySum = ($this->rating_materi ?? 0) + ($this->rating_penyampaian ?? 0) + ($this->rating_fasilitasi ?? 0);
+        return $legacySum > 0 ? round($legacySum / 3, 1) : 0.0;
     }
 }

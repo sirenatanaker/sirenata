@@ -452,94 +452,30 @@
                 @endif
 
                 @if ($isBimtekEvent)
-                {{-- CARD EVALUASI NARASUMBER / PEMATERI (KHUSUS BIMTEK) --}}
+                {{-- CARD EVALUASI NARASUMBER / PEMATERI (KHUSUS BIMTEK - GAYA GOOGLE FORM PINDAH HALAMAN) --}}
                 <div data-tour="evaluasi-narasumber"
                     id="card-evaluasi-narasumber"
-                    @open-evaluasi-narasumber.window="showModal = true; $el.scrollIntoView({ behavior: 'smooth' })"
-                    x-data="{
-                        showModal: false,
-                        loading: false,
-                        submitted: {{ $isEvaluasiNarasumberCompleted ? 'true' : 'false' }},
-                        ratingMateri: {{ $existingEvaluasiNarasumber?->rating_materi ?? 5 }},
-                        ratingPenyampaian: {{ $existingEvaluasiNarasumber?->rating_penyampaian ?? 5 }},
-                        ratingFasilitasi: {{ $existingEvaluasiNarasumber?->rating_fasilitasi ?? 5 }},
-                        feedback: @js($existingEvaluasiNarasumber?->feedback ?? ''),
-                        showSuccessToast: false,
-                        errorMessage: '',
-                        async saveEvaluation() {
-                            if (this.loading) return;
-                            this.loading = true;
-                            this.errorMessage = '';
-                            try {
-                                const response = await fetch('{{ route('user.course.my-course.submit-evaluasi-narasumber', ['slug' => $courseSlug]) }}', {
-                                    method: 'POST',
-                                    headers: {
-                                        'Content-Type': 'application/json',
-                                        'Accept': 'application/json',
-                                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                                    },
-                                    body: JSON.stringify({
-                                        rating_materi: this.ratingMateri,
-                                        rating_penyampaian: this.ratingPenyampaian,
-                                        rating_fasilitasi: this.ratingFasilitasi,
-                                        feedback: this.feedback
-                                    })
-                                });
-                                const data = await response.json();
-                                if (response.ok && data.success) {
-                                    this.submitted = true;
-                                    this.showModal = false;
-                                    this.showSuccessToast = true;
-                                    window.dispatchEvent(new CustomEvent('evaluasi-narasumber-submitted', { detail: data.data }));
-                                    setTimeout(() => {
-                                        this.showSuccessToast = false;
-                                        window.location.reload();
-                                    }, 1000);
-                                } else {
-                                    this.errorMessage = data.message || 'Gagal menyimpan evaluasi. Silakan periksa isian Anda.';
-                                }
-                            } catch (error) {
-                                console.error('Error submitting evaluation:', error);
-                                this.errorMessage = 'Terjadi gangguan jaringan saat mengirim data. Silakan coba beberapa saat lagi.';
-                            } finally {
-                                this.loading = false;
-                            }
-                        }
-                    }"
                     class="bg-white rounded-none sm:rounded-md shadow-sm border-y border-x-0 sm:border sm:border-x border-slate-200 p-4 sm:px-6 sm:py-5 lg:px-7 lg:py-6 transition-all">
 
-                    {{-- Alert Notifikasi Sukses --}}
-                    <div x-show="showSuccessToast" x-cloak
-                        x-transition:enter="transition ease-out duration-300"
-                        x-transition:enter-start="opacity-0 -translate-y-2"
-                        x-transition:enter-end="opacity-100 translate-y-0"
-                        x-transition:leave="transition ease-in duration-200"
-                        x-transition:leave-start="opacity-100 translate-y-0"
-                        x-transition:leave-end="opacity-0 -translate-y-2"
-                        class="mb-4 p-3.5 rounded-md bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs sm:text-sm font-semibold flex items-center gap-2">
-                        <i class="fas fa-check-circle text-emerald-600 text-base shrink-0"></i>
-                        <span>Terima kasih! Evaluasi narasumber & fasilitas bimtek berhasil dikirimkan.</span>
-                    </div>
-
                     <div class="flex flex-row items-end justify-between gap-6 lg:gap-8">
-                        {{-- Kolom Kiri: Informasi Evaluasi Narasumber & Tombol Aksi --}}
+                        {{-- Kolom Kiri: Informasi Evaluasi Narasumber & Tombol Aksi Pindah Halaman --}}
                         <div class="flex-1 min-w-0 sm:py-1">
                             <div class="flex items-center gap-2 flex-wrap">
                                 <h3 class="text-base sm:text-lg lg:text-xl font-bold text-slate-700 leading-snug">
                                     Evaluasi Narasumber & Penyelenggaraan
                                 </h3>
-                                <template x-if="submitted">
+                                @if ($isEvaluasiNarasumberCompleted)
                                     <span class="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-md">
                                         <i class="fas fa-check-circle text-emerald-600 text-xs"></i> Sudah Diisi
                                     </span>
-                                </template>
+                                @endif
                             </div>
 
                             <p class="text-xs sm:text-sm text-slate-600 mt-1.5 leading-relaxed max-w-full lg:max-w-[90%]">
-                                Penilaian objektif terhadap penyampaian materi oleh narasumber dan pelaksanaan bimbingan teknis.
+                                Penilaian objektif bergaya kuesioner mandiri terhadap penguasaan materi, metode penyampaian narasumber, dan fasilitas penyelenggaraan bimbingan teknis.
                             </p>
 
-                            {{-- Meta Badges (Sesuai Gaya Desain Evaluasi Akhir) --}}
+                            {{-- Meta Badges --}}
                             <div class="mt-3 sm:mt-4 flex flex-wrap items-center gap-2.5 sm:gap-3">
                                 <span
                                     class="text-[11px] sm:text-xs font-semibold text-white bg-[#547996] px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-md border border-[#446680] flex items-center gap-1.5 shadow-xs">
@@ -551,11 +487,11 @@
                                 </span>
                                 <span
                                     class="text-[11px] sm:text-xs font-semibold text-white bg-[#547996] px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-md border border-[#446680] flex items-center gap-1.5 shadow-xs">
-                                    <i class="fas fa-star text-[10px] sm:text-xs text-amber-300"></i> Skala 1 - 5
+                                    <i class="fas fa-poll-h text-[10px] sm:text-xs text-amber-300"></i> Kuesioner Formulir
                                 </span>
                             </div>
 
-                            {{-- Tombol Aksi di Bawah Badges (Konsisten dengan Evaluasi Akhir) --}}
+                            {{-- Tombol Aksi: Pindah Halaman Langsung (Google Form Style) --}}
                             <div class="mt-4 sm:mt-5 flex justify-start">
                                 @if ($isEvaluasiNarasumberLocked)
                                     <button type="button" disabled
@@ -564,12 +500,12 @@
                                         <i class="fas fa-lock text-xs"></i> Evaluasi Terkunci
                                     </button>
                                 @else
-                                    <button type="button" @click="showModal = true"
-                                        :class="submitted ? 'bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200' : 'bg-[#13416B] hover:bg-[#0f3354] text-white shadow-sm'"
-                                        class="inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-md text-xs sm:text-sm font-bold transition-all shadow-xs">
-                                        <i :class="submitted ? 'fas fa-eye' : 'fas fa-pen-alt'" class="text-xs"></i>
-                                        <span x-text="submitted ? 'Lihat / Edit Ulasan' : 'Mulai Evaluasi'"></span>
-                                    </button>
+                                    <a href="{{ route('user.course.my-course.evaluasi-narasumber', ['slug' => $courseSlug]) }}"
+                                        class="inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-md text-xs sm:text-sm font-bold transition-all shadow-xs
+                                        {{ $isEvaluasiNarasumberCompleted ? 'bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200' : 'bg-[#13416B] hover:bg-[#0f3354] text-white shadow-sm' }}">
+                                        <i class="fas {{ $isEvaluasiNarasumberCompleted ? 'fa-eye' : 'fa-pen-alt' }} text-xs"></i>
+                                        <span>{{ $isEvaluasiNarasumberCompleted ? 'Lihat / Edit Tanggapan Kuesioner' : 'Buka Kuesioner Evaluasi' }}</span>
+                                    </a>
                                 @endif
                             </div>
                         </div>
@@ -581,123 +517,8 @@
                                 class="sm:h-44 md:h-48 lg:h-52 w-auto object-contain object-bottom select-none pointer-events-none" />
                         </div>
                     </div>
-
-                    {{-- Modal Kuesioner Evaluasi Narasumber (Popup Elegan) --}}
-                    <template x-teleport="body">
-                        <div x-show="showModal" x-cloak
-                            @keydown.escape.window="showModal = false"
-                            class="fixed inset-0 z-[100] overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
-                            
-                            <div @click.away="showModal = false"
-                                class="bg-white rounded-lg shadow-xl max-w-lg w-full p-5 sm:p-6 space-y-4 text-left border border-slate-200 relative animate-in fade-in zoom-in-95 duration-200">
-                            
-                            {{-- Header Modal --}}
-                            <div class="flex items-center justify-between pb-3 border-b border-slate-100">
-                                <div class="flex items-center gap-2.5">
-                                    <div class="w-8 h-8 rounded-md bg-[#13416B]/10 text-[#13416B] flex items-center justify-center text-sm font-bold">
-                                        <i class="fas fa-chalkboard-teacher"></i>
-                                    </div>
-                                    <h4 class="text-base font-bold text-slate-800">Evaluasi & Feedback Narasumber</h4>
-                                </div>
-                                <button type="button" @click="showModal = false"
-                                    class="text-slate-400 hover:text-slate-600 p-1 rounded-md transition-colors">
-                                    <i class="fas fa-times text-sm"></i>
-                                </button>
-                            </div>
-
-                            <p class="text-xs text-slate-500 leading-relaxed">
-                                Mohon berikan penilaian secara objektif mengenai pelaksanaan bimbingan teknis dan narasumber. Data evaluasi ini bersifat anonim dan digunakan untuk peningkatan mutu.
-                            </p>
-
-                            <div class="space-y-4 py-1">
-                                {{-- 1. Penguasaan Materi --}}
-                                <div>
-                                    <label class="block text-xs font-bold text-slate-700 mb-1.5">
-                                        1. Penguasaan Materi & Kejelasan Paparan Narasumber
-                                    </label>
-                                    <div class="flex items-center gap-2">
-                                        <template x-for="star in [1, 2, 3, 4, 5]" :key="star">
-                                            <button type="button" @click="ratingMateri = star"
-                                                class="text-xl sm:text-2xl transition-transform hover:scale-110 focus:outline-none"
-                                                :class="star <= ratingMateri ? 'text-amber-400' : 'text-slate-200'">
-                                                <i class="fas fa-star"></i>
-                                            </button>
-                                        </template>
-                                        <span class="text-xs font-semibold text-slate-600 ml-2" x-text="ratingMateri + ' / 5'"></span>
-                                    </div>
-                                </div>
-
-                                {{-- 2. Interaktivitas & Komunikasi --}}
-                                <div>
-                                    <label class="block text-xs font-bold text-slate-700 mb-1.5">
-                                        2. Metode Penyampaian & Interaktivitas Sesi
-                                    </label>
-                                    <div class="flex items-center gap-2">
-                                        <template x-for="star in [1, 2, 3, 4, 5]" :key="star">
-                                            <button type="button" @click="ratingPenyampaian = star"
-                                                class="text-xl sm:text-2xl transition-transform hover:scale-110 focus:outline-none"
-                                                :class="star <= ratingPenyampaian ? 'text-amber-400' : 'text-slate-200'">
-                                                <i class="fas fa-star"></i>
-                                            </button>
-                                        </template>
-                                        <span class="text-xs font-semibold text-slate-600 ml-2" x-text="ratingPenyampaian + ' / 5'"></span>
-                                    </div>
-                                </div>
-
-                                {{-- 3. Ketepatan Waktu & Fasilitasi --}}
-                                <div>
-                                    <label class="block text-xs font-bold text-slate-700 mb-1.5">
-                                        3. Ketepatan Waktu & Pengelolaan Diskusi
-                                    </label>
-                                    <div class="flex items-center gap-2">
-                                        <template x-for="star in [1, 2, 3, 4, 5]" :key="star">
-                                            <button type="button" @click="ratingFasilitasi = star"
-                                                class="text-xl sm:text-2xl transition-transform hover:scale-110 focus:outline-none"
-                                                :class="star <= ratingFasilitasi ? 'text-amber-400' : 'text-slate-200'">
-                                                <i class="fas fa-star"></i>
-                                            </button>
-                                        </template>
-                                        <span class="text-xs font-semibold text-slate-600 ml-2" x-text="ratingFasilitasi + ' / 5'"></span>
-                                    </div>
-                                </div>
-
-                                {{-- 4. Masukan & Saran --}}
-                                <div>
-                                    <label class="block text-xs font-bold text-slate-700 mb-1.5">
-                                        Catatan / Masukan Tambahan untuk Narasumber & Panitia
-                                    </label>
-                                    <textarea x-model="feedback" rows="3"
-                                        placeholder="Tuliskan masukan atau hal yang perlu ditingkatkan untuk narasumber..."
-                                        class="w-full text-xs sm:text-sm rounded-md border border-slate-300 p-2.5 focus:border-[#13416B] focus:ring-1 focus:ring-[#13416B] outline-none transition-all placeholder:text-slate-400"></textarea>
-                                </div>
-
-                                {{-- Pesan Error Validasi / Jaringan --}}
-                                <div x-show="errorMessage" x-cloak
-                                    class="p-2.5 rounded-md bg-rose-50 border border-rose-200 text-rose-700 text-xs font-semibold flex items-center gap-2">
-                                    <i class="fas fa-exclamation-circle text-rose-500 shrink-0"></i>
-                                    <span x-text="errorMessage"></span>
-                                </div>
-                            </div>
-
-                            {{-- Footer Tombol Modal --}}
-                            <div class="flex items-center justify-end gap-2.5 pt-3 border-t border-slate-100">
-                                <button type="button" @click="showModal = false" :disabled="loading"
-                                    class="px-4 py-2 rounded-md text-xs font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-colors disabled:opacity-50">
-                                    Batal
-                                </button>
-                                <button type="button" @click="saveEvaluation()" :disabled="loading"
-                                    class="px-5 py-2 rounded-md text-xs font-bold text-white bg-[#13416B] hover:bg-[#0f3354] transition-colors shadow-xs disabled:opacity-70 disabled:cursor-not-allowed inline-flex items-center gap-1.5">
-                                    <template x-if="loading">
-                                        <i class="fas fa-spinner fa-spin text-xs"></i>
-                                    </template>
-                                    <span x-text="loading ? 'Menyimpan...' : 'Simpan Evaluasi'"></span>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </template>
-            </div>
-            @endif
+                </div>
+                @endif
         </div>
 
             {{-- Right Column: Side Widget (Sertifikat & Info) --}}
@@ -1126,11 +947,11 @@
                                                 </span>
                                             </template>
                                             <template x-if="!evalNarasumberDone && !{{ $isEvaluasiNarasumberLocked ? 'true' : 'false' }}">
-                                                <button type="button" @click="showRequirementsModal = false; $dispatch('open-evaluasi-narasumber')"
+                                                <a href="{{ route('user.course.my-course.evaluasi-narasumber', ['slug' => $courseSlug]) }}"
                                                     class="inline-flex items-center gap-1 px-3 py-1.5 rounded-md text-xs font-bold text-white bg-[#13416B] hover:bg-[#0f3354] transition-colors shadow-2xs whitespace-nowrap">
                                                     <span>Isi</span>
                                                     <i class="fas fa-arrow-right text-[9px]"></i>
-                                                </button>
+                                                </a>
                                             </template>
                                         </div>
                                     </div>

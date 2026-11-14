@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use Modules\LMS\Http\Controllers\AdminKabKota\RekapitulasiController as AdminKabKotaRekapitulasiController;
 use Modules\LMS\Http\Controllers\AdminProvince\RekapitulasiController as AdminProvinceRekapitulasiController;
 use Modules\LMS\Http\Controllers\AdminPusat\CertificateController as AdminPusatCertificateController;
+use Modules\LMS\Http\Controllers\AdminPusat\BimtekEvaluationQuestionController;
 use Modules\LMS\Http\Controllers\AdminPusat\BimtekEventController;
 use Modules\LMS\Http\Controllers\AdminPusat\CertificateSubmissionController;
 use Modules\LMS\Http\Controllers\PublicCertificateVerifierController;
@@ -43,6 +44,8 @@ Route::prefix('admin-pusat')->middleware(['auth', 'role:admin-pusat'])->name('ad
         Route::resource('courses', CourseController::class);
         Route::resource('bimtek-events', BimtekEventController::class);
         Route::post('bimtek-events/{eventId}/toggle-attendance/{userId}', [BimtekEventController::class, 'toggleAttendance'])->name('bimtek-events.toggle-attendance');
+        Route::resource('evaluation-questions', BimtekEvaluationQuestionController::class);
+        Route::post('evaluation-questions/{id}/toggle-status', [BimtekEvaluationQuestionController::class, 'toggleStatus'])->name('evaluation-questions.toggle-status');
         
         Route::resource('certificate-submissions', CertificateSubmissionController::class);
         Route::get('certificate-submissions/{id}/export-excel', [CertificateSubmissionController::class, 'exportExcel'])->name('certificate-submissions.export-excel');
@@ -114,6 +117,7 @@ Route::prefix('user')->middleware(['auth', 'role:user'])->name('user.')->group(f
         Route::post('/my-course/{slug}/section/{sectionId}/submit-essay', 'submitEssay')->name('section.submit-essay');
         Route::get('/my-course/{slug}/join-zoom', 'joinZoom')->name('my-course.join-zoom');
         Route::post('/my-course/{slug}/attend-zoom', 'attendZoom')->name('my-course.attend-zoom');
+        Route::get('/my-course/{slug}/evaluasi-narasumber', 'showEvaluasiNarasumber')->name('my-course.evaluasi-narasumber');
         Route::post('/my-course/{slug}/evaluasi-narasumber', 'submitEvaluasiNarasumber')->name('my-course.submit-evaluasi-narasumber');
         Route::post('/my-course/{slug}/generate-certificate', 'generateCertificate')->name('my-course.generate-certificate');
         Route::post('/content/{content}/complete', 'completeContent')->name('content.complete');

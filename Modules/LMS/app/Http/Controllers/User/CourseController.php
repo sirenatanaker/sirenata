@@ -11,6 +11,8 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 use Modules\LMS\Models\BimtekEvent;
+use Modules\LMS\Models\BimtekEvaluationAnswer;
+use Modules\LMS\Models\BimtekEvaluationQuestion;
 use Modules\LMS\Models\BimtekInstructorEvaluation;
 use Modules\LMS\Models\Course;
 use Modules\LMS\Models\CourseSection;
@@ -463,21 +465,73 @@ class CourseController extends Controller
         return redirect()->back();
     }
 
-    public function submitEvaluasiNarasumber(Request $request, string $slug): JsonResponse
+    public function showEvaluasiNarasumber(Request $request, string $slug): View|RedirectResponse
     {
-        $validated = $request->validate([
-            'rating_materi'      => 'required|integer|min:1|max:5',
-            'rating_penyampaian' => 'required|integer|min:1|max:5',
-            'rating_fasilitasi'  => 'required|integer|min:1|max:5',
-            'feedback'           => 'nullable|string|max:2000',
-        ]);
+        $result = $this->courseService->getCourseDetailSlug($slug);
+        $course = $result['data'] ?? null;
+
+        if (!$course) {
+            abort(404, 'Course tidak ditemukan');
+        }
 
         $user = $request->user();
         if (!$user) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Silakan masuk terlebih dahulu.',
-            ], 401);
+            return redirect()->route('login');
+        }
+
+        // Cek apakah terkunci
+        if ($course->is_evaluasi_narasumber_locked && !$course->can_review_all) {
+            ToastMagic::error($course->evaluasi_narasumber_lock_reason ?? 'Evaluasi narasumber belum dapat diakses.');
+            return redirect()->route('user.course.my-course.detail', $slug);
+        }
+
+        $activeBimtek = $course->active_bimtek;
+        $bimtekEventId = $course->enrollment?->pivot?->bimtek_event_id ?? $activeBimtek?->id;
+
+        // Ambil daftar pertanyaan kuesioner aktif
+        $questions = BimtekEvaluationQuestion::where('is_active', true)
+            ->orderBy('order')
+            ->get();
+
+        // Ambil evaluasi yang sudah pernah diisi oleh user
+        $existingEvaluation = null;
+        $existingAnswers = collect();
+
+        if ($bimtekEventId) {
+            $existingEvaluation = BimtekInstructorEvaluation::with('answers')
+                ->where('bimtek_event_id', $bimtekEventId)
+                ->where('user_id', $user->id)
+                ->first();
+
+            if ($existingEvaluation) {
+                $existingAnswers = $existingEvaluation->answers->keyBy('question_id');
+            }
+        }
+
+        $isSubmitted = (bool) $existingEvaluation;
+        $showSuccessState = $request->boolean('submitted') || ($isSubmitted && !$request->boolean('edit'));
+
+        return view('lms::user.course.evaluasi-narasumber', [
+            'course'             => $course,
+            'activeBimtek'       => $activeBimtek,
+            'courseSlug'         => $slug,
+            'questions'          => $questions,
+            'existingEvaluation' => $existingEvaluation,
+            'existingAnswers'    => $existingAnswers,
+            'isSubmitted'        => $isSubmitted,
+            'showSuccessState'   => $showSuccessState,
+            'backToUrl'          => route('user.course.my-course.detail', $slug),
+        ]);
+    }
+
+    public function submitEvaluasiNarasumber(Request $request, string $slug): RedirectResponse|JsonResponse
+    {
+        $user = $request->user();
+        if (!$user) {
+            if ($request->wantsJson()) {
+                return response()->json(['success' => false, 'message' => 'Silakan masuk terlebih dahulu.'], 401);
+            }
+            return redirect()->route('login');
         }
 
         $course = Course::where('slug', $slug)->firstOrFail();
@@ -485,10 +539,11 @@ class CourseController extends Controller
         // Cari enrollment peserta
         $enrollment = $course->students()->wherePivot('user_id', $user->id)->first();
         if (!$enrollment) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Anda belum terdaftar pada pelatihan ini.',
-            ], 403);
+            if ($request->wantsJson()) {
+                return response()->json(['success' => false, 'message' => 'Anda belum terdaftar pada pelatihan ini.'], 403);
+            }
+            ToastMagic::error('Anda belum terdaftar pada pelatihan ini.');
+            return redirect()->back();
         }
 
         // Ambil event bimtek aktif atau dari pivot
@@ -496,11 +551,71 @@ class CourseController extends Controller
             ?? BimtekEvent::where('course_id', $course->id)->latest()->value('id');
 
         if (!$bimtekEventId) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Event Bimtek tidak ditemukan untuk pelatihan ini.',
-            ], 404);
+            if ($request->wantsJson()) {
+                return response()->json(['success' => false, 'message' => 'Event Bimtek tidak ditemukan untuk pelatihan ini.'], 404);
+            }
+            ToastMagic::error('Event Bimtek tidak ditemukan.');
+            return redirect()->back();
         }
+
+        // Validasi jawaban kuesioner dinamis
+        $activeQuestions = BimtekEvaluationQuestion::where('is_active', true)->get();
+        $rules = [];
+        $messages = [];
+
+        foreach ($activeQuestions as $q) {
+            $key = "answers.{$q->id}";
+            if ($q->is_required) {
+                if ($q->type === 'scale') {
+                    $rules[$key] = 'required|integer|min:1|max:5';
+                    $messages["{$key}.required"] = "Pertanyaan '{$q->question}' wajib diisi.";
+                } else {
+                    $rules[$key] = 'required|string|max:2000';
+                    $messages["{$key}.required"] = "Masukan untuk '{$q->question}' wajib diisi.";
+                }
+            } else {
+                if ($q->type === 'scale') {
+                    $rules[$key] = 'nullable|integer|min:1|max:5';
+                } else {
+                    $rules[$key] = 'nullable|string|max:2000';
+                }
+            }
+        }
+
+        // Dukung juga payload legacy jika ada (rating_materi, dll.)
+        if ($request->has('rating_materi')) {
+            $rules['rating_materi'] = 'required|integer|min:1|max:5';
+            $rules['rating_penyampaian'] = 'required|integer|min:1|max:5';
+            $rules['rating_fasilitasi'] = 'required|integer|min:1|max:5';
+            $rules['feedback'] = 'nullable|string|max:2000';
+        }
+
+        $validated = $request->validate($rules, $messages);
+
+        // Hitung rata-rata dan siapkan jawaban
+        $answersData = $request->input('answers', []);
+        $scaleRatings = [];
+        $primaryFeedback = null;
+
+        // Cek rating dari jawaban dinamis
+        foreach ($activeQuestions as $q) {
+            $val = $answersData[$q->id] ?? null;
+            if ($q->type === 'scale' && !empty($val)) {
+                $scaleRatings[] = (int) $val;
+            } elseif ($q->type === 'text' && !empty($val) && is_null($primaryFeedback)) {
+                $primaryFeedback = (string) $val;
+            }
+        }
+
+        // Fallback ke legacy input jika form lama dikirim
+        $legacyR1 = $request->input('rating_materi', $scaleRatings[0] ?? 5);
+        $legacyR2 = $request->input('rating_penyampaian', $scaleRatings[1] ?? 5);
+        $legacyR3 = $request->input('rating_fasilitasi', $scaleRatings[2] ?? 5);
+        $legacyFeedback = $request->input('feedback', $primaryFeedback);
+
+        $overallScore = !empty($scaleRatings)
+            ? round(array_sum($scaleRatings) / count($scaleRatings), 1)
+            : round(($legacyR1 + $legacyR2 + $legacyR3) / 3, 1);
 
         $evaluation = BimtekInstructorEvaluation::updateOrCreate(
             [
@@ -509,24 +624,55 @@ class CourseController extends Controller
             ],
             [
                 'course_id'          => $course->id,
-                'rating_materi'      => $validated['rating_materi'],
-                'rating_penyampaian' => $validated['rating_penyampaian'],
-                'rating_fasilitasi'  => $validated['rating_fasilitasi'],
-                'feedback'           => $validated['feedback'] ?? null,
+                'rating_materi'      => $legacyR1,
+                'rating_penyampaian' => $legacyR2,
+                'rating_fasilitasi'  => $legacyR3,
+                'overall_score'      => $overallScore,
+                'feedback'           => $legacyFeedback,
             ]
         );
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Terima kasih! Evaluasi narasumber & penyelenggaraan berhasil dikirimkan.',
-            'data'    => [
-                'id'                 => $evaluation->id,
-                'rating_materi'      => $evaluation->rating_materi,
-                'rating_penyampaian' => $evaluation->rating_penyampaian,
-                'rating_fasilitasi'  => $evaluation->rating_fasilitasi,
-                'feedback'           => $evaluation->feedback,
-                'average'            => $evaluation->average_rating,
-            ],
+        // Simpan setiap jawaban ke tabel bimtek_evaluation_answers
+        foreach ($activeQuestions as $q) {
+            $val = $answersData[$q->id] ?? null;
+            if ($q->type === 'scale') {
+                BimtekEvaluationAnswer::updateOrCreate(
+                    [
+                        'evaluation_id' => $evaluation->id,
+                        'question_id'   => $q->id,
+                    ],
+                    [
+                        'rating'      => !is_null($val) ? (int) $val : null,
+                        'text_answer' => null,
+                    ]
+                );
+            } else {
+                BimtekEvaluationAnswer::updateOrCreate(
+                    [
+                        'evaluation_id' => $evaluation->id,
+                        'question_id'   => $q->id,
+                    ],
+                    [
+                        'rating'      => null,
+                        'text_answer' => !is_null($val) ? (string) $val : null,
+                    ]
+                );
+            }
+        }
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Terima kasih! Evaluasi narasumber & penyelenggaraan berhasil dikirimkan.',
+                'data'    => $evaluation,
+            ]);
+        }
+
+        ToastMagic::success('Terima kasih! Kuesioner evaluasi narasumber & bimtek berhasil disimpan.');
+
+        return redirect()->route('user.course.my-course.evaluasi-narasumber', [
+            'slug'      => $slug,
+            'submitted' => 1,
         ]);
     }
 
