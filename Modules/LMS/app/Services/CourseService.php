@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Modules\LMS\Models\BimtekEvent;
+use Modules\LMS\Models\BimtekInstructorEvaluation;
 use Modules\LMS\Models\Course;
 use Modules\LMS\Models\CourseSection;
 use Modules\LMS\Models\PostTest;
@@ -674,7 +675,24 @@ class CourseService
             $totalItems = $totalContents + $totalTests + $totalZoom;
             $completedItems = $totalCompletedCount + $passedTests + $passedZoom;
             $currentProgress = $totalItems > 0 ? (int) round(($completedItems / $totalItems) * 100) : 0;
-            $isFullyCompleted = $isCourseAlreadyFinished || ($currentProgress >= 100 && (!$evaluasiAkhir || $isEvaluasiAkhirCompleted) && (!$hasZoom || !empty($course->zoom_attended)));
+
+            // Evaluasi narasumber & fasilitas bimtek
+            $isBimtekEvent = (bool) ($activeBimtek && ($activeBimtek->batch_name || $activeBimtek->start_date));
+            $isEvaluasiNarasumberCompleted = false;
+            $existingEvaluasiNarasumber = null;
+            if ($isBimtekEvent && $activeBimtek && $user) {
+                $existingEvaluasiNarasumber = BimtekInstructorEvaluation::where('bimtek_event_id', $activeBimtek->id)
+                    ->where('user_id', $user->id)
+                    ->first();
+                $isEvaluasiNarasumberCompleted = !empty($existingEvaluasiNarasumber);
+            }
+
+            $isFullyCompleted = $isCourseAlreadyFinished || (
+                $currentProgress >= 100 
+                && (!$evaluasiAkhir || $isEvaluasiAkhirCompleted) 
+                && (!$hasZoom || !empty($course->zoom_attended))
+                && (!$isBimtekEvent || $isEvaluasiNarasumberCompleted)
+            );
 
             $sectionsList = collect($mappedSections);
             $totalSections = $sectionsList->count();
@@ -787,6 +805,8 @@ class CourseService
             $course->is_last_day_reached = $isLastDayReached;
             $course->is_evaluasi_narasumber_locked = $isEvaluasiNarasumberLocked;
             $course->evaluasi_narasumber_lock_reason = $evaluasiNarasumberLockReason;
+            $course->is_evaluasi_narasumber_completed = $isEvaluasiNarasumberCompleted;
+            $course->existing_evaluasi_narasumber = $existingEvaluasiNarasumber;
             $course->first_incomplete_section_id = $firstIncompleteSectionId;
             $course->progress_bar_class = $progressBarClass;
             $course->progress_text_class = $progressTextClass;

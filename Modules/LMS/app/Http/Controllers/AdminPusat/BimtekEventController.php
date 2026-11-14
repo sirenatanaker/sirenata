@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Modules\LMS\Models\BimtekEvent;
 use Modules\LMS\Models\BimtekEventSession;
+use Modules\LMS\Models\BimtekInstructorEvaluation;
 use Modules\LMS\Models\BimtekSessionAttendance;
 use Modules\LMS\Models\Course;
 
@@ -77,12 +78,12 @@ class BimtekEventController extends Controller
             'batch_code'               => 'nullable|string|max:100|unique:bimtek_events,batch_code',
             'quota'                    => $isUnlimitedQuota ? 'nullable' : 'required|integer|min:1',
 
-            // 1. Periode Pendaftaran (Hanya Tanggal)
-            'registration_start_at'    => 'nullable|date_format:Y-m-d',
-            'registration_end_at'      => 'nullable|date_format:Y-m-d' . ($hasRegStart ? '|after_or_equal:registration_start_at' : ''),
+            // 1. Periode Pendaftaran (Hanya Tanggal - Wajib)
+            'registration_start_at'    => 'required|date_format:Y-m-d',
+            'registration_end_at'      => 'required|date_format:Y-m-d|after_or_equal:registration_start_at',
 
-            // 2. Periode Pelaksanaan (Hanya Tanggal, harus berurutan setelah pendaftaran)
-            'start_date'               => 'required|date_format:Y-m-d' . ($hasRegEnd ? '|after_or_equal:registration_end_at' : ($hasRegStart ? '|after_or_equal:registration_start_at' : '')),
+            // 2. Periode Pelaksanaan (Hanya Tanggal, harus berurutan setelah pendaftaran - Wajib)
+            'start_date'               => 'required|date_format:Y-m-d|after_or_equal:registration_end_at',
             'end_date'                 => 'required|date_format:Y-m-d|after_or_equal:start_date',
 
             // Detail Sesi Zoom (Wajib Tanggal & Jam)
@@ -110,18 +111,24 @@ class BimtekEventController extends Controller
             'sessions.*.attendance_start_at'   => 'nullable|date',
             'sessions.*.attendance_end_at'     => 'nullable|date',
 
-            // 3. Periode Evaluasi & Sertifikat (Hanya Tanggal, setelah pelaksanaan)
-            'assessment_start_at'      => 'nullable|date_format:Y-m-d|after_or_equal:end_date',
-            'assessment_end_at'        => 'nullable|date_format:Y-m-d' . ($hasAssessmentStart ? '|after_or_equal:assessment_start_at' : '|after_or_equal:end_date'),
+            // 3. Periode Evaluasi & Sertifikat (Hanya Tanggal, setelah pelaksanaan - Wajib)
+            'assessment_start_at'      => 'required|date_format:Y-m-d|after_or_equal:end_date',
+            'assessment_end_at'        => 'required|date_format:Y-m-d|after_or_equal:assessment_start_at',
 
             'location_name'            => 'nullable|string|max:255',
             'location_address'         => 'nullable|string',
         ], [
+            'registration_start_at.required'     => 'Tanggal buka pendaftaran wajib diisi.',
+            'registration_end_at.required'       => 'Tanggal tutup pendaftaran wajib diisi.',
             'registration_end_at.after_or_equal' => 'Tanggal tutup pendaftaran harus sama atau setelah tanggal buka pendaftaran.',
-            'start_date.after_or_equal'          => 'Tanggal mulai pelaksanaan harus setelah periode pendaftaran.',
+            'start_date.required'                => 'Tanggal mulai pelaksanaan wajib diisi.',
+            'start_date.after_or_equal'          => 'Tanggal mulai pelaksanaan harus setelah atau sama dengan tanggal tutup pendaftaran.',
+            'end_date.required'                  => 'Tanggal selesai pelaksanaan wajib diisi.',
             'end_date.after_or_equal'            => 'Tanggal selesai pelaksanaan harus sama atau setelah tanggal mulai pelaksanaan.',
+            'assessment_start_at.required'       => 'Tanggal mulai evaluasi wajib diisi.',
             'assessment_start_at.after_or_equal' => 'Tanggal mulai masa evaluasi tidak boleh sebelum tanggal selesai pelaksanaan.',
-            'assessment_end_at.after_or_equal'   => 'Tanggal batas akhir evaluasi & sertifikat harus setelah tanggal mulai evaluasi.',
+            'assessment_end_at.required'         => 'Tanggal batas akhir evaluasi wajib diisi.',
+            'assessment_end_at.after_or_equal'   => 'Tanggal batas akhir evaluasi & sertifikat harus sama atau setelah tanggal mulai evaluasi.',
         ]);
 
         // Validasi ketat sesi Zoom & Presensi di dalam rentang waktu yang diizinkan
@@ -370,12 +377,28 @@ class BimtekEventController extends Controller
             ->get()
             ->groupBy('user_id');
 
+        // Ambil data evaluasi narasumber & penyelenggaraan
+        $evaluations = BimtekInstructorEvaluation::with('user')
+            ->where('bimtek_event_id', $event->id)
+            ->latest()
+            ->get();
+
+        $evaluationsCount = $evaluations->count();
+        $evaluationsByUser = $evaluations->keyBy('user_id');
+
+        $avgMateri = $evaluationsCount > 0 ? round((float) $evaluations->avg('rating_materi'), 1) : 0.0;
+        $avgPenyampaian = $evaluationsCount > 0 ? round((float) $evaluations->avg('rating_penyampaian'), 1) : 0.0;
+        $avgFasilitasi = $evaluationsCount > 0 ? round((float) $evaluations->avg('rating_fasilitasi'), 1) : 0.0;
+        $avgOverall = $evaluationsCount > 0 ? round(($avgMateri + $avgPenyampaian + $avgFasilitasi) / 3, 1) : 0.0;
+
         $totalSessionsCount = $event->sessions->count();
         foreach ($participants as $p) {
             $attended = isset($sessionAttendances[$p->user_id])
                 ? $sessionAttendances[$p->user_id]->count()
                 : ($p->zoom_attended ? ($totalSessionsCount ?: 1) : 0);
             $p->attended_sessions_count = $attended;
+            $p->evaluation = $evaluationsByUser[$p->user_id] ?? null;
+            $p->has_evaluated = isset($evaluationsByUser[$p->user_id]);
         }
 
         // Hitung kelulusan
@@ -391,7 +414,13 @@ class BimtekEventController extends Controller
             'totalCompleted',
             'totalAttendedZoom',
             'totalCertified',
-            'totalSessionsCount'
+            'totalSessionsCount',
+            'evaluations',
+            'evaluationsCount',
+            'avgMateri',
+            'avgPenyampaian',
+            'avgFasilitasi',
+            'avgOverall'
         ));
     }
 
@@ -430,12 +459,12 @@ class BimtekEventController extends Controller
             'batch_code'               => 'required|string|max:100|unique:bimtek_events,batch_code,' . $event->id,
             'quota'                    => $isUnlimitedQuota ? 'nullable' : 'required|integer|min:1',
 
-            // 1. Periode Pendaftaran (Hanya Tanggal)
-            'registration_start_at'    => 'nullable|date_format:Y-m-d',
-            'registration_end_at'      => 'nullable|date_format:Y-m-d' . ($hasRegStart ? '|after_or_equal:registration_start_at' : ''),
+            // 1. Periode Pendaftaran (Hanya Tanggal - Wajib)
+            'registration_start_at'    => 'required|date_format:Y-m-d',
+            'registration_end_at'      => 'required|date_format:Y-m-d|after_or_equal:registration_start_at',
 
-            // 2. Periode Pelaksanaan (Hanya Tanggal, harus berurutan setelah pendaftaran)
-            'start_date'               => 'required|date_format:Y-m-d' . ($hasRegEnd ? '|after_or_equal:registration_end_at' : ($hasRegStart ? '|after_or_equal:registration_start_at' : '')),
+            // 2. Periode Pelaksanaan (Hanya Tanggal, harus berurutan setelah pendaftaran - Wajib)
+            'start_date'               => 'required|date_format:Y-m-d|after_or_equal:registration_end_at',
             'end_date'                 => 'required|date_format:Y-m-d|after_or_equal:start_date',
 
             // Detail Sesi Zoom (Wajib Tanggal & Jam)
@@ -463,18 +492,24 @@ class BimtekEventController extends Controller
             'sessions.*.attendance_start_at'   => 'nullable|date',
             'sessions.*.attendance_end_at'     => 'nullable|date',
 
-            // 3. Periode Evaluasi & Sertifikat (Hanya Tanggal, setelah pelaksanaan)
-            'assessment_start_at'      => 'nullable|date_format:Y-m-d|after_or_equal:end_date',
-            'assessment_end_at'        => 'nullable|date_format:Y-m-d' . ($hasAssessmentStart ? '|after_or_equal:assessment_start_at' : '|after_or_equal:end_date'),
+            // 3. Periode Evaluasi & Sertifikat (Hanya Tanggal, setelah pelaksanaan - Wajib)
+            'assessment_start_at'      => 'required|date_format:Y-m-d|after_or_equal:end_date',
+            'assessment_end_at'        => 'required|date_format:Y-m-d|after_or_equal:assessment_start_at',
 
             'location_name'            => 'nullable|string|max:255',
             'location_address'         => 'nullable|string',
         ], [
+            'registration_start_at.required'     => 'Tanggal buka pendaftaran wajib diisi.',
+            'registration_end_at.required'       => 'Tanggal tutup pendaftaran wajib diisi.',
             'registration_end_at.after_or_equal' => 'Tanggal tutup pendaftaran harus sama atau setelah tanggal buka pendaftaran.',
-            'start_date.after_or_equal'          => 'Tanggal mulai pelaksanaan harus setelah periode pendaftaran.',
+            'start_date.required'                => 'Tanggal mulai pelaksanaan wajib diisi.',
+            'start_date.after_or_equal'          => 'Tanggal mulai pelaksanaan harus setelah atau sama dengan tanggal tutup pendaftaran.',
+            'end_date.required'                  => 'Tanggal selesai pelaksanaan wajib diisi.',
             'end_date.after_or_equal'            => 'Tanggal selesai pelaksanaan harus sama atau setelah tanggal mulai pelaksanaan.',
+            'assessment_start_at.required'       => 'Tanggal mulai evaluasi wajib diisi.',
             'assessment_start_at.after_or_equal' => 'Tanggal mulai masa evaluasi tidak boleh sebelum tanggal selesai pelaksanaan.',
-            'assessment_end_at.after_or_equal'   => 'Tanggal batas akhir evaluasi & sertifikat harus setelah tanggal mulai evaluasi.',
+            'assessment_end_at.required'         => 'Tanggal batas akhir evaluasi wajib diisi.',
+            'assessment_end_at.after_or_equal'   => 'Tanggal batas akhir evaluasi & sertifikat harus sama atau setelah tanggal mulai evaluasi.',
         ]);
 
         // Validasi ketat sesi Zoom & Presensi di dalam rentang waktu yang diizinkan

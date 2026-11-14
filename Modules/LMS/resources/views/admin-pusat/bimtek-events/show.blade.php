@@ -382,6 +382,7 @@
                             <th class="py-3 px-3.5 min-w-[200px]">Nama Peserta</th>
                             <th class="py-3 px-3.5 min-w-[150px]">Progres Modul</th>
                             <th class="py-3 px-3.5 min-w-[140px] text-center">Presensi Zoom</th>
+                            <th class="py-3 px-3.5 min-w-[130px] text-center">Evaluasi Narasumber</th>
                             <th class="py-3 px-3.5 min-w-[160px]">Status Sertifikasi PPSDM</th>
                             <th class="py-3 px-3.5 min-w-[160px]">Nomor Resmi Sertifikat</th>
                         </tr>
@@ -437,6 +438,21 @@
                                         </form>
                                     @endif
                                 </td>
+                                <td class="py-3 px-3.5 text-center">
+                                    @if ($p->has_evaluated)
+                                        <div class="inline-flex flex-col items-center gap-0.5">
+                                            <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200" title="Materi: {{ $p->evaluation?->rating_materi }}★, Penyampaian: {{ $p->evaluation?->rating_penyampaian }}★, Fasilitasi: {{ $p->evaluation?->rating_fasilitasi }}★">
+                                                <i class="fas fa-star text-amber-400 text-[10px]"></i>
+                                                <span>{{ number_format($p->evaluation?->average_rating, 1) }}</span>
+                                            </span>
+                                            <span class="text-[10px] text-slate-400">Sudah Mengisi</span>
+                                        </div>
+                                    @else
+                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-medium text-slate-400 bg-slate-100">
+                                            <i class="far fa-clock text-[9px]"></i> Belum
+                                        </span>
+                                    @endif
+                                </td>
                                 <td class="py-3 px-3.5">
                                     @if ($p->official_cert_number)
                                         <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
@@ -472,13 +488,180 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="6" class="py-10 text-center text-xs text-slate-500">
+                                <td colspan="7" class="py-10 text-center text-xs text-slate-500">
                                     Belum ada peserta yang terdaftar pada kursus ini.
                                 </td>
                             </tr>
                         @endforelse
                     </tbody>
                 </table>
+            </div>
+        </div>
+
+        {{-- SECTION EVALUASI NARASUMBER & PENYELENGGARAAN --}}
+        <div class="bg-white rounded-md border border-slate-200 shadow-2xs overflow-hidden">
+            <div class="px-5 py-4 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-50/50">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-8 h-8 rounded-md bg-[#13416B]/10 text-[#13416B] flex items-center justify-center text-sm font-bold">
+                        <i class="fas fa-chalkboard-teacher"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-sm font-bold text-slate-800">
+                            Hasil Evaluasi Narasumber & Penyelenggaraan
+                        </h2>
+                        <p class="text-[11px] text-slate-500">
+                            Kompilasi penilaian mutu pengajar dan masukan evaluasi dari peserta bimtek
+                        </p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-bold bg-blue-50 text-[#13416B] border border-blue-200">
+                        <i class="fas fa-users text-xs"></i>
+                        <span>{{ $evaluationsCount }} dari {{ $totalRegistered }} Responden</span>
+                    </span>
+                </div>
+            </div>
+
+            {{-- 4 Metric Score Cards --}}
+            <div class="p-5 sm:p-6 bg-slate-50/30 border-b border-slate-100">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    {{-- 1. Skor Keseluruhan --}}
+                    <div class="p-4 rounded-md bg-white border border-slate-200 shadow-2xs space-y-2">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-semibold text-slate-500">Skor Rata-Rata</span>
+                            <span class="w-7 h-7 rounded-md bg-amber-50 text-amber-500 flex items-center justify-center text-xs">
+                                <i class="fas fa-star"></i>
+                            </span>
+                        </div>
+                        <div class="flex items-baseline gap-2">
+                            <span class="text-2xl font-black text-slate-800 tracking-tight">{{ number_format($avgOverall, 1) }}</span>
+                            <span class="text-xs font-medium text-slate-400">/ 5.0</span>
+                        </div>
+                        <div class="flex items-center gap-1 text-amber-400 text-xs">
+                            @for ($i = 1; $i <= 5; $i++)
+                                <i class="fas fa-star {{ $i <= round($avgOverall) ? 'text-amber-400' : 'text-slate-200' }}"></i>
+                            @endfor
+                            <span class="text-[11px] text-slate-500 font-medium ml-1">Overall</span>
+                        </div>
+                    </div>
+
+                    {{-- 2. Penguasaan Materi --}}
+                    <div class="p-4 rounded-md bg-white border border-slate-200 shadow-2xs space-y-2">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-semibold text-slate-500">1. Penguasaan Materi</span>
+                            <span class="w-7 h-7 rounded-md bg-blue-50 text-blue-600 flex items-center justify-center text-xs">
+                                <i class="fas fa-book-reader"></i>
+                            </span>
+                        </div>
+                        <div class="flex items-baseline gap-2">
+                            <span class="text-2xl font-black text-slate-800 tracking-tight">{{ number_format($avgMateri, 1) }}</span>
+                            <span class="text-xs font-medium text-slate-400">/ 5.0</span>
+                        </div>
+                        <p class="text-[11px] text-slate-500 leading-tight">
+                            Kejelasan paparan & bobot materi narasumber
+                        </p>
+                    </div>
+
+                    {{-- 3. Metode Penyampaian --}}
+                    <div class="p-4 rounded-md bg-white border border-slate-200 shadow-2xs space-y-2">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-semibold text-slate-500">2. Penyampaian Sesi</span>
+                            <span class="w-7 h-7 rounded-md bg-indigo-50 text-indigo-600 flex items-center justify-center text-xs">
+                                <i class="fas fa-comments"></i>
+                            </span>
+                        </div>
+                        <div class="flex items-baseline gap-2">
+                            <span class="text-2xl font-black text-slate-800 tracking-tight">{{ number_format($avgPenyampaian, 1) }}</span>
+                            <span class="text-xs font-medium text-slate-400">/ 5.0</span>
+                        </div>
+                        <p class="text-[11px] text-slate-500 leading-tight">
+                            Interaktivitas metode diskusi & tanya jawab
+                        </p>
+                    </div>
+
+                    {{-- 4. Ketepatan Waktu & Fasilitasi --}}
+                    <div class="p-4 rounded-md bg-white border border-slate-200 shadow-2xs space-y-2">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-semibold text-slate-500">3. Fasilitasi Panitia</span>
+                            <span class="w-7 h-7 rounded-md bg-emerald-50 text-emerald-600 flex items-center justify-center text-xs">
+                                <i class="fas fa-user-clock"></i>
+                            </span>
+                        </div>
+                        <div class="flex items-baseline gap-2">
+                            <span class="text-2xl font-black text-slate-800 tracking-tight">{{ number_format($avgFasilitasi, 1) }}</span>
+                            <span class="text-xs font-medium text-slate-400">/ 5.0</span>
+                        </div>
+                        <p class="text-[11px] text-slate-500 leading-tight">
+                            Ketepatan jadwal & fasilitasi teknis bimtek
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            {{-- Daftar Ulasan & Catatan Masukan Peserta --}}
+            <div class="p-5 sm:p-6 space-y-4">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-xs sm:text-sm font-bold text-slate-800 flex items-center gap-2">
+                        <i class="fas fa-comment-alt text-[#13416B]"></i>
+                        <span>Daftar Ulasan & Masukan Peserta</span>
+                    </h3>
+                    <span class="text-xs text-slate-400 font-medium">
+                        Identitas peserta disamarkan (Anonim)
+                    </span>
+                </div>
+
+                @if ($evaluations->isEmpty())
+                    <div class="py-10 text-center text-slate-400 text-xs sm:text-sm bg-slate-50 rounded-md border border-dashed border-slate-200">
+                        <i class="far fa-clipboard text-2xl mb-2 text-slate-300 block"></i>
+                        <span>Belum ada peserta yang mengisi kuesioner evaluasi narasumber untuk bimtek ini.</span>
+                    </div>
+                @else
+                    <div class="space-y-3">
+                        @foreach ($evaluations as $index => $eval)
+                            <div class="p-4 rounded-md border border-slate-200 bg-white hover:border-slate-300 transition-colors space-y-2.5">
+                                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-2.5">
+                                    <div class="flex items-center gap-2">
+                                        <div class="w-7 h-7 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center text-xs font-bold">
+                                            #{{ $index + 1 }}
+                                        </div>
+                                        <div>
+                                            <span class="text-xs font-bold text-slate-800">Peserta Bimtek (Responden Anonim)</span>
+                                            <span class="text-[11px] text-slate-400 ml-1.5">• {{ $eval->created_at->translatedFormat('d M Y, H:i') }} WIB</span>
+                                        </div>
+                                    </div>
+                                    
+                                    {{-- Badges Per Aspek --}}
+                                    <div class="flex items-center gap-2 flex-wrap">
+                                        <span class="inline-flex items-center gap-1 text-[11px] font-semibold text-slate-700 bg-slate-100 px-2 py-0.5 rounded">
+                                            <span>Materi:</span>
+                                            <span class="font-bold text-amber-500">{{ $eval->rating_materi }}★</span>
+                                        </span>
+                                        <span class="inline-flex items-center gap-1 text-[11px] font-semibold text-slate-700 bg-slate-100 px-2 py-0.5 rounded">
+                                            <span>Penyampaian:</span>
+                                            <span class="font-bold text-amber-500">{{ $eval->rating_penyampaian }}★</span>
+                                        </span>
+                                        <span class="inline-flex items-center gap-1 text-[11px] font-semibold text-slate-700 bg-slate-100 px-2 py-0.5 rounded">
+                                            <span>Fasilitasi:</span>
+                                            <span class="font-bold text-amber-500">{{ $eval->rating_fasilitasi }}★</span>
+                                        </span>
+                                        <span class="inline-flex items-center gap-1 text-xs font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded">
+                                            <span>Rata-rata: {{ $eval->average_rating }}</span>
+                                        </span>
+                                    </div>
+                                </div>
+
+                                {{-- Isi Catatan / Masukan --}}
+                                <div class="text-xs sm:text-sm text-slate-700 leading-relaxed bg-slate-50/60 p-3 rounded-md border border-slate-150">
+                                    @if (!empty(trim($eval->feedback)))
+                                        <p class="italic">“{{ $eval->feedback }}”</p>
+                                    @else
+                                        <p class="text-slate-400 italic">Peserta tidak meninggalkan catatan tertulis tambahan.</p>
+                                    @endif
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                @endif
             </div>
         </div>
 

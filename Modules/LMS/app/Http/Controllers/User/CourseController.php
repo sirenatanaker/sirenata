@@ -4,11 +4,15 @@ namespace Modules\LMS\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
 use Devrabiul\ToastMagic\Facades\ToastMagic;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
+use Modules\LMS\Models\BimtekEvent;
+use Modules\LMS\Models\BimtekInstructorEvaluation;
+use Modules\LMS\Models\Course;
 use Modules\LMS\Models\CourseSection;
 use Modules\LMS\Models\PostTest;
 use Modules\LMS\Models\SectionContent;
@@ -131,6 +135,8 @@ class CourseController extends Controller
             'isFullyCompleted'             => $course->is_fully_completed,
             'evaluasiAkhir'                => $course->evaluasi_akhir,
             'isEvaluasiAkhirCompleted'     => $course->is_evaluasi_akhir_completed,
+            'isEvaluasiNarasumberCompleted' => $course->is_evaluasi_narasumber_completed,
+            'existingEvaluasiNarasumber'   => $course->existing_evaluasi_narasumber,
             'sectionProofs'                => $sectionProofs,
             'success'                      => $result['success'],
             'message'                      => $result['message'],
@@ -455,6 +461,73 @@ class CourseController extends Controller
         ToastMagic::success($successMsg);
 
         return redirect()->back();
+    }
+
+    public function submitEvaluasiNarasumber(Request $request, string $slug): JsonResponse
+    {
+        $validated = $request->validate([
+            'rating_materi'      => 'required|integer|min:1|max:5',
+            'rating_penyampaian' => 'required|integer|min:1|max:5',
+            'rating_fasilitasi'  => 'required|integer|min:1|max:5',
+            'feedback'           => 'nullable|string|max:2000',
+        ]);
+
+        $user = $request->user();
+        if (!$user) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Silakan masuk terlebih dahulu.',
+            ], 401);
+        }
+
+        $course = Course::where('slug', $slug)->firstOrFail();
+
+        // Cari enrollment peserta
+        $enrollment = $course->students()->wherePivot('user_id', $user->id)->first();
+        if (!$enrollment) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Anda belum terdaftar pada pelatihan ini.',
+            ], 403);
+        }
+
+        // Ambil event bimtek aktif atau dari pivot
+        $bimtekEventId = $enrollment->pivot->bimtek_event_id
+            ?? BimtekEvent::where('course_id', $course->id)->latest()->value('id');
+
+        if (!$bimtekEventId) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Event Bimtek tidak ditemukan untuk pelatihan ini.',
+            ], 404);
+        }
+
+        $evaluation = BimtekInstructorEvaluation::updateOrCreate(
+            [
+                'bimtek_event_id' => $bimtekEventId,
+                'user_id'         => $user->id,
+            ],
+            [
+                'course_id'          => $course->id,
+                'rating_materi'      => $validated['rating_materi'],
+                'rating_penyampaian' => $validated['rating_penyampaian'],
+                'rating_fasilitasi'  => $validated['rating_fasilitasi'],
+                'feedback'           => $validated['feedback'] ?? null,
+            ]
+        );
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Terima kasih! Evaluasi narasumber & penyelenggaraan berhasil dikirimkan.',
+            'data'    => [
+                'id'                 => $evaluation->id,
+                'rating_materi'      => $evaluation->rating_materi,
+                'rating_penyampaian' => $evaluation->rating_penyampaian,
+                'rating_fasilitasi'  => $evaluation->rating_fasilitasi,
+                'feedback'           => $evaluation->feedback,
+                'average'            => $evaluation->average_rating,
+            ],
+        ]);
     }
 
     public function generateCertificate(Request $request, string $slug): RedirectResponse

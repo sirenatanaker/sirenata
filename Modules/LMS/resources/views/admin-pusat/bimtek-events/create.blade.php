@@ -180,10 +180,10 @@
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
                                 <label for="registration_start_at" class="block text-xs font-semibold text-slate-700 mb-1">
-                                    Tanggal Buka Pendaftaran
+                                    Tanggal Buka Pendaftaran <span class="text-rose-500">*</span>
                                 </label>
                                 <input type="date" id="registration_start_at" name="registration_start_at"
-                                       value="{{ old('registration_start_at') }}"
+                                       value="{{ old('registration_start_at') }}" required
                                        class="w-full px-3 py-2 rounded-lg border border-slate-300 text-xs sm:text-sm focus:ring-1 focus:ring-slate-900 focus:border-slate-900 bg-white transition-colors">
                                 @error('registration_start_at')
                                     <p class="text-xs text-rose-500 mt-1">{{ $message }}</p>
@@ -191,10 +191,10 @@
                             </div>
                             <div>
                                 <label for="registration_end_at" class="block text-xs font-semibold text-slate-700 mb-1">
-                                    Tanggal Tutup Pendaftaran
+                                    Tanggal Tutup Pendaftaran <span class="text-rose-500">*</span>
                                 </label>
                                 <input type="date" id="registration_end_at" name="registration_end_at"
-                                       value="{{ old('registration_end_at') }}"
+                                       value="{{ old('registration_end_at') }}" required
                                        class="w-full px-3 py-2 rounded-lg border border-slate-300 text-xs sm:text-sm focus:ring-1 focus:ring-slate-900 focus:border-slate-900 bg-white transition-colors">
                                 @error('registration_end_at')
                                     <p class="text-xs text-rose-500 mt-1">{{ $message }}</p>
@@ -390,10 +390,10 @@
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
                                 <label for="assessment_start_at" class="block text-xs font-semibold text-slate-700 mb-1">
-                                    Tanggal Mulai Evaluasi
+                                    Tanggal Mulai Evaluasi <span class="text-rose-500">*</span>
                                 </label>
                                 <input type="date" id="assessment_start_at" name="assessment_start_at"
-                                       value="{{ old('assessment_start_at') }}"
+                                       value="{{ old('assessment_start_at') }}" required
                                        class="w-full px-3 py-2 rounded-lg border border-slate-300 text-xs sm:text-sm focus:ring-1 focus:ring-slate-900 focus:border-slate-900 bg-white transition-colors">
                                 @error('assessment_start_at')
                                     <p class="text-xs text-rose-500 mt-1">{{ $message }}</p>
@@ -401,10 +401,10 @@
                             </div>
                             <div>
                                 <label for="assessment_end_at" class="block text-xs font-semibold text-slate-700 mb-1">
-                                    Tanggal Batas Akhir Evaluasi / Sertifikat
+                                    Tanggal Batas Akhir Evaluasi / Sertifikat <span class="text-rose-500">*</span>
                                 </label>
                                 <input type="date" id="assessment_end_at" name="assessment_end_at"
-                                       value="{{ old('assessment_end_at') }}"
+                                       value="{{ old('assessment_end_at') }}" required
                                        class="w-full px-3 py-2 rounded-lg border border-slate-300 text-xs sm:text-sm focus:ring-1 focus:ring-slate-900 focus:border-slate-900 bg-white transition-colors">
                                 @error('assessment_end_at')
                                     <p class="text-xs text-rose-500 mt-1">{{ $message }}</p>
@@ -535,6 +535,10 @@
                     maxStepReached: config.isEdit ? 3 : (config.initialStep || 1),
                     isUnlimited: config.isUnlimitedQuota || false,
 
+                    init() {
+                        window._bimtekWizard = this;
+                    },
+
                     goToStep(targetStep) {
                         if (targetStep < this.step) {
                             this.step = targetStep;
@@ -598,11 +602,17 @@
                                 showBimtekAlert('Silakan tentukan kuota peserta (minimal 1) atau centang Tanpa Batas.', 'Peringatan', quota);
                                 return false;
                             }
-                            if (regStart?.value && regEnd?.value) {
-                                if (regEnd.value < regStart.value) {
-                                    showBimtekAlert('Tanggal tutup pendaftaran tidak boleh sebelum tanggal buka pendaftaran.', 'Peringatan', regEnd);
-                                    return false;
-                                }
+                            if (!regStart?.value) {
+                                showBimtekAlert('Silakan tentukan Tanggal Buka Pendaftaran.', 'Peringatan', regStart);
+                                return false;
+                            }
+                            if (!regEnd?.value) {
+                                showBimtekAlert('Silakan tentukan Tanggal Tutup Pendaftaran.', 'Peringatan', regEnd);
+                                return false;
+                            }
+                            if (regEnd.value < regStart.value) {
+                                showBimtekAlert('Tanggal tutup pendaftaran tidak boleh sebelum tanggal buka pendaftaran.', 'Peringatan', regEnd);
+                                return false;
                             }
                             return true;
                         }
@@ -649,6 +659,30 @@
                                 }
                             }
 
+                            return true;
+                        }
+
+                        if (currentStepNum === 3) {
+                            const evalStart = document.getElementById('assessment_start_at');
+                            const evalEnd = document.getElementById('assessment_end_at');
+                            const execEnd = document.getElementById('end_date');
+
+                            if (!evalStart?.value) {
+                                showBimtekAlert('Silakan tentukan Tanggal Mulai Evaluasi.', 'Peringatan', evalStart);
+                                return false;
+                            }
+                            if (execEnd?.value && evalStart.value < execEnd.value) {
+                                showBimtekAlert('Tanggal mulai evaluasi harus setelah atau sama dengan tanggal selesai pelaksanaan (' + execEnd.value + ').', 'Peringatan', evalStart);
+                                return false;
+                            }
+                            if (!evalEnd?.value) {
+                                showBimtekAlert('Silakan tentukan Tanggal Batas Akhir Evaluasi / Sertifikat.', 'Peringatan', evalEnd);
+                                return false;
+                            }
+                            if (evalEnd.value < evalStart.value) {
+                                showBimtekAlert('Tanggal batas akhir evaluasi harus sama atau setelah tanggal mulai evaluasi.', 'Peringatan', evalEnd);
+                                return false;
+                            }
                             return true;
                         }
 
@@ -1025,6 +1059,29 @@
                 [regStart, regEnd, execStart, execEnd, evalStart, evalEnd].forEach(el => {
                     el?.addEventListener('change', updateTimelineSummary);
                     el?.addEventListener('input', updateTimelineSummary);
+                });
+
+                document.getElementById('bimtekForm')?.addEventListener('submit', function (e) {
+                    if (window._bimtekWizard) {
+                        if (!window._bimtekWizard.validateStep(1)) {
+                            e.preventDefault();
+                            window._bimtekWizard.step = 1;
+                            window._bimtekWizard.scrollToTop();
+                            return false;
+                        }
+                        if (!window._bimtekWizard.validateStep(2)) {
+                            e.preventDefault();
+                            window._bimtekWizard.step = 2;
+                            window._bimtekWizard.scrollToTop();
+                            return false;
+                        }
+                        if (!window._bimtekWizard.validateStep(3)) {
+                            e.preventDefault();
+                            window._bimtekWizard.step = 3;
+                            window._bimtekWizard.scrollToTop();
+                            return false;
+                        }
+                    }
                 });
 
                 updateTimelineSummary();

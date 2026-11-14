@@ -114,6 +114,7 @@ Route::prefix('user')->middleware(['auth', 'role:user'])->name('user.')->group(f
         Route::post('/my-course/{slug}/section/{sectionId}/submit-essay', 'submitEssay')->name('section.submit-essay');
         Route::get('/my-course/{slug}/join-zoom', 'joinZoom')->name('my-course.join-zoom');
         Route::post('/my-course/{slug}/attend-zoom', 'attendZoom')->name('my-course.attend-zoom');
+        Route::post('/my-course/{slug}/evaluasi-narasumber', 'submitEvaluasiNarasumber')->name('my-course.submit-evaluasi-narasumber');
         Route::post('/my-course/{slug}/generate-certificate', 'generateCertificate')->name('my-course.generate-certificate');
         Route::post('/content/{content}/complete', 'completeContent')->name('content.complete');
         Route::get('/my-course/{slug}/content/{content}', 'showContent')->name('content.show');

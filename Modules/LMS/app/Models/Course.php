@@ -111,6 +111,11 @@ class Course extends Model
         return $this->hasMany(BimtekEvent::class, 'course_id')->latest();
     }
 
+    public function instructorEvaluations(): HasMany
+    {
+        return $this->hasMany(BimtekInstructorEvaluation::class, 'course_id');
+    }
+
     /**
      * Pivot biasa — semua field di course_student diload lewat withPivot
      */

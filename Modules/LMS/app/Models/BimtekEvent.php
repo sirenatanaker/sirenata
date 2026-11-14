@@ -88,6 +88,14 @@ class BimtekEvent extends Model
     }
 
     /**
+     * Evaluasi narasumber & penyelenggaraan oleh peserta
+     */
+    public function instructorEvaluations(): HasMany
+    {
+        return $this->hasMany(BimtekInstructorEvaluation::class, 'bimtek_event_id');
+    }
+
+    /**
      * Peserta yang terdaftar pada batch bimtek ini lewat pivot course_student
      */
     public function participants(): BelongsToMany

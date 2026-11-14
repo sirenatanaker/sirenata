@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Modules\LMS\Models\CertificateSetting;
 use Modules\LMS\Models\Course;
+use Modules\LMS\Models\BimtekInstructorEvaluation;
 
 class CertificateService
 {
@@ -109,6 +110,15 @@ class CertificateService
 
         if ($enrollment->pivot->status !== 'completed' || $enrollment->pivot->progress < 100) {
             return ['success' => false, 'message' => 'Anda belum menyelesaikan kursus ini.'];
+        }
+
+        if (!empty($enrollment->pivot->bimtek_event_id)) {
+            $hasEvaluated = BimtekInstructorEvaluation::where('bimtek_event_id', $enrollment->pivot->bimtek_event_id)
+                ->where('user_id', $user->id)
+                ->exists();
+            if (!$hasEvaluated) {
+                return ['success' => false, 'message' => 'Anda harus mengisi evaluasi narasumber & fasilitas bimtek terlebih dahulu sebelum menerbitkan sertifikat.'];
+            }
         }
 
         $activeSetting = CertificateSetting::getActive();
