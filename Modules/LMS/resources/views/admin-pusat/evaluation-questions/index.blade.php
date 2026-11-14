@@ -41,127 +41,19 @@
         </div>
 
         @if ($tab === 'questions')
-            {{-- TAB 1: DAFTAR INSTRUMEN PERTANYAAN (FORM BUILDER STYLE) --}}
-            <div class="space-y-6">
-                @php
-                    $groupedQuestions = $questions->groupBy('section');
-                @endphp
-
-                @forelse ($groupedQuestions as $sectionName => $sectionQuestions)
-                    <div class="bg-white rounded-md border border-slate-200 shadow-2xs overflow-hidden">
-                        {{-- Header Section --}}
-                        <div class="px-5 py-3.5 bg-slate-50/70 border-b border-slate-100 flex items-center justify-between">
-                            <div class="flex items-center gap-2">
-                                <span class="w-2.5 h-2.5 rounded-full bg-[#13416B]"></span>
-                                <h3 class="text-sm font-bold text-slate-800">{{ $sectionName ?: 'Umum' }}</h3>
-                                <span class="text-xs text-slate-400">({{ $sectionQuestions->count() }} Pertanyaan)</span>
-                            </div>
-                        </div>
-
-                        {{-- Item Pertanyaan --}}
-                        <div class="divide-y divide-slate-100">
-                            @foreach ($sectionQuestions as $q)
-                                <div class="p-4 sm:p-5 hover:bg-slate-50/50 transition-colors flex flex-col sm:flex-row sm:items-start justify-between gap-4">
-                                    <div class="flex items-start gap-3 sm:gap-4 flex-1 min-w-0">
-                                        {{-- Badge Nomor Urut --}}
-                                        <div class="w-7 h-7 rounded-md bg-slate-100 text-slate-600 font-bold text-xs flex items-center justify-center shrink-0 border border-slate-200 mt-0.5">
-                                            {{ $q->order }}
-                                        </div>
-
-                                        <div class="space-y-1.5 flex-1 min-w-0">
-                                            <div class="flex items-center gap-2 flex-wrap">
-                                                <h4 class="text-sm font-bold text-slate-900 leading-snug">
-                                                    {{ $q->question }}
-                                                    @if ($q->is_required)
-                                                        <span class="text-rose-500 font-bold" title="Wajib Diisi">*</span>
-                                                    @endif
-                                                </h4>
-                                                
-                                                {{-- Badge Tipe Pertanyaan --}}
-                                                @if ($q->type === 'scale')
-                                                    <span class="inline-flex items-center gap-1 text-[11px] font-semibold text-blue-700 bg-blue-50 border border-blue-200 px-2 py-0.5 rounded">
-                                                        <i class="fas fa-star text-[10px] text-amber-500"></i> Skala 1 - {{ $q->scale_max }}
-                                                    </span>
-                                                @else
-                                                    <span class="inline-flex items-center gap-1 text-[11px] font-semibold text-purple-700 bg-purple-50 border border-purple-200 px-2 py-0.5 rounded">
-                                                        <i class="fas fa-align-left text-[10px]"></i> Teks Uraian / Masukan
-                                                    </span>
-                                                @endif
-
-                                                {{-- Badge Wajib / Opsional --}}
-                                                @if ($q->is_required)
-                                                    <span class="text-[10px] font-bold text-slate-600 bg-slate-100 px-1.5 py-0.5 rounded">Wajib</span>
-                                                @else
-                                                    <span class="text-[10px] font-medium text-slate-400 bg-slate-50 px-1.5 py-0.5 rounded">Opsional</span>
-                                                @endif
-
-                                                {{-- Badge Status --}}
-                                                @if ($q->is_active)
-                                                    <span class="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded">
-                                                        <i class="fas fa-check-circle text-[9px]"></i> Aktif
-                                                    </span>
-                                                @else
-                                                    <span class="inline-flex items-center gap-1 text-[10px] font-medium text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded">
-                                                        Non-Aktif
-                                                    </span>
-                                                @endif
-                                            </div>
-
-                                            @if ($q->description)
-                                                <p class="text-xs text-slate-500 leading-relaxed">
-                                                    {{ $q->description }}
-                                                </p>
-                                            @endif
-
-                                            @if ($q->type === 'scale')
-                                                <div class="flex items-center gap-3 text-[11px] text-slate-400 pt-0.5">
-                                                    <span>1 = {{ $q->min_label ?: 'Sangat Kurang' }}</span>
-                                                    <span>•</span>
-                                                    <span>{{ $q->scale_max }} = {{ $q->max_label ?: 'Sangat Baik' }}</span>
-                                                </div>
-                                            @endif
-                                        </div>
-                                    </div>
-
-                                    {{-- Aksi Edit / Hapus / Toggle Status --}}
-                                    <div class="flex items-center gap-2 self-end sm:self-start shrink-0">
-                                        {{-- Toggle Status --}}
-                                        <form action="{{ route('admin-pusat.management-course.evaluation-questions.toggle-status', $q->id) }}" method="POST">
-                                            @csrf
-                                            <button type="submit"
-                                                    title="{{ $q->is_active ? 'Klik untuk nonaktifkan' : 'Klik untuk aktifkan' }}"
-                                                    class="px-2.5 py-1 text-xs rounded border transition-colors
-                                                    {{ $q->is_active ? 'text-slate-600 hover:bg-slate-100 border-slate-200' : 'text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border-emerald-200 font-semibold' }}">
-                                                {{ $q->is_active ? 'Nonaktifkan' : 'Aktifkan' }}
-                                            </button>
-                                        </form>
-
-                                        {{-- Edit --}}
-                                        <a href="{{ route('admin-pusat.management-course.evaluation-questions.edit', $q->id) }}"
-                                           class="p-1.5 text-slate-500 hover:text-[#13416B] hover:bg-[#13416B]/10 rounded transition-colors"
-                                           title="Edit Pertanyaan">
-                                            <i class="fas fa-pen text-xs"></i>
-                                        </a>
-
-                                        {{-- Hapus --}}
-                                        <form action="{{ route('admin-pusat.management-course.evaluation-questions.destroy', $q->id) }}"
-                                              method="POST"
-                                              onsubmit="return confirm('Apakah Anda yakin ingin menghapus pertanyaan ini? Data jawaban terdahulu yang terkait mungkin ikut terhapus.')">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit"
-                                                    class="p-1.5 text-rose-500 hover:text-rose-700 hover:bg-rose-50 rounded transition-colors"
-                                                    title="Hapus Pertanyaan">
-                                                <i class="fas fa-trash-alt text-xs"></i>
-                                            </button>
-                                        </form>
-                                    </div>
-                                </div>
-                            @endforeach
-                        </div>
+            {{-- TAB 1: DAFTAR INSTRUMEN PERTANYAAN --}}
+            <div class="bg-white rounded-md border border-slate-200 shadow-2xs overflow-hidden">
+                <div class="px-5 py-3.5 bg-slate-50/70 border-b border-slate-200 flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                        <span class="w-2.5 h-2.5 rounded-full bg-[#13416B]"></span>
+                        <h3 class="text-sm font-bold text-slate-800">Daftar Pertanyaan Kuesioner</h3>
+                        <span class="text-xs text-slate-500 font-medium">({{ $questions->count() }} Pertanyaan)</span>
                     </div>
-                @empty
-                    <div class="p-12 text-center bg-white rounded-md border border-slate-200 text-slate-400 space-y-3">
+                    <span class="text-xs text-slate-400">Diurutkan berdasarkan nomor urut</span>
+                </div>
+
+                @if ($questions->isEmpty())
+                    <div class="p-12 text-center text-slate-400 space-y-3">
                         <i class="fas fa-clipboard-list text-3xl text-slate-300"></i>
                         <p class="text-sm">Belum ada pertanyaan kuesioner yang dibuat.</p>
                         <a href="{{ route('admin-pusat.management-course.evaluation-questions.create') }}"
@@ -169,7 +61,108 @@
                             <i class="fas fa-plus"></i> Tambah Pertanyaan Pertama
                         </a>
                     </div>
-                @endforelse
+                @else
+                    <div class="divide-y divide-slate-100">
+                        @foreach ($questions as $q)
+                            <div class="p-4 sm:p-5 hover:bg-slate-50/50 transition-colors flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+                                <div class="flex items-start gap-3 sm:gap-4 flex-1 min-w-0">
+                                    {{-- Badge Nomor Urut --}}
+                                    <div class="w-7 h-7 rounded-md bg-slate-100 text-slate-600 font-bold text-xs flex items-center justify-center shrink-0 border border-slate-200 mt-0.5">
+                                        {{ $q->order }}
+                                    </div>
+
+                                    <div class="space-y-1.5 flex-1 min-w-0">
+                                        <div class="flex items-center gap-2 flex-wrap">
+                                            <h4 class="text-sm font-bold text-slate-900 leading-snug">
+                                                {{ $q->question }}
+                                                @if ($q->is_required)
+                                                    <span class="text-rose-500 font-bold" title="Wajib Diisi">*</span>
+                                                @endif
+                                            </h4>
+                                            
+                                            {{-- Badge Tipe Pertanyaan --}}
+                                            @if ($q->type === 'scale')
+                                                <span class="inline-flex items-center gap-1 text-[11px] font-semibold text-blue-700 bg-blue-50 border border-blue-200 px-2 py-0.5 rounded">
+                                                    <i class="fas fa-star text-[10px] text-amber-500"></i> Skala 1 - {{ $q->scale_max }}
+                                                </span>
+                                            @else
+                                                <span class="inline-flex items-center gap-1 text-[11px] font-semibold text-purple-700 bg-purple-50 border border-purple-200 px-2 py-0.5 rounded">
+                                                    <i class="fas fa-align-left text-[10px]"></i> Teks Uraian / Masukan
+                                                </span>
+                                            @endif
+
+                                            {{-- Badge Wajib / Opsional --}}
+                                            @if ($q->is_required)
+                                                <span class="text-[10px] font-bold text-slate-600 bg-slate-100 px-1.5 py-0.5 rounded">Wajib</span>
+                                            @else
+                                                <span class="text-[10px] font-medium text-slate-400 bg-slate-50 px-1.5 py-0.5 rounded">Opsional</span>
+                                            @endif
+
+                                            {{-- Badge Status --}}
+                                            @if ($q->is_active)
+                                                <span class="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded">
+                                                    <i class="fas fa-check-circle text-[9px]"></i> Aktif
+                                                </span>
+                                            @else
+                                                <span class="inline-flex items-center gap-1 text-[10px] font-medium text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded">
+                                                    Non-Aktif
+                                                </span>
+                                            @endif
+                                        </div>
+
+                                        @if ($q->description)
+                                            <p class="text-xs text-slate-500 leading-relaxed">
+                                                {{ $q->description }}
+                                            </p>
+                                        @endif
+
+                                        @if ($q->type === 'scale')
+                                            <div class="flex items-center gap-3 text-[11px] text-slate-400 pt-0.5">
+                                                <span>1 = {{ $q->min_label ?: 'Sangat Kurang' }}</span>
+                                                <span>•</span>
+                                                <span>{{ $q->scale_max }} = {{ $q->max_label ?: 'Sangat Baik' }}</span>
+                                            </div>
+                                        @endif
+                                    </div>
+                                </div>
+
+                                {{-- Aksi Edit / Hapus / Toggle Status --}}
+                                <div class="flex items-center gap-2 self-end sm:self-start shrink-0">
+                                    {{-- Toggle Status --}}
+                                    <form action="{{ route('admin-pusat.management-course.evaluation-questions.toggle-status', $q->id) }}" method="POST">
+                                        @csrf
+                                        <button type="submit"
+                                                title="{{ $q->is_active ? 'Klik untuk nonaktifkan' : 'Klik untuk aktifkan' }}"
+                                                class="px-2.5 py-1 text-xs rounded border transition-colors
+                                                {{ $q->is_active ? 'text-slate-600 hover:bg-slate-100 border-slate-200' : 'text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border-emerald-200 font-semibold' }}">
+                                            {{ $q->is_active ? 'Nonaktifkan' : 'Aktifkan' }}
+                                        </button>
+                                    </form>
+
+                                    {{-- Edit --}}
+                                    <a href="{{ route('admin-pusat.management-course.evaluation-questions.edit', $q->id) }}"
+                                       class="p-1.5 text-slate-500 hover:text-[#13416B] hover:bg-[#13416B]/10 rounded transition-colors"
+                                       title="Edit Pertanyaan">
+                                        <i class="fas fa-pen text-xs"></i>
+                                    </a>
+
+                                    {{-- Hapus --}}
+                                    <form action="{{ route('admin-pusat.management-course.evaluation-questions.destroy', $q->id) }}"
+                                          method="POST"
+                                          onsubmit="return confirm('Apakah Anda yakin ingin menghapus pertanyaan ini? Data jawaban terdahulu yang terkait mungkin ikut terhapus.')">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit"
+                                                class="p-1.5 text-rose-500 hover:text-rose-700 hover:bg-rose-50 rounded transition-colors"
+                                                title="Hapus Pertanyaan">
+                                            <i class="fas fa-trash-alt text-xs"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                @endif
             </div>
 
         @else

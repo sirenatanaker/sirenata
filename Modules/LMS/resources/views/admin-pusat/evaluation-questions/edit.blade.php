@@ -15,14 +15,13 @@
             <div class="p-5 sm:p-6 border-b border-slate-100 bg-[#13416B] text-white">
                 <h2 class="text-base sm:text-lg font-bold">Edit Instrumen Pertanyaan Kuesioner</h2>
                 <p class="text-xs text-slate-200 mt-1">
-                    Sesuaikan redaksi pertanyaan, kelompok materi, atau tipe penilaian kuesioner evaluasi.
+                    Sesuaikan redaksi pertanyaan, urutan tampil, atau tipe penilaian kuesioner evaluasi.
                 </p>
             </div>
 
             <form action="{{ route('admin-pusat.management-course.evaluation-questions.update', $question->id) }}" method="POST"
                   x-data="{
-                      questionType: '{{ old('type', $question->type) }}',
-                      useCustomSection: false
+                      questionType: '{{ old('type', $question->type) }}'
                   }"
                   class="p-5 sm:p-6 space-y-5">
                 @csrf
@@ -40,57 +39,23 @@
                     @enderror
                 </div>
 
-                {{-- 2. Petunjuk Pengisian (Opsional) --}}
-                <div>
-                    <label for="description" class="block text-xs font-bold text-slate-700 mb-1">
-                        Petunjuk / Penjelasan Tambahan (Opsional)
-                    </label>
-                    <input type="text" id="description" name="description" value="{{ old('description', $question->description) }}"
-                           placeholder="Misal: Berikan penilaian terhadap kedalaman dan penguasaan materi narasumber..."
-                           class="w-full px-3.5 py-2.5 rounded-md border border-slate-300 text-xs sm:text-sm focus:border-[#13416B] focus:ring-1 focus:ring-[#13416B] outline-none transition-colors">
-                    @error('description')
-                        <p class="text-xs text-rose-500 mt-1">{{ $message }}</p>
-                    @enderror
-                </div>
-
-                {{-- 3. Kelompok / Bagian Pertanyaan --}}
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                        <label for="section" class="block text-xs font-bold text-slate-700 mb-1">
-                            Kelompok / Kategori Bagian <span class="text-rose-500">*</span>
+                {{-- 2. Petunjuk Pengisian (Opsional) & Nomor Urut --}}
+                <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
+                    <div class="sm:col-span-3">
+                        <label for="description" class="block text-xs font-bold text-slate-700 mb-1">
+                            Petunjuk / Penjelasan Tambahan (Opsional)
                         </label>
-                        <template x-if="!useCustomSection">
-                            <select id="section_select"
-                                    @change="if ($el.value === '__custom__') { useCustomSection = true; $nextTick(() => $refs.customSectionInput.focus()); } else { $refs.sectionHidden.value = $el.value; }"
-                                    class="w-full px-3.5 py-2.5 rounded-md border border-slate-300 text-xs sm:text-sm bg-white focus:border-[#13416B] focus:ring-1 focus:ring-[#13416B] outline-none">
-                                @foreach ($sections as $sec)
-                                    <option value="{{ $sec }}" @selected(old('section', $question->section) === $sec)>{{ $sec }}</option>
-                                @endforeach
-                                <option value="__custom__">+ Buat Kelompok Baru...</option>
-                            </select>
-                        </template>
-
-                        <div x-show="useCustomSection" x-cloak class="flex items-center gap-2">
-                            <input type="text" x-ref="customSectionInput"
-                                   @input="$refs.sectionHidden.value = $el.value"
-                                   placeholder="Ketik nama kategori bagian baru..."
-                                   class="w-full px-3.5 py-2.5 rounded-md border border-slate-300 text-xs sm:text-sm focus:border-[#13416B] focus:ring-1 focus:ring-[#13416B] outline-none">
-                            <button type="button" @click="useCustomSection = false; $refs.sectionHidden.value = '{{ $question->section }}'"
-                                    class="px-2.5 py-2 rounded-md bg-slate-100 hover:bg-slate-200 text-xs text-slate-600 font-semibold shrink-0">
-                                Batal
-                            </button>
-                        </div>
-
-                        <input type="hidden" name="section" x-ref="sectionHidden" value="{{ old('section', $question->section) }}">
-                        @error('section')
+                        <input type="text" id="description" name="description" value="{{ old('description', $question->description) }}"
+                               placeholder="Misal: Berikan penilaian terhadap kedalaman dan penguasaan materi narasumber..."
+                               class="w-full px-3.5 py-2.5 rounded-md border border-slate-300 text-xs sm:text-sm focus:border-[#13416B] focus:ring-1 focus:ring-[#13416B] outline-none transition-colors">
+                        @error('description')
                             <p class="text-xs text-rose-500 mt-1">{{ $message }}</p>
                         @enderror
                     </div>
 
-                    {{-- 4. Urutan Tampil --}}
                     <div>
                         <label for="order" class="block text-xs font-bold text-slate-700 mb-1">
-                            Nomor Urut Tampil <span class="text-rose-500">*</span>
+                            Nomor Urut <span class="text-rose-500">*</span>
                         </label>
                         <input type="number" id="order" name="order" min="1" value="{{ old('order', $question->order) }}" required
                                class="w-full px-3.5 py-2.5 rounded-md border border-slate-300 text-xs sm:text-sm focus:border-[#13416B] focus:ring-1 focus:ring-[#13416B] outline-none transition-colors">
@@ -100,7 +65,7 @@
                     </div>
                 </div>
 
-                {{-- 5. Tipe Pertanyaan --}}
+                {{-- 3. Tipe Pertanyaan --}}
                 <div class="space-y-2">
                     <label class="block text-xs font-bold text-slate-700">
                         Tipe Format Jawaban <span class="text-rose-500">*</span>

@@ -479,14 +479,6 @@
                             <div class="mt-3 sm:mt-4 flex flex-wrap items-center gap-2.5 sm:gap-3">
                                 <span
                                     class="text-[11px] sm:text-xs font-semibold text-white bg-[#547996] px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-md border border-[#446680] flex items-center gap-1.5 shadow-xs">
-                                    <i class="fas fa-user-secret text-[10px] sm:text-xs text-white"></i> Anonim & Rahasia
-                                </span>
-                                <span
-                                    class="text-[11px] sm:text-xs font-semibold text-white bg-[#547996] px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-md border border-[#446680] flex items-center gap-1.5 shadow-xs">
-                                    <i class="far fa-clock text-[10px] sm:text-xs text-white"></i> ± 3 Menit
-                                </span>
-                                <span
-                                    class="text-[11px] sm:text-xs font-semibold text-white bg-[#547996] px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-md border border-[#446680] flex items-center gap-1.5 shadow-xs">
                                     <i class="fas fa-poll-h text-[10px] sm:text-xs text-amber-300"></i> Kuesioner Formulir
                                 </span>
                             </div>

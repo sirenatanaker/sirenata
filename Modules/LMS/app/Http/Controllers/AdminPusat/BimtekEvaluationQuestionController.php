@@ -86,14 +86,9 @@ class BimtekEvaluationQuestionController extends Controller
      */
     public function create(): View
     {
-        $sections = BimtekEvaluationQuestion::distinct()->pluck('section')->filter()->values();
-        if ($sections->isEmpty()) {
-            $sections = collect(['Materi & Pemateri', 'Fasilitas & Penyelenggaraan', 'Catatan & Masukan']);
-        }
-
         $nextOrder = (BimtekEvaluationQuestion::max('order') ?? 0) + 1;
 
-        return view('lms::admin-pusat.evaluation-questions.create', compact('sections', 'nextOrder'));
+        return view('lms::admin-pusat.evaluation-questions.create', compact('nextOrder'));
     }
 
     /**
@@ -107,16 +102,15 @@ class BimtekEvaluationQuestionController extends Controller
             'type'        => 'required|in:scale,text',
             'min_label'   => 'nullable|string|max:100',
             'max_label'   => 'nullable|string|max:100',
-            'section'     => 'required|string|max:150',
             'order'       => 'required|integer|min:1',
             'is_required' => 'boolean',
             'is_active'   => 'boolean',
         ], [
             'question.required' => 'Teks pertanyaan kuesioner wajib diisi.',
-            'section.required'  => 'Kelompok/Bagian pertanyaan wajib ditentukan.',
             'order.required'    => 'Nomor urutan pertanyaan wajib diisi.',
         ]);
 
+        $validated['section']     = 'Umum';
         $validated['is_required'] = $request->boolean('is_required', true);
         $validated['is_active']   = $request->boolean('is_active', true);
         $validated['scale_max']   = 5;
@@ -140,12 +134,7 @@ class BimtekEvaluationQuestionController extends Controller
     {
         $question = BimtekEvaluationQuestion::findOrFail($id);
 
-        $sections = BimtekEvaluationQuestion::distinct()->pluck('section')->filter()->values();
-        if (!$sections->contains($question->section)) {
-            $sections->push($question->section);
-        }
-
-        return view('lms::admin-pusat.evaluation-questions.edit', compact('question', 'sections'));
+        return view('lms::admin-pusat.evaluation-questions.edit', compact('question'));
     }
 
     /**
@@ -161,16 +150,15 @@ class BimtekEvaluationQuestionController extends Controller
             'type'        => 'required|in:scale,text',
             'min_label'   => 'nullable|string|max:100',
             'max_label'   => 'nullable|string|max:100',
-            'section'     => 'required|string|max:150',
             'order'       => 'required|integer|min:1',
             'is_required' => 'boolean',
             'is_active'   => 'boolean',
         ], [
             'question.required' => 'Teks pertanyaan kuesioner wajib diisi.',
-            'section.required'  => 'Kelompok/Bagian pertanyaan wajib ditentukan.',
             'order.required'    => 'Nomor urutan pertanyaan wajib diisi.',
         ]);
 
+        $validated['section']     = $question->section ?: 'Umum';
         $validated['is_required'] = $request->boolean('is_required');
         $validated['is_active']   = $request->boolean('is_active');
         $validated['scale_max']   = 5;
