@@ -150,7 +150,7 @@
                     <div
                         class="flex items-center justify-between mb-5 sm:mb-6 pb-4 border-b border-slate-100 gap-3 sm:gap-4">
                         <div class="flex items-start gap-3 sm:gap-3.5">
-                            <i class="fas {{ $isBimtekEvent ? 'fa-calendar-alt' : 'fa-layer-group' }} text-[#13416B] text-xl sm:text-2xl mt-0.5 shrink-0"></i>
+                            
                             <div>
                                 <h2 class="text-base sm:text-lg font-bold text-slate-700 leading-tight">
                                     {{ $isBimtekEvent ? 'Timeline & Agenda Pelaksanaan' : 'Daftar Modul Pembelajaran' }}
@@ -472,16 +472,10 @@
                             </div>
 
                             <p class="text-xs sm:text-sm text-slate-600 mt-1.5 leading-relaxed max-w-full lg:max-w-[90%]">
-                                Penilaian objektif bergaya kuesioner mandiri terhadap penguasaan materi, metode penyampaian narasumber, dan fasilitas penyelenggaraan bimbingan teknis.
+                                Penilaian bergaya kuesioner terhadap penguasaan materi, metode penyampaian narasumber, dan fasilitas penyelenggaraan bimbingan teknis.
                             </p>
 
-                            {{-- Meta Badges --}}
-                            <div class="mt-3 sm:mt-4 flex flex-wrap items-center gap-2.5 sm:gap-3">
-                                <span
-                                    class="text-[11px] sm:text-xs font-semibold text-white bg-[#547996] px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-md border border-[#446680] flex items-center gap-1.5 shadow-xs">
-                                    <i class="fas fa-poll-h text-[10px] sm:text-xs text-amber-300"></i> Kuesioner Formulir
-                                </span>
-                            </div>
+                   
 
                             {{-- Tombol Aksi: Pindah Halaman Langsung (Google Form Style) --}}
                             <div class="mt-4 sm:mt-5 flex justify-start">
