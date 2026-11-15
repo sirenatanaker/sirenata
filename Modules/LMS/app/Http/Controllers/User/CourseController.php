@@ -110,6 +110,7 @@ class CourseController extends Controller
             'activeBimtek'                 => $course->active_bimtek,
             'isBimtekEvent'                => $course->is_bimtek_event,
             'formattedPeriod'              => $course->formatted_period,
+            'formattedEvaluationPeriod'    => $course->formatted_evaluation_period,
             'isWaitingForStart'            => $course->is_waiting_for_start,
             'canReviewAll'                 => $course->can_review_all,
             'isCourseAlreadyFinished'      => $course->is_course_already_finished,

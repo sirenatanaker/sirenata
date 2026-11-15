@@ -37,113 +37,121 @@
                 $encodedName = urlencode($courseName);
                 $thumbnailUrl = "https://ui-avatars.com/api/?name={$encodedName}&background=eff6ff&color=1e3a8a&size=512&font-size=0.33&bold=true";
             }
+
+            $formattedEvaluationPeriod = $formattedEvaluationPeriod ?? null;
+            if (!$formattedEvaluationPeriod && $activeBimtek) {
+                $evalStart = $activeBimtek->assessment_start_at ?? $activeBimtek->end_date;
+                $evalEnd   = $activeBimtek->assessment_end_at ?? ($activeBimtek->end_date ? \Carbon\Carbon::parse($activeBimtek->end_date)->addDays(3) : null);
+                if ($evalStart && $evalEnd) {
+                    $eStart = \Carbon\Carbon::parse($evalStart);
+                    $eEnd   = \Carbon\Carbon::parse($evalEnd);
+                    if ($eStart->format('Y-m') === $eEnd->format('Y-m')) {
+                        $formattedEvaluationPeriod = $eStart->locale('id')->isoFormat('D') . ' - ' . $eEnd->locale('id')->isoFormat('D MMMM Y');
+                    } elseif ($eStart->format('Y') === $eEnd->format('Y')) {
+                        $formattedEvaluationPeriod = $eStart->locale('id')->isoFormat('D MMM') . ' - ' . $eEnd->locale('id')->isoFormat('D MMMM Y');
+                    } else {
+                        $formattedEvaluationPeriod = $eStart->locale('id')->isoFormat('D MMMM Y') . ' - ' . $eEnd->locale('id')->isoFormat('D MMMM Y');
+                    }
+                }
+            }
         @endphp
 
-        {{-- Header Card --}}
+        {{-- Header Card (Gaya YouTube Playlist) --}}
         <!-- PERBAIKAN: rounded-none border-x-0 di mobile -->
         <div
             class="bg-white rounded-none sm:rounded-md shadow-sm border-y border-x-0 sm:border border-slate-200 p-4 sm:p-5 lg:p-6 mb-6 transition-all">
             
-            <div class="flex flex-col md:flex-row gap-4 sm:gap-5 lg:gap-6 items-start">
-                {{-- Thumbnail Bersih & Proporsional (rounded-md) --}}
-                <div class="w-full md:w-52 lg:w-64 shrink-0 rounded-md overflow-hidden bg-slate-100 aspect-video md:aspect-[16/10] border border-slate-200 shadow-2xs relative">
-                    <img src="{{ $thumbnailUrl }}" alt="{{ $courseName }}" class="w-full h-full object-cover" />
+            <div class="flex flex-col md:flex-row gap-5 lg:gap-6 items-start">
+                {{-- Thumbnail Playlist YouTube Style (16:9 dengan Badge Overlay) --}}
+                <div class="w-full md:w-60 lg:w-72 shrink-0 rounded-md overflow-hidden bg-slate-900 aspect-video md:aspect-[16/10] border border-slate-200 shadow-sm relative group">
+                    <img src="{{ $thumbnailUrl }}" alt="{{ $courseName }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                    
+                    {{-- Overlay Badge Playlist khas YouTube --}}
+                    <div class="absolute bottom-2.5 right-2.5 bg-black/80 backdrop-blur-xs text-white text-[11px] font-bold px-2.5 py-1 rounded-md flex items-center gap-1.5 shadow-sm">
+                        <i class="far fa-clock text-[10px] text-white/90"></i>
+                        <span>{{ $totalSections }} {{ $isBimtekEvent ? 'Hari' : 'Modul' }}</span>
+                    </div>
+
+                    {{-- Hover Play Button Overlay --}}
+                    @php
+                        $targetSectionId = $firstIncompleteSectionId ?? data_get($sectionsList->first(), 'id');
+                    @endphp
+                    @if ($targetSectionId && !$isWaitingForStart)
+                        <a href="{{ route('user.course.section.show', ['slug' => $courseSlug, 'sectionId' => $targetSectionId]) }}"
+                            class="absolute inset-0 bg-black/25 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                            <span class="w-12 h-12 rounded-full bg-[#13416B] text-white flex items-center justify-center shadow-lg transform group-hover:scale-110 transition-transform">
+                                <i class="fas fa-play text-sm ml-0.5"></i>
+                            </span>
+                        </a>
+                    @endif
                 </div>
 
-                {{-- Detail Informasi & Progress --}}
-                <div class="flex-1 min-w-0 w-full flex flex-col justify-between gap-3.5 sm:gap-4.5">
-                    <div>
-                        {{-- Baris Judul & Tombol Panduan --}}
-                        <div class="flex items-start justify-between gap-3">
-                            <h1 class="text-base sm:text-xl lg:text-2xl font-extrabold text-slate-900 tracking-tight leading-snug">
-                                {{ $courseName }}
-                            </h1>
-
-                            <button type="button" onclick="window.startCoursePlayerTour && window.startCoursePlayerTour()"
-                                class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-slate-700 bg-slate-50 hover:bg-slate-100 hover:text-[#13416B] border border-slate-200 rounded-md transition-all shadow-2xs cursor-pointer shrink-0">
-                                <i class="fas fa-route text-[#13416B]"></i>
-                                <span>Panduan</span>
-                            </button>
-                        </div>
-
-                        {{-- Info Pelatihan / Event: Terstruktur & Fleksibel (Bimtek vs Kursus Mandiri) --}}
-                        @if ($isBimtekEvent)
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-3.5 mt-3.5 sm:mt-4 max-w-2xl">
-                                @if ($activeBimtek->batch_name)
-                                    <div class="flex items-center gap-3 px-3.5 py-2.5 sm:py-3 rounded-md bg-slate-50/80 border border-slate-200/80 text-xs text-slate-700 min-w-0">
-                                        <div class="w-8 h-8 rounded-md bg-blue-50 text-[#13416B] border border-blue-100 flex items-center justify-center shrink-0">
-                                            <i class="fas fa-satellite-dish text-xs"></i>
-                                        </div>
-                                        <div class="min-w-0 flex-1 flex flex-col gap-1.5 sm:gap-2">
-                                            <span class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider leading-none">Gelombang / Batch</span>
-                                            <span class="font-bold text-slate-800 truncate text-xs sm:text-[13px] leading-tight" title="{{ $activeBimtek->batch_name }}">{{ $activeBimtek->batch_name }}</span>
-                                        </div>
-                                    </div>
-                                @endif
-
-                                @if ($formattedPeriod)
-                                    <div class="flex items-center gap-3 px-3.5 py-2.5 sm:py-3 rounded-md bg-slate-50/80 border border-slate-200/80 text-xs text-slate-700 min-w-0">
-                                        <div class="w-8 h-8 rounded-md bg-blue-50 text-[#13416B] border border-blue-100 flex items-center justify-center shrink-0">
-                                            <i class="far fa-calendar-alt text-xs"></i>
-                                        </div>
-                                        <div class="min-w-0 flex-1 flex flex-col gap-1.5 sm:gap-2">
-                                            <span class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider leading-none">Periode Pelaksanaan</span>
-                                            <span class="font-bold text-slate-800 truncate text-xs sm:text-[13px] leading-tight">{{ $formattedPeriod }}</span>
-                                        </div>
-                                    </div>
-                                @endif
+                {{-- Detail Informasi Playlist --}}
+                <div class="flex-1 min-w-0 w-full flex flex-col justify-between self-stretch gap-4">
+                    <div class="space-y-2">
+                        @if ($isBimtekEvent && $activeBimtek?->batch_name)
+                            <div class="flex items-center gap-2 text-xs">
+                                <span class="font-semibold text-slate-600 text-xs tracking-wide">{{ $activeBimtek->batch_name }}</span>
                             </div>
-                        @else
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-3.5 mt-3.5 sm:mt-4 max-w-2xl">
-                                <div class="flex items-center gap-3 px-3.5 py-2.5 sm:py-3 rounded-md bg-slate-50/80 border border-slate-200/80 text-xs text-slate-700 min-w-0">
-                                    <div class="w-8 h-8 rounded-md bg-blue-50 text-[#13416B] border border-blue-100 flex items-center justify-center shrink-0">
-                                        <i class="fas fa-laptop-code text-xs"></i>
-                                    </div>
-                                    <div class="min-w-0 flex-1 flex flex-col gap-1.5 sm:gap-2">
-                                        <span class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider leading-none">Tipe Pelatihan</span>
-                                        <span class="font-bold text-slate-800 truncate text-xs sm:text-[13px] leading-tight">Kursus Mandiri (Self-Paced)</span>
-                                    </div>
-                                </div>
+                        @endif
 
-                                <div class="flex items-center gap-3 px-3.5 py-2.5 sm:py-3 rounded-md bg-slate-50/80 border border-slate-200/80 text-xs text-slate-700 min-w-0">
-                                    <div class="w-8 h-8 rounded-md bg-blue-50 text-[#13416B] border border-blue-100 flex items-center justify-center shrink-0">
-                                        <i class="far fa-clock text-xs"></i>
+                        {{-- Judul Kursus --}}
+                        <h1 class="text-lg sm:text-xl lg:text-2xl font-black text-slate-900 tracking-tight leading-snug">
+                            {{ $courseName }}
+                        </h1>
+
+                        {{-- Info Periode Pelaksanaan & Periode Evaluasi --}}
+                        @if ($formattedPeriod || $formattedEvaluationPeriod)
+                            <div class="space-y-1 text-xs sm:text-[13px] text-slate-600 pt-0.5">
+                                @if ($formattedPeriod)
+                                    <div class="flex flex-wrap items-center gap-x-2 gap-y-0.5">
+                                        <span class="text-slate-500 font-medium min-w-[135px]">Periode Pelaksanaan:</span>
+                                        <span class="font-bold text-slate-800">{{ $formattedPeriod }}</span>
                                     </div>
-                                    <div class="min-w-0 flex-1 flex flex-col gap-1.5 sm:gap-2">
-                                        <span class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider leading-none">Akses Belajar</span>
-                                        <span class="font-bold text-slate-800 truncate text-xs sm:text-[13px] leading-tight">Fleksibel (Kapan Saja)</span>
+                                @endif
+                                @if ($formattedEvaluationPeriod)
+                                    <div class="flex flex-wrap items-center gap-x-2 gap-y-0.5">
+                                        <span class="text-slate-500 font-medium min-w-[135px]">Periode Evaluasi:</span>
+                                        <span class="font-bold text-slate-800">{{ $formattedEvaluationPeriod }}</span>
                                     </div>
-                                </div>
+                                @endif
                             </div>
                         @endif
                     </div>
 
-                    {{-- Tombol Aksi Utama: Lanjutkan Belajar --}}
-                    @php
-                        $targetSectionId = $firstIncompleteSectionId ?? data_get($sectionsList->first(), 'id');
-                    @endphp
-                    <div class="pt-3 sm:pt-4 border-t border-slate-100 flex items-center gap-3">
+                    {{-- Action Buttons Row (Gaya Tombol YouTube: Play Icon + Panduan) --}}
+                    <div class="pt-2 sm:pt-3 flex flex-wrap items-center gap-2.5 sm:gap-3">
                         @if ($isWaitingForStart)
                             <button type="button" disabled
-                                class="inline-flex items-center justify-center px-6 py-2.5 rounded-md text-xs sm:text-sm font-bold bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed select-none">
+                                class="inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-md text-xs sm:text-sm font-bold bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed select-none">
                                 <span>Pelatihan Belum Dimulai</span>
                             </button>
                         @elseif ($isFullyCompleted)
                             <a href="{{ $targetSectionId ? route('user.course.section.show', ['slug' => $courseSlug, 'sectionId' => $targetSectionId]) : '#agenda-pelaksanaan' }}"
-                                class="inline-flex items-center justify-center px-6 py-2.5 rounded-md text-xs sm:text-sm font-bold bg-[#13416B] hover:bg-[#0f3354] text-white shadow-sm transition-all">
+                                class="inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-md text-xs sm:text-sm font-bold bg-[#13416B] hover:bg-[#0f3354] text-white shadow-sm transition-all group">
+                                <i class="fas fa-play text-xs text-white"></i>
                                 <span>Pelajari Kembali</span>
                             </a>
                         @elseif ($targetSectionId)
                             <a href="{{ route('user.course.section.show', ['slug' => $courseSlug, 'sectionId' => $targetSectionId]) }}"
-                                class="inline-flex items-center justify-center px-6 py-2.5 rounded-md text-xs sm:text-sm font-bold bg-[#13416B] hover:bg-[#0f3354] text-white shadow-sm transition-all">
+                                class="inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-md text-xs sm:text-sm font-bold bg-[#13416B] hover:bg-[#0f3354] text-white shadow-sm transition-all group">
+                                <i class="fas fa-play text-xs text-white"></i>
                                 <span>Lanjutkan Belajar</span>
                             </a>
                         @else
                             <a href="#agenda-pelaksanaan"
-                                class="inline-flex items-center justify-center px-6 py-2.5 rounded-md text-xs sm:text-sm font-bold bg-[#13416B] hover:bg-[#0f3354] text-white shadow-sm transition-all">
+                                class="inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-md text-xs sm:text-sm font-bold bg-[#13416B] hover:bg-[#0f3354] text-white shadow-sm transition-all group">
+                                <i class="fas fa-play text-xs text-white"></i>
                                 <span>Lanjutkan Belajar</span>
                             </a>
                         @endif
+
+                        {{-- Tombol Panduan Tour (Secondary) --}}
+                        <button type="button" onclick="window.startCoursePlayerTour && window.startCoursePlayerTour()"
+                            class="inline-flex items-center gap-2 px-4 py-2.5 text-xs sm:text-sm font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-md transition-all cursor-pointer">
+                            <i class="fas fa-route text-xs text-[#13416B]"></i>
+                            <span>Panduan</span>
+                        </button>
                     </div>
                 </div>
             </div>
@@ -218,18 +226,13 @@
                             @endphp
 
                             <div class="space-y-2.5">
-                                {{-- Date Divider di Luar Card Timeline (Opsi 3: Timeline Divider Header) --}}
+                                {{-- Date Divider di Luar Card Timeline (Tanpa Icon Bullet) --}}
                                 @if ($isBimtekEvent && $dayDate)
-                                    <div class="flex items-center gap-3 sm:gap-4 {{ $index > 0 ? 'pt-4 sm:pt-5' : 'pt-0.5' }}">
-                                        <div class="w-12 sm:w-14 flex items-center justify-center shrink-0">
-                                            <span class="w-2.5 h-2.5 rounded-full {{ $isLocked ? 'bg-slate-300' : 'bg-[#13416B]' }} ring-4 ring-white z-[1]"></span>
-                                        </div>
-                                        <div class="flex-1 flex items-center gap-3 min-w-0">
-                                            <span class="text-xs sm:text-[13px] font-bold {{ $isLocked ? 'text-slate-400' : 'text-slate-700' }} tracking-wide">
-                                                {{ $dayDate->locale('id')->isoFormat('dddd, D MMMM Y') }}
-                                            </span>
-                                            <div class="h-px bg-slate-200 flex-1"></div>
-                                        </div>
+                                    <div class="flex items-center gap-3 pl-[60px] sm:pl-[72px] {{ $index > 0 ? 'pt-4 sm:pt-5' : 'pt-0.5' }}">
+                                        <span class="text-xs sm:text-[13px] font-bold {{ $isLocked ? 'text-slate-400' : 'text-slate-700' }} tracking-wide">
+                                            {{ $dayDate->locale('id')->isoFormat('dddd, D MMMM Y') }}
+                                        </span>
+                                        <div class="h-px bg-slate-200 flex-1"></div>
                                     </div>
                                 @endif
 
@@ -247,17 +250,17 @@
                                         @endif
                                     </div>
 
-                                    {{-- Card Modul Harian (Bersih tanpa info tanggal di dalam card) --}}
+                                    {{-- Card Modul Harian (Rapi & Profesional tanpa icon bullet) --}}
                                     <div
                                         class="flex-1 min-w-0 border {{ $isLocked ? 'border-slate-200/80 bg-slate-50/60' : 'border-slate-200 bg-white hover:border-slate-300 shadow-2xs hover:shadow-xs' }} rounded-md p-4 sm:p-5 transition-all flex flex-col md:flex-row md:items-center justify-between gap-4">
                                         
-                                        {{-- Kolom Kiri: Judul Langsung & Ringkasan Agenda Terpadu dengan Radio Ceklis --}}
+                                        {{-- Kolom Kiri: Judul Langsung & Ringkasan Agenda Terpadu --}}
                                         <div class="flex-1 min-w-0">
                                             <h3 class="font-bold {{ $isLocked ? 'text-slate-500' : 'text-slate-800' }} text-sm sm:text-base leading-snug break-words mb-1">
                                                 {{ $displayTitle }}
                                             </h3>
 
-                                            {{-- Baris Aktivitas: Micro-checklist Bersih, Proporsional & Adaptif --}}
+                                            {{-- Baris Aktivitas: Checklist Bulat Bersih & Rapi --}}
                                             <div class="flex flex-wrap items-center gap-x-4 sm:gap-x-5 gap-y-2 mt-2.5 sm:mt-3">
                                                 {{-- 1. Sesi Tatap Muka Online (Khusus Bimtek dengan Zoom) --}}
                                                 @if ($isBimtekEvent && $hasZoom)
@@ -295,7 +298,7 @@
                                                         @else
                                                             <span class="w-4 h-4 rounded-full border border-slate-300 bg-white shrink-0"></span>
                                                         @endif
-                                                        <span>Bukti Pelengkap</span>
+                                                        <span>Bukti Hadir</span>
                                                     </div>
                                                 @endif
 

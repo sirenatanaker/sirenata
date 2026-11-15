@@ -743,6 +743,24 @@ class CourseService
                     $formattedPeriod = $startDate->translatedFormat('d M Y') . ' - ' . $endDate->translatedFormat('d M Y');
                 }
             }
+
+            // Format tanggal periode evaluasi bimtek
+            $formattedEvaluationPeriod = null;
+            if ($activeBimtek) {
+                $evalStart = $activeBimtek->assessment_start_at ?? $activeBimtek->end_date;
+                $evalEnd   = $activeBimtek->assessment_end_at ?? ($activeBimtek->end_date ? \Carbon\Carbon::parse($activeBimtek->end_date)->addDays(3) : null);
+                if ($evalStart && $evalEnd) {
+                    $eStart = \Carbon\Carbon::parse($evalStart);
+                    $eEnd   = \Carbon\Carbon::parse($evalEnd);
+                    if ($eStart->format('Y-m') === $eEnd->format('Y-m')) {
+                        $formattedEvaluationPeriod = $eStart->translatedFormat('d') . ' - ' . $eEnd->translatedFormat('d F Y');
+                    } elseif ($eStart->format('Y') === $eEnd->format('Y')) {
+                        $formattedEvaluationPeriod = $eStart->translatedFormat('d M') . ' - ' . $eEnd->translatedFormat('d M Y');
+                    } else {
+                        $formattedEvaluationPeriod = $eStart->translatedFormat('d M Y') . ' - ' . $eEnd->translatedFormat('d M Y');
+                    }
+                }
+            }
             $isBimtekEvent = (bool) ($activeBimtek && ($activeBimtek->batch_name || $formattedPeriod));
 
             // Cari modul pertama yang belum selesai dan tidak terkunci agar aksi 'Lanjutkan Belajar' langsung terarah
@@ -796,6 +814,7 @@ class CourseService
             $course->active_bimtek = $activeBimtek;
             $course->is_waiting_for_start = $isWaitingForStart;
             $course->formatted_period = $formattedPeriod;
+            $course->formatted_evaluation_period = $formattedEvaluationPeriod;
             $course->is_bimtek_event = $isBimtekEvent;
             $course->is_zoom_unlocked = true;
             $course->is_zoom_attended = $isZoomAttended;
