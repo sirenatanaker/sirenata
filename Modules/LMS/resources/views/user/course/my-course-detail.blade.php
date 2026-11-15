@@ -118,20 +118,32 @@
                         @endif
                     </div>
 
-                    {{-- Progress Bar (Tanpa Icon Progres) --}}
-                    <div data-tour="progres" class="w-full max-w-2xl pt-2.5 sm:pt-3.5 border-t border-slate-100">
-                        <div class="flex justify-between items-center mb-1.5 text-xs">
-                            <span class="font-semibold text-slate-600">
-                                {{ $isWaitingForStart ? 'Status Pelatihan' : 'Progres Pembelajaran' }}
-                            </span>
-                            <span class="font-bold text-xs sm:text-sm {{ $isFullyCompleted ? 'text-emerald-600' : 'text-[#13416B]' }}">
-                                {{ $isWaitingForStart ? 'Menunggu Pelaksanaan' : $currentProgress . '%' }}
-                            </span>
-                        </div>
-                        <div class="w-full bg-slate-100 rounded-full h-2 overflow-hidden border border-slate-200/50">
-                            <div class="{{ $progressBarClass }} h-full rounded-full transition-all duration-700 shadow-2xs"
-                                style="width: {{ $isWaitingForStart ? 0 : $currentProgress }}%"></div>
-                        </div>
+                    {{-- Tombol Aksi Utama: Lanjutkan Belajar --}}
+                    @php
+                        $targetSectionId = $firstIncompleteSectionId ?? data_get($sectionsList->first(), 'id');
+                    @endphp
+                    <div class="pt-3 sm:pt-4 border-t border-slate-100 flex items-center gap-3">
+                        @if ($isWaitingForStart)
+                            <button type="button" disabled
+                                class="inline-flex items-center justify-center px-6 py-2.5 rounded-md text-xs sm:text-sm font-bold bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed select-none">
+                                <span>Pelatihan Belum Dimulai</span>
+                            </button>
+                        @elseif ($isFullyCompleted)
+                            <a href="{{ $targetSectionId ? route('user.course.section.show', ['slug' => $courseSlug, 'sectionId' => $targetSectionId]) : '#agenda-pelaksanaan' }}"
+                                class="inline-flex items-center justify-center px-6 py-2.5 rounded-md text-xs sm:text-sm font-bold bg-[#13416B] hover:bg-[#0f3354] text-white shadow-sm transition-all">
+                                <span>Pelajari Kembali</span>
+                            </a>
+                        @elseif ($targetSectionId)
+                            <a href="{{ route('user.course.section.show', ['slug' => $courseSlug, 'sectionId' => $targetSectionId]) }}"
+                                class="inline-flex items-center justify-center px-6 py-2.5 rounded-md text-xs sm:text-sm font-bold bg-[#13416B] hover:bg-[#0f3354] text-white shadow-sm transition-all">
+                                <span>Lanjutkan Belajar</span>
+                            </a>
+                        @else
+                            <a href="#agenda-pelaksanaan"
+                                class="inline-flex items-center justify-center px-6 py-2.5 rounded-md text-xs sm:text-sm font-bold bg-[#13416B] hover:bg-[#0f3354] text-white shadow-sm transition-all">
+                                <span>Lanjutkan Belajar</span>
+                            </a>
+                        @endif
                     </div>
                 </div>
             </div>
@@ -144,8 +156,8 @@
             <div class="lg:col-span-2 space-y-6">
 
                 <!-- PERBAIKAN: rounded-none border-x-0 di mobile -->
-                <div data-tour="modul"
-                    class="bg-white rounded-none sm:rounded-md shadow-sm border-y border-x-0 sm:border border-slate-200 p-4 sm:p-6">
+                <div data-tour="modul" id="agenda-pelaksanaan"
+                    class="bg-white rounded-none sm:rounded-md shadow-sm border-y border-x-0 sm:border border-slate-200 p-4 sm:p-6 scroll-mt-6">
 
                     <div
                         class="flex items-center justify-between mb-5 sm:mb-6 pb-4 border-b border-slate-100 gap-3 sm:gap-4">
@@ -173,9 +185,9 @@
                             $isPreviousSectionDone = true;
                         @endphp
 
-                        {{-- Garis vertikal timeline yang menyambung secara kontinu dari badge pertama hingga badge terakhir --}}
+                        {{-- Garis vertikal timeline yang menyambung secara kontinu dari badge/divider pertama hingga terakhir --}}
                         @if ($totalSections > 1)
-                            <div class="absolute left-6 sm:left-7 top-6 sm:top-7 bottom-6 sm:bottom-7 w-0.5 bg-slate-200 -translate-x-1/2 pointer-events-none z-0"></div>
+                            <div class="absolute left-6 sm:left-7 top-4 sm:top-5 bottom-6 sm:bottom-7 w-0.5 bg-slate-200 -translate-x-1/2 pointer-events-none z-0"></div>
                         @endif
 
                         @forelse ($sectionsList as $index => $section)
@@ -205,111 +217,125 @@
                                 $hasZoom = (bool) ($activeBimtek && $activeBimtek->zoom_url);
                             @endphp
 
-                            <div class="relative flex items-start gap-3 sm:gap-4 group">
-                                {{-- Node Timeline: Badge Hari / Modul seperti Kalender --}}
-                                <div class="flex flex-col items-center justify-center w-12 h-12 sm:w-14 sm:h-14 rounded-md {{ $isLocked ? 'bg-slate-100 text-slate-400 border border-slate-300 border-r-2 border-b-2 border-r-slate-400 border-b-slate-400' : 'bg-[#13416B] text-white border border-[#13416B] border-r-2 border-b-2 border-r-[#092035] border-b-[#092035] shadow-2xs' }} shrink-0 z-[1] relative transition-transform group-hover:scale-105">
-                                    <span class="text-[9px] font-bold uppercase tracking-wider {{ $isLocked ? 'text-slate-400' : 'text-slate-300' }} leading-none">
-                                        {{ $isBimtekEvent ? 'HARI' : 'MODUL' }}
-                                    </span>
-                                    <span class="text-base sm:text-lg font-black leading-tight mt-0.5">{{ $index + 1 }}</span>
-                                </div>
-
-                                {{-- Card Modul Harian (rounded-md) --}}
-                                <div
-                                    class="flex-1 min-w-0 border {{ $isLocked ? 'border-slate-200/80 bg-slate-50/60' : 'border-slate-200 bg-white hover:border-[#13416B]/40 hover:shadow-xs' }} rounded-md p-4 sm:p-5 transition-all flex flex-col md:flex-row md:items-center justify-between gap-4">
-                                    
-                                    {{-- Kolom Kiri: Judul Langsung & Ringkasan Agenda Terpadu dengan Radio Ceklis --}}
-                                    <div class="flex-1 min-w-0">
-                                        <div class="flex flex-wrap items-center gap-2 mb-1">
-                                            <h3 class="font-bold {{ $isLocked ? 'text-slate-500' : 'text-slate-800' }} text-sm sm:text-base leading-snug break-words">
-                                                {{ $displayTitle }}
-                                            </h3>
-                                            @if ($isBimtekEvent && $dayDate)
-                                                <span class="text-slate-300 hidden sm:inline">•</span>
-                                                <span class="inline-flex items-center gap-1 text-[11px] font-medium text-slate-400 shrink-0">
-                                                    <i class="far fa-calendar-alt text-slate-400"></i> {{ $dayDate->translatedFormat('d F Y') }}
-                                                </span>
-                                            @endif
+                            <div class="space-y-2.5">
+                                {{-- Date Divider di Luar Card Timeline (Opsi 3: Timeline Divider Header) --}}
+                                @if ($isBimtekEvent && $dayDate)
+                                    <div class="flex items-center gap-3 sm:gap-4 {{ $index > 0 ? 'pt-4 sm:pt-5' : 'pt-0.5' }}">
+                                        <div class="w-12 sm:w-14 flex items-center justify-center shrink-0">
+                                            <span class="w-2.5 h-2.5 rounded-full {{ $isLocked ? 'bg-slate-300' : 'bg-[#13416B]' }} ring-4 ring-white z-[1]"></span>
                                         </div>
-
-                                        {{-- Baris Aktivitas: Micro-checklist Bersih, Proporsional & Adaptif --}}
-                                        <div class="flex flex-wrap items-center gap-x-4 sm:gap-x-5 gap-y-2 mt-2.5 sm:mt-3">
-                                            {{-- 1. Sesi Tatap Muka Online (Khusus Bimtek dengan Zoom) --}}
-                                            @if ($isBimtekEvent && $hasZoom)
-                                                <div class="inline-flex items-center gap-1.5 text-xs sm:text-[13px] {{ $isLocked ? 'text-slate-400' : ($isZoomAttended ? 'text-slate-800 font-medium' : 'text-slate-500') }}" title="{{ $isZoomAttended ? 'Tatap Muka: Hadir' : 'Tatap Muka: Belum Hadir' }}">
-                                                    @if ($isZoomAttended)
-                                                        <span class="w-4 h-4 rounded-full bg-emerald-600 text-white flex items-center justify-center shrink-0 text-[9px] shadow-2xs">
-                                                            <i class="fas fa-check"></i>
-                                                        </span>
-                                                    @else
-                                                        <span class="w-4 h-4 rounded-full border-2 {{ $isLocked ? 'border-slate-300 bg-slate-100' : 'border-slate-300 bg-white' }} shrink-0"></span>
-                                                    @endif
-                                                    <span>Tatap Muka</span>
-                                                </div>
-                                            @endif
-
-                                            {{-- 2. Topik Materi Mandiri --}}
-                                            <div class="inline-flex items-center gap-1.5 text-xs sm:text-[13px] {{ $isLocked ? 'text-slate-400' : ($isContentCompleted ? 'text-slate-800 font-medium' : 'text-slate-500') }}" title="Materi Pembelajaran">
-                                                @if ($isContentCompleted)
-                                                    <span class="w-4 h-4 rounded-full bg-emerald-600 text-white flex items-center justify-center shrink-0 text-[9px] shadow-2xs">
-                                                        <i class="fas fa-check"></i>
-                                                    </span>
-                                                @else
-                                                    <span class="w-4 h-4 rounded-full border-2 {{ $isLocked ? 'border-slate-300 bg-slate-100' : 'border-slate-300 bg-white' }} shrink-0"></span>
-                                                @endif
-                                                <span>{{ $isBimtekEvent ? 'Materi' : 'Materi (' . $totalCount . ' Topik)' }}</span>
-                                            </div>
-
-                                            {{-- 3. Upload Bukti Pelengkap / Tugas Drive (Khusus Bimtek dengan Zoom) --}}
-                                            @if ($isBimtekEvent && $hasZoom)
-                                                <div class="inline-flex items-center gap-1.5 text-xs sm:text-[13px] {{ $isLocked ? 'text-slate-400' : ($hasZoomProof ? 'text-slate-800 font-medium' : 'text-slate-500') }}" title="{{ $hasZoomProof ? 'Bukti pelengkap sudah diunggah' : 'Belum upload bukti pelengkap' }}">
-                                                    @if ($hasZoomProof)
-                                                        <span class="w-4 h-4 rounded-full bg-emerald-600 text-white flex items-center justify-center shrink-0 text-[9px] shadow-2xs">
-                                                            <i class="fas fa-check"></i>
-                                                        </span>
-                                                    @else
-                                                        <span class="w-4 h-4 rounded-full border-2 {{ $isLocked ? 'border-slate-300 bg-slate-100' : 'border-slate-300 bg-white' }} shrink-0"></span>
-                                                    @endif
-                                                    <span>Bukti Pelengkap</span>
-                                                </div>
-                                            @endif
-
-                                            {{-- 4. Evaluasi Harian / Modul (Post-Test Bab) --}}
-                                            @if ($postTestBab)
-                                                <div class="inline-flex items-center gap-1.5 text-xs sm:text-[13px] {{ $isLocked ? 'text-slate-400' : ($isPostTestBabCompleted ? 'text-slate-800 font-medium' : 'text-slate-500') }}" title="{{ $isPostTestBabCompleted ? 'Evaluasi tuntas' : 'Evaluasi belum dikerjakan' }}">
-                                                    @if ($isPostTestBabCompleted)
-                                                        <span class="w-4 h-4 rounded-full bg-emerald-600 text-white flex items-center justify-center shrink-0 text-[9px] shadow-2xs">
-                                                            <i class="fas fa-check"></i>
-                                                        </span>
-                                                    @else
-                                                        <span class="w-4 h-4 rounded-full border-2 {{ $isLocked ? 'border-slate-300 bg-slate-100' : 'border-slate-300 bg-white' }} shrink-0"></span>
-                                                    @endif
-                                                    <span>{{ $isBimtekEvent ? 'Evaluasi Harian' : 'Evaluasi Modul' }}</span>
-                                                </div>
-                                            @endif
+                                        <div class="flex-1 flex items-center gap-3 min-w-0">
+                                            <span class="text-xs sm:text-[13px] font-bold {{ $isLocked ? 'text-slate-400' : 'text-slate-700' }} tracking-wide">
+                                                {{ $dayDate->locale('id')->isoFormat('dddd, D MMMM Y') }}
+                                            </span>
+                                            <div class="h-px bg-slate-200 flex-1"></div>
                                         </div>
                                     </div>
+                                @endif
 
-                                    {{-- Kolom Kanan: Tombol Masuk ke Isi Modul (Brand Primary Navy #13416B) --}}
-                                    <div class="shrink-0 self-end md:self-center w-full md:w-auto">
-                                        @if ($isWaitingForStart)
-                                            <button type="button" disabled
-                                                title="Modul dibuka saat periode pelaksanaan pelatihan resmi dimulai"
-                                                class="w-full md:w-auto inline-flex items-center justify-center px-5 py-2.5 rounded-md text-xs sm:text-sm font-bold bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed select-none whitespace-nowrap">
-                                                <span>Terkunci</span>
-                                            </button>
-                                        @elseif ($isLocked)
-                                            <button type="button" disabled
-                                                title="Selesaikan modul sebelumnya terlebih dahulu"
-                                                class="w-full md:w-auto inline-flex items-center justify-center px-5 py-2.5 rounded-md text-xs sm:text-sm font-bold bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed select-none whitespace-nowrap">
-                                                <span>Terkunci</span>
-                                            </button>
-                                        @else
-                                            <a href="{{ route('user.course.section.show', ['slug' => $courseSlug, 'sectionId' => $sectionId]) }}"
-                                                class="w-full md:w-auto inline-flex items-center justify-center px-5 py-2.5 rounded-md text-xs sm:text-sm font-bold bg-[#13416B] hover:bg-[#0f3354] text-white shadow-sm transition-all whitespace-nowrap">
-                                                <span>Masuk</span>
-                                            </a>
+                                <div class="relative flex items-start gap-3 sm:gap-4 group">
+                                    {{-- Node Timeline: Badge Hari / Modul seperti Kalender --}}
+                                    <div class="flex flex-col items-center justify-center w-12 h-12 sm:w-14 sm:h-14 rounded-md {{ $isLocked ? 'bg-slate-100 text-slate-400 border border-slate-200' : 'bg-[#13416B] text-white border border-[#13416B] shadow-2xs' }} shrink-0 z-[1] relative transition-transform group-hover:scale-105">
+                                        <span class="text-[9px] font-bold uppercase tracking-wider {{ $isLocked ? 'text-slate-400' : 'text-slate-200' }} leading-none">
+                                            {{ $isBimtekEvent ? 'HARI' : 'MODUL' }}
+                                        </span>
+                                        <span class="text-base sm:text-lg font-black leading-tight mt-0.5">{{ $index + 1 }}</span>
+                                        @if ($isSectionCompleted)
+                                            <span class="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-emerald-500 text-white flex items-center justify-center text-[8px] ring-2 ring-white shadow-2xs" title="Selesai">
+                                                <i class="fas fa-check"></i>
+                                            </span>
                                         @endif
+                                    </div>
+
+                                    {{-- Card Modul Harian (Bersih tanpa info tanggal di dalam card) --}}
+                                    <div
+                                        class="flex-1 min-w-0 border {{ $isLocked ? 'border-slate-200/80 bg-slate-50/60' : 'border-slate-200 bg-white hover:border-slate-300 shadow-2xs hover:shadow-xs' }} rounded-md p-4 sm:p-5 transition-all flex flex-col md:flex-row md:items-center justify-between gap-4">
+                                        
+                                        {{-- Kolom Kiri: Judul Langsung & Ringkasan Agenda Terpadu dengan Radio Ceklis --}}
+                                        <div class="flex-1 min-w-0">
+                                            <h3 class="font-bold {{ $isLocked ? 'text-slate-500' : 'text-slate-800' }} text-sm sm:text-base leading-snug break-words mb-1">
+                                                {{ $displayTitle }}
+                                            </h3>
+
+                                            {{-- Baris Aktivitas: Micro-checklist Bersih, Proporsional & Adaptif --}}
+                                            <div class="flex flex-wrap items-center gap-x-4 sm:gap-x-5 gap-y-2 mt-2.5 sm:mt-3">
+                                                {{-- 1. Sesi Tatap Muka Online (Khusus Bimtek dengan Zoom) --}}
+                                                @if ($isBimtekEvent && $hasZoom)
+                                                    <div class="inline-flex items-center gap-1.5 text-xs sm:text-[13px] {{ $isLocked ? 'text-slate-400' : ($isZoomAttended ? 'text-slate-800 font-medium' : 'text-slate-500') }}" title="{{ $isZoomAttended ? 'Tatap Muka: Hadir' : 'Tatap Muka: Belum Hadir' }}">
+                                                        @if ($isZoomAttended)
+                                                            <span class="w-4 h-4 rounded-full bg-emerald-600 text-white flex items-center justify-center shrink-0 text-[8px] shadow-2xs">
+                                                                <i class="fas fa-check"></i>
+                                                            </span>
+                                                        @else
+                                                            <span class="w-4 h-4 rounded-full border border-slate-300 bg-white shrink-0"></span>
+                                                        @endif
+                                                        <span>Tatap Muka</span>
+                                                    </div>
+                                                @endif
+
+                                                {{-- 2. Topik Materi Mandiri --}}
+                                                <div class="inline-flex items-center gap-1.5 text-xs sm:text-[13px] {{ $isLocked ? 'text-slate-400' : ($isContentCompleted ? 'text-slate-800 font-medium' : 'text-slate-500') }}" title="Materi Pembelajaran">
+                                                    @if ($isContentCompleted)
+                                                        <span class="w-4 h-4 rounded-full bg-emerald-600 text-white flex items-center justify-center shrink-0 text-[8px] shadow-2xs">
+                                                            <i class="fas fa-check"></i>
+                                                        </span>
+                                                    @else
+                                                        <span class="w-4 h-4 rounded-full border border-slate-300 bg-white shrink-0"></span>
+                                                    @endif
+                                                    <span>{{ $isBimtekEvent ? 'Materi' : 'Materi (' . $totalCount . ' Topik)' }}</span>
+                                                </div>
+
+                                                {{-- 3. Upload Bukti Pelengkap / Tugas Drive (Khusus Bimtek dengan Zoom) --}}
+                                                @if ($isBimtekEvent && $hasZoom)
+                                                    <div class="inline-flex items-center gap-1.5 text-xs sm:text-[13px] {{ $isLocked ? 'text-slate-400' : ($hasZoomProof ? 'text-slate-800 font-medium' : 'text-slate-500') }}" title="{{ $hasZoomProof ? 'Bukti pelengkap sudah diunggah' : 'Belum upload bukti pelengkap' }}">
+                                                        @if ($hasZoomProof)
+                                                            <span class="w-4 h-4 rounded-full bg-emerald-600 text-white flex items-center justify-center shrink-0 text-[8px] shadow-2xs">
+                                                                <i class="fas fa-check"></i>
+                                                            </span>
+                                                        @else
+                                                            <span class="w-4 h-4 rounded-full border border-slate-300 bg-white shrink-0"></span>
+                                                        @endif
+                                                        <span>Bukti Pelengkap</span>
+                                                    </div>
+                                                @endif
+
+                                                {{-- 4. Evaluasi Harian / Modul (Post-Test Bab) --}}
+                                                @if ($postTestBab)
+                                                    <div class="inline-flex items-center gap-1.5 text-xs sm:text-[13px] {{ $isLocked ? 'text-slate-400' : ($isPostTestBabCompleted ? 'text-slate-800 font-medium' : 'text-slate-500') }}" title="{{ $isPostTestBabCompleted ? 'Evaluasi tuntas' : 'Evaluasi belum dikerjakan' }}">
+                                                        @if ($isPostTestBabCompleted)
+                                                            <span class="w-4 h-4 rounded-full bg-emerald-600 text-white flex items-center justify-center shrink-0 text-[8px] shadow-2xs">
+                                                                <i class="fas fa-check"></i>
+                                                            </span>
+                                                        @else
+                                                            <span class="w-4 h-4 rounded-full border border-slate-300 bg-white shrink-0"></span>
+                                                        @endif
+                                                        <span>{{ $isBimtekEvent ? 'Evaluasi Harian' : 'Evaluasi Modul' }}</span>
+                                                    </div>
+                                                @endif
+                                            </div>
+                                        </div>
+
+                                        {{-- Kolom Kanan: Tombol Masuk ke Isi Modul (Brand Primary Navy #13416B) --}}
+                                        <div class="shrink-0 self-end md:self-center w-full md:w-auto">
+                                            @if ($isWaitingForStart)
+                                                <button type="button" disabled
+                                                    title="Modul dibuka saat periode pelaksanaan pelatihan resmi dimulai"
+                                                    class="w-full md:w-auto inline-flex items-center justify-center px-5 py-2.5 rounded-md text-xs sm:text-sm font-semibold bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed select-none whitespace-nowrap">
+                                                    <span>Terkunci</span>
+                                                </button>
+                                            @elseif ($isLocked)
+                                                <button type="button" disabled
+                                                    title="Selesaikan modul sebelumnya terlebih dahulu"
+                                                    class="w-full md:w-auto inline-flex items-center justify-center px-5 py-2.5 rounded-md text-xs sm:text-sm font-semibold bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed select-none whitespace-nowrap">
+                                                    <span>Terkunci</span>
+                                                </button>
+                                            @else
+                                                <a href="{{ route('user.course.section.show', ['slug' => $courseSlug, 'sectionId' => $sectionId]) }}"
+                                                    class="w-full md:w-auto inline-flex items-center justify-center px-5 py-2.5 rounded-md text-xs sm:text-sm font-bold bg-[#13416B] hover:bg-[#0f3354] text-white shadow-xs transition-all whitespace-nowrap">
+                                                    <span>Masuk</span>
+                                                </a>
+                                            @endif
+                                        </div>
                                     </div>
                                 </div>
                             </div>
