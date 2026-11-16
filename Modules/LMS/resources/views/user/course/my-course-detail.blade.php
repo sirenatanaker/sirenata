@@ -81,6 +81,88 @@
                     ? $evalStartObj->locale('id')->isoFormat('D MMMM Y')
                     : $formattedEvaluationPeriod;
             }
+
+            $totalBimtekDays = $totalSections;
+            if ($isBimtekEvent && $execStartObj && $execEndObj) {
+                if ($evalStartObj && $evalEndObj) {
+                    if ($evalStartObj->lessThanOrEqualTo($execEndObj)) {
+                        $totalBimtekDays = (int) $execStartObj->diffInDays($evalEndObj->copy()->startOfDay()) + 1;
+                    } else {
+                        $totalBimtekDays = ((int) $execStartObj->diffInDays($execEndObj->copy()->startOfDay()) + 1)
+                            + ((int) $evalStartObj->diffInDays($evalEndObj->copy()->startOfDay()) + 1);
+                    }
+                } else {
+                    $totalBimtekDays = (int) $execStartObj->diffInDays($execEndObj->copy()->startOfDay()) + 1;
+                }
+            }
+
+            $hasZoom = (bool) ($activeBimtek && $activeBimtek->zoom_url);
+            $sectionProofs = $sectionProofs ?? [];
+            $microTotal = 0;
+            $microCompleted = 0;
+
+            foreach ($sectionsList as $sec) {
+                $secId = data_get($sec, 'id') ?? data_get($sec, 'section_id');
+                $secContents = data_get($sec, 'section_contents', []) ?: data_get($sec, 'contents', []);
+                $secTotalCount = count($secContents);
+                $secDoneCount = data_get($sec, 'completed_count', 0);
+                $secContentDone = data_get($sec, 'is_content_completed', $secTotalCount === 0 || $secDoneCount === $secTotalCount);
+                $secPostTest = data_get($sec, 'post_test_bab');
+                $secPostTestDone = data_get($sec, 'is_post_test_bab_completed', true);
+
+                // 1. Tatap Muka per hari
+                if ($isBimtekEvent && $hasZoom) {
+                    $microTotal++;
+                    if ($isZoomAttended) {
+                        $microCompleted++;
+                    }
+                }
+
+                // 2. Materi per hari
+                $microTotal++;
+                if ($secContentDone) {
+                    $microCompleted++;
+                }
+
+                // 3. Bukti Hadir per hari
+                if ($isBimtekEvent && $hasZoom) {
+                    $microTotal++;
+                    if (!empty($sectionProofs[$secId])) {
+                        $microCompleted++;
+                    }
+                }
+
+                // 4. Evaluasi Harian / Modul
+                if ($secPostTest) {
+                    $microTotal++;
+                    if ($secPostTestDone) {
+                        $microCompleted++;
+                    }
+                }
+            }
+
+            // 5. Evaluasi Akhir
+            if ($evaluasiAkhir) {
+                $microTotal++;
+                if ($isEvaluasiAkhirCompleted) {
+                    $microCompleted++;
+                }
+            }
+
+            // 6. Evaluasi Narasumber
+            if ($isBimtekEvent) {
+                $microTotal++;
+                if ($isEvaluasiNarasumberCompleted) {
+                    $microCompleted++;
+                }
+            }
+
+            $currentProgress = $microTotal > 0 ? (int) round(($microCompleted / $microTotal) * 100) : 0;
+            if ($isCourseAlreadyFinished) {
+                $currentProgress = 100;
+                $microCompleted = $microTotal;
+            }
+            $progressBarClass = $currentProgress >= 100 ? 'bg-emerald-500' : 'bg-[#13416B]';
         @endphp
 
         {{-- Header Card (Gaya YouTube Playlist) --}}
@@ -96,7 +178,7 @@
                     {{-- Overlay Badge Playlist khas YouTube --}}
                     <div class="absolute bottom-2.5 right-2.5 bg-black/80 backdrop-blur-xs text-white text-[11px] font-bold px-2.5 py-1 rounded-md flex items-center gap-1.5 shadow-sm">
                         <i class="far fa-clock text-[10px] text-white/90"></i>
-                        <span>{{ $totalSections }} {{ $isBimtekEvent ? 'Hari' : 'Modul' }}</span>
+                        <span>{{ $isBimtekEvent ? $totalBimtekDays . ' Hari' : $totalSections . ' Modul' }}</span>
                     </div>
 
                     {{-- Hover Play Button Overlay --}}
@@ -129,71 +211,35 @@
 
                         {{-- Info Periode Pelaksanaan & Periode Evaluasi --}}
                         @if ($formattedPeriod || $formattedEvaluationPeriod)
-                            <div class="pt-2 sm:pt-2.5">
-                                <div class="border-l-2 border-slate-200 pl-3.5 sm:pl-4 space-y-2.5 sm:space-y-3 text-xs sm:text-[13px] text-slate-600">
-                                    @if ($formattedPeriod)
-                                        <div class="flex flex-wrap items-center gap-x-3 sm:gap-x-3.5 gap-y-1">
-                                            <span class="text-slate-500 font-medium min-w-[148px] sm:min-w-[155px]">Periode Pelaksanaan:</span>
-                                            <span class="font-bold {{ $isExecPeriodActive ? 'text-[#13416B]' : 'text-slate-800' }}">{{ $formattedPeriod }}</span>
-                                            @if ($isExecPeriodActive)
-                                                <span class="text-slate-300">•</span>
-                                                <span class="text-[11px] sm:text-xs font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded">Sedang berlangsung</span>
-                                            @elseif ($execEndObj && $now->greaterThan($execEndObj))
-                                                <span class="text-slate-300">•</span>
-                                                <span class="text-[11px] sm:text-xs font-medium text-slate-400">Telah selesai</span>
-                                            @elseif ($execStartObj && $now->lessThan($execStartObj))
-                                                <span class="text-slate-300">•</span>
-                                                <span class="text-[11px] sm:text-xs font-medium text-slate-400">Menunggu jadwal</span>
-                                            @endif
-                                        </div>
-                                    @endif
-                                    @if ($formattedEvaluationPeriod)
-                                        <div class="flex flex-wrap items-center gap-x-3 sm:gap-x-3.5 gap-y-1">
-                                            <span class="text-slate-500 font-medium min-w-[148px] sm:min-w-[155px]">Periode Evaluasi:</span>
-                                            <span class="font-bold {{ $isEvalPeriodActive ? 'text-[#13416B]' : 'text-slate-800' }}">{{ $formattedEvaluationPeriod }}</span>
-                                            @if ($isEvalPeriodActive)
-                                                <span class="text-slate-300">•</span>
-                                                <span class="text-[11px] sm:text-xs font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded">Sedang berlangsung</span>
-                                            @elseif ($evalEndObj && $now->greaterThan($evalEndObj))
-                                                <span class="text-slate-300">•</span>
-                                                <span class="text-[11px] sm:text-xs font-medium text-slate-400">Telah selesai</span>
-                                            @elseif ($evalStartObj && $now->lessThan($evalStartObj))
-                                                <span class="text-slate-300">•</span>
-                                                <span class="text-[11px] sm:text-xs font-medium text-slate-400">Menunggu jadwal</span>
-                                            @endif
-                                        </div>
-                                    @endif
-                                </div>
+                            <div class="pt-1.5 space-y-1.5 text-xs sm:text-[13px] text-slate-600 leading-relaxed">
+                                @if ($formattedPeriod)
+                                    <p>
+                                        Periode pelaksanaan berlangsung pada <span class="font-bold text-slate-800">{{ $formattedPeriod }}</span>@if ($isExecPeriodActive) <span class="font-semibold text-emerald-600">(sedang berlangsung)</span>@elseif ($execEndObj && $now->greaterThan($execEndObj)) <span class="text-slate-400">(telah selesai)</span>@elseif ($execStartObj && $now->lessThan($execStartObj)) <span class="text-slate-400">(menunggu jadwal)</span>@endif.
+                                    </p>
+                                @endif
+                                @if ($formattedEvaluationPeriod)
+                                    <p>
+                                        Periode evaluasi berlangsung pada <span class="font-bold text-slate-800">{{ $formattedEvaluationPeriod }}</span>@if ($isEvalPeriodActive) <span class="font-semibold text-emerald-600">(sedang berlangsung)</span>@elseif ($evalEndObj && $now->greaterThan($evalEndObj)) <span class="text-slate-400">(telah selesai)</span>@elseif ($evalStartObj && $now->lessThan($evalStartObj)) <span class="text-slate-400">(menunggu jadwal)</span>@endif.
+                                    </p>
+                                @endif
                             </div>
                         @endif
                     </div>
 
-                    {{-- Action Button: Lanjutkan Belajar --}}
-                    <div class="pt-2 sm:pt-3">
-                        @if ($isWaitingForStart)
-                            <button type="button" disabled
-                                class="inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-md text-xs sm:text-sm font-bold bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed select-none">
-                                <span>Pelatihan Belum Dimulai</span>
-                            </button>
-                        @elseif ($isFullyCompleted)
-                            <a href="{{ $targetSectionId ? route('user.course.section.show', ['slug' => $courseSlug, 'sectionId' => $targetSectionId]) : '#agenda-pelaksanaan' }}"
-                                class="inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-md text-xs sm:text-sm font-bold bg-[#13416B] hover:bg-[#0f3354] text-white shadow-sm transition-all group">
-                                <i class="fas fa-play text-xs text-white"></i>
-                                <span>Pelajari Kembali</span>
-                            </a>
-                        @elseif ($targetSectionId)
-                            <a href="{{ route('user.course.section.show', ['slug' => $courseSlug, 'sectionId' => $targetSectionId]) }}"
-                                class="inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-md text-xs sm:text-sm font-bold bg-[#13416B] hover:bg-[#0f3354] text-white shadow-sm transition-all group">
-                                <i class="fas fa-play text-xs text-white"></i>
-                                <span>Lanjutkan Belajar</span>
-                            </a>
-                        @else
-                            <a href="#agenda-pelaksanaan"
-                                class="inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-md text-xs sm:text-sm font-bold bg-[#13416B] hover:bg-[#0f3354] text-white shadow-sm transition-all group">
-                                <i class="fas fa-play text-xs text-white"></i>
-                                <span>Lanjutkan Belajar</span>
-                            </a>
-                        @endif
+                    {{-- Progress Bar Pembelajaran (Mikro: Seluruh Tahapan & Agenda Harian) --}}
+                    <div data-tour="progres" class="w-full pt-2.5 sm:pt-3 border-t border-slate-100">
+                        <div class="flex justify-between items-center mb-1.5 text-xs">
+                            <span class="font-semibold text-slate-600">
+                                {{ $isWaitingForStart ? 'Status Pelatihan' : 'Progres Pembelajaran' }}
+                            </span>
+                            <span class="font-bold text-xs sm:text-sm {{ $currentProgress >= 100 ? 'text-emerald-600' : 'text-[#13416B]' }}">
+                                {{ $isWaitingForStart ? 'Menunggu Pelaksanaan' : $currentProgress . '%' }}
+                            </span>
+                        </div>
+                        <div class="w-full bg-slate-100 rounded-full h-2 overflow-hidden border border-slate-200/50">
+                            <div class="{{ $progressBarClass }} h-full rounded-full transition-all duration-700 shadow-2xs"
+                                style="width: {{ $isWaitingForStart ? 0 : $currentProgress }}%"></div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -215,7 +261,7 @@
                             
                             <div>
                                 <h2 class="text-base sm:text-lg font-bold text-slate-700 leading-tight">
-                                    {{ $isBimtekEvent ? 'Timeline & Agenda Pelaksanaan' : 'Daftar Modul Pembelajaran' }}
+                                    {{ $isBimtekEvent ? 'Linimasa Kegiatan' : 'Daftar Modul Pembelajaran' }}
                                 </h2>
                                 <p class="text-[11px] sm:text-xs text-slate-500 mt-1">
                                     {{ $isBimtekEvent 
@@ -309,10 +355,10 @@
                                             </h3>
 
                                             {{-- Baris Aktivitas: Checklist Bulat Bersih & Rapi --}}
-                                            <div class="flex flex-wrap items-center gap-x-4 sm:gap-x-5 gap-y-2 mt-2.5 sm:mt-3">
+                                            <div class="grid grid-cols-2 gap-x-4 gap-y-3 sm:flex sm:flex-wrap sm:items-center sm:gap-x-6 sm:gap-y-2.5 mt-3">
                                                 {{-- 1. Sesi Tatap Muka Online (Khusus Bimtek dengan Zoom) --}}
                                                 @if ($isBimtekEvent && $hasZoom)
-                                                    <div class="inline-flex items-center gap-1.5 text-xs sm:text-[13px] {{ $isLocked ? 'text-slate-400' : ($isZoomAttended ? 'text-slate-800 font-medium' : 'text-slate-500') }}" title="{{ $isZoomAttended ? 'Tatap Muka: Hadir' : 'Tatap Muka: Belum Hadir' }}">
+                                                    <div class="inline-flex items-center gap-2 text-xs sm:text-[13px] {{ $isLocked ? 'text-slate-400' : ($isZoomAttended ? 'text-slate-800 font-medium' : 'text-slate-500') }}" title="{{ $isZoomAttended ? 'Tatap Muka: Hadir' : 'Tatap Muka: Belum Hadir' }}">
                                                         @if ($isZoomAttended)
                                                             <span class="w-4 h-4 rounded-full bg-emerald-600 text-white flex items-center justify-center shrink-0 text-[8px] shadow-2xs">
                                                                 <i class="fas fa-check"></i>
@@ -325,7 +371,7 @@
                                                 @endif
 
                                                 {{-- 2. Topik Materi Mandiri --}}
-                                                <div class="inline-flex items-center gap-1.5 text-xs sm:text-[13px] {{ $isLocked ? 'text-slate-400' : ($isContentCompleted ? 'text-slate-800 font-medium' : 'text-slate-500') }}" title="Materi Pembelajaran">
+                                                <div class="inline-flex items-center gap-2 text-xs sm:text-[13px] {{ $isLocked ? 'text-slate-400' : ($isContentCompleted ? 'text-slate-800 font-medium' : 'text-slate-500') }}" title="Materi Pembelajaran">
                                                     @if ($isContentCompleted)
                                                         <span class="w-4 h-4 rounded-full bg-emerald-600 text-white flex items-center justify-center shrink-0 text-[8px] shadow-2xs">
                                                             <i class="fas fa-check"></i>
@@ -338,7 +384,7 @@
 
                                                 {{-- 3. Upload Bukti Pelengkap / Tugas Drive (Khusus Bimtek dengan Zoom) --}}
                                                 @if ($isBimtekEvent && $hasZoom)
-                                                    <div class="inline-flex items-center gap-1.5 text-xs sm:text-[13px] {{ $isLocked ? 'text-slate-400' : ($hasZoomProof ? 'text-slate-800 font-medium' : 'text-slate-500') }}" title="{{ $hasZoomProof ? 'Bukti pelengkap sudah diunggah' : 'Belum upload bukti pelengkap' }}">
+                                                    <div class="inline-flex items-center gap-2 text-xs sm:text-[13px] {{ $isLocked ? 'text-slate-400' : ($hasZoomProof ? 'text-slate-800 font-medium' : 'text-slate-500') }}" title="{{ $hasZoomProof ? 'Bukti pelengkap sudah diunggah' : 'Belum upload bukti pelengkap' }}">
                                                         @if ($hasZoomProof)
                                                             <span class="w-4 h-4 rounded-full bg-emerald-600 text-white flex items-center justify-center shrink-0 text-[8px] shadow-2xs">
                                                                 <i class="fas fa-check"></i>
@@ -352,7 +398,7 @@
 
                                                 {{-- 4. Evaluasi Harian / Modul (Post-Test Bab) --}}
                                                 @if ($postTestBab)
-                                                    <div class="inline-flex items-center gap-1.5 text-xs sm:text-[13px] {{ $isLocked ? 'text-slate-400' : ($isPostTestBabCompleted ? 'text-slate-800 font-medium' : 'text-slate-500') }}" title="{{ $isPostTestBabCompleted ? 'Evaluasi tuntas' : 'Evaluasi belum dikerjakan' }}">
+                                                    <div class="inline-flex items-center gap-2 text-xs sm:text-[13px] {{ $isLocked ? 'text-slate-400' : ($isPostTestBabCompleted ? 'text-slate-800 font-medium' : 'text-slate-500') }}" title="{{ $isPostTestBabCompleted ? 'Evaluasi tuntas' : 'Evaluasi belum dikerjakan' }}">
                                                         @if ($isPostTestBabCompleted)
                                                             <span class="w-4 h-4 rounded-full bg-emerald-600 text-white flex items-center justify-center shrink-0 text-[8px] shadow-2xs">
                                                                 <i class="fas fa-check"></i>
@@ -435,7 +481,7 @@
                                     <div class="flex flex-row items-end justify-between gap-6 lg:gap-8">
                                         {{-- Kolom Kiri: Informasi Evaluasi & Tombol Aksi --}}
                                         <div class="flex-1 min-w-0 sm:py-1">
-                                            <h3 class="text-base sm:text-lg lg:text-xl font-bold text-slate-700 leading-snug max-w-full lg:max-w-[85%]">
+                                            <h3 class="text-base sm:text-lg lg:text-xl font-bold text-slate-700 leading-snug max-w-full lg:max-w-[85%] line-clamp-2" title="{{ $evaluasiAkhirTitle }}">
                                                 {{ $evaluasiAkhirTitle }}
                                             </h3>
 
@@ -716,7 +762,7 @@
                                 <div class="flex flex-col gap-2.5">
                                     <a href="{{ data_get($course, 'certificate_file') }}" target="_blank" download
                                         class="w-full bg-[#13416B] hover:bg-[#0f3354] text-white py-3 rounded-md font-bold transition-all shadow-sm flex items-center justify-center gap-2 text-sm">
-                                        <i class="fas fa-download"></i> Unduh e-Sertifikat Resmi
+                                        <i class="fas fa-download"></i> Unduh e-Sertifikat
                                     </a>
                                     <a href="{{ route('user.profile') }}#certificates"
                                         class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 py-2.5 rounded-md font-semibold transition-all flex items-center justify-center gap-1.5 text-xs border border-slate-200 shadow-2xs">
