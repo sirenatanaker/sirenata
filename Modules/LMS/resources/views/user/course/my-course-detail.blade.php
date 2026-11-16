@@ -645,9 +645,19 @@
                             @endif
 
                             @if ($isBimtekEvent)
+                                @php
+                                    $narasumberQuestions = \Modules\LMS\Models\BimtekEvaluationQuestion::where('is_active', true)->get();
+                                    $narasumberQuestionsCount = $narasumberQuestions->count() ?: 4;
+                                    $narasumberScaleCount = $narasumberQuestions->where('type', 'scale')->count();
+                                    $narasumberTextCount = $narasumberQuestions->where('type', '!=', 'scale')->count();
+                                    $narasumberFormTypeLabel = ($narasumberScaleCount > 0 && $narasumberTextCount > 0)
+                                        ? 'Skala Rating (1–5) & Masukan Tertulis'
+                                        : ($narasumberScaleCount > 0 ? 'Kuesioner Skala Rating (1–5)' : 'Kuesioner Evaluasi');
+                                @endphp
                                 {{-- CARD EVALUASI NARASUMBER / PEMATERI (KHUSUS BIMTEK - GAYA GOOGLE FORM PINDAH HALAMAN) --}}
                                 <div data-tour="evaluasi-narasumber"
                                     id="card-evaluasi-narasumber"
+                                    x-data="{ showStartNarasumberModal: false }"
                                     class="border {{ $isEvaluasiNarasumberLocked ? 'border-slate-200/80 bg-slate-50/60' : 'border-slate-200 bg-white hover:border-slate-300 shadow-2xs hover:shadow-xs' }} rounded-md p-4 sm:px-6 sm:py-5 lg:px-7 lg:py-6 transition-all">
 
                                     <div class="flex flex-row items-end justify-between gap-6 lg:gap-8">
@@ -676,13 +686,18 @@
                                                         class="inline-flex items-center justify-center gap-1.5 px-5 py-2.5 rounded-md text-xs sm:text-sm font-bold bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed select-none">
                                                         <i class="fas fa-lock text-xs"></i> Evaluasi Terkunci
                                                     </button>
-                                                @else
+                                                @elseif ($isEvaluasiNarasumberCompleted)
                                                     <a href="{{ route('user.course.my-course.evaluasi-narasumber', ['slug' => $courseSlug]) }}"
-                                                        class="inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-md text-xs sm:text-sm font-bold transition-all shadow-xs
-                                                        {{ $isEvaluasiNarasumberCompleted ? 'bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200' : 'bg-[#13416B] hover:bg-[#0f3354] text-white shadow-sm' }}">
-                                                        <i class="fas {{ $isEvaluasiNarasumberCompleted ? 'fa-eye' : 'fa-pen-alt' }} text-xs"></i>
-                                                        <span>{{ $isEvaluasiNarasumberCompleted ? 'Lihat / Edit Tanggapan Kuesioner' : 'Buka Kuesioner Evaluasi' }}</span>
+                                                        class="inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-md text-xs sm:text-sm font-bold transition-all shadow-xs bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200">
+                                                        <i class="fas fa-eye text-xs"></i>
+                                                        <span>Lihat / Edit Tanggapan Kuesioner</span>
                                                     </a>
+                                                @else
+                                                    <button type="button" @click="showStartNarasumberModal = true"
+                                                        class="inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-md text-xs sm:text-sm font-bold transition-all bg-[#13416B] hover:bg-[#0f3354] text-white shadow-sm cursor-pointer">
+                                                        <i class="fas fa-pen-alt text-xs"></i>
+                                                        <span>Buka Kuesioner Evaluasi</span>
+                                                    </button>
                                                 @endif
                                             </div>
                                         </div>
@@ -694,6 +709,97 @@
                                                 class="sm:h-44 md:h-48 lg:h-52 w-auto object-contain object-bottom select-none pointer-events-none" />
                                         </div>
                                     </div>
+
+                                    {{-- MODAL / BOTTOM SHEET KONFIRMASI MULAI EVALUASI NARASUMBER --}}
+                                    <template x-teleport="body">
+                                        <div x-show="showStartNarasumberModal" x-cloak
+                                            @keydown.escape.window="showStartNarasumberModal = false"
+                                            class="fixed inset-0 z-[100] overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4">
+
+                                            {{-- Overlay Click to Dismiss --}}
+                                            <div class="fixed inset-0" @click="showStartNarasumberModal = false"></div>
+
+                                            {{-- Panel Konten: Bottom Sheet di Mobile, Modal di Tablet/Desktop --}}
+                                            <div x-show="showStartNarasumberModal"
+                                                x-transition:enter="transition ease-out duration-300"
+                                                x-transition:enter-start="opacity-0 translate-y-full sm:translate-y-4 sm:scale-95"
+                                                x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
+                                                x-transition:leave="transition ease-in duration-200"
+                                                x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
+                                                x-transition:leave-end="opacity-0 translate-y-full sm:translate-y-4 sm:scale-95"
+                                                class="relative bg-white w-full sm:max-w-md rounded-t-2xl sm:rounded-lg shadow-2xl border-t sm:border border-slate-200 p-5 sm:p-6 space-y-4 text-left max-h-[88vh] sm:max-h-[85vh] overflow-y-auto z-10">
+
+                                                {{-- Drag Indicator Bar khusus Mobile --}}
+                                                <div class="sm:hidden w-12 h-1.5 bg-slate-300 rounded-full mx-auto -mt-2 mb-2"></div>
+
+                                                {{-- Header Modal / Bottom Sheet --}}
+                                                <div class="flex items-start justify-between gap-3 pb-3 border-b border-slate-100">
+                                                    <div class="flex items-center gap-2.5 min-w-0">
+                                                        <div class="w-9 h-9 rounded-md bg-[#13416B]/10 text-[#13416B] flex items-center justify-center text-sm font-bold shrink-0">
+                                                            <i class="fas fa-poll-h"></i>
+                                                        </div>
+                                                        <div class="min-w-0">
+                                                            <h4 class="text-base font-bold text-slate-800 leading-tight">Konfirmasi Kuesioner Evaluasi</h4>
+                                                            <p class="text-[11px] text-slate-500 mt-0.5 truncate">Evaluasi Narasumber &amp; Penyelenggaraan</p>
+                                                        </div>
+                                                    </div>
+                                                    <button type="button" @click="showStartNarasumberModal = false"
+                                                        class="text-slate-400 hover:text-slate-600 p-1.5 rounded-md transition-colors cursor-pointer shrink-0">
+                                                        <i class="fas fa-times text-base"></i>
+                                                    </button>
+                                                </div>
+
+                                                {{-- Ringkasan Ketentuan Kuesioner --}}
+                                                <div class="bg-slate-50 border border-slate-200 rounded-md divide-y divide-slate-200/80 text-xs sm:text-[13px]">
+                                                    <div class="flex items-center justify-between gap-3 px-3.5 py-2.5">
+                                                        <span class="text-slate-500 font-medium flex items-center gap-2">
+                                                            <i class="fas fa-list-ol text-slate-400 w-4 text-center"></i>
+                                                            Jumlah Pertanyaan
+                                                        </span>
+                                                        <span class="font-bold text-slate-800 text-right">
+                                                            {{ $narasumberQuestionsCount }} Pertanyaan
+                                                        </span>
+                                                    </div>
+                                                    <div class="flex items-center justify-between gap-3 px-3.5 py-2.5">
+                                                        <span class="text-slate-500 font-medium flex items-center gap-2">
+                                                            <i class="fas fa-sliders-h text-slate-400 w-4 text-center"></i>
+                                                            Bentuk Evaluasi
+                                                        </span>
+                                                        <span class="font-bold text-slate-800 text-right">
+                                                            {{ $narasumberFormTypeLabel }}
+                                                        </span>
+                                                    </div>
+                                                    <div class="flex items-center justify-between gap-3 px-3.5 py-2.5">
+                                                        <span class="text-slate-500 font-medium flex items-center gap-2">
+                                                            <i class="fas fa-stopwatch text-slate-400 w-4 text-center"></i>
+                                                            Waktu Pengerjaan
+                                                        </span>
+                                                        <span class="font-bold text-slate-800 text-right">
+                                                            Tanpa Batas Waktu
+                                                        </span>
+                                                    </div>
+                                                </div>
+
+                                                {{-- Pesan Kesiapan --}}
+                                                <p class="text-xs sm:text-[13px] text-slate-600 leading-relaxed">
+                                                    Mohon berikan penilaian objektif terhadap pemateri dan penyelenggaraan bimtek. Lanjutkan untuk membuka lembar kuesioner?
+                                                </p>
+
+                                                {{-- Footer Tombol Aksi --}}
+                                                <div class="pt-1 flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-2.5">
+                                                    <button type="button" @click="showStartNarasumberModal = false"
+                                                        class="inline-flex items-center justify-center px-4 py-2.5 rounded-md text-xs sm:text-sm font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 border border-slate-200 transition-colors cursor-pointer">
+                                                        Batal
+                                                    </button>
+                                                    <a href="{{ route('user.course.my-course.evaluasi-narasumber', ['slug' => $courseSlug]) }}"
+                                                        class="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-md text-xs sm:text-sm font-bold bg-[#13416B] hover:bg-[#0f3354] text-white shadow-sm transition-all">
+                                                        <i class="fas fa-pen-alt text-xs"></i>
+                                                        <span>Ya, Isi Kuesioner Sekarang</span>
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </template>
                                 </div>
                             @endif
                         </div>
