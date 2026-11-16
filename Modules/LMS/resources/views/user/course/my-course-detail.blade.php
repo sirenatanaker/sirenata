@@ -205,7 +205,7 @@
                         @endif
 
                         {{-- Judul Kursus --}}
-                        <h1 class="text-lg sm:text-xl lg:text-2xl font-black text-slate-900 tracking-tight leading-snug">
+                        <h1 class="text-lg sm:text-xl lg:text-2xl font-medium text-slate-700 tracking-wide leading-snug" style="font-family: 'Oswald', sans-serif;">
                             {{ $courseName }}
                         </h1>
 
@@ -260,7 +260,7 @@
                         <div class="flex items-start gap-3 sm:gap-3.5">
                             
                             <div>
-                                <h2 class="text-base sm:text-lg font-bold text-slate-700 leading-tight">
+                                <h2 class="text-lg sm:text-xl font-medium text-slate-700 leading-tight tracking-wide" style="font-family: 'Oswald', sans-serif;">
                                     {{ $isBimtekEvent ? 'Linimasa Kegiatan' : 'Daftar Modul Pembelajaran' }}
                                 </h2>
                                 <p class="text-[11px] sm:text-xs text-slate-500 mt-1">
@@ -350,7 +350,7 @@
                                         
                                         {{-- Kolom Kiri: Judul Langsung & Ringkasan Agenda Terpadu --}}
                                         <div class="flex-1 min-w-0">
-                                            <h3 class="font-bold {{ $isLocked ? 'text-slate-500' : 'text-slate-800' }} text-sm sm:text-base leading-snug break-words mb-1">
+                                            <h3 class="font-semibold {{ $isLocked ? 'text-slate-500' : 'text-slate-800' }} text-sm sm:text-base leading-snug break-words mb-1">
                                                 {{ $displayTitle }}
                                             </h3>
 
@@ -477,11 +477,11 @@
                             @if ($evaluasiAkhir)
                                 <div data-tour="evaluasi"
                                     x-data="{ showStartEvaluasiModal: false }"
-                                    class="border border-[#0f3354] bg-[#13416B] text-white shadow-sm hover:shadow-md rounded-md p-4 sm:px-6 sm:py-5 lg:px-7 lg:py-6 transition-all">
+                                    class="overflow-hidden border border-[#0f3354] bg-[#13416B] text-white shadow-sm hover:shadow-md rounded-md p-4 sm:px-6 sm:py-5 lg:px-7 lg:py-6 transition-all">
                                     <div class="flex flex-row items-end justify-between gap-6 lg:gap-8">
                                         {{-- Kolom Kiri: Informasi Evaluasi & Tombol Aksi --}}
                                         <div class="flex-1 min-w-0 sm:py-1">
-                                            <h3 class="text-base sm:text-lg lg:text-xl font-bold text-white leading-snug max-w-full lg:max-w-[85%] line-clamp-2" title="{{ $evaluasiAkhirTitle }}">
+                                            <h3 class="text-base sm:text-lg lg:text-xl font-medium text-white leading-snug tracking-wide max-w-full lg:max-w-[85%] line-clamp-2" style="font-family: 'Oswald', sans-serif;" title="{{ $evaluasiAkhirTitle }}">
                                                 {{ $evaluasiAkhirTitle }}
                                             </h3>
 
@@ -544,10 +544,10 @@
                                         </div>
 
                                         {{-- Kolom Kanan: Ilustrasi Gambar khusus Layar Tablet/Desktop (sm ke atas) --}}
-                                        <div class="hidden sm:flex sm:shrink-0 items-end justify-center self-end -mb-3.5 lg:-mb-4">
+                                        <div class="hidden sm:flex sm:shrink-0 items-end justify-center self-end -mb-6 sm:-mb-6 lg:-mb-7">
                                             <img src="{{ asset('images/modul_ilustrasi.webp') }}"
                                                 alt="Ilustrasi Evaluasi Akhir"
-                                                class="sm:h-44 md:h-48 lg:h-52 w-auto object-contain object-bottom select-none pointer-events-none" />
+                                                class="sm:h-44 md:h-48 lg:h-52 w-auto object-contain object-bottom translate-y-1 select-none pointer-events-none" />
                                         </div>
                                     </div>
 
@@ -664,7 +664,7 @@
                                         {{-- Kolom Kiri: Informasi Evaluasi Narasumber & Tombol Aksi Pindah Halaman --}}
                                         <div class="flex-1 min-w-0 sm:py-1">
                                             <div class="flex items-center gap-2 flex-wrap">
-                                                <h3 class="text-base sm:text-lg lg:text-xl font-bold text-white leading-snug">
+                                                <h3 class="text-base sm:text-lg lg:text-xl font-medium text-white leading-snug tracking-wide" style="font-family: 'Oswald', sans-serif;">
                                                     Evaluasi Narasumber & Penyelenggaraan
                                                 </h3>
                                                 @if ($isEvaluasiNarasumberCompleted)
@@ -825,7 +825,7 @@
                             <i class="fas fa-award"></i>
                         </div>
                         <div>
-                            <h3 class="text-base md:text-lg font-bold text-slate-700">Sertifikat Kelulusan</h3>
+                            <h3 class="text-base md:text-lg font-medium text-slate-700 tracking-wide" style="font-family: 'Oswald', sans-serif;">Sertifikat Kelulusan</h3>
                             <p class="text-[11px] text-slate-500 mt-0.5">Dokumen resmi bukti penyelesaian kursus</p>
                         </div>
                     </div>
