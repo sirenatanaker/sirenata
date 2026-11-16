@@ -168,8 +168,11 @@
                 // Payload ringan untuk modal (tanpa query tambahan per kartu)
                 $coursePayload = $courses->mapWithKeys(function ($c) use ($enrolledCourseIds, $userBimtekEventIds) {
                     $sections = $c->sections->values()->map(function ($s, $i) {
+                        $rawName = (string) ($s->name ?? $s->title ?? '');
+                        $cleanName = trim((string) preg_replace('/^(modul|hari)\s*(ke[\-\s]*)?\d+\s*[:\-–]\s*/i', '', $rawName));
+
                         return [
-                            'name'     => $s->name ?? $s->title ?? 'Modul ' . ($i + 1),
+                            'name'     => $cleanName !== '' ? $cleanName : ($rawName !== '' ? $rawName : 'Bagian ' . ($i + 1)),
                             'contents' => $s->contents->map(fn($ct) => [
                                 'name' => $ct->name,
                                 'type' => $ct->video ? 'video' : ($ct->document ? 'document' : 'text'),
@@ -225,10 +228,10 @@
                     open: false,          // modal lihat kurikulum
                     confirmOpen: false,   // alert konfirmasi daftar
                     submitting: false,
-                    expandedSections: [0],
+                    expandedSections: [],
                     show(id) {
                         this.selected = this.courses[id];
-                        this.expandedSections = [0];
+                        this.expandedSections = [];
                         this.submitting = false;
                         this.open = true;
                     },
@@ -238,7 +241,7 @@
                             return;
                         }
                         this.selected = c;
-                        this.expandedSections = [0];
+                        this.expandedSections = [];
                         this.submitting = false;
                         this.confirmOpen = true;
                     },
@@ -335,31 +338,51 @@
                                         <div class="flex-1 min-w-0">
                                             <template x-if="selected.isEvent && selected.bimtekBatchName">
                                                 <div class="inline-flex items-center gap-1.5 text-[11px] sm:text-xs font-bold text-amber-700 bg-amber-50 border border-amber-200/80 px-2 py-0.5 rounded-md mb-1.5 max-w-full">
-                                                    <i class="fas fa-satellite-dish text-[10px] sm:text-[11px] text-amber-600 shrink-0"></i>
+                                                    <i class="fas fa-satellite-dish text-2xs sm:text-[11px] text-amber-600 shrink-0"></i>
                                                     <span class="truncate" :title="selected.bimtekBatchName" x-text="selected.bimtekBatchName"></span>
                                                 </div>
                                             </template>
 
                                             <h3 id="enroll-title" class="text-base sm:text-lg font-bold text-slate-900 leading-snug line-clamp-2"
                                                 :title="selected.name" x-text="selected.name"></h3>
-                                            
-                                            <p class="text-xs text-slate-500 leading-relaxed mt-1 line-clamp-2"
+
+                                            <p class="text-xs sm:text-[13px] text-slate-500 leading-relaxed mt-1 line-clamp-2"
                                                x-show="selected.description" x-text="selected.description"></p>
+
+                                            <div class="flex flex-wrap items-center gap-x-3 gap-y-1.5 mt-2.5 text-[11px] sm:text-xs text-slate-600">
+                                                <span class="inline-flex items-center gap-1.5 font-medium">
+                                                    <i class="far fa-folder-open text-[#13416B]/80 text-xs"></i>
+                                                    <span><strong class="font-bold text-slate-800" x-text="selected.modules"></strong> Modul</span>
+                                                </span>
+                                                <span class="text-slate-300">•</span>
+                                                <span class="inline-flex items-center gap-1.5 font-medium">
+                                                    <i class="far fa-user text-[#13416B]/80 text-xs"></i>
+                                                    <span><strong class="font-bold text-slate-800" x-text="selected.students.toLocaleString('id-ID')"></strong> Peserta</span>
+                                                </span>
+                                                <template x-if="selected.isEvent">
+                                                    <span class="inline-flex items-center gap-2 font-medium">
+                                                        <span class="text-slate-300">•</span>
+                                                        <span class="inline-flex items-center gap-1 text-blue-700 bg-blue-50 px-2 py-0.5 rounded-md border border-blue-200/60 font-semibold">
+                                                            <i class="fas fa-video text-blue-500 text-[11px]"></i>
+                                                            <span>Live Zoom</span>
+                                                        </span>
+                                                    </span>
+                                                </template>
+                                            </div>
                                         </div>
                                         <button type="button" @click="close()" aria-label="Tutup"
                                                 class="shrink-0 w-8 h-8 -mr-1 rounded-lg flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors">
                                             <i class="fas fa-times text-sm"></i>
                                         </button>
                                     </div>
-
                                 </div>
 
                                 {{-- Body: Detail Kursus & Kurikulum (Scrollable) --}}
-                                <div class="flex-1 overflow-y-auto px-5 sm:px-6 py-4 sm:py-5 custom-scrollbar bg-slate-50/40">
+                                <div class="flex-1 overflow-y-auto px-5 sm:px-6 py-4 sm:py-5 custom-scrollbar bg-slate-50/40 space-y-5">
 
                                     {{-- Banner Notifikasi Jika Pendaftaran Gelombang Ini Ditutup (Disuruh Ikut Batch Berikutnya) --}}
                                     <template x-if="selected && selected.isEvent && !selected.isEnrolledInThisBimtek && (!selected.isRegistrationOpen || selected.bimtekStatus !== 'open_registration')">
-                                        <div class="mb-5 p-3.5 sm:p-4 rounded-xl bg-amber-50 border border-amber-200/90 flex items-start gap-3 text-amber-900 shadow-2xs">
+                                        <div class="p-3.5 sm:p-4 rounded-xl bg-amber-50 border border-amber-200/90 flex items-start gap-3 text-amber-900 shadow-2xs">
                                             <div class="w-8 h-8 rounded-lg bg-amber-100/80 border border-amber-200 text-amber-700 flex items-center justify-center shrink-0 mt-0.5">
                                                 <i class="fas fa-calendar-times text-sm"></i>
                                             </div>
@@ -372,59 +395,52 @@
                                         </div>
                                     </template>
 
-                                    {{-- Timeline Pelaksanaan Pelatihan (Khusus Event Pelatihan) --}}
+                                    {{-- Timeline Pembelajaran (Khusus Event Pelatihan) --}}
                                     <template x-if="selected && selected.isEvent && selected.timelineSteps">
-                                        <div class="mb-6">
-                                            {{-- Header di luar card seperti pada Kurikulum (Badge di bawah title & deskripsi) --}}
-                                            <div class="mb-3.5">
-                                                <h4 class="text-xs sm:text-sm font-extrabold uppercase tracking-wider text-slate-800">Timeline Pelaksanaan Pelatihan</h4>
-                                                <p class="text-[11px] text-slate-400 mt-0.5">Rangkaian tahapan dari registrasi hingga sertifikasi</p>
+                                        <div>
+                                            <div class="flex items-center justify-between gap-2 mb-3">
+                                                <h4 class="text-xs sm:text-sm font-extrabold uppercase tracking-wider text-slate-800">Timeline Pembelajaran</h4>
                                                 <template x-if="selected.currentTimelinePhase">
-                                                    <div class="mt-2">
-                                                        <span class="inline-flex items-center gap-1.5 rounded uppercase tracking-wider text-white shadow-2xs font-bold"
-                                                              :class="[
-                                                                  selected.currentTimelinePhase.badge_bg,
-                                                                  selected.currentTimelinePhase.phase === 'completed' ? 'px-3 py-1 text-xs' : 'px-2.5 py-0.5 text-[10px]'
-                                                              ]">
-                                                            <i class="fas text-[9px]" :class="selected.currentTimelinePhase.icon || 'fa-clock'"></i>
-                                                            <span x-text="selected.currentTimelinePhase.badge"></span>
-                                                        </span>
-                                                    </div>
+                                                    <span class="inline-flex items-center gap-1.5 rounded-md uppercase tracking-wider text-white shadow-2xs font-bold shrink-0 px-2.5 py-0.5 text-2xs"
+                                                          :class="selected.currentTimelinePhase.badge_bg">
+                                                        <i class="fas text-[9px]" :class="selected.currentTimelinePhase.icon || 'fa-clock'"></i>
+                                                        <span x-text="selected.currentTimelinePhase.badge"></span>
+                                                    </span>
                                                 </template>
                                             </div>
 
-                                            {{-- Stepper 3 Tahap Tanpa Outer Card Container (Gap Luwes) --}}
-                                            <div class="relative pl-9 sm:pl-12 space-y-4 before:absolute before:left-3 sm:before:left-4 before:top-2 before:bottom-2 before:w-0.5 before:bg-slate-200">
+                                            {{-- Stepper 3 Tahap Ringkas --}}
+                                            <div class="relative pl-8 sm:pl-10 space-y-2.5 before:absolute before:left-2.5 sm:before:left-3.5 before:top-2 before:bottom-2 before:w-0.5 before:bg-slate-200">
                                                 <template x-for="(step, idx) in selected.timelineSteps" :key="idx">
                                                     <div class="relative">
                                                         {{-- Dot / Icon Step --}}
-                                                        <div class="absolute -left-9 sm:-left-12 top-1 w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all shadow-2xs"
+                                                        <div class="absolute -left-8 sm:-left-10 top-2.5 w-5 h-5 sm:w-7 sm:h-7 rounded-full flex items-center justify-center text-[11px] sm:text-xs font-bold transition-all shadow-2xs"
                                                              :class="{
-                                                                 'bg-emerald-600 text-white ring-4 ring-emerald-50': step.status === 'completed',
-                                                                 'bg-[#13416B] text-white ring-4 ring-blue-100 animate-pulse': step.status === 'active',
+                                                                 'bg-emerald-600 text-white ring-3 ring-emerald-50': step.status === 'completed',
+                                                                 'bg-[#13416B] text-white ring-3 ring-blue-100': step.status === 'active',
                                                                  'bg-white text-slate-400 border-2 border-slate-300': step.status === 'upcoming'
                                                              }">
                                                             <template x-if="step.status === 'completed'">
-                                                                <i class="fas fa-check text-[10px] sm:text-xs"></i>
+                                                                <i class="fas fa-check text-[9px] sm:text-2xs"></i>
                                                             </template>
                                                             <template x-if="step.status !== 'completed'">
                                                                 <span x-text="step.step"></span>
                                                             </template>
                                                         </div>
 
-                                                        {{-- Card Timeline --}}
-                                                        <div class="p-3 sm:p-3.5 rounded-xl border transition-all"
+                                                        {{-- Card Timeline Ringkas --}}
+                                                        <div class="p-2.5 sm:p-3 rounded-lg border transition-all"
                                                              :class="{
-                                                                 'bg-white border-[#13416B]/30 shadow-xs ring-1 ring-[#13416B]/10': step.status === 'active',
+                                                                 'bg-white border-[#13416B]/30 shadow-xs': step.status === 'active',
                                                                  'bg-slate-50/70 border-slate-200/80': step.status === 'completed',
                                                                  'bg-white border-slate-200/70': step.status === 'upcoming'
                                                              }">
                                                             <div class="flex items-center justify-between gap-2 flex-wrap">
-                                                                <div class="flex items-center gap-1.5 font-bold text-xs sm:text-sm text-slate-800">
-                                                                    <i class="fas" :class="step.icon + (step.status === 'active' ? ' text-[#13416B]' : ' text-slate-400')"></i>
+                                                                <div class="flex items-center gap-1.5 font-bold text-xs sm:text-[13px] text-slate-800">
+                                                                    <i class="fas text-xs" :class="step.icon + (step.status === 'active' ? ' text-[#13416B]' : ' text-slate-400')"></i>
                                                                     <span x-text="step.title"></span>
                                                                 </div>
-                                                                <span class="px-2 py-0.5 rounded text-[10px] font-bold"
+                                                                <span class="px-2 py-0.5 rounded text-2xs font-bold shrink-0"
                                                                       :class="{
                                                                           'bg-emerald-100 text-emerald-700': step.status === 'completed',
                                                                           'bg-[#13416B] text-white': step.status === 'active',
@@ -433,11 +449,9 @@
                                                                       x-text="step.status === 'completed' ? 'Selesai' : (step.status === 'active' ? 'Sedang Berlangsung' : 'Akan Datang')">
                                                                 </span>
                                                             </div>
-                                                            <p class="text-[11px] text-slate-500 mt-1 leading-relaxed" x-text="step.subtitle"></p>
-                                                            
-                                                            <div class="mt-2.5 pt-2 border-t border-slate-100 flex flex-wrap items-center gap-3 text-[11px] text-slate-700 font-medium">
+                                                            <div class="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] sm:text-xs text-slate-600 font-medium">
                                                                 <span class="inline-flex items-center gap-1.5">
-                                                                    <i class="far fa-calendar-alt text-[#13416B]"></i>
+                                                                    <i class="far fa-calendar-alt text-[#13416B]/80"></i>
                                                                     <span x-text="step.date_range"></span>
                                                                 </span>
                                                                 <template x-if="step.zoom_time">
@@ -449,7 +463,7 @@
                                                                 <template x-if="step.step === 1">
                                                                     <span class="inline-flex items-center gap-1.5 text-slate-500">
                                                                         <i class="fas fa-users text-slate-400"></i>
-                                                                        <span>Kuota: <strong x-text="selected.bimtekQuota > 0 ? selected.bimtekQuota + ' Peserta' : 'Tanpa Batasan Kuota'"></strong></span>
+                                                                        <span>Kuota: <strong x-text="selected.bimtekQuota > 0 ? selected.bimtekQuota + ' Peserta' : 'Tanpa Batasan'"></strong></span>
                                                                     </span>
                                                                 </template>
                                                             </div>
@@ -460,98 +474,81 @@
                                         </div>
                                     </template>
 
-                                    <div class="mb-3.5">
-                                        <div>
+                                    {{-- Struktur Kurikulum --}}
+                                    <div>
+                                        <div class="flex items-center justify-between gap-2 mb-2.5">
                                             <h4 class="text-xs sm:text-sm font-extrabold uppercase tracking-wider text-slate-800">Struktur Kurikulum</h4>
-                                            <p class="text-[11px] text-slate-400 mt-0.5">Daftar modul dan topik materi pembelajaran</p>
+                                            <button type="button"
+                                                    x-show="selected.sections && selected.sections.length > 0"
+                                                    @click="toggleAll()"
+                                                    class="text-[11px] sm:text-xs font-semibold text-[#13416B] hover:underline cursor-pointer"
+                                                    x-text="allExpanded() ? 'Tutup Semua' : 'Buka Semua'"></button>
                                         </div>
 
-                                        {{-- Meta Stats Ribbon (Modul • Peserta • Live Zoom) --}}
-                                        <div class="flex flex-wrap items-center gap-2 sm:gap-3 mt-2.5 pt-2.5 border-t border-slate-200/70 text-[11px] sm:text-xs text-slate-600">
-                                            <div class="inline-flex items-center gap-1.5 font-medium">
-                                                <i class="far fa-folder-open text-[#13416B]/80 text-xs"></i>
-                                                <span><strong class="font-bold text-slate-800" x-text="selected.modules"></strong> Modul</span>
-                                            </div>
-                                            <span class="text-slate-300">•</span>
-                                            <div class="inline-flex items-center gap-1.5 font-medium">
-                                                <i class="far fa-user text-[#13416B]/80 text-xs"></i>
-                                                <span><strong class="font-bold text-slate-800" x-text="selected.students.toLocaleString('id-ID')"></strong> Peserta</span>
-                                            </div>
-                                            <template x-if="selected.isEvent">
-                                                <div class="inline-flex items-center gap-2 font-medium">
-                                                    <span class="text-slate-300">•</span>
-                                                    <span class="inline-flex items-center gap-1 text-blue-700 bg-blue-50 px-2 py-0.5 rounded-md border border-blue-200/60 font-semibold">
-                                                        <i class="fas fa-video text-blue-500 text-[11px]"></i>
-                                                        <span>Live Zoom</span>
-                                                    </span>
+                                        <div class="space-y-2">
+                                            <template x-for="(section, i) in selected.sections" :key="i">
+                                                <div class="bg-white rounded-xl border transition-all duration-200 overflow-hidden"
+                                                     :class="isExpanded(i) ? 'border-slate-300 shadow-xs' : 'border-slate-200/80 hover:border-slate-300'">
+
+                                                    <button type="button"
+                                                            @click="toggleSection(i)"
+                                                            class="w-full flex items-center gap-3 px-3.5 sm:px-4 py-2.5 sm:py-3 text-left transition-colors cursor-pointer select-none"
+                                                            :class="isExpanded(i) ? 'bg-slate-50/70' : 'hover:bg-slate-50/40'"
+                                                            :aria-expanded="isExpanded(i)">
+
+                                                        <span class="shrink-0 w-6 h-6 rounded-lg text-xs font-semibold flex items-center justify-center transition-colors"
+                                                              :class="isExpanded(i) ? 'bg-[#13416B] text-white shadow-xs' : 'bg-slate-100 text-slate-600'"
+                                                              x-text="i + 1"></span>
+
+                                                        <span class="flex-1 min-w-0 text-xs sm:text-sm font-semibold text-slate-800 leading-snug line-clamp-2 wrap-break-word"
+                                                              :title="section.name"
+                                                              x-text="section.name"></span>
+
+                                                        <div class="shrink-0 flex items-center gap-2">
+                                                            <span class="text-[11px] font-medium text-slate-500"
+                                                                  x-text="section.contents.length + ' materi'"></span>
+                                                            <i class="fas fa-chevron-down text-2xs text-slate-400 transition-transform duration-200"
+                                                               :class="{ 'rotate-180 text-slate-600': isExpanded(i) }"></i>
+                                                        </div>
+                                                    </button>
+
+                                                    <div x-show="isExpanded(i)"
+                                                         x-collapse
+                                                         x-cloak
+                                                         class="border-t border-slate-100 divide-y divide-slate-100 bg-slate-50/50">
+
+                                                        <!-- Daftar Materi Konten -->
+                                                        <template x-for="(content, j) in section.contents" :key="j">
+                                                            <div class="flex items-center gap-2.5 px-3.5 sm:px-4 py-2 text-xs">
+                                                                <span class="w-5 h-5 rounded-md flex items-center justify-center shrink-0 text-2xs"
+                                                                      :class="{
+                                                                          'bg-sky-50 text-sky-600': content.type === 'video',
+                                                                          'bg-emerald-50 text-emerald-600': content.type === 'document',
+                                                                          'bg-slate-200/70 text-slate-600': content.type !== 'video' && content.type !== 'document'
+                                                                      }">
+                                                                    <i class="fas" :class="icon(content.type)"></i>
+                                                                </span>
+
+                                                                <span class="flex-1 min-w-0 font-medium text-slate-700 leading-snug line-clamp-2 wrap-break-word"
+                                                                      :title="content.name"
+                                                                      x-text="content.name"></span>
+                                                            </div>
+                                                        </template>
+
+                                                        <div x-show="section.contents.length === 0" class="py-2.5 text-center text-xs italic text-slate-400">
+                                                            Belum ada topik materi pada bagian ini.
+                                                        </div>
+                                                    </div>
                                                 </div>
                                             </template>
-                                        </div>
-                                    </div>
 
-                                    <div class="space-y-2.5">
-                                        <template x-for="(section, i) in selected.sections" :key="i">
-                                            <div class="bg-white rounded-xl border transition-all duration-200 overflow-hidden"
-                                                 :class="isExpanded(i) ? 'border-slate-300 shadow-xs' : 'border-slate-200/80 hover:border-slate-300'">
-                                                
-                                                <button type="button"
-                                                        @click="toggleSection(i)"
-                                                        class="w-full flex items-center gap-3 px-3.5 sm:px-4 py-3 text-left transition-colors cursor-pointer select-none"
-                                                        :class="isExpanded(i) ? 'bg-slate-50/50' : 'hover:bg-slate-50/40'"
-                                                        :aria-expanded="isExpanded(i)">
-                                                    
-                                                    <span class="shrink-0 w-6 h-6 sm:w-7 sm:h-7 rounded-lg text-xs font-semibold flex items-center justify-center transition-colors"
-                                                          :class="isExpanded(i) ? 'bg-[#13416B] text-white shadow-xs' : 'bg-slate-100 text-slate-600'"
-                                                          x-text="i + 1"></span>
-
-                                                    <span class="flex-1 min-w-0 text-xs sm:text-sm font-semibold text-slate-800 leading-snug line-clamp-2 break-words"
-                                                          :title="section.name"
-                                                          x-text="section.name"></span>
-
-                                                    <div class="shrink-0 flex items-center gap-2">
-                                                        <span class="px-2 py-0.5 rounded-md text-[10px] sm:text-[11px] font-medium bg-slate-100 text-slate-500"
-                                                              x-text="section.contents.length + ' materi'"></span>
-                                                        <i class="fas fa-chevron-down text-[10px] text-slate-400 transition-transform duration-200"
-                                                           :class="{ 'rotate-180 text-slate-600': isExpanded(i) }"></i>
-                                                    </div>
-                                                </button>
-
-                                                <div x-show="isExpanded(i)"
-                                                     x-collapse
-                                                     x-cloak
-                                                     class="border-t border-slate-100 bg-slate-50/30 p-2.5 sm:p-3 space-y-1.5">
-                                                    
-                                                    <!-- Daftar Materi Konten -->
-                                                    <template x-for="(content, j) in section.contents" :key="j">
-                                                        <div class="flex items-center gap-2.5 px-3 py-2 rounded-lg bg-white border border-slate-100 hover:border-slate-200 transition-colors text-xs">
-                                                            <span class="w-6 h-6 rounded-md flex items-center justify-center shrink-0 text-[10px]"
-                                                                  :class="{
-                                                                      'bg-sky-50 text-sky-600': content.type === 'video',
-                                                                      'bg-emerald-50 text-emerald-600': content.type === 'document',
-                                                                      'bg-slate-100 text-slate-600': content.type !== 'video' && content.type !== 'document'
-                                                                  }">
-                                                                <i class="fas" :class="icon(content.type)"></i>
-                                                            </span>
-
-                                                            <span class="flex-1 min-w-0 font-medium text-slate-700 leading-snug line-clamp-2 break-words"
-                                                                  :title="content.name"
-                                                                  x-text="content.name"></span>
-                                                        </div>
-                                                    </template>
-
-                                                    <div x-show="section.contents.length === 0" class="py-2.5 text-center text-xs italic text-slate-400">
-                                                        Belum ada topik materi pada modul ini.
-                                                    </div>
+                                            <div x-show="selected.sections.length === 0" class="py-10 text-center bg-white rounded-xl border border-dashed border-slate-200">
+                                                <div class="w-11 h-11 mx-auto mb-2.5 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center">
+                                                    <i class="fas fa-book-open text-sm"></i>
                                                 </div>
+                                                <p class="text-sm font-semibold text-slate-700">Kurikulum Belum Tersedia</p>
+                                                <p class="text-xs text-slate-400 mt-1">Materi untuk kursus ini sedang dalam tahap penyusunan.</p>
                                             </div>
-                                        </template>
-
-                                        <div x-show="selected.sections.length === 0" class="py-12 text-center bg-white rounded-xl border border-dashed border-slate-200">
-                                            <div class="w-12 h-12 mx-auto mb-3 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center">
-                                                <i class="fas fa-book-open text-base"></i>
-                                            </div>
-                                            <p class="text-sm font-semibold text-slate-700">Kurikulum Belum Tersedia</p>
-                                            <p class="text-xs text-slate-400 mt-1">Materi untuk kursus ini sedang dalam tahap penyusunan.</p>
                                         </div>
                                     </div>
                                 </div>

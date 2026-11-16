@@ -6,6 +6,15 @@
         $courseSlug = $slug ?? data_get($course, 'slug');
         $canReviewAll = data_get($course, 'can_review_all', false);
         $isWaitingForStart = data_get($course, 'is_waiting_for_start', false);
+        $activeSession = $currentSession ?? null;
+        $activeSessionId = data_get($activeSession, 'id');
+        $activeSessionTitle = data_get($activeSession, 'title');
+        $activeSessionNumber = data_get($activeSession, 'session_number');
+        $sessionZoomUrl = data_get($activeSession, 'effective_zoom_url') ?? data_get($activeBimtek, 'zoom_url');
+        $sessionMeetingId = data_get($activeSession, 'zoom_meeting_id') ?: data_get($activeBimtek, 'zoom_meeting_id');
+        $sessionPasscode = data_get($activeSession, 'zoom_passcode') ?: data_get($activeBimtek, 'zoom_passcode');
+        $sessionSchedule = data_get($activeSession, 'schedule_formatted') ?? ($zoomScheduleFormatted ?? null);
+        $sessionAttendanceSchedule = data_get($activeSession, 'attendance_schedule_formatted') ?? ($attendanceScheduleFormatted ?? null);
     @endphp
 
     <div class="px-0 py-2 sm:p-6 max-w-full mx-auto scroll-smooth">
@@ -21,9 +30,9 @@
                 </li>
                 <li>
                     <div class="flex items-center gap-1.5 sm:gap-2">
-                        <i class="fas fa-chevron-right text-slate-400 text-[9px] sm:text-[10px]"></i>
+                        <i class="fas fa-chevron-right text-slate-400 text-[9px] sm:text-2xs"></i>
                         <a href="{{ route('user.course.my-course.detail', $courseSlug) }}"
-                            class="text-xs sm:text-sm font-medium text-slate-500 hover:text-[#13416B] transition-colors truncate max-w-[160px] sm:max-w-xs"
+                            class="text-xs sm:text-sm font-medium text-slate-500 hover:text-[#13416B] transition-colors truncate max-w-40 sm:max-w-xs"
                             title="{{ $courseName }}">
                             {{ $courseName }}
                         </a>
@@ -31,8 +40,8 @@
                 </li>
                 <li>
                     <div class="flex items-center gap-1.5 sm:gap-2">
-                        <i class="fas fa-chevron-right text-slate-400 text-[9px] sm:text-[10px]"></i>
-                        <span class="text-xs sm:text-sm font-semibold text-slate-800 leading-snug truncate max-w-[200px] sm:max-w-none">
+                        <i class="fas fa-chevron-right text-slate-400 text-[9px] sm:text-2xs"></i>
+                        <span class="text-xs sm:text-sm font-semibold text-slate-800 leading-snug truncate max-w-50 sm:max-w-none">
                             {{ $isBimtekEvent ? 'Hari ke-' . ($sectionIndex + 1) : 'Modul ' . ($sectionIndex + 1) }}
                         </span>
                     </div>
@@ -60,7 +69,7 @@
                                 {{ $isBimtekEvent ? 'Agenda Hari ke-' . ($sectionIndex + 1) : 'Modul Pembelajaran ' . ($sectionIndex + 1) }}
                             </span>
                         </div>
-                        <h1 class="text-lg sm:text-xl lg:text-2xl font-medium text-slate-700 tracking-wide leading-tight break-words" style="font-family: 'Oswald', sans-serif;">
+                        <h1 class="text-lg sm:text-xl lg:text-2xl font-medium text-slate-700 tracking-wide leading-tight wrap-break-word" style="font-family: 'Oswald', sans-serif;">
                             {{ $sectionName }}
                         </h1>
                     </div>
@@ -115,11 +124,11 @@
                                             </div>
 
                                             <div class="flex items-center gap-2 flex-1 min-w-0">
-                                                <p class="font-bold text-slate-800 text-sm sm:text-[15px] leading-snug break-words line-clamp-2" title="{{ $contentName }}">
+                                                <p class="font-bold text-slate-800 text-sm sm:text-[15px] leading-snug wrap-break-word line-clamp-2" title="{{ $contentName }}">
                                                     {{ $contentName }}
                                                 </p>
                                                 @if ($isContentItemCompleted)
-                                                    <div class="w-5 h-5 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center text-[10px] font-bold shrink-0" title="Selesai">
+                                                    <div class="w-5 h-5 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center text-2xs font-bold shrink-0" title="Selesai">
                                                         <i class="fas fa-check"></i>
                                                     </div>
                                                 @endif
@@ -157,14 +166,6 @@
 
                 {{-- 2. CARD SESI LIVE ZOOM --}}
                 @if ($hasZoom)
-                    @php
-                        $activeSession = $currentSession ?? null;
-                        $sessionZoomUrl = $activeSession?->effective_zoom_url ?? $activeBimtek?->zoom_url;
-                        $sessionMeetingId = $activeSession?->zoom_meeting_id ?: $activeBimtek?->zoom_meeting_id;
-                        $sessionPasscode = $activeSession?->zoom_passcode ?: $activeBimtek?->zoom_passcode;
-                        $sessionSchedule = $activeSession?->schedule_formatted ?? $zoomScheduleFormatted;
-                        $sessionAttendanceSchedule = $activeSession?->attendance_schedule_formatted ?? $attendanceScheduleFormatted;
-                    @endphp
                     <div class="relative flex items-stretch gap-3.5 sm:gap-5 pb-6 sm:pb-8">
                         {{-- Node Timeline Tahap 2 & Garis Penghubung --}}
                         <div class="relative w-8 sm:w-10 shrink-0 flex flex-col items-center select-none">
@@ -189,12 +190,12 @@
                             class="flex-1 min-w-0 scroll-mt-6 rounded-md border border-slate-200 bg-slate-50/40 p-4 sm:p-5 lg:p-6 shadow-2xs transition-all space-y-4">
                             <div>
                                 <h2 class="text-base sm:text-lg lg:text-xl font-medium text-slate-700 tracking-wide leading-tight" style="font-family: 'Oswald', sans-serif;">
-                                    Sesi Tatap Muka Online {{ $activeSession ? '— ' . $activeSession->title : '' }}
+                                    Sesi Tatap Muka Online {{ $activeSessionTitle ? '— ' . $activeSessionTitle : '' }}
                                 </h2>
 
                                 <p class="text-sm sm:text-[15px] text-slate-600 mt-1 leading-relaxed">
                                     @if ($isZoomAttended)
-                                        Terima kasih, Anda telah mengisi presensi kehadiran sesi {{ $activeSession ? $activeSession->title : 'tatap muka online' }}.
+                                        Terima kasih, Anda telah mengisi presensi kehadiran sesi {{ $activeSessionTitle ?: 'tatap muka online' }}.
                                     @elseif ($isPresensiOpen)
                                         Silakan masuk ke ruang tatap muka, lalu klik tombol Konfirmasi Kehadiran setelah Anda bergabung.
                                     @elseif ($isZoomEnded)
@@ -221,7 +222,7 @@
                                         @foreach ($bimtekSessions as $sIdx => $sessionItem)
                                             @php
                                                 $isItemAttended = $attendedSessionIds->contains($sessionItem->id);
-                                                $isCurrent = $activeSession && $activeSession->id === $sessionItem->id;
+                                                $isCurrent = !empty($activeSessionId) && $activeSessionId === $sessionItem->id;
                                             @endphp
                                             <div class="flex items-center justify-between p-2 rounded-md border text-xs {{ $isCurrent ? 'border-blue-400 bg-blue-50/60 ring-1 ring-blue-300' : 'border-slate-200 bg-slate-50/50' }}">
                                                 <div class="min-w-0 pr-1">
@@ -231,22 +232,22 @@
                                                             <span class="ml-1 text-[9px] font-bold text-blue-700 uppercase">(Hari Ini)</span>
                                                         @endif
                                                     </p>
-                                                    <p class="text-[10px] text-slate-500 truncate">{{ $sessionItem->schedule_formatted }}</p>
+                                                    <p class="text-2xs text-slate-500 truncate">{{ $sessionItem->schedule_formatted }}</p>
                                                 </div>
                                                 @if ($isItemAttended)
-                                                    <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-700 shrink-0">
+                                                    <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-2xs font-bold bg-emerald-100 text-emerald-700 shrink-0">
                                                         <i class="fas fa-check"></i> Hadir
                                                     </span>
                                                 @elseif ($sessionItem->is_presensi_open)
-                                                    <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800 shrink-0 animate-pulse">
+                                                    <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-2xs font-bold bg-amber-100 text-amber-800 shrink-0 animate-pulse">
                                                         <i class="fas fa-clock"></i> Buka
                                                     </span>
                                                 @elseif ($sessionItem->is_zoom_ended)
-                                                    <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-slate-200 text-slate-600 shrink-0">
+                                                    <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-2xs font-semibold bg-slate-200 text-slate-600 shrink-0">
                                                         Lewat
                                                     </span>
                                                 @else
-                                                    <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-slate-100 text-slate-400 shrink-0">
+                                                    <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-2xs font-semibold bg-slate-100 text-slate-400 shrink-0">
                                                         Nanti
                                                     </span>
                                                 @endif
@@ -265,8 +266,8 @@
                                                 <i class="fas fa-calendar-alt"></i>
                                             </div>
                                             <div class="min-w-0 flex-1">
-                                                <p class="text-[10px] font-bold uppercase tracking-wider text-[#13416B]/75">Jadwal Zoom</p>
-                                                <p class="text-xs font-bold text-slate-800 leading-snug break-words mt-0.5" title="{{ $sessionSchedule }}">
+                                                <p class="text-2xs font-bold uppercase tracking-wider text-[#13416B]/75">Jadwal Zoom</p>
+                                                <p class="text-xs font-bold text-slate-800 leading-snug wrap-break-word mt-0.5" title="{{ $sessionSchedule }}">
                                                     {{ $sessionSchedule }}
                                                 </p>
                                             </div>
@@ -278,8 +279,8 @@
                                                 <i class="fas fa-clock"></i>
                                             </div>
                                             <div class="min-w-0 flex-1">
-                                                <p class="text-[10px] font-bold uppercase tracking-wider text-[#13416B]/75">Waktu Presensi</p>
-                                                <p class="text-xs font-bold text-slate-800 leading-snug break-words mt-0.5" title="{{ $sessionAttendanceSchedule }}">
+                                                <p class="text-2xs font-bold uppercase tracking-wider text-[#13416B]/75">Waktu Presensi</p>
+                                                <p class="text-xs font-bold text-slate-800 leading-snug wrap-break-word mt-0.5" title="{{ $sessionAttendanceSchedule }}">
                                                     {{ $sessionAttendanceSchedule }}
                                                 </p>
                                             </div>
@@ -291,7 +292,7 @@
                                                 <i class="fas fa-hashtag"></i>
                                             </div>
                                             <div class="min-w-0 flex-1">
-                                                <p class="text-[10px] font-bold uppercase tracking-wider text-[#13416B]/75">Meeting ID</p>
+                                                <p class="text-2xs font-bold uppercase tracking-wider text-[#13416B]/75">Meeting ID</p>
                                                 <p class="text-xs font-mono font-bold text-slate-800 tracking-wide select-all break-all mt-0.5" title="{{ $sessionMeetingId }}">{{ $sessionMeetingId }}</p>
                                             </div>
                                         </div>
@@ -302,7 +303,7 @@
                                                 <i class="fas fa-key"></i>
                                             </div>
                                             <div class="min-w-0 flex-1">
-                                                <p class="text-[10px] font-bold uppercase tracking-wider text-[#13416B]/75">Passcode</p>
+                                                <p class="text-2xs font-bold uppercase tracking-wider text-[#13416B]/75">Passcode</p>
                                                 <p class="text-xs font-mono font-bold text-slate-800 tracking-wide select-all break-all mt-0.5" title="{{ $sessionPasscode }}">{{ $sessionPasscode }}</p>
                                             </div>
                                         </div>
@@ -320,12 +321,12 @@
                                         <span>Sesi Tatap Muka Berakhir</span>
                                     </button>
                                 @else
-                                    <a href="{{ route('user.course.my-course.join-zoom', array_filter(['slug' => $courseSlug, 'session_id' => $activeSession?->id])) }}"
+                                    <a href="{{ route('user.course.my-course.join-zoom', array_filter(['slug' => $courseSlug, 'session_id' => $activeSessionId])) }}"
                                         target="_blank" rel="noopener noreferrer"
                                         class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-md font-bold text-xs sm:text-sm bg-[#13416B] hover:bg-[#0f3354] text-white shadow-sm transition-all text-center">
                                         <i class="fas fa-video text-xs"></i>
-                                        <span>Masuk Tatap Muka {{ $activeSession ? 'Hari ' . $activeSession->session_number : '' }}</span>
-                                        <i class="fas fa-external-link-alt text-[10px] opacity-75"></i>
+                                        <span>Masuk Tatap Muka {{ $activeSessionNumber ? 'Hari ' . $activeSessionNumber : '' }}</span>
+                                        <i class="fas fa-external-link-alt text-2xs opacity-75"></i>
                                     </a>
                                 @endif
 
@@ -334,18 +335,18 @@
                                     <button type="button" disabled
                                         class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-md font-bold text-xs sm:text-sm bg-emerald-600 text-white shadow-sm select-none cursor-default text-center">
                                         <i class="fas fa-check-circle text-xs"></i>
-                                        <span>Sudah Presensi {{ $activeSession ? 'Hari ' . $activeSession->session_number : '' }}</span>
+                                        <span>Sudah Presensi {{ $activeSessionNumber ? 'Hari ' . $activeSessionNumber : '' }}</span>
                                     </button>
                                 @elseif ($isPresensiOpen)
                                     <form action="{{ route('user.course.my-course.attend-zoom', $courseSlug) }}" method="POST" class="w-full sm:w-auto inline-flex">
                                         @csrf
-                                        @if ($activeSession)
-                                            <input type="hidden" name="session_id" value="{{ $activeSession->id }}">
+                                        @if ($activeSessionId)
+                                            <input type="hidden" name="session_id" value="{{ $activeSessionId }}">
                                         @endif
                                         <button type="submit"
                                             class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-md font-bold text-xs sm:text-sm bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm transition-all cursor-pointer animate-pulse text-center">
                                             <i class="fas fa-clipboard-check text-xs"></i>
-                                            <span>Konfirmasi Kehadiran {{ $activeSession ? 'Hari ' . $activeSession->session_number : '' }}</span>
+                                            <span>Konfirmasi Kehadiran {{ $activeSessionNumber ? 'Hari ' . $activeSessionNumber : '' }}</span>
                                         </button>
                                     </form>
                                 @else
@@ -410,7 +411,7 @@
                                         class="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-md text-xs sm:text-sm font-bold text-white bg-[#13416B] hover:bg-[#0f3354] shadow-xs transition-all shrink-0 whitespace-nowrap cursor-pointer">
                                         <i class="fab fa-google-drive text-sm"></i>
                                         <span>Buka Google Drive</span>
-                                        <i class="fas fa-external-link-alt text-[10px] ml-0.5 opacity-80"></i>
+                                        <i class="fas fa-external-link-alt text-2xs ml-0.5 opacity-80"></i>
                                     </a>
                                 </div>
                             @else
@@ -485,7 +486,7 @@
                                             </div>
                                             <div class="space-y-0.5">
                                                 <div class="flex items-center gap-2 flex-wrap">
-                                                    <span class="text-[10px] font-bold uppercase tracking-wider text-blue-800 bg-blue-100 px-2 py-0.5 rounded">
+                                                    <span class="text-2xs font-bold uppercase tracking-wider text-blue-800 bg-blue-100 px-2 py-0.5 rounded">
                                                         Berkas Soal dari Admin
                                                     </span>
                                                     <span class="text-[11px] text-slate-500 font-medium">{{ $adminFileSize }} • PDF Document</span>
@@ -518,7 +519,7 @@
                                                         <div>
                                                             <div class="flex items-center gap-2">
                                                                 <p class="text-xs sm:text-sm font-bold text-slate-800">Tugas Berhasil Dikumpulkan</p>
-                                                                <span class="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">Diserahkan</span>
+                                                                <span class="text-2xs font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">Diserahkan</span>
                                                             </div>
                                                             <p class="text-xs text-slate-600 mt-0.5">
                                                                 Berkas: <span class="font-semibold text-slate-800">{{ $evalResult?->file_name ?? 'Dokumen_Tugas.pdf' }}</span>
@@ -620,7 +621,7 @@
                                         class="inline-flex items-center gap-2 px-3.5 py-2 rounded-md text-xs font-bold text-white bg-[#13416B] hover:bg-[#0f3354] transition-all shadow-xs shrink-0 whitespace-nowrap cursor-pointer">
                                         <i class="fab fa-google-drive"></i>
                                         <span>Buka Folder Drive</span>
-                                        <i class="fas fa-external-link-alt text-[10px] ml-0.5"></i>
+                                        <i class="fas fa-external-link-alt text-2xs ml-0.5"></i>
                                     </a>
                                 </div>
                             @endif
@@ -668,7 +669,7 @@
                     <template x-teleport="body">
                         <div x-show="showStartEvalModal" x-cloak
                             @keydown.escape.window="showStartEvalModal = false"
-                            class="fixed inset-0 z-[100] overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4">
+                            class="fixed inset-0 z-100 overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4">
 
                             {{-- Overlay Click to Dismiss --}}
                             <div class="fixed inset-0" @click="showStartEvalModal = false"></div>
@@ -817,11 +818,11 @@
                             class="group flex items-start gap-2.5 p-2 rounded-md hover:bg-white hover:shadow-2xs transition-all border border-transparent hover:border-slate-200">
                             <div class="mt-0.5 shrink-0">
                                 @if ($isMateriDone)
-                                    <div class="w-5 h-5 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center text-[10px] font-bold">
+                                    <div class="w-5 h-5 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center text-2xs font-bold">
                                         <i class="fas fa-check"></i>
                                     </div>
                                 @else
-                                    <div class="w-5 h-5 rounded-full bg-slate-200 text-slate-600 flex items-center justify-center text-[10px] font-bold">
+                                    <div class="w-5 h-5 rounded-full bg-slate-200 text-slate-600 flex items-center justify-center text-2xs font-bold">
                                         1
                                     </div>
                                 @endif
@@ -842,11 +843,11 @@
                                 class="group flex items-start gap-2.5 p-2 rounded-md hover:bg-white hover:shadow-2xs transition-all border border-transparent hover:border-slate-200">
                                 <div class="mt-0.5 shrink-0">
                                     @if ($isZoomDone)
-                                        <div class="w-5 h-5 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center text-[10px] font-bold">
+                                        <div class="w-5 h-5 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center text-2xs font-bold">
                                             <i class="fas fa-check"></i>
                                         </div>
                                     @else
-                                        <div class="w-5 h-5 rounded-full bg-slate-200 text-slate-600 flex items-center justify-center text-[10px] font-bold">
+                                        <div class="w-5 h-5 rounded-full bg-slate-200 text-slate-600 flex items-center justify-center text-2xs font-bold">
                                             2
                                         </div>
                                     @endif
@@ -865,7 +866,7 @@
                             <a href="#bukti-presensi"
                                 class="group flex items-start gap-2.5 p-2 rounded-md hover:bg-white hover:shadow-2xs transition-all border border-transparent hover:border-slate-200">
                                 <div class="mt-0.5 shrink-0">
-                                    <div class="w-5 h-5 rounded-full bg-blue-100 text-[#0B5CFF] flex items-center justify-center text-[10px]">
+                                    <div class="w-5 h-5 rounded-full bg-blue-100 text-[#0B5CFF] flex items-center justify-center text-2xs">
                                         <i class="fab fa-google-drive"></i>
                                     </div>
                                 </div>
@@ -885,11 +886,11 @@
                             class="group flex items-start gap-2.5 p-2 rounded-md hover:bg-white hover:shadow-2xs transition-all border border-transparent hover:border-slate-200">
                             <div class="mt-0.5 shrink-0">
                                 @if ($isEvaluasiDone)
-                                    <div class="w-5 h-5 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center text-[10px] font-bold">
+                                    <div class="w-5 h-5 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center text-2xs font-bold">
                                         <i class="fas fa-check"></i>
                                     </div>
                                 @else
-                                    <div class="w-5 h-5 rounded-full bg-slate-200 text-slate-600 flex items-center justify-center text-[10px] font-bold">
+                                    <div class="w-5 h-5 rounded-full bg-slate-200 text-slate-600 flex items-center justify-center text-2xs font-bold">
                                         {{ $hasZoom ? 4 : 2 }}
                                     </div>
                                 @endif
