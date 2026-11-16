@@ -60,7 +60,7 @@
                                 {{ $isBimtekEvent ? 'Agenda Hari ke-' . ($sectionIndex + 1) : 'Modul Pembelajaran ' . ($sectionIndex + 1) }}
                             </span>
                         </div>
-                        <h1 class="text-lg sm:text-xl lg:text-2xl font-extrabold text-slate-800 leading-tight break-words">
+                        <h1 class="text-lg sm:text-xl lg:text-2xl font-medium text-slate-700 tracking-wide leading-tight break-words" style="font-family: 'Oswald', sans-serif;">
                             {{ $sectionName }}
                         </h1>
                     </div>
@@ -92,7 +92,7 @@
                         {{-- Card Konten Tahap 1 --}}
                         <div id="pembelajaran-mandiri" data-tour="pembelajaran-mandiri" class="flex-1 min-w-0 scroll-mt-6 rounded-md border border-slate-200 bg-slate-50/40 p-4 sm:p-5 lg:p-6 shadow-2xs transition-all">
                             <div class="pb-3.5 mb-4 border-b border-slate-200/80">
-                                <h2 class="text-base sm:text-lg lg:text-xl font-bold text-slate-700 tracking-tight leading-tight">Pembelajaran Mandiri</h2>
+                                <h2 class="text-base sm:text-lg lg:text-xl font-medium text-slate-700 tracking-wide leading-tight" style="font-family: 'Oswald', sans-serif;">Pembelajaran Mandiri</h2>
                                 <p class="text-xs sm:text-sm text-slate-500 mt-0.5">Pelajari seluruh materi secara mandiri dan bertahap hingga selesai.</p>
                             </div>
 
@@ -188,7 +188,7 @@
                         <div id="sesi-zoom" data-tour="zoom"
                             class="flex-1 min-w-0 scroll-mt-6 rounded-md border border-slate-200 bg-slate-50/40 p-4 sm:p-5 lg:p-6 shadow-2xs transition-all space-y-4">
                             <div>
-                                <h2 class="text-base sm:text-lg lg:text-xl font-bold text-slate-700 tracking-tight leading-tight">
+                                <h2 class="text-base sm:text-lg lg:text-xl font-medium text-slate-700 tracking-wide leading-tight" style="font-family: 'Oswald', sans-serif;">
                                     Sesi Tatap Muka Online {{ $activeSession ? '— ' . $activeSession->title : '' }}
                                 </h2>
 
@@ -383,7 +383,7 @@
                         <div id="bukti-presensi" data-tour="bukti-presensi"
                             class="flex-1 min-w-0 scroll-mt-6 rounded-md border border-slate-200 bg-slate-50/40 p-4 sm:p-5 lg:p-6 shadow-2xs transition-all space-y-4">
                             <div>
-                                <h2 class="text-base sm:text-lg lg:text-xl font-bold text-slate-700 tracking-tight leading-tight">
+                                <h2 class="text-base sm:text-lg lg:text-xl font-medium text-slate-700 tracking-wide leading-tight" style="font-family: 'Oswald', sans-serif;">
                                     Bukti Pendukung Presensi
                                 </h2>
 
@@ -455,59 +455,21 @@
                     </div>
 
                     {{-- Card Konten Tahap 4 --}}
-                    <div id="evaluasi-modul" data-tour="evaluasi" class="flex-1 min-w-0 scroll-mt-6 rounded-md border border-slate-200 bg-slate-50/40 p-4 sm:px-6 sm:py-5 lg:px-7 lg:py-6 shadow-2xs transition-all relative overflow-hidden">
+                    <div id="evaluasi-modul" data-tour="evaluasi"
+                        x-data="{ showStartEvalModal: false }"
+                        class="flex-1 min-w-0 scroll-mt-6 rounded-md border border-[#446680] bg-[#547996] text-white p-4 sm:px-6 sm:py-5 lg:px-7 lg:py-6 shadow-sm hover:shadow-md transition-all relative overflow-hidden">
                         <div class="flex flex-row items-end justify-between gap-6 lg:gap-8">
                             {{-- Kolom Kiri: Informasi Evaluasi & Aksi --}}
                             <div class="flex-1 min-w-0 sm:py-1 space-y-4">
                                 <div>
-                                <h2 class="text-base sm:text-lg lg:text-xl font-bold text-slate-700 tracking-tight leading-tight max-w-full lg:max-w-[85%]">
-                                    {{ $isBimtekEvent ? 'Evaluasi Hari ke-' . ($sectionIndex + 1) : 'Evaluasi Modul ' . ($sectionIndex + 1) }}
-                                </h2>
+                                    <h2 class="text-base sm:text-lg lg:text-xl font-medium text-white tracking-wide leading-tight max-w-full lg:max-w-[85%]" style="font-family: 'Oswald', sans-serif;">
+                                        {{ $isBimtekEvent ? 'Evaluasi Hari ke-' . ($sectionIndex + 1) : 'Evaluasi Modul ' . ($sectionIndex + 1) }}
+                                    </h2>
 
-                                <p class="text-sm sm:text-[15px] text-slate-600 mt-1.5 leading-relaxed max-w-full lg:max-w-[90%]">
-                                    Selesaikan evaluasi pembelajaran pada {{ $isBimtekEvent ? 'hari ini' : 'modul ini' }} untuk menguji pemahaman dan capaian pembelajaran Anda.
-                                </p>
-
-                                {{-- Badges Spesifikasi Sesuai Tipe Evaluasi --}}
-                                <div class="mt-3 flex flex-wrap items-center gap-2.5 sm:gap-3">
-                                    @if ($currentEvalType === 'uraian')
-                                        <span class="text-xs sm:text-sm font-semibold text-white bg-[#547996] px-3 py-1.5 rounded-md border border-[#446680] flex items-center gap-1.5 shadow-xs">
-                                            <i class="fas fa-feather-alt text-xs text-white"></i>
-                                            {{ $postTestQuestionsCount ?: 2 }} Soal Uraian / Esai
-                                        </span>
-                                        <span class="text-xs sm:text-sm font-semibold text-white bg-[#547996] px-3 py-1.5 rounded-md border border-[#446680] flex items-center gap-1.5 shadow-xs">
-                                            <i class="fas fa-user-check text-xs text-white"></i>
-                                            Penilaian Instruktur
-                                        </span>
-                                    @elseif ($currentEvalType === 'upload')
-                                        <span class="text-xs sm:text-sm font-semibold text-white bg-[#547996] px-3 py-1.5 rounded-md border border-[#446680] flex items-center gap-1.5 shadow-xs">
-                                            <i class="fas fa-file-upload text-xs text-white"></i>
-                                            Penugasan Berkas Mandiri
-                                        </span>
-                                        <span class="text-xs sm:text-sm font-semibold text-white bg-[#547996] px-3 py-1.5 rounded-md border border-[#446680] flex items-center gap-1.5 shadow-xs">
-                                            <i class="fas fa-cloud-download-alt text-xs text-white"></i>
-                                            Unduh Soal & Upload Jawaban
-                                        </span>
-                                        <span class="text-xs sm:text-sm font-semibold text-white bg-[#547996] px-3 py-1.5 rounded-md border border-[#446680] flex items-center gap-1.5 shadow-xs">
-                                            <i class="fas fa-file-pdf text-xs text-white"></i>
-                                            PDF / DOCX / ZIP (Maks. 10 MB)
-                                        </span>
-                                    @else
-                                        <span class="text-xs sm:text-sm font-semibold text-white bg-[#547996] px-3 py-1.5 rounded-md border border-[#446680] flex items-center gap-1.5 shadow-xs">
-                                            <i class="fas fa-question-circle text-xs text-white"></i>
-                                            {{ $postTestQuestionsCount }} Butir Pilihan Ganda
-                                        </span>
-                                        <span class="text-xs sm:text-sm font-semibold text-white bg-[#547996] px-3 py-1.5 rounded-md border border-[#446680] flex items-center gap-1.5 shadow-xs">
-                                            <i class="fas fa-clock text-xs text-white"></i>
-                                            {{ data_get($postTestBab, 'duration', 15) }} Menit
-                                        </span>
-                                        <span class="text-xs sm:text-sm font-semibold text-white bg-[#547996] px-3 py-1.5 rounded-md border border-[#446680] flex items-center gap-1.5 shadow-xs">
-                                            <i class="fas fa-award text-xs text-white"></i>
-                                            KKM: {{ data_get($postTestBab, 'passing_score', 0) }}
-                                        </span>
-                                    @endif
+                                    <p class="text-sm sm:text-[15px] text-white/85 mt-1.5 leading-relaxed max-w-full lg:max-w-[90%]">
+                                        Selesaikan evaluasi pembelajaran pada {{ $isBimtekEvent ? 'hari ini' : 'modul ini' }} untuk menguji pemahaman dan capaian pembelajaran Anda.
+                                    </p>
                                 </div>
-                            </div>
 
                             {{-- ======================================================== --}}
                             {{-- TAMPILAN KHUSUS TIPE 3: UPLOAD FILE PENUGASAN BERKAS    --}}
@@ -516,7 +478,7 @@
                             @if ($currentEvalType === 'upload')
                                 <div class="space-y-3.5">
                                     {{-- 1. Berkas Soal dari Admin/Penyelenggara --}}
-                                    <div class="p-4 rounded-md bg-blue-50/70 border border-blue-200/90 shadow-2xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3.5">
+                                    <div class="p-4 rounded-md bg-white border border-white/20 shadow-2xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3.5">
                                         <div class="flex items-center gap-3">
                                             <div class="w-11 h-11 rounded-md bg-white text-red-500 border border-blue-200 flex items-center justify-center shrink-0 shadow-2xs">
                                                 <i class="fas fa-file-pdf text-2xl"></i>
@@ -664,62 +626,157 @@
                             @endif
 
                             {{-- Tombol Aksi untuk Membuka Lembar Evaluasi / Ujian (Konsep Sama untuk Uraian & Pilgan) --}}
-                            @if ($postTestBab && $currentEvalType === 'uraian')
+                            @if ($postTestBab && in_array($currentEvalType, ['uraian', 'pilgan']))
+                                @php
+                                    $evalDoneLabel = $currentEvalType === 'uraian' ? 'Lihat Lembar Jawaban Uraian' : 'Lihat Hasil Evaluasi';
+                                    $evalStartLabel = $currentEvalType === 'uraian' ? 'Mulai Kerjakan Uraian' : 'Mulai Evaluasi';
+                                @endphp
                                 <div class="pt-1 flex flex-wrap items-center gap-3">
                                     @if ($isEvaluasiDone)
                                         <a href="{{ route('user.course.test.show', ['slug' => $courseSlug, 'postTestId' => $postTestBab->id]) }}"
-                                            class="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-md text-xs sm:text-sm font-bold bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 transition-all shadow-xs">
+                                            class="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-md text-xs sm:text-sm font-bold bg-white hover:bg-slate-100 text-[#13416B] transition-all shadow-sm">
                                             <i class="fas fa-eye text-xs"></i>
-                                            <span>Lihat Lembar Jawaban Uraian</span>
+                                            <span>{{ $evalDoneLabel }}</span>
                                         </a>
                                     @elseif ($isPostTestBabLocked)
                                         <button type="button" disabled
                                             title="Tuntaskan semua materi pada modul ini terlebih dahulu"
-                                            class="inline-flex items-center justify-center gap-1.5 px-5 py-2.5 rounded-md text-xs sm:text-sm font-bold bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed select-none">
+                                            class="inline-flex items-center justify-center gap-1.5 px-5 py-2.5 rounded-md text-xs sm:text-sm font-bold bg-white/15 text-white/75 border border-white/25 cursor-not-allowed select-none">
                                             <i class="fas fa-lock text-xs"></i>
                                             <span>Evaluasi Terkunci</span>
                                         </button>
                                     @else
-                                        <a href="{{ route('user.course.test.show', ['slug' => $courseSlug, 'postTestId' => $postTestBab->id]) }}"
-                                            class="inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-md text-xs sm:text-sm font-bold bg-[#13416B] hover:bg-[#0f3354] text-white shadow-sm transition-all">
+                                        <button type="button" @click="showStartEvalModal = true"
+                                            class="inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-md text-xs sm:text-sm font-bold bg-white hover:bg-slate-100 text-[#13416B] shadow-sm transition-all cursor-pointer">
                                             <i class="fas fa-play text-xs"></i>
-                                            <span>Mulai Kerjakan Uraian</span>
-                                        </a>
-                                    @endif
-                                </div>
-                            @elseif ($postTestBab && $currentEvalType === 'pilgan')
-                                <div class="pt-1 flex flex-wrap items-center gap-3">
-                                    @if ($isEvaluasiDone)
-                                        <a href="{{ route('user.course.test.show', ['slug' => $courseSlug, 'postTestId' => $postTestBab->id]) }}"
-                                            class="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-md text-xs sm:text-sm font-bold bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 transition-all shadow-xs">
-                                            <i class="fas fa-eye text-xs"></i>
-                                            <span>Lihat Hasil Evaluasi</span>
-                                        </a>
-                                    @elseif ($isPostTestBabLocked)
-                                        <button type="button" disabled
-                                            title="Tuntaskan semua materi pada modul ini terlebih dahulu"
-                                            class="inline-flex items-center justify-center gap-1.5 px-5 py-2.5 rounded-md text-xs sm:text-sm font-bold bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed select-none">
-                                            <i class="fas fa-lock text-xs"></i>
-                                            <span>Evaluasi Terkunci</span>
+                                            <span>{{ $evalStartLabel }}</span>
                                         </button>
-                                    @else
-                                        <a href="{{ route('user.course.test.show', ['slug' => $courseSlug, 'postTestId' => $postTestBab->id]) }}"
-                                            class="inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-md text-xs sm:text-sm font-bold bg-[#13416B] hover:bg-[#0f3354] text-white shadow-sm transition-all">
-                                            <i class="fas fa-play text-xs"></i>
-                                            <span>Mulai Evaluasi</span>
-                                        </a>
                                     @endif
                                 </div>
                             @endif
                         </div>
 
                         {{-- Kolom Kanan: Ilustrasi Gambar nempel bawah --}}
-                        <div class="hidden sm:flex sm:shrink-0 items-end justify-center self-end -mb-5 lg:-mb-6">
+                        <div class="hidden sm:flex sm:shrink-0 items-end justify-center self-end -mb-6 sm:-mb-6 lg:-mb-7">
                             <img src="{{ asset('images/modul_ilustrasi.webp') }}"
                                 alt="Ilustrasi Evaluasi Modul"
-                                class="sm:h-40 md:h-46 lg:h-52 w-auto object-contain object-bottom select-none pointer-events-none" />
+                                class="sm:h-40 md:h-46 lg:h-52 w-auto object-contain object-bottom translate-y-1 select-none pointer-events-none" />
                         </div>
                     </div>
+
+                    {{-- MODAL / BOTTOM SHEET KONFIRMASI MULAI EVALUASI HARIAN / MODUL --}}
+                    <template x-teleport="body">
+                        <div x-show="showStartEvalModal" x-cloak
+                            @keydown.escape.window="showStartEvalModal = false"
+                            class="fixed inset-0 z-[100] overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4">
+
+                            {{-- Overlay Click to Dismiss --}}
+                            <div class="fixed inset-0" @click="showStartEvalModal = false"></div>
+
+                            {{-- Panel Konten: Bottom Sheet di Mobile, Modal di Tablet/Desktop --}}
+                            <div x-show="showStartEvalModal"
+                                x-transition:enter="transition ease-out duration-300"
+                                x-transition:enter-start="opacity-0 translate-y-full sm:translate-y-4 sm:scale-95"
+                                x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
+                                x-transition:leave="transition ease-in duration-200"
+                                x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
+                                x-transition:leave-end="opacity-0 translate-y-full sm:translate-y-4 sm:scale-95"
+                                class="relative bg-white w-full sm:max-w-md rounded-t-2xl sm:rounded-lg shadow-2xl border-t sm:border border-slate-200 p-5 sm:p-6 space-y-4 text-left max-h-[88vh] sm:max-h-[85vh] overflow-y-auto z-10">
+
+                                {{-- Drag Indicator Bar khusus Mobile --}}
+                                <div class="sm:hidden w-12 h-1.5 bg-slate-300 rounded-full mx-auto -mt-2 mb-2"></div>
+
+                                {{-- Header Modal / Bottom Sheet --}}
+                                <div class="flex items-start justify-between gap-3 pb-3 border-b border-slate-100">
+                                    <div class="flex items-center gap-2.5 min-w-0">
+                                        <div class="w-9 h-9 rounded-md bg-[#13416B]/10 text-[#13416B] flex items-center justify-center text-sm font-bold shrink-0">
+                                            <i class="fas fa-clipboard-check"></i>
+                                        </div>
+                                        <div class="min-w-0">
+                                            <h4 class="text-base font-bold text-slate-800 leading-tight">Konfirmasi Mulai Evaluasi</h4>
+                                            <p class="text-[11px] text-slate-500 mt-0.5 truncate">
+                                                {{ $isBimtekEvent ? 'Evaluasi Hari ke-' . ($sectionIndex + 1) : 'Evaluasi Modul ' . ($sectionIndex + 1) }} — {{ $sectionName }}
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <button type="button" @click="showStartEvalModal = false"
+                                        class="text-slate-400 hover:text-slate-600 p-1.5 rounded-md transition-colors cursor-pointer shrink-0">
+                                        <i class="fas fa-times text-base"></i>
+                                    </button>
+                                </div>
+
+                                {{-- Ringkasan Informasi Evaluasi --}}
+                                <div class="bg-slate-50 border border-slate-200 rounded-md divide-y divide-slate-200/80 text-xs sm:text-[13px]">
+                                    <div class="flex items-center justify-between gap-3 px-3.5 py-2.5">
+                                        <span class="text-slate-500 font-medium flex items-center gap-2">
+                                            <i class="fas fa-tags text-slate-400 w-4 text-center"></i>
+                                            Jenis Soal
+                                        </span>
+                                        <span class="font-bold text-slate-800 text-right">
+                                            {{ $currentEvalType === 'uraian' ? 'Soal Uraian / Esai' : ($currentEvalType === 'upload' ? 'Penugasan Berkas Mandiri' : 'Pilihan Ganda (CBT)') }}
+                                        </span>
+                                    </div>
+                                    <div class="flex items-center justify-between gap-3 px-3.5 py-2.5">
+                                        <span class="text-slate-500 font-medium flex items-center gap-2">
+                                            <i class="fas fa-list-ol text-slate-400 w-4 text-center"></i>
+                                            Jumlah Soal
+                                        </span>
+                                        <span class="font-bold text-slate-800 text-right">
+                                            {{ $currentEvalType === 'uraian' ? ($postTestQuestionsCount ?: 2) . ' Soal Uraian' : ($currentEvalType === 'upload' ? '1 Berkas Penugasan' : $postTestQuestionsCount . ' Butir Soal') }}
+                                        </span>
+                                    </div>
+                                    <div class="flex items-center justify-between gap-3 px-3.5 py-2.5">
+                                        <span class="text-slate-500 font-medium flex items-center gap-2">
+                                            <i class="fas fa-stopwatch text-slate-400 w-4 text-center"></i>
+                                            Waktu Pengerjaan
+                                        </span>
+                                        <span class="font-bold text-slate-800 text-right">
+                                            {{ ($currentEvalType === 'pilgan' || data_get($postTestBab, 'duration', 0) > 0) ? (data_get($postTestBab, 'duration', 15) ?: 15) . ' Menit' : 'Tanpa Batas Waktu' }}
+                                        </span>
+                                    </div>
+                                    @if ($currentEvalType === 'uraian')
+                                        <div class="flex items-center justify-between gap-3 px-3.5 py-2.5">
+                                            <span class="text-slate-500 font-medium flex items-center gap-2">
+                                                <i class="fas fa-user-check text-slate-400 w-4 text-center"></i>
+                                                Metode Penilaian
+                                            </span>
+                                            <span class="font-bold text-slate-800 text-right">
+                                                Penilaian Instruktur
+                                            </span>
+                                        </div>
+                                    @elseif (data_get($postTestBab, 'passing_score', 0) > 0)
+                                        <div class="flex items-center justify-between gap-3 px-3.5 py-2.5">
+                                            <span class="text-slate-500 font-medium flex items-center gap-2">
+                                                <i class="fas fa-bullseye text-slate-400 w-4 text-center"></i>
+                                                Ambang Batas (KKM)
+                                            </span>
+                                            <span class="font-bold text-slate-800 text-right">
+                                                {{ data_get($postTestBab, 'passing_score') }} Poin
+                                            </span>
+                                        </div>
+                                    @endif
+                                </div>
+
+                                {{-- Pesan Kesiapan --}}
+                                <p class="text-xs sm:text-[13px] text-slate-600 leading-relaxed">
+                                    Apakah Anda yakin ingin memulai pengerjaan evaluasi sekarang? Pastikan koneksi internet stabil sebelum melanjutkan.
+                                </p>
+
+                                {{-- Footer Tombol Aksi --}}
+                                <div class="pt-1 flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-2.5">
+                                    <button type="button" @click="showStartEvalModal = false"
+                                        class="inline-flex items-center justify-center px-4 py-2.5 rounded-md text-xs sm:text-sm font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 border border-slate-200 transition-colors cursor-pointer">
+                                        Batal
+                                    </button>
+                                    <a href="{{ $postTestBab ? route('user.course.test.show', ['slug' => $courseSlug, 'postTestId' => $postTestBab->id]) : '#' }}"
+                                        class="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-md text-xs sm:text-sm font-bold bg-[#1E568A] hover:bg-[#13416B] text-white shadow-sm transition-all">
+                                        <i class="fas fa-play text-xs"></i>
+                                        <span>Ya, Kerjakan Sekarang</span>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </template>
                 </div>
             </div>
 
