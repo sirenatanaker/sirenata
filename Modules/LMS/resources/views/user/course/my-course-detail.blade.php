@@ -197,7 +197,7 @@
 
                 {{-- Detail Informasi Playlist --}}
                 <div class="flex-1 min-w-0 w-full flex flex-col justify-between self-stretch gap-4">
-                    <div class="space-y-2">
+                    <div class="space-y-2 w-[95%] max-w-[95%] sm:w-full sm:max-w-none">
                         @if ($isBimtekEvent && $activeBimtek?->batch_name)
                             <div class="flex items-center gap-2 text-xs">
                                 <span class="font-semibold text-slate-600 text-xs tracking-wide">{{ $activeBimtek->batch_name }}</span>
@@ -211,18 +211,18 @@
 
                         {{-- Info Periode Pelaksanaan & Periode Evaluasi --}}
                         @if ($formattedPeriod || $formattedEvaluationPeriod)
-                            <div class="pt-1.5 space-y-1.5 text-xs sm:text-[13px] text-slate-600 leading-relaxed">
+                            <ul class="pt-1.5 space-y-1.5 list-disc pl-4 text-xs sm:text-[13px] text-slate-600 leading-relaxed marker:text-slate-400">
                                 @if ($formattedPeriod)
-                                    <p>
+                                    <li>
                                         Periode pelaksanaan berlangsung pada <span class="font-bold text-slate-800">{{ $formattedPeriod }}</span>@if ($isExecPeriodActive) <span class="font-semibold text-emerald-600">(sedang berlangsung)</span>@elseif ($execEndObj && $now->greaterThan($execEndObj)) <span class="text-slate-400">(telah selesai)</span>@elseif ($execStartObj && $now->lessThan($execStartObj)) <span class="text-slate-400">(menunggu jadwal)</span>@endif.
-                                    </p>
+                                    </li>
                                 @endif
                                 @if ($formattedEvaluationPeriod)
-                                    <p>
+                                    <li>
                                         Periode evaluasi berlangsung pada <span class="font-bold text-slate-800">{{ $formattedEvaluationPeriod }}</span>@if ($isEvalPeriodActive) <span class="font-semibold text-emerald-600">(sedang berlangsung)</span>@elseif ($evalEndObj && $now->greaterThan($evalEndObj)) <span class="text-slate-400">(telah selesai)</span>@elseif ($evalStartObj && $now->lessThan($evalStartObj)) <span class="text-slate-400">(menunggu jadwal)</span>@endif.
-                                    </p>
+                                    </li>
                                 @endif
-                            </div>
+                            </ul>
                         @endif
                     </div>
 
@@ -252,7 +252,7 @@
             <div class="lg:col-span-2 space-y-6">
 
                 <!-- PERBAIKAN: rounded-none border-x-0 di mobile -->
-                <div data-tour="modul" id="agenda-pelaksanaan"
+                <div id="agenda-pelaksanaan"
                     class="bg-white rounded-none sm:rounded-md shadow-sm border-y border-x-0 sm:border border-slate-200 p-4 sm:p-6 scroll-mt-6">
 
                     <div
@@ -278,7 +278,7 @@
                         </button>
                     </div>
 
-                    <div class="relative space-y-4 sm:space-y-5">
+                    <div data-tour="modul" class="relative space-y-4 sm:space-y-5">
                         @php
                             $sectionProofs = $sectionProofs ?? [];
                             $isPreviousSectionDone = true;

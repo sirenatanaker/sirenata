@@ -69,7 +69,7 @@
         color: #334155 !important;
     }
     .driver-popover-description strong {
-        color: #0B5CFF !important;
+        color: #1E568A !important;
         font-weight: 700 !important;
     }
     .driver-popover-footer {
