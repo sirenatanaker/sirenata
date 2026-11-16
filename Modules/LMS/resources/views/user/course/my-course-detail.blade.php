@@ -122,19 +122,10 @@
                             </div>
                         @endif
 
-                        {{-- Baris Judul Kursus & Tombol Panduan di Sebelah Kanan --}}
-                        <div class="flex items-start justify-between gap-3 sm:gap-4">
-                            <h1 class="text-lg sm:text-xl lg:text-2xl font-black text-slate-900 tracking-tight leading-snug">
-                                {{ $courseName }}
-                            </h1>
-
-                            {{-- Tombol Panduan Tour (Sebelah Kanan) --}}
-                            <button type="button" onclick="window.startCoursePlayerTour && window.startCoursePlayerTour()"
-                                class="inline-flex items-center gap-1.5 sm:gap-2 px-3 py-1.5 sm:px-4 sm:py-2 lg:px-5 lg:py-2.5 text-xs sm:text-sm font-semibold text-slate-700 bg-slate-50 hover:bg-slate-100 hover:text-[#13416B] border border-slate-200 rounded-md transition-all shadow-2xs cursor-pointer shrink-0">
-                                <i class="fas fa-route text-xs sm:text-sm text-[#13416B]"></i>
-                                <span>Panduan</span>
-                            </button>
-                        </div>
+                        {{-- Judul Kursus --}}
+                        <h1 class="text-lg sm:text-xl lg:text-2xl font-black text-slate-900 tracking-tight leading-snug">
+                            {{ $courseName }}
+                        </h1>
 
                         {{-- Info Periode Pelaksanaan & Periode Evaluasi --}}
                         @if ($formattedPeriod || $formattedEvaluationPeriod)
@@ -233,9 +224,12 @@
                                 </p>
                             </div>
                         </div>
-                        <span class="text-xs font-bold text-slate-600 bg-slate-100 border border-slate-200 px-2.5 py-1 rounded-md shrink-0">
-                            {{ $totalSections }} {{ $isBimtekEvent ? 'Hari' : 'Modul' }}
-                        </span>
+                        {{-- Tombol Panduan Tour --}}
+                        <button type="button" onclick="window.startCoursePlayerTour && window.startCoursePlayerTour()"
+                            class="inline-flex items-center gap-1.5 sm:gap-2 px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm font-semibold text-slate-700 bg-slate-50 hover:bg-slate-100 hover:text-[#13416B] border border-slate-200 rounded-md transition-all shadow-2xs cursor-pointer shrink-0">
+                            <i class="fas fa-route text-xs sm:text-sm text-[#13416B]"></i>
+                            <span>Panduan</span>
+                        </button>
                     </div>
 
                     <div class="relative space-y-4 sm:space-y-5">
