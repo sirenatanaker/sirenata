@@ -38,21 +38,48 @@
                 $thumbnailUrl = "https://ui-avatars.com/api/?name={$encodedName}&background=eff6ff&color=1e3a8a&size=512&font-size=0.33&bold=true";
             }
 
+            $formatIndoDateRange = function ($start, $end) {
+                $s = \Carbon\Carbon::parse($start)->locale('id');
+                $e = \Carbon\Carbon::parse($end)->locale('id');
+                if ($s->format('Y-m') === $e->format('Y-m')) {
+                    return $s->isoFormat('D') . ' - ' . $e->isoFormat('D MMMM Y');
+                }
+                if ($s->format('Y') === $e->format('Y')) {
+                    return $s->isoFormat('D MMM') . ' - ' . $e->isoFormat('D MMMM Y');
+                }
+                return $s->isoFormat('D MMMM Y') . ' - ' . $e->isoFormat('D MMMM Y');
+            };
+
+            if ($activeBimtek && $activeBimtek->start_date && $activeBimtek->end_date) {
+                $formattedPeriod = $formatIndoDateRange($activeBimtek->start_date, $activeBimtek->end_date);
+            }
+
             $formattedEvaluationPeriod = $formattedEvaluationPeriod ?? null;
-            if (!$formattedEvaluationPeriod && $activeBimtek) {
+            if ($activeBimtek) {
                 $evalStart = $activeBimtek->assessment_start_at ?? $activeBimtek->end_date;
                 $evalEnd   = $activeBimtek->assessment_end_at ?? ($activeBimtek->end_date ? \Carbon\Carbon::parse($activeBimtek->end_date)->addDays(3) : null);
                 if ($evalStart && $evalEnd) {
-                    $eStart = \Carbon\Carbon::parse($evalStart);
-                    $eEnd   = \Carbon\Carbon::parse($evalEnd);
-                    if ($eStart->format('Y-m') === $eEnd->format('Y-m')) {
-                        $formattedEvaluationPeriod = $eStart->locale('id')->isoFormat('D') . ' - ' . $eEnd->locale('id')->isoFormat('D MMMM Y');
-                    } elseif ($eStart->format('Y') === $eEnd->format('Y')) {
-                        $formattedEvaluationPeriod = $eStart->locale('id')->isoFormat('D MMM') . ' - ' . $eEnd->locale('id')->isoFormat('D MMMM Y');
-                    } else {
-                        $formattedEvaluationPeriod = $eStart->locale('id')->isoFormat('D MMMM Y') . ' - ' . $eEnd->locale('id')->isoFormat('D MMMM Y');
-                    }
+                    $formattedEvaluationPeriod = $formatIndoDateRange($evalStart, $evalEnd);
                 }
+            }
+
+            $now = now();
+            $execStartObj = ($activeBimtek && $activeBimtek->start_date) ? \Carbon\Carbon::parse($activeBimtek->start_date)->startOfDay() : null;
+            $execEndObj   = ($activeBimtek && $activeBimtek->end_date) ? \Carbon\Carbon::parse($activeBimtek->end_date)->endOfDay() : null;
+
+            $rawEvalStart = $activeBimtek ? ($activeBimtek->assessment_start_at ?? $activeBimtek->end_date) : null;
+            $rawEvalEnd   = $activeBimtek ? ($activeBimtek->assessment_end_at ?? ($activeBimtek->end_date ? \Carbon\Carbon::parse($activeBimtek->end_date)->addDays(3) : null)) : null;
+            $evalStartObj = $rawEvalStart ? \Carbon\Carbon::parse($rawEvalStart)->startOfDay() : null;
+            $evalEndObj   = $rawEvalEnd ? \Carbon\Carbon::parse($rawEvalEnd)->endOfDay() : null;
+
+            $isExecPeriodActive = $execStartObj && $execEndObj && $now->between($execStartObj, $execEndObj);
+            $isEvalPeriodActive = $evalStartObj && $evalEndObj && $now->between($evalStartObj, $evalEndObj);
+
+            $evalDividerDate = null;
+            if ($evalStartObj && $evalEndObj) {
+                $evalDividerDate = $evalStartObj->isSameDay($evalEndObj)
+                    ? $evalStartObj->locale('id')->isoFormat('D MMMM Y')
+                    : $formattedEvaluationPeriod;
             }
         @endphp
 
@@ -103,27 +130,49 @@
 
                             {{-- Tombol Panduan Tour (Sebelah Kanan) --}}
                             <button type="button" onclick="window.startCoursePlayerTour && window.startCoursePlayerTour()"
-                                class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-slate-700 bg-slate-50 hover:bg-slate-100 hover:text-[#13416B] border border-slate-200 rounded-md transition-all shadow-2xs cursor-pointer shrink-0">
-                                <i class="fas fa-route text-[#13416B]"></i>
+                                class="inline-flex items-center gap-1.5 sm:gap-2 px-3 py-1.5 sm:px-4 sm:py-2 lg:px-5 lg:py-2.5 text-xs sm:text-sm font-semibold text-slate-700 bg-slate-50 hover:bg-slate-100 hover:text-[#13416B] border border-slate-200 rounded-md transition-all shadow-2xs cursor-pointer shrink-0">
+                                <i class="fas fa-route text-xs sm:text-sm text-[#13416B]"></i>
                                 <span>Panduan</span>
                             </button>
                         </div>
 
                         {{-- Info Periode Pelaksanaan & Periode Evaluasi --}}
                         @if ($formattedPeriod || $formattedEvaluationPeriod)
-                            <div class="space-y-1 text-xs sm:text-[13px] text-slate-600 pt-0.5">
-                                @if ($formattedPeriod)
-                                    <div class="flex flex-wrap items-center gap-x-2 gap-y-0.5">
-                                        <span class="text-slate-500 font-medium min-w-[135px]">Periode Pelaksanaan:</span>
-                                        <span class="font-bold text-slate-800">{{ $formattedPeriod }}</span>
-                                    </div>
-                                @endif
-                                @if ($formattedEvaluationPeriod)
-                                    <div class="flex flex-wrap items-center gap-x-2 gap-y-0.5">
-                                        <span class="text-slate-500 font-medium min-w-[135px]">Periode Evaluasi:</span>
-                                        <span class="font-bold text-slate-800">{{ $formattedEvaluationPeriod }}</span>
-                                    </div>
-                                @endif
+                            <div class="pt-2 sm:pt-2.5">
+                                <div class="border-l-2 border-slate-200 pl-3.5 sm:pl-4 space-y-2.5 sm:space-y-3 text-xs sm:text-[13px] text-slate-600">
+                                    @if ($formattedPeriod)
+                                        <div class="flex flex-wrap items-center gap-x-3 sm:gap-x-3.5 gap-y-1">
+                                            <span class="text-slate-500 font-medium min-w-[148px] sm:min-w-[155px]">Periode Pelaksanaan:</span>
+                                            <span class="font-bold {{ $isExecPeriodActive ? 'text-[#13416B]' : 'text-slate-800' }}">{{ $formattedPeriod }}</span>
+                                            @if ($isExecPeriodActive)
+                                                <span class="text-slate-300">•</span>
+                                                <span class="text-[11px] sm:text-xs font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded">Sedang berlangsung</span>
+                                            @elseif ($execEndObj && $now->greaterThan($execEndObj))
+                                                <span class="text-slate-300">•</span>
+                                                <span class="text-[11px] sm:text-xs font-medium text-slate-400">Telah selesai</span>
+                                            @elseif ($execStartObj && $now->lessThan($execStartObj))
+                                                <span class="text-slate-300">•</span>
+                                                <span class="text-[11px] sm:text-xs font-medium text-slate-400">Menunggu jadwal</span>
+                                            @endif
+                                        </div>
+                                    @endif
+                                    @if ($formattedEvaluationPeriod)
+                                        <div class="flex flex-wrap items-center gap-x-3 sm:gap-x-3.5 gap-y-1">
+                                            <span class="text-slate-500 font-medium min-w-[148px] sm:min-w-[155px]">Periode Evaluasi:</span>
+                                            <span class="font-bold {{ $isEvalPeriodActive ? 'text-[#13416B]' : 'text-slate-800' }}">{{ $formattedEvaluationPeriod }}</span>
+                                            @if ($isEvalPeriodActive)
+                                                <span class="text-slate-300">•</span>
+                                                <span class="text-[11px] sm:text-xs font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded">Sedang berlangsung</span>
+                                            @elseif ($evalEndObj && $now->greaterThan($evalEndObj))
+                                                <span class="text-slate-300">•</span>
+                                                <span class="text-[11px] sm:text-xs font-medium text-slate-400">Telah selesai</span>
+                                            @elseif ($evalStartObj && $now->lessThan($evalStartObj))
+                                                <span class="text-slate-300">•</span>
+                                                <span class="text-[11px] sm:text-xs font-medium text-slate-400">Menunggu jadwal</span>
+                                            @endif
+                                        </div>
+                                    @endif
+                                </div>
                             </div>
                         @endif
                     </div>
@@ -231,9 +280,12 @@
                                 {{-- Date Divider di Luar Card Timeline (Tanpa Icon Bullet) --}}
                                 @if ($isBimtekEvent && $dayDate)
                                     <div class="flex items-center gap-3 pl-[60px] sm:pl-[72px] {{ $index > 0 ? 'pt-4 sm:pt-5' : 'pt-0.5' }}">
-                                        <span class="text-xs sm:text-[13px] font-bold {{ $isLocked ? 'text-slate-400' : 'text-slate-700' }} tracking-wide">
+                                        <span class="text-xs sm:text-[13px] font-bold {{ $isLocked ? 'text-slate-400' : ($dayDate->isToday() ? 'text-[#13416B]' : 'text-slate-700') }} tracking-wide">
                                             {{ $dayDate->locale('id')->isoFormat('dddd, D MMMM Y') }}
                                         </span>
+                                        @if ($dayDate->isToday())
+                                            <span class="text-[10px] sm:text-[11px] font-bold text-white bg-[#13416B] px-2.5 py-0.5 rounded-md shadow-2xs shrink-0">Hari Ini</span>
+                                        @endif
                                         <div class="h-px bg-slate-200 flex-1"></div>
                                     </div>
                                 @endif
@@ -356,187 +408,258 @@
                             </div>
                         @endforelse
                     </div>
-                </div>
 
-                {{-- CARD EVALUASI AKHIR (FLEKSIBEL: PILIHAN GANDA CBT / PENUGASAN GOOGLE DRIVE) --}}
-                @php
-                    $evaluasiAkhirTitle = 'Evaluasi Akhir : ' . $courseName;
-                    $evaluasiQuestionsCount = $evaluasiAkhir ? data_get($evaluasiAkhir, 'questions', collect())->count() : 0;
-                    $isCbtPostTest = $evaluasiAkhir && $evaluasiQuestionsCount > 0;
-                    $isDriveAssignment = $evaluasiAkhir && $evaluasiQuestionsCount === 0;
-                    $adminDriveLink = $activeBimtek?->submission_drive_link ?? null;
-                @endphp
+                    {{-- EVALUASI AKHIR & EVALUASI NARASUMBER DI DALAM CARD TIMELINE (TANPA TIMELINE BADGE + GARIS TANGGAL) --}}
+                    @php
+                        $evaluasiAkhirTitle = 'Evaluasi Akhir : ' . $courseName;
+                        $evaluasiQuestionsCount = $evaluasiAkhir ? data_get($evaluasiAkhir, 'questions', collect())->count() : 0;
+                        $isCbtPostTest = $evaluasiAkhir && $evaluasiQuestionsCount > 0;
+                        $isDriveAssignment = $evaluasiAkhir && $evaluasiQuestionsCount === 0;
+                        $adminDriveLink = $activeBimtek?->submission_drive_link ?? null;
+                    @endphp
 
-                @if ($evaluasiAkhir)
-                    <!-- PERBAIKAN: rounded-none border-x-0 di mobile -->
-                    <div data-tour="evaluasi"
-                        class="bg-white rounded-none sm:rounded-md shadow-sm border-y border-x-0 sm:border sm:border-x border-slate-200 p-4 sm:px-6 sm:py-5 lg:px-7 lg:py-6 transition-all">
-                        <div class="flex flex-row items-end justify-between gap-6 lg:gap-8">
-                            {{-- Kolom Kiri: Informasi Evaluasi & Tombol Aksi --}}
-                            <div class="flex-1 min-w-0 sm:py-1">
-                                <h3 class="text-base sm:text-lg lg:text-xl font-bold text-slate-700 leading-snug max-w-full lg:max-w-[85%]">
-                                    {{ $evaluasiAkhirTitle }}
-                                </h3>
-
-                                {{-- Deskripsi Dinamis Mengenai Evaluasi Akhir --}}
-                                <p class="text-xs sm:text-sm text-slate-600 mt-1.5 leading-relaxed max-w-full lg:max-w-[90%]">
-                                    @if ($isCbtPostTest)
-                                        Ujian evaluasi komprehensif seluruh materi sebagai syarat kelulusan dan penerbitan sertifikat.
-                                    @else
-                                        Pengumpulan berkas tugas akhir atau portofolio pelatihan ke Google Drive panitia sebagai syarat kelulusan dan penerbitan sertifikat.
-                                    @endif
-                                </p>
-
-                                <div class="mt-3 sm:mt-4 flex flex-wrap items-center gap-2.5 sm:gap-3">
-                                    @if ($isCbtPostTest)
-                                        <span
-                                            class="text-[11px] sm:text-xs font-semibold text-white bg-[#547996] px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-md border border-[#446680] flex items-center gap-1.5 shadow-xs">
-                                            <i class="fas fa-list-ol text-[10px] sm:text-xs text-white"></i>
-                                            {{ $evaluasiQuestionsCount }} Soal
-                                        </span>
-                                        <span
-                                            class="text-[11px] sm:text-xs font-semibold text-white bg-[#547996] px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-md border border-[#446680] flex items-center gap-1.5 shadow-xs">
-                                            <i class="fas fa-stopwatch text-[10px] sm:text-xs text-white"></i>
-                                            {{ data_get($evaluasiAkhir, 'duration', 0) }} Menit
-                                        </span>
-                                        <span
-                                            class="text-[11px] sm:text-xs font-semibold text-white bg-[#547996] px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-md border border-[#446680] flex items-center gap-1.5 shadow-xs">
-                                            <i class="fas fa-bullseye text-[10px] sm:text-xs text-white"></i> KKM:
-                                            {{ data_get($evaluasiAkhir, 'passing_score', 0) }}
-                                        </span>
-                                    @else
-                                        <span
-                                            class="text-[11px] sm:text-xs font-semibold text-white bg-[#547996] px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-md border border-[#446680] flex items-center gap-1.5 shadow-xs">
-                                            <i class="fab fa-google-drive text-[10px] sm:text-xs text-white"></i>
-                                            Tugas Google Drive
-                                        </span>
-                                        <span
-                                            class="text-[11px] sm:text-xs font-semibold text-white bg-[#547996] px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-md border border-[#446680] flex items-center gap-1.5 shadow-xs">
-                                            <i class="fas fa-file-invoice text-[10px] sm:text-xs text-white"></i>
-                                            Unggah Dokumen
-                                        </span>
-                                        <span
-                                            class="text-[11px] sm:text-xs font-semibold text-white bg-[#547996] px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-md border border-[#446680] flex items-center gap-1.5 shadow-xs">
-                                            <i class="fas fa-user-check text-[10px] sm:text-xs text-white"></i>
-                                            Review Instruktur
-                                        </span>
-                                    @endif
-                                </div>
-
-                                <div class="mt-4 sm:mt-5 flex flex-wrap items-center gap-2.5 justify-start">
-                                    @if ($isCbtPostTest)
-                                        @if ($isEvaluasiAkhirCompleted)
-                                            <a href="{{ route('user.course.test.show', ['slug' => $courseSlug, 'postTestId' => $evaluasiAkhir->id]) }}"
-                                                class="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-md text-xs sm:text-sm font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 transition-all shadow-xs">
-                                                <i class="fas fa-eye text-xs"></i> Lihat Hasil
-                                            </a>
-                                        @elseif ($isWaitingForStart)
-                                            <button type="button" disabled
-                                                title="Evaluasi dibuka saat periode pelaksanaan pelatihan resmi dimulai"
-                                                class="inline-flex items-center justify-center gap-1.5 px-5 py-2.5 rounded-md text-xs sm:text-sm font-bold bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed select-none">
-                                                <i class="fas fa-lock text-xs"></i> Evaluasi Terkunci
-                                            </button>
-                                        @elseif (!$isEvaluasiAkhirLocked && !$isEventEnded)
-                                            <a href="{{ route('user.course.test.show', ['slug' => $courseSlug, 'postTestId' => $evaluasiAkhir->id]) }}"
-                                                class="inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-md text-xs sm:text-sm font-bold bg-[#13416B] hover:bg-[#0f3354] text-white shadow-sm transition-all">
-                                                <i class="fas fa-play text-xs"></i> Mulai Evaluasi
-                                            </a>
-                                        @elseif ($isEventEnded && !$isEvaluasiAkhirCompleted)
-                                            <div class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-md text-xs font-semibold bg-slate-100 text-slate-500 border border-slate-200">
-                                                <i class="fas fa-clock text-slate-400"></i>
-                                                <span>Periode Pelatihan Telah Berakhir</span>
-                                            </div>
-                                        @else
-                                            <button type="button" disabled
-                                                title="Selesaikan materi terlebih dahulu"
-                                                class="inline-flex items-center justify-center gap-1.5 px-5 py-2.5 rounded-md text-xs sm:text-sm font-bold bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed select-none">
-                                                <i class="fas fa-lock text-xs"></i> Evaluasi Terkunci
-                                            </button>
-                                        @endif
-                                    @else
-                                        {{-- Penugasan Akhir via Google Drive --}}
-                                        @if ($adminDriveLink)
-                                            <a href="{{ $adminDriveLink }}" target="_blank" rel="noopener noreferrer"
-                                                class="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-md text-xs sm:text-sm font-bold bg-[#13416B] hover:bg-[#0f3354] text-white shadow-sm transition-all">
-                                                <i class="fab fa-google-drive text-xs"></i>
-                                                <span>Buka Folder Drive Tugas</span>
-                                                <i class="fas fa-external-link-alt text-[10px] ml-0.5 opacity-80"></i>
-                                            </a>
-                                        @endif
-                                        <a href="{{ route('user.course.test.show', ['slug' => $courseSlug, 'postTestId' => $evaluasiAkhir->id]) }}"
-                                            class="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-md text-xs sm:text-sm font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 transition-all shadow-xs">
-                                            <i class="fas fa-tasks text-xs"></i>
-                                            <span>Lembar Penyerahan Tugas</span>
-                                        </a>
-                                    @endif
-                                </div>
-                            </div>
-
-                            {{-- Kolom Kanan: Ilustrasi Gambar khusus Layar Tablet/Desktop (sm ke atas) --}}
-                            <div class="hidden sm:flex sm:shrink-0 items-end justify-center self-end -mb-3.5 lg:-mb-4">
-                                <img src="{{ asset('images/modul_ilustrasi.webp') }}"
-                                    alt="Ilustrasi Evaluasi Akhir"
-                                    class="sm:h-44 md:h-48 lg:h-52 w-auto object-contain object-bottom select-none pointer-events-none" />
-                            </div>
-                        </div>
-                    </div>
-                @endif
-
-                @if ($isBimtekEvent)
-                {{-- CARD EVALUASI NARASUMBER / PEMATERI (KHUSUS BIMTEK - GAYA GOOGLE FORM PINDAH HALAMAN) --}}
-                <div data-tour="evaluasi-narasumber"
-                    id="card-evaluasi-narasumber"
-                    class="bg-white rounded-none sm:rounded-md shadow-sm border-y border-x-0 sm:border sm:border-x border-slate-200 p-4 sm:px-6 sm:py-5 lg:px-7 lg:py-6 transition-all">
-
-                    <div class="flex flex-row items-end justify-between gap-6 lg:gap-8">
-                        {{-- Kolom Kiri: Informasi Evaluasi Narasumber & Tombol Aksi Pindah Halaman --}}
-                        <div class="flex-1 min-w-0 sm:py-1">
-                            <div class="flex items-center gap-2 flex-wrap">
-                                <h3 class="text-base sm:text-lg lg:text-xl font-bold text-slate-700 leading-snug">
-                                    Evaluasi Narasumber & Penyelenggaraan
-                                </h3>
-                                @if ($isEvaluasiNarasumberCompleted)
-                                    <span class="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-md">
-                                        <i class="fas fa-check-circle text-emerald-600 text-xs"></i> Sudah Diisi
+                    @if ($evaluasiAkhir || $isBimtekEvent)
+                        <div class="mt-6 sm:mt-7 space-y-4 sm:space-y-5">
+                            {{-- Garis Tanggal Periode Evaluasi (Tanpa Timeline Badge) --}}
+                            @if ($isBimtekEvent && $evalDividerDate)
+                                <div class="flex items-center gap-3 pt-1">
+                                    <span class="text-xs sm:text-[13px] font-bold {{ ($isEvaluasiAkhirLocked && $isEvaluasiNarasumberLocked) ? 'text-slate-400' : ($isEvalPeriodActive ? 'text-[#13416B]' : 'text-slate-700') }} tracking-wide">
+                                        {{ $evalDividerDate }}
                                     </span>
-                                @endif
-                            </div>
+                                    @if ($isEvalPeriodActive)
+                                        <span class="text-[10px] sm:text-[11px] font-bold text-white bg-emerald-600 px-2.5 py-0.5 rounded-md shadow-2xs shrink-0">Periode Evaluasi</span>
+                                    @endif
+                                    <div class="h-px bg-slate-200 flex-1"></div>
+                                </div>
+                            @endif
 
-                            <p class="text-xs sm:text-sm text-slate-600 mt-1.5 leading-relaxed max-w-full lg:max-w-[90%]">
-                                Penilaian bergaya kuesioner terhadap penguasaan materi, metode penyampaian narasumber, dan fasilitas penyelenggaraan bimbingan teknis.
-                            </p>
+                            {{-- CARD EVALUASI AKHIR (FLEKSIBEL: PILIHAN GANDA CBT / PENUGASAN GOOGLE DRIVE) --}}
+                            @if ($evaluasiAkhir)
+                                <div data-tour="evaluasi"
+                                    x-data="{ showStartEvaluasiModal: false }"
+                                    class="border {{ $isEvaluasiAkhirLocked ? 'border-slate-200/80 bg-slate-50/60' : 'border-slate-200 bg-white hover:border-slate-300 shadow-2xs hover:shadow-xs' }} rounded-md p-4 sm:px-6 sm:py-5 lg:px-7 lg:py-6 transition-all">
+                                    <div class="flex flex-row items-end justify-between gap-6 lg:gap-8">
+                                        {{-- Kolom Kiri: Informasi Evaluasi & Tombol Aksi --}}
+                                        <div class="flex-1 min-w-0 sm:py-1">
+                                            <h3 class="text-base sm:text-lg lg:text-xl font-bold text-slate-700 leading-snug max-w-full lg:max-w-[85%]">
+                                                {{ $evaluasiAkhirTitle }}
+                                            </h3>
 
-                   
+                                            {{-- Deskripsi Dinamis Mengenai Evaluasi Akhir --}}
+                                            <p class="text-xs sm:text-sm text-slate-600 mt-1.5 leading-relaxed max-w-full lg:max-w-[90%]">
+                                                @if ($isCbtPostTest)
+                                                    Ujian evaluasi komprehensif seluruh materi sebagai syarat kelulusan dan penerbitan sertifikat.
+                                                @else
+                                                    Pengumpulan berkas tugas akhir atau portofolio pelatihan ke Google Drive panitia sebagai syarat kelulusan dan penerbitan sertifikat.
+                                                @endif
+                                            </p>
 
-                            {{-- Tombol Aksi: Pindah Halaman Langsung (Google Form Style) --}}
-                            <div class="mt-4 sm:mt-5 flex justify-start">
-                                @if ($isEvaluasiNarasumberLocked)
-                                    <button type="button" disabled
-                                        title="{{ $evaluasiNarasumberLockReason }}"
-                                        class="inline-flex items-center justify-center gap-1.5 px-5 py-2.5 rounded-md text-xs sm:text-sm font-bold bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed select-none">
-                                        <i class="fas fa-lock text-xs"></i> Evaluasi Terkunci
-                                    </button>
-                                @else
-                                    <a href="{{ route('user.course.my-course.evaluasi-narasumber', ['slug' => $courseSlug]) }}"
-                                        class="inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-md text-xs sm:text-sm font-bold transition-all shadow-xs
-                                        {{ $isEvaluasiNarasumberCompleted ? 'bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200' : 'bg-[#13416B] hover:bg-[#0f3354] text-white shadow-sm' }}">
-                                        <i class="fas {{ $isEvaluasiNarasumberCompleted ? 'fa-eye' : 'fa-pen-alt' }} text-xs"></i>
-                                        <span>{{ $isEvaluasiNarasumberCompleted ? 'Lihat / Edit Tanggapan Kuesioner' : 'Buka Kuesioner Evaluasi' }}</span>
-                                    </a>
-                                @endif
-                            </div>
+                                            <div class="mt-4 sm:mt-5 flex flex-wrap items-center gap-2.5 justify-start">
+                                                @if ($isCbtPostTest)
+                                                    @if ($isEvaluasiAkhirCompleted)
+                                                        <a href="{{ route('user.course.test.show', ['slug' => $courseSlug, 'postTestId' => $evaluasiAkhir->id]) }}"
+                                                            class="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-md text-xs sm:text-sm font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 transition-all shadow-xs">
+                                                            <i class="fas fa-eye text-xs"></i> Lihat Hasil
+                                                        </a>
+                                                    @elseif ($isWaitingForStart)
+                                                        <button type="button" disabled
+                                                            title="Evaluasi dibuka saat periode pelaksanaan pelatihan resmi dimulai"
+                                                            class="inline-flex items-center justify-center gap-1.5 px-5 py-2.5 rounded-md text-xs sm:text-sm font-bold bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed select-none">
+                                                            <i class="fas fa-lock text-xs"></i> Evaluasi Terkunci
+                                                        </button>
+                                                    @elseif (!$isEvaluasiAkhirLocked && !$isEventEnded)
+                                                        <button type="button" @click="showStartEvaluasiModal = true"
+                                                            class="inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-md text-xs sm:text-sm font-bold bg-[#13416B] hover:bg-[#0f3354] text-white shadow-sm transition-all cursor-pointer">
+                                                            <i class="fas fa-play text-xs"></i> Mulai Evaluasi
+                                                        </button>
+                                                    @elseif ($isEventEnded && !$isEvaluasiAkhirCompleted)
+                                                        <div class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-md text-xs font-semibold bg-slate-100 text-slate-500 border border-slate-200">
+                                                            <i class="fas fa-clock text-slate-400"></i>
+                                                            <span>Periode Pelatihan Telah Berakhir</span>
+                                                        </div>
+                                                    @else
+                                                        <button type="button" disabled
+                                                            title="Selesaikan materi terlebih dahulu"
+                                                            class="inline-flex items-center justify-center gap-1.5 px-5 py-2.5 rounded-md text-xs sm:text-sm font-bold bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed select-none">
+                                                            <i class="fas fa-lock text-xs"></i> Evaluasi Terkunci
+                                                        </button>
+                                                    @endif
+                                                @else
+                                                    {{-- Penugasan Akhir via Google Drive --}}
+                                                    @if ($adminDriveLink)
+                                                        <a href="{{ $adminDriveLink }}" target="_blank" rel="noopener noreferrer"
+                                                            class="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-md text-xs sm:text-sm font-bold bg-[#13416B] hover:bg-[#0f3354] text-white shadow-sm transition-all">
+                                                            <i class="fab fa-google-drive text-xs"></i>
+                                                            <span>Buka Folder Drive Tugas</span>
+                                                            <i class="fas fa-external-link-alt text-[10px] ml-0.5 opacity-80"></i>
+                                                        </a>
+                                                    @endif
+                                                    <a href="{{ route('user.course.test.show', ['slug' => $courseSlug, 'postTestId' => $evaluasiAkhir->id]) }}"
+                                                        class="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-md text-xs sm:text-sm font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 transition-all shadow-xs">
+                                                        <i class="fas fa-tasks text-xs"></i>
+                                                        <span>Lembar Penyerahan Tugas</span>
+                                                    </a>
+                                                @endif
+                                            </div>
+                                        </div>
+
+                                        {{-- Kolom Kanan: Ilustrasi Gambar khusus Layar Tablet/Desktop (sm ke atas) --}}
+                                        <div class="hidden sm:flex sm:shrink-0 items-end justify-center self-end -mb-3.5 lg:-mb-4">
+                                            <img src="{{ asset('images/modul_ilustrasi.webp') }}"
+                                                alt="Ilustrasi Evaluasi Akhir"
+                                                class="sm:h-44 md:h-48 lg:h-52 w-auto object-contain object-bottom select-none pointer-events-none" />
+                                        </div>
+                                    </div>
+
+                                    {{-- MODAL / BOTTOM SHEET KONFIRMASI MULAI EVALUASI AKHIR --}}
+                                    <template x-teleport="body">
+                                        <div x-show="showStartEvaluasiModal" x-cloak
+                                            @keydown.escape.window="showStartEvaluasiModal = false"
+                                            class="fixed inset-0 z-[100] overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4">
+
+                                            {{-- Overlay Click to Dismiss --}}
+                                            <div class="fixed inset-0" @click="showStartEvaluasiModal = false"></div>
+
+                                            {{-- Panel Konten: Bottom Sheet di Mobile, Modal di Tablet/Desktop --}}
+                                            <div x-show="showStartEvaluasiModal"
+                                                x-transition:enter="transition ease-out duration-300"
+                                                x-transition:enter-start="opacity-0 translate-y-full sm:translate-y-4 sm:scale-95"
+                                                x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
+                                                x-transition:leave="transition ease-in duration-200"
+                                                x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
+                                                x-transition:leave-end="opacity-0 translate-y-full sm:translate-y-4 sm:scale-95"
+                                                class="relative bg-white w-full sm:max-w-md rounded-t-2xl sm:rounded-lg shadow-2xl border-t sm:border border-slate-200 p-5 sm:p-6 space-y-4 text-left max-h-[88vh] sm:max-h-[85vh] overflow-y-auto z-10">
+
+                                                {{-- Drag Indicator Bar khusus Mobile --}}
+                                                <div class="sm:hidden w-12 h-1.5 bg-slate-300 rounded-full mx-auto -mt-2 mb-2"></div>
+
+                                                {{-- Header Modal / Bottom Sheet --}}
+                                                <div class="flex items-start justify-between gap-3 pb-3 border-b border-slate-100">
+                                                    <div class="flex items-center gap-2.5 min-w-0">
+                                                        <div class="w-9 h-9 rounded-md bg-[#13416B]/10 text-[#13416B] flex items-center justify-center text-sm font-bold shrink-0">
+                                                            <i class="fas fa-clipboard-check"></i>
+                                                        </div>
+                                                        <div class="min-w-0">
+                                                            <h4 class="text-base font-bold text-slate-800 leading-tight">Konfirmasi Mulai Evaluasi</h4>
+                                                            <p class="text-[11px] text-slate-500 mt-0.5 truncate">{{ $evaluasiAkhirTitle }}</p>
+                                                        </div>
+                                                    </div>
+                                                    <button type="button" @click="showStartEvaluasiModal = false"
+                                                        class="text-slate-400 hover:text-slate-600 p-1.5 rounded-md transition-colors cursor-pointer shrink-0">
+                                                        <i class="fas fa-times text-base"></i>
+                                                    </button>
+                                                </div>
+
+                                                {{-- Ringkasan Ketentuan Evaluasi --}}
+                                                <div class="bg-slate-50 border border-slate-200 rounded-md divide-y divide-slate-200/80 text-xs sm:text-[13px]">
+                                                    <div class="flex items-center justify-between gap-3 px-3.5 py-2.5">
+                                                        <span class="text-slate-500 font-medium flex items-center gap-2">
+                                                            <i class="fas fa-list-ol text-slate-400 w-4 text-center"></i>
+                                                            Bentuk &amp; Jumlah Soal
+                                                        </span>
+                                                        <span class="font-bold text-slate-800 text-right">
+                                                            {{ $isCbtPostTest ? 'Pilihan Ganda • ' . $evaluasiQuestionsCount . ' Soal' : 'Penugasan Berkas / Portofolio' }}
+                                                        </span>
+                                                    </div>
+                                                    <div class="flex items-center justify-between gap-3 px-3.5 py-2.5">
+                                                        <span class="text-slate-500 font-medium flex items-center gap-2">
+                                                            <i class="fas fa-stopwatch text-slate-400 w-4 text-center"></i>
+                                                            Waktu Pengerjaan
+                                                        </span>
+                                                        <span class="font-bold text-slate-800 text-right">
+                                                            {{ data_get($evaluasiAkhir, 'duration', 0) > 0 ? data_get($evaluasiAkhir, 'duration') . ' Menit' : 'Tanpa Batas Waktu' }}
+                                                        </span>
+                                                    </div>
+                                                    <div class="flex items-center justify-between gap-3 px-3.5 py-2.5">
+                                                        <span class="text-slate-500 font-medium flex items-center gap-2">
+                                                            <i class="fas fa-bullseye text-slate-400 w-4 text-center"></i>
+                                                            Ambang Batas (KKM)
+                                                        </span>
+                                                        <span class="font-bold text-slate-800 text-right">
+                                                            {{ data_get($evaluasiAkhir, 'passing_score', 0) > 0 ? data_get($evaluasiAkhir, 'passing_score') . ' Poin' : '-' }}
+                                                        </span>
+                                                    </div>
+                                                </div>
+
+                                                {{-- Pesan Kesiapan --}}
+                                                <p class="text-xs sm:text-[13px] text-slate-600 leading-relaxed">
+                                                    Apakah Anda yakin ingin memulai pengerjaan evaluasi sekarang? Pastikan koneksi internet stabil sebelum melanjutkan.
+                                                </p>
+
+                                                {{-- Footer Tombol Aksi --}}
+                                                <div class="pt-1 flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-2.5">
+                                                    <button type="button" @click="showStartEvaluasiModal = false"
+                                                        class="inline-flex items-center justify-center px-4 py-2.5 rounded-md text-xs sm:text-sm font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 border border-slate-200 transition-colors cursor-pointer">
+                                                        Batal
+                                                    </button>
+                                                    <a href="{{ route('user.course.test.show', ['slug' => $courseSlug, 'postTestId' => $evaluasiAkhir->id]) }}"
+                                                        class="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-md text-xs sm:text-sm font-bold bg-[#13416B] hover:bg-[#0f3354] text-white shadow-sm transition-all">
+                                                        <i class="fas fa-play text-xs"></i>
+                                                        <span>Ya, Kerjakan Sekarang</span>
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </template>
+                                </div>
+                            @endif
+
+                            @if ($isBimtekEvent)
+                                {{-- CARD EVALUASI NARASUMBER / PEMATERI (KHUSUS BIMTEK - GAYA GOOGLE FORM PINDAH HALAMAN) --}}
+                                <div data-tour="evaluasi-narasumber"
+                                    id="card-evaluasi-narasumber"
+                                    class="border {{ $isEvaluasiNarasumberLocked ? 'border-slate-200/80 bg-slate-50/60' : 'border-slate-200 bg-white hover:border-slate-300 shadow-2xs hover:shadow-xs' }} rounded-md p-4 sm:px-6 sm:py-5 lg:px-7 lg:py-6 transition-all">
+
+                                    <div class="flex flex-row items-end justify-between gap-6 lg:gap-8">
+                                        {{-- Kolom Kiri: Informasi Evaluasi Narasumber & Tombol Aksi Pindah Halaman --}}
+                                        <div class="flex-1 min-w-0 sm:py-1">
+                                            <div class="flex items-center gap-2 flex-wrap">
+                                                <h3 class="text-base sm:text-lg lg:text-xl font-bold text-slate-700 leading-snug">
+                                                    Evaluasi Narasumber & Penyelenggaraan
+                                                </h3>
+                                                @if ($isEvaluasiNarasumberCompleted)
+                                                    <span class="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-md">
+                                                        <i class="fas fa-check-circle text-emerald-600 text-xs"></i> Sudah Diisi
+                                                    </span>
+                                                @endif
+                                            </div>
+
+                                            <p class="text-xs sm:text-sm text-slate-600 mt-1.5 leading-relaxed max-w-full lg:max-w-[90%]">
+                                                Penilaian bergaya kuesioner terhadap penguasaan materi, metode penyampaian narasumber, dan fasilitas penyelenggaraan bimbingan teknis.
+                                            </p>
+
+                                            {{-- Tombol Aksi: Pindah Halaman Langsung (Google Form Style) --}}
+                                            <div class="mt-4 sm:mt-5 flex justify-start">
+                                                @if ($isEvaluasiNarasumberLocked)
+                                                    <button type="button" disabled
+                                                        title="{{ $evaluasiNarasumberLockReason }}"
+                                                        class="inline-flex items-center justify-center gap-1.5 px-5 py-2.5 rounded-md text-xs sm:text-sm font-bold bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed select-none">
+                                                        <i class="fas fa-lock text-xs"></i> Evaluasi Terkunci
+                                                    </button>
+                                                @else
+                                                    <a href="{{ route('user.course.my-course.evaluasi-narasumber', ['slug' => $courseSlug]) }}"
+                                                        class="inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-md text-xs sm:text-sm font-bold transition-all shadow-xs
+                                                        {{ $isEvaluasiNarasumberCompleted ? 'bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200' : 'bg-[#13416B] hover:bg-[#0f3354] text-white shadow-sm' }}">
+                                                        <i class="fas {{ $isEvaluasiNarasumberCompleted ? 'fa-eye' : 'fa-pen-alt' }} text-xs"></i>
+                                                        <span>{{ $isEvaluasiNarasumberCompleted ? 'Lihat / Edit Tanggapan Kuesioner' : 'Buka Kuesioner Evaluasi' }}</span>
+                                                    </a>
+                                                @endif
+                                            </div>
+                                        </div>
+
+                                        {{-- Kolom Kanan: Ilustrasi Narasumber khusus Layar Tablet/Desktop (sm ke atas) --}}
+                                        <div class="hidden sm:flex sm:shrink-0 items-end justify-center self-end -mb-5 sm:-mb-5 lg:-mb-6">
+                                            <img src="{{ asset('images/narasumber_ilustrasi.webp') }}"
+                                                alt="Ilustrasi Narasumber"
+                                                class="sm:h-44 md:h-48 lg:h-52 w-auto object-contain object-bottom select-none pointer-events-none" />
+                                        </div>
+                                    </div>
+                                </div>
+                            @endif
                         </div>
-
-                        {{-- Kolom Kanan: Ilustrasi Narasumber khusus Layar Tablet/Desktop (sm ke atas) --}}
-                        <div class="hidden sm:flex sm:shrink-0 items-end justify-center self-end -mb-5 sm:-mb-5 lg:-mb-6">
-                            <img src="{{ asset('images/narasumber_ilustrasi.webp') }}"
-                                alt="Ilustrasi Narasumber"
-                                class="sm:h-44 md:h-48 lg:h-52 w-auto object-contain object-bottom select-none pointer-events-none" />
-                        </div>
-                    </div>
+                    @endif
                 </div>
-                @endif
-        </div>
+            </div>
 
             {{-- Right Column: Side Widget (Sertifikat & Info) --}}
             <div class="space-y-0 lg:sticky lg:top-24 lg:self-start">
