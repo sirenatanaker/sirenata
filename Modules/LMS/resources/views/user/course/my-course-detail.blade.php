@@ -428,7 +428,7 @@
                                                 </button>
                                             @else
                                                 <a href="{{ route('user.course.section.show', ['slug' => $courseSlug, 'sectionId' => $sectionId]) }}"
-                                                    class="w-full md:w-auto inline-flex items-center justify-center px-5 py-2.5 rounded-md text-xs sm:text-sm font-bold bg-[#13416B] hover:bg-[#0f3354] text-white shadow-xs transition-all whitespace-nowrap">
+                                                    class="w-full md:w-auto inline-flex items-center justify-center px-5 py-2.5 rounded-md text-xs sm:text-sm font-bold bg-[#1E568A] hover:bg-[#13416B] text-white shadow-xs transition-all whitespace-nowrap">
                                                     <span>Masuk</span>
                                                 </a>
                                             @endif
@@ -477,16 +477,16 @@
                             @if ($evaluasiAkhir)
                                 <div data-tour="evaluasi"
                                     x-data="{ showStartEvaluasiModal: false }"
-                                    class="border {{ $isEvaluasiAkhirLocked ? 'border-slate-200/80 bg-slate-50/60' : 'border-slate-200 bg-white hover:border-slate-300 shadow-2xs hover:shadow-xs' }} rounded-md p-4 sm:px-6 sm:py-5 lg:px-7 lg:py-6 transition-all">
+                                    class="border border-[#0f3354] bg-[#13416B] text-white shadow-sm hover:shadow-md rounded-md p-4 sm:px-6 sm:py-5 lg:px-7 lg:py-6 transition-all">
                                     <div class="flex flex-row items-end justify-between gap-6 lg:gap-8">
                                         {{-- Kolom Kiri: Informasi Evaluasi & Tombol Aksi --}}
                                         <div class="flex-1 min-w-0 sm:py-1">
-                                            <h3 class="text-base sm:text-lg lg:text-xl font-bold text-slate-700 leading-snug max-w-full lg:max-w-[85%] line-clamp-2" title="{{ $evaluasiAkhirTitle }}">
+                                            <h3 class="text-base sm:text-lg lg:text-xl font-bold text-white leading-snug max-w-full lg:max-w-[85%] line-clamp-2" title="{{ $evaluasiAkhirTitle }}">
                                                 {{ $evaluasiAkhirTitle }}
                                             </h3>
 
                                             {{-- Deskripsi Dinamis Mengenai Evaluasi Akhir --}}
-                                            <p class="text-xs sm:text-sm text-slate-600 mt-1.5 leading-relaxed max-w-full lg:max-w-[90%]">
+                                            <p class="text-xs sm:text-sm text-white/85 mt-1.5 leading-relaxed max-w-full lg:max-w-[90%]">
                                                 @if ($isCbtPostTest)
                                                     Ujian evaluasi komprehensif seluruh materi sebagai syarat kelulusan dan penerbitan sertifikat.
                                                 @else
@@ -498,29 +498,29 @@
                                                 @if ($isCbtPostTest)
                                                     @if ($isEvaluasiAkhirCompleted)
                                                         <a href="{{ route('user.course.test.show', ['slug' => $courseSlug, 'postTestId' => $evaluasiAkhir->id]) }}"
-                                                            class="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-md text-xs sm:text-sm font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 transition-all shadow-xs">
+                                                            class="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-md text-xs sm:text-sm font-bold bg-white hover:bg-slate-100 text-[#13416B] transition-all shadow-sm">
                                                             <i class="fas fa-eye text-xs"></i> Lihat Hasil
                                                         </a>
                                                     @elseif ($isWaitingForStart)
                                                         <button type="button" disabled
                                                             title="Evaluasi dibuka saat periode pelaksanaan pelatihan resmi dimulai"
-                                                            class="inline-flex items-center justify-center gap-1.5 px-5 py-2.5 rounded-md text-xs sm:text-sm font-bold bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed select-none">
+                                                            class="inline-flex items-center justify-center gap-1.5 px-5 py-2.5 rounded-md text-xs sm:text-sm font-bold bg-white/15 text-white/75 border border-white/25 cursor-not-allowed select-none">
                                                             <i class="fas fa-lock text-xs"></i> Evaluasi Terkunci
                                                         </button>
                                                     @elseif (!$isEvaluasiAkhirLocked && !$isEventEnded)
                                                         <button type="button" @click="showStartEvaluasiModal = true"
-                                                            class="inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-md text-xs sm:text-sm font-bold bg-[#13416B] hover:bg-[#0f3354] text-white shadow-sm transition-all cursor-pointer">
+                                                            class="inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-md text-xs sm:text-sm font-bold bg-white hover:bg-slate-100 text-[#13416B] shadow-sm transition-all cursor-pointer">
                                                             <i class="fas fa-play text-xs"></i> Mulai Evaluasi
                                                         </button>
                                                     @elseif ($isEventEnded && !$isEvaluasiAkhirCompleted)
-                                                        <div class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-md text-xs font-semibold bg-slate-100 text-slate-500 border border-slate-200">
-                                                            <i class="fas fa-clock text-slate-400"></i>
+                                                        <div class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-md text-xs font-semibold bg-white/15 text-white/75 border border-white/25">
+                                                            <i class="fas fa-clock text-white/75"></i>
                                                             <span>Periode Pelatihan Telah Berakhir</span>
                                                         </div>
                                                     @else
                                                         <button type="button" disabled
                                                             title="Selesaikan materi terlebih dahulu"
-                                                            class="inline-flex items-center justify-center gap-1.5 px-5 py-2.5 rounded-md text-xs sm:text-sm font-bold bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed select-none">
+                                                            class="inline-flex items-center justify-center gap-1.5 px-5 py-2.5 rounded-md text-xs sm:text-sm font-bold bg-white/15 text-white/75 border border-white/25 cursor-not-allowed select-none">
                                                             <i class="fas fa-lock text-xs"></i> Evaluasi Terkunci
                                                         </button>
                                                     @endif
@@ -528,14 +528,14 @@
                                                     {{-- Penugasan Akhir via Google Drive --}}
                                                     @if ($adminDriveLink)
                                                         <a href="{{ $adminDriveLink }}" target="_blank" rel="noopener noreferrer"
-                                                            class="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-md text-xs sm:text-sm font-bold bg-[#13416B] hover:bg-[#0f3354] text-white shadow-sm transition-all">
+                                                            class="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-md text-xs sm:text-sm font-bold bg-white hover:bg-slate-100 text-[#13416B] shadow-sm transition-all">
                                                             <i class="fab fa-google-drive text-xs"></i>
                                                             <span>Buka Folder Drive Tugas</span>
                                                             <i class="fas fa-external-link-alt text-[10px] ml-0.5 opacity-80"></i>
                                                         </a>
                                                     @endif
                                                     <a href="{{ route('user.course.test.show', ['slug' => $courseSlug, 'postTestId' => $evaluasiAkhir->id]) }}"
-                                                        class="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-md text-xs sm:text-sm font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 transition-all shadow-xs">
+                                                        class="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-md text-xs sm:text-sm font-bold bg-white hover:bg-slate-100 text-[#13416B] transition-all shadow-sm">
                                                         <i class="fas fa-tasks text-xs"></i>
                                                         <span>Lembar Penyerahan Tugas</span>
                                                     </a>
@@ -633,7 +633,7 @@
                                                         Batal
                                                     </button>
                                                     <a href="{{ route('user.course.test.show', ['slug' => $courseSlug, 'postTestId' => $evaluasiAkhir->id]) }}"
-                                                        class="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-md text-xs sm:text-sm font-bold bg-[#13416B] hover:bg-[#0f3354] text-white shadow-sm transition-all">
+                                                        class="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-md text-xs sm:text-sm font-bold bg-[#1E568A] hover:bg-[#13416B] text-white shadow-sm transition-all">
                                                         <i class="fas fa-play text-xs"></i>
                                                         <span>Ya, Kerjakan Sekarang</span>
                                                     </a>
@@ -658,23 +658,23 @@
                                 <div data-tour="evaluasi-narasumber"
                                     id="card-evaluasi-narasumber"
                                     x-data="{ showStartNarasumberModal: false }"
-                                    class="border {{ $isEvaluasiNarasumberLocked ? 'border-slate-200/80 bg-slate-50/60' : 'border-slate-200 bg-white hover:border-slate-300 shadow-2xs hover:shadow-xs' }} rounded-md p-4 sm:px-6 sm:py-5 lg:px-7 lg:py-6 transition-all">
+                                    class="border border-[#446680] bg-[#547996] text-white shadow-sm hover:shadow-md rounded-md p-4 sm:px-6 sm:py-5 lg:px-7 lg:py-6 transition-all">
 
                                     <div class="flex flex-row items-end justify-between gap-6 lg:gap-8">
                                         {{-- Kolom Kiri: Informasi Evaluasi Narasumber & Tombol Aksi Pindah Halaman --}}
                                         <div class="flex-1 min-w-0 sm:py-1">
                                             <div class="flex items-center gap-2 flex-wrap">
-                                                <h3 class="text-base sm:text-lg lg:text-xl font-bold text-slate-700 leading-snug">
+                                                <h3 class="text-base sm:text-lg lg:text-xl font-bold text-white leading-snug">
                                                     Evaluasi Narasumber & Penyelenggaraan
                                                 </h3>
                                                 @if ($isEvaluasiNarasumberCompleted)
-                                                    <span class="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-md">
-                                                        <i class="fas fa-check-circle text-emerald-600 text-xs"></i> Sudah Diisi
+                                                    <span class="inline-flex items-center gap-1 text-[11px] font-bold text-white bg-emerald-600 border border-emerald-500 px-2 py-0.5 rounded-md">
+                                                        <i class="fas fa-check-circle text-white text-xs"></i> Sudah Diisi
                                                     </span>
                                                 @endif
                                             </div>
 
-                                            <p class="text-xs sm:text-sm text-slate-600 mt-1.5 leading-relaxed max-w-full lg:max-w-[90%]">
+                                            <p class="text-xs sm:text-sm text-white/90 mt-1.5 leading-relaxed max-w-full lg:max-w-[90%]">
                                                 Penilaian bergaya kuesioner terhadap penguasaan materi, metode penyampaian narasumber, dan fasilitas penyelenggaraan bimbingan teknis.
                                             </p>
 
@@ -683,18 +683,18 @@
                                                 @if ($isEvaluasiNarasumberLocked)
                                                     <button type="button" disabled
                                                         title="{{ $evaluasiNarasumberLockReason }}"
-                                                        class="inline-flex items-center justify-center gap-1.5 px-5 py-2.5 rounded-md text-xs sm:text-sm font-bold bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed select-none">
+                                                        class="inline-flex items-center justify-center gap-1.5 px-5 py-2.5 rounded-md text-xs sm:text-sm font-bold bg-white/15 text-white/75 border border-white/25 cursor-not-allowed select-none">
                                                         <i class="fas fa-lock text-xs"></i> Evaluasi Terkunci
                                                     </button>
                                                 @elseif ($isEvaluasiNarasumberCompleted)
                                                     <a href="{{ route('user.course.my-course.evaluasi-narasumber', ['slug' => $courseSlug]) }}"
-                                                        class="inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-md text-xs sm:text-sm font-bold transition-all shadow-xs bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200">
+                                                        class="inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-md text-xs sm:text-sm font-bold transition-all shadow-sm bg-white hover:bg-slate-100 text-[#13416B]">
                                                         <i class="fas fa-eye text-xs"></i>
                                                         <span>Lihat / Edit Tanggapan Kuesioner</span>
                                                     </a>
                                                 @else
                                                     <button type="button" @click="showStartNarasumberModal = true"
-                                                        class="inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-md text-xs sm:text-sm font-bold transition-all bg-[#13416B] hover:bg-[#0f3354] text-white shadow-sm cursor-pointer">
+                                                        class="inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-md text-xs sm:text-sm font-bold transition-all bg-white hover:bg-slate-100 text-[#13416B] shadow-sm cursor-pointer">
                                                         <i class="fas fa-pen-alt text-xs"></i>
                                                         <span>Buka Kuesioner Evaluasi</span>
                                                     </button>
@@ -792,7 +792,7 @@
                                                         Batal
                                                     </button>
                                                     <a href="{{ route('user.course.my-course.evaluasi-narasumber', ['slug' => $courseSlug]) }}"
-                                                        class="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-md text-xs sm:text-sm font-bold bg-[#13416B] hover:bg-[#0f3354] text-white shadow-sm transition-all">
+                                                        class="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-md text-xs sm:text-sm font-bold bg-[#1E568A] hover:bg-[#13416B] text-white shadow-sm transition-all">
                                                         <i class="fas fa-pen-alt text-xs"></i>
                                                         <span>Ya, Isi Kuesioner Sekarang</span>
                                                     </a>
@@ -867,7 +867,7 @@
 
                                 <div class="flex flex-col gap-2.5">
                                     <a href="{{ data_get($course, 'certificate_file') }}" target="_blank" download
-                                        class="w-full bg-[#13416B] hover:bg-[#0f3354] text-white py-3 rounded-md font-bold transition-all shadow-sm flex items-center justify-center gap-2 text-sm">
+                                        class="w-full bg-[#1E568A] hover:bg-[#13416B] text-white py-3 rounded-md font-bold transition-all shadow-sm flex items-center justify-center gap-2 text-sm">
                                         <i class="fas fa-download"></i> Unduh e-Sertifikat
                                     </a>
                                     <a href="{{ route('user.profile') }}#certificates"
@@ -931,7 +931,7 @@
                                         method="POST" x-data="{ loading: false }" @submit="loading = true">
                                         @csrf
                                         <button type="submit" :disabled="loading"
-                                            class="w-full bg-[#13416B] hover:bg-[#0f3354] text-white py-3 rounded-md font-bold transition-all shadow-sm flex items-center justify-center gap-2 text-sm disabled:opacity-70 disabled:cursor-not-allowed">
+                                            class="w-full bg-[#1E568A] hover:bg-[#13416B] text-white py-3 rounded-md font-bold transition-all shadow-sm flex items-center justify-center gap-2 text-sm disabled:opacity-70 disabled:cursor-not-allowed">
                                             <template x-if="!loading">
                                                 <span class="flex items-center gap-2"><i class="fas fa-cogs"></i>
                                                     Terbitkan Sertifikat</span>
@@ -1067,7 +1067,7 @@
                                                 </span>
                                             @else
                                                 <a href="{{ route('user.course.section.show', ['slug' => $courseSlug, 'sectionId' => $firstIncompleteSectionId]) }}#sesi-zoom"
-                                                    class="inline-flex items-center gap-1 px-3 py-1.5 rounded-md text-xs font-bold text-white bg-[#13416B] hover:bg-[#0f3354] transition-colors shadow-2xs whitespace-nowrap">
+                                                    class="inline-flex items-center gap-1 px-3 py-1.5 rounded-md text-xs font-bold text-white bg-[#1E568A] hover:bg-[#13416B] transition-colors shadow-2xs whitespace-nowrap">
                                                     <span>Masuk</span>
                                                     <i class="fas fa-arrow-right text-[9px]"></i>
                                                 </a>
@@ -1108,7 +1108,7 @@
                                             </span>
                                         @else
                                             <a href="{{ route('user.course.section.show', ['slug' => $courseSlug, 'sectionId' => $firstIncompleteSectionId]) }}"
-                                                class="inline-flex items-center gap-1 px-3 py-1.5 rounded-md text-xs font-bold text-white bg-[#13416B] hover:bg-[#0f3354] transition-colors shadow-2xs whitespace-nowrap">
+                                                class="inline-flex items-center gap-1 px-3 py-1.5 rounded-md text-xs font-bold text-white bg-[#1E568A] hover:bg-[#13416B] transition-colors shadow-2xs whitespace-nowrap">
                                                 <span>Pelajari</span>
                                                 <i class="fas fa-arrow-right text-[9px]"></i>
                                             </a>
@@ -1149,7 +1149,7 @@
                                                 </span>
                                             @else
                                                 <a href="{{ route('user.course.section.show', ['slug' => $courseSlug, 'sectionId' => $firstIncompleteSectionId]) }}#bukti-zoom"
-                                                    class="inline-flex items-center gap-1 px-3 py-1.5 rounded-md text-xs font-bold text-white bg-[#13416B] hover:bg-[#0f3354] transition-colors shadow-2xs whitespace-nowrap">
+                                                    class="inline-flex items-center gap-1 px-3 py-1.5 rounded-md text-xs font-bold text-white bg-[#1E568A] hover:bg-[#13416B] transition-colors shadow-2xs whitespace-nowrap">
                                                     <span>Unggah</span>
                                                     <i class="fas fa-arrow-right text-[9px]"></i>
                                                 </a>
@@ -1191,7 +1191,7 @@
                                                 </span>
                                             @else
                                                 <a href="{{ route('user.course.test.show', ['slug' => $courseSlug, 'postTestId' => $evaluasiAkhir->id]) }}"
-                                                    class="inline-flex items-center gap-1 px-3 py-1.5 rounded-md text-xs font-bold text-white bg-[#13416B] hover:bg-[#0f3354] transition-colors shadow-2xs whitespace-nowrap">
+                                                    class="inline-flex items-center gap-1 px-3 py-1.5 rounded-md text-xs font-bold text-white bg-[#1E568A] hover:bg-[#13416B] transition-colors shadow-2xs whitespace-nowrap">
                                                     <span>{{ $isCbtPostTest ? 'Kerjakan' : 'Kumpulkan' }}</span>
                                                     <i class="fas fa-arrow-right text-[9px]"></i>
                                                 </a>
@@ -1234,7 +1234,7 @@
                                             </template>
                                             <template x-if="!evalNarasumberDone && !{{ $isEvaluasiNarasumberLocked ? 'true' : 'false' }}">
                                                 <a href="{{ route('user.course.my-course.evaluasi-narasumber', ['slug' => $courseSlug]) }}"
-                                                    class="inline-flex items-center gap-1 px-3 py-1.5 rounded-md text-xs font-bold text-white bg-[#13416B] hover:bg-[#0f3354] transition-colors shadow-2xs whitespace-nowrap">
+                                                    class="inline-flex items-center gap-1 px-3 py-1.5 rounded-md text-xs font-bold text-white bg-[#1E568A] hover:bg-[#13416B] transition-colors shadow-2xs whitespace-nowrap">
                                                     <span>Isi</span>
                                                     <i class="fas fa-arrow-right text-[9px]"></i>
                                                 </a>
