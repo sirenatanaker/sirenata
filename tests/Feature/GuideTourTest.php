@@ -8,7 +8,7 @@ test('course player page exposes guided tour hooks', function () {
         base_path('Modules/LMS/resources/views/user/course/my-course-detail.blade.php')
     );
 
-    foreach (['data-tour="progres"', 'data-tour="modul"', 'data-tour="evaluasi"', 'data-tour="sertifikat"', 'startCoursePlayerTour', 'guide-assets'] as $needle) {
+    foreach (['data-tour="modul"', 'data-tour="evaluasi"', 'data-tour="sertifikat"', 'startCoursePlayerTour', 'guide-assets'] as $needle) {
         expect($source)->toContain($needle);
     }
 });

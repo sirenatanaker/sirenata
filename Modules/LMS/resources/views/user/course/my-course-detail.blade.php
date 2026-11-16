@@ -95,10 +95,19 @@
                             </div>
                         @endif
 
-                        {{-- Judul Kursus --}}
-                        <h1 class="text-lg sm:text-xl lg:text-2xl font-black text-slate-900 tracking-tight leading-snug">
-                            {{ $courseName }}
-                        </h1>
+                        {{-- Baris Judul Kursus & Tombol Panduan di Sebelah Kanan --}}
+                        <div class="flex items-start justify-between gap-3 sm:gap-4">
+                            <h1 class="text-lg sm:text-xl lg:text-2xl font-black text-slate-900 tracking-tight leading-snug">
+                                {{ $courseName }}
+                            </h1>
+
+                            {{-- Tombol Panduan Tour (Sebelah Kanan) --}}
+                            <button type="button" onclick="window.startCoursePlayerTour && window.startCoursePlayerTour()"
+                                class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-slate-700 bg-slate-50 hover:bg-slate-100 hover:text-[#13416B] border border-slate-200 rounded-md transition-all shadow-2xs cursor-pointer shrink-0">
+                                <i class="fas fa-route text-[#13416B]"></i>
+                                <span>Panduan</span>
+                            </button>
+                        </div>
 
                         {{-- Info Periode Pelaksanaan & Periode Evaluasi --}}
                         @if ($formattedPeriod || $formattedEvaluationPeriod)
@@ -119,8 +128,8 @@
                         @endif
                     </div>
 
-                    {{-- Action Buttons Row (Gaya Tombol YouTube: Play Icon + Panduan) --}}
-                    <div class="pt-2 sm:pt-3 flex flex-wrap items-center gap-2.5 sm:gap-3">
+                    {{-- Action Button: Lanjutkan Belajar --}}
+                    <div class="pt-2 sm:pt-3">
                         @if ($isWaitingForStart)
                             <button type="button" disabled
                                 class="inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-md text-xs sm:text-sm font-bold bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed select-none">
@@ -145,13 +154,6 @@
                                 <span>Lanjutkan Belajar</span>
                             </a>
                         @endif
-
-                        {{-- Tombol Panduan Tour (Secondary) --}}
-                        <button type="button" onclick="window.startCoursePlayerTour && window.startCoursePlayerTour()"
-                            class="inline-flex items-center gap-2 px-4 py-2.5 text-xs sm:text-sm font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-md transition-all cursor-pointer">
-                            <i class="fas fa-route text-xs text-[#13416B]"></i>
-                            <span>Panduan</span>
-                        </button>
                     </div>
                 </div>
             </div>
