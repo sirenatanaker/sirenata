@@ -18,6 +18,21 @@
     $phaseKey = $curPhase['phase'] ?? ($activeBimtek->status === 'open_registration' ? 'registration' : 'learning');
     $isRegistrationOpen = ($phaseKey === 'registration' && $activeBimtek->status === 'open_registration');
 
+    $execStart = $activeBimtek->start_date;
+    $execEnd   = $activeBimtek->end_date;
+    $execDates = ($execStart || $execEnd)
+        ? (($execStart ? $execStart->translatedFormat('d M') : '-') . ($execEnd ? ' - ' . $execEnd->translatedFormat('d M Y') : ''))
+        : null;
+
+    $zoomScheduleText = null;
+    if ($activeBimtek->zoom_scheduled_at) {
+        $startStr = $activeBimtek->zoom_scheduled_at->translatedFormat('d M Y, H:i');
+        $endStr   = $activeBimtek->zoom_end_at ? $activeBimtek->zoom_end_at->translatedFormat('H:i') . ' WIB' : 'WIB';
+        $zoomScheduleText = $startStr . ' - ' . $endStr;
+    } elseif ($activeBimtek->zoom_url) {
+        $zoomScheduleText = 'Sesi Live Zoom Terjadwal';
+    }
+
     if ($phaseKey === 'registration') {
         $periodeLabel = 'Periode Pendaftaran';
         $regStart = $activeBimtek->registration_start_at ?? $activeBimtek->start_date?->copy()->subDays(7);
@@ -30,13 +45,8 @@
         $periodeDates = ($evalStart ? $evalStart->translatedFormat('d M') : '-') . ' - ' . ($evalEnd ? $evalEnd->translatedFormat('d M Y') : '-');
     } else {
         $periodeLabel = 'Periode Pelaksanaan';
-        $execStart = $activeBimtek->start_date;
-        $execEnd   = $activeBimtek->end_date;
-        $periodeDates = ($execStart ? $execStart->translatedFormat('d M') : '-') . ($execEnd ? ' - ' . $execEnd->translatedFormat('d M Y') : '');
+        $periodeDates = $execDates;
     }
-
-    // Jumlah Peserta Terdaftar
-    $studentsCount = $activeBimtek->participants_count ?? ($activeBimtek->relationLoaded('participants') ? $activeBimtek->participants->count() : ($course->students_count ?? 0));
 @endphp
 
 <div class="group flex flex-col h-full bg-transparent sm:bg-white sm:dark:bg-slate-800/90 rounded-none sm:rounded-md border-0 sm:border border-slate-200 dark:border-slate-700/80 shadow-none sm:shadow-sm hover:shadow-xl hover:border-[#13416B]/30 dark:hover:border-slate-500 hover:-translate-y-1 transition-all duration-300 overflow-hidden w-full">
@@ -65,7 +75,7 @@
         {{-- Nama Event di Dasar Thumbnail (Tanpa Icon) --}}
         @if (!empty($activeBimtek?->batch_name))
             <div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 via-black/30 to-transparent px-2.5 sm:px-3.5 pt-4 pb-1.5 sm:pb-2 flex items-center text-white z-10">
-                <span class="text-[11px] sm:text-xs font-medium truncate tracking-wide text-white drop-shadow-xs"
+                <span class="text-[11px] sm:text-[13px] font-medium truncate tracking-wide text-white drop-shadow-xs"
                       title="{{ preg_replace('/\bbatch\b/i', 'Gelombang', $activeBimtek->batch_name) }}">
                     {{ preg_replace('/\bbatch\b/i', 'Gelombang', $activeBimtek->batch_name) }}
                 </span>
@@ -76,61 +86,79 @@
     {{-- Konten Text --}}
     <div class="p-0 pt-3 sm:p-5 flex flex-col flex-1">
         {{-- Judul Kursus (Tampil Utama & Bersih) --}}
-        <h3 class="text-xs sm:text-base font-bold text-slate-800 dark:text-white leading-snug mb-2.5 sm:mb-3.5 group-hover:text-[#13416B] dark:group-hover:text-slate-200 transition-colors line-clamp-2 min-h-[2rem] sm:min-h-[2.75rem]"
+        <h3 class="text-xs sm:text-[17px] font-bold text-slate-800 dark:text-white leading-snug mb-2.5 sm:mb-3.5 group-hover:text-[#13416B] dark:group-hover:text-slate-200 transition-colors line-clamp-2 min-h-[2rem] sm:min-h-[2.75rem]"
             title="{{ $course->name }}">
             {{ $course->name }}
         </h3>
 
-        {{-- Info Ringkas (Jadwal Periode & Jumlah Peserta, Data di Bawah Label agar Tidak Kepotong) --}}
+        {{-- Info Ringkas (Kontekstual 2 Baris: Pendaftaran + Pelaksanaan / Pelaksanaan + Jadwal Zoom) --}}
         <div class="flex flex-col gap-2.5 sm:gap-3.5 mb-3.5 sm:mb-4">
-            {{-- Jadwal per Periode (Data di Baris Bawah) --}}
+            {{-- Baris 1: Periode Fase Aktif --}}
             @if (!empty($periodeDates))
                 <div class="flex flex-col gap-0.5 min-w-0">
-                    <div class="flex items-center gap-1.5 text-xs sm:text-[13px] text-slate-400 dark:text-slate-500 font-medium">
-                        <i class="far fa-calendar-alt shrink-0 text-[11px] sm:text-xs"></i>
+                    <div class="flex items-center gap-1.5 text-xs sm:text-sm text-slate-400 dark:text-slate-500 font-medium">
+                        <i class="far fa-calendar-alt shrink-0 text-[11px] sm:text-[13px]"></i>
                         <span>{{ $periodeLabel }}</span>
                     </div>
-                    <div class="text-xs sm:text-sm font-semibold text-slate-700 dark:text-slate-200 truncate pl-3.5 sm:pl-4">
+                    <div class="text-xs sm:text-[15px] font-semibold text-slate-700 dark:text-slate-200 truncate pl-3.5 sm:pl-4">
                         {{ $periodeDates }}
                     </div>
                 </div>
             @endif
 
-            {{-- Jumlah Peserta Terdaftar --}}
-            <div class="flex items-center gap-1.5 min-w-0 text-xs sm:text-sm text-slate-500 dark:text-slate-400">
-                <i class="far fa-user text-slate-400 shrink-0 text-xs sm:text-sm"></i>
-                <span>{{ number_format($studentsCount, 0, ',', '.') }} Peserta Terdaftar</span>
-            </div>
+            {{-- Baris 2: Kontekstual (Periode Pelaksanaan saat Pendaftaran, atau Jadwal Zoom saat Berlangsung/Selesai) --}}
+            @if ($phaseKey === 'registration' && !empty($execDates))
+                <div class="flex flex-col gap-0.5 min-w-0">
+                    <div class="flex items-center gap-1.5 text-xs sm:text-sm text-slate-400 dark:text-slate-500 font-medium">
+                        <i class="far fa-calendar-check shrink-0 text-[11px] sm:text-[13px]"></i>
+                        <span>Periode Pelaksanaan</span>
+                    </div>
+                    <div class="text-xs sm:text-[15px] font-semibold text-slate-700 dark:text-slate-200 truncate pl-3.5 sm:pl-4">
+                        {{ $execDates }}
+                    </div>
+                </div>
+            @elseif ($phaseKey !== 'registration' && !empty($zoomScheduleText))
+                @php $isZoomNeutral = ($phaseKey === 'completed'); @endphp
+                <div class="flex flex-col gap-0.5 min-w-0">
+                    <div class="flex items-center gap-1.5 text-xs sm:text-sm {{ $isZoomNeutral ? 'text-slate-400 dark:text-slate-500' : 'text-blue-500' }} font-medium">
+                        <i class="fas fa-video shrink-0 text-[11px] sm:text-[13px]"></i>
+                        <span>Jadwal Sesi Zoom</span>
+                    </div>
+                    <div class="text-xs sm:text-[15px] font-semibold {{ $isZoomNeutral ? 'text-slate-700 dark:text-slate-200' : 'text-blue-600 dark:text-blue-400' }} truncate pl-3.5 sm:pl-4">
+                        {{ $zoomScheduleText }}
+                    </div>
+                </div>
+            @endif
         </div>
 
         {{-- Footer Aksi (Tombol Detail & Tombol Daftar / Sudah Terdaftar / Disable Menunggu Batch Berikutnya) --}}
         <div class="mt-auto pt-2.5 sm:pt-3.5 border-t border-slate-100 dark:border-slate-700/60 flex flex-col sm:flex-row gap-1.5 sm:gap-2">
             @if ($isEnrolledInThisBimtek)
                 <button type="button" @click="show('{{ $course->id }}')"
-                    class="order-2 sm:order-1 flex-1 py-1.5 sm:py-2 text-xs sm:text-sm font-bold text-center rounded-md sm:rounded-lg transition-colors bg-white text-[#13416B] border border-[#13416B]/30 hover:bg-[#13416B]/5">
+                    class="order-2 sm:order-1 flex-1 py-1.5 sm:py-2 text-xs sm:text-[15px] font-bold text-center rounded-md sm:rounded-lg transition-colors bg-white text-[#13416B] border border-[#13416B]/30 hover:bg-[#13416B]/5">
                     <span class="sm:hidden">Detail</span>
                     <span class="hidden sm:inline">Lihat Detail</span>
                 </button>
                 <a href="{{ route('user.course.my-course.detail', $course->slug) }}"
-                   class="order-1 sm:order-2 flex-1 py-1.5 sm:py-2 text-xs sm:text-sm inline-flex items-center justify-center gap-1.5 font-bold text-center rounded-md sm:rounded-lg transition-colors bg-emerald-600 text-white hover:bg-emerald-700 shadow-xs">
+                   class="order-1 sm:order-2 flex-1 py-1.5 sm:py-2 text-xs sm:text-[15px] inline-flex items-center justify-center gap-1.5 font-bold text-center rounded-md sm:rounded-lg transition-colors bg-emerald-600 text-white hover:bg-emerald-700 shadow-xs">
                     <span>Sudah Terdaftar</span>
                     <i class="fas fa-arrow-up-right-from-square text-[8px] sm:text-[10px]"></i>
                 </a>
             @elseif (!$isRegistrationOpen)
                 {{-- Sedang berlangsung dan setelahnya: Munculkan tombol Lihat Detail saja --}}
                 <button type="button" @click="show('{{ $course->id }}')"
-                    class="w-full py-1.5 sm:py-2 text-xs sm:text-sm font-bold text-center rounded-md sm:rounded-lg transition-colors bg-white text-[#13416B] border border-[#13416B]/30 hover:bg-[#13416B]/5">
+                    class="w-full py-1.5 sm:py-2 text-xs sm:text-[15px] font-bold text-center rounded-md sm:rounded-lg transition-colors bg-white text-[#13416B] border border-[#13416B]/30 hover:bg-[#13416B]/5">
                     <span class="sm:hidden">Detail</span>
                     <span class="hidden sm:inline">Lihat Detail</span>
                 </button>
             @else
                 <button type="button" @click="show('{{ $course->id }}')"
-                    class="order-2 sm:order-1 flex-1 py-1.5 sm:py-2 text-xs sm:text-sm font-bold text-center rounded-md sm:rounded-lg transition-colors bg-white text-[#13416B] border border-[#13416B]/30 hover:bg-[#13416B]/5">
+                    class="order-2 sm:order-1 flex-1 py-1.5 sm:py-2 text-xs sm:text-[15px] font-bold text-center rounded-md sm:rounded-lg transition-colors bg-white text-[#13416B] border border-[#13416B]/30 hover:bg-[#13416B]/5">
                     <span class="sm:hidden">Detail</span>
                     <span class="hidden sm:inline">Lihat Detail</span>
                 </button>
                 <button type="button" @click="askEnroll('{{ $course->id }}')"
-                    class="order-1 sm:order-2 flex-1 py-1.5 sm:py-2 text-xs sm:text-sm inline-flex items-center justify-center gap-1.5 font-bold text-center rounded-md sm:rounded-lg transition-colors bg-amber-500 text-white border border-amber-500 hover:bg-amber-600 shadow-xs">
+                    class="order-1 sm:order-2 flex-1 py-1.5 sm:py-2 text-xs sm:text-[15px] inline-flex items-center justify-center gap-1.5 font-bold text-center rounded-md sm:rounded-lg transition-colors bg-amber-500 text-white border border-amber-500 hover:bg-amber-600 shadow-xs">
                     <span>Daftar</span>
                     <i class="fas fa-arrow-up-right-from-square text-[8px] sm:text-[10px]"></i>
                 </button>

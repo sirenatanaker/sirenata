@@ -209,7 +209,9 @@
                         'bimtekExecutionType'    => $activeB?->execution_type,
                         'bimtekDates'            => $activeB ? ($activeB->start_date ? $activeB->start_date->format('d M') : '-') . ' s/d ' . ($activeB->end_date ? $activeB->end_date->format('d M Y') : '-') : null,
                         'bimtekTime'             => $activeB?->start_date ? $activeB->start_date->format('H:i') . ' WIB' : '08:00 WIB',
-                        'bimtekQuota'            => $activeB?->quota ?? 0,
+                        'bimtekQuota'            => (int) ($activeB?->quota ?? 0),
+                        'bimtekParticipants'     => (int) ($activeB?->participants_count ?? 0),
+                        'bimtekQuotaPct'         => ($activeB?->quota ?? 0) > 0 ? min(100, (int) round((($activeB?->participants_count ?? 0) / $activeB->quota) * 100)) : 0,
                         'timelineSteps'          => $activeB ? $activeB->timeline_steps : [],
                         'currentTimelinePhase'   => $activeB ? $activeB->current_timeline_phase : null,
                         'isEnrolledInCourse'     => $isEnrolledInCourse,
@@ -408,7 +410,21 @@
                                                                     <li class="contents">
                                                                         <ul class="space-y-1.5 list-disc">
                                                                             <li>Pendaftaran peserta dibuka pada <span class="font-semibold text-slate-800" x-text="step.date_range"></span>.</li>
-                                                                            <li><span x-text="selected.bimtekQuota > 0 ? 'Kuota pelatihan dibatasi untuk ' + selected.bimtekQuota + ' peserta.' : 'Terbuka bagi seluruh peserta tanpa batasan kuota.'"></span></li>
+                                                                            <li>
+                                                                                <template x-if="selected.isRegistrationOpen">
+                                                                                    <span>
+                                                                                        <template x-if="selected.bimtekQuota > 0">
+                                                                                            <span>Saat ini sudah <strong class="font-bold text-slate-800" x-text="selected.bimtekParticipants"></strong> dari kuota <strong class="font-bold text-slate-800" x-text="selected.bimtekQuota"></strong> peserta yang bergabung.</span>
+                                                                                        </template>
+                                                                                        <template x-if="selected.bimtekQuota <= 0">
+                                                                                            <span>Terbuka tanpa batasan kuota (<strong class="font-bold text-slate-800" x-text="selected.bimtekParticipants"></strong> peserta telah bergabung).</span>
+                                                                                        </template>
+                                                                                    </span>
+                                                                                </template>
+                                                                                <template x-if="!selected.isRegistrationOpen">
+                                                                                    <span x-text="selected.bimtekQuota > 0 ? 'Kuota pelatihan dibatasi untuk ' + selected.bimtekQuota + ' peserta.' : 'Terbuka bagi seluruh peserta tanpa batasan kuota.'"></span>
+                                                                                </template>
+                                                                            </li>
                                                                         </ul>
                                                                     </li>
                                                                 </template>
@@ -431,6 +447,23 @@
                                                                     </li>
                                                                 </template>
                                                             </ul>
+                                                            <template x-if="step.step === 1 && selected.isRegistrationOpen && selected.bimtekQuota > 0">
+                                                                <div class="mt-3 pt-2.5 border-t border-slate-100">
+                                                                    <div class="flex items-center justify-between gap-2 text-xs mb-1.5">
+                                                                        <span class="font-semibold text-slate-600">
+                                                                            Keterisian Kuota (<span x-text="selected.bimtekParticipants + '/' + selected.bimtekQuota + ' Peserta'"></span>)
+                                                                        </span>
+                                                                        <span class="font-bold"
+                                                                              :class="selected.bimtekQuotaPct >= 85 ? 'text-amber-600' : 'text-[#0B5CFF]'"
+                                                                              x-text="selected.bimtekQuotaPct + '%'"></span>
+                                                                    </div>
+                                                                    <div class="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                                                                        <div class="h-full rounded-full transition-all duration-300"
+                                                                             :class="selected.bimtekQuotaPct >= 85 ? 'bg-amber-500' : 'bg-[#0B5CFF]'"
+                                                                             :style="'width: ' + selected.bimtekQuotaPct + '%'"></div>
+                                                                    </div>
+                                                                </div>
+                                                            </template>
                                                         </div>
                                                     </div>
                                                 </template>
@@ -516,23 +549,16 @@
                                 <div class="px-4 sm:px-6 py-3 sm:py-4 border-t border-slate-100 bg-white shrink-0">
                                     {{-- KONDISI 1: SEDANG BERLANGSUNG / MENUNGGU BATCH BERIKUTNYA --}}
                                     <template x-if="selected.isEvent && !selected.isEnrolledInThisBimtek && (!selected.isRegistrationOpen || selected.bimtekStatus !== 'open_registration')">
-                                        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2.5 sm:gap-3">
-                                            <p class="text-sm sm:text-[15px] text-slate-500 font-medium text-center sm:text-left">
-                                                Pendaftaran ditutup (menunggu gelombang berikutnya).
-                                            </p>
-
-                                            {{-- Tombol Aksi --}}
-                                            <div class="flex items-center gap-2 justify-end w-full sm:w-auto shrink-0">
-                                                <button type="button" @click="close()"
-                                                        class="flex-1 sm:flex-none px-4 py-2 sm:py-2.5 text-sm sm:text-[15px] font-semibold rounded-xl text-slate-600 bg-white border border-slate-200 hover:bg-slate-50 transition-colors">
-                                                    Tutup
-                                                </button>
-                                                <button type="button" disabled
-                                                        class="flex-1 sm:flex-none px-4 py-2 sm:py-2.5 text-sm sm:text-[15px] font-semibold rounded-xl text-slate-400 bg-slate-100 border border-slate-200 cursor-not-allowed inline-flex items-center justify-center gap-1.5 shadow-none">
-                                                    <i class="fas fa-lock text-xs"></i>
-                                                    <span class="truncate">Pendaftaran Ditutup</span>
-                                                </button>
-                                            </div>
+                                        <div class="flex items-center gap-2 justify-end w-full">
+                                            <button type="button" @click="close()"
+                                                    class="flex-1 sm:flex-none px-4 py-2 sm:py-2.5 text-sm sm:text-[15px] font-semibold rounded-xl text-slate-600 bg-white border border-slate-200 hover:bg-slate-50 transition-colors">
+                                                Tutup
+                                            </button>
+                                            <button type="button" disabled
+                                                    class="flex-1 sm:flex-none px-4 py-2 sm:py-2.5 text-sm sm:text-[15px] font-semibold rounded-xl text-slate-400 bg-slate-100 border border-slate-200 cursor-not-allowed inline-flex items-center justify-center gap-1.5 shadow-none">
+                                                <i class="fas fa-lock text-xs"></i>
+                                                <span class="truncate">Pendaftaran Ditutup</span>
+                                            </button>
                                         </div>
                                     </template>
 

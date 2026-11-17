@@ -390,6 +390,7 @@ class CourseService
                 // Penentuan Periode & Jadwal Zoom
                 $periodeLabel = null;
                 $periodeDates = null;
+                $execDates = null;
                 $zoomScheduleText = null;
                 $isRegistrationPhase = false;
                 $isOngoingPhase = false;
@@ -399,11 +400,17 @@ class CourseService
                     $curPhase = $bimtekEvent->current_timeline_phase ?? [];
                     $phaseKey = $curPhase['phase'] ?? 'learning';
 
-                    $isRegistrationPhase = ($phaseKey === 'registration' || $bimtekEvent->status === 'open_registration');
-                    $isOngoingPhase = ($phaseKey === 'learning' || $bimtekEvent->status === 'ongoing');
+                    $isRegistrationPhase = ($phaseKey === 'registration');
+                    $isOngoingPhase = in_array($phaseKey, ['learning', 'assessment'], true);
 
                     if ($tabStatus !== 'finish') {
-                        $isWaitingForStart = ($isRegistrationPhase || ($bimtekEvent->start_date && now()->lessThan($bimtekEvent->start_date)));
+                        $isWaitingForStart = ($phaseKey === 'registration' || ($bimtekEvent->start_date && now()->lessThan($bimtekEvent->start_date)));
+                    }
+
+                    $execStart = $bimtekEvent->start_date;
+                    $execEnd   = $bimtekEvent->end_date;
+                    if ($execStart || $execEnd) {
+                        $execDates = ($execStart ? $execStart->translatedFormat('d M') : '-') . ($execEnd ? ' - ' . $execEnd->translatedFormat('d M Y') : '');
                     }
 
                     if ($phaseKey === 'registration') {
@@ -419,27 +426,23 @@ class CourseService
                     } else {
                         // learning, ongoing, atau completed
                         $periodeLabel = 'Periode Pelaksanaan';
-                        $execStart = $bimtekEvent->start_date;
-                        $execEnd   = $bimtekEvent->end_date;
-                        $periodeDates = ($execStart ? $execStart->translatedFormat('d M') : '-') . ($execEnd ? ' - ' . $execEnd->translatedFormat('d M Y') : '');
+                        $periodeDates = $execDates;
                     }
 
-                    // Tampilkan Jadwal Zoom jika status Bimtek sedang berlangsung
-                    if ($isOngoingPhase) {
-                        if ($bimtekEvent->zoom_scheduled_at) {
-                            $startStr = $bimtekEvent->zoom_scheduled_at->translatedFormat('d M Y, H:i');
-                            $endStr   = $bimtekEvent->zoom_end_at ? $bimtekEvent->zoom_end_at->translatedFormat('H:i') . ' WIB' : 'WIB';
-                            $zoomScheduleText = $startStr . ' - ' . $endStr;
-                        } elseif ($bimtekEvent->zoom_url) {
-                            $zoomScheduleText = 'Sesi Live Zoom Terjadwal';
-                        }
+                    // Siapkan Jadwal Zoom jika event Bimtek memiliki jadwal / tautan Zoom
+                    if ($bimtekEvent->zoom_scheduled_at) {
+                        $startStr = $bimtekEvent->zoom_scheduled_at->translatedFormat('d M Y, H:i');
+                        $endStr   = $bimtekEvent->zoom_end_at ? $bimtekEvent->zoom_end_at->translatedFormat('H:i') . ' WIB' : 'WIB';
+                        $zoomScheduleText = $startStr . ' - ' . $endStr;
+                    } elseif ($bimtekEvent->zoom_url) {
+                        $zoomScheduleText = 'Sesi Live Zoom Terjadwal';
                     }
                 } else {
                     $periodeLabel = 'Akses';
                     $periodeDates = 'Fleksibel (Kapan Saja)';
                 }
 
-                $bimtekDates = $periodeDates;
+                $bimtekDates = $execDates ?? $periodeDates;
 
                 $batchStudentsCount = $bimtekEvent
                     ? DB::table('course_student')->where('bimtek_event_id', $bimtekEvent->id)->count()
@@ -453,6 +456,7 @@ class CourseService
                     'has_bimtek'            => (bool) $bimtekEvent || $course->bimtekEvents()->exists(),
                     'bimtek_event'          => $bimtekEvent,
                     'bimtek_dates'          => $bimtekDates,
+                    'execution_dates'       => $execDates,
                     'periode_label'         => $periodeLabel,
                     'periode_dates'         => $periodeDates,
                     'zoom_schedule_text'    => $zoomScheduleText,

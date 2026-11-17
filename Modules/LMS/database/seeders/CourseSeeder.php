@@ -135,7 +135,7 @@ class CourseSeeder extends Seeder
                 'description' => 'Metodologi identifikasi gap kompetensi dan perencanaan diklat pegawai berbasis kebutuhan riil industri dan standar kompetensi kerja.',
                 'is_enrolled' => false,
                 'bimtek'      => [
-                    'batch_name'            => 'Bimtek AKPK Berbasis SKKNI Batch 1',
+                    'batch_name'            => 'Bimtek AKPK Berbasis SKKNI Gelombang 1',
                     'batch_code'            => 'AKPK-B1-2026',
                     'execution_type'        => 'online',
                     'status'                => 'open_registration',
@@ -231,7 +231,7 @@ class CourseSeeder extends Seeder
                 'description' => 'Tinjauan yuridis regulasi ketenagakerjaan terkini, perikatan Perjanjian Kerja Bersama (PKB), dan teknik pencegahan perselisihan industrial.',
                 'is_enrolled' => false,
                 'bimtek'      => [
-                    'batch_name'            => 'Bimtek Mediasi & Penyelesaian Perselisihan Kerja Batch 2',
+                    'batch_name'            => 'Bimtek Mediasi & Penyelesaian Perselisihan Kerja Gelombang 2',
                     'batch_code'            => 'HKM-HI-B2',
                     'execution_type'        => 'online',
                     'status'                => 'open_registration',
@@ -245,7 +245,7 @@ class CourseSeeder extends Seeder
                     'zoom_attendance_code'  => 'HI55',
                     'zoom_scheduled_at'     => now()->addDays(20)->setTime(9, 0),
                     'zoom_end_at'           => now()->addDays(20)->setTime(12, 0),
-                    'quota'                 => 50,
+                    'quota'                 => null,
                     'description'           => 'Teknik mediasi, konsiliasi, dan penyusunan anjuran hubungan industrial sesuai UU Ketenagakerjaan.',
                 ],
             ],
@@ -274,27 +274,78 @@ class CourseSeeder extends Seeder
                 ],
             ],
 
-            // --- 6 Kursus Mandiri / Self-Paced ---
+            // --- 3 Kursus Bimtek Online (Sedang Berlangsung) & 3 Kursus Mandiri / Self-Paced ---
             [
                 'name'        => 'Manajemen Produktivitas Tenaga Kerja Nasional',
                 'category'    => 'Teori',
                 'description' => 'Konsep dan teknik pengukuran efisiensi jam kerja, Total Factor Productivity (TFP), dan strategi peningkatan daya saing SDM berstandar global.',
                 'is_enrolled' => false,
-                'bimtek'      => null,
+                'bimtek'      => [
+                    'batch_name'            => 'Bimtek Pengukuran Produktivitas Nasional Gelombang 1',
+                    'batch_code'            => 'PROD-NAS-2026-I',
+                    'execution_type'        => 'online',
+                    'status'                => 'ongoing',
+                    'start_date'            => now()->subDays(3)->setTime(8, 30),
+                    'end_date'              => now()->addDays(10)->setTime(16, 0),
+                    'registration_start_at' => now()->subDays(12)->setTime(8, 0),
+                    'registration_end_at'   => now()->subDays(4)->setTime(23, 59),
+                    'zoom_url'              => 'https://zoom.us/j/7771112223',
+                    'zoom_meeting_id'       => '777 1112 2233',
+                    'zoom_passcode'         => 'PROD2026',
+                    'zoom_attendance_code'  => 'PROD77',
+                    'zoom_scheduled_at'     => now()->addDays(1)->setTime(9, 0),
+                    'zoom_end_at'           => now()->addDays(1)->setTime(12, 0),
+                    'quota'                 => 50,
+                    'description'           => 'Bimbingan teknis penghitungan Total Factor Productivity sektor industri daerah.',
+                ],
             ],
             [
                 'name'        => 'Pengelolaan Big Data Ketenagakerjaan',
                 'category'    => 'Perkiraan',
                 'description' => 'Pengolahan dan pemodelan data analitik pasar kerja skala besar untuk perumusan intervensi kebijakan ketenagakerjaan berbasis bukti.',
                 'is_enrolled' => false,
-                'bimtek'      => null,
+                'bimtek'      => [
+                    'batch_name'            => 'Bimtek Analitik Big Data Ketenagakerjaan Gelombang 1',
+                    'batch_code'            => 'BIGDATA-2026-I',
+                    'execution_type'        => 'online',
+                    'status'                => 'ongoing',
+                    'start_date'            => now()->subDays(2)->setTime(8, 30),
+                    'end_date'              => now()->addDays(12)->setTime(16, 0),
+                    'registration_start_at' => now()->subDays(10)->setTime(8, 0),
+                    'registration_end_at'   => now()->subDays(3)->setTime(23, 59),
+                    'zoom_url'              => 'https://zoom.us/j/8882223334',
+                    'zoom_meeting_id'       => '888 2223 3344',
+                    'zoom_passcode'         => 'BIGDATA26',
+                    'zoom_attendance_code'  => 'BDATA88',
+                    'zoom_scheduled_at'     => now()->addDays(2)->setTime(9, 0),
+                    'zoom_end_at'           => now()->addDays(2)->setTime(12, 0),
+                    'quota'                 => 60,
+                    'description'           => 'Implementasi analitik big data untuk pemetaan kebutuhan tenaga kerja daerah.',
+                ],
             ],
             [
                 'name'        => 'Teknik Investigasi Kecelakaan Kerja & Ergonomi Industri',
                 'category'    => 'Praktik',
                 'description' => 'Prosedur investigasi akar penyebab (root cause analysis) insiden kerja serta tata cara rekayasa ergonomi stasiun kerja ramah operator.',
                 'is_enrolled' => false,
-                'bimtek'      => null,
+                'bimtek'      => [
+                    'batch_name'            => 'Bimtek Investigasi Kecelakaan Kerja & Ergonomi Gelombang 1',
+                    'batch_code'            => 'IKK-ERGO-2026-I',
+                    'execution_type'        => 'online',
+                    'status'                => 'ongoing',
+                    'start_date'            => now()->subDays(1)->setTime(8, 30),
+                    'end_date'              => now()->addDays(14)->setTime(16, 0),
+                    'registration_start_at' => now()->subDays(9)->setTime(8, 0),
+                    'registration_end_at'   => now()->subDays(2)->setTime(23, 59),
+                    'zoom_url'              => 'https://zoom.us/j/9993334445',
+                    'zoom_meeting_id'       => '999 3334 4455',
+                    'zoom_passcode'         => 'ERGO2026',
+                    'zoom_attendance_code'  => 'ERGO99',
+                    'zoom_scheduled_at'     => now()->addDays(3)->setTime(9, 0),
+                    'zoom_end_at'           => now()->addDays(3)->setTime(12, 0),
+                    'quota'                 => 45,
+                    'description'           => 'Pendalaman investigasi insiden kerja menggunakan metode root cause analysis.',
+                ],
             ],
             [
                 'name'        => 'Metodologi Analisis Pasar Kerja & Proyeksi Pengangguran',
@@ -392,6 +443,36 @@ class CourseSeeder extends Seeder
                 ],
             ]);
         }
+
+        // Akun demo utama yang harus tetap belum terdaftar pada kursus katalog
+        $primaryDemoEmails = [
+            'pusat@gmail.com',
+            'pusat2@gmail.com',
+            'pusat3@gmail.com',
+            'user.pusat@gmail.com',
+            'user.jabar@gmail.com',
+            'user.sumut@gmail.com',
+            'user.kotabandung@gmail.com',
+            'user.kabbandung@gmail.com',
+            'user.kotamedan@gmail.com',
+            'user.dki-jakarta@gmail.com',
+            'user.jawa-barat@gmail.com',
+            'user.sumatera-utara@gmail.com',
+        ];
+        $peerUsers = $users->reject(fn($u) => in_array($u->email, $primaryDemoEmails, true))->values();
+
+        // Simulasi jumlah peserta realistis untuk gelombang Bimtek di katalog
+        $catalogPeerTargets = [
+            'AKPK-B1-2026'    => 36, // kuota 50
+            'RTKD-2026-I'     => 35, // kuota 40 (>= 85%)
+            'SMK3-A3-2026'    => 42, // kuota 60
+            'SIPKERJA-2026'   => 18, // kuota 45
+            'HKM-HI-B2'       => 27, // kuota null (tanpa batas kuota)
+            'PPMI-LTSA-2026'  => 31, // kuota 35 (>= 85%)
+            'PROD-NAS-2026-I' => 38, // ongoing
+            'BIGDATA-2026-I'  => 44, // ongoing
+            'IKK-ERGO-2026-I' => 29, // ongoing
+        ];
 
         foreach ($courseData as $item) {
             $course = Course::where('slug', Str::slug($item['name']))->with(['sections.contents'])->first();
@@ -500,7 +581,7 @@ class CourseSeeder extends Seeder
                 }
             } else {
                 // =============================================================
-                // KATALOG (PASTIKAN TIDAK TERDAFTAR)
+                // KATALOG (PASTIKAN AKUN DEMO BELUM TERDAFTAR, ISI SIMULASI PESERTA LAIN)
                 // =============================================================
                 DB::table('course_student')
                     ->where('course_id', $course->id)
@@ -512,6 +593,32 @@ class CourseSeeder extends Seeder
 
                 if (!empty($allPostTestIds)) {
                     DB::table('post_test_results')->whereIn('post_test_id', $allPostTestIds)->delete();
+                }
+
+                if ($bimtekEventId && $peerUsers->isNotEmpty()) {
+                    $batchCode = $item['bimtek']['batch_code'] ?? '';
+                    $targetPeers = $catalogPeerTargets[$batchCode] ?? 0;
+                    $isOngoingEvent = ($item['bimtek']['status'] ?? '') === 'ongoing';
+
+                    if ($targetPeers > 0) {
+                        $selectedPeers = $peerUsers->shuffle()->take(min($targetPeers, $peerUsers->count()));
+                        $nowTs = now();
+                        $pivotRows = $selectedPeers->map(fn($peer) => [
+                            'course_id'              => $course->id,
+                            'user_id'                => $peer->id,
+                            'bimtek_event_id'        => $bimtekEventId,
+                            'status'                 => $isOngoingEvent ? 'in_progress' : 'enrolled',
+                            'progress'               => $isOngoingEvent ? 15 : 0,
+                            'zoom_attended'          => 0,
+                            'cert_submission_status' => 'belum_diajukan',
+                            'created_at'             => $nowTs->copy()->subDays(rand(1, 3)),
+                            'updated_at'             => $nowTs,
+                        ])->all();
+
+                        if (!empty($pivotRows)) {
+                            DB::table('course_student')->insert($pivotRows);
+                        }
+                    }
                 }
             }
         }
