@@ -200,7 +200,7 @@
                     <div class="space-y-2 w-[95%] max-w-[95%] sm:w-full sm:max-w-none">
                         @if ($isBimtekEvent && $activeBimtek?->batch_name)
                             <div class="flex items-center gap-2 text-xs">
-                                <span class="font-semibold text-slate-600 text-xs tracking-wide">{{ $activeBimtek->batch_name }}</span>
+                                <span class="font-semibold text-slate-600 text-xs tracking-wide">{{ preg_replace('/\bbatch\b/i', 'Gelombang', $activeBimtek->batch_name) }}</span>
                             </div>
                         @endif
 

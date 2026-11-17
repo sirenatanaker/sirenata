@@ -300,7 +300,7 @@ class BimtekEvent extends Model
             ],
             [
                 'step'        => 3,
-                'title'       => 'Evaluasi Akhir & Sertifikasi PPSDM',
+                'title'       => 'Evaluasi Akhir & Sertifikasi',
                 'subtitle'    => 'Pengerjaan evaluasi akhir dan proses penerbitan e-Sertifikat resmi',
                 'icon'        => 'fa-award',
                 'start_date'  => $evalStart ? $evalStart->translatedFormat('d M Y') : '-',
