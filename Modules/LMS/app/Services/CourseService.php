@@ -1406,12 +1406,27 @@ class CourseService
     public function getCatalogCourses(int $perPage = 12, ?string $search = null, ?array $categoryIds = null, ?string $programType = null)
     {
         $excludedCourseIds = $this->getExcludedCatalogCourseIds();
+        $waveStatus = $programType ?? 'all';
+        $now = now();
+
+        $waveFilter = match ($waveStatus) {
+            'open_registration' => fn($q) => $q->where('status', 'open_registration')
+                ->where(fn($sub) => $sub->whereNull('start_date')->orWhere('start_date', '>', $now)),
+            'ongoing' => fn($q) => $q->where(fn($sub) => $sub->where('status', 'ongoing')
+                ->orWhere(fn($sub2) => $sub2->where('status', 'open_registration')
+                    ->whereNotNull('start_date')
+                    ->where('start_date', '<=', $now))),
+            default => fn($q) => $q->whereIn('status', ['open_registration', 'ongoing']),
+        };
 
         $query = Course::with([
             'category',
-            'bimtekEvents' => fn($q) => $q->whereIn('status', ['open_registration', 'ongoing'])
+            'bimtekEvents' => fn($q) => $waveFilter($q)
                 ->withCount('participants')
-                ->orderByRaw("FIELD(status, 'open_registration', 'ongoing')")
+                ->orderByRaw(
+                    "CASE WHEN status = 'open_registration' AND (start_date IS NULL OR start_date > ?) THEN 0 ELSE 1 END ASC",
+                    [$now]
+                )
                 ->latest(),
             'sections.contents' => fn($q) => $q
                 ->select('id', 'course_section_id', 'name', 'position', 'video', 'document')
@@ -1426,8 +1441,19 @@ class CourseService
             $query->whereNotIn('id', $excludedCourseIds);
         }
 
-        // Katalog hanya menampilkan kursus berbasis event dengan Bimtek Event aktif (open_registration atau ongoing)
-        $query->whereHas('bimtekEvents', fn($b) => $b->whereIn('status', ['open_registration', 'ongoing']));
+        // Katalog hanya menampilkan kursus berbasis event dengan Bimtek Event sesuai filter status gelombang
+        $query->whereHas('bimtekEvents', $waveFilter);
+
+        // Prioritaskan program yang pendaftarannya sedang dibuka agar tampil paling atas
+        $query->orderByRaw(
+            "EXISTS (
+                SELECT 1 FROM bimtek_events
+                WHERE bimtek_events.course_id = courses.id
+                  AND bimtek_events.status = 'open_registration'
+                  AND (bimtek_events.start_date IS NULL OR bimtek_events.start_date > ?)
+            ) DESC",
+            [$now]
+        );
 
         return $query->latest()
             ->paginate($perPage)

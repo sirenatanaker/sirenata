@@ -54,42 +54,62 @@
 
        
         <div>
-            {{-- HEADER DAFTAR KURSUS & FILTER --}}
+            {{-- HEADER DAFTAR KURSUS & FILTER STATUS GELOMBANG --}}
+            @php
+                $activeWaveStatus = $waveStatus ?? request('status', 'all');
+                if (!in_array($activeWaveStatus, ['all', 'open_registration', 'ongoing'], true)) {
+                    $activeWaveStatus = 'all';
+                }
+                $statusOptions = [
+                    'all' => [
+                        'label' => 'Semua Gelombang',
+                        'url'   => route('user.catalog.index', request()->except(['page', 'status', 'type', 'categories'])),
+                    ],
+                    'open_registration' => [
+                        'label' => 'Pendaftaran Buka',
+                        'url'   => route('user.catalog.index', array_merge(request()->except(['page', 'type', 'categories']), ['status' => 'open_registration'])),
+                    ],
+                    'ongoing' => [
+                        'label' => 'Sedang Berlangsung',
+                        'url'   => route('user.catalog.index', array_merge(request()->except(['page', 'type', 'categories']), ['status' => 'ongoing'])),
+                    ],
+                ];
+                $isStatusFiltered = $activeWaveStatus !== 'all';
+            @endphp
+
             <div class="mb-5 sm:mb-6 border-b border-slate-200 pb-3.5 sm:pb-4">
-                
                 {{-- Baris Atas: Judul & Tombol Filter (Sejajar di semua resolusi) --}}
-                <div class="flex flex-row items-center justify-between gap-3 sm:gap-4 {{ !empty($selectedCategories) ? 'mb-2.5 sm:mb-4' : 'mb-0' }}">
-                    
-                    {{-- Kiri: Teks (Diperkecil di mobile) --}}
+                <div class="flex flex-row items-center justify-between gap-3 sm:gap-4 {{ $isStatusFiltered ? 'mb-2.5 sm:mb-4' : 'mb-0' }}">
+                    {{-- Kiri: Teks --}}
                     <div class="flex flex-col gap-0.5 sm:gap-1">
                         <h2 class="text-base sm:text-xl font-extrabold text-slate-800 leading-tight">
                             Jelajahi Program Pelatihan
                         </h2>
                         <p class="text-[11px] sm:text-sm font-medium text-slate-500">
-                            Ada <span class="text-[#13416B] font-bold">{{ $courses->total() }}</span> program yang siap dipelajari.
+                            Ada <span class="text-[#13416B] font-bold">{{ $courses->total() }}</span> gelombang pelatihan yang tersedia.
                         </p>
                     </div>
 
                     {{-- Kanan: Tombol Filter & Dropdown (Alpine.js) --}}
                     <div x-data="{ openFilter: false }" class="relative z-30 shrink-0">
-                        <button @click="openFilter = !openFilter" 
-                            class="flex items-center justify-center gap-1.5 sm:gap-2.5 px-3 py-1.5 sm:px-4 sm:py-2.5 bg-white border border-slate-300 rounded-md text-xs sm:text-sm font-semibold text-slate-700 hover:border-[#13416B]/50 hover:text-[#13416B] transition-all"
+                        <button type="button" @click="openFilter = !openFilter"
+                            class="flex items-center justify-center gap-1.5 sm:gap-2.5 px-3 py-1.5 sm:px-4 sm:py-2.5 bg-white border border-slate-300 rounded-md text-xs sm:text-sm font-semibold text-slate-700 hover:border-[#13416B]/50 hover:text-[#13416B] transition-all cursor-pointer"
                             :class="{ 'border-[#13416B] text-[#13416B] ring-2 ring-[#13416B]/10': openFilter }">
-                            
+
                             <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path>
                             </svg>
                             <span>Filter Kursus</span>
-                            
-                            @if(!empty($selectedCategories))
-                                <span class="flex items-center justify-center w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-amber-400 text-[9px] sm:text-[10px] font-bold text-slate-900 ml-1">
-                                    {{ count($selectedCategories) }}
+
+                            @if($isStatusFiltered)
+                                <span class="flex items-center justify-center w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-amber-400 text-[9px] sm:text-2xs font-bold text-slate-900 ml-1">
+                                    1
                                 </span>
                             @endif
                         </button>
 
                         {{-- Dropdown Menu --}}
-                        <div x-show="openFilter" 
+                        <div x-show="openFilter"
                              @click.away="openFilter = false"
                              x-transition:enter="transition ease-out duration-150"
                              x-transition:enter-start="opacity-0 -translate-y-1"
@@ -97,68 +117,44 @@
                              x-transition:leave="transition ease-in duration-100"
                              x-transition:leave-start="opacity-100 translate-y-0"
                              x-transition:leave-end="opacity-0 -translate-y-1"
-                             class="absolute right-0 mt-2 w-[min(92vw,24rem)] bg-white rounded-md shadow-xl border border-slate-200 p-4 sm:p-5"
+                             class="absolute right-0 mt-2 w-[min(92vw,22rem)] bg-white rounded-md shadow-xl border border-slate-200 p-4 sm:p-5"
                              style="display: none;">
-                            
-                            <div class="flex items-center justify-between mb-4">
-                                <h3 class="text-sm font-bold text-slate-800">Kategori Kursus</h3>
-                                @if(!empty($selectedCategories))
-                                    <a href="{{ route('user.catalog.index', ['type' => request('type')]) }}" class="text-[11px] font-bold text-red-500 hover:text-red-700 hover:underline">Reset</a>
+
+                            <div class="flex items-center justify-between mb-3.5">
+                                <h3 class="text-sm font-bold text-slate-800">Status Gelombang</h3>
+                                @if($isStatusFiltered)
+                                    <a href="{{ $statusOptions['all']['url'] }}" class="text-[11px] font-bold text-red-500 hover:text-red-700 hover:underline">Reset</a>
                                 @endif
                             </div>
 
-                            <form action="{{ route('user.catalog.index') }}" method="GET" id="catalogCategoryForm">
-                                @if(request('type'))
-                                    <input type="hidden" name="type" value="{{ request('type') }}">
-                                @endif
-                                <div class="flex flex-wrap gap-2 max-h-72 overflow-y-auto pr-1 custom-scrollbar">
-                                    @forelse($categories as $category)
-                                        <label class="cursor-pointer">
-                                            <input type="checkbox" name="categories[]" value="{{ $category->id }}"
-                                                class="peer sr-only"
-                                                onchange="document.getElementById('catalogCategoryForm').submit();"
-                                                {{ in_array($category->id, $selectedCategories) ? 'checked' : '' }}>
-                                            <span class="inline-flex items-center gap-1.5 pl-3 pr-1.5 py-1 rounded-full border border-slate-200 bg-white text-[11px] sm:text-xs font-semibold text-slate-600 transition-all
-                                                         hover:border-[#13416B]/40 hover:bg-slate-50
-                                                         peer-checked:border-[#13416B] peer-checked:bg-[#13416B] peer-checked:text-white
-                                                         peer-checked:[&>span]:bg-white/20 peer-checked:[&>span]:text-white peer-checked:[&>span]:border-transparent
-                                                         peer-focus-visible:ring-2 peer-focus-visible:ring-[#13416B]/30">
-                                                {{ $category->name }}
-                                                <span class="inline-flex items-center justify-center min-w-[1.25rem] h-5 px-1.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-500 border border-slate-200">
-                                                    {{ $category->courses_count }}
-                                                </span>
-                                            </span>
-                                        </label>
-                                    @empty
-                                        <p class="text-xs text-slate-400 italic px-2">Tidak ada kategori tersedia.</p>
-                                    @endforelse
-                                </div>
-                            </form>
+                            <div class="flex flex-wrap gap-2">
+                                @foreach ($statusOptions as $key => $opt)
+                                    <a href="{{ $opt['url'] }}"
+                                       class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-[11px] sm:text-xs font-semibold transition-all {{ $activeWaveStatus === $key ? 'border-[#13416B] bg-[#13416B] text-white shadow-2xs' : 'border-slate-200 bg-white text-slate-600 hover:border-[#13416B]/40 hover:bg-slate-50' }}">
+                                        <span>{{ $opt['label'] }}</span>
+                                    </a>
+                                @endforeach
+                            </div>
                         </div>
                     </div>
                 </div>
 
-
-
-                {{-- Chip Kategori Aktif --}}
-                @if(!empty($selectedCategories))
+                {{-- Chip Status Aktif --}}
+                @if($isStatusFiltered)
                     <div class="flex flex-wrap items-center gap-2 mt-3 pt-3 border-t border-slate-100">
-                        <span class="text-xs text-slate-400 font-medium">Filter Kategori:</span>
-                        @foreach($categories->whereIn('id', $selectedCategories) as $active)
-                            <a href="{{ route('user.catalog.index', array_merge(request()->except(['page']), ['categories' => array_values(array_diff($selectedCategories, [$active->id]))])) }}"
-                               class="inline-flex items-center gap-1.5 pl-2.5 pr-1.5 py-1 rounded-lg bg-[#13416B]/5 border border-[#13416B]/20 text-[11px] sm:text-xs font-semibold text-[#13416B] hover:bg-[#13416B]/10 transition-colors">
-                                {{ $active->name }}
-                                <svg class="w-3 h-3 text-slate-400 hover:text-red-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12" />
-                                </svg>
-                            </a>
-                        @endforeach
-                        <a href="{{ route('user.catalog.index', request()->except(['page', 'categories'])) }}" class="text-[11px] sm:text-xs font-semibold text-slate-400 hover:text-red-500 underline underline-offset-2 transition-colors ml-1">
+                        <span class="text-xs text-slate-400 font-medium">Filter Status:</span>
+                        <a href="{{ $statusOptions['all']['url'] }}"
+                           class="inline-flex items-center gap-1.5 pl-2.5 pr-1.5 py-1 rounded-lg bg-[#13416B]/5 border border-[#13416B]/20 text-[11px] sm:text-xs font-semibold text-[#13416B] hover:bg-[#13416B]/10 transition-colors">
+                            {{ $statusOptions[$activeWaveStatus]['label'] }}
+                            <svg class="w-3 h-3 text-slate-400 hover:text-red-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </a>
+                        <a href="{{ $statusOptions['all']['url'] }}" class="text-[11px] sm:text-xs font-semibold text-slate-400 hover:text-red-500 underline underline-offset-2 transition-colors ml-1">
                             Hapus filter
                         </a>
                     </div>
                 @endif
-                
             </div>
 
             {{-- ========================================== --}}
@@ -297,10 +293,10 @@
                         <div class="w-16 h-16 bg-[#13416B]/5 rounded-full flex items-center justify-center mx-auto mb-4 border border-[#13416B]/10 text-[#13416B]/40">
                             <i class="fas fa-box-open text-2xl"></i>
                         </div>
-                        <h3 class="text-base font-bold text-slate-800 mb-1">Belum ada program di kategori ini</h3>
-                        <p class="text-sm text-slate-500 max-w-sm mb-4">Kamu sudah terdaftar di semua program yang tersedia, atau coba ubah filter kategori/tipe untuk melihat pilihan lain.</p>
-                        @if(!empty($selectedCategories) || request('type'))
-                            <a href="{{ route('user.catalog.index') }}" class="text-xs font-bold text-[#13416B] hover:underline">Tampilkan semua program</a>
+                        <h3 class="text-base font-bold text-slate-800 mb-1">Belum ada gelombang pelatihan yang sesuai</h3>
+                        <p class="text-sm text-slate-500 max-w-sm mb-4">Kamu sudah terdaftar di seluruh gelombang yang tersedia, atau coba pilih status gelombang lain.</p>
+                        @if(($waveStatus ?? request('status', 'all')) !== 'all' || request('search'))
+                            <a href="{{ route('user.catalog.index') }}" class="text-xs font-bold text-[#13416B] hover:underline">Tampilkan semua gelombang</a>
                         @endif
                     </div>
                 @endif

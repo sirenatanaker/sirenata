@@ -21,11 +21,12 @@ class CatalogController extends Controller
     {
         $search = $request->get('search');
         $selectedCategories = $request->get('categories', []);
-        $programType = $request->get('type', 'all');
+        $waveStatus = $request->get('status', $request->get('type', 'all'));
+        $programType = $waveStatus;
 
         $excludedCourseIds = $this->courseService->getExcludedCatalogCourseIds();
         $enrolledCourseIds = $this->courseService->getEnrolledCourseIds();
-        $courses = $this->courseService->getCatalogCourses(12, $search, $selectedCategories, $programType);
+        $courses = $this->courseService->getCatalogCourses(12, $search, $selectedCategories, $waveStatus);
         $categories = $this->categoryService->getCategoriesForCatalog($excludedCourseIds);
 
         // Ambil ID Bimtek Event yang sudah diikuti oleh user yang sedang login
@@ -46,7 +47,8 @@ class CatalogController extends Controller
             'search',
             'categories',
             'selectedCategories',
-            'programType'
+            'programType',
+            'waveStatus'
         ));
     }
 
