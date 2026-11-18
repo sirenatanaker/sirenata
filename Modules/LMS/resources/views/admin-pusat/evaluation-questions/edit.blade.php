@@ -4,7 +4,7 @@
         {{-- Navigasi Kembali --}}
         <div>
             <a href="{{ route('admin-pusat.management-course.evaluation-questions.index') }}"
-               class="inline-flex items-center gap-2 text-xs sm:text-sm font-semibold text-slate-500 hover:text-[#13416B] transition-colors">
+               class="inline-flex items-center gap-2 text-sm sm:text-[15px] font-semibold text-slate-500 hover:text-[#13416B] transition-colors">
                 <i class="fas fa-arrow-left"></i>
                 <span>Kembali ke Daftar Kuesioner</span>
             </a>
@@ -13,8 +13,8 @@
         {{-- Form Card --}}
         <div class="bg-white rounded-md border border-slate-200 shadow-2xs overflow-hidden">
             <div class="p-5 sm:p-6 border-b border-slate-100 bg-[#13416B] text-white">
-                <h2 class="text-base sm:text-lg font-bold">Edit Instrumen Pertanyaan Kuesioner</h2>
-                <p class="text-xs text-slate-200 mt-1">
+                <h2 class="text-lg sm:text-xl font-bold">Edit Instrumen Pertanyaan Kuesioner</h2>
+                <p class="text-sm sm:text-[15px] text-slate-200 mt-1">
                     Sesuaikan redaksi pertanyaan, urutan tampil, atau tipe penilaian kuesioner evaluasi.
                 </p>
             </div>
@@ -29,45 +29,45 @@
 
                 {{-- 1. Teks Pertanyaan --}}
                 <div>
-                    <label for="question" class="block text-xs font-bold text-slate-700 mb-1">
+                    <label for="question" class="block text-xs sm:text-sm font-bold text-slate-700 mb-1">
                         Teks Pertanyaan <span class="text-rose-500">*</span>
                     </label>
                     <textarea id="question" name="question" rows="2" required
-                              class="w-full px-3.5 py-2.5 rounded-md border border-slate-300 text-xs sm:text-sm focus:border-[#13416B] focus:ring-1 focus:ring-[#13416B] outline-none transition-colors">{{ old('question', $question->question) }}</textarea>
+                              class="w-full px-3.5 py-2.5 rounded-md border border-slate-300 text-sm sm:text-[15px] focus:border-[#13416B] focus:ring-1 focus:ring-[#13416B] outline-none transition-colors">{{ old('question', $question->question) }}</textarea>
                     @error('question')
-                        <p class="text-xs text-rose-500 mt-1">{{ $message }}</p>
+                        <p class="text-xs sm:text-sm text-rose-500 mt-1">{{ $message }}</p>
                     @enderror
                 </div>
 
                 {{-- 2. Petunjuk Pengisian (Opsional) & Nomor Urut --}}
                 <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
                     <div class="sm:col-span-3">
-                        <label for="description" class="block text-xs font-bold text-slate-700 mb-1">
+                        <label for="description" class="block text-xs sm:text-sm font-bold text-slate-700 mb-1">
                             Petunjuk / Penjelasan Tambahan (Opsional)
                         </label>
                         <input type="text" id="description" name="description" value="{{ old('description', $question->description) }}"
                                placeholder="Misal: Berikan penilaian terhadap kedalaman dan penguasaan materi narasumber..."
-                               class="w-full px-3.5 py-2.5 rounded-md border border-slate-300 text-xs sm:text-sm focus:border-[#13416B] focus:ring-1 focus:ring-[#13416B] outline-none transition-colors">
+                               class="w-full px-3.5 py-2.5 rounded-md border border-slate-300 text-sm sm:text-[15px] focus:border-[#13416B] focus:ring-1 focus:ring-[#13416B] outline-none transition-colors">
                         @error('description')
-                            <p class="text-xs text-rose-500 mt-1">{{ $message }}</p>
+                            <p class="text-xs sm:text-sm text-rose-500 mt-1">{{ $message }}</p>
                         @enderror
                     </div>
 
                     <div>
-                        <label for="order" class="block text-xs font-bold text-slate-700 mb-1">
+                        <label for="order" class="block text-xs sm:text-sm font-bold text-slate-700 mb-1">
                             Nomor Urut <span class="text-rose-500">*</span>
                         </label>
                         <input type="number" id="order" name="order" min="1" value="{{ old('order', $question->order) }}" required
-                               class="w-full px-3.5 py-2.5 rounded-md border border-slate-300 text-xs sm:text-sm focus:border-[#13416B] focus:ring-1 focus:ring-[#13416B] outline-none transition-colors">
+                               class="w-full px-3.5 py-2.5 rounded-md border border-slate-300 text-sm sm:text-[15px] focus:border-[#13416B] focus:ring-1 focus:ring-[#13416B] outline-none transition-colors">
                         @error('order')
-                            <p class="text-xs text-rose-500 mt-1">{{ $message }}</p>
+                            <p class="text-xs sm:text-sm text-rose-500 mt-1">{{ $message }}</p>
                         @enderror
                     </div>
                 </div>
 
                 {{-- 3. Tipe Pertanyaan --}}
                 <div class="space-y-2">
-                    <label class="block text-xs font-bold text-slate-700">
+                    <label class="block text-xs sm:text-sm font-bold text-slate-700">
                         Tipe Format Jawaban <span class="text-rose-500">*</span>
                     </label>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -75,10 +75,10 @@
                                :class="questionType === 'scale' ? 'border-[#13416B] bg-[#13416B]/5 ring-1 ring-[#13416B]' : 'border-slate-200 hover:bg-slate-50'">
                             <input type="radio" name="type" value="scale" x-model="questionType" class="mt-0.5 text-[#13416B]">
                             <div class="space-y-0.5">
-                                <span class="text-xs sm:text-sm font-bold text-slate-800 flex items-center gap-1.5">
+                                <span class="text-sm sm:text-base font-bold text-slate-800 flex items-center gap-1.5">
                                     <i class="fas fa-star text-amber-500 text-xs"></i> Skala Linear (1 - 5)
                                 </span>
-                                <p class="text-[11px] text-slate-500">
+                                <p class="text-xs sm:text-sm text-slate-500">
                                     Peserta memberikan rating bintang / nilai angka 1 sampai 5.
                                 </p>
                             </div>
@@ -88,10 +88,10 @@
                                :class="questionType === 'text' ? 'border-[#13416B] bg-[#13416B]/5 ring-1 ring-[#13416B]' : 'border-slate-200 hover:bg-slate-50'">
                             <input type="radio" name="type" value="text" x-model="questionType" class="mt-0.5 text-[#13416B]">
                             <div class="space-y-0.5">
-                                <span class="text-xs sm:text-sm font-bold text-slate-800 flex items-center gap-1.5">
+                                <span class="text-sm sm:text-base font-bold text-slate-800 flex items-center gap-1.5">
                                     <i class="fas fa-align-left text-purple-600 text-xs"></i> Uraian Teks Terbuka
                                 </span>
-                                <p class="text-[11px] text-slate-500">
+                                <p class="text-xs sm:text-sm text-slate-500">
                                     Peserta menuliskan uraian tanggapan, kritik, atau catatan saran.
                                 </p>
                             </div>
@@ -101,23 +101,23 @@
 
                 {{-- Label Skala (Hanya muncul jika tipe 'scale') --}}
                 <div x-show="questionType === 'scale'" x-cloak class="p-4 rounded-md bg-slate-50 border border-slate-200 space-y-3">
-                    <span class="text-xs font-bold text-slate-700 block">Label Ujung Skala Penilaian:</span>
+                    <span class="text-xs sm:text-sm font-bold text-slate-700 block">Label Ujung Skala Penilaian:</span>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
-                            <label for="min_label" class="block text-[11px] font-semibold text-slate-600 mb-1">
+                            <label for="min_label" class="block text-xs sm:text-sm font-semibold text-slate-600 mb-1">
                                 Label Nilai 1 (Skor Terendah)
                             </label>
                             <input type="text" id="min_label" name="min_label" value="{{ old('min_label', $question->min_label ?? 'Sangat Kurang') }}"
                                    placeholder="Misal: Sangat Kurang / Tidak Puas"
-                                   class="w-full px-3 py-2 rounded-md border border-slate-300 text-xs sm:text-sm bg-white focus:border-[#13416B] focus:ring-1 focus:ring-[#13416B] outline-none">
+                                   class="w-full px-3 py-2 rounded-md border border-slate-300 text-sm sm:text-[15px] bg-white focus:border-[#13416B] focus:ring-1 focus:ring-[#13416B] outline-none">
                         </div>
                         <div>
-                            <label for="max_label" class="block text-[11px] font-semibold text-slate-600 mb-1">
+                            <label for="max_label" class="block text-xs sm:text-sm font-semibold text-slate-600 mb-1">
                                 Label Nilai 5 (Skor Tertinggi)
                             </label>
                             <input type="text" id="max_label" name="max_label" value="{{ old('max_label', $question->max_label ?? 'Sangat Baik') }}"
                                    placeholder="Misal: Sangat Baik / Sangat Puas"
-                                   class="w-full px-3 py-2 rounded-md border border-slate-300 text-xs sm:text-sm bg-white focus:border-[#13416B] focus:ring-1 focus:ring-[#13416B] outline-none">
+                                   class="w-full px-3 py-2 rounded-md border border-slate-300 text-sm sm:text-[15px] bg-white focus:border-[#13416B] focus:ring-1 focus:ring-[#13416B] outline-none">
                         </div>
                     </div>
                 </div>
@@ -127,24 +127,24 @@
                     <label class="inline-flex items-center gap-2 cursor-pointer">
                         <input type="checkbox" name="is_required" value="1" @checked(old('is_required', $question->is_required))
                                class="rounded border-slate-300 text-[#13416B] focus:ring-[#13416B]">
-                        <span class="text-xs sm:text-sm font-bold text-slate-700">Wajib Diisi oleh Peserta</span>
+                        <span class="text-sm sm:text-[15px] font-bold text-slate-700">Wajib Diisi oleh Peserta</span>
                     </label>
 
                     <label class="inline-flex items-center gap-2 cursor-pointer">
                         <input type="checkbox" name="is_active" value="1" @checked(old('is_active', $question->is_active))
                                class="rounded border-slate-300 text-[#13416B] focus:ring-[#13416B]">
-                        <span class="text-xs sm:text-sm font-bold text-slate-700">Aktifkan Pertanyaan</span>
+                        <span class="text-sm sm:text-[15px] font-bold text-slate-700">Aktifkan Pertanyaan</span>
                     </label>
                 </div>
 
                 {{-- Tombol Aksi --}}
                 <div class="flex items-center justify-end gap-3 pt-4 border-t border-slate-100">
                     <a href="{{ route('admin-pusat.management-course.evaluation-questions.index') }}"
-                       class="px-5 py-2.5 rounded-md text-xs sm:text-sm font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-colors">
+                       class="px-5 py-2.5 rounded-md text-sm sm:text-[15px] font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-colors">
                         Batal
                     </a>
                     <button type="submit"
-                            class="px-6 py-2.5 rounded-md text-xs sm:text-sm font-bold text-white bg-[#13416B] hover:bg-[#0f3354] transition-colors shadow-2xs inline-flex items-center gap-2">
+                            class="px-6 py-2.5 rounded-md text-sm sm:text-[15px] font-bold text-white bg-[#13416B] hover:bg-[#0f3354] transition-colors shadow-2xs inline-flex items-center gap-2">
                         <i class="fas fa-save text-xs"></i>
                         <span>Perbarui Pertanyaan</span>
                     </button>
