@@ -9,7 +9,7 @@
 
             <x-slot name="actions">
                 <a href="{{ route('admin-pusat.management-course.bimtek-events.create') }}"
-                   class="inline-flex items-center gap-1.5 px-4 py-2 text-xs sm:text-sm font-bold text-white bg-[#13416B] hover:bg-[#0e2c48] rounded-lg transition-colors shadow-2xs">
+                   class="inline-flex items-center gap-1.5 px-4 py-2 text-sm sm:text-[15px] font-bold text-white bg-[#13416B] hover:bg-[#0e2c48] rounded-lg transition-colors shadow-2xs">
                     <i class="fas fa-plus text-xs"></i>
                     <span>Buka Gelombang Baru</span>
                 </a>
@@ -18,8 +18,8 @@
             <x-slot name="filter_inputs">
                 {{-- Status --}}
                 <div class="w-full sm:w-48">
-                    <label class="block text-xs font-medium text-slate-500 mb-1">Status Pelaksanaan</label>
-                    <select name="status" class="w-full px-3 py-2 rounded-lg border border-slate-300 text-xs sm:text-sm">
+                    <label class="block text-xs sm:text-sm font-medium text-slate-500 mb-1">Status Pelaksanaan</label>
+                    <select name="status" class="w-full px-3 py-2 rounded-lg border border-slate-300 text-sm sm:text-[15px]">
                         <option value="">Semua Status</option>
                         <option value="draft" @selected(request('status') === 'draft')>Draft</option>
                         <option value="open_registration" @selected(request('status') === 'open_registration')>Pendaftaran Buka</option>
@@ -30,12 +30,12 @@
 
                 {{-- Cari --}}
                 <div class="flex-1 min-w-[200px]">
-                    <label class="block text-xs font-medium text-slate-500 mb-1">Cari Bimtek / Kursus</label>
+                    <label class="block text-xs sm:text-sm font-medium text-slate-500 mb-1">Cari Bimtek / Kursus</label>
                     <div class="relative">
-                        <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+                        <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs sm:text-sm"></i>
                         <input type="text" name="search" value="{{ request('search') }}"
                                placeholder="Cari nama gelombang atau kursus..."
-                               class="w-full pl-9 pr-3 py-2 rounded-lg border border-slate-300 text-xs sm:text-sm">
+                               class="w-full pl-9 pr-3 py-2 rounded-lg border border-slate-300 text-sm sm:text-[15px]">
                     </div>
                 </div>
             </x-slot>
@@ -43,7 +43,7 @@
             <div class="overflow-x-auto">
                 <table class="w-full text-left border-collapse">
                     <thead>
-                        <tr class="bg-slate-50 border-b border-slate-200 text-[11px] font-bold text-slate-600 uppercase tracking-wider">
+                        <tr class="bg-slate-50 border-b border-slate-200 text-xs sm:text-[13px] font-bold text-slate-600 uppercase tracking-wider">
                             <th class="py-3 px-3.5 w-12 text-center">No.</th>
                             <th class="py-3 px-3.5 min-w-[220px]">Gelombang & Kode</th>
                             <th class="py-3 px-3.5 min-w-[200px]">Master Kursus</th>
@@ -53,19 +53,19 @@
                             <th class="py-3 px-3.5 w-28 text-center">Aksi</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-slate-100 text-xs sm:text-sm">
+                    <tbody class="divide-y divide-slate-100 text-sm sm:text-[15px]">
                         @forelse ($events as $index => $item)
                             <tr class="hover:bg-slate-50/70 transition-colors">
-                                <td class="py-3 px-3.5 text-center text-xs font-semibold text-slate-400">
+                                <td class="py-3 px-3.5 text-center text-xs sm:text-sm font-semibold text-slate-400">
                                     {{ $events->firstItem() + $index }}
                                 </td>
                                 <td class="py-3 px-3.5">
                                     <a href="{{ route('admin-pusat.management-course.bimtek-events.show', $item->id) }}"
-                                       class="font-bold text-slate-900 hover:text-[#13416B] transition-colors line-clamp-2 leading-snug"
+                                       class="text-sm sm:text-base font-bold text-slate-900 hover:text-[#13416B] transition-colors line-clamp-2 leading-snug"
                                        title="{{ $item->batch_name }}">
                                         {{ $item->batch_name }}
                                     </a>
-                                    <span class="inline-block mt-0.5 text-[11px] font-mono font-medium text-slate-400">
+                                    <span class="inline-block mt-0.5 text-xs sm:text-[13px] font-mono font-medium text-slate-400">
                                         {{ $item->batch_code }}
                                     </span>
                                 </td>
@@ -75,15 +75,15 @@
                                     </p>
                                 </td>
                                 <td class="py-3 px-3.5">
-                                    <p class="font-bold text-slate-800 text-xs tabular-nums">
+                                    <p class="font-bold text-slate-800 text-xs sm:text-sm tabular-nums">
                                         {{ $item->start_date ? $item->start_date->format('d M Y') : '-' }} s/d {{ $item->end_date ? $item->end_date->format('d M Y') : '-' }}
                                     </p>
                                     @if ($item->zoom_scheduled_at)
-                                        <p class="text-[11px] text-blue-600 font-semibold mt-0.5">
-                                            <i class="fas fa-video text-[10px] mr-0.5"></i> Zoom: {{ $item->zoom_schedule_formatted }}
+                                        <p class="text-xs sm:text-[13px] text-blue-600 font-semibold mt-0.5">
+                                            <i class="fas fa-video text-xs mr-0.5"></i> Zoom: {{ $item->zoom_schedule_formatted }}
                                         </p>
                                     @else
-                                        <p class="text-[11px] text-slate-400 mt-0.5">
+                                        <p class="text-xs sm:text-[13px] text-slate-400 mt-0.5">
                                             Pukul {{ $item->start_date ? $item->start_date->format('H:i') : '08:00' }} WIB
                                         </p>
                                     @endif
@@ -94,8 +94,8 @@
                                             {{ number_format($item->quota, 0, ',', '.') }} Peserta
                                         </span>
                                     @else
-                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-semibold bg-slate-100 text-slate-700">
-                                            <i class="fas fa-infinity text-[10px] text-blue-600"></i>
+                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs sm:text-[13px] font-semibold bg-slate-100 text-slate-700">
+                                            <i class="fas fa-infinity text-xs text-blue-600"></i>
                                             <span>Tanpa Batas</span>
                                         </span>
                                     @endif
@@ -105,7 +105,7 @@
                                         $badge = $item->status_badge;
                                         $isCompleted = ($badge['label'] ?? '') === 'Selesai';
                                     @endphp
-                                    <span class="inline-flex items-center justify-center {{ $isCompleted ? 'px-3.5 py-1 text-xs sm:text-[13px] font-bold tracking-wide shadow-2xs' : 'px-3 py-0.5 text-xs font-semibold' }} rounded-full {{ $badge['class'] }}">
+                                    <span class="inline-flex items-center justify-center {{ $isCompleted ? 'px-3.5 py-1 text-xs sm:text-sm font-bold tracking-wide shadow-2xs' : 'px-3 py-0.5 text-xs sm:text-[13px] font-semibold' }} rounded-full {{ $badge['class'] }}">
                                         {{ $badge['label'] }}
                                     </span>
                                 </td>
@@ -113,13 +113,13 @@
                                     <div class="flex items-center justify-center gap-1.5">
                                         <a href="{{ route('admin-pusat.management-course.bimtek-events.show', $item->id) }}"
                                            title="Detail & Monitoring Peserta"
-                                           class="inline-flex items-center justify-center w-7 h-7 rounded-lg text-[#13416B] bg-[#13416B]/10 hover:bg-[#13416B]/20 transition-colors">
-                                            <i class="fas fa-eye text-xs"></i>
+                                           class="inline-flex items-center justify-center w-8 h-8 rounded-lg text-[#13416B] bg-[#13416B]/10 hover:bg-[#13416B]/20 transition-colors">
+                                            <i class="fas fa-eye text-xs sm:text-sm"></i>
                                         </a>
                                         <a href="{{ route('admin-pusat.management-course.bimtek-events.edit', $item->id) }}"
                                            title="Edit Pengaturan"
-                                           class="inline-flex items-center justify-center w-7 h-7 rounded-lg text-amber-600 bg-amber-50 hover:bg-amber-100 transition-colors">
-                                            <i class="fas fa-pen text-xs"></i>
+                                           class="inline-flex items-center justify-center w-8 h-8 rounded-lg text-amber-600 bg-amber-50 hover:bg-amber-100 transition-colors">
+                                            <i class="fas fa-pen text-xs sm:text-sm"></i>
                                         </a>
                                     </div>
                                 </td>
@@ -131,10 +131,10 @@
                                         <div class="w-12 h-12 bg-slate-100 rounded-full flex items-center justify-center mx-auto text-slate-400">
                                             <i class="fas fa-calendar-xmark text-lg"></i>
                                         </div>
-                                        <p class="text-sm font-semibold text-slate-700">Belum Ada Gelombang Bimtek</p>
-                                        <p class="text-xs text-slate-500">Silakan buat gelombang bimtek online baru yang terhubung ke master kursus.</p>
+                                        <p class="text-base font-semibold text-slate-700">Belum Ada Gelombang Bimtek</p>
+                                        <p class="text-sm text-slate-500">Silakan buat gelombang bimtek online baru yang terhubung ke master kursus.</p>
                                         <a href="{{ route('admin-pusat.management-course.bimtek-events.create') }}"
-                                           class="inline-block mt-2 px-3.5 py-1.5 text-xs font-bold text-white bg-[#13416B] rounded-lg">
+                                           class="inline-block mt-2 px-3.5 py-1.5 text-xs sm:text-sm font-bold text-white bg-[#13416B] rounded-lg">
                                             Buka Gelombang Pertama
                                         </a>
                                     </div>
