@@ -357,12 +357,9 @@
         {{-- Tabel Monitoring Peserta --}}
         <div class="bg-white rounded-md border border-slate-200 shadow-2xs overflow-hidden">
             <div class="px-5 py-3.5 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-50/50">
-                <div class="flex items-center gap-2">
-                    <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
-                    <h2 class="text-base sm:text-lg font-bold text-slate-800">
-                        Monitoring Peserta Bimtek & Presensi
-                    </h2>
-                </div>
+                <h2 class="text-base sm:text-lg font-bold text-slate-800">
+                    Monitoring Peserta Bimtek & Presensi
+                </h2>
                 <span class="text-xs sm:text-sm text-slate-500">
                     Total {{ $participants->count() }} peserta terdaftar
                 </span>
@@ -405,9 +402,8 @@
                                 <td class="py-3 px-3.5 text-center">
                                     @if ($totalSessionsCount > 0)
                                         <div class="inline-flex flex-col items-center gap-1">
-                                            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] sm:text-xs font-bold
+                                            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] sm:text-xs font-bold
                                                 {{ $p->attended_sessions_count >= $totalSessionsCount ? 'bg-emerald-600 text-white' : ($p->attended_sessions_count > 0 ? 'bg-amber-500 text-white' : 'bg-slate-200 text-slate-700') }}">
-                                                <i class="fas {{ $p->attended_sessions_count >= $totalSessionsCount ? 'fa-check-double' : ($p->attended_sessions_count > 0 ? 'fa-check' : 'fa-times') }} text-[10px]"></i>
                                                 <span>{{ $p->attended_sessions_count }} / {{ $totalSessionsCount }} Sesi</span>
                                             </span>
                                             <form action="{{ route('admin-pusat.management-course.bimtek-events.toggle-attendance', [$event->id, $p->user_id]) }}" method="POST">
@@ -424,9 +420,8 @@
                                             @csrf
                                             <button type="submit"
                                                     title="Klik untuk ubah status kehadiran Zoom"
-                                                    class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] sm:text-xs font-bold transition-transform active:scale-95 cursor-pointer
+                                                    class="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] sm:text-xs font-bold transition-transform active:scale-95 cursor-pointer
                                                     {{ $p->zoom_attended ? 'bg-emerald-600 text-white' : 'bg-slate-200 text-slate-600 hover:bg-slate-300' }}">
-                                                <i class="fas {{ $p->zoom_attended ? 'fa-check' : 'fa-times' }} text-[10px]"></i>
                                                 <span>{{ $p->zoom_attended ? 'Hadir' : 'Belum Hadir' }}</span>
                                             </button>
                                         </form>
@@ -442,24 +437,22 @@
                                             <span class="text-[11px] text-slate-400">Sudah Mengisi</span>
                                         </div>
                                     @else
-                                        <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded text-[11px] sm:text-xs font-medium text-slate-400 bg-slate-100">
-                                            <i class="far fa-clock text-[10px]"></i> Belum
+                                        <span class="inline-flex items-center px-2.5 py-1 rounded text-[11px] sm:text-xs font-medium text-slate-400 bg-slate-100">
+                                            Belum
                                         </span>
                                     @endif
                                 </td>
                                 <td class="py-3 px-3.5">
                                     @if ($p->official_cert_number)
-                                        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs sm:text-sm font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                                            <i class="fas fa-check-double text-xs"></i>
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs sm:text-sm font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
                                             <span>Sertifikat Terbit</span>
                                         </span>
                                     @elseif ($p->cert_submission_status === 'diajukan_ke_ppsdm')
-                                        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs sm:text-sm font-bold bg-amber-50 text-amber-700 border border-amber-200">
-                                            <i class="fas fa-clock text-xs"></i>
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs sm:text-sm font-bold bg-amber-50 text-amber-700 border border-amber-200">
                                             <span>Diajukan ke PPSDM</span>
                                         </span>
                                     @elseif ($p->status === 'completed')
-                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-semibold bg-blue-50 text-blue-700">
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-blue-50 text-blue-700">
                                             Siap Diajukan
                                         </span>
                                     @else
@@ -495,18 +488,13 @@
         {{-- SECTION EVALUASI NARASUMBER & PENYELENGGARAAN --}}
         <div class="bg-white rounded-md border border-slate-200 shadow-2xs overflow-hidden">
             <div class="px-5 py-4 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-50/50">
-                <div class="flex items-center gap-2.5">
-                    <div class="w-8 h-8 rounded-md bg-[#13416B]/10 text-[#13416B] flex items-center justify-center text-sm font-bold">
-                        <i class="fas fa-chalkboard-teacher"></i>
-                    </div>
-                    <div>
-                        <h2 class="text-base sm:text-lg font-bold text-slate-800">
-                            Hasil Evaluasi Narasumber & Penyelenggaraan
-                        </h2>
-                        <p class="text-xs sm:text-sm text-slate-500">
-                            Kompilasi penilaian mutu pengajar dan masukan evaluasi dari peserta bimtek
-                        </p>
-                    </div>
+                <div>
+                    <h2 class="text-base sm:text-lg font-bold text-slate-800">
+                        Hasil Evaluasi Narasumber & Penyelenggaraan
+                    </h2>
+                    <p class="text-xs sm:text-sm text-slate-500">
+                        Kompilasi penilaian mutu pengajar dan masukan evaluasi dari peserta bimtek
+                    </p>
                 </div>
                 <div class="flex items-center gap-2 flex-wrap">
                     <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-md text-xs sm:text-sm font-bold bg-blue-50 text-[#13416B] border border-blue-200">
@@ -600,9 +588,8 @@
             {{-- Daftar Ulasan & Catatan Masukan Peserta --}}
             <div class="p-5 sm:p-6 space-y-4">
                 <div class="flex items-center justify-between">
-                    <h3 class="text-sm sm:text-base font-bold text-slate-800 flex items-center gap-2">
-                        <i class="fas fa-comment-alt text-[#13416B]"></i>
-                        <span>Daftar Ulasan & Masukan Peserta</span>
+                    <h3 class="text-sm sm:text-base font-bold text-slate-800">
+                        Daftar Ulasan & Masukan Peserta
                     </h3>
                     <span class="text-xs sm:text-sm text-slate-400 font-medium">
                         Identitas peserta disamarkan (Anonim)
@@ -625,7 +612,7 @@
                                         </div>
                                         <div>
                                             <span class="text-sm sm:text-[15px] font-bold text-slate-800">Peserta Bimtek (Responden Anonim)</span>
-                                            <span class="text-xs sm:text-[13px] text-slate-400 ml-1.5">• {{ $eval->created_at->translatedFormat('d M Y, H:i') }} WIB</span>
+                                            <span class="text-xs sm:text-[13px] text-slate-400 ml-1.5">— {{ $eval->created_at->translatedFormat('d M Y, H:i') }} WIB</span>
                                         </div>
                                     </div>
                                     

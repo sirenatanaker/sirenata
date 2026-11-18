@@ -80,7 +80,7 @@
                                     </p>
                                     @if ($item->zoom_scheduled_at)
                                         <p class="text-xs sm:text-[13px] text-blue-600 font-semibold mt-0.5">
-                                            <i class="fas fa-video text-xs mr-0.5"></i> Zoom: {{ $item->zoom_schedule_formatted }}
+                                            Zoom: {{ $item->zoom_schedule_formatted }}
                                         </p>
                                     @else
                                         <p class="text-xs sm:text-[13px] text-slate-400 mt-0.5">
@@ -94,8 +94,7 @@
                                             {{ number_format($item->quota, 0, ',', '.') }} Peserta
                                         </span>
                                     @else
-                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs sm:text-[13px] font-semibold bg-slate-100 text-slate-700">
-                                            <i class="fas fa-infinity text-xs text-blue-600"></i>
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs sm:text-[13px] font-semibold bg-slate-100 text-slate-700">
                                             <span>Tanpa Batas</span>
                                         </span>
                                     @endif

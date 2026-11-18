@@ -1,5 +1,5 @@
 <x-dashboard::layouts.dashboard title="Pengajuan Sertifikat PPSDM - Admin Pusat">
-    <div class="p-3 sm:p-6 max-w-[1600px] mx-auto space-y-4 sm:space-y-6">
+    <div class="w-full p-3 sm:p-6 space-y-4 sm:space-y-6">
 
         {{-- Filter Card & Tabel --}}
         <x-dashboard::filter-card
@@ -9,8 +9,8 @@
 
             <x-slot name="actions">
                 <a href="{{ route('admin-pusat.management-course.certificate-submissions.create') }}"
-                   class="inline-flex items-center gap-1.5 px-4 py-2 text-xs sm:text-sm font-bold text-white bg-[#13416B] hover:bg-[#0e2c48] rounded-lg transition-colors shadow-2xs">
-                    <i class="fas fa-plus text-xs"></i>
+                   class="inline-flex items-center gap-1.5 px-4 py-2 text-sm sm:text-[15px] font-bold text-white bg-[#13416B] hover:bg-[#0e2c48] rounded-lg transition-colors shadow-2xs">
+                    <i class="fas fa-plus text-xs sm:text-sm"></i>
                     <span>Buat Pengajuan Baru</span>
                 </a>
             </x-slot>
@@ -18,8 +18,8 @@
             <x-slot name="filter_inputs">
                 {{-- Status --}}
                 <div class="w-full sm:w-48">
-                    <label class="block text-xs font-medium text-slate-500 mb-1">Status Pengajuan</label>
-                    <select name="status" class="w-full px-3 py-2 rounded-lg border border-slate-300 text-xs sm:text-sm">
+                    <label class="block text-xs sm:text-sm font-medium text-slate-500 mb-1">Status Pengajuan</label>
+                    <select name="status" class="w-full px-3 py-2 rounded-lg border border-slate-300 text-sm sm:text-[15px]">
                         <option value="">Semua Status</option>
                         <option value="draft" @selected(request('status') === 'draft')>Draft</option>
                         <option value="submitted_to_ppsdm" @selected(request('status') === 'submitted_to_ppsdm')>Diajukan ke PPSDM</option>
@@ -30,12 +30,12 @@
 
                 {{-- Cari --}}
                 <div class="flex-1 min-w-[240px]">
-                    <label class="block text-xs font-medium text-slate-500 mb-1">Cari Kode / Bimtek / No. Nota</label>
+                    <label class="block text-xs sm:text-sm font-medium text-slate-500 mb-1">Cari Kode / Bimtek / No. Nota</label>
                     <div class="relative">
-                        <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+                        <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs sm:text-sm"></i>
                         <input type="text" name="search" value="{{ request('search') }}"
                                placeholder="Cari kode usulan, nomor nota dinas, atau nama bimtek..."
-                               class="w-full pl-9 pr-3 py-2 rounded-lg border border-slate-300 text-xs sm:text-sm">
+                               class="w-full pl-9 pr-3 py-2 rounded-lg border border-slate-300 text-sm sm:text-[15px]">
                     </div>
                 </div>
             </x-slot>
@@ -43,7 +43,7 @@
             <div class="overflow-x-auto">
                 <table class="w-full text-left border-collapse">
                     <thead>
-                        <tr class="bg-slate-50 border-b border-slate-200 text-[11px] font-bold text-slate-600 uppercase tracking-wider">
+                        <tr class="bg-slate-50 border-b border-slate-200 text-xs sm:text-[13px] font-bold text-slate-600 uppercase tracking-wider">
                             <th class="py-3 px-3.5 w-12 text-center">No.</th>
                             <th class="py-3 px-3.5 min-w-[200px]">Kode Usulan & No. Nota</th>
                             <th class="py-3 px-3.5 min-w-[220px]">Bimtek / Kursus</th>
@@ -53,10 +53,10 @@
                             <th class="py-3 px-3.5 w-24 text-center">Aksi</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-slate-100 text-xs sm:text-sm">
+                    <tbody class="divide-y divide-slate-100 text-sm sm:text-[15px]">
                         @forelse ($submissions as $index => $item)
                             <tr class="hover:bg-slate-50/70 transition-colors">
-                                <td class="py-3 px-3.5 text-center text-xs font-semibold text-slate-400">
+                                <td class="py-3 px-3.5 text-center text-xs sm:text-sm font-semibold text-slate-400">
                                     {{ $submissions->firstItem() + $index }}
                                 </td>
                                 <td class="py-3 px-3.5">
@@ -65,7 +65,7 @@
                                         {{ $item->submission_code }}
                                     </a>
                                     @if ($item->submission_letter_number)
-                                        <p class="text-[11px] text-slate-500 mt-0.5">
+                                        <p class="text-xs sm:text-[13px] text-slate-500 mt-0.5">
                                             Nota: <strong class="text-slate-700">{{ $item->submission_letter_number }}</strong>
                                         </p>
                                     @endif
@@ -74,34 +74,34 @@
                                     <p class="font-bold text-slate-800 line-clamp-1">
                                         {{ $item->bimtekEvent?->batch_name ?? '-' }}
                                     </p>
-                                    <p class="text-[11px] text-slate-400 line-clamp-1">
+                                    <p class="text-xs sm:text-[13px] text-slate-400 line-clamp-1">
                                         {{ $item->bimtekEvent?->course?->name ?? '-' }}
                                     </p>
                                 </td>
                                 <td class="py-3 px-3.5 text-center">
-                                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-extrabold bg-[#13416B]/10 text-[#13416B] tabular-nums">
+                                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs sm:text-sm font-extrabold bg-[#13416B]/10 text-[#13416B] tabular-nums">
                                         {{ $item->total_graduates }} ASN
                                     </span>
                                 </td>
                                 <td class="py-3 px-3.5">
-                                    <p class="font-bold text-slate-800 text-xs tabular-nums">
+                                    <p class="font-bold text-slate-800 text-xs sm:text-sm tabular-nums">
                                         {{ $item->submitted_at ? $item->submitted_at->format('d M Y') : '-' }}
                                     </p>
-                                    <p class="text-[11px] text-slate-400">
+                                    <p class="text-xs sm:text-[13px] text-slate-400">
                                         Oleh: {{ $item->submitter?->name ?? 'Admin' }}
                                     </p>
                                 </td>
                                 <td class="py-3 px-3.5 text-center">
                                     @php $badge = $item->status_badge; @endphp
-                                    <span class="inline-flex px-2.5 py-0.5 rounded-full text-xs font-semibold border {{ $badge['class'] }}">
+                                    <span class="inline-flex px-2.5 py-0.5 rounded-full text-xs sm:text-sm font-semibold border {{ $badge['class'] }}">
                                         {{ $badge['label'] }}
                                     </span>
                                 </td>
                                 <td class="py-3 px-3.5 text-center">
                                     <a href="{{ route('admin-pusat.management-course.certificate-submissions.show', $item->id) }}"
-                                       class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-bold text-[#13416B] bg-[#13416B]/10 hover:bg-[#13416B]/20 transition-colors">
+                                       class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs sm:text-sm font-bold text-[#13416B] bg-[#13416B]/10 hover:bg-[#13416B]/20 transition-colors">
                                         <span>Buka</span>
-                                        <i class="fas fa-arrow-right text-[10px]"></i>
+                                        <i class="fas fa-arrow-right text-xs"></i>
                                     </a>
                                 </td>
                             </tr>
@@ -110,14 +110,14 @@
                                 <td colspan="7" class="py-12 px-4 text-center">
                                     <div class="max-w-xs mx-auto space-y-2">
                                         <div class="w-12 h-12 bg-slate-100 rounded-full flex items-center justify-center mx-auto text-slate-400">
-                                            <i class="fas fa-file-circle-check text-lg"></i>
+                                            <i class="fas fa-file-circle-check text-xl"></i>
                                         </div>
-                                        <p class="text-sm font-semibold text-slate-700">Belum Ada Pengajuan ke PPSDM</p>
-                                        <p class="text-xs text-slate-500">
+                                        <p class="text-base font-semibold text-slate-700">Belum Ada Pengajuan ke PPSDM</p>
+                                        <p class="text-xs sm:text-sm text-slate-500">
                                             Peserta yang telah lulus Bimtek Online dapat diajukan secara terpusat ke PPSDM untuk mendapatkan nomor registrasi resmi sertifikat.
                                         </p>
                                         <a href="{{ route('admin-pusat.management-course.certificate-submissions.create') }}"
-                                           class="inline-block mt-2 px-3.5 py-1.5 text-xs font-bold text-white bg-[#13416B] rounded-lg">
+                                           class="inline-block mt-2 px-3.5 py-1.5 text-xs sm:text-sm font-bold text-white bg-[#13416B] rounded-lg">
                                             Buat Pengajuan Pertama
                                         </a>
                                     </div>
