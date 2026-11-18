@@ -63,10 +63,16 @@
                     <div class="hidden sm:flex flex-col items-end shrink-0">
                         @if ($evalType === 'uraian')
                             <div class="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">Metode Koreksi</div>
-                            <div class="text-base font-black text-[#13416B]">Penilaian Instruktur</div>
+                            <div class="text-base font-black text-[#13416B]">
+                                {{ $postTest->has_auto_grading ? 'Koreksi Otomatis Sistem' : 'Penilaian Instruktur' }}
+                            </div>
                         @elseif ($evalType === 'upload')
-                            <div class="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">Maks. Ukuran File</div>
-                            <div class="text-base font-black text-[#13416B]">10 MB (PDF/DOCX)</div>
+                            <div class="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">
+                                {{ $postTest->has_auto_grading ? 'Metode Koreksi' : 'Maks. Ukuran File' }}
+                            </div>
+                            <div class="text-base font-black text-[#13416B]">
+                                {{ $postTest->has_auto_grading ? 'Koreksi Otomatis Sistem' : '10 MB (XLSX/PDF/DOCX)' }}
+                            </div>
                         @else
                             <div class="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">Ambang Batas</div>
                             <div class="text-2xl font-black text-[#13416B]">{{ $postTest->passing_score }}</div>
@@ -223,25 +229,33 @@
                     {{-- TAMPILAN LEMBAR PENUGASAN BERKAS (ADMIN SOAL & USER JAWAB) --}}
                     {{-- ======================================================= --}}
                     <div class="bg-white p-5 sm:p-8 lg:p-10 space-y-6 text-left animate-fadeIn">
-                        
+                        @php
+                            $adminFileExt = strtolower(pathinfo((string) ($postTest->admin_file_name ?? $postTest->admin_file_path ?? ''), PATHINFO_EXTENSION));
+                            $isExcelAdminFile = in_array($adminFileExt, ['xlsx', 'xls', 'csv'], true);
+                        @endphp
                         {{-- 1. Berkas Soal dari Admin --}}
                         <div class="p-5 rounded-xl bg-blue-50/70 border border-blue-200 shadow-2xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                             <div class="flex items-center gap-3.5">
-                                <div class="w-12 h-12 rounded-xl bg-white text-red-500 border border-blue-200 flex items-center justify-center shrink-0 shadow-2xs">
-                                    <i class="fas fa-file-pdf text-2xl"></i>
+                                <div class="w-12 h-12 rounded-xl bg-white {{ $isExcelAdminFile ? 'text-emerald-600' : 'text-red-500' }} border border-blue-200 flex items-center justify-center shrink-0 shadow-2xs">
+                                    <i class="fas {{ $isExcelAdminFile ? 'fa-file-excel' : 'fa-file-pdf' }} text-2xl"></i>
                                 </div>
                                 <div class="space-y-1">
-                                    <div class="flex items-center gap-2">
+                                    <div class="flex items-center gap-2 flex-wrap">
                                         <span class="text-[10px] font-bold uppercase tracking-wider text-blue-800 bg-blue-100 px-2.5 py-0.5 rounded">
                                             Berkas Soal dari Admin
                                         </span>
-                                        <span class="text-xs text-slate-500 font-medium">{{ $postTest->admin_file_size ?? '2.4 MB' }} • PDF Document</span>
+                                        @if ($postTest->has_auto_grading)
+                                            <span class="text-[10px] font-bold uppercase tracking-wider text-emerald-800 bg-emerald-100 px-2.5 py-0.5 rounded">
+                                                <i class="fas fa-robot mr-1"></i> Koreksi Otomatis Aktif
+                                            </span>
+                                        @endif
+                                        <span class="text-xs text-slate-500 font-medium">{{ $postTest->admin_file_size ?? '2.4 MB' }} • {{ $adminFileExt ? strtoupper($adminFileExt) : 'PDF' }} Document</span>
                                     </div>
                                     <h3 class="text-sm sm:text-base font-bold text-slate-800">
                                         {{ $postTest->admin_file_name ?? 'Dokumen_Panduan_Soal.pdf' }}
                                     </h3>
                                     <p class="text-xs text-slate-600">
-                                        {{ $postTest->instructions ?? 'Disediakan oleh Panitia Penyelenggara. Silakan unduh dokumen panduan ini, kerjakan lembar kerja, dan simpan dalam format PDF atau DOCX.' }}
+                                        {{ $postTest->instructions ?? 'Disediakan oleh Panitia Penyelenggara. Silakan unduh dokumen panduan ini, kerjakan lembar kerja, dan unggah kembali hasilnya.' }}
                                     </p>
                                 </div>
                             </div>
@@ -321,7 +335,7 @@
 
                                 <div class="space-y-1">
                                     <h3 class="text-sm font-bold text-slate-800">Unggah Lembar Jawaban / Laporan Tugas Anda</h3>
-                                    <p class="text-xs text-slate-500">Unggah dokumen pengerjaan tugas Anda dalam format PDF, DOCX, atau ZIP (Maks. 10 MB).</p>
+                                    <p class="text-xs text-slate-500">Unggah dokumen pengerjaan tugas Anda dalam format Excel (XLSX, XLS, CSV), PDF, DOCX, atau ZIP (Maks. 10 MB).</p>
                                 </div>
 
                                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -332,7 +346,7 @@
                                         <input type="file"
                                             name="assignment_file"
                                             required
-                                            accept=".pdf,.docx,.doc,.zip,.rar"
+                                            accept=".xlsx,.xls,.csv,.pdf,.docx,.doc,.zip,.rar"
                                             class="block w-full text-xs text-slate-500 file:mr-2 file:py-2.5 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-[#13416B] file:text-white hover:file:bg-[#0f3354] file:cursor-pointer border border-slate-300 rounded-lg bg-white p-1" />
                                     </div>
                                     <div>
@@ -341,7 +355,7 @@
                                         </label>
                                         <input type="text"
                                             name="notes"
-                                            value="{{ old('notes', $evalResult?->notes ?? '') }}"
+                                            value="{{ old('notes', !str_contains((string) ($evalResult?->notes ?? ''), '[Koreksi Otomatis Sistem]') ? ($evalResult?->notes ?? '') : '') }}"
                                             placeholder="Contoh: Laporan tugas studi kasus modul kelompok 1"
                                             class="w-full px-3.5 py-2.5 text-xs rounded-lg border border-slate-300 text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-[#13416B]" />
                                     </div>

@@ -30,7 +30,11 @@ class PostTestController extends Controller
     public function store(StorePostTestRequest $request): RedirectResponse
     {
         $validated = $request->validated();
-        $result = $this->postTestService->storePostTestWithQuestions($validated, $request->file('admin_file'));
+        $result = $this->postTestService->storePostTestWithQuestions(
+            $validated,
+            $request->file('admin_file'),
+            $request->file('answer_key_file')
+        );
 
         if (!$result['success']) {
             ToastMagic::error($result['message']);
@@ -57,7 +61,12 @@ class PostTestController extends Controller
     {
         $validated = $request->validated();
         $postTest = $this->postTestService->findOrFail((string) $id);
-        $result = $this->postTestService->updatePostTestWithQuestions($postTest, $validated, $request->file('admin_file'));
+        $result = $this->postTestService->updatePostTestWithQuestions(
+            $postTest,
+            $validated,
+            $request->file('admin_file'),
+            $request->file('answer_key_file')
+        );
 
         if (!$result['success']) {
             ToastMagic::error($result['message']);

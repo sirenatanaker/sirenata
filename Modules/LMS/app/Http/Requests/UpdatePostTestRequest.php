@@ -17,7 +17,7 @@ class UpdatePostTestRequest extends FormRequest
     {
         if ($this->input('type') === 'file_upload') {
             $this->merge([
-                'passing_score' => $this->input('passing_score') ?: 0,
+                'passing_score' => $this->input('passing_score') ?: 75,
                 'duration'      => $this->input('duration') ?: 0,
             ]);
         }
@@ -58,15 +58,17 @@ class UpdatePostTestRequest extends FormRequest
         ];
 
         if ($type === 'file_upload') {
-            $rules['passing_score'] = ['nullable', 'integer', 'min:0', 'max:100'];
-            $rules['duration']      = ['nullable', 'integer', 'min:0'];
-            $rules['admin_file']    = ['nullable', 'file', 'mimes:pdf,docx,doc,zip,rar', 'max:10240'];
-            $rules['instructions']  = ['nullable', 'string', 'max:2000'];
+            $rules['passing_score']   = ['nullable', 'integer', 'min:0', 'max:100'];
+            $rules['duration']        = ['nullable', 'integer', 'min:0'];
+            $rules['admin_file']      = ['nullable', 'file', 'mimes:xlsx,xls,csv,pdf,docx,doc,zip,rar', 'max:10240'];
+            $rules['answer_key_file'] = ['nullable', 'file', 'mimes:xlsx,xls,csv,pdf,docx,doc', 'max:10240'];
+            $rules['instructions']    = ['nullable', 'string', 'max:2000'];
         } elseif ($type === 'essay') {
-            $rules['passing_score']              = ['required', 'integer', 'min:0', 'max:100'];
-            $rules['duration']                   = ['required', 'integer', 'min:1'];
-            $rules['essay_questions']            = ['required', 'array', 'min:1'];
-            $rules['essay_questions.*.question'] = ['required', 'string'];
+            $rules['passing_score']                 = ['required', 'integer', 'min:0', 'max:100'];
+            $rules['duration']                      = ['required', 'integer', 'min:1'];
+            $rules['essay_questions']               = ['required', 'array', 'min:1'];
+            $rules['essay_questions.*.question']    = ['required', 'string'];
+            $rules['essay_questions.*.answer_key']  = ['nullable', 'string'];
         } else {
             $rules['passing_score']              = ['required', 'integer', 'min:0', 'max:100'];
             $rules['duration']                   = ['required', 'integer', 'min:1'];
@@ -83,8 +85,10 @@ class UpdatePostTestRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'admin_file.mimes'                    => 'Format berkas soal harus berupa PDF, DOCX, DOC, atau ZIP.',
+            'admin_file.mimes'                    => 'Format berkas soal harus berupa XLSX, XLS, CSV, PDF, DOCX, DOC, atau ZIP.',
             'admin_file.max'                      => 'Ukuran berkas soal maksimal 10 MB.',
+            'answer_key_file.mimes'               => 'Format berkas kunci jawaban harus berupa XLSX, XLS, CSV, PDF, DOCX, atau DOC.',
+            'answer_key_file.max'                 => 'Ukuran berkas kunci jawaban maksimal 10 MB.',
             'essay_questions.required'            => 'Harap tambahkan minimal 1 butir pertanyaan uraian.',
             'essay_questions.min'                 => 'Harap tambahkan minimal 1 butir pertanyaan uraian.',
             'essay_questions.*.question.required' => 'Setiap butir pertanyaan uraian wajib diisi.',

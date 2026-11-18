@@ -201,11 +201,11 @@ class CourseController extends Controller
     public function submitAssignment(Request $request, string $slug, string $sectionId): RedirectResponse
     {
         $request->validate([
-            'assignment_file' => 'required|file|mimes:pdf,docx,doc,zip,rar,jpg,png|max:10240',
+            'assignment_file' => 'required|file|mimes:xlsx,xls,csv,pdf,docx,doc,zip,rar,jpg,png|max:10240',
             'notes'           => 'nullable|string|max:500',
         ], [
             'assignment_file.required' => 'Harap pilih berkas jawaban tugas yang ingin diunggah.',
-            'assignment_file.mimes'    => 'Format berkas jawaban harus berupa PDF, DOCX, DOC, atau ZIP.',
+            'assignment_file.mimes'    => 'Format berkas jawaban harus berupa XLSX, XLS, CSV, PDF, DOCX, DOC, atau ZIP.',
             'assignment_file.max'      => 'Ukuran berkas jawaban maksimal 10 MB.',
         ]);
 
@@ -215,7 +215,15 @@ class CourseController extends Controller
         $path = $file->store("assignments/{$userId}", 'public');
 
         $postTest = PostTest::where('course_section_id', $sectionId)->first();
+        $autoEval = null;
+
         if ($postTest && $userId) {
+            $autoEval = $this->postTestService->autoGradeFileUpload($postTest, $path);
+            $studentNote = trim((string) $request->input('notes', ''));
+            $finalNotes = $autoEval['auto_graded']
+                ? trim(($autoEval['notes'] ?? '') . ($studentNote !== '' ? "\nCatatan Peserta: " . $studentNote : ''))
+                : ($studentNote !== '' ? $studentNote : null);
+
             \Modules\LMS\Models\PostTestResult::updateOrCreate(
                 [
                     'post_test_id' => $postTest->id,
@@ -224,43 +232,10 @@ class CourseController extends Controller
                 [
                     'file_path'    => $path,
                     'file_name'    => $originalName,
-                    'notes'        => $request->input('notes'),
-                    'status'       => 'submitted',
-                    'is_passed'    => true,
-                    'score'        => 100,
-                    'completed_at' => now(),
-                ]
-            );
-        }
-
-        ToastMagic::success('Berkas tugas evaluasi berhasil dikumpulkan!');
-        return redirect()->back();
-    }
-
-    public function submitEssay(Request $request, string $slug, string $sectionId): RedirectResponse
-    {
-        $request->validate([
-            'essay_answers'   => 'required|array|min:1',
-            'essay_answers.*' => 'required|string|min:5',
-        ], [
-            'essay_answers.required'   => 'Harap isi seluruh jawaban uraian.',
-            'essay_answers.*.required' => 'Setiap soal uraian wajib dijawab.',
-            'essay_answers.*.min'      => 'Jawaban uraian minimal 5 karakter.',
-        ]);
-
-        $userId = $request->user()?->id;
-        $postTest = PostTest::where('course_section_id', $sectionId)->first();
-        if ($postTest && $userId) {
-            \Modules\LMS\Models\PostTestResult::updateOrCreate(
-                [
-                    'post_test_id' => $postTest->id,
-                    'user_id'      => $userId,
-                ],
-                [
-                    'answers'      => $request->input('essay_answers'),
-                    'status'       => 'submitted',
-                    'is_passed'    => true,
-                    'score'        => 85,
+                    'notes'        => $finalNotes,
+                    'status'       => $autoEval['status'],
+                    'is_passed'    => $autoEval['is_passed'],
+                    'score'        => $autoEval['score'],
                     'completed_at' => now(),
                 ]
             );
@@ -278,7 +253,72 @@ class CourseController extends Controller
             }
         }
 
-        ToastMagic::success('Jawaban uraian evaluasi berhasil dikirim dan menunggu penilaian pengajar!');
+        if ($autoEval && $autoEval['auto_graded']) {
+            $statusLabel = $autoEval['is_passed'] ? 'Lulus' : 'Perlu Revisi';
+            $msg = "Berkas tugas dikumpulkan & dikoreksi otomatis! Skor Anda: {$autoEval['score']} ({$statusLabel}).";
+            $autoEval['is_passed'] ? ToastMagic::success($msg) : ToastMagic::error($msg);
+        } else {
+            ToastMagic::success('Berkas tugas evaluasi berhasil dikumpulkan!');
+        }
+
+        return redirect()->back();
+    }
+
+    public function submitEssay(Request $request, string $slug, string $sectionId): RedirectResponse
+    {
+        $request->validate([
+            'essay_answers'   => 'required|array|min:1',
+            'essay_answers.*' => 'required|string|min:5',
+        ], [
+            'essay_answers.required'   => 'Harap isi seluruh jawaban uraian.',
+            'essay_answers.*.required' => 'Setiap soal uraian wajib dijawab.',
+            'essay_answers.*.min'      => 'Jawaban uraian minimal 5 karakter.',
+        ]);
+
+        $userId = $request->user()?->id;
+        $postTest = PostTest::with('questions')->where('course_section_id', $sectionId)->first();
+        $autoEval = null;
+
+        if ($postTest && $userId) {
+            $essayAnswers = $request->input('essay_answers', []);
+            $autoEval = $this->postTestService->autoGradeEssay($postTest, $essayAnswers);
+
+            \Modules\LMS\Models\PostTestResult::updateOrCreate(
+                [
+                    'post_test_id' => $postTest->id,
+                    'user_id'      => $userId,
+                ],
+                [
+                    'answers'      => $essayAnswers,
+                    'notes'        => $autoEval['notes'],
+                    'status'       => $autoEval['status'],
+                    'is_passed'    => $autoEval['is_passed'],
+                    'score'        => $autoEval['score'],
+                    'completed_at' => now(),
+                ]
+            );
+
+            $course = \Modules\LMS\Models\Course::where('slug', $slug)->first();
+            if ($course) {
+                $newProgress = $this->courseService->calculateDynamicProgress($course, $userId);
+                DB::table('course_student')
+                    ->where('course_id', $course->id)
+                    ->where('user_id', $userId)
+                    ->update([
+                        'progress' => $newProgress,
+                        'status'   => $newProgress >= 100 ? 'completed' : 'in_progress',
+                    ]);
+            }
+        }
+
+        if ($autoEval && $autoEval['auto_graded']) {
+            $statusLabel = $autoEval['is_passed'] ? 'Lulus' : 'Perlu Revisi';
+            $msg = "Jawaban uraian dikoreksi otomatis oleh sistem! Skor Anda: {$autoEval['score']} ({$statusLabel}).";
+            $autoEval['is_passed'] ? ToastMagic::success($msg) : ToastMagic::error($msg);
+        } else {
+            ToastMagic::success('Jawaban uraian evaluasi berhasil dikirim dan menunggu penilaian pengajar!');
+        }
+
         return redirect()->back();
     }
 
@@ -860,17 +900,23 @@ class CourseController extends Controller
         // 1. Submit Tipe Upload File / Penugasan Berkas
         if ($postTest->is_file_upload || $request->hasFile('assignment_file')) {
             $request->validate([
-                'assignment_file' => 'required|file|mimes:pdf,docx,doc,zip,rar,jpg,png|max:10240',
+                'assignment_file' => 'required|file|mimes:xlsx,xls,csv,pdf,docx,doc,zip,rar,jpg,png|max:10240',
                 'notes'           => 'nullable|string|max:500',
             ], [
                 'assignment_file.required' => 'Harap pilih berkas jawaban tugas yang ingin diunggah.',
-                'assignment_file.mimes'    => 'Format berkas jawaban harus berupa PDF, DOCX, DOC, atau ZIP.',
+                'assignment_file.mimes'    => 'Format berkas jawaban harus berupa XLSX, XLS, CSV, PDF, DOCX, DOC, atau ZIP.',
                 'assignment_file.max'      => 'Ukuran berkas jawaban maksimal 10 MB.',
             ]);
 
             $file = $request->file('assignment_file');
             $originalName = $file->getClientOriginalName();
             $path = $file->store("assignments/{$userId}", 'public');
+
+            $autoEval = $this->postTestService->autoGradeFileUpload($postTest, $path);
+            $studentNote = trim((string) $request->input('notes', ''));
+            $finalNotes = $autoEval['auto_graded']
+                ? trim(($autoEval['notes'] ?? '') . ($studentNote !== '' ? "\nCatatan Peserta: " . $studentNote : ''))
+                : ($studentNote !== '' ? $studentNote : null);
 
             \Modules\LMS\Models\PostTestResult::updateOrCreate(
                 [
@@ -880,10 +926,10 @@ class CourseController extends Controller
                 [
                     'file_path'    => $path,
                     'file_name'    => $originalName,
-                    'notes'        => $request->input('notes'),
-                    'status'       => 'submitted',
-                    'is_passed'    => true,
-                    'score'        => 100,
+                    'notes'        => $finalNotes,
+                    'status'       => $autoEval['status'],
+                    'is_passed'    => $autoEval['is_passed'],
+                    'score'        => $autoEval['score'],
                     'completed_at' => now(),
                 ]
             );
@@ -900,7 +946,14 @@ class CourseController extends Controller
                     ]);
             }
 
-            ToastMagic::success('Berkas tugas evaluasi berhasil dikumpulkan!');
+            if ($autoEval['auto_graded']) {
+                $statusLabel = $autoEval['is_passed'] ? 'Lulus' : 'Perlu Revisi';
+                $msg = "Berkas tugas dikumpulkan & dikoreksi otomatis! Skor Anda: {$autoEval['score']} ({$statusLabel}).";
+                $autoEval['is_passed'] ? ToastMagic::success($msg) : ToastMagic::error($msg);
+            } else {
+                ToastMagic::success('Berkas tugas evaluasi berhasil dikumpulkan!');
+            }
+
             return redirect()->route('user.course.test.show', ['slug' => $slug, 'postTestId' => $postTest->id]);
         }
 
@@ -915,16 +968,20 @@ class CourseController extends Controller
                 'essay_answers.*.min'      => 'Jawaban uraian minimal 5 karakter.',
             ]);
 
+            $essayAnswers = $request->input('essay_answers', []);
+            $autoEval = $this->postTestService->autoGradeEssay($postTest, $essayAnswers);
+
             \Modules\LMS\Models\PostTestResult::updateOrCreate(
                 [
                     'post_test_id' => $postTest->id,
                     'user_id'      => $userId,
                 ],
                 [
-                    'answers'      => $request->input('essay_answers'),
-                    'status'       => 'submitted',
-                    'is_passed'    => true,
-                    'score'        => 85,
+                    'answers'      => $essayAnswers,
+                    'notes'        => $autoEval['notes'],
+                    'status'       => $autoEval['status'],
+                    'is_passed'    => $autoEval['is_passed'],
+                    'score'        => $autoEval['score'],
                     'completed_at' => now(),
                 ]
             );
@@ -941,7 +998,14 @@ class CourseController extends Controller
                     ]);
             }
 
-            ToastMagic::success('Jawaban uraian evaluasi berhasil dikirim dan menunggu penilaian pengajar!');
+            if ($autoEval['auto_graded']) {
+                $statusLabel = $autoEval['is_passed'] ? 'Lulus' : 'Perlu Revisi';
+                $msg = "Jawaban uraian dikoreksi otomatis oleh sistem! Skor Anda: {$autoEval['score']} ({$statusLabel}).";
+                $autoEval['is_passed'] ? ToastMagic::success($msg) : ToastMagic::error($msg);
+            } else {
+                ToastMagic::success('Jawaban uraian evaluasi berhasil dikirim dan menunggu penilaian pengajar!');
+            }
+
             return redirect()->route('user.course.test.show', ['slug' => $slug, 'postTestId' => $postTest->id]);
         }
 

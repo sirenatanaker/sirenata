@@ -620,6 +620,20 @@
                                                 :value="eq.question" :disabled="evalType !== 'essay'">
                                         </div>
                                     </div>
+
+                                    <!-- KUNCI JAWABAN OTOMATIS URAIAN -->
+                                    <div>
+                                        <label class="block text-xs font-bold text-slate-700 mb-1.5">
+                                            Kunci Jawaban / Poin Kunci Koreksi Otomatis <span class="text-slate-400 font-normal">(Opsional)</span>
+                                        </label>
+                                        <textarea
+                                            :name="'essay_questions[' + eqIndex + '][answer_key]'"
+                                            x-model="eq.answer_key"
+                                            :disabled="evalType !== 'essay'"
+                                            rows="2"
+                                            placeholder="Masukkan kata/poin kunci jawaban yang benar dipisahkan koma (misal: RPJMD, elastisitas sektoral, koordinasi lintas instansi). Jika diisi, sistem otomatis mencocokkan dan memberi skor jawaban peserta."
+                                            class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-xs sm:text-sm focus:border-[#13416B] focus:ring-1 focus:ring-[#13416B] leading-relaxed"></textarea>
+                                    </div>
                                 </div>
                             </div>
                         </template>
@@ -677,13 +691,13 @@
                                                 <i class="fas fa-cloud-arrow-up text-xl"></i>
                                             </div>
                                             <p class="text-xs font-bold text-slate-700 group-hover:text-[#13416B] transition-colors mb-1" x-text="fileName ? fileName : '{{ !empty($postTest->admin_file_path) ? 'Pilih dokumen baru jika ingin mengganti berkas di atas' : 'Pilih dokumen dari komputer / perangkat Anda' }}'"></p>
-                                            <p class="text-[11px] text-slate-400" x-text="fileSize ? fileSize : 'Format yang didukung: PDF, Word (DOCX/DOC), atau ZIP (Maks. 10MB)'"></p>
+                                            <p class="text-[11px] text-slate-400" x-text="fileSize ? fileSize : 'Format yang didukung: Excel (XLSX/XLS/CSV), PDF, Word (DOCX/DOC), atau ZIP (Maks. 10MB)'"></p>
                                         </div>
                                         <input type="file"
                                             name="admin_file"
                                             :disabled="evalType !== 'file_upload'"
                                             @if (empty($postTest->admin_file_path)) :required="evalType === 'file_upload'" @endif
-                                            accept=".pdf,.docx,.doc,.zip,.rar"
+                                            accept=".xlsx,.xls,.csv,.pdf,.docx,.doc,.zip,.rar"
                                             class="hidden"
                                             @change="
                                                 if ($event.target.files.length > 0) {
@@ -696,6 +710,55 @@
                                     @if (!empty($postTest->admin_file_path))
                                         <p class="text-[11px] text-slate-400 italic">* Kosongkan pilihan file jika tidak ingin mengganti berkas yang sudah ada.</p>
                                     @endif
+                                </div>
+                            </div>
+
+                            <!-- UNGGAH BERKAS KUNCI JAWABAN (AUTO GRADING) -->
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-2">
+                                    Berkas Kunci Jawaban / Template Terisi untuk Koreksi Otomatis <span class="text-slate-400 font-normal">(Opsional)</span>
+                                </label>
+
+                                @if (!empty($postTest->answer_key_file_path))
+                                    <div class="mb-3.5 p-3.5 bg-emerald-50/70 border border-emerald-200 rounded-xl flex items-center justify-between gap-3">
+                                        <div class="flex items-center gap-3 min-w-0">
+                                            <div class="w-10 h-10 rounded-lg bg-emerald-600 text-white flex items-center justify-center shrink-0">
+                                                <i class="fas fa-check-double text-lg"></i>
+                                            </div>
+                                            <div class="min-w-0">
+                                                <p class="text-xs font-bold text-slate-800 truncate">{{ $postTest->answer_key_file_name ?? 'Berkas Kunci Jawaban' }}</p>
+                                                <p class="text-[11px] text-slate-500">{{ $postTest->answer_key_file_size ?? 'Tersimpan' }} &bull; Aktif untuk koreksi otomatis</p>
+                                            </div>
+                                        </div>
+                                        <a href="{{ Storage::url($postTest->answer_key_file_path) }}" target="_blank"
+                                            class="px-3.5 py-1.5 rounded-lg bg-white border border-emerald-200 text-xs font-bold text-emerald-700 hover:bg-emerald-50 transition shrink-0 flex items-center gap-1.5 shadow-2xs">
+                                            <i class="fas fa-download text-[11px]"></i> Unduh Kunci
+                                        </a>
+                                    </div>
+                                @endif
+
+                                <div x-data="{ keyFileName: '', keyFileSize: '' }" class="space-y-2">
+                                    <label class="flex flex-col items-center justify-center w-full h-36 border-2 border-dashed border-emerald-300 rounded-2xl cursor-pointer bg-emerald-50/40 hover:bg-emerald-50/70 hover:border-emerald-500 transition-all group">
+                                        <div class="flex flex-col items-center justify-center pt-4 pb-5 text-center px-4">
+                                            <div class="w-10 h-10 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mb-2.5">
+                                                <i class="fas fa-check-double text-lg"></i>
+                                            </div>
+                                            <p class="text-xs font-bold text-slate-700 group-hover:text-emerald-700 transition-colors mb-1" x-text="keyFileName ? keyFileName : '{{ !empty($postTest->answer_key_file_path) ? 'Pilih berkas kunci baru jika ingin mengganti kunci di atas' : 'Unggah berkas kunci jawaban yang sudah diisi benar' }}'"></p>
+                                            <p class="text-[11px] text-slate-500" x-text="keyFileSize ? keyFileSize : 'Excel (.xlsx/.xls/.csv) dicocokkan otomatis per sel; Word/PDF dicocokkan kata kuncinya (Maks. 10MB)'"></p>
+                                        </div>
+                                        <input type="file"
+                                            name="answer_key_file"
+                                            :disabled="evalType !== 'file_upload'"
+                                            accept=".xlsx,.xls,.csv,.pdf,.docx,.doc"
+                                            class="hidden"
+                                            @change="
+                                                if ($event.target.files.length > 0) {
+                                                    keyFileName = $event.target.files[0].name;
+                                                    let size = $event.target.files[0].size;
+                                                    keyFileSize = size >= 1048576 ? (size / 1048576).toFixed(1) + ' MB' : Math.round(size / 1024) + ' KB';
+                                                }
+                                            " />
+                                    </label>
                                 </div>
                             </div>
 
@@ -2347,7 +2410,8 @@
                     },
                     addEssayQuestion() {
                         this.essayQuestions.push({
-                            question: ''
+                            question: '',
+                            answer_key: ''
                         });
                     },
                     removeEssayQuestion(index) {

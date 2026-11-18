@@ -451,6 +451,12 @@
                                 </div>
 
                                 <div class="flex items-center justify-between sm:justify-end gap-3 shrink-0">
+                                    @if (str_contains((string) ($sub->notes ?? ''), '[Koreksi Otomatis Sistem]'))
+                                        <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded text-xs font-bold bg-blue-50 text-[#13416B] border border-blue-200">
+                                            <i class="fas fa-robot text-[11px]"></i> Otomatis Dinilai Sistem
+                                        </span>
+                                    @endif
+
                                     @if ($isGraded)
                                         <span class="text-xs sm:text-sm font-bold {{ $sub->is_passed ? 'text-emerald-600' : 'text-rose-600' }}">
                                             Nilai {{ $sub->score ?? 0 }} — {{ $sub->is_passed ? 'Lulus' : 'Perlu Revisi' }}
@@ -489,6 +495,12 @@
                                                         {{ $qIdx + 1 }}. {{ strip_tags($question->question) }}
                                                     </p>
                                                     <div class="p-3.5 sm:p-4 rounded bg-slate-50 border border-slate-200 text-sm sm:text-[15px] text-slate-800 leading-relaxed whitespace-pre-wrap wrap-break-word">{{ $ansText !== '' ? $ansText : 'Peserta tidak mengisi jawaban pada nomor ini.' }}</div>
+                                                    @if (!empty($question->answer_key))
+                                                        <div class="p-3 rounded bg-emerald-50/70 border border-emerald-200 text-xs sm:text-sm text-emerald-900">
+                                                            <span class="font-bold text-emerald-700">Kunci Jawaban / Poin Kunci:</span>
+                                                            <span>{{ $question->answer_key }}</span>
+                                                        </div>
+                                                    @endif
                                                     <div class="text-xs text-slate-400 text-right">{{ $wordCount }} kata</div>
                                                 </div>
                                             @empty
@@ -528,6 +540,13 @@
                                                     <div class="pt-3 border-t border-slate-100 flex items-center justify-between gap-2 text-xs sm:text-sm text-slate-500">
                                                         <span class="truncate">Soal Admin: {{ $selectedPostTest->admin_file_name ?? 'Dokumen Soal' }}</span>
                                                         <a href="{{ $selectedPostTest->admin_file_url }}" target="_blank" class="font-bold text-[#13416B] hover:underline shrink-0">Lihat Soal</a>
+                                                    </div>
+                                                @endif
+
+                                                @if ($selectedPostTest->answer_key_file_url)
+                                                    <div class="pt-3 border-t border-slate-100 flex items-center justify-between gap-2 text-xs sm:text-sm text-emerald-700">
+                                                        <span class="truncate font-semibold">Kunci Jawaban Otomatis: {{ $selectedPostTest->answer_key_file_name ?? 'Berkas Kunci' }}</span>
+                                                        <a href="{{ $selectedPostTest->answer_key_file_url }}" target="_blank" class="font-bold text-emerald-700 hover:underline shrink-0">Lihat Kunci</a>
                                                     </div>
                                                 @endif
                                             </div>

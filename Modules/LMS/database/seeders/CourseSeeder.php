@@ -12,6 +12,7 @@ use Modules\LMS\Models\Category;
 use Modules\LMS\Models\Course;
 use Modules\LMS\Models\PostTest;
 use Modules\LMS\Models\StudentContentProgress;
+use Modules\LMS\Services\PostTestService;
 
 class CourseSeeder extends Seeder
 {
@@ -535,7 +536,8 @@ class CourseSeeder extends Seeder
                             ]);
                         }
 
-                        // Luluskan semua post test modul & evaluasi akhir
+                        // Luluskan semua post test modul & evaluasi akhir menggunakan mesin koreksi otomatis
+                        $postTestService = app(PostTestService::class);
                         foreach ($allPostTests as $pt) {
                             $row = [
                                 'id'           => (string) Str::uuid(),
@@ -552,16 +554,24 @@ class CourseSeeder extends Seeder
                             if ($pt->is_essay) {
                                 $essayResponses = $pt->questions->values()->map(function ($q, $qIdx) use ($course) {
                                     return $qIdx === 0
-                                        ? "Pada implementasi {$course->name}, instansi kami memulai dari pemetaan regulasi, pengumpulan data primer lintas unit kerja, serta validasi indikator lapangan secara berkala."
-                                        : "Berdasarkan studi kasus tersebut, kendala utama di lapangan adalah sinkronisasi data antar bagian. Mitigasi yang diterapkan mencakup standardisasi SOP pelaporan dan audit kepatuhan berkala.";
+                                        ? "Pada implementasi {$course->name}, instansi kami melakukan pemetaan regulasi, pengumpulan data primer lintas unit, analisis kebutuhan kompetensi, serta validasi indikator lapangan secara berkala."
+                                        : "Mitigasi risiko ketidaksesuaian diterapkan melalui sinkronisasi data, koordinasi lintas unit, standardisasi SOP pelaporan, serta audit kepatuhan berkala.";
                                 })->all();
+                                $autoEval = $postTestService->autoGradeEssay($pt, $essayResponses);
                                 $row['answers'] = json_encode($essayResponses);
-                                $row['notes'] = 'Analisis uraian sudah tajam, sistematis, dan selaras dengan standar studi kasus.';
+                                $row['score'] = $autoEval['score'];
+                                $row['is_passed'] = $autoEval['is_passed'] ? 1 : 0;
+                                $row['status'] = $autoEval['status'];
+                                $row['notes'] = $autoEval['notes'];
                             } elseif ($pt->is_file_upload) {
-                                $row['file_path'] = 'assignments/demo/Contoh_Jawaban_Tugas_Peserta.pdf';
-                                $row['file_name'] = 'Laporan_Tugas_' . Str::slug(Str::limit($course->name, 25, ''), '_') . '.pdf';
-                                $row['score'] = 92;
-                                $row['notes'] = 'Berkas tugas tersusun lengkap sesuai sistematika lembar kerja.';
+                                $samplePath = 'assignments/demo/Jawaban_Peserta_Sempurna_100.xlsx';
+                                $autoEval = $postTestService->autoGradeFileUpload($pt, $samplePath);
+                                $row['file_path'] = $samplePath;
+                                $row['file_name'] = 'Kertas_Kerja_' . Str::slug(Str::limit($course->name, 20, ''), '_') . '.xlsx';
+                                $row['score'] = $autoEval['score'];
+                                $row['is_passed'] = $autoEval['is_passed'] ? 1 : 0;
+                                $row['status'] = $autoEval['status'];
+                                $row['notes'] = $autoEval['notes'];
                             }
 
                             DB::table('post_test_results')->insert($row);
@@ -581,12 +591,12 @@ class CourseSeeder extends Seeder
                             ]);
                         }
 
-                        // Jika bimtek online makro, sesi zoom kemarin sudah dihadiri & sebagian peserta sudah submit uraian/upload berkas
+                        // Jika bimtek online makro, sesi zoom kemarin sudah dihadiri & sebagian peserta sudah submit uraian/upload Excel (auto-graded variasi 100%, 80%, 50%)
                         if ($item['bimtek'] && $item['bimtek']['batch_code'] === 'PTK-MAKRO-2026-I') {
                             $zoomAttended = 1;
+                            $postTestService = app(PostTestService::class);
 
                             if ($studentIdx < 6) {
-                                $isPendingReview = $studentIdx < 4;
                                 $sampleEvaluationTests = $allPostTests
                                     ->whereNotNull('course_section_id')
                                     ->take(2)
@@ -594,37 +604,68 @@ class CourseSeeder extends Seeder
 
                                 foreach ($sampleEvaluationTests as $pt) {
                                     if ($pt->is_essay) {
-                                        $essayResponses = $pt->questions->values()->map(function ($q, $qIdx) {
-                                            return $qIdx === 0
-                                                ? 'Langkah strategis pertama adalah menyelaraskan proyeksi kebutuhan tenaga kerja makro dengan dokumen RPJMD daerah menggunakan analisis rasio elastisitas sektoral.'
-                                                : 'Mitigasi risiko ketidaksesuaian pasokan dan kebutuhan kerja dilakukan melalui koordinasi berkala antara Disnaker, Bappeda, dan balai pelatihan kerja setempat.';
-                                        })->all();
+                                        if ($studentIdx < 2) {
+                                            // Jawaban lengkap memuat semua poin kunci (Skor ~95-100 Lulus)
+                                            $essayResponses = $pt->questions->values()->map(function ($q, $qIdx) {
+                                                return $qIdx === 0
+                                                    ? 'Langkah strategis pertama dalam perencanaan tenaga kerja makro adalah pemetaan regulasi nasional/daerah, pengumpulan data primer sektoral, analisis kebutuhan lapangan kerja, serta validasi indikator secara berkala.'
+                                                    : 'Mitigasi risiko dilakukan melalui sinkronisasi data antar instansi, koordinasi lintas unit kerja, standardisasi SOP pelaporan, dan audit kepatuhan rutin.';
+                                            })->all();
+                                        } elseif ($studentIdx < 4) {
+                                            // Jawaban memuat sebagian besar poin kunci (Skor ~75-85 Lulus)
+                                            $essayResponses = $pt->questions->values()->map(function ($q, $qIdx) {
+                                                return $qIdx === 0
+                                                    ? 'Tahap implementasi mencakup pemetaan regulasi daerah, pengumpulan data primer, dan analisis kebutuhan kerja pada level makro.'
+                                                    : 'Penyelesaian kendala lapangan difokuskan pada sinkronisasi data, koordinasi lintas unit, dan standardisasi SOP.';
+                                            })->all();
+                                        } else {
+                                            // Jawaban kurang lengkap (Skor ~40-55 Perlu Revisi)
+                                            $essayResponses = $pt->questions->values()->map(function ($q, $qIdx) {
+                                                return $qIdx === 0
+                                                    ? 'Perencanaan tenaga kerja memerlukan pengumpulan data primer dari unit daerah.'
+                                                    : 'Perlu koordinasi lintas unit untuk mengurangi kesalahan pencatatan.';
+                                            })->all();
+                                        }
+
+                                        $autoEval = $postTestService->autoGradeEssay($pt, $essayResponses);
 
                                         DB::table('post_test_results')->insert([
                                             'id'           => (string) Str::uuid(),
                                             'user_id'      => $student->id,
                                             'post_test_id' => $pt->id,
                                             'answers'      => json_encode($essayResponses),
-                                            'score'        => $isPendingReview ? 85 : 88,
-                                            'is_passed'    => 1,
-                                            'status'       => $isPendingReview ? 'submitted' : 'graded',
-                                            'notes'        => $isPendingReview ? null : 'Penjelasan metodologi sudah tepat dan mudah dipahami.',
+                                            'score'        => $autoEval['score'],
+                                            'is_passed'    => $autoEval['is_passed'] ? 1 : 0,
+                                            'status'       => $autoEval['status'],
+                                            'notes'        => $autoEval['notes'],
                                             'completed_at' => now()->subHours(2 + $studentIdx),
                                             'created_at'   => now()->subHours(2 + $studentIdx),
                                             'updated_at'   => now()->subHours(2 + $studentIdx),
                                         ]);
                                     } elseif ($pt->is_file_upload) {
-                                        $filePrefix = $pt->course_section_id ? 'Tugas_Perencanaan_Makro_' : 'Evaluasi_Akhir_Perencanaan_Makro_';
+                                        if ($studentIdx < 2) {
+                                            $sampleFile = 'assignments/demo/Jawaban_Peserta_Sempurna_100.xlsx';
+                                            $displayFile = 'Kertas_Kerja_Sempurna_Peserta_' . ($studentIdx + 1) . '.xlsx';
+                                        } elseif ($studentIdx < 4) {
+                                            $sampleFile = 'assignments/demo/Jawaban_Peserta_Sebagian_80.xlsx';
+                                            $displayFile = 'Kertas_Kerja_Sebagian_Peserta_' . ($studentIdx + 1) . '.xlsx';
+                                        } else {
+                                            $sampleFile = 'assignments/demo/Jawaban_Peserta_Perlu_Revisi_50.xlsx';
+                                            $displayFile = 'Kertas_Kerja_Revisi_Peserta_' . ($studentIdx + 1) . '.xlsx';
+                                        }
+
+                                        $autoEval = $postTestService->autoGradeFileUpload($pt, $sampleFile);
+
                                         DB::table('post_test_results')->insert([
                                             'id'           => (string) Str::uuid(),
                                             'user_id'      => $student->id,
                                             'post_test_id' => $pt->id,
-                                            'file_path'    => 'assignments/demo/Contoh_Jawaban_Tugas_Peserta.pdf',
-                                            'file_name'    => $filePrefix . ($studentIdx + 1) . '.pdf',
-                                            'score'        => $isPendingReview ? 100 : 90,
-                                            'is_passed'    => 1,
-                                            'status'       => $isPendingReview ? 'submitted' : 'graded',
-                                            'notes'        => $isPendingReview ? 'Mohon arahan terkait lampiran proyeksi sektor industri pada halaman 3.' : 'Lampiran proyeksi sektor industri sudah akurat.',
+                                            'file_path'    => $sampleFile,
+                                            'file_name'    => $displayFile,
+                                            'score'        => $autoEval['score'],
+                                            'is_passed'    => $autoEval['is_passed'] ? 1 : 0,
+                                            'status'       => $autoEval['status'],
+                                            'notes'        => $autoEval['notes'],
                                             'completed_at' => now()->subHours(1 + $studentIdx),
                                             'created_at'   => now()->subHours(1 + $studentIdx),
                                             'updated_at'   => now()->subHours(1 + $studentIdx),

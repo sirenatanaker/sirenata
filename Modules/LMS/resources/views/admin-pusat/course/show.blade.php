@@ -285,12 +285,6 @@
                                                             class="flex-1 px-4 py-3 rounded-xl text-sm font-bold text-white bg-amber-500 hover:bg-amber-600 transition-colors flex items-center justify-center gap-2 shadow-sm">
                                                             <i class="fas {{ $postTestTypeIcon }}"></i> Edit Evaluasi ({{ $postTestTypeLabel }})
                                                         </a>
-                                                        @if (in_array($postTestType, ['essay', 'uraian', 'file_upload', 'upload'], true))
-                                                            <a href="{{ route('admin-pusat.management-course.post-test-submissions.index', ['course_id' => $course->id, 'post_test_id' => data_get($existingPostTest, 'id')]) }}"
-                                                                class="px-4 py-3 rounded-xl text-sm font-bold text-[#13416B] bg-white hover:bg-slate-100 border border-slate-200 transition-colors flex items-center justify-center gap-2 shadow-sm">
-                                                                <i class="fas fa-clipboard-check"></i> Jawaban Peserta
-                                                            </a>
-                                                        @endif
                                                     @else
                                                         <a href="{{ route('admin-pusat.management-course.post-tests.create', ['course_slug' => $course->slug, 'section_id' => $section->id]) }}"
                                                             class="flex-1 px-4 py-3 border border-emerald-200 rounded-xl text-sm font-bold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 transition-colors flex items-center justify-center gap-2 shadow-sm">
@@ -334,12 +328,6 @@
 
                                         @if ($existingFinalTest)
                                             <div class="w-full sm:w-auto flex flex-col sm:flex-row items-stretch sm:items-center gap-2 shrink-0">
-                                                @if (in_array($finalType, ['essay', 'uraian', 'file_upload', 'upload'], true))
-                                                    <a href="{{ route('admin-pusat.management-course.post-test-submissions.index', ['course_id' => $course->id, 'post_test_id' => data_get($existingFinalTest, 'id')]) }}"
-                                                        class="w-full sm:w-auto px-4 sm:px-5 py-2.5 bg-white text-[#13416B] text-xs sm:text-sm font-bold rounded-xl hover:bg-slate-100 transition-all shadow-sm flex items-center justify-center gap-2">
-                                                        <i class="fas fa-clipboard-check"></i> Jawaban Peserta
-                                                    </a>
-                                                @endif
                                                 <a href="{{ route('admin-pusat.management-course.post-tests.edit', data_get($existingFinalTest, 'id')) }}?course_slug={{ $course->slug }}"
                                                     class="w-full sm:w-auto px-4 sm:px-5 py-2.5 bg-amber-500 text-white text-xs sm:text-sm font-bold rounded-xl hover:bg-amber-600 transition-all shadow-sm flex items-center justify-center gap-2">
                                                     <i class="fas {{ $finalTypeIcon }}"></i> Edit Evaluasi ({{ $finalTypeLabel }})

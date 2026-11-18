@@ -25,6 +25,9 @@ class PostTest extends Model
         'admin_file_path',
         'admin_file_name',
         'admin_file_size',
+        'answer_key_file_path',
+        'answer_key_file_name',
+        'answer_key_file_size',
         'instructions',
         'max_words',
     ];
@@ -47,6 +50,25 @@ class PostTest extends Model
     public function getAdminFileUrlAttribute(): ?string
     {
         return $this->admin_file_path ? Storage::url($this->admin_file_path) : null;
+    }
+
+    public function getAnswerKeyFileUrlAttribute(): ?string
+    {
+        return $this->answer_key_file_path ? Storage::url($this->answer_key_file_path) : null;
+    }
+
+    public function getHasAutoGradingAttribute(): bool
+    {
+        if ($this->is_file_upload) {
+            return !empty($this->answer_key_file_path);
+        }
+
+        if ($this->is_essay) {
+            $questions = $this->relationLoaded('questions') ? $this->questions : $this->questions()->get();
+            return $questions->contains(fn($q) => !empty(trim((string) $q->answer_key)));
+        }
+
+        return $this->is_multiple_choice;
     }
 
     public function getIsEssayAttribute(): bool

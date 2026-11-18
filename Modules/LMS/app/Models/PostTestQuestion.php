@@ -16,6 +16,7 @@ class PostTestQuestion extends Model
     protected $fillable = [
         'post_test_id',
         'question',
+        'answer_key',
     ];
 
     public function postTest(): BelongsTo

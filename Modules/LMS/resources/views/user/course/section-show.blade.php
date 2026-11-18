@@ -477,19 +477,29 @@
                             {{-- (Admin Upload File Soal -> User Download & Upload Tugas) --}}
                             {{-- ======================================================== --}}
                             @if ($currentEvalType === 'upload')
+                                @php
+                                    $secAdminExt = strtolower(pathinfo((string) ($adminFileName ?? ''), PATHINFO_EXTENSION));
+                                    $isSecExcel = in_array($secAdminExt, ['xlsx', 'xls', 'csv'], true);
+                                    $secHasAutoGrade = (bool) ($postTestBab?->has_auto_grading ?? false);
+                                @endphp
                                 <div class="space-y-3.5">
                                     {{-- 1. Berkas Soal dari Admin/Penyelenggara --}}
                                     <div class="p-4 rounded-md bg-white border border-white/20 shadow-2xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3.5">
                                         <div class="flex items-center gap-3">
-                                            <div class="w-11 h-11 rounded-md bg-white text-red-500 border border-blue-200 flex items-center justify-center shrink-0 shadow-2xs">
-                                                <i class="fas fa-file-pdf text-2xl"></i>
+                                            <div class="w-11 h-11 rounded-md bg-white {{ $isSecExcel ? 'text-emerald-600' : 'text-red-500' }} border border-blue-200 flex items-center justify-center shrink-0 shadow-2xs">
+                                                <i class="fas {{ $isSecExcel ? 'fa-file-excel' : 'fa-file-pdf' }} text-2xl"></i>
                                             </div>
                                             <div class="space-y-0.5">
                                                 <div class="flex items-center gap-2 flex-wrap">
                                                     <span class="text-2xs font-bold uppercase tracking-wider text-blue-800 bg-blue-100 px-2 py-0.5 rounded">
                                                         Berkas Soal dari Admin
                                                     </span>
-                                                    <span class="text-[11px] text-slate-500 font-medium">{{ $adminFileSize }} • PDF Document</span>
+                                                    @if ($secHasAutoGrade)
+                                                        <span class="text-2xs font-bold uppercase tracking-wider text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded">
+                                                            <i class="fas fa-robot mr-1"></i> Koreksi Otomatis Aktif
+                                                        </span>
+                                                    @endif
+                                                    <span class="text-[11px] text-slate-500 font-medium">{{ $adminFileSize }} • {{ $secAdminExt ? strtoupper($secAdminExt) : 'PDF' }} Document</span>
                                                 </div>
                                                 <p class="text-xs sm:text-sm font-bold text-slate-800">
                                                     {{ $adminFileName }}
@@ -517,16 +527,28 @@
                                                             <i class="fas fa-check-circle text-xl"></i>
                                                         </div>
                                                         <div>
-                                                            <div class="flex items-center gap-2">
-                                                                <p class="text-xs sm:text-sm font-bold text-slate-800">Tugas Berhasil Dikumpulkan</p>
-                                                                <span class="text-2xs font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">Diserahkan</span>
+                                                            @php
+                                                                $isSecAssignGraded = ($evalResult?->status ?? '') === 'graded';
+                                                                $isSecAssignPassed = (bool) ($evalResult?->is_passed ?? true);
+                                                            @endphp
+                                                            <div class="flex items-center gap-2 flex-wrap">
+                                                                <p class="text-xs sm:text-sm font-bold text-slate-800">
+                                                                    {{ $isSecAssignGraded ? 'Berkas Tugas Telah Dinilai' : 'Tugas Berhasil Dikumpulkan' }}
+                                                                </p>
+                                                                @if ($isSecAssignGraded)
+                                                                    <span class="text-2xs font-bold {{ $isSecAssignPassed ? 'text-emerald-700 bg-emerald-50 border-emerald-200' : 'text-rose-700 bg-rose-50 border-rose-200' }} px-2 py-0.5 rounded border">
+                                                                        Nilai: {{ $evalResult?->score ?? 0 }} ({{ $isSecAssignPassed ? 'Lulus' : 'Perlu Revisi' }})
+                                                                    </span>
+                                                                @else
+                                                                    <span class="text-2xs font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">Diserahkan</span>
+                                                                @endif
                                                             </div>
                                                             <p class="text-xs text-slate-600 mt-0.5">
                                                                 Berkas: <span class="font-semibold text-slate-800">{{ $evalResult?->file_name ?? 'Dokumen_Tugas.pdf' }}</span>
                                                                 • {{ $evalResult?->completed_at ? $evalResult->completed_at->translatedFormat('d M Y, H:i') . ' WIB' : 'Hari ini' }}
                                                             </p>
                                                             @if (!empty($evalResult?->notes))
-                                                                <p class="text-xs text-slate-500 italic mt-0.5">"{{ $evalResult->notes }}"</p>
+                                                                <p class="text-xs text-slate-600 mt-1">{{ $evalResult->notes }}</p>
                                                             @endif
                                                         </div>
                                                     </div>
@@ -564,9 +586,9 @@
                                                         <input type="file"
                                                             name="assignment_file"
                                                             required
-                                                            accept=".pdf,.docx,.doc,.zip,.rar"
+                                                            accept=".xlsx,.xls,.csv,.pdf,.docx,.doc,.zip,.rar"
                                                             class="block w-full text-xs text-slate-500 file:mr-2 file:py-2 file:px-3 file:rounded file:border-0 file:text-xs file:font-bold file:bg-[#13416B] file:text-white hover:file:bg-[#0f3354] file:cursor-pointer border border-slate-200 rounded bg-slate-50 p-1" />
-                                                        <span class="block text-[11px] text-slate-400 mt-1">Format: PDF, DOCX, ZIP (Maks. 10 MB)</span>
+                                                        <span class="block text-[11px] text-slate-400 mt-1">Format: Excel (XLSX/XLS/CSV), PDF, DOCX, ZIP (Maks. 10 MB)</span>
                                                     </div>
                                                     <div>
                                                         <label class="block text-xs font-bold text-slate-700 mb-1.5">
@@ -574,7 +596,7 @@
                                                         </label>
                                                         <input type="text"
                                                             name="notes"
-                                                            value="{{ old('notes', $evalResult?->notes ?? '') }}"
+                                                            value="{{ old('notes', !str_contains((string) ($evalResult?->notes ?? ''), '[Koreksi Otomatis Sistem]') ? ($evalResult?->notes ?? '') : '') }}"
                                                             placeholder="Contoh: Berkas lembar kerja tugas studi kasus kelompok/peserta"
                                                             class="w-full px-3 py-2 text-xs rounded border border-slate-300 text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-[#13416B]" />
                                                     </div>
@@ -742,7 +764,7 @@
                                                 Metode Penilaian
                                             </span>
                                             <span class="font-bold text-slate-800 text-right">
-                                                Penilaian Instruktur
+                                                {{ ($postTestBab && $postTestBab->has_auto_grading) ? 'Koreksi Otomatis Sistem' : 'Penilaian Instruktur' }}
                                             </span>
                                         </div>
                                     @elseif (data_get($postTestBab, 'passing_score', 0) > 0)
