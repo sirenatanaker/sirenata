@@ -5,6 +5,7 @@ namespace Modules\LMS\Database\Seeders;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Modules\LMS\Models\BimtekEvent;
 use Modules\LMS\Models\Category;
@@ -444,6 +445,15 @@ class CourseSeeder extends Seeder
             ]);
         }
 
+        // Pastikan file dummy jawaban tugas peserta tersedia untuk link pratinjau admin
+        Storage::disk('public')->makeDirectory('assignments/demo');
+        if (!Storage::disk('public')->exists('assignments/demo/Contoh_Jawaban_Tugas_Peserta.pdf')) {
+            Storage::disk('public')->put(
+                'assignments/demo/Contoh_Jawaban_Tugas_Peserta.pdf',
+                "%PDF-1.4\n1 0 obj\n<< /Title (Contoh Lembar Jawaban Tugas Peserta) /Author (Peserta Bimtek) >>\nendobj\ntrailer\n<< /Root 1 0 R >>\n%%EOF"
+            );
+        }
+
         // Akun demo utama yang harus tetap belum terdaftar pada kursus katalog
         $primaryDemoEmails = [
             'pusat@gmail.com',
@@ -482,7 +492,7 @@ class CourseSeeder extends Seeder
 
             $allContents = $course->sections->flatMap->contents;
             $allContentIds = $allContents->pluck('id')->toArray();
-            $allPostTests = PostTest::where('course_id', $course->id)->get();
+            $allPostTests = PostTest::with('questions')->where('course_id', $course->id)->get();
             $allPostTestIds = $allPostTests->pluck('id')->toArray();
 
             $activeBimtek = BimtekEvent::where('course_id', $course->id)->latest()->first();
@@ -494,7 +504,7 @@ class CourseSeeder extends Seeder
                 // =============================================================
                 $targetPct = $item['target_pct'] ?? 0;
 
-                foreach ($users as $student) {
+                foreach ($users as $studentIdx => $student) {
                     // Reset status lama di pivot & progress konten untuk kursus ini
                     if (!empty($allContentIds)) {
                         StudentContentProgress::where('user_id', $student->id)
@@ -527,16 +537,34 @@ class CourseSeeder extends Seeder
 
                         // Luluskan semua post test modul & evaluasi akhir
                         foreach ($allPostTests as $pt) {
-                            DB::table('post_test_results')->insert([
+                            $row = [
                                 'id'           => (string) Str::uuid(),
                                 'user_id'      => $student->id,
                                 'post_test_id' => $pt->id,
                                 'score'        => 90,
                                 'is_passed'    => 1,
+                                'status'       => 'graded',
                                 'completed_at' => now()->subDay(),
                                 'created_at'   => now()->subDay(),
                                 'updated_at'   => now()->subDay(),
-                            ]);
+                            ];
+
+                            if ($pt->is_essay) {
+                                $essayResponses = $pt->questions->values()->map(function ($q, $qIdx) use ($course) {
+                                    return $qIdx === 0
+                                        ? "Pada implementasi {$course->name}, instansi kami memulai dari pemetaan regulasi, pengumpulan data primer lintas unit kerja, serta validasi indikator lapangan secara berkala."
+                                        : "Berdasarkan studi kasus tersebut, kendala utama di lapangan adalah sinkronisasi data antar bagian. Mitigasi yang diterapkan mencakup standardisasi SOP pelaporan dan audit kepatuhan berkala.";
+                                })->all();
+                                $row['answers'] = json_encode($essayResponses);
+                                $row['notes'] = 'Analisis uraian sudah tajam, sistematis, dan selaras dengan standar studi kasus.';
+                            } elseif ($pt->is_file_upload) {
+                                $row['file_path'] = 'assignments/demo/Contoh_Jawaban_Tugas_Peserta.pdf';
+                                $row['file_name'] = 'Laporan_Tugas_' . Str::slug(Str::limit($course->name, 25, ''), '_') . '.pdf';
+                                $row['score'] = 92;
+                                $row['notes'] = 'Berkas tugas tersusun lengkap sesuai sistematika lembar kerja.';
+                            }
+
+                            DB::table('post_test_results')->insert($row);
                         }
 
                         $zoomAttended = $activeBimtek ? 1 : 0;
@@ -553,9 +581,51 @@ class CourseSeeder extends Seeder
                             ]);
                         }
 
-                        // Jika bimtek online makro, sesi zoom kemarin sudah dihadiri
+                        // Jika bimtek online makro, sesi zoom kemarin sudah dihadiri & sebagian peserta sudah submit uraian/upload berkas
                         if ($item['bimtek'] && $item['bimtek']['batch_code'] === 'PTK-MAKRO-2026-I') {
                             $zoomAttended = 1;
+
+                            if ($studentIdx < 6) {
+                                $isPendingReview = $studentIdx < 4;
+                                foreach ($allPostTests->whereNotNull('course_section_id')->take(2) as $pt) {
+                                    if ($pt->is_essay) {
+                                        $essayResponses = $pt->questions->values()->map(function ($q, $qIdx) {
+                                            return $qIdx === 0
+                                                ? 'Langkah strategis pertama adalah menyelaraskan proyeksi kebutuhan tenaga kerja makro dengan dokumen RPJMD daerah menggunakan analisis rasio elastisitas sektoral.'
+                                                : 'Mitigasi risiko ketidaksesuaian pasokan dan kebutuhan kerja dilakukan melalui koordinasi berkala antara Disnaker, Bappeda, dan balai pelatihan kerja setempat.';
+                                        })->all();
+
+                                        DB::table('post_test_results')->insert([
+                                            'id'           => (string) Str::uuid(),
+                                            'user_id'      => $student->id,
+                                            'post_test_id' => $pt->id,
+                                            'answers'      => json_encode($essayResponses),
+                                            'score'        => $isPendingReview ? 85 : 88,
+                                            'is_passed'    => 1,
+                                            'status'       => $isPendingReview ? 'submitted' : 'graded',
+                                            'notes'        => $isPendingReview ? null : 'Penjelasan metodologi sudah tepat dan mudah dipahami.',
+                                            'completed_at' => now()->subHours(2 + $studentIdx),
+                                            'created_at'   => now()->subHours(2 + $studentIdx),
+                                            'updated_at'   => now()->subHours(2 + $studentIdx),
+                                        ]);
+                                    } elseif ($pt->is_file_upload) {
+                                        DB::table('post_test_results')->insert([
+                                            'id'           => (string) Str::uuid(),
+                                            'user_id'      => $student->id,
+                                            'post_test_id' => $pt->id,
+                                            'file_path'    => 'assignments/demo/Contoh_Jawaban_Tugas_Peserta.pdf',
+                                            'file_name'    => 'Tugas_Perencanaan_Makro_' . ($studentIdx + 1) . '.pdf',
+                                            'score'        => $isPendingReview ? 100 : 90,
+                                            'is_passed'    => 1,
+                                            'status'       => $isPendingReview ? 'submitted' : 'graded',
+                                            'notes'        => $isPendingReview ? 'Mohon arahan terkait lampiran proyeksi sektor industri pada halaman 3.' : 'Lampiran proyeksi sektor industri sudah akurat.',
+                                            'completed_at' => now()->subHours(1 + $studentIdx),
+                                            'created_at'   => now()->subHours(1 + $studentIdx),
+                                            'updated_at'   => now()->subHours(1 + $studentIdx),
+                                        ]);
+                                    }
+                                }
+                            }
                         }
                     } else {
                         // Belum Mulai (0%)

@@ -13,6 +13,7 @@ use Modules\LMS\Http\Controllers\AdminPusat\Course\CategoryController as AdminPu
 use Modules\LMS\Http\Controllers\AdminPusat\Course\CourseSectionController;
 use Modules\LMS\Http\Controllers\AdminPusat\Course\PostTestController;
 use Modules\LMS\Http\Controllers\AdminPusat\Course\SectionContentController;
+use Modules\LMS\Http\Controllers\AdminPusat\PostTestSubmissionController;
 use Modules\LMS\Http\Controllers\AdminPusat\LibraryCategoryController as AdminPusatLibraryCategoryController;
 use Modules\LMS\Http\Controllers\AdminPusat\LibraryController as AdminPusatLibraryController;
 use Modules\LMS\Http\Controllers\AdminPusat\RekapitulasiController;
@@ -62,6 +63,9 @@ Route::prefix('admin-pusat')->middleware(['auth', 'role:admin-pusat'])->name('ad
 
             Route::post('/upload-image', [PostTestController::class, 'uploadImage'])->name('upload-image');
         });
+
+        Route::get('post-test-submissions', [PostTestSubmissionController::class, 'index'])->name('post-test-submissions.index');
+        Route::post('post-test-submissions/{id}/grade', [PostTestSubmissionController::class, 'grade'])->name('post-test-submissions.grade');
 
         Route::post('upload-video-editor', [SectionContentController::class, 'uploadVideoEditor'])->name('upload-video-editor');
         Route::post('upload-image-editor', [SectionContentController::class, 'uploadImageEditor'])->name('upload-image-editor');

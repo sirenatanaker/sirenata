@@ -82,27 +82,49 @@
                     {{-- (Satu Card Rata Kiri Mencakup Seluruh Soal & Textarea) --}}
                     {{-- ======================================================= --}}
                     @if ($isEssayDone && !request()->query('retake'))
+                        @php
+                            $isEssayGraded = ($evalResult?->status ?? '') === 'graded';
+                            $isEssayPassed = (bool) ($evalResult?->is_passed ?? true);
+                        @endphp
                         <div class="bg-white p-5 sm:p-8 lg:p-10 text-left space-y-6 animate-fadeIn">
-                            <div class="p-5 rounded-lg bg-emerald-50 border border-emerald-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                                <div class="flex items-center gap-3.5">
-                                    <div class="w-12 h-12 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0 border border-emerald-200">
-                                        <i class="fas fa-check-circle text-2xl"></i>
-                                    </div>
-                                    <div>
-                                        <div class="flex items-center gap-2">
-                                            <h2 class="text-base sm:text-lg font-extrabold text-slate-800">Jawaban Uraian Berhasil Dikirim 🎉</h2>
-                                            <span class="text-[10px] font-bold text-emerald-700 bg-white border border-emerald-200 px-2 py-0.5 rounded">Diserahkan</span>
+                            <div class="p-5 rounded-lg {{ $isEssayGraded ? ($isEssayPassed ? 'bg-emerald-50 border-emerald-200' : 'bg-amber-50 border-amber-200') : 'bg-emerald-50 border-emerald-200' }} border space-y-3">
+                                <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                                    <div class="flex items-center gap-3.5">
+                                        <div class="w-12 h-12 rounded-full {{ $isEssayGraded && !$isEssayPassed ? 'bg-amber-100 text-amber-600 border-amber-200' : 'bg-emerald-100 text-emerald-600 border-emerald-200' }} flex items-center justify-center shrink-0 border">
+                                            <i class="fas {{ $isEssayGraded && !$isEssayPassed ? 'fa-exclamation-circle' : 'fa-check-circle' }} text-2xl"></i>
                                         </div>
-                                        <p class="text-xs sm:text-sm text-slate-600 mt-0.5">
-                                            Diserahkan pada {{ $evalResult?->completed_at ? $evalResult->completed_at->translatedFormat('d M Y, H:i') . ' WIB' : 'Hari ini' }} • Menunggu penilaian dari instruktur.
-                                        </p>
+                                        <div>
+                                            <div class="flex items-center gap-2 flex-wrap">
+                                                <h2 class="text-base sm:text-lg font-extrabold text-slate-800">
+                                                    {{ $isEssayGraded ? 'Evaluasi Uraian Telah Dinilai' : 'Jawaban Uraian Berhasil Dikirim' }}
+                                                </h2>
+                                                @if ($isEssayGraded)
+                                                    <span class="text-[10px] font-bold {{ $isEssayPassed ? 'text-emerald-700 border-emerald-200' : 'text-rose-700 border-rose-200' }} bg-white border px-2 py-0.5 rounded">
+                                                        Nilai: {{ $evalResult?->score ?? 0 }} ({{ $isEssayPassed ? 'Lulus' : 'Perlu Revisi' }})
+                                                    </span>
+                                                @else
+                                                    <span class="text-[10px] font-bold text-amber-700 bg-white border border-amber-200 px-2 py-0.5 rounded">Menunggu Penilaian</span>
+                                                @endif
+                                            </div>
+                                            <p class="text-xs sm:text-sm text-slate-600 mt-0.5">
+                                                Diserahkan pada {{ $evalResult?->completed_at ? $evalResult->completed_at->translatedFormat('d M Y, H:i') . ' WIB' : 'Hari ini' }}
+                                                • {{ $isEssayGraded ? 'Sudah dikoreksi oleh instruktur.' : 'Menunggu penilaian dari instruktur.' }}
+                                            </p>
+                                        </div>
                                     </div>
+
+                                    <a href="?retake=1" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 transition-colors shadow-2xs whitespace-nowrap">
+                                        <i class="fas fa-edit text-xs text-slate-500"></i>
+                                        <span>Edit Jawaban Uraian</span>
+                                    </a>
                                 </div>
 
-                                <a href="?retake=1" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 transition-colors shadow-2xs whitespace-nowrap">
-                                    <i class="fas fa-edit text-xs text-slate-500"></i>
-                                    <span>Edit Jawaban Uraian</span>
-                                </a>
+                                @if ($isEssayGraded && !empty($evalResult?->notes))
+                                    <div class="p-3.5 rounded-lg bg-white/90 border border-slate-200/80 text-xs sm:text-sm text-slate-700 leading-relaxed">
+                                        <span class="font-bold text-[#13416B] block mb-0.5">Catatan / Umpan Balik Instruktur:</span>
+                                        <span>{{ $evalResult->notes }}</span>
+                                    </div>
+                                @endif
                             </div>
 
                             <div class="space-y-6 pt-2">
@@ -111,7 +133,7 @@
                                         Salinan Jawaban Anda ({{ count($postTest->questions) }} Soal)
                                     </h3>
                                     <span class="text-xs text-slate-400">
-                                        Penilaian Instruktur
+                                        {{ $isEssayGraded ? 'Nilai: ' . ($evalResult?->score ?? 0) . ' / 100' : 'Penilaian Instruktur' }}
                                     </span>
                                 </div>
 
@@ -235,22 +257,37 @@
 
                         {{-- 2. Formulir / Status Pengumpulan Jawaban --}}
                         @if ($isAssignmentDone && !request()->query('retake'))
-                            <div class="p-5 rounded-xl bg-emerald-50 border border-emerald-200 space-y-4">
+                            @php
+                                $isAssignGraded = ($evalResult?->status ?? '') === 'graded';
+                                $isAssignPassed = (bool) ($evalResult?->is_passed ?? true);
+                            @endphp
+                            <div class="p-5 rounded-xl {{ $isAssignGraded && !$isAssignPassed ? 'bg-amber-50 border-amber-200' : 'bg-emerald-50 border-emerald-200' }} border space-y-4">
                                 <div class="flex items-center gap-3">
-                                    <div class="w-10 h-10 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0">
-                                        <i class="fas fa-check-circle text-xl"></i>
+                                    <div class="w-10 h-10 rounded-full {{ $isAssignGraded && !$isAssignPassed ? 'bg-amber-100 text-amber-600' : 'bg-emerald-100 text-emerald-600' }} flex items-center justify-center shrink-0">
+                                        <i class="fas {{ $isAssignGraded && !$isAssignPassed ? 'fa-exclamation-circle' : 'fa-check-circle' }} text-xl"></i>
                                     </div>
                                     <div>
-                                        <div class="flex items-center gap-2">
-                                            <h3 class="text-sm sm:text-base font-bold text-slate-800">Berkas Tugas Berhasil Dikumpulkan 🎉</h3>
-                                            <span class="text-[10px] font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded">Diserahkan</span>
+                                        <div class="flex items-center gap-2 flex-wrap">
+                                            <h3 class="text-sm sm:text-base font-bold text-slate-800">
+                                                {{ $isAssignGraded ? 'Berkas Tugas Telah Dinilai' : 'Berkas Tugas Berhasil Dikumpulkan' }}
+                                            </h3>
+                                            @if ($isAssignGraded)
+                                                <span class="text-[10px] font-bold {{ $isAssignPassed ? 'text-emerald-700 bg-white border-emerald-200' : 'text-rose-700 bg-white border-rose-200' }} border px-2 py-0.5 rounded">
+                                                    Nilai: {{ $evalResult?->score ?? 0 }} ({{ $isAssignPassed ? 'Lulus' : 'Perlu Revisi' }})
+                                                </span>
+                                            @else
+                                                <span class="text-[10px] font-bold text-amber-700 bg-white border border-amber-200 px-2 py-0.5 rounded">Menunggu Penilaian</span>
+                                            @endif
                                         </div>
                                         <p class="text-xs text-slate-600 mt-0.5">
                                             Nama Berkas: <span class="font-bold text-slate-800">{{ $evalResult?->file_name ?? 'Dokumen_Jawaban.pdf' }}</span>
                                             • Diserahkan pada {{ $evalResult?->completed_at ? $evalResult->completed_at->translatedFormat('d M Y, H:i') . ' WIB' : 'Hari ini' }}
                                         </p>
                                         @if (!empty($evalResult?->notes))
-                                            <p class="text-xs text-slate-600 italic mt-1">Catatan: "{{ $evalResult->notes }}"</p>
+                                            <p class="text-xs text-slate-700 mt-1.5 bg-white/80 border border-slate-200/80 rounded px-3 py-2">
+                                                <span class="font-bold text-[#13416B]">{{ $isAssignGraded ? 'Catatan Instruktur:' : 'Catatan Anda:' }}</span>
+                                                <span class="italic">“{{ $evalResult->notes }}”</span>
+                                            </p>
                                         @endif
                                     </div>
                                 </div>

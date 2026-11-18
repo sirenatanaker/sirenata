@@ -4,12 +4,7 @@
         {{-- Header Banner --}}
         <div class="p-5 sm:p-6 rounded-md bg-[#13416B] text-white shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div class="space-y-1.5">
-                <div class="flex items-center gap-2">
-                    <span class="w-8 h-8 rounded-md bg-white/10 flex items-center justify-center text-sm">
-                        <i class="fas fa-poll-h"></i>
-                    </span>
-                    <h1 class="text-lg sm:text-xl font-bold tracking-tight">Kuesioner Evaluasi Bimtek</h1>
-                </div>
+                <h1 class="text-lg sm:text-xl font-bold tracking-tight">Kuesioner Evaluasi Bimtek</h1>
                 <p class="text-xs sm:text-sm text-slate-200 max-w-2xl leading-relaxed">
                     Kelola format instrumen evaluasi narasumber & sarana bimtek bergaya kuesioner mandiri, serta pantau rekapitulasi masukan objektif dari seluruh peserta pelatihan.
                 </p>
@@ -27,15 +22,13 @@
         {{-- Navigasi Tab (Pertanyaan vs Rekap Respon) --}}
         <div class="flex border-b border-slate-200 gap-2">
             <a href="{{ route('admin-pusat.management-course.evaluation-questions.index', ['tab' => 'questions']) }}"
-               class="px-4 py-2.5 text-xs sm:text-sm font-bold border-b-2 transition-colors flex items-center gap-2
+               class="px-4 py-2.5 text-xs sm:text-sm font-bold border-b-2 transition-colors flex items-center
                {{ $tab === 'questions' ? 'border-[#13416B] text-[#13416B]' : 'border-transparent text-slate-500 hover:text-slate-700' }}">
-                <i class="fas fa-list-ul"></i>
                 <span>Instrumen Pertanyaan ({{ $questions->count() }})</span>
             </a>
             <a href="{{ route('admin-pusat.management-course.evaluation-questions.index', ['tab' => 'responses', 'bimtek_event_id' => $selectedEventId]) }}"
-               class="px-4 py-2.5 text-xs sm:text-sm font-bold border-b-2 transition-colors flex items-center gap-2
+               class="px-4 py-2.5 text-xs sm:text-sm font-bold border-b-2 transition-colors flex items-center
                {{ $tab === 'responses' ? 'border-[#13416B] text-[#13416B]' : 'border-transparent text-slate-500 hover:text-slate-700' }}">
-                <i class="fas fa-chart-bar"></i>
                 <span>Rekapitulasi Respon Kuesioner ({{ $totalEvaluationsCount }})</span>
             </a>
         </div>
@@ -45,7 +38,6 @@
             <div class="bg-white rounded-md border border-slate-200 shadow-2xs overflow-hidden">
                 <div class="px-5 py-3.5 bg-slate-50/70 border-b border-slate-200 flex items-center justify-between">
                     <div class="flex items-center gap-2">
-                        <span class="w-2.5 h-2.5 rounded-full bg-[#13416B]"></span>
                         <h3 class="text-sm font-bold text-slate-800">Daftar Pertanyaan Kuesioner</h3>
                         <span class="text-xs text-slate-500 font-medium">({{ $questions->count() }} Pertanyaan)</span>
                     </div>
@@ -72,43 +64,13 @@
                                     </div>
 
                                     <div class="space-y-1.5 flex-1 min-w-0">
-                                        <div class="flex items-center gap-2 flex-wrap">
-                                            <h4 class="text-sm font-bold text-slate-900 leading-snug">
-                                                {{ $q->question }}
-                                                @if ($q->is_required)
-                                                    <span class="text-rose-500 font-bold" title="Wajib Diisi">*</span>
-                                                @endif
-                                            </h4>
-                                            
-                                            {{-- Badge Tipe Pertanyaan --}}
-                                            @if ($q->type === 'scale')
-                                                <span class="inline-flex items-center gap-1 text-[11px] font-semibold text-blue-700 bg-blue-50 border border-blue-200 px-2 py-0.5 rounded">
-                                                    <i class="fas fa-star text-[10px] text-amber-500"></i> Skala 1 - {{ $q->scale_max }}
-                                                </span>
-                                            @else
-                                                <span class="inline-flex items-center gap-1 text-[11px] font-semibold text-purple-700 bg-purple-50 border border-purple-200 px-2 py-0.5 rounded">
-                                                    <i class="fas fa-align-left text-[10px]"></i> Teks Uraian / Masukan
-                                                </span>
-                                            @endif
-
-                                            {{-- Badge Wajib / Opsional --}}
+                                        {{-- Judul Pertanyaan Bersih --}}
+                                        <h4 class="text-sm font-bold text-slate-900 leading-snug">
+                                            {{ $q->question }}
                                             @if ($q->is_required)
-                                                <span class="text-[10px] font-bold text-slate-600 bg-slate-100 px-1.5 py-0.5 rounded">Wajib</span>
-                                            @else
-                                                <span class="text-[10px] font-medium text-slate-400 bg-slate-50 px-1.5 py-0.5 rounded">Opsional</span>
+                                                <span class="text-rose-500 font-bold" title="Wajib Diisi">*</span>
                                             @endif
-
-                                            {{-- Badge Status --}}
-                                            @if ($q->is_active)
-                                                <span class="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded">
-                                                    <i class="fas fa-check-circle text-[9px]"></i> Aktif
-                                                </span>
-                                            @else
-                                                <span class="inline-flex items-center gap-1 text-[10px] font-medium text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded">
-                                                    Non-Aktif
-                                                </span>
-                                            @endif
-                                        </div>
+                                        </h4>
 
                                         @if ($q->description)
                                             <p class="text-xs text-slate-500 leading-relaxed">
@@ -116,13 +78,27 @@
                                             </p>
                                         @endif
 
-                                        @if ($q->type === 'scale')
-                                            <div class="flex items-center gap-3 text-[11px] text-slate-400 pt-0.5">
-                                                <span>1 = {{ $q->min_label ?: 'Sangat Kurang' }}</span>
-                                                <span>•</span>
-                                                <span>{{ $q->scale_max }} = {{ $q->max_label ?: 'Sangat Baik' }}</span>
-                                            </div>
-                                        @endif
+                                        {{-- Metadata Mengalir di Bawah Title (Tanpa Badge Kotak) --}}
+                                        <div class="flex flex-wrap items-center gap-x-2.5 sm:gap-x-3 gap-y-1.5 text-xs text-slate-500 pt-1">
+                                            <span>
+                                                @if ($q->type === 'scale')
+                                                    <span class="font-semibold text-slate-700">Skala 1 - {{ $q->scale_max }}</span>
+                                                    <span class="text-slate-500 font-medium ml-1">(1 = {{ $q->min_label ?: 'Sangat Kurang' }}, {{ $q->scale_max }} = {{ $q->max_label ?: 'Sangat Baik' }})</span>
+                                                @else
+                                                    <span class="font-semibold text-slate-700">Teks Uraian / Masukan</span>
+                                                @endif
+                                            </span>
+                                            <span class="text-slate-300 select-none">—</span>
+                                            <span class="font-semibold {{ $q->is_required ? 'text-slate-700' : 'text-slate-500' }}">
+                                                {{ $q->is_required ? 'Wajib Diisi' : 'Opsional' }}
+                                            </span>
+                                            <span class="text-slate-300 select-none">—</span>
+                                            @if ($q->is_active)
+                                                <span class="text-emerald-600 font-bold">Aktif</span>
+                                            @else
+                                                <span class="text-slate-400 font-semibold">Non-Aktif</span>
+                                            @endif
+                                        </div>
                                     </div>
                                 </div>
 
@@ -246,7 +222,7 @@
                                         </span>
                                         <div>
                                             <span class="text-xs font-bold text-slate-800">Peserta Bimtek (Anonim)</span>
-                                            <span class="text-[11px] text-slate-400 ml-1.5">• {{ $resp->created_at->translatedFormat('d M Y, H:i') }} WIB</span>
+                                            <span class="text-[11px] text-slate-400 ml-1.5">— {{ $resp->created_at->translatedFormat('d M Y, H:i') }} WIB</span>
                                             <span class="text-[11px] font-semibold text-blue-700 bg-blue-50 px-2 py-0.5 rounded ml-2">
                                                 {{ $resp->bimtekEvent?->batch_name ?? $resp->course?->name }}
                                             </span>
@@ -284,9 +260,9 @@
                                         {{-- Legacy Data Fallback --}}
                                         <div class="p-2 rounded bg-slate-50 border border-slate-150">
                                             <span class="text-slate-500">Materi:</span> <strong class="text-amber-500">{{ $resp->rating_materi }}★</strong>
-                                            <span class="mx-2">•</span>
+                                            <span class="mx-2">—</span>
                                             <span class="text-slate-500">Penyampaian:</span> <strong class="text-amber-500">{{ $resp->rating_penyampaian }}★</strong>
-                                            <span class="mx-2">•</span>
+                                            <span class="mx-2">—</span>
                                             <span class="text-slate-500">Fasilitasi:</span> <strong class="text-amber-500">{{ $resp->rating_fasilitasi }}★</strong>
                                         </div>
                                         @if ($resp->feedback)
