@@ -587,7 +587,12 @@ class CourseSeeder extends Seeder
 
                             if ($studentIdx < 6) {
                                 $isPendingReview = $studentIdx < 4;
-                                foreach ($allPostTests->whereNotNull('course_section_id')->take(2) as $pt) {
+                                $sampleEvaluationTests = $allPostTests
+                                    ->whereNotNull('course_section_id')
+                                    ->take(2)
+                                    ->concat($allPostTests->whereNull('course_section_id')->take(1));
+
+                                foreach ($sampleEvaluationTests as $pt) {
                                     if ($pt->is_essay) {
                                         $essayResponses = $pt->questions->values()->map(function ($q, $qIdx) {
                                             return $qIdx === 0
@@ -609,12 +614,13 @@ class CourseSeeder extends Seeder
                                             'updated_at'   => now()->subHours(2 + $studentIdx),
                                         ]);
                                     } elseif ($pt->is_file_upload) {
+                                        $filePrefix = $pt->course_section_id ? 'Tugas_Perencanaan_Makro_' : 'Evaluasi_Akhir_Perencanaan_Makro_';
                                         DB::table('post_test_results')->insert([
                                             'id'           => (string) Str::uuid(),
                                             'user_id'      => $student->id,
                                             'post_test_id' => $pt->id,
                                             'file_path'    => 'assignments/demo/Contoh_Jawaban_Tugas_Peserta.pdf',
-                                            'file_name'    => 'Tugas_Perencanaan_Makro_' . ($studentIdx + 1) . '.pdf',
+                                            'file_name'    => $filePrefix . ($studentIdx + 1) . '.pdf',
                                             'score'        => $isPendingReview ? 100 : 90,
                                             'is_passed'    => 1,
                                             'status'       => $isPendingReview ? 'submitted' : 'graded',

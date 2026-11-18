@@ -22,9 +22,9 @@ class PostTestSeeder extends Seeder
             );
         }
 
-        $courses = Course::with('sections')->get();
+        $courses = Course::with('sections')->get()->values();
 
-        foreach ($courses as $course) {
+        foreach ($courses as $courseIndex => $course) {
             // 1. Evaluasi per Bab / Agenda / Section (Divariasikan: Uraian atau Upload File saja)
             foreach ($course->sections as $index => $section) {
                 $isEssay = ($index % 2 === 0); // Genap (Hari 1, 3) = Uraian, Ganjil (Hari 2) = Upload File
@@ -65,22 +65,37 @@ class PostTestSeeder extends Seeder
                 }
             }
 
-            // 2. Evaluasi Akhir (course_section_id bernilai NULL - Multiple Choice CBT)
+            // 2. Evaluasi Akhir (course_section_id bernilai NULL - Variasi Uraian atau Upload Berkas)
+            $isFinalEssay = ($courseIndex % 2 === 0);
+            $finalType = $isFinalEssay ? 'essay' : 'file_upload';
+            $cleanCourseName = preg_replace('/[^A-Za-z0-9_]/', '_', $course->name);
+
             $finalTest = PostTest::updateOrCreate(
                 [
                     'course_id'         => $course->id,
                     'course_section_id' => null,
                 ],
                 [
-                    'title'         => 'Evaluasi Akhir: ' . $course->name,
-                    'description'   => 'Ujian kelulusan akhir komprehensif seluruh materi kursus.',
-                    'passing_score' => 75,
-                    'duration'      => 30,
-                    'type'          => 'multiple_choice',
+                    'title'           => 'Evaluasi Akhir: ' . $course->name,
+                    'description'     => $isFinalEssay
+                        ? 'Evaluasi komprehensif akhir pelatihan berbasis uraian dan analisis studi kasus lintas modul.'
+                        : 'Penugasan portofolio dan laporan evaluasi akhir pelatihan sebagai syarat kelulusan.',
+                    'passing_score'   => 75,
+                    'duration'        => $isFinalEssay ? 45 : 60,
+                    'type'            => $finalType,
+                    'admin_file_path' => $isFinalEssay ? null : 'assignments/soal/Soal_Tugas_Studi_Kasus.pdf',
+                    'admin_file_name' => $isFinalEssay ? null : 'Soal_Evaluasi_Akhir_' . substr($cleanCourseName, 0, 30) . '.pdf',
+                    'admin_file_size' => $isFinalEssay ? null : '2.4 MB',
+                    'instructions'    => $isFinalEssay ? null : 'Unduh lembar kerja evaluasi akhir di atas, susun dokumen penyelesaian studi kasus komprehensif, lalu unggah kembali berkas hasil pengerjaan Anda dalam format PDF atau DOCX.',
+                    'max_words'       => $isFinalEssay ? 600 : null,
                 ]
             );
 
-            $this->createMultipleChoiceQuestions($finalTest, $course->name);
+            if ($isFinalEssay) {
+                $this->createEssayQuestions($finalTest, $course->name);
+            } else {
+                $finalTest->questions()->delete();
+            }
         }
 
         $this->command->info("PostTestSeeder (Variasi Uraian & Upload File pada Agenda Harian) berhasil dijalankan 🚀");

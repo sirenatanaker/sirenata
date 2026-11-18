@@ -234,7 +234,7 @@
             @endif
 
         {{-- ===================================================================== --}}
-        {{-- LANGKAH 2: TIMELINE AGENDA HARIAN & EVALUASI AKHIR (JIKA ADA DATANYA)  --}}
+        {{-- LANGKAH 2: TIMELINE AGENDA HARIAN & EVALUASI AKHIR                    --}}
         {{-- ===================================================================== --}}
         @elseif ($step === 'agenda')
             @php
@@ -315,38 +315,63 @@
                     </div>
                 @endforelse
 
-                {{-- Node & Card Timeline Evaluasi Akhir (Hanya Muncul Jika Sudah Ada Datanya) --}}
+                {{-- Node & Card Timeline Evaluasi Akhir (Ikon Bendera Finish) --}}
                 @if ($finalEvaluation)
+                    @php
+                        $finalHasSubmitted = $finalEvaluation->submitted_count > 0;
+                        $finalAllGraded = $finalEvaluation->post_test && $finalHasSubmitted && $finalEvaluation->pending_count === 0;
+                    @endphp
                     <div class="relative flex items-start gap-3.5 sm:gap-5">
-                        <div class="relative z-10 w-12 h-12 sm:w-14 sm:h-14 rounded-md bg-[#13416B] text-white border border-[#13416B] shrink-0 flex flex-col items-center justify-center shadow-2xs">
-                            <span class="text-[9px] font-bold uppercase tracking-wider text-blue-200 leading-none">TAHAP</span>
-                            <span class="text-xs sm:text-sm font-black leading-tight mt-0.5">AKHIR</span>
+                        {{-- Node Timeline Finish (Hanya Ikon Bendera) --}}
+                        <div class="relative z-10 w-12 h-12 sm:w-14 sm:h-14 rounded-md shrink-0 flex items-center justify-center border shadow-2xs
+                            {{ $finalEvaluation->post_test ? ($finalHasSubmitted ? 'bg-[#13416B] text-white border-[#13416B]' : 'bg-white text-[#13416B] border-slate-300') : 'bg-slate-100 text-slate-400 border-slate-200' }}"
+                             title="Evaluasi Akhir">
+                            <i class="fas fa-flag-checkered text-lg sm:text-xl"></i>
+                            @if ($finalAllGraded)
+                                <span class="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full bg-emerald-500 text-white flex items-center justify-center text-[9px] ring-2 ring-white shadow-2xs" title="Semua jawaban telah dinilai">
+                                    <i class="fas fa-check"></i>
+                                </span>
+                            @elseif ($finalEvaluation->pending_count > 0)
+                                <span class="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full bg-amber-500 text-white flex items-center justify-center text-[9px] font-bold ring-2 ring-white shadow-2xs" title="{{ $finalEvaluation->pending_count }} menunggu penilaian">
+                                    !
+                                </span>
+                            @endif
                         </div>
 
-                        <div class="flex-1 min-w-0 bg-white rounded-md border border-[#13416B]/30 p-4 sm:p-5 shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        {{-- Card Evaluasi Akhir --}}
+                        <div class="flex-1 min-w-0 bg-white rounded-md border border-slate-200 p-4 sm:p-5 shadow-2xs hover:border-slate-300 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                             <div class="space-y-2 min-w-0 flex-1">
                                 <div>
-                                    <div class="text-xs sm:text-sm font-bold text-[#13416B]">Evaluasi Akhir</div>
+                                    <div class="text-xs sm:text-sm font-bold text-[#13416B]">
+                                        Evaluasi Akhir{{ $selectedEvent->end_date ? ' — ' . $selectedEvent->end_date->translatedFormat('d M Y') : '' }}
+                                    </div>
                                     <h3 class="text-base sm:text-lg font-bold text-slate-900 leading-snug mt-0.5">
-                                        {{ $finalEvaluation->post_test->title }}
+                                        {{ $finalEvaluation->title }}
                                     </h3>
                                 </div>
-                                <div class="inline-flex flex-wrap items-center gap-x-3 gap-y-1 px-3.5 py-2 rounded-md bg-slate-50 border border-slate-200 text-xs sm:text-sm text-slate-600">
-                                    <span class="font-semibold text-slate-800">Format {{ $finalEvaluation->format_label }}</span>
-                                    <span class="text-slate-300 select-none">—</span>
-                                    <span class="font-medium">{{ $finalEvaluation->submitted_count }} dari {{ $finalEvaluation->total_participants }} peserta telah mengumpulkan</span>
-                                    @if ($finalEvaluation->pending_count > 0)
+
+                                @if ($finalEvaluation->post_test)
+                                    <div class="inline-flex flex-wrap items-center gap-x-3 gap-y-1 px-3.5 py-2 rounded-md bg-slate-50 border border-slate-200 text-xs sm:text-sm text-slate-600">
+                                        <span class="font-semibold text-slate-800">Format {{ $finalEvaluation->format_label }}</span>
                                         <span class="text-slate-300 select-none">—</span>
-                                        <span class="font-bold text-amber-600">{{ $finalEvaluation->pending_count }} menunggu penilaian</span>
-                                    @endif
-                                </div>
+                                        <span class="font-medium">{{ $finalEvaluation->submitted_count }} dari {{ $finalEvaluation->total_participants }} peserta mengumpulkan</span>
+                                        @if ($finalEvaluation->pending_count > 0)
+                                            <span class="text-slate-300 select-none">—</span>
+                                            <span class="font-bold text-amber-600">{{ $finalEvaluation->pending_count }} menunggu penilaian</span>
+                                        @endif
+                                    </div>
+                                @else
+                                    <p class="text-xs sm:text-sm italic text-slate-400">Belum ada instrumen evaluasi akhir pada kursus ini</p>
+                                @endif
                             </div>
 
-                            <a href="{{ route('admin-pusat.management-course.post-test-submissions.index', ['bimtek_event_id' => $selectedEvent->id, 'post_test_id' => $finalEvaluation->post_test->id]) }}"
-                               class="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-md text-xs sm:text-sm font-bold text-white bg-[#13416B] hover:bg-[#0f3354] transition-colors shrink-0">
-                                <span>Lihat Hasil Evaluasi Akhir</span>
-                                <i class="fas fa-chevron-right text-xs"></i>
-                            </a>
+                            @if ($finalEvaluation->post_test)
+                                <a href="{{ route('admin-pusat.management-course.post-test-submissions.index', ['bimtek_event_id' => $selectedEvent->id, 'post_test_id' => $finalEvaluation->post_test->id]) }}"
+                                   class="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-md text-xs sm:text-sm font-bold text-[#13416B] bg-slate-100 hover:bg-[#13416B] hover:text-white transition-colors shrink-0">
+                                    <span>Lihat Hasil Evaluasi</span>
+                                    <i class="fas fa-chevron-right text-xs"></i>
+                                </a>
+                            @endif
                         </div>
                     </div>
                 @endif
@@ -404,7 +429,7 @@
                     @endphp
 
                     @if ($isManualTest)
-                        <div x-data="{ expanded: {{ $loop->first ? 'true' : 'false' }}, scoreVal: {{ (int) $defaultScore }}, isPassedVal: '{{ $sub->is_passed ? '1' : '0' }}' }">
+                        <div x-data="{ expanded: false, scoreVal: {{ (int) $defaultScore }}, isPassedVal: '{{ $sub->is_passed ? '1' : '0' }}' }">
                             <div @click="expanded = !expanded"
                                  class="p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 cursor-pointer hover:bg-slate-50/70 transition-colors select-none">
                                 <div class="space-y-1.5 min-w-0 flex-1">

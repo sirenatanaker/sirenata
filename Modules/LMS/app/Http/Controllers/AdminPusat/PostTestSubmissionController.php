@@ -203,28 +203,27 @@ class PostTestSubmissionController extends Controller
                 ];
             });
 
-            $finalEvaluation = null;
-            if ($finalTest) {
-                $finalRows = $resultsByTest->get($finalTest->id, collect());
-                $finalSubmittedCount = $finalRows->count();
-                $finalIsManual = in_array($finalTest->type, $manualTypes, true);
+            $finalRows = $finalTest ? $resultsByTest->get($finalTest->id, collect()) : collect();
+            $finalSubmittedCount = $finalRows->count();
+            $finalIsManual = $finalTest && in_array($finalTest->type, $manualTypes, true);
 
-                if ($finalSubmittedCount > 0) {
-                    $finalEvaluation = (object) [
-                        'post_test'          => $finalTest,
-                        'format_label'       => match ($finalTest->type) {
-                            'essay', 'uraian'       => 'Uraian',
-                            'file_upload', 'upload' => 'Upload Berkas',
-                            default                 => 'Pilihan Ganda (CBT)',
-                        },
-                        'submitted_count'    => $finalSubmittedCount,
-                        'pending_count'      => $finalIsManual
-                            ? $finalRows->filter(fn($r) => $r->status === 'submitted' || is_null($r->status))->count()
-                            : 0,
-                        'total_participants' => $eventParticipantsCount,
-                    ];
-                }
-            }
+            $finalEvaluation = (object) [
+                'title'              => $finalTest?->title ?? ('Evaluasi Akhir: ' . ($selectedEvent->course?->name ?? 'Pelatihan')),
+                'post_test'          => $finalTest,
+                'format_label'       => match ($finalTest?->type) {
+                    'essay', 'uraian'       => 'Uraian',
+                    'file_upload', 'upload' => 'Upload Berkas',
+                    default                 => $finalTest ? 'Pilihan Ganda (CBT)' : 'Belum Ada Evaluasi',
+                },
+                'submitted_count'    => $finalSubmittedCount,
+                'pending_count'      => $finalIsManual
+                    ? $finalRows->filter(fn($r) => $r->status === 'submitted' || is_null($r->status))->count()
+                    : 0,
+                'graded_count'       => $finalIsManual
+                    ? $finalRows->filter(fn($r) => $r->status === 'graded')->count()
+                    : $finalSubmittedCount,
+                'total_participants' => $eventParticipantsCount,
+            ];
 
             return view('lms::admin-pusat.post-test-submissions.index', [
                 'step'             => 'agenda',
