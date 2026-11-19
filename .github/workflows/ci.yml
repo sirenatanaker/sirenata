@@ -6,9 +6,13 @@ on:
     pull_request:
         branches: [main]
 
+concurrency:
+    group: ci-${{ github.ref }}
+    cancel-in-progress: true
+
 jobs:
     test:
-        name: Tests (Pest)
+        name: Tests & Build (Pest + Vite)
         runs-on: ubuntu-latest
 
         steps:
@@ -52,23 +56,3 @@ jobs:
 
             - name: Run Pest tests
               run: vendor/bin/pest --ci
-
-    build:
-        name: Build Assets (Vite)
-        runs-on: ubuntu-latest
-
-        steps:
-            - name: Checkout code
-              uses: actions/checkout@v4
-
-            - name: Setup Node.js
-              uses: actions/setup-node@v4
-              with:
-                  node-version: '24'
-                  cache: 'npm'
-
-            - name: Install npm dependencies
-              run: npm ci
-
-            - name: Build Vite assets
-              run: npm run build

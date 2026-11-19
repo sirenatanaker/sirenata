@@ -5,30 +5,68 @@ on:
     workflows: [CI]
     types: [completed]
     branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-vps-main
+  cancel-in-progress: false
 
 jobs:
   deploy:
     name: Deploy to VPS
     runs-on: self-hosted
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
 
     steps:
       - name: Deploy Application
         run: |
-          cd ${{ secrets.DEPLOY_PATH }}
+          set -euo pipefail
+          cd "${{ secrets.DEPLOY_PATH }}"
 
-          git pull origin main
+          OLD_HEAD=$(git rev-parse HEAD)
+          git fetch origin main
+          git pull --ff-only origin main
+          NEW_HEAD=$(git rev-parse HEAD)
 
-          docker exec elearning_app composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader
+          CHANGED_FILES=$(git diff --name-only "$OLD_HEAD" "$NEW_HEAD" || true)
 
-          docker exec elearning_app npm install
-          docker exec elearning_app npm run build
+          # 1. Composer install hanya saat composer.json/lock berubah atau vendor belum ada
+          if [ ! -d vendor ] || echo "$CHANGED_FILES" | grep -Eq '^(composer\.json|composer\.lock)$'; then
+            echo ">> Installing Composer dependencies..."
+            docker exec elearning_app composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader
+          else
+            echo ">> Refreshing optimized autoloader..."
+            docker exec elearning_app composer dump-autoload --no-dev --optimize
+          fi
 
-          docker exec elearning_app php artisan migrate --force
+          # 2. npm ci hanya saat package.json/lock berubah atau node_modules belum ada
+          if [ ! -d node_modules ] || echo "$CHANGED_FILES" | grep -Eq '^(package\.json|package-lock\.json)$'; then
+            echo ">> Installing npm dependencies..."
+            docker exec elearning_app npm ci --no-audit --no-fund
+          else
+            echo ">> Skipping npm ci (no package lockfile change)"
+          fi
 
-          docker exec elearning_app php artisan config:cache
-          docker exec elearning_app php artisan route:cache
-          docker exec elearning_app php artisan view:cache
-          docker exec elearning_app php artisan event:cache
+          # 3. Build Vite hanya saat ada perubahan aset/Blade/konfigurasi atau manifest belum ada
+          if [ ! -f public/build/manifest.json ] || echo "$CHANGED_FILES" | grep -Eq '(^resources/|^Modules/.*/resources/|^package(-lock)?\.json$|^vite\.config\.|^tailwind\.config\.|^postcss\.config\.)'; then
+            echo ">> Building Vite assets..."
+            docker exec elearning_app npm run build
+          else
+            echo ">> Skipping npm run build (no frontend changes)"
+          fi
 
-          docker exec elearning_app php artisan queue:restart
+          # 4. Pastikan permission storage & bootstrap/cache aman untuk php-fpm (www-data)
+          docker exec elearning_app chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache
+
+          # 5. Migrasi database
+          docker exec -u www-data elearning_app php artisan migrate --force
+
+          # 6. Clear cache lama terlebih dulu agar route/view/config baru tidak memicu 500
+          docker exec -u www-data elearning_app php artisan optimize:clear
+          docker exec -u www-data elearning_app php artisan config:cache
+          docker exec -u www-data elearning_app php artisan route:cache
+          docker exec -u www-data elearning_app php artisan view:cache
+          docker exec -u www-data elearning_app php artisan event:cache
+
+          # 7. Restart queue worker
+          docker exec -u www-data elearning_app php artisan queue:restart
