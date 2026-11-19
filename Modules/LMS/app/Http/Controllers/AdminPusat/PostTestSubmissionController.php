@@ -371,20 +371,22 @@ class PostTestSubmissionController extends Controller
         }
 
         $isExcel = $gradingType === PostTest::GRADING_AUTO_EXCEL;
-        $title = $isExcel ? 'Penilaian Otomatis Excel Selesai (Draf)' : 'Batch Penilaian AI Dimulai';
+        $title = $isExcel ? 'Penilaian Otomatis Selesai' : 'Penilaian Otomatis Sedang Diproses';
         $message = $isExcel
-            ? "Seluruh {$batch->processed_count} berkas Excel berhasil dinilai 100% lokal (0 kuota AI) sebagai draf. Tinjau hasil lalu klik Publikasikan Nilai."
-            : "Pengumpulan peserta telah dikunci dan {$batch->total_targets} jawaban diproses melalui antrean (queue: ai-grading). Pantau progres di dashboard lalu tinjau draf sebelum dipublikasikan.";
+            ? "Seluruh {$batch->processed_count} berkas jawaban Excel sudah selesai diperiksa dan disimpan sebagai draf. Silakan tinjau hasilnya terlebih dahulu, lalu klik tombol Publikasikan Semua Nilai agar nilai tampil di halaman peserta."
+            : "Pengumpulan tugas telah dikunci sementara agar jawaban tidak berubah. Sebanyak {$batch->total_targets} jawaban peserta sedang diperiksa secara bertahap di latar belakang. Pantau progresnya di halaman ini, lalu tinjau draf nilai sebelum dipublikasikan ke peserta.";
 
         ToastMagic::success($title);
 
         return redirect()->back()->with('grading_popup', [
             'title'        => $title,
-            'method'       => $isExcel ? 'Penilaian Excel Lokal (0 AI)' : 'Batch Antrean AI',
+            'method'       => 'Penilaian Otomatis',
             'student_name' => "{$batch->total_targets} Peserta",
             'score'        => null,
             'is_passed'    => null,
-            'summary'      => "Status Batch: {$batch->status}",
+            'summary'      => $isExcel
+                ? "{$batch->processed_count} dari {$batch->total_targets} selesai (Draf)"
+                : 'Sedang diproses di latar belakang',
             'message'      => $message,
         ]);
     }
@@ -417,16 +419,16 @@ class PostTestSubmissionController extends Controller
         $batch = GradingBatch::findOrFail($batchId);
         $updated = $this->gradingBatchService->resumeBatch($batch);
 
-        ToastMagic::success('Batch penilaian otomatis berhasil dilanjutkan.');
+        ToastMagic::success('Penilaian otomatis berhasil dilanjutkan.');
 
         return redirect()->back()->with('grading_popup', [
-            'title'        => 'Batch Dilanjutkan',
-            'method'       => 'Resume Quota Batch',
-            'student_name' => "Batch {$updated->status}",
+            'title'        => 'Penilaian Otomatis Dilanjutkan',
+            'method'       => 'Penilaian Otomatis',
+            'student_name' => "{$updated->total_targets} Peserta",
             'score'        => null,
             'is_passed'    => null,
-            'summary'      => "{$updated->processed_count} / {$updated->total_targets} selesai",
-            'message'      => 'Sisa jawaban peserta berstatus PENDING telah didorong kembali ke antrean ai-grading.',
+            'summary'      => "{$updated->processed_count} dari {$updated->total_targets} selesai",
+            'message'      => 'Sisa jawaban peserta yang belum dinilai telah dimasukkan kembali ke antrean dan sedang diproses otomatis di latar belakang.',
         ]);
     }
 
@@ -438,16 +440,16 @@ class PostTestSubmissionController extends Controller
         $batch = GradingBatch::findOrFail($batchId);
         $updated = $this->gradingBatchService->retryFailed($batch);
 
-        ToastMagic::success('Jawaban yang gagal telah didorong ulang ke antrean penilaian.');
+        ToastMagic::success('Jawaban yang gagal telah dimasukkan ulang untuk dinilai.');
 
         return redirect()->back()->with('grading_popup', [
-            'title'        => 'Ulangi Penilaian Gagal',
-            'method'       => 'Retry Failed Only',
-            'student_name' => "Batch {$updated->status}",
+            'title'        => 'Penilaian Ulang Dimulai',
+            'method'       => 'Penilaian Otomatis',
+            'student_name' => "{$updated->total_targets} Peserta",
             'score'        => null,
             'is_passed'    => null,
-            'summary'      => "{$updated->processed_count} / {$updated->total_targets} selesai",
-            'message'      => 'Hanya jawaban berstatus FAILED yang dimasukkan ulang ke antrean (draf/nilai terpublikasi tidak tersentuh).',
+            'summary'      => "{$updated->processed_count} dari {$updated->total_targets} selesai",
+            'message'      => 'Hanya jawaban peserta yang sebelumnya gagal diperiksa yang sedang dinilai ulang. Nilai peserta lain yang sudah berhasil tidak berubah.',
         ]);
     }
 
@@ -474,12 +476,12 @@ class PostTestSubmissionController extends Controller
 
         return redirect()->back()->with('grading_popup', [
             'title'        => 'Nilai Berhasil Dipublikasikan',
-            'method'       => 'Publikasi Massal',
+            'method'       => 'Publikasi Nilai',
             'student_name' => "{$publishedCount} Peserta",
             'score'        => null,
             'is_passed'    => null,
-            'summary'      => 'Status: PUBLISHED',
-            'message'      => "Nilai akhir untuk {$publishedCount} peserta kini telah tampil di halaman peserta dan disinkronkan dengan progres kelulusan.",
+            'summary'      => 'Sudah tampil di halaman peserta',
+            'message'      => "Nilai akhir untuk {$publishedCount} peserta kini sudah dapat dilihat oleh masing-masing peserta dan otomatis memperbarui progres kelulusan pelatihan.",
         ]);
     }
 
@@ -624,8 +626,8 @@ class PostTestSubmissionController extends Controller
                     'passing_grade'  => $passingGrade,
                     'triage_reasons' => $triage['reasons'],
                 ]);
-                $methodLabel = 'Penilaian Otomatis Excel Lokal (Draf)';
-                $summaryMessage = $eval['summary_note'];
+                $methodLabel = 'Penilaian Otomatis';
+                $summaryMessage = $eval['summary_note'] . ' Hasil disimpan sebagai draf, silakan tinjau lalu klik Publikasikan Nilai agar tampil ke peserta.';
             } elseif ($gradingType === PostTest::GRADING_AUTO_AI_ESSAY) {
                 $snapshot = $this->gradingBatchService->buildRubricSnapshot($postTest);
                 $aiResult = $this->aiGradingService->gradeEssay($postTest, is_array($result->answers) ? $result->answers : [], $snapshot);
@@ -636,8 +638,9 @@ class PostTestSubmissionController extends Controller
                     'passing_grade'  => $passingGrade,
                     'triage_reasons' => $triage['reasons'],
                 ]);
-                $methodLabel = 'Koreksi Otomatis AI Uraian (Draf)';
-                $summaryMessage = $aiResult['overall_feedback'] ?: 'Draf penilaian AI berhasil dibuat.';
+                $methodLabel = 'Penilaian Otomatis';
+                $summaryMessage = ($aiResult['overall_feedback'] ?: 'Jawaban uraian berhasil diperiksa secara otomatis.')
+                    . ' Hasil disimpan sebagai draf, silakan tinjau sebelum dipublikasikan ke peserta.';
             } elseif ($gradingType === PostTest::GRADING_AUTO_AI_REPORT) {
                 $cleanText = trim((string) ($result->extracted_text ?? ''));
                 $isTruncated = (bool) $result->is_truncated;
@@ -659,8 +662,9 @@ class PostTestSubmissionController extends Controller
                     'passing_grade'  => $passingGrade,
                     'triage_reasons' => $triage['reasons'],
                 ]);
-                $methodLabel = 'Koreksi Otomatis AI Laporan (Draf)';
-                $summaryMessage = $aiResult['overall_feedback'] ?: 'Draf penilaian AI berhasil dibuat.';
+                $methodLabel = 'Penilaian Otomatis';
+                $summaryMessage = ($aiResult['overall_feedback'] ?: 'Laporan peserta berhasil diperiksa secara otomatis.')
+                    . ' Hasil disimpan sebagai draf, silakan tinjau sebelum dipublikasikan ke peserta.';
             } else {
                 ToastMagic::error('Evaluasi ini disetel untuk penilaian manual.');
 
@@ -683,7 +687,7 @@ class PostTestSubmissionController extends Controller
             ToastMagic::success("Draf penilaian otomatis berhasil dibuat: Skor {$score}");
 
             return redirect()->back()->with('grading_popup', [
-                'title'        => 'Draf Koreksi Otomatis Berhasil',
+                'title'        => 'Penilaian Otomatis Selesai',
                 'method'       => $methodLabel,
                 'student_name' => $studentName,
                 'score'        => $score,

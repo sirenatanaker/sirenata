@@ -74,15 +74,12 @@
                         <h1 class="text-xl sm:text-2xl font-bold tracking-tight wrap-break-word">
                             {{ $step3HeaderTitle }}
                         </h1>
-                        <div class="space-y-0.5">
-                            <p class="text-sm sm:text-base text-slate-200 leading-relaxed">
-                                {{ $eventTitleShort }}
-                            </p>
-                            <p class="text-xs sm:text-sm text-slate-300 leading-relaxed">
-                                {{ $selectedPostTest?->course_section_id ? 'Evaluasi Harian' : 'Evaluasi Akhir' }}
-                                — Format {{ $selectedPostTest?->is_essay ? 'Uraian / Esai' : ($selectedPostTest?->is_file_upload ? 'Upload Berkas' : 'Pilihan Ganda (CBT)') }}
-                            </p>
-                        </div>
+                        <p class="text-sm sm:text-base text-slate-200 leading-relaxed">
+                            {{ $eventTitleShort }}
+                            @if ($selectedPostTest?->is_multiple_choice)
+                                — Format Pilihan Ganda (CBT)
+                            @endif
+                        </p>
                     @endif
                 </div>
 
@@ -454,7 +451,7 @@
                         : '';
                 @endphp
 
-                <div class="bg-emerald-50/80 border border-emerald-200 rounded-md p-4 sm:p-5 space-y-3.5 shadow-2xs"
+                <div class="bg-[#1B568A] text-white rounded-md p-4 sm:p-5 space-y-3.5 shadow-sm"
                      x-data="{
                          batchStatus: '{{ $batchObj?->status ?? '' }}',
                          processed: {{ (int) ($batchObj?->processed_count ?? 0) }},
@@ -487,7 +484,7 @@
                      }">
                     <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
                         <div class="space-y-1">
-                            <p class="text-sm sm:text-base font-bold text-emerald-800">
+                            <p class="text-sm sm:text-base font-bold text-white">
                                 @if ($tc['pure_pending'] > 0)
                                     Tersedia {{ $tc['pure_pending'] }} Jawaban Belum Dinilai
                                 @elseif ($tc['draft_ready'] > 0)
@@ -496,11 +493,16 @@
                                     Kontrol Penilaian Otomatis & Publikasi
                                 @endif
                             </p>
-                            @if ($tc['needs_review'] > 0)
-                                <p class="text-xs sm:text-sm font-semibold text-amber-700">
-                                    {{ $tc['needs_review'] }} Perlu Review Manual
-                                </p>
-                            @endif
+                            <p class="text-xs sm:text-sm text-blue-100 leading-relaxed">
+                                <span>
+                                    {{ $selectedPostTest?->course_section_id ? 'Evaluasi Harian' : 'Evaluasi Akhir' }}
+                                    — Format {{ $selectedPostTest?->is_essay ? 'Uraian / Esai' : 'Upload Berkas' }}
+                                </span>
+                                @if ($tc['needs_review'] > 0)
+                                    <span class="text-white/40 mx-1.5 select-none">—</span>
+                                    <span class="font-semibold text-amber-200">{{ $tc['needs_review'] }} Perlu Review Manual</span>
+                                @endif
+                            </p>
                         </div>
 
                         <div class="flex flex-wrap items-center gap-2 shrink-0">
@@ -510,7 +512,7 @@
                                     <input type="hidden" name="bimtek_event_id" value="{{ $selectedEvent->id }}">
                                     <input type="hidden" name="post_test_id" value="{{ $selectedPostTest->id }}">
                                     <button type="submit"
-                                            class="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-md text-xs sm:text-sm font-bold text-white bg-emerald-600 hover:bg-emerald-700 transition-colors shadow-2xs cursor-pointer">
+                                            class="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-md text-xs sm:text-sm font-bold text-white bg-emerald-500 hover:bg-emerald-600 transition-colors shadow-2xs cursor-pointer">
                                         <i class="fas fa-wand-magic-sparkles"></i>
                                         <span>Mulai Penilaian Otomatis ({{ $tc['pure_pending'] }})</span>
                                     </button>
@@ -521,7 +523,7 @@
                                 <form action="{{ route('admin-pusat.management-course.post-test-submissions.batch.resume', $batchObj->id) }}" method="POST">
                                     @csrf
                                     <button type="submit"
-                                            class="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-md text-xs sm:text-sm font-bold text-white bg-amber-600 hover:bg-amber-700 transition-colors shadow-2xs cursor-pointer">
+                                            class="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-md text-xs sm:text-sm font-bold text-white bg-amber-500 hover:bg-amber-600 transition-colors shadow-2xs cursor-pointer">
                                         <i class="fas fa-play"></i>
                                         <span>Lanjutkan Batch</span>
                                     </button>
@@ -532,7 +534,7 @@
                                 <form action="{{ route('admin-pusat.management-course.post-test-submissions.batch.retry-failed', $batchObj->id) }}" method="POST">
                                     @csrf
                                     <button type="submit"
-                                            class="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-md text-xs sm:text-sm font-bold text-white bg-rose-600 hover:bg-rose-700 transition-colors shadow-2xs cursor-pointer">
+                                            class="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-md text-xs sm:text-sm font-bold text-white bg-rose-500 hover:bg-rose-600 transition-colors shadow-2xs cursor-pointer">
                                         <i class="fas fa-rotate-right"></i>
                                         <span>Ulangi yang Gagal ({{ $tc['failed'] }})</span>
                                     </button>
@@ -540,24 +542,19 @@
                             @endif
 
                             @if ($tc['draft_ready'] > 0)
-                                <form action="{{ route('admin-pusat.management-course.post-test-submissions.publish') }}" method="POST"
-                                      onsubmit="return confirm('Publikasikan {{ $tc['draft_ready'] }} draf nilai ke peserta? Nilai akan tampil di halaman peserta dan memperbarui progres kelulusan.');">
-                                    @csrf
-                                    <input type="hidden" name="bimtek_event_id" value="{{ $selectedEvent->id }}">
-                                    <input type="hidden" name="post_test_id" value="{{ $selectedPostTest->id }}">
-                                    <button type="submit"
-                                            class="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-md text-xs sm:text-sm font-bold text-white bg-[#13416B] hover:bg-[#0f3354] transition-colors shadow-2xs cursor-pointer">
-                                        <i class="fas fa-paper-plane"></i>
-                                        <span>Publikasikan Semua Nilai ({{ $tc['draft_ready'] }})</span>
-                                    </button>
-                                </form>
+                                <button type="button"
+                                        @click="$dispatch('open-modal', 'confirm-publish-grades')"
+                                        class="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-md text-xs sm:text-sm font-bold text-[#13416B] bg-white hover:bg-blue-50 transition-colors shadow-2xs cursor-pointer">
+                                    <i class="fas fa-paper-plane"></i>
+                                    <span>Publikasikan Semua Nilai ({{ $tc['draft_ready'] }})</span>
+                                </button>
                             @endif
 
                             <form action="{{ route('admin-pusat.management-course.post-test-submissions.toggle-lock') }}" method="POST">
                                 @csrf
                                 <input type="hidden" name="post_test_id" value="{{ $selectedPostTest->id }}">
                                 <button type="submit"
-                                        class="inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-md text-xs sm:text-sm font-semibold text-slate-700 bg-white hover:bg-slate-100 border border-slate-200 transition-colors cursor-pointer">
+                                        class="inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-md text-xs sm:text-sm font-semibold text-white bg-white/15 hover:bg-white/25 border border-white/25 transition-colors cursor-pointer">
                                     <i class="fas {{ $selectedPostTest->is_submission_locked ? 'fa-lock-open' : 'fa-lock' }} text-xs"></i>
                                     <span>{{ $selectedPostTest->is_submission_locked ? 'Buka Kunci' : 'Kunci Pengumpulan' }}</span>
                                 </button>
@@ -566,24 +563,24 @@
                     </div>
 
                     @if ($batchObj && in_array($batchObj->status, ['RUNNING', 'PAUSED_QUOTA'], true))
-                        <div class="pt-3 border-t border-emerald-200/80 space-y-2">
+                        <div class="pt-3 border-t border-white/15 space-y-2">
                             <div class="flex flex-wrap items-center justify-between gap-2 text-xs sm:text-sm">
-                                <span class="font-semibold text-slate-700">
+                                <span class="font-semibold text-blue-100">
                                     @if ($batchObj->status === 'PAUSED_QUOTA')
-                                        <span class="text-amber-700 font-semibold">Dijeda sementara — Kuota harian/RPM tercapai, tekan Lanjutkan Batch saat siap</span>
+                                        <span class="text-amber-200 font-semibold">Dijeda sementara — Kuota harian/RPM tercapai, tekan Lanjutkan Batch saat siap</span>
                                     @else
                                         <span>Sedang memproses penilaian otomatis...</span>
                                     @endif
                                 </span>
-                                <span class="font-bold text-emerald-800 tabular-nums">
+                                <span class="font-bold text-white tabular-nums">
                                     <span x-text="processed"></span> / <span x-text="total"></span> selesai
                                     <template x-if="failed > 0">
-                                        <span class="text-rose-600 ml-1">(<span x-text="failed"></span> gagal)</span>
+                                        <span class="text-rose-200 ml-1">(<span x-text="failed"></span> gagal)</span>
                                     </template>
                                 </span>
                             </div>
-                            <div class="w-full h-2 rounded-full bg-white border border-emerald-200 overflow-hidden">
-                                <div class="h-full bg-emerald-600 transition-all duration-300" :style="`width: ${progress}%`"></div>
+                            <div class="w-full h-2 rounded-full bg-white/20 overflow-hidden">
+                                <div class="h-full bg-emerald-400 transition-all duration-300" :style="`width: ${progress}%`"></div>
                             </div>
                         </div>
                     @endif
@@ -632,37 +629,37 @@
                                             @endif
                                         </div>
 
-                                        {{-- Badge Kotak Info Sejajar Step 1 --}}
-                                        <div class="inline-flex flex-wrap items-center gap-x-3 gap-y-1 px-3.5 py-2 rounded-md bg-slate-50 border border-slate-200 text-xs sm:text-sm text-slate-600">
+                                        {{-- Badge Kotak Info Solid Biru Cerah dengan Teks Kontras Tinggi --}}
+                                        <div class="inline-flex flex-wrap items-center gap-x-3 gap-y-1 px-3.5 py-2 rounded-md bg-[#DCEBF8] border border-[#BBD6EE] text-xs sm:text-sm text-[#1E4468]">
                                             @if ($isPublished)
-                                                <span class="font-bold {{ $isPassedNow ? 'text-emerald-600' : 'text-rose-600' }}">
+                                                <span class="font-extrabold {{ $isPassedNow ? 'text-emerald-600' : 'text-rose-600' }}">
                                                     Nilai {{ rtrim(rtrim(number_format((float) $displayScore, 2, '.', ''), '0'), '.') }}
                                                 </span>
-                                                <span class="text-slate-300 select-none">—</span>
-                                                <span class="font-semibold text-emerald-700">Dipublikasikan</span>
+                                                <span class="text-[#13416B]/35 select-none">—</span>
+                                                <span class="font-bold text-emerald-600">Dipublikasikan</span>
                                             @elseif ($isDraft)
-                                                <span class="font-bold {{ $isPassedNow ? 'text-emerald-600' : 'text-rose-600' }}">
+                                                <span class="font-extrabold {{ $isPassedNow ? 'text-emerald-600' : 'text-rose-600' }}">
                                                     Nilai {{ rtrim(rtrim(number_format((float) $displayScore, 2, '.', ''), '0'), '.') }}
                                                 </span>
-                                                <span class="text-slate-300 select-none">—</span>
+                                                <span class="text-[#13416B]/35 select-none">—</span>
                                                 @if ($sub->needs_manual_review)
-                                                    <span class="font-semibold text-amber-600">Draf &amp; Perlu Direview Manual</span>
+                                                    <span class="font-bold text-amber-600">Draf &amp; Perlu Direview Manual</span>
                                                 @else
-                                                    <span class="font-semibold text-[#13416B]">Draf</span>
+                                                    <span class="font-bold text-[#13416B]">Draf</span>
                                                 @endif
                                             @elseif ($gStatus === 'FAILED')
                                                 <span class="font-bold text-rose-600">Gagal AI</span>
                                             @elseif ($gStatus === 'MANUAL_REVIEW')
                                                 <span class="font-bold text-amber-600">Perlu Review Manual</span>
                                             @elseif (in_array($gStatus, ['QUEUED', 'PROCESSING'], true))
-                                                <span class="font-bold text-blue-600">{{ $gStatus === 'PROCESSING' ? 'Sedang Dinilai' : 'Dalam Antrean' }}</span>
+                                                <span class="font-bold text-[#13416B]">{{ $gStatus === 'PROCESSING' ? 'Sedang Dinilai' : 'Dalam Antrean' }}</span>
                                             @else
                                                 <span class="font-bold text-amber-600">Menunggu Penilaian</span>
                                             @endif
 
                                             @if ($submittedAt)
-                                                <span class="text-slate-300 select-none">—</span>
-                                                <span class="font-medium">Dikumpulkan {{ $submittedAt->translatedFormat('d M Y, H:i') }} WIB</span>
+                                                <span class="text-[#13416B]/35 select-none">—</span>
+                                                <span class="font-semibold text-[#1E4468]">Dikumpulkan {{ $submittedAt->translatedFormat('d M Y, H:i') }} WIB</span>
                                             @endif
                                         </div>
                                     </div>
@@ -978,6 +975,43 @@
             @if ($submissions->hasPages())
                 <div>{{ $submissions->links() }}</div>
             @endif
+
+            @if ($isManualTest && ($triageCounts['draft_ready'] ?? 0) > 0)
+                <x-modal name="confirm-publish-grades" title="Konfirmasi Publikasi Nilai" maxWidth="sm:max-w-md">
+                    <form action="{{ route('admin-pusat.management-course.post-test-submissions.publish') }}" method="POST" class="space-y-4">
+                        @csrf
+                        <input type="hidden" name="bimtek_event_id" value="{{ $selectedEvent->id }}">
+                        <input type="hidden" name="post_test_id" value="{{ $selectedPostTest->id }}">
+
+                        <div class="flex items-start gap-3.5 py-1">
+                            <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blue-100 text-[#13416B]">
+                                <i class="fas fa-paper-plane text-sm"></i>
+                            </div>
+                            <div class="flex-1 pt-0.5 space-y-1">
+                                <p class="text-sm font-semibold text-slate-800 leading-relaxed">
+                                    Publikasikan {{ $triageCounts['draft_ready'] }} draf nilai ke peserta?
+                                </p>
+                                <p class="text-xs sm:text-sm text-slate-600 leading-relaxed">
+                                    Nilai akhir akan tampil di halaman masing-masing peserta dan otomatis memperbarui progres kelulusan pelatihan.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
+                            <button type="button"
+                                    @click="$dispatch('close-modal', 'confirm-publish-grades')"
+                                    class="px-4 py-2 rounded-md text-xs sm:text-sm font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-colors cursor-pointer">
+                                Batal
+                            </button>
+                            <button type="submit"
+                                    class="inline-flex items-center gap-1.5 px-4 py-2 rounded-md text-xs sm:text-sm font-bold text-white bg-[#13416B] hover:bg-[#0f3354] transition-colors cursor-pointer">
+                                <i class="fas fa-paper-plane text-xs"></i>
+                                <span>Ya, Publikasikan</span>
+                            </button>
+                        </div>
+                    </form>
+                </x-modal>
+            @endif
         @endif
 
         {{-- Pop-up Notifikasi Berhasil Menilai (Otomatis / Manual) --}}
@@ -990,7 +1024,7 @@
                  class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-xs">
                 <div class="fixed inset-0" @click="open = false"></div>
 
-                <div class="relative z-10 w-full max-w-md bg-white rounded-xl border border-slate-200 shadow-2xl overflow-hidden">
+                <div class="relative z-10 w-full max-w-md bg-white rounded-md border border-slate-200 shadow-2xl overflow-hidden">
                     <div class="p-6 space-y-4">
                         <div class="flex items-start gap-3.5">
                             <div class="w-11 h-11 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0">
@@ -1009,7 +1043,7 @@
                             </button>
                         </div>
 
-                        <div class="p-3.5 rounded-lg bg-slate-50 border border-slate-200 space-y-1.5 text-sm">
+                        <div class="p-3.5 rounded-md bg-slate-50 border border-slate-200 space-y-1.5 text-sm">
                             <div class="flex items-center justify-between gap-2">
                                 <span class="text-slate-500">Peserta</span>
                                 <span class="font-bold text-slate-900">{{ $popup['student_name'] ?? '-' }}</span>
@@ -1023,14 +1057,14 @@
                                 </div>
                             @elseif (!empty($popup['summary']))
                                 <div class="flex items-center justify-between gap-2">
-                                    <span class="text-slate-500">Ringkasan</span>
+                                    <span class="text-slate-500">Status</span>
                                     <span class="font-bold text-slate-800">{{ $popup['summary'] }}</span>
                                 </div>
                             @endif
                         </div>
 
                         @if (!empty($popup['message']))
-                            <p class="text-xs sm:text-sm text-slate-600 leading-relaxed bg-emerald-50/60 border border-emerald-200/80 rounded-lg p-3">
+                            <p class="text-xs sm:text-sm text-slate-600 leading-relaxed bg-emerald-50/60 border border-emerald-200/80 rounded-md p-3">
                                 {{ $popup['message'] }}
                             </p>
                         @endif
@@ -1038,7 +1072,7 @@
                         <div class="pt-1 flex justify-end">
                             <button type="button"
                                     @click="open = false"
-                                    class="px-5 py-2.5 rounded-lg text-sm font-bold text-white bg-emerald-600 hover:bg-emerald-700 transition-colors shadow-2xs cursor-pointer">
+                                    class="px-5 py-2.5 rounded-md text-sm font-bold text-white bg-emerald-600 hover:bg-emerald-700 transition-colors shadow-2xs cursor-pointer">
                                 Tutup
                             </button>
                         </div>
