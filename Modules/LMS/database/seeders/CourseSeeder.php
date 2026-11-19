@@ -591,12 +591,13 @@ class CourseSeeder extends Seeder
                             ]);
                         }
 
-                        // Jika bimtek online makro, sesi zoom kemarin sudah dihadiri & sebagian peserta sudah submit uraian/upload Excel (auto-graded variasi 100%, 80%, 50%)
+                        // Jika bimtek online makro, sesi zoom kemarin sudah dihadiri & sebagian peserta sudah submit uraian/upload Excel (6 belum dinilai + 2 sudah dinilai sebagai pembanding)
                         if ($item['bimtek'] && $item['bimtek']['batch_code'] === 'PTK-MAKRO-2026-I') {
                             $zoomAttended = 1;
                             $postTestService = app(PostTestService::class);
 
-                            if ($studentIdx < 6) {
+                            if ($studentIdx < 8) {
+                                $isUngradedDummy = $studentIdx < 6;
                                 $sampleEvaluationTests = $allPostTests
                                     ->whereNotNull('course_section_id')
                                     ->take(2)
@@ -604,72 +605,153 @@ class CourseSeeder extends Seeder
 
                                 foreach ($sampleEvaluationTests as $pt) {
                                     if ($pt->is_essay) {
-                                        if ($studentIdx < 2) {
-                                            // Jawaban lengkap memuat semua poin kunci (Skor ~95-100 Lulus)
-                                            $essayResponses = $pt->questions->values()->map(function ($q, $qIdx) {
-                                                return $qIdx === 0
-                                                    ? 'Langkah strategis pertama dalam perencanaan tenaga kerja makro adalah pemetaan regulasi nasional/daerah, pengumpulan data primer sektoral, analisis kebutuhan lapangan kerja, serta validasi indikator secara berkala.'
-                                                    : 'Mitigasi risiko dilakukan melalui sinkronisasi data antar instansi, koordinasi lintas unit kerja, standardisasi SOP pelaporan, dan audit kepatuhan rutin.';
-                                            })->all();
-                                        } elseif ($studentIdx < 4) {
-                                            // Jawaban memuat sebagian besar poin kunci (Skor ~75-85 Lulus)
-                                            $essayResponses = $pt->questions->values()->map(function ($q, $qIdx) {
-                                                return $qIdx === 0
-                                                    ? 'Tahap implementasi mencakup pemetaan regulasi daerah, pengumpulan data primer, dan analisis kebutuhan kerja pada level makro.'
-                                                    : 'Penyelesaian kendala lapangan difokuskan pada sinkronisasi data, koordinasi lintas unit, dan standardisasi SOP.';
-                                            })->all();
+                                        if ($studentIdx === 0) {
+                                            $essayResponses = [
+                                                'Langkah strategis pertama dalam perencanaan ini adalah melakukan pemetaan regulasi di tingkat pusat dan daerah, dilanjutkan dengan pengumpulan data primer dari sektor prioritas, analisis kebutuhan kompetensi, validasi indikator, serta penyusunan proyeksi tenaga kerja lima tahunan.',
+                                                'Mitigasi risiko terhadap kendala lapangan ditempuh melalui sinkronisasi data antarinstansi, koordinasi lintas unit secara berkala, standardisasi SOP pelaporan, audit kepatuhan rutin, serta langkah mitigasi risiko sejak tahap awal.',
+                                            ];
+                                            $studentNote = '[Kasus Uji 1 - Jawaban Lengkap] Memuat seluruh 5 poin kunci pada tiap nomor secara terstruktur.';
+                                        } elseif ($studentIdx === 1) {
+                                            $essayResponses = [
+                                                'Tahap awal implementasi berfokus pada pemetaan regulasi yang berlaku, pengumpulan data primer langsung dari daerah, analisis kebutuhan sektoral, serta validasi indikator capaian program.',
+                                                'Untuk mengatasi kendala di lapangan diperlukan sinkronisasi data terpadu, koordinasi lintas unit kerja, standardisasi SOP kerja, serta audit kepatuhan secara berkala.',
+                                            ];
+                                            $studentNote = '[Kasus Uji 2 - Jawaban Baik 4/5 Poin] Sebagian besar poin kunci terpenuhi dengan kalimat wajar.';
+                                        } elseif ($studentIdx === 2) {
+                                            $essayResponses = [
+                                                'Strategi implementasi dimulai dari inventarisasi peraturan daerah yang relevan, survei langsung kepada pelaku usaha, telaah keperluan SDM sektoral, pengecekan tolok ukur kinerja, dan estimasi kebutuhan angkatan kerja jangka menengah.',
+                                                'Penanganan hambatan operasional dilakukan melalui penyelarasan basis data antarlembaga, sinergi antarbidang teknis, penyusunan prosedur baku layanan, pemeriksaan kepatuhan berkala, serta pengendalian potensi kendala di daerah.',
+                                            ];
+                                            $studentNote = '[Kasus Uji 3 - Parafrase/Sinonim] Substansi jawaban benar namun menggunakan sinonim/parafrase (menguji keterbatasan non-AI).';
+                                        } elseif ($studentIdx === 3) {
+                                            $essayResponses = [
+                                                'Implementasi dilakukan dengan melakukan pemetaan regulasi terlebih dahulu lalu melanjutkan pengumpulan data primer sesuai panduan modul.',
+                                                'Kendala koordinasi di lapangan dapat dikurangi dengan sinkronisasi data berkala serta koordinasi lintas unit.',
+                                            ];
+                                            $studentNote = '[Kasus Uji 4 - Jawaban Setengah Lengkap] Hanya memuat 2 poin kunci pada tiap nomor.';
+                                        } elseif ($studentIdx === 4) {
+                                            $essayResponses = [
+                                                'Kami telah mempelajari materi pembelajaran dan mendiskusikan rencana penerapannya bersama rekan tim di kantor.',
+                                                'Semua kendala yang muncul sebaiknya dibicarakan dalam rapat evaluasi bulanan agar segera selesai.',
+                                            ];
+                                            $studentNote = '[Kasus Uji 5 - Tidak Relevan / Sangat Singkat] Tidak menyebutkan konsep/poin kunci jawaban.';
+                                        } elseif ($studentIdx === 5) {
+                                            $essayResponses = [
+                                                'pemetaan regulasi, pengumpulan data primer, analisis kebutuhan, validasi indikator, proyeksi tenaga kerja',
+                                                'sinkronisasi data, koordinasi lintas unit, standardisasi SOP, audit kepatuhan, mitigasi risiko',
+                                            ];
+                                            $studentNote = '[Kasus Uji 6 - Hanya Daftar Kata Kunci] Berisi daftar kata kunci persis tanpa uraian kalimat (menguji batas otomasi kata kunci).';
+                                        } elseif ($studentIdx === 6) {
+                                            $essayResponses = [
+                                                'Langkah strategis implementasi dimulai dari pemetaan regulasi, pengumpulan data primer, analisis kebutuhan tenaga kerja, validasi indikator, serta penyusunan proyeksi tenaga kerja yang akurat.',
+                                                'Rekomendasi mitigasi risiko meliputi sinkronisasi data, koordinasi lintas unit, standardisasi SOP, audit kepatuhan, serta evaluasi mitigasi risiko berkala.',
+                                            ];
+                                            $studentNote = null;
                                         } else {
-                                            // Jawaban kurang lengkap (Skor ~40-55 Perlu Revisi)
-                                            $essayResponses = $pt->questions->values()->map(function ($q, $qIdx) {
-                                                return $qIdx === 0
-                                                    ? 'Perencanaan tenaga kerja memerlukan pengumpulan data primer dari unit daerah.'
-                                                    : 'Perlu koordinasi lintas unit untuk mengurangi kesalahan pencatatan.';
-                                            })->all();
+                                            $essayResponses = [
+                                                'Pelaksanaan program memerlukan pemetaan regulasi daerah.',
+                                                'Koordinasi lintas unit perlu diperkuat di masa mendatang.',
+                                            ];
+                                            $studentNote = null;
                                         }
 
-                                        $autoEval = $postTestService->autoGradeEssay($pt, $essayResponses);
-
-                                        DB::table('post_test_results')->insert([
-                                            'id'           => (string) Str::uuid(),
-                                            'user_id'      => $student->id,
-                                            'post_test_id' => $pt->id,
-                                            'answers'      => json_encode($essayResponses),
-                                            'score'        => $autoEval['score'],
-                                            'is_passed'    => $autoEval['is_passed'] ? 1 : 0,
-                                            'status'       => $autoEval['status'],
-                                            'notes'        => $autoEval['notes'],
-                                            'completed_at' => now()->subHours(2 + $studentIdx),
-                                            'created_at'   => now()->subHours(2 + $studentIdx),
-                                            'updated_at'   => now()->subHours(2 + $studentIdx),
-                                        ]);
+                                        if ($isUngradedDummy) {
+                                            DB::table('post_test_results')->insert([
+                                                'id'           => (string) Str::uuid(),
+                                                'user_id'      => $student->id,
+                                                'post_test_id' => $pt->id,
+                                                'answers'      => json_encode($essayResponses),
+                                                'score'        => 0,
+                                                'is_passed'    => 0,
+                                                'status'       => 'submitted',
+                                                'notes'        => $studentNote,
+                                                'completed_at' => now()->subHours(2 + $studentIdx),
+                                                'created_at'   => now()->subHours(2 + $studentIdx),
+                                                'updated_at'   => now()->subHours(2 + $studentIdx),
+                                            ]);
+                                        } else {
+                                            $autoEval = $postTestService->autoGradeEssay($pt, $essayResponses);
+                                            DB::table('post_test_results')->insert([
+                                                'id'           => (string) Str::uuid(),
+                                                'user_id'      => $student->id,
+                                                'post_test_id' => $pt->id,
+                                                'answers'      => json_encode($essayResponses),
+                                                'score'        => $autoEval['score'],
+                                                'is_passed'    => $autoEval['is_passed'] ? 1 : 0,
+                                                'status'       => $autoEval['status'],
+                                                'notes'        => $autoEval['notes'],
+                                                'completed_at' => now()->subHours(2 + $studentIdx),
+                                                'created_at'   => now()->subHours(2 + $studentIdx),
+                                                'updated_at'   => now()->subHours(2 + $studentIdx),
+                                            ]);
+                                        }
                                     } elseif ($pt->is_file_upload) {
-                                        if ($studentIdx < 2) {
+                                        if ($studentIdx === 0) {
                                             $sampleFile = 'assignments/demo/Jawaban_Peserta_Sempurna_100.xlsx';
-                                            $displayFile = 'Kertas_Kerja_Sempurna_Peserta_' . ($studentIdx + 1) . '.xlsx';
-                                        } elseif ($studentIdx < 4) {
+                                            $displayFile = 'Uji_1_Sempurna_10_dari_10.xlsx';
+                                            $studentNote = '[Kasus Uji 1 - Cocok Sempurna] Seluruh 10 sel jawaban D2:E6 persis sesuai kunci jawaban.';
+                                        } elseif ($studentIdx === 1) {
+                                            $sampleFile = 'assignments/demo/Jawaban_Peserta_Format_Berbeda.xlsx';
+                                            $displayFile = 'Uji_2_Beda_Kapital_Spasi_DesimalKoma.xlsx';
+                                            $studentNote = '[Kasus Uji 2 - Normalisasi Format] Isi benar, namun memakai huruf kecil/kapital berbeda, spasi ganda, angka sebagai teks, dan desimal koma 1,25.';
+                                        } elseif ($studentIdx === 2) {
                                             $sampleFile = 'assignments/demo/Jawaban_Peserta_Sebagian_80.xlsx';
-                                            $displayFile = 'Kertas_Kerja_Sebagian_Peserta_' . ($studentIdx + 1) . '.xlsx';
+                                            $displayFile = 'Uji_3_Sebagian_80_Lulus.xlsx';
+                                            $studentNote = '[Kasus Uji 3 - Sebagian Salah 8/10] Sel D5 dan E6 tidak sesuai kunci (uji lulus di atas KKM 75).';
+                                        } elseif ($studentIdx === 3) {
+                                            $sampleFile = 'assignments/demo/Jawaban_Peserta_Sebagian_70.xlsx';
+                                            $displayFile = 'Uji_4_Ambang_KKM_70_Revisi.xlsx';
+                                            $studentNote = '[Kasus Uji 4 - Ambang KKM 7/10] 7 sel benar (skor 70), tepat di bawah KKM 75.';
+                                        } elseif ($studentIdx === 4) {
+                                            $sampleFile = 'assignments/demo/Jawaban_Peserta_Sinonim.xlsx';
+                                            $displayFile = 'Uji_5_Teks_Sinonim_50.xlsx';
+                                            $studentNote = '[Kasus Uji 5 - Sinonim Teks] Angka D2:D6 benar semua, namun teks E2:E6 memakai kalimat sinonim (menguji keterbatasan non-AI).';
+                                        } elseif ($studentIdx === 5) {
+                                            $sampleFile = 'assignments/demo/Jawaban_Peserta_Kosong.xlsx';
+                                            $displayFile = 'Uji_6_Template_Kosong_0.xlsx';
+                                            $studentNote = '[Kasus Uji 6 - Template Belum Diisi] Mengunggah template kosong tanpa isian sel D2:E6.';
+                                        } elseif ($studentIdx === 6) {
+                                            $sampleFile = 'assignments/demo/Jawaban_Peserta_Sempurna_100.xlsx';
+                                            $displayFile = 'Pembanding_SudahDinilai_100.xlsx';
+                                            $studentNote = null;
                                         } else {
                                             $sampleFile = 'assignments/demo/Jawaban_Peserta_Perlu_Revisi_50.xlsx';
-                                            $displayFile = 'Kertas_Kerja_Revisi_Peserta_' . ($studentIdx + 1) . '.xlsx';
+                                            $displayFile = 'Pembanding_SudahDinilai_50.xlsx';
+                                            $studentNote = null;
                                         }
 
-                                        $autoEval = $postTestService->autoGradeFileUpload($pt, $sampleFile);
-
-                                        DB::table('post_test_results')->insert([
-                                            'id'           => (string) Str::uuid(),
-                                            'user_id'      => $student->id,
-                                            'post_test_id' => $pt->id,
-                                            'file_path'    => $sampleFile,
-                                            'file_name'    => $displayFile,
-                                            'score'        => $autoEval['score'],
-                                            'is_passed'    => $autoEval['is_passed'] ? 1 : 0,
-                                            'status'       => $autoEval['status'],
-                                            'notes'        => $autoEval['notes'],
-                                            'completed_at' => now()->subHours(1 + $studentIdx),
-                                            'created_at'   => now()->subHours(1 + $studentIdx),
-                                            'updated_at'   => now()->subHours(1 + $studentIdx),
-                                        ]);
+                                        if ($isUngradedDummy) {
+                                            DB::table('post_test_results')->insert([
+                                                'id'           => (string) Str::uuid(),
+                                                'user_id'      => $student->id,
+                                                'post_test_id' => $pt->id,
+                                                'file_path'    => $sampleFile,
+                                                'file_name'    => $displayFile,
+                                                'score'        => 0,
+                                                'is_passed'    => 0,
+                                                'status'       => 'submitted',
+                                                'notes'        => $studentNote,
+                                                'completed_at' => now()->subHours(1 + $studentIdx),
+                                                'created_at'   => now()->subHours(1 + $studentIdx),
+                                                'updated_at'   => now()->subHours(1 + $studentIdx),
+                                            ]);
+                                        } else {
+                                            $autoEval = $postTestService->autoGradeFileUpload($pt, $sampleFile);
+                                            DB::table('post_test_results')->insert([
+                                                'id'           => (string) Str::uuid(),
+                                                'user_id'      => $student->id,
+                                                'post_test_id' => $pt->id,
+                                                'file_path'    => $sampleFile,
+                                                'file_name'    => $displayFile,
+                                                'score'        => $autoEval['score'],
+                                                'is_passed'    => $autoEval['is_passed'] ? 1 : 0,
+                                                'status'       => $autoEval['status'],
+                                                'notes'        => $autoEval['notes'],
+                                                'completed_at' => now()->subHours(1 + $studentIdx),
+                                                'created_at'   => now()->subHours(1 + $studentIdx),
+                                                'updated_at'   => now()->subHours(1 + $studentIdx),
+                                            ]);
+                                        }
                                     }
                                 }
                             }

@@ -65,6 +65,8 @@ Route::prefix('admin-pusat')->middleware(['auth', 'role:admin-pusat'])->name('ad
         });
 
         Route::get('post-test-submissions', [PostTestSubmissionController::class, 'index'])->name('post-test-submissions.index');
+        Route::post('post-test-submissions/auto-grade-bulk', [PostTestSubmissionController::class, 'autoGradeBulk'])->name('post-test-submissions.auto-grade-bulk');
+        Route::post('post-test-submissions/{id}/auto-grade', [PostTestSubmissionController::class, 'autoGrade'])->name('post-test-submissions.auto-grade');
         Route::post('post-test-submissions/{id}/grade', [PostTestSubmissionController::class, 'grade'])->name('post-test-submissions.grade');
 
         Route::post('upload-video-editor', [SectionContentController::class, 'uploadVideoEditor'])->name('upload-video-editor');

@@ -121,7 +121,7 @@ class PostTestSeeder extends Seeder
         $questions = [
             [
                 'question'   => 'Jelaskan langkah-langkah strategis dan metodologi analisis yang tepat dalam implementasi materi ' . $contextName . ' di instansi Anda!',
-                'answer_key' => 'pemetaan regulasi, pengumpulan data primer, analisis kebutuhan, validasi indikator, ' . mb_strtolower($contextName),
+                'answer_key' => 'pemetaan regulasi, pengumpulan data primer, analisis kebutuhan, validasi indikator, proyeksi tenaga kerja',
             ],
             [
                 'question'   => 'Berdasarkan studi kasus pada modul ' . $contextName . ', berikan analisis komparatif serta rekomendasi mitigasi risiko terhadap kendala yang dihadapi di lapangan!',
@@ -174,7 +174,38 @@ class PostTestSeeder extends Seeder
         $fail50Rows[4][4] = 'Dalam Proses';
         $fail50Rows[5][3] = 1;
 
+        // --- Variasi tambahan untuk menguji kualitas koreksi otomatis (data belum dinilai) ---
+
+        // Benar semua tetapi penulisan berbeda (huruf besar/kecil, spasi, angka sebagai teks, desimal koma) -> seharusnya 100
+        $formatRows = $answerKeyRows;
+        $formatRows[1][3] = '85';
+        $formatRows[1][4] = 'sesuai regulasi';
+        $formatRows[2][3] = '1,25';
+        $formatRows[2][4] = 'PROYEKSI MODERAT';
+        $formatRows[3][4] = '  Tervalidasi ';
+        $formatRows[4][3] = '12 ';
+        $formatRows[4][4] = 'Tersedia   Lengkap';
+        $formatRows[5][4] = 'berjalan rutin';
+
+        // 7 dari 10 sel benar -> 70 (tepat di bawah KKM 75)
+        $partial70Rows = $answerKeyRows;
+        $partial70Rows[2][3] = 1.5;
+        $partial70Rows[3][4] = 'Belum Valid';
+        $partial70Rows[5][3] = 2;
+
+        // Angka benar, tetapi isian teks memakai sinonim (maknanya benar, kata berbeda) -> sistem hanya memberi 50
+        $synonymRows = $answerKeyRows;
+        $synonymRows[1][4] = 'Memenuhi Regulasi';
+        $synonymRows[2][4] = 'Moderat';
+        $synonymRows[3][4] = 'Sudah Divalidasi';
+        $synonymRows[4][4] = 'Lengkap Tersedia';
+        $synonymRows[5][4] = 'Rutin Berjalan';
+
         $this->writeXlsx($disk->path('assignments/soal/Template_Kertas_Kerja_Bimtek.xlsx'), $baseRows);
+        $this->writeXlsx($disk->path('assignments/demo/Jawaban_Peserta_Format_Berbeda.xlsx'), $formatRows);
+        $this->writeXlsx($disk->path('assignments/demo/Jawaban_Peserta_Sebagian_70.xlsx'), $partial70Rows);
+        $this->writeXlsx($disk->path('assignments/demo/Jawaban_Peserta_Sinonim.xlsx'), $synonymRows);
+        $this->writeXlsx($disk->path('assignments/demo/Jawaban_Peserta_Kosong.xlsx'), $baseRows);
         $this->writeXlsx($disk->path('assignments/kunci/Kunci_Jawaban_Kertas_Kerja_Bimtek.xlsx'), $answerKeyRows);
         $this->writeXlsx($disk->path('assignments/demo/Jawaban_Peserta_Sempurna_100.xlsx'), $perfectRows);
         $this->writeXlsx($disk->path('assignments/demo/Jawaban_Peserta_Sebagian_80.xlsx'), $partial80Rows);

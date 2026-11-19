@@ -415,6 +415,30 @@
                 </div>
             </form>
 
+            @if ($isManualTest && $selectedPostTest->has_auto_grading && ($pendingCount ?? 0) > 0)
+                <div class="bg-emerald-50/80 border border-emerald-200 rounded-md p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-2xs">
+                    <div class="space-y-0.5">
+                        <p class="text-sm sm:text-base font-bold text-emerald-800 flex items-center gap-2">
+                            <i class="fas fa-robot"></i>
+                            <span>Tersedia {{ $pendingCount }} Jawaban Belum Dinilai</span>
+                        </p>
+                        <p class="text-xs sm:text-sm text-slate-600">
+                            Anda dapat menjalankan koreksi otomatis terhadap kunci jawaban untuk seluruh peserta yang belum dinilai, atau menguji satu per satu di bawah ini.
+                        </p>
+                    </div>
+                    <form action="{{ route('admin-pusat.management-course.post-test-submissions.auto-grade-bulk') }}" method="POST" class="shrink-0">
+                        @csrf
+                        <input type="hidden" name="bimtek_event_id" value="{{ $selectedEvent->id }}">
+                        <input type="hidden" name="post_test_id" value="{{ $selectedPostTest->id }}">
+                        <button type="submit"
+                                class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-md text-xs sm:text-sm font-bold text-white bg-emerald-600 hover:bg-emerald-700 transition-colors shadow-2xs cursor-pointer">
+                            <i class="fas fa-wand-magic-sparkles"></i>
+                            <span>Koreksi Otomatis Semua ({{ $pendingCount }} Belum Dinilai)</span>
+                        </button>
+                    </form>
+                </div>
+            @endif
+
             <div class="bg-white rounded-md border border-slate-200 shadow-2xs overflow-hidden divide-y divide-slate-200">
                 @forelse ($submissions as $sub)
                     @php
@@ -422,51 +446,47 @@
                         $isUpload = (bool) $selectedPostTest->is_file_upload;
                         $isGraded = ($sub->status ?? '') === 'graded';
                         $passingScore = (int) ($selectedPostTest->passing_score ?? 70);
-                        $defaultScore = $sub->score ?? ($isEssay ? 85 : 100);
+                        $defaultScore = $isGraded ? (int) ($sub->score ?? 0) : '';
                         $studentName = $sub->user?->profile?->full_name ?? $sub->user?->name ?? 'Peserta';
                         $studentInstansi = $sub->user?->profile?->instansi;
                         $submittedAt = $sub->completed_at ?? $sub->updated_at;
                     @endphp
 
                     @if ($isManualTest)
-                        <div x-data="{ expanded: false, scoreVal: {{ (int) $defaultScore }}, isPassedVal: '{{ $sub->is_passed ? '1' : '0' }}' }">
+                        <div x-data="{ expanded: false, scoreVal: {{ $isGraded ? (int) ($sub->score ?? 0) : "''" }}, isPassedVal: '{{ $sub->is_passed ? '1' : '0' }}' }">
                             <div @click="expanded = !expanded"
-                                 class="p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 cursor-pointer hover:bg-slate-50/70 transition-colors select-none">
-                                <div class="space-y-1.5 min-w-0 flex-1">
-                                    <div class="flex flex-wrap items-center gap-x-2 gap-y-0.5">
-                                        <h3 class="text-base sm:text-lg font-bold text-slate-900">{{ $studentName }}</h3>
-                                        @if ($studentInstansi)
-                                            <span class="text-xs sm:text-sm text-slate-500">({{ $studentInstansi }})</span>
+                                 class="p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 cursor-pointer hover:bg-slate-50/70 transition-colors select-none">
+                                <div class="space-y-2 min-w-0 flex-1">
+                                    <div>
+                                        <div class="flex flex-wrap items-center gap-x-2 gap-y-0.5">
+                                            <h3 class="text-base sm:text-lg font-bold text-slate-900 leading-snug">{{ $studentName }}</h3>
+                                            @if ($studentInstansi)
+                                                <span class="text-xs sm:text-sm text-slate-500">({{ $studentInstansi }})</span>
+                                            @endif
+                                        </div>
+                                        @if ($sub->user?->email)
+                                            <p class="text-sm sm:text-[15px] font-medium text-slate-600 mt-0.5">{{ $sub->user->email }}</p>
                                         @endif
                                     </div>
-                                    <div class="flex flex-wrap items-center gap-x-2.5 gap-y-0.5 text-xs sm:text-sm text-slate-500">
-                                        @if ($sub->user?->email)
-                                            <span>{{ $sub->user->email }}</span>
-                                            <span class="text-slate-300 select-none">—</span>
+
+                                    {{-- Badge Kotak Info Sejajar Step 1 --}}
+                                    <div class="inline-flex flex-wrap items-center gap-x-3 gap-y-1 px-3.5 py-2 rounded-md bg-slate-50 border border-slate-200 text-xs sm:text-sm text-slate-600">
+                                        @if ($isGraded)
+                                            <span class="font-bold {{ $sub->is_passed ? 'text-emerald-600' : 'text-rose-600' }}">
+                                                Nilai {{ $sub->score ?? 0 }}
+                                            </span>
+                                        @else
+                                            <span class="font-bold text-amber-600">Menunggu Penilaian</span>
                                         @endif
+
                                         @if ($submittedAt)
-                                            <span>Dikumpulkan {{ $submittedAt->translatedFormat('d M Y, H:i') }} WIB</span>
+                                            <span class="text-slate-300 select-none">—</span>
+                                            <span class="font-medium">Dikumpulkan {{ $submittedAt->translatedFormat('d M Y, H:i') }} WIB</span>
                                         @endif
                                     </div>
                                 </div>
 
-                                <div class="flex items-center justify-between sm:justify-end gap-3 shrink-0">
-                                    @if (str_contains((string) ($sub->notes ?? ''), '[Koreksi Otomatis Sistem]'))
-                                        <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded text-xs font-bold bg-blue-50 text-[#13416B] border border-blue-200">
-                                            <i class="fas fa-robot text-[11px]"></i> Otomatis Dinilai Sistem
-                                        </span>
-                                    @endif
-
-                                    @if ($isGraded)
-                                        <span class="text-xs sm:text-sm font-bold {{ $sub->is_passed ? 'text-emerald-600' : 'text-rose-600' }}">
-                                            Nilai {{ $sub->score ?? 0 }} — {{ $sub->is_passed ? 'Lulus' : 'Perlu Revisi' }}
-                                        </span>
-                                    @else
-                                        <span class="text-xs sm:text-sm font-bold text-amber-600">
-                                            Menunggu Penilaian
-                                        </span>
-                                    @endif
-
+                                <div class="flex items-center justify-end gap-2.5 flex-wrap shrink-0">
                                     <span class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-md text-xs sm:text-sm font-semibold text-[#13416B] bg-slate-100 hover:bg-slate-200 transition-colors">
                                         <span x-text="expanded ? 'Tutup' : 'Periksa & Nilai'"></span>
                                         <i class="fas fa-chevron-down text-[11px] transition-transform duration-200" :class="{ 'rotate-180': expanded }"></i>
@@ -511,6 +531,13 @@
                                                     </div>
                                                 @endforeach
                                             @endforelse
+
+                                            @if (!$isGraded && !empty($sub->notes))
+                                                <div class="p-3.5 rounded bg-white border border-slate-200 text-xs sm:text-sm text-slate-700 shadow-2xs">
+                                                    <span class="font-bold text-slate-600">Catatan Peserta:</span>
+                                                    <span class="italic">“{{ $sub->notes }}”</span>
+                                                </div>
+                                            @endif
                                         @elseif ($isUpload)
                                             <div class="bg-white rounded-md border border-slate-200 p-4 sm:p-5 space-y-4 shadow-2xs">
                                                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -555,15 +582,34 @@
 
                                     {{-- Form Penilaian --}}
                                     <div class="lg:col-span-5">
+                                        @if ($selectedPostTest->has_auto_grading)
+                                            <form id="auto-grade-form-{{ $sub->id }}"
+                                                  action="{{ route('admin-pusat.management-course.post-test-submissions.auto-grade', $sub->id) }}"
+                                                  method="POST"
+                                                  class="hidden">
+                                                @csrf
+                                            </form>
+                                        @endif
+
                                         <form action="{{ route('admin-pusat.management-course.post-test-submissions.grade', $sub->id) }}"
                                               method="POST"
                                               class="bg-white rounded-md border border-slate-200 p-4 sm:p-5 space-y-4 shadow-2xs">
                                             @csrf
 
-                                            <div class="pb-2.5 border-b border-slate-100 flex items-center justify-between">
-                                                <h4 class="text-sm sm:text-base font-bold text-slate-800">Penilaian Instruktur</h4>
-                                                @if ($passingScore > 0)
-                                                    <span class="text-xs sm:text-sm text-slate-500">KKM: {{ $passingScore }}</span>
+                                            <div class="pb-2.5 border-b border-slate-100 flex items-center justify-between gap-2 flex-wrap">
+                                                <div>
+                                                    <h4 class="text-sm sm:text-base font-bold text-slate-800">Penilaian Instruktur</h4>
+                                                    @if ($passingScore > 0)
+                                                        <span class="text-xs sm:text-sm text-slate-500">KKM: {{ $passingScore }}</span>
+                                                    @endif
+                                                </div>
+                                                @if ($selectedPostTest->has_auto_grading)
+                                                    <button type="submit"
+                                                            form="auto-grade-form-{{ $sub->id }}"
+                                                            class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-md text-xs sm:text-sm font-bold text-white bg-emerald-600 hover:bg-emerald-700 transition-colors cursor-pointer">
+                                                        <i class="fas fa-robot text-xs"></i>
+                                                        <span>Koreksi Otomatis</span>
+                                                    </button>
                                                 @endif
                                             </div>
 
@@ -578,7 +624,7 @@
                                                        required
                                                        x-model.number="scoreVal"
                                                        @if ($passingScore > 0)
-                                                           @input="isPassedVal = (Number(scoreVal) >= {{ $passingScore }}) ? '1' : '0'"
+                                                           @input="isPassedVal = (scoreVal !== '' && Number(scoreVal) >= {{ $passingScore }}) ? '1' : '0'"
                                                        @endif
                                                        class="w-full px-3.5 py-2.5 text-sm sm:text-base font-bold text-slate-800 rounded-md border border-slate-300 focus:border-[#13416B] focus:ring-1 focus:ring-[#13416B] outline-none">
                                             </div>
@@ -651,6 +697,73 @@
             @if ($submissions->hasPages())
                 <div>{{ $submissions->links() }}</div>
             @endif
+        @endif
+
+        {{-- Pop-up Notifikasi Berhasil Menilai (Otomatis / Manual) --}}
+        @if (session('grading_popup'))
+            @php $popup = session('grading_popup'); @endphp
+            <div x-data="{ open: true }"
+                 x-show="open"
+                 x-cloak
+                 @keydown.escape.window="open = false"
+                 class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-xs">
+                <div class="fixed inset-0" @click="open = false"></div>
+
+                <div class="relative z-10 w-full max-w-md bg-white rounded-xl border border-slate-200 shadow-2xl overflow-hidden">
+                    <div class="p-6 space-y-4">
+                        <div class="flex items-start gap-3.5">
+                            <div class="w-11 h-11 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0">
+                                <i class="fas fa-check-circle text-2xl"></i>
+                            </div>
+                            <div class="min-w-0 flex-1">
+                                <p class="text-xs font-bold uppercase tracking-wider text-emerald-700">
+                                    {{ $popup['method'] ?? 'Penilaian Selesai' }}
+                                </p>
+                                <h3 class="text-lg font-extrabold text-slate-900 mt-0.5 leading-snug">
+                                    {{ $popup['title'] ?? 'Berhasil Menilai' }}
+                                </h3>
+                            </div>
+                            <button type="button" @click="open = false" class="text-slate-400 hover:text-slate-600 p-1 cursor-pointer">
+                                <i class="fas fa-times text-sm"></i>
+                            </button>
+                        </div>
+
+                        <div class="p-3.5 rounded-lg bg-slate-50 border border-slate-200 space-y-1.5 text-sm">
+                            <div class="flex items-center justify-between gap-2">
+                                <span class="text-slate-500">Peserta</span>
+                                <span class="font-bold text-slate-900">{{ $popup['student_name'] ?? '-' }}</span>
+                            </div>
+                            @if (!is_null($popup['score'] ?? null))
+                                <div class="flex items-center justify-between gap-2">
+                                    <span class="text-slate-500">Nilai Akhir</span>
+                                    <span class="font-extrabold {{ !empty($popup['is_passed']) ? 'text-emerald-600' : 'text-rose-600' }}">
+                                        {{ $popup['score'] }} ({{ !empty($popup['is_passed']) ? 'Lulus' : 'Perlu Revisi' }})
+                                    </span>
+                                </div>
+                            @elseif (!empty($popup['summary']))
+                                <div class="flex items-center justify-between gap-2">
+                                    <span class="text-slate-500">Ringkasan</span>
+                                    <span class="font-bold text-slate-800">{{ $popup['summary'] }}</span>
+                                </div>
+                            @endif
+                        </div>
+
+                        @if (!empty($popup['message']))
+                            <p class="text-xs sm:text-sm text-slate-600 leading-relaxed bg-emerald-50/60 border border-emerald-200/80 rounded-lg p-3">
+                                {{ $popup['message'] }}
+                            </p>
+                        @endif
+
+                        <div class="pt-1 flex justify-end">
+                            <button type="button"
+                                    @click="open = false"
+                                    class="px-5 py-2.5 rounded-lg text-sm font-bold text-white bg-emerald-600 hover:bg-emerald-700 transition-colors shadow-2xs cursor-pointer">
+                                Tutup
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
         @endif
 
     </div>
