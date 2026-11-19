@@ -394,19 +394,14 @@ class CourseController extends Controller
     public function uploadZoomProof(Request $request, string $slug, string $sectionId): RedirectResponse
     {
         $request->validate([
-            'proof_file' => 'nullable|file|mimes:jpeg,png,jpg,pdf,webp,docx,doc,zip,rar|max:10240',
-            'drive_link' => 'nullable|url|max:1000',
+            'proof_file' => 'required|image|mimes:jpeg,png,jpg,webp|max:3072',
             'notes'      => 'nullable|string|max:500',
         ], [
-            'proof_file.mimes' => 'Format berkas harus berupa JPG, PNG, WEBP, PDF, DOCX, atau ZIP.',
-            'proof_file.max'   => 'Ukuran berkas maksimal 10 MB.',
-            'drive_link.url'   => 'Format tautan Google Drive harus berupa URL yang valid (diawali https://).',
+            'proof_file.required' => 'Harap pilih berkas screenshot bukti mengikuti Zoom terlebih dahulu.',
+            'proof_file.image'    => 'Berkas bukti harus berupa gambar (JPG, PNG, atau WEBP).',
+            'proof_file.mimes'    => 'Format berkas harus berupa JPG, PNG, atau WEBP.',
+            'proof_file.max'      => 'Ukuran berkas maksimal 3 MB.',
         ]);
-
-        if (!$request->hasFile('proof_file') && empty(trim((string) $request->input('drive_link'))) && empty(trim((string) $request->input('notes')))) {
-            ToastMagic::error('Harap unggah berkas bukti atau isi keterangan konfirmasi.');
-            return redirect()->back();
-        }
 
         $userId = $request->user()->id;
         $zoomProof = SectionZoomProof::firstOrNew([
@@ -422,19 +417,14 @@ class CourseController extends Controller
             $zoomProof->file_path = $filePath;
         }
 
-        if ($request->filled('drive_link')) {
-            $zoomProof->drive_link = trim((string) $request->input('drive_link'));
-        }
-
-        if ($request->has('notes')) {
-            $zoomProof->notes = $request->input('notes');
-        }
-
+        $noteInput = trim((string) $request->input('notes', ''));
+        $zoomProof->notes = $noteInput !== '' ? $noteInput : null;
+        $zoomProof->drive_link = null;
         $zoomProof->status = 'submitted';
         $zoomProof->submitted_at = now();
         $zoomProof->save();
 
-        ToastMagic::success('Bukti pendukung presensi berhasil disimpan!');
+        ToastMagic::success('Screenshot bukti mengikuti Zoom berhasil diunggah!');
         return redirect()->back();
     }
 

@@ -14,6 +14,7 @@ use Modules\LMS\Models\BimtekEvent;
 use Modules\LMS\Models\CertificateSetting;
 use Modules\LMS\Models\CertificateSubmission;
 use Modules\LMS\Models\Course;
+use Modules\LMS\Models\SectionZoomProof;
 use Modules\LMS\Services\CertificateService;
 
 class CertificateSubmissionController extends Controller
@@ -137,8 +138,40 @@ class CertificateSubmissionController extends Controller
                 'cert_submission_status' => 'diajukan_ke_ppsdm',
             ]);
 
+        // Auto-cleanup: hapus file fisik screenshot bukti Zoom peserta yang sudah diajukan ke PPSDM
+        // agar storage server tetap hemat, sementara riwayat pengumpulan pada DB tetap dipertahankan.
+        $sectionIds = $event->course?->sections()->pluck('id')->all() ?? [];
+        $cleanedFilesCount = 0;
+        if (!empty($sectionIds)) {
+            $proofs = SectionZoomProof::whereIn('course_section_id', $sectionIds)
+                ->whereIn('user_id', $validated['student_ids'])
+                ->whereNotNull('file_path')
+                ->get();
+
+            foreach ($proofs as $proof) {
+                if ($proof->file_path && Storage::disk('public')->exists($proof->file_path)) {
+                    Storage::disk('public')->delete($proof->file_path);
+                    $cleanedFilesCount++;
+                }
+
+                $archiveNote = 'Berkas screenshot telah dibersihkan otomatis setelah peserta diajukan ke PPSDM.';
+                $existingNotes = trim((string) ($proof->notes ?? ''));
+                $proof->update([
+                    'file_path' => null,
+                    'notes'     => $existingNotes !== '' && !str_contains($existingNotes, 'dibersihkan otomatis')
+                        ? ($existingNotes . ' (' . $archiveNote . ')')
+                        : ($existingNotes !== '' ? $existingNotes : $archiveNote),
+                ]);
+            }
+        }
+
+        $successMessage = "Berkas pengajuan sertifikat #{$submissionCode} berhasil diajukan ke PPSDM!";
+        if ($cleanedFilesCount > 0) {
+            $successMessage .= " ({$cleanedFilesCount} berkas screenshot bukti Zoom peserta terkait otomatis dibersihkan dari penyimpanan server.)";
+        }
+
         return redirect()->route('admin-pusat.management-course.certificate-submissions.show', $submission->id)
-            ->with('success', "Berkas pengajuan sertifikat #{$submissionCode} berhasil diajukan ke PPSDM!");
+            ->with('success', $successMessage);
     }
 
     /**

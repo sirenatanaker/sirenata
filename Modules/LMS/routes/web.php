@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use Modules\LMS\Http\Controllers\AdminKabKota\RekapitulasiController as AdminKabKotaRekapitulasiController;
 use Modules\LMS\Http\Controllers\AdminProvince\RekapitulasiController as AdminProvinceRekapitulasiController;
 use Modules\LMS\Http\Controllers\AdminPusat\CertificateController as AdminPusatCertificateController;
+use Modules\LMS\Http\Controllers\AdminPusat\AttendanceManagementController;
 use Modules\LMS\Http\Controllers\AdminPusat\BimtekEvaluationQuestionController;
 use Modules\LMS\Http\Controllers\AdminPusat\BimtekEventController;
 use Modules\LMS\Http\Controllers\AdminPusat\CertificateSubmissionController;
@@ -74,6 +75,12 @@ Route::prefix('admin-pusat')->middleware(['auth', 'role:admin-pusat'])->name('ad
         Route::post('post-test-submissions/auto-grade-bulk', [PostTestSubmissionController::class, 'startBatch'])->name('post-test-submissions.auto-grade-bulk');
         Route::post('post-test-submissions/{id}/auto-grade', [PostTestSubmissionController::class, 'autoGrade'])->name('post-test-submissions.auto-grade');
         Route::post('post-test-submissions/{id}/grade', [PostTestSubmissionController::class, 'grade'])->name('post-test-submissions.grade');
+
+        Route::get('attendances', [AttendanceManagementController::class, 'index'])->name('attendances.index');
+        Route::post('attendances/event/{eventId}/drive-link', [AttendanceManagementController::class, 'updateEventDriveLink'])->name('attendances.event-drive-link');
+        Route::post('attendances/toggle-presence', [AttendanceManagementController::class, 'togglePresence'])->name('attendances.toggle-presence');
+        Route::post('attendances/bulk-mark-presence-with-proof', [AttendanceManagementController::class, 'bulkMarkPresenceWithProof'])->name('attendances.bulk-mark-presence-with-proof');
+        Route::post('attendances/proof-status', [AttendanceManagementController::class, 'updateProofStatus'])->name('attendances.proof-status');
 
         Route::post('upload-video-editor', [SectionContentController::class, 'uploadVideoEditor'])->name('upload-video-editor');
         Route::post('upload-image-editor', [SectionContentController::class, 'uploadImageEditor'])->name('upload-image-editor');

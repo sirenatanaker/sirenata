@@ -34,6 +34,7 @@ class BimtekEvent extends Model
         'zoom_end_at',
         'zoom_attendance_start_at',
         'zoom_attendance_end_at',
+        'submission_drive_link',
         'assessment_start_at',
         'assessment_end_at',
         'location_name',

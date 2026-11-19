@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Modules\LMS\Models\BimtekEvent;
@@ -13,6 +15,11 @@ use Modules\LMS\Models\BimtekEventSession;
 use Modules\LMS\Models\BimtekInstructorEvaluation;
 use Modules\LMS\Models\BimtekSessionAttendance;
 use Modules\LMS\Models\Course;
+use Modules\LMS\Models\CourseSection;
+use Modules\LMS\Models\GradingBatch;
+use Modules\LMS\Models\PostTest;
+use Modules\LMS\Models\PostTestResult;
+use Modules\LMS\Models\SectionZoomProof;
 
 class BimtekEventController extends Controller
 {
@@ -97,6 +104,7 @@ class BimtekEventController extends Controller
             // Rentang Waktu Pembukaan Presensi (Wajib Tanggal & Jam, harus di dalam rentang sesi Zoom)
             'zoom_attendance_start_at' => 'nullable|date',
             'zoom_attendance_end_at'   => 'nullable|date',
+            'submission_drive_link'    => 'nullable|url|max:1000',
 
             // Multi-Sesi Zoom & Presensi Harian (Skenario 1)
             'sessions'                         => 'nullable|array',
@@ -339,15 +347,41 @@ class BimtekEventController extends Controller
     }
 
     /**
-     * Display the specified Bimtek Event with monitoring details.
+     * Pusat Kendali 1 Event (4 Tab Berurutan):
+     * 1. overview   : Ringkasan, Linimasa, Zoom, 1 Link Google Drive Master & Evaluasi Narasumber
+     * 2. attendance : Absensi & Bukti Mengikuti Zoom Harian (Hari 1..N)
+     * 3. evaluation : Penilaian Evaluasi Harian & Evaluasi Akhir (Uraian/Upload Berkas & CBT)
+     * 4. graduation : Monitoring Kelulusan Lengkap & Pengajuan Sertifikat ke PPSDM
      */
-    public function show($id)
+    public function show(Request $request, $id)
     {
-        $event = BimtekEvent::with(['course.sections', 'certificateSubmissions', 'sessions.attendances'])->findOrFail($id);
+        $event = BimtekEvent::with([
+            'course.sections' => fn($q) => $q->orderBy('position'),
+            'certificateSubmissions',
+            'sessions'        => fn($q) => $q->orderBy('session_number')->orderBy('session_date')->orderBy('start_time'),
+            'sessions.attendances',
+        ])->findOrFail($id);
 
-        // Ambil daftar peserta yang terdaftar pada batch ini atau kursus terkait
-        $participants = \DB::table('course_student')
+        $activeTab = (string) $request->query('tab', 'overview');
+        if (!in_array($activeTab, ['overview', 'attendance', 'evaluation', 'graduation'], true)) {
+            $activeTab = 'overview';
+        }
+        if ($request->filled('post_test_id')) {
+            $activeTab = 'evaluation';
+        } elseif ($request->filled('section_id') && !$request->filled('tab')) {
+            $activeTab = 'attendance';
+        }
+
+        $sections = $event->course?->sections?->values() ?? collect();
+        $sessions = $event->sessions->values();
+        $sectionIds = $sections->pluck('id')->all();
+        $totalAgendaDays = $sections->count();
+        $totalSessionsCount = $sessions->count();
+
+        // Ambil daftar peserta yang terdaftar pada gelombang ini
+        $participants = DB::table('course_student')
             ->join('users', 'users.id', '=', 'course_student.user_id')
+            ->leftJoin('user_profiles', 'user_profiles.user_id', '=', 'users.id')
             ->where('course_student.course_id', $event->course_id)
             ->where(function ($q) use ($event) {
                 $q->where('course_student.bimtek_event_id', $event->id)
@@ -355,8 +389,9 @@ class BimtekEventController extends Controller
             })
             ->select(
                 'users.id as user_id',
-                'users.name as user_name',
+                DB::raw('COALESCE(user_profiles.full_name, users.name) as user_name'),
                 'users.email as user_email',
+                'user_profiles.instansi as user_instansi',
                 'course_student.progress',
                 'course_student.status',
                 'course_student.completed_at',
@@ -369,15 +404,52 @@ class BimtekEventController extends Controller
                 'course_student.certificate_code',
                 'course_student.certificate_file'
             )
-            ->orderBy('users.name')
+            ->orderBy('user_name')
             ->get();
 
-        // Hitung kehadiran multi-sesi per peserta
-        $sessionAttendances = BimtekSessionAttendance::where('bimtek_event_id', $event->id)
-            ->get()
-            ->groupBy('user_id');
+        $participantIds = $participants->pluck('user_id')->unique()->values();
+        $enrollmentByUser = $participants->keyBy('user_id');
 
-        // Ambil data evaluasi narasumber & penyelenggaraan
+        // Presensi multi-sesi & bukti Zoom per hari
+        $allSessionAttendances = BimtekSessionAttendance::where('bimtek_event_id', $event->id)->get();
+        $sessionAttByUser = $allSessionAttendances->groupBy('user_id');
+        $sessionAttBySession = $allSessionAttendances->groupBy('bimtek_event_session_id');
+
+        $allProofs = (!empty($sectionIds) && $participantIds->isNotEmpty())
+            ? SectionZoomProof::whereIn('course_section_id', $sectionIds)
+                ->whereIn('user_id', $participantIds)
+                ->get()
+            : collect();
+        $proofsBySection = $allProofs->groupBy('course_section_id');
+        $proofsByUser = $allProofs->groupBy('user_id');
+
+        // Evaluasi (PostTest harian & akhir) beserta hasilnya untuk event ini
+        $manualTypes = ['essay', 'uraian', 'file_upload', 'upload'];
+        $coursePostTests = PostTest::with('questions')
+            ->where('course_id', $event->course_id)
+            ->get();
+
+        $resultsByTest = collect();
+        $resultsByUser = collect();
+        if ($coursePostTests->isNotEmpty() && $participantIds->isNotEmpty()) {
+            $allResults = PostTestResult::whereIn('post_test_id', $coursePostTests->pluck('id'))
+                ->whereIn('user_id', $participantIds)
+                ->get();
+            $resultsByTest = $allResults->groupBy('post_test_id');
+            $resultsByUser = $allResults->groupBy('user_id');
+        }
+
+        // Hitung total evaluasi non-pilgan yang masih menunggu penilaian / draf belum dipublikasikan
+        $pendingEvalTotal = 0;
+        foreach ($coursePostTests as $pt) {
+            if (in_array($pt->type, $manualTypes, true)) {
+                $pendingEvalTotal += $resultsByTest->get($pt->id, collect())
+                    ->filter(fn($r) => $r->grading_status !== PostTestResult::GRADING_PUBLISHED)
+                    ->count();
+            }
+        }
+
+        // Evaluasi narasumber & penyelenggaraan
         $evaluations = BimtekInstructorEvaluation::with('user')
             ->where('bimtek_event_id', $event->id)
             ->latest()
@@ -391,36 +463,353 @@ class BimtekEventController extends Controller
         $avgFasilitasi = $evaluationsCount > 0 ? round((float) $evaluations->avg('rating_fasilitasi'), 1) : 0.0;
         $avgOverall = $evaluationsCount > 0 ? round(($avgMateri + $avgPenyampaian + $avgFasilitasi) / 3, 1) : 0.0;
 
-        $totalSessionsCount = $event->sessions->count();
+        $totalEvalTestsCount = $coursePostTests->count();
         foreach ($participants as $p) {
-            $attended = isset($sessionAttendances[$p->user_id])
-                ? $sessionAttendances[$p->user_id]->count()
-                : ($p->zoom_attended ? ($totalSessionsCount ?: 1) : 0);
-            $p->attended_sessions_count = $attended;
+            $attendedSessions = isset($sessionAttByUser[$p->user_id])
+                ? $sessionAttByUser[$p->user_id]->count()
+                : ($p->zoom_attended ? ($totalSessionsCount ?: ($totalAgendaDays ?: 1)) : 0);
+            $p->attended_sessions_count = $attendedSessions;
+
+            $userProofs = $proofsByUser->get($p->user_id, collect());
+            $p->proof_submitted_count = $userProofs->where('status', '!=', 'rejected')->count();
+            $p->proof_verified_count = $userProofs->where('status', 'verified')->count();
+
+            $userResults = $resultsByUser->get($p->user_id, collect());
+            $p->eval_passed_count = $userResults->filter(function ($r) {
+                return (bool) $r->is_passed && ($r->grading_status === PostTestResult::GRADING_PUBLISHED || $r->status === 'graded');
+            })->count();
+            $p->eval_total_count = $totalEvalTestsCount;
+
             $p->evaluation = $evaluationsByUser[$p->user_id] ?? null;
             $p->has_evaluated = isset($evaluationsByUser[$p->user_id]);
         }
 
-        // Hitung kelulusan
         $totalRegistered = $participants->count();
         $totalCompleted = $participants->where('status', 'completed')->count();
         $totalAttendedZoom = $participants->where('zoom_attended', true)->count();
         $totalCertified = $participants->whereNotNull('official_cert_number')->count();
+        $readyForPpsdmCount = $participants->filter(fn($p) => $p->status === 'completed' && empty($p->official_cert_number) && $p->cert_submission_status !== 'diajukan_ke_ppsdm')->count();
+
+        // Helper mencocokkan sesi dengan indeks hari
+        $resolveSessionForDay = function (int $idx) use ($sessions): ?BimtekEventSession {
+            return $sessions->firstWhere('session_number', $idx + 1) ?: $sessions->get($idx);
+        };
+
+        // =========================================================================
+        // TAB 2: DATA ABSENSI & BUKTI HARIAN (HARI 1..N)
+        // =========================================================================
+        $attSearch = trim((string) $request->query('att_search', $request->query('search', '')));
+        $attFilter = (string) $request->query('att_filter', $request->query('filter', 'all'));
+
+        $attendanceDays = $sections->map(function ($section, $idx) use (
+            $event,
+            $resolveSessionForDay,
+            $sessionAttBySession,
+            $proofsBySection,
+            $totalRegistered,
+            $totalAttendedZoom
+        ) {
+            $dayNum = $idx + 1;
+            $session = $resolveSessionForDay($idx);
+            $rawName = trim((string) $section->name);
+            $cleanTitle = trim((string) preg_replace('/^(?:Modul|Hari(?:\s+ke-?)?)\s*\d+\s*[:\-—]\s*/i', '', $rawName)) ?: $rawName;
+
+            $dayDate = null;
+            if ($session?->session_date) {
+                $dayDate = $session->session_date->translatedFormat('d M Y');
+            } elseif ($event->start_date) {
+                $dayDate = $event->start_date->copy()->addDays($idx)->translatedFormat('d M Y');
+            }
+
+            $attRows = $session ? $sessionAttBySession->get($session->id, collect()) : collect();
+            $attendedCount = $session ? $attRows->pluck('user_id')->unique()->count() : $totalAttendedZoom;
+            $proofRows = $proofsBySection->get($section->id, collect());
+
+            return (object) [
+                'day_number'         => $dayNum,
+                'day_date'           => $dayDate,
+                'section'            => $section,
+                'session'            => $session,
+                'title'              => $cleanTitle,
+                'attended_count'     => $attendedCount,
+                'proof_count'        => $proofRows->count(),
+                'verified_count'     => $proofRows->where('status', 'verified')->count(),
+                'total_participants' => $totalRegistered,
+            ];
+        });
+
+        $requestedSectionId = $request->query('section_id');
+        $activeAttendanceDay = $requestedSectionId
+            ? $attendanceDays->first(fn($d) => (string) $d->section->id === (string) $requestedSectionId)
+            : null;
+
+        $attendanceSummary = [
+            'all' => 0, 'complete' => 0, 'attended' => 0, 'not_attended' => 0,
+            'proof_submitted' => 0, 'proof_verified' => 0, 'proof_missing' => 0,
+            'proof_not_attended' => 0,
+        ];
+        $attendanceRows = null;
+
+        if ($activeTab === 'attendance' && $activeAttendanceDay) {
+            $activeSession = $activeAttendanceDay->session;
+            $activeSecId = $activeAttendanceDay->section->id;
+            $sessAttMap = $activeSession ? $sessionAttBySession->get($activeSession->id, collect())->keyBy('user_id') : collect();
+            $secProofMap = $proofsBySection->get($activeSecId, collect())->keyBy('user_id');
+
+            $allAttRows = $participants->map(function ($p) use ($activeSession, $sessAttMap, $secProofMap) {
+                $sAtt = $sessAttMap->get($p->user_id);
+                $proof = $secProofMap->get($p->user_id);
+
+                $isAttended = $activeSession ? (bool) $sAtt : (bool) $p->zoom_attended;
+                $attendedAt = $sAtt?->attended_at
+                    ?? ($p->zoom_attended_at ? Carbon::parse($p->zoom_attended_at) : null);
+                $joinedAt = $p->zoom_joined_at ? Carbon::parse($p->zoom_joined_at) : null;
+                $hasProof = (bool) $proof;
+                $proofStatus = $proof?->status ?? 'missing';
+
+                return (object) [
+                    'user_id'      => $p->user_id,
+                    'name'         => $p->user_name,
+                    'email'        => $p->user_email,
+                    'instansi'     => $p->user_instansi,
+                    'is_attended'  => $isAttended,
+                    'attended_at'  => $attendedAt,
+                    'joined_at'    => $joinedAt,
+                    'has_proof'    => $hasProof,
+                    'proof'        => $proof,
+                    'proof_status' => $proofStatus,
+                    'is_complete'  => $isAttended && $hasProof && $proofStatus !== 'rejected',
+                ];
+            });
+
+            $attendanceSummary = [
+                'all'                => $allAttRows->count(),
+                'complete'           => $allAttRows->where('is_complete', true)->count(),
+                'attended'           => $allAttRows->where('is_attended', true)->count(),
+                'not_attended'       => $allAttRows->where('is_attended', false)->count(),
+                'proof_submitted'    => $allAttRows->where('has_proof', true)->count(),
+                'proof_verified'     => $allAttRows->where('proof_status', 'verified')->count(),
+                'proof_missing'      => $allAttRows->where('has_proof', false)->count(),
+                'proof_not_attended' => $allAttRows->where('is_attended', false)->where('has_proof', true)->count(),
+            ];
+
+            $filteredAtt = $allAttRows->filter(function ($row) use ($attSearch, $attFilter) {
+                if ($attSearch !== '') {
+                    $needle = mb_strtolower($attSearch);
+                    $hay = mb_strtolower(($row->name ?? '') . ' ' . ($row->email ?? '') . ' ' . ($row->instansi ?? ''));
+                    if (!str_contains($hay, $needle)) {
+                        return false;
+                    }
+                }
+                return match ($attFilter) {
+                    'complete'           => $row->is_complete,
+                    'attended'           => $row->is_attended,
+                    'not_attended'       => !$row->is_attended,
+                    'proof_submitted'    => $row->has_proof,
+                    'proof_verified'     => $row->proof_status === 'verified',
+                    'proof_missing'      => !$row->has_proof,
+                    'proof_not_attended' => !$row->is_attended && $row->has_proof,
+                    default              => true,
+                };
+            })->values();
+
+            $perPage = 15;
+            $page = max(1, (int) $request->query('att_page', 1));
+            $attendanceRows = new LengthAwarePaginator(
+                $filteredAtt->slice(($page - 1) * $perPage, $perPage)->values(),
+                $filteredAtt->count(),
+                $perPage,
+                $page,
+                [
+                    'path'     => $request->url(),
+                    'pageName' => 'att_page',
+                    'query'    => $request->query(),
+                ]
+            );
+        }
+
+        // =========================================================================
+        // TAB 3: PENILAIAN EVALUASI (HARIAN & EVALUASI AKHIR)
+        // =========================================================================
+        $testsBySection = $coursePostTests->whereNotNull('course_section_id')->keyBy('course_section_id');
+        $finalTest = $coursePostTests->firstWhere('course_section_id', null);
+
+        $evalDailyAgendas = $sections->map(function ($section, $index) use (
+            $testsBySection,
+            $resultsByTest,
+            $manualTypes,
+            $event,
+            $totalRegistered
+        ) {
+            $pt = $testsBySection->get($section->id);
+            $rows = $pt ? $resultsByTest->get($pt->id, collect()) : collect();
+            $isManual = $pt && in_array($pt->type, $manualTypes, true);
+
+            $rawName = trim((string) $section->name);
+            $cleanTitle = trim((string) preg_replace('/^(?:Modul|Hari(?:\s+ke-?)?)\s*\d+\s*[:\-—]\s*/i', '', $rawName)) ?: $rawName;
+            $dayDate = $event->start_date ? $event->start_date->copy()->addDays($index)->translatedFormat('d M Y') : null;
+
+            return (object) [
+                'day_number'         => $index + 1,
+                'day_date'           => $dayDate,
+                'title'              => $cleanTitle,
+                'post_test'          => $pt,
+                'is_manual'          => $isManual,
+                'format_label'       => match ($pt?->type) {
+                    'essay', 'uraian'       => 'Uraian / Esai',
+                    'file_upload', 'upload' => 'Upload Berkas',
+                    default                 => $pt ? 'Pilihan Ganda (CBT)' : 'Belum Ada Evaluasi',
+                },
+                'submitted_count'    => $rows->count(),
+                'pending_count'      => $isManual
+                    ? $rows->filter(fn($r) => $r->grading_status !== PostTestResult::GRADING_PUBLISHED)->count()
+                    : 0,
+                'graded_count'       => $isManual
+                    ? $rows->filter(fn($r) => $r->grading_status === PostTestResult::GRADING_PUBLISHED)->count()
+                    : $rows->count(),
+                'total_participants' => $totalRegistered,
+            ];
+        });
+
+        $finalRows = $finalTest ? $resultsByTest->get($finalTest->id, collect()) : collect();
+        $finalIsManual = $finalTest && in_array($finalTest->type, $manualTypes, true);
+        $evalFinalEvaluation = (object) [
+            'title'              => $finalTest?->title ?? ('Evaluasi Akhir: ' . ($event->course?->name ?? 'Pelatihan')),
+            'post_test'          => $finalTest,
+            'is_manual'          => $finalIsManual,
+            'format_label'       => match ($finalTest?->type) {
+                'essay', 'uraian'       => 'Uraian / Esai',
+                'file_upload', 'upload' => 'Upload Berkas',
+                default                 => $finalTest ? 'Pilihan Ganda (CBT)' : 'Belum Ada Evaluasi',
+            },
+            'submitted_count'    => $finalRows->count(),
+            'pending_count'      => $finalIsManual
+                ? $finalRows->filter(fn($r) => $r->grading_status !== PostTestResult::GRADING_PUBLISHED)->count()
+                : 0,
+            'graded_count'       => $finalIsManual
+                ? $finalRows->filter(fn($r) => $r->grading_status === PostTestResult::GRADING_PUBLISHED)->count()
+                : $finalRows->count(),
+            'total_participants' => $totalRegistered,
+        ];
+
+        $selectedPostTest = null;
+        $isManualTest = false;
+        $triageCounts = ['all' => 0, 'pure_pending' => 0, 'pending' => 0, 'needs_review' => 0, 'failed' => 0, 'draft_ready' => 0, 'published' => 0];
+        $activeBatch = null;
+        $evalSubmissions = null;
+        $evalSearch = trim((string) $request->query('eval_search', ''));
+        $evalStatus = (string) $request->query('eval_status', 'all');
+        $selectedPostTestHeaderTitle = '';
+        $selectedPostTestDayNum = 1;
+
+        if ($activeTab === 'evaluation' && $request->filled('post_test_id')) {
+            $selectedPostTest = PostTest::with(['questions', 'section'])->findOrFail($request->query('post_test_id'));
+            $isManualTest = in_array($selectedPostTest->type, $manualTypes, true);
+
+            if ($selectedPostTest->course_section_id) {
+                $sIdx = $sections->search(fn($s) => (string) $s->id === (string) $selectedPostTest->course_section_id);
+                $selectedPostTestDayNum = $sIdx !== false ? ($sIdx + 1) : 1;
+                $rawT = trim((string) ($selectedPostTest->section?->name ?: $selectedPostTest->title ?: ''));
+                $cleanT = preg_replace('/^(?:(?:Penugasan\s+Berkas|Evaluasi(?:\s+Uraian|\s+Harian|\s+Berkas)?)\s*:\s*)+/i', '', $rawT);
+                $cleanT = trim((string) preg_replace('/^(?:Modul|Hari(?:\s+ke-?)?)\s*\d+\s*[:\-—]\s*/i', '', trim((string) $cleanT)));
+                $selectedPostTestHeaderTitle = "Evaluasi Hari ke-{$selectedPostTestDayNum}" . ($cleanT !== '' ? ": {$cleanT}" : '');
+            } else {
+                $selectedPostTestHeaderTitle = $selectedPostTest->title ?? 'Evaluasi Akhir';
+            }
+
+            $baseSubQuery = PostTestResult::query()->where('post_test_id', $selectedPostTest->id);
+            if ($participantIds->isNotEmpty()) {
+                $baseSubQuery->whereIn('user_id', $participantIds);
+            } else {
+                $baseSubQuery->whereRaw('1 = 0');
+            }
+
+            $triageRows = (clone $baseSubQuery)->get(['grading_status', 'needs_manual_review', 'ai_score', 'final_score']);
+            $triageCounts = [
+                'all'          => $triageRows->count(),
+                'pure_pending' => $triageRows->where('grading_status', PostTestResult::GRADING_PENDING)->count(),
+                'pending'      => $triageRows->whereIn('grading_status', [PostTestResult::GRADING_PENDING, PostTestResult::GRADING_QUEUED, PostTestResult::GRADING_PROCESSING])->count(),
+                'needs_review' => $triageRows->filter(fn($r) => (bool) $r->needs_manual_review && $r->grading_status !== PostTestResult::GRADING_PUBLISHED)->count(),
+                'failed'       => $triageRows->where('grading_status', PostTestResult::GRADING_FAILED)->count(),
+                'draft_ready'  => $triageRows->filter(fn($r) => in_array($r->grading_status, [PostTestResult::GRADING_DRAFT_GRADED, PostTestResult::GRADING_MANUAL_REVIEW], true) && (!is_null($r->final_score) || !is_null($r->ai_score)))->count(),
+                'published'    => $triageRows->where('grading_status', PostTestResult::GRADING_PUBLISHED)->count(),
+            ];
+
+            $activeBatch = GradingBatch::where('post_test_id', $selectedPostTest->id)
+                ->where(fn($q) => $q->where('bimtek_event_id', $event->id)->orWhereNull('bimtek_event_id'))
+                ->latest('started_at')
+                ->first();
+
+            $subQuery = (clone $baseSubQuery)->with(['user.profile']);
+            if ($evalSearch !== '') {
+                $subQuery->whereHas('user', function ($uq) use ($evalSearch) {
+                    $uq->where('name', 'like', "%{$evalSearch}%")
+                       ->orWhere('email', 'like', "%{$evalSearch}%")
+                       ->orWhereHas('profile', fn($pq) => $pq->where('full_name', 'like', "%{$evalSearch}%")->orWhere('instansi', 'like', "%{$evalSearch}%"));
+                });
+            }
+
+            if ($isManualTest) {
+                if (in_array($evalStatus, ['pending', 'submitted'], true)) {
+                    $subQuery->whereIn('grading_status', [PostTestResult::GRADING_PENDING, PostTestResult::GRADING_QUEUED, PostTestResult::GRADING_PROCESSING]);
+                } elseif ($evalStatus === 'needs_review') {
+                    $subQuery->where('needs_manual_review', true)->where('grading_status', '!=', PostTestResult::GRADING_PUBLISHED);
+                } elseif ($evalStatus === 'failed') {
+                    $subQuery->where('grading_status', PostTestResult::GRADING_FAILED);
+                } elseif ($evalStatus === 'draft_graded') {
+                    $subQuery->whereIn('grading_status', [PostTestResult::GRADING_DRAFT_GRADED, PostTestResult::GRADING_MANUAL_REVIEW]);
+                } elseif (in_array($evalStatus, ['published', 'graded'], true)) {
+                    $subQuery->where('grading_status', PostTestResult::GRADING_PUBLISHED);
+                }
+            }
+
+            $evalSubmissions = $subQuery
+                ->orderByRaw("CASE
+                    WHEN grading_status = 'FAILED' THEN 0
+                    WHEN needs_manual_review = 1 AND grading_status != 'PUBLISHED' THEN 1
+                    WHEN grading_status IN ('PENDING', 'QUEUED', 'PROCESSING') THEN 2
+                    WHEN grading_status IN ('DRAFT_GRADED', 'MANUAL_REVIEW') THEN 3
+                    ELSE 4 END")
+                ->latest('completed_at')
+                ->latest('updated_at')
+                ->paginate(15, ['*'], 'eval_page')
+                ->withQueryString();
+        }
 
         return view('lms::admin-pusat.bimtek-events.show', compact(
             'event',
+            'activeTab',
             'participants',
             'totalRegistered',
             'totalCompleted',
             'totalAttendedZoom',
             'totalCertified',
             'totalSessionsCount',
+            'totalAgendaDays',
+            'pendingEvalTotal',
+            'readyForPpsdmCount',
             'evaluations',
             'evaluationsCount',
             'avgMateri',
             'avgPenyampaian',
             'avgFasilitasi',
-            'avgOverall'
+            'avgOverall',
+            'attendanceDays',
+            'activeAttendanceDay',
+            'attendanceSummary',
+            'attendanceRows',
+            'attSearch',
+            'attFilter',
+            'evalDailyAgendas',
+            'evalFinalEvaluation',
+            'selectedPostTest',
+            'selectedPostTestHeaderTitle',
+            'isManualTest',
+            'triageCounts',
+            'activeBatch',
+            'evalSubmissions',
+            'evalSearch',
+            'evalStatus'
         ));
     }
 
@@ -478,6 +867,7 @@ class BimtekEventController extends Controller
             // Rentang Waktu Pembukaan Presensi (Wajib Tanggal & Jam, harus di dalam rentang sesi Zoom)
             'zoom_attendance_start_at' => 'nullable|date',
             'zoom_attendance_end_at'   => 'nullable|date',
+            'submission_drive_link'    => 'nullable|url|max:1000',
 
             // Multi-Sesi Zoom & Presensi Harian (Skenario 1)
             'sessions'                         => 'nullable|array',

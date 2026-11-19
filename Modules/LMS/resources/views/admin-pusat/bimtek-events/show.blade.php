@@ -1,7 +1,30 @@
-<x-dashboard::layouts.dashboard title="Monitoring Gelombang Bimtek - Admin Pusat">
-    <div class="w-full p-8 space-y-6">
+<x-dashboard::layouts.dashboard title="Pusat Kendali Gelombang Bimtek - Admin Pusat">
+    @push('styles')
+        <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&display=swap" rel="stylesheet">
+        <style>
+            @media (min-width: 1024px) {
+                .timeline-arrow-start {
+                    clip-path: polygon(0 0, calc(100% - 16px) 0, 100% 50%, calc(100% - 16px) 100%, 0 100%);
+                    padding-left: 1rem;
+                    padding-right: 1.75rem;
+                }
+                .timeline-arrow-mid {
+                    clip-path: polygon(0 0, calc(100% - 16px) 0, 100% 50%, calc(100% - 16px) 100%, 0 100%, 16px 50%);
+                    padding-left: 1.85rem;
+                    padding-right: 1.75rem;
+                }
+                .timeline-arrow-end {
+                    clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%, 16px 50%);
+                    padding-left: 1.85rem;
+                    padding-right: 1rem;
+                }
+            }
+        </style>
+    @endpush
 
-        {{-- Breadcrumb Navigation (2 Teks) --}}
+    <div class="w-full p-4 sm:p-6 lg:p-8 max-w-400 mx-auto space-y-6">
+
+        {{-- Breadcrumb Navigation --}}
         <nav class="flex" aria-label="Breadcrumb">
             <ol class="inline-flex items-center space-x-1 sm:space-x-2">
                 <li>
@@ -13,15 +36,12 @@
                 <li class="inline-flex items-center">
                     <i class="fas fa-chevron-right text-xs text-slate-300 mx-1.5"></i>
                     <span class="text-sm sm:text-[15px] font-bold text-slate-900">
-                        Detail & Monitoring
+                        Pusat Kendali Event
                     </span>
                 </li>
             </ol>
         </nav>
 
-        {{-- ======================================================== --}}
-        {{-- STRUKTUR TIMELINE KESELURUHAN & RINCIAN 3 PERIODE BIMTEK --}}
-        {{-- ======================================================== --}}
         @php
             $now = now();
             $regStart = $event->registration_start_at ?? $event->start_date?->copy()->subDays(7);
@@ -33,48 +53,51 @@
 
             $overallStart = $event->overall_start_at;
             $overallEnd = $event->overall_end_at;
-            $totalDays = ($overallStart && $overallEnd) ? max(1, (int) $overallStart->copy()->startOfDay()->diffInDays($overallEnd->copy()->startOfDay()) + 1) : 0;
+            $totalDays = ($overallStart && $overallEnd)
+                ? max(1, (int) $overallStart->copy()->startOfDay()->diffInDays($overallEnd->copy()->startOfDay()) + 1)
+                : 0;
             $isUnlimitedQuota = is_null($event->quota) || $event->quota <= 0;
-            $quotaPercent = (!$isUnlimitedQuota && $event->quota > 0) ? min(100, round(($totalRegistered / $event->quota) * 100)) : 0;
+            $quotaPercent = (!$isUnlimitedQuota && $event->quota > 0)
+                ? min(100, round(($totalRegistered / $event->quota) * 100))
+                : 0;
+            $eventBadge = $event->status_badge;
         @endphp
 
-        {{-- Header Banner Utama Linimasa Program (Desain Sirenata Terpadu) --}}
-        <div class="p-5 sm:p-6 rounded-md bg-[#13416B] text-white shadow-sm space-y-4">
-            {{-- Baris Atas: Info Gelombang Bimtek & Tombol Aksi Rata Kiri --}}
-            <div class="border-b border-white/15 pb-4 space-y-3">
-                <div class="space-y-1.5">
-                    <h1 class="text-2xl sm:text-3xl font-bold text-white tracking-tight">{{ $event->batch_name }}</h1>
-                    <p class="text-sm sm:text-base text-slate-200">
-                        Kode Gelombang: <strong class="font-mono text-white">{{ $event->batch_code }}</strong> | Master Kursus: <strong class="text-white">{{ $event->course?->name }}</strong>
-                    </p>
+        {{-- Header Banner Utama Event + Navigasi Panah 4 Tahap --}}
+        <div class="p-5 sm:p-6 rounded-md bg-[#13416B] text-white shadow-sm space-y-5">
+            <div class="flex flex-col lg:flex-row lg:items-start justify-between gap-4 border-b border-white/15 pb-4">
+                <div class="space-y-2 min-w-0">
+                    <h1 class="text-xl sm:text-2xl lg:text-3xl font-semibold text-white tracking-wide" style="font-family: 'Oswald', sans-serif;">{{ $event->batch_name }}</h1>
+                    <div class="flex flex-wrap items-center gap-x-2.5 gap-y-1.5 text-sm sm:text-base text-slate-200">
+                        <span class="px-3 py-1 rounded text-sm font-bold {{ $eventBadge['class'] }}">
+                            {{ $eventBadge['label'] }}
+                        </span>
+                        <span class="text-white/40 select-none">|</span>
+                        <span>Master Kursus: <strong class="text-white">{{ $event->course?->name ?? '-' }}</strong></span>
+                    </div>
                 </div>
 
-                <div class="flex items-center gap-2.5 flex-wrap pt-0.5">
+                <div class="flex items-center gap-2 flex-wrap shrink-0">
                     <a href="{{ route('admin-pusat.management-course.bimtek-events.edit', $event->id) }}"
-                       class="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs sm:text-sm font-semibold text-white bg-white/10 hover:bg-white/20 border border-white/20 rounded-md transition-colors shadow-2xs">
+                       class="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs sm:text-sm font-semibold text-white bg-white/15 hover:bg-white/25 border border-white/20 rounded-md transition-colors shadow-2xs">
                         <i class="fas fa-pen text-xs"></i>
-                        <span>Edit Linimasa & Kuota</span>
-                    </a>
-                    <a href="{{ route('admin-pusat.management-course.certificate-submissions.create', ['bimtek_event_id' => $event->id]) }}"
-                       class="inline-flex items-center gap-1.5 px-4 py-2 text-xs sm:text-sm font-bold text-[#13416B] bg-white hover:bg-slate-100 rounded-md transition-colors shadow-2xs">
-                        <i class="fas fa-file-signature text-xs sm:text-sm"></i>
-                        <span>Ajukan Sertifikat ke PPSDM</span>
+                        <span>Edit Event &amp; Jadwal</span>
                     </a>
                 </div>
             </div>
 
-            {{-- Baris Bawah: Rentang Waktu Keseluruhan & Keterisian Kuota --}}
-            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pt-1">
+            {{-- Info Linimasa & Kapasitas --}}
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
                     <div class="flex items-center gap-2 flex-wrap mb-1">
                         <span class="text-xs font-bold uppercase tracking-wider text-slate-300">Linimasa Keseluruhan Program</span>
                         @if ($totalDays > 0)
                             <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-white/15 border border-white/20 text-white">
-                                Durasi: {{ $totalDays }} Hari
+                                {{ $totalDays }} Hari
                             </span>
                         @endif
                     </div>
-                    <p class="text-lg sm:text-2xl font-extrabold text-white">
+                    <p class="text-base sm:text-xl font-extrabold text-white">
                         {{ $event->overall_timeline_formatted }}
                     </p>
                 </div>
@@ -83,17 +106,15 @@
                     @if ($isUnlimitedQuota)
                         <div class="flex items-center justify-between text-xs sm:text-sm text-slate-200">
                             <span>Kapasitas Pendaftaran</span>
-                            <span class="font-bold text-amber-300 flex items-center gap-1">
-                                <i class="fas fa-infinity text-xs sm:text-sm"></i> Tanpa Batas
-                            </span>
+                            <span class="font-bold text-amber-300">Tanpa Batas</span>
                         </div>
                         <div class="px-3 py-1.5 rounded-md bg-white/10 border border-white/15 text-xs sm:text-sm text-white flex items-center justify-between">
-                            <span class="text-slate-300">Pendaftar Terdaftar:</span>
+                            <span class="text-slate-200">Peserta Terdaftar:</span>
                             <strong class="font-bold text-white">{{ $totalRegistered }} Peserta</strong>
                         </div>
                     @else
                         <div class="flex justify-between text-xs sm:text-sm text-slate-200">
-                            <span>Keterisian Kuota ({{ $totalRegistered }} / {{ $event->quota }} Peserta)</span>
+                            <span>Kuota ({{ $totalRegistered }} / {{ $event->quota }} Peserta)</span>
                             <span class="font-bold text-amber-300">{{ $quotaPercent }}%</span>
                         </div>
                         <div class="w-full bg-white/20 rounded-full h-2 overflow-hidden">
@@ -102,554 +123,150 @@
                     @endif
                 </div>
             </div>
+
+            {{-- Navigasi 4 Tab Berurutan Desain Card Panah --}}
+            <div class="border-t border-white/15 pt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 lg:gap-1.5">
+                @php
+                    $tabs = [
+                        [
+                            'key'        => 'overview',
+                            'num'        => '1',
+                            'label'      => 'Ringkasan & Jadwal',
+                            'sub'        => 'Linimasa 3 Tahap Event',
+                            'badge'      => null,
+                            'arrowClass' => 'timeline-arrow-start rounded-md lg:rounded-none lg:rounded-l-md',
+                        ],
+                        [
+                            'key'        => 'attendance',
+                            'num'        => '2',
+                            'label'      => 'Absensi Harian',
+                            'sub'        => "{$totalAgendaDays} Hari Agenda Zoom",
+                            'badge'      => null,
+                            'arrowClass' => 'timeline-arrow-mid rounded-md lg:rounded-none',
+                        ],
+                        [
+                            'key'        => 'evaluation',
+                            'num'        => '3',
+                            'label'      => 'Penilaian Evaluasi',
+                            'sub'        => $pendingEvalTotal > 0 ? "{$pendingEvalTotal} Menunggu Dinilai" : 'Harian & Evaluasi Akhir',
+                            'badge'      => $pendingEvalTotal > 0 ? ['text' => $pendingEvalTotal, 'cls' => 'bg-amber-500 text-white'] : null,
+                            'arrowClass' => 'timeline-arrow-mid rounded-md lg:rounded-none',
+                        ],
+                        [
+                            'key'        => 'graduation',
+                            'num'        => '4',
+                            'label'      => 'Kelulusan & PPSDM',
+                            'sub'        => "{$totalCompleted} Tuntas • {$totalCertified} Terbit",
+                            'badge'      => $readyForPpsdmCount > 0 ? ['text' => $readyForPpsdmCount, 'cls' => 'bg-emerald-500 text-white'] : null,
+                            'arrowClass' => 'timeline-arrow-end rounded-md lg:rounded-none lg:rounded-r-md',
+                        ],
+                    ];
+                @endphp
+
+                @foreach ($tabs as $t)
+                    @php $isCurrent = $activeTab === $t['key']; @endphp
+                    <a href="{{ route('admin-pusat.management-course.bimtek-events.show', ['bimtek_event' => $event->id, 'tab' => $t['key']]) }}"
+                       class="{{ $t['arrowClass'] }} flex items-center gap-3 py-3 px-4 transition-colors {{ $isCurrent ? 'bg-white text-slate-900 shadow-xs' : 'bg-white/10 hover:bg-white/20 text-white' }}">
+                        <span class="w-8 h-8 rounded-full text-sm font-bold flex items-center justify-center shrink-0 {{ $isCurrent ? 'bg-[#13416B] text-white' : 'bg-white/15 text-white' }}">
+                            {{ $t['num'] }}
+                        </span>
+                        <div class="min-w-0 flex-1">
+                            <div class="flex items-center justify-between gap-1.5">
+                                <span class="text-sm font-bold truncate {{ $isCurrent ? 'text-slate-900' : 'text-white' }}">
+                                    {{ $t['label'] }}
+                                </span>
+                                @if ($t['badge'])
+                                    <span class="px-1.5 py-0.5 rounded text-[11px] font-bold leading-none shrink-0 {{ $t['badge']['cls'] }}">
+                                        {{ $t['badge']['text'] }}
+                                    </span>
+                                @endif
+                            </div>
+                            <div class="text-xs truncate mt-0.5 {{ $isCurrent ? 'text-slate-500' : 'text-blue-100/85' }}">
+                                {{ $t['sub'] }}
+                            </div>
+                        </div>
+                    </a>
+                @endforeach
+            </div>
         </div>
 
-        {{-- Grid Rincian 3 Tahapan Timeline --}}
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {{-- Konten Tab Aktif --}}
+        @if ($activeTab === 'overview')
+            @include('lms::admin-pusat.bimtek-events.partials.tab-overview')
+        @elseif ($activeTab === 'attendance')
+            @include('lms::admin-pusat.bimtek-events.partials.tab-attendance')
+        @elseif ($activeTab === 'evaluation')
+            @include('lms::admin-pusat.bimtek-events.partials.tab-evaluation')
+        @elseif ($activeTab === 'graduation')
+            @include('lms::admin-pusat.bimtek-events.partials.tab-graduation')
+        @endif
 
-            {{-- Tahap 1: Periode Pendaftaran --}}
-            <div class="bg-white rounded-md border border-slate-200 p-4.5 space-y-3 shadow-2xs relative flex flex-col justify-between">
-                <div class="space-y-2.5">
-                    <div class="flex items-center justify-between gap-2 border-b border-slate-100 pb-2">
-                        <div class="flex items-center gap-2">
-                            <span class="w-7 h-7 rounded-full bg-slate-900 text-white text-xs sm:text-sm font-bold flex items-center justify-center shrink-0">1</span>
-                            <span class="text-xs sm:text-sm font-bold text-slate-800 uppercase tracking-wider">Periode Pendaftaran</span>
+        {{-- Pop-up Notifikasi Penilaian (Otomatis / Manual / Publikasi) --}}
+        @if (session('grading_popup'))
+            @php $popup = session('grading_popup'); @endphp
+            <div x-data="{ open: true }"
+                 x-show="open"
+                 x-cloak
+                 @keydown.escape.window="open = false"
+                 class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-xs">
+                <div class="fixed inset-0" @click="open = false"></div>
+
+                <div class="relative z-10 w-full max-w-md bg-white rounded-md border border-slate-200 shadow-2xl overflow-hidden">
+                    <div class="p-6 space-y-4">
+                        <div class="flex items-start gap-3.5">
+                            <div class="w-11 h-11 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0">
+                                <i class="fas fa-check-circle text-2xl"></i>
+                            </div>
+                            <div class="min-w-0 flex-1">
+                                <p class="text-xs font-bold uppercase tracking-wider text-emerald-700">
+                                    {{ $popup['method'] ?? 'Penilaian Selesai' }}
+                                </p>
+                                <h3 class="text-lg font-extrabold text-slate-900 mt-0.5 leading-snug">
+                                    {{ $popup['title'] ?? 'Berhasil Menilai' }}
+                                </h3>
+                            </div>
+                            <button type="button" @click="open = false" class="text-slate-400 hover:text-slate-600 p-1 cursor-pointer">
+                                <i class="fas fa-times text-sm"></i>
+                            </button>
                         </div>
-                        @if ($regStart && $regEnd && $now->between($regStart, $regEnd))
-                            <span class="px-2 py-0.5 rounded text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                                Buka
-                            </span>
-                        @elseif ($regEnd && $now->greaterThan($regEnd))
-                            <span class="px-2 py-0.5 rounded text-xs font-bold bg-slate-100 text-slate-600">
-                                Selesai
-                            </span>
-                        @else
-                            <span class="px-2 py-0.5 rounded text-xs font-bold bg-slate-100 text-slate-500">
-                                Mendatang
-                            </span>
-                        @endif
-                    </div>
 
-                    <div>
-                        <p class="text-xs sm:text-[13px] text-slate-400 font-medium">Jadwal Buka & Tutup Pendaftaran:</p>
-                        <p class="text-sm sm:text-base font-semibold text-slate-800 mt-0.5">
-                            @if ($event->registration_start_at && $event->registration_end_at)
-                                {{ $event->registration_start_at->translatedFormat('d M Y') }} s/d {{ $event->registration_end_at->translatedFormat('d M Y') }}
-                            @elseif ($event->registration_start_at)
-                                Mulai {{ $event->registration_start_at->translatedFormat('d M Y') }}
-                            @else
-                                <span class="text-slate-400 italic">Otomatis H-7 sebelum pelaksanaan</span>
-                            @endif
-                        </p>
-                    </div>
-
-                    <p class="text-xs sm:text-sm text-slate-500 leading-relaxed">
-                        Calon peserta melakukan pendaftaran mandiri melalui katalog pelatihan.
-                    </p>
-                </div>
-
-                <div class="pt-2 border-t border-slate-100 flex items-center justify-between text-xs sm:text-sm">
-                    <span class="text-slate-500">Pendaftar Terdaftar:</span>
-                    <strong class="text-slate-900 font-bold">
-                        @if ($event->quota && $event->quota > 0)
-                            {{ $totalRegistered }} / {{ $event->quota }} Peserta
-                        @else
-                            {{ $totalRegistered }} Peserta (Tanpa Batas)
-                        @endif
-                    </strong>
-                </div>
-            </div>
-
-            {{-- Tahap 2: Periode Pelaksanaan & Sesi Live Zoom --}}
-            <div class="bg-white rounded-md border border-slate-200 p-4.5 space-y-3 shadow-2xs relative flex flex-col justify-between">
-                <div class="space-y-3">
-                    <div class="flex items-center justify-between gap-2 border-b border-slate-100 pb-2">
-                        <div class="flex items-center gap-2">
-                            <span class="w-7 h-7 rounded-full bg-slate-900 text-white text-xs sm:text-sm font-bold flex items-center justify-center shrink-0">2</span>
-                            <span class="text-xs sm:text-sm font-bold text-slate-800 uppercase tracking-wider">Periode Pelaksanaan</span>
-                        </div>
-                        @if ($execStart && $execEnd && $now->between($execStart, $execEnd))
-                            <span class="px-2 py-0.5 rounded text-xs font-bold bg-blue-50 text-blue-700 border border-blue-200">
-                                Berlangsung
-                            </span>
-                        @elseif ($execEnd && $now->greaterThan($execEnd))
-                            <span class="px-2 py-0.5 rounded text-xs font-bold bg-slate-100 text-slate-600">
-                                Selesai
-                            </span>
-                        @else
-                            <span class="px-2 py-0.5 rounded text-xs font-bold bg-slate-100 text-slate-500">
-                                Mendatang
-                            </span>
-                        @endif
-                    </div>
-
-                    <div>
-                        <p class="text-xs sm:text-[13px] text-slate-400 font-medium">Rentang Waktu Pelatihan:</p>
-                        <p class="text-sm sm:text-base font-semibold text-slate-800 mt-0.5">
-                            {{ $event->start_date ? $event->start_date->translatedFormat('d M Y') : '-' }} s/d {{ $event->end_date ? $event->end_date->translatedFormat('d M Y') : '-' }}
-                        </p>
-                    </div>
-
-                    {{-- Detail Sesi Zoom Terpadu di Pelaksanaan (Biru Sirenata Kalem & Teks White) --}}
-                    @if ($event->sessions->isNotEmpty())
-                        <div class="p-3.5 sm:p-4 rounded-md bg-[#1E40AF] text-white shadow-sm space-y-3">
-                            <div class="flex items-center justify-between gap-1 border-b border-white/20 pb-2">
-                                <div class="flex items-center gap-1.5">
-                                    <i class="fas fa-calendar-check text-amber-300 text-xs sm:text-sm"></i>
-                                    <span class="text-xs sm:text-sm font-bold uppercase tracking-wider text-white">
-                                        Daftar Sesi Harian ({{ $event->sessions->count() }} Sesi)
+                        <div class="p-3.5 rounded-md bg-slate-50 border border-slate-200 space-y-1.5 text-sm">
+                            <div class="flex items-center justify-between gap-2">
+                                <span class="text-slate-500">Peserta</span>
+                                <span class="font-bold text-slate-900">{{ $popup['student_name'] ?? '-' }}</span>
+                            </div>
+                            @if (!is_null($popup['score'] ?? null))
+                                <div class="flex items-center justify-between gap-2">
+                                    <span class="text-slate-500">Nilai Akhir</span>
+                                    <span class="font-extrabold {{ !empty($popup['is_passed']) ? 'text-emerald-600' : 'text-rose-600' }}">
+                                        {{ $popup['score'] }} ({{ !empty($popup['is_passed']) ? 'Lulus' : 'Perlu Revisi' }})
                                     </span>
                                 </div>
-                                @if ($event->zoom_url)
-                                    <a href="{{ $event->zoom_url }}" target="_blank"
-                                       class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-bold text-[#1E40AF] bg-white hover:bg-blue-50 transition-colors shadow-2xs">
-                                        <span>Buka Zoom Utama</span>
-                                        <i class="fas fa-external-link-alt text-[11px]"></i>
-                                    </a>
-                                @endif
-                            </div>
-
-                            <div class="space-y-2 max-h-72 overflow-y-auto pr-1">
-                                @foreach ($event->sessions as $s)
-                                    <div class="p-2.5 rounded bg-black/20 border border-white/10 space-y-1 text-xs sm:text-sm">
-                                        <div class="flex items-center justify-between gap-2">
-                                            <div class="flex items-center gap-1.5">
-                                                <span class="px-1.5 py-0.5 rounded text-[11px] font-bold bg-amber-400 text-slate-900">
-                                                    Hari {{ $s->session_number }}
-                                                </span>
-                                                <strong class="text-white">{{ $s->title }}</strong>
-                                            </div>
-                                            <span class="px-2 py-0.5 rounded text-[11px] font-bold bg-white/20 text-white">
-                                                {{ $s->attendances->count() }} / {{ $totalRegistered }} Hadir
-                                            </span>
-                                        </div>
-
-                                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-1 text-xs text-blue-100">
-                                            <div>
-                                                <span class="text-slate-300">Zoom:</span>
-                                                <span class="text-white font-medium">{{ $s->schedule_formatted }}</span>
-                                            </div>
-                                            <div>
-                                                <span class="text-amber-200">Presensi:</span>
-                                                <span class="text-white font-medium">{{ $s->attendance_schedule_formatted }}</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                @endforeach
-                            </div>
-
-                            @if ($event->zoom_meeting_id || $event->zoom_passcode)
-                                <div class="text-xs text-blue-100 font-mono flex items-center gap-3 pt-2 border-t border-white/15">
-                                    @if ($event->zoom_meeting_id) <span>ID: <strong class="text-white">{{ $event->zoom_meeting_id }}</strong></span> @endif
-                                    @if ($event->zoom_passcode) <span>Passcode: <strong class="text-white">{{ $event->zoom_passcode }}</strong></span> @endif
+                            @elseif (!empty($popup['summary']))
+                                <div class="flex items-center justify-between gap-2">
+                                    <span class="text-slate-500">Status</span>
+                                    <span class="font-bold text-slate-800">{{ $popup['summary'] }}</span>
                                 </div>
                             @endif
                         </div>
-                    @else
-                        <div class="p-3.5 sm:p-4 rounded-md bg-[#1E40AF] text-white shadow-sm space-y-2.5">
-                            <div class="flex items-center justify-between gap-1 border-b border-white/20 pb-2">
-                                <span class="text-xs sm:text-sm font-bold uppercase tracking-wider text-white">Sesi Live Zoom</span>
-                                @if ($event->zoom_url)
-                                    <a href="{{ $event->zoom_url }}" target="_blank"
-                                       class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-bold text-[#1E40AF] bg-white hover:bg-blue-50 transition-colors shadow-2xs">
-                                        <span>Buka Zoom</span>
-                                        <i class="fas fa-external-link-alt text-[11px]"></i>
-                                    </a>
-                                @endif
-                            </div>
 
-                            <div>
-                                <span class="text-xs text-blue-100 block">Jadwal Sesi Zoom:</span>
-                                <p class="text-sm sm:text-[15px] font-semibold text-white mt-0.5">
-                                    {{ $event->zoom_schedule_formatted }}
-                                </p>
-                            </div>
-
-                            @if ($event->zoom_attendance_start_at || $event->zoom_attendance_end_at)
-                                <div class="pt-1.5 border-t border-white/15">
-                                    <span class="text-xs text-amber-200 block font-semibold">Jadwal Presensi Dibuka:</span>
-                                    <p class="text-sm sm:text-[15px] font-bold text-white mt-0.5">
-                                        {{ $event->attendance_schedule_formatted }}
-                                    </p>
-                                </div>
-                            @endif
-
-                            @if ($event->zoom_meeting_id || $event->zoom_passcode || $event->zoom_attendance_code)
-                                <div class="text-xs text-blue-100 font-mono space-y-1 pt-2 border-t border-white/15">
-                                    @if ($event->zoom_meeting_id) <p>Meeting ID: <strong class="text-white font-mono">{{ $event->zoom_meeting_id }}</strong></p> @endif
-                                    @if ($event->zoom_passcode) <p>Passcode: <strong class="text-white font-mono">{{ $event->zoom_passcode }}</strong></p> @endif
-                                    @if ($event->zoom_attendance_code)
-                                        <p class="pt-0.5 text-white font-sans">
-                                            Kode Presensi: <strong class="px-2 py-0.5 rounded-md bg-white text-[#1E40AF] font-mono text-xs sm:text-sm font-bold ml-1">{{ $event->zoom_attendance_code }}</strong>
-                                        </p>
-                                    @endif
-                                </div>
-                            @endif
-                        </div>
-                    @endif
-                </div>
-
-                <div class="pt-2 border-t border-slate-100 flex items-center justify-between text-xs sm:text-sm">
-                    <span class="text-slate-500">Kehadiran Zoom:</span>
-                    <strong class="text-slate-900 font-bold">{{ $totalAttendedZoom }} / {{ $totalRegistered }} Peserta</strong>
-                </div>
-            </div>
-
-            {{-- Tahap 3: Periode Evaluasi & Sertifikat --}}
-            <div class="bg-white rounded-md border border-slate-200 p-4.5 space-y-3 shadow-2xs relative flex flex-col justify-between">
-                <div class="space-y-2.5">
-                    <div class="flex items-center justify-between gap-2 border-b border-slate-100 pb-2">
-                        <div class="flex items-center gap-2">
-                            <span class="w-7 h-7 rounded-full bg-slate-900 text-white text-xs sm:text-sm font-bold flex items-center justify-center shrink-0">3</span>
-                            <span class="text-xs sm:text-sm font-bold text-slate-800 uppercase tracking-wider">Periode Evaluasi & Sertifikat</span>
-                        </div>
-                        @if ($evalStart && $evalEnd && $now->between($evalStart, $evalEnd))
-                            <span class="px-2 py-0.5 rounded text-xs font-bold bg-amber-50 text-amber-700 border border-amber-200">
-                                Evaluasi
-                            </span>
-                        @elseif ($evalEnd && $now->greaterThan($evalEnd))
-                            <span class="px-2 py-0.5 rounded text-xs font-bold bg-slate-100 text-slate-600">
-                                Selesai
-                            </span>
-                        @else
-                            <span class="px-2 py-0.5 rounded text-xs font-bold bg-slate-100 text-slate-500">
-                                Menunggu
-                            </span>
+                        @if (!empty($popup['message']))
+                            <p class="text-xs sm:text-sm text-slate-600 leading-relaxed bg-emerald-50/60 border border-emerald-200/80 rounded-md p-3">
+                                {{ $popup['message'] }}
+                            </p>
                         @endif
-                    </div>
 
-                    <div>
-                        <p class="text-xs sm:text-[13px] text-slate-400 font-medium">Batas Evaluasi & Sertifikasi:</p>
-                        <p class="text-sm sm:text-base font-semibold text-slate-800 mt-0.5">
-                            @if ($event->assessment_start_at && $event->assessment_end_at)
-                                {{ $event->assessment_start_at->translatedFormat('d M Y') }} s/d {{ $event->assessment_end_at->translatedFormat('d M Y') }}
-                            @elseif ($event->assessment_start_at)
-                                Mulai {{ $event->assessment_start_at->translatedFormat('d M Y') }}
-                            @else
-                                <span class="text-slate-400 italic">Setelah periode pelaksanaan selesai</span>
-                            @endif
-                        </p>
-                    </div>
-
-                    <div class="p-3 rounded-md bg-slate-50 border border-slate-200 space-y-1.5 text-xs sm:text-sm text-slate-600">
-                        <div class="flex justify-between items-center">
-                            <span>Pengajuan Nota Dinas:</span>
-                            <strong class="font-bold text-slate-800">{{ $event->certificateSubmissions->count() }} Berkas</strong>
-                        </div>
-                        <div class="flex justify-between items-center">
-                            <span>Nomor PPSDM Terbit:</span>
-                            <strong class="font-bold text-emerald-700">{{ $totalCertified }} dari {{ $totalRegistered }} Peserta</strong>
+                        <div class="pt-1 flex justify-end">
+                            <button type="button"
+                                    @click="open = false"
+                                    class="px-5 py-2.5 rounded-md text-sm font-bold text-white bg-emerald-600 hover:bg-emerald-700 transition-colors shadow-2xs cursor-pointer">
+                                Tutup
+                            </button>
                         </div>
                     </div>
                 </div>
-
-                <div class="pt-2 border-t border-slate-100">
-                    <a href="{{ route('admin-pusat.management-course.certificate-submissions.create', ['bimtek_event_id' => $event->id]) }}"
-                       class="w-full inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-md text-xs sm:text-sm font-bold text-white bg-[#13416B] hover:bg-[#0e2c48] transition-colors">
-                        <span>Proses Pengajuan PPSDM</span>
-                    </a>
-                </div>
             </div>
-
-        </div>
-
-
-        {{-- Tabel Monitoring Peserta --}}
-        <div class="bg-white rounded-md border border-slate-200 shadow-2xs overflow-hidden">
-            <div class="px-5 py-3.5 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-50/50">
-                <h2 class="text-base sm:text-lg font-bold text-slate-800">
-                    Monitoring Peserta Bimtek & Presensi
-                </h2>
-                <span class="text-xs sm:text-sm text-slate-500">
-                    Total {{ $participants->count() }} peserta terdaftar
-                </span>
-            </div>
-
-            <div class="overflow-x-auto">
-                <table class="w-full text-left border-collapse">
-                    <thead>
-                        <tr class="bg-slate-50 border-b border-slate-200 text-xs sm:text-[13px] font-bold text-slate-600 uppercase tracking-wider">
-                            <th class="py-3 px-3.5 w-12 text-center">No.</th>
-                            <th class="py-3 px-3.5 min-w-[200px]">Nama Peserta</th>
-                            <th class="py-3 px-3.5 min-w-[150px]">Progres Modul</th>
-                            <th class="py-3 px-3.5 min-w-[140px] text-center">Presensi Zoom</th>
-                            <th class="py-3 px-3.5 min-w-[130px] text-center">Evaluasi Narasumber</th>
-                            <th class="py-3 px-3.5 min-w-[160px]">Status Sertifikasi PPSDM</th>
-                            <th class="py-3 px-3.5 min-w-[160px]">Nomor Resmi Sertifikat</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-slate-100 text-sm sm:text-[15px]">
-                        @forelse ($participants as $idx => $p)
-                            <tr class="hover:bg-slate-50/70 transition-colors">
-                                <td class="py-3 px-3.5 text-center text-xs sm:text-sm font-semibold text-slate-400">
-                                    {{ $idx + 1 }}
-                                </td>
-                                <td class="py-3 px-3.5">
-                                    <p class="font-bold text-slate-900 text-sm sm:text-[15px]">{{ $p->user_name }}</p>
-                                    <p class="text-xs sm:text-[13px] text-slate-400">{{ $p->user_email }}</p>
-                                </td>
-                                <td class="py-3 px-3.5">
-                                    <div class="flex items-center gap-2">
-                                        <div class="w-24 bg-slate-200 rounded-full h-2 overflow-hidden">
-                                            <div class="bg-emerald-500 h-2 rounded-full" style="width: {{ $p->progress }}%"></div>
-                                        </div>
-                                        <span class="text-xs sm:text-sm font-bold text-slate-700 tabular-nums">{{ $p->progress }}%</span>
-                                    </div>
-                                    @if ($p->status === 'completed')
-                                        <span class="text-xs text-emerald-600 font-semibold">Tuntas (Lulus Ujian)</span>
-                                    @endif
-                                </td>
-                                <td class="py-3 px-3.5 text-center">
-                                    @if ($totalSessionsCount > 0)
-                                        <div class="inline-flex flex-col items-center gap-1">
-                                            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] sm:text-xs font-bold
-                                                {{ $p->attended_sessions_count >= $totalSessionsCount ? 'bg-emerald-600 text-white' : ($p->attended_sessions_count > 0 ? 'bg-amber-500 text-white' : 'bg-slate-200 text-slate-700') }}">
-                                                <span>{{ $p->attended_sessions_count }} / {{ $totalSessionsCount }} Sesi</span>
-                                            </span>
-                                            <form action="{{ route('admin-pusat.management-course.bimtek-events.toggle-attendance', [$event->id, $p->user_id]) }}" method="POST">
-                                                @csrf
-                                                <button type="submit"
-                                                        title="Override status presensi"
-                                                        class="text-[11px] text-slate-400 hover:text-slate-600 underline cursor-pointer">
-                                                    {{ $p->zoom_attended ? 'Tandai Belum' : 'Tandai Hadir' }}
-                                                </button>
-                                            </form>
-                                        </div>
-                                    @else
-                                        <form action="{{ route('admin-pusat.management-course.bimtek-events.toggle-attendance', [$event->id, $p->user_id]) }}" method="POST">
-                                            @csrf
-                                            <button type="submit"
-                                                    title="Klik untuk ubah status kehadiran Zoom"
-                                                    class="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] sm:text-xs font-bold transition-transform active:scale-95 cursor-pointer
-                                                    {{ $p->zoom_attended ? 'bg-emerald-600 text-white' : 'bg-slate-200 text-slate-600 hover:bg-slate-300' }}">
-                                                <span>{{ $p->zoom_attended ? 'Hadir' : 'Belum Hadir' }}</span>
-                                            </button>
-                                        </form>
-                                    @endif
-                                </td>
-                                <td class="py-3 px-3.5 text-center">
-                                    @if ($p->has_evaluated)
-                                        <div class="inline-flex flex-col items-center gap-0.5">
-                                            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] sm:text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200" title="Materi: {{ $p->evaluation?->rating_materi }}★, Penyampaian: {{ $p->evaluation?->rating_penyampaian }}★, Fasilitasi: {{ $p->evaluation?->rating_fasilitasi }}★">
-                                                <i class="fas fa-star text-amber-400 text-[10px]"></i>
-                                                <span>{{ number_format($p->evaluation?->average_rating, 1) }}</span>
-                                            </span>
-                                            <span class="text-[11px] text-slate-400">Sudah Mengisi</span>
-                                        </div>
-                                    @else
-                                        <span class="inline-flex items-center px-2.5 py-1 rounded text-[11px] sm:text-xs font-medium text-slate-400 bg-slate-100">
-                                            Belum
-                                        </span>
-                                    @endif
-                                </td>
-                                <td class="py-3 px-3.5">
-                                    @if ($p->official_cert_number)
-                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs sm:text-sm font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                                            <span>Sertifikat Terbit</span>
-                                        </span>
-                                    @elseif ($p->cert_submission_status === 'diajukan_ke_ppsdm')
-                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs sm:text-sm font-bold bg-amber-50 text-amber-700 border border-amber-200">
-                                            <span>Diajukan ke PPSDM</span>
-                                        </span>
-                                    @elseif ($p->status === 'completed')
-                                        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-blue-50 text-blue-700">
-                                            Siap Diajukan
-                                        </span>
-                                    @else
-                                        <span class="text-xs sm:text-sm text-slate-400 italic">Belum Memenuhi Syarat</span>
-                                    @endif
-                                </td>
-                                <td class="py-3 px-3.5">
-                                    @if ($p->official_cert_number)
-                                        <span class="font-mono text-xs sm:text-sm font-bold text-slate-800 block">
-                                            {{ $p->official_cert_number }}
-                                        </span>
-                                        <a href="{{ route('verify-certificate', $p->certificate_code) }}" target="_blank"
-                                           class="text-xs text-indigo-600 hover:underline">
-                                            Cek Validasi QR
-                                        </a>
-                                    @else
-                                        <span class="text-xs sm:text-sm text-slate-400 italic">-</span>
-                                    @endif
-                                </td>
-                            </tr>
-                        @empty
-                            <tr>
-                                <td colspan="7" class="py-10 text-center text-sm text-slate-500">
-                                    Belum ada peserta yang terdaftar pada kursus ini.
-                                </td>
-                            </tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        {{-- SECTION EVALUASI NARASUMBER & PENYELENGGARAAN --}}
-        <div class="bg-white rounded-md border border-slate-200 shadow-2xs overflow-hidden">
-            <div class="px-5 py-4 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-50/50">
-                <div>
-                    <h2 class="text-base sm:text-lg font-bold text-slate-800">
-                        Hasil Evaluasi Narasumber & Penyelenggaraan
-                    </h2>
-                    <p class="text-xs sm:text-sm text-slate-500">
-                        Kompilasi penilaian mutu pengajar dan masukan evaluasi dari peserta bimtek
-                    </p>
-                </div>
-                <div class="flex items-center gap-2 flex-wrap">
-                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-md text-xs sm:text-sm font-bold bg-blue-50 text-[#13416B] border border-blue-200">
-                        <i class="fas fa-users text-xs sm:text-sm"></i>
-                        <span>{{ $evaluationsCount }} dari {{ $totalRegistered }} Responden</span>
-                    </span>
-                    <a href="{{ route('admin-pusat.management-course.evaluation-questions.index') }}"
-                       class="inline-flex items-center gap-1.5 px-3 py-1 rounded-md text-xs sm:text-sm font-semibold text-[#13416B] bg-slate-100 hover:bg-slate-200 border border-slate-200 transition-colors">
-                        <i class="fas fa-sliders-h text-xs sm:text-sm"></i>
-                        <span>Kelola Kuesioner</span>
-                    </a>
-                </div>
-            </div>
-
-            {{-- 4 Metric Score Cards --}}
-            <div class="p-5 sm:p-6 bg-slate-50/30 border-b border-slate-100">
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                    {{-- 1. Skor Keseluruhan --}}
-                    <div class="p-4 rounded-md bg-white border border-slate-200 shadow-2xs space-y-2">
-                        <div class="flex items-center justify-between">
-                            <span class="text-xs sm:text-sm font-semibold text-slate-500">Skor Rata-Rata</span>
-                            <span class="w-7 h-7 rounded-md bg-amber-50 text-amber-500 flex items-center justify-center text-xs sm:text-sm">
-                                <i class="fas fa-star"></i>
-                            </span>
-                        </div>
-                        <div class="flex items-baseline gap-2">
-                            <span class="text-2xl sm:text-3xl font-black text-slate-800 tracking-tight">{{ number_format($avgOverall, 1) }}</span>
-                            <span class="text-xs sm:text-sm font-medium text-slate-400">/ 5.0</span>
-                        </div>
-                        <div class="flex items-center gap-1 text-amber-400 text-xs sm:text-sm">
-                            @for ($i = 1; $i <= 5; $i++)
-                                <i class="fas fa-star {{ $i <= round($avgOverall) ? 'text-amber-400' : 'text-slate-200' }}"></i>
-                            @endfor
-                            <span class="text-xs text-slate-500 font-medium ml-1">Overall</span>
-                        </div>
-                    </div>
-
-                    {{-- 2. Penguasaan Materi --}}
-                    <div class="p-4 rounded-md bg-white border border-slate-200 shadow-2xs space-y-2">
-                        <div class="flex items-center justify-between">
-                            <span class="text-xs sm:text-sm font-semibold text-slate-500">1. Penguasaan Materi</span>
-                            <span class="w-7 h-7 rounded-md bg-blue-50 text-blue-600 flex items-center justify-center text-xs sm:text-sm">
-                                <i class="fas fa-book-reader"></i>
-                            </span>
-                        </div>
-                        <div class="flex items-baseline gap-2">
-                            <span class="text-2xl sm:text-3xl font-black text-slate-800 tracking-tight">{{ number_format($avgMateri, 1) }}</span>
-                            <span class="text-xs sm:text-sm font-medium text-slate-400">/ 5.0</span>
-                        </div>
-                        <p class="text-xs text-slate-500 leading-tight">
-                            Kejelasan paparan & bobot materi narasumber
-                        </p>
-                    </div>
-
-                    {{-- 3. Metode Penyampaian --}}
-                    <div class="p-4 rounded-md bg-white border border-slate-200 shadow-2xs space-y-2">
-                        <div class="flex items-center justify-between">
-                            <span class="text-xs sm:text-sm font-semibold text-slate-500">2. Penyampaian Sesi</span>
-                            <span class="w-7 h-7 rounded-md bg-indigo-50 text-indigo-600 flex items-center justify-center text-xs sm:text-sm">
-                                <i class="fas fa-comments"></i>
-                            </span>
-                        </div>
-                        <div class="flex items-baseline gap-2">
-                            <span class="text-2xl sm:text-3xl font-black text-slate-800 tracking-tight">{{ number_format($avgPenyampaian, 1) }}</span>
-                            <span class="text-xs sm:text-sm font-medium text-slate-400">/ 5.0</span>
-                        </div>
-                        <p class="text-xs text-slate-500 leading-tight">
-                            Interaktivitas metode diskusi & tanya jawab
-                        </p>
-                    </div>
-
-                    {{-- 4. Ketepatan Waktu & Fasilitasi --}}
-                    <div class="p-4 rounded-md bg-white border border-slate-200 shadow-2xs space-y-2">
-                        <div class="flex items-center justify-between">
-                            <span class="text-xs sm:text-sm font-semibold text-slate-500">3. Fasilitasi Panitia</span>
-                            <span class="w-7 h-7 rounded-md bg-emerald-50 text-emerald-600 flex items-center justify-center text-xs sm:text-sm">
-                                <i class="fas fa-user-clock"></i>
-                            </span>
-                        </div>
-                        <div class="flex items-baseline gap-2">
-                            <span class="text-2xl sm:text-3xl font-black text-slate-800 tracking-tight">{{ number_format($avgFasilitasi, 1) }}</span>
-                            <span class="text-xs sm:text-sm font-medium text-slate-400">/ 5.0</span>
-                        </div>
-                        <p class="text-xs text-slate-500 leading-tight">
-                            Ketepatan jadwal & fasilitasi teknis bimtek
-                        </p>
-                    </div>
-                </div>
-            </div>
-
-            {{-- Daftar Ulasan & Catatan Masukan Peserta --}}
-            <div class="p-5 sm:p-6 space-y-4">
-                <div class="flex items-center justify-between">
-                    <h3 class="text-sm sm:text-base font-bold text-slate-800">
-                        Daftar Ulasan & Masukan Peserta
-                    </h3>
-                    <span class="text-xs sm:text-sm text-slate-400 font-medium">
-                        Identitas peserta disamarkan (Anonim)
-                    </span>
-                </div>
-
-                @if ($evaluations->isEmpty())
-                    <div class="py-10 text-center text-slate-400 text-sm sm:text-base bg-slate-50 rounded-md border border-dashed border-slate-200">
-                        <i class="far fa-clipboard text-2xl mb-2 text-slate-300 block"></i>
-                        <span>Belum ada peserta yang mengisi kuesioner evaluasi narasumber untuk bimtek ini.</span>
-                    </div>
-                @else
-                    <div class="space-y-3">
-                        @foreach ($evaluations as $index => $eval)
-                            <div class="p-4 rounded-md border border-slate-200 bg-white hover:border-slate-300 transition-colors space-y-2.5">
-                                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-2.5">
-                                    <div class="flex items-center gap-2">
-                                        <div class="w-8 h-8 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center text-xs sm:text-sm font-bold">
-                                            #{{ $index + 1 }}
-                                        </div>
-                                        <div>
-                                            <span class="text-sm sm:text-[15px] font-bold text-slate-800">Peserta Bimtek (Responden Anonim)</span>
-                                            <span class="text-xs sm:text-[13px] text-slate-400 ml-1.5">— {{ $eval->created_at->translatedFormat('d M Y, H:i') }} WIB</span>
-                                        </div>
-                                    </div>
-                                    
-                                    {{-- Badges Per Aspek --}}
-                                    <div class="flex items-center gap-2 flex-wrap">
-                                        <span class="inline-flex items-center gap-1 text-xs font-semibold text-slate-700 bg-slate-100 px-2 py-0.5 rounded">
-                                            <span>Materi:</span>
-                                            <span class="font-bold text-amber-500">{{ $eval->rating_materi }}★</span>
-                                        </span>
-                                        <span class="inline-flex items-center gap-1 text-xs font-semibold text-slate-700 bg-slate-100 px-2 py-0.5 rounded">
-                                            <span>Penyampaian:</span>
-                                            <span class="font-bold text-amber-500">{{ $eval->rating_penyampaian }}★</span>
-                                        </span>
-                                        <span class="inline-flex items-center gap-1 text-xs font-semibold text-slate-700 bg-slate-100 px-2 py-0.5 rounded">
-                                            <span>Fasilitasi:</span>
-                                            <span class="font-bold text-amber-500">{{ $eval->rating_fasilitasi }}★</span>
-                                        </span>
-                                        <span class="inline-flex items-center gap-1 text-xs sm:text-sm font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded">
-                                            <span>Rata-rata: {{ $eval->average_rating }}</span>
-                                        </span>
-                                    </div>
-                                </div>
-
-                                {{-- Isi Catatan / Masukan --}}
-                                <div class="text-sm sm:text-[15px] text-slate-700 leading-relaxed bg-slate-50/60 p-3 rounded-md border border-slate-150">
-                                    @if (!empty(trim($eval->feedback)))
-                                        <p class="italic">“{{ $eval->feedback }}”</p>
-                                    @else
-                                        <p class="text-slate-400 italic">Peserta tidak meninggalkan catatan tertulis tambahan.</p>
-                                    @endif
-                                </div>
-                            </div>
-                        @endforeach
-                    </div>
-                @endif
-            </div>
-        </div>
+        @endif
 
     </div>
 </x-dashboard::layouts.dashboard>

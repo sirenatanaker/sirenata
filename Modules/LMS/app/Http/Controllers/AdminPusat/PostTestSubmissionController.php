@@ -33,12 +33,50 @@ class PostTestSubmissionController extends Controller
     ) {}
 
     /**
-     * Alur 3 langkah pengelolaan & triage penilaian evaluasi Admin Pusat:
-     * 1. Pilih Event Bimtek
-     * 2. Pilih Agenda Harian atau Evaluasi Akhir
-     * 3. Dashboard Batch, Triage, Edit Manual, & Publikasi Nilai
+     * Redirect tautan lama Jawaban Evaluasi langsung ke Pusat Kendali Periode Event (Tab Penilaian Evaluasi).
      */
-    public function index(Request $request): View
+    public function index(Request $request): View|RedirectResponse
+    {
+        $bimtekEventId = $request->query('bimtek_event_id');
+        $postTestId    = $request->query('post_test_id');
+        $courseId      = $request->query('course_id');
+
+        if ($bimtekEventId) {
+            return redirect()->route('admin-pusat.management-course.bimtek-events.show', array_filter([
+                'bimtek_event' => $bimtekEventId,
+                'tab'          => 'evaluation',
+                'post_test_id' => $postTestId,
+                'eval_search'  => $request->query('search'),
+                'eval_status'  => $request->query('status'),
+            ], fn($v) => $v !== null && $v !== ''));
+        }
+
+        if ($postTestId || $courseId) {
+            $pt = $postTestId ? PostTest::with('section')->find($postTestId) : null;
+            $resolvedCourseId = $pt?->course_id ?? $pt?->section?->course_id ?? $courseId;
+            $resolvedEvent = $resolvedCourseId
+                ? BimtekEvent::where('course_id', $resolvedCourseId)
+                    ->orderByRaw("FIELD(status, 'ongoing', 'completed', 'open_registration', 'draft')")
+                    ->latest('start_date')
+                    ->first()
+                : null;
+
+            if ($resolvedEvent) {
+                return redirect()->route('admin-pusat.management-course.bimtek-events.show', array_filter([
+                    'bimtek_event' => $resolvedEvent->id,
+                    'tab'          => 'evaluation',
+                    'post_test_id' => $postTestId,
+                ], fn($v) => $v !== null && $v !== ''));
+            }
+        }
+
+        return redirect()->route('admin-pusat.management-course.bimtek-events.index');
+    }
+
+    /**
+     * Legacy fallback unused: kept clean.
+     */
+    private function unusedLegacyIndex(Request $request): View
     {
         $bimtekEventId = $request->query('bimtek_event_id');
         $postTestId    = $request->query('post_test_id');

@@ -889,10 +889,15 @@ class CourseService
                     ->pluck('bimtek_event_session_id');
             }
             if ($bimtekSessions->isNotEmpty()) {
-                // Prioritaskan sesi yang cocok dengan indeks hari/modul ini
-                $currentSession = $bimtekSessions->get($sectionIndex) ?: $bimtekSessions->first();
+                // Prioritaskan sesi yang cocok dengan nomor hari/modul ini
+                $currentSession = $bimtekSessions->firstWhere('session_number', $sectionIndex + 1)
+                    ?: $bimtekSessions->get($sectionIndex)
+                    ?: $bimtekSessions->first();
             }
         }
+
+        // Link Google Drive bukti Zoom: 1 tautan folder master event untuk seluruh hari
+        $adminDriveLink = $activeBimtek?->submission_drive_link ?? null;
 
         if ($currentSession) {
             $isZoomAttended = $attendedSessionIds->contains($currentSession->id);

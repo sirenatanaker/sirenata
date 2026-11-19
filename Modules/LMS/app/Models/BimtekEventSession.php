@@ -28,6 +28,7 @@ class BimtekEventSession extends Model
         'attendance_code',
         'attendance_start_at',
         'attendance_end_at',
+        'proof_drive_link',
     ];
 
     protected $casts = [
@@ -70,6 +71,11 @@ class BimtekEventSession extends Model
     public function getEffectivePasscodeAttribute(): ?string
     {
         return $this->zoom_passcode ?: $this->bimtekEvent?->zoom_passcode;
+    }
+
+    public function getEffectiveProofDriveLinkAttribute(): ?string
+    {
+        return $this->proof_drive_link ?: $this->bimtekEvent?->submission_drive_link;
     }
 
     public function getEffectiveAttendanceStartAtAttribute()

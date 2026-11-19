@@ -364,7 +364,7 @@
                     <div class="relative flex items-stretch gap-3.5 sm:gap-5 pb-6 sm:pb-8">
                         {{-- Node Timeline Tahap 3 & Garis Penghubung --}}
                         <div class="relative w-8 sm:w-10 shrink-0 flex flex-col items-center select-none">
-                            @if ($isEvaluasiDone)
+                            @if ($hasProof || $isEvaluasiDone)
                                 <div class="relative z-10 w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-emerald-600 text-white flex items-center justify-center font-bold text-xs sm:text-sm shadow-xs ring-4 ring-white shrink-0" title="Tahap 3 Selesai">
                                     <i class="fas fa-check"></i>
                                 </div>
@@ -380,8 +380,90 @@
                             <div class="absolute top-4 sm:top-5 -bottom-8 sm:-bottom-10 left-1/2 -translate-x-1/2 w-0.5 {{ ($isZoomDone && $isMateriDone) ? 'bg-emerald-500' : 'bg-slate-200' }} z-0"></div>
                         </div>
 
-                        {{-- Card Konten Tahap 3 --}}
+                        {{-- Card Konten Tahap 3: Upload Screenshot Bukti Zoom + Auto-Kompresi di Browser --}}
                         <div id="bukti-presensi" data-tour="bukti-presensi"
+                            x-data="{
+                                showUploadForm: {{ $hasProof ? 'false' : 'true' }},
+                                compressing: false,
+                                previewUrl: '',
+                                sizeInfo: '',
+                                errorMsg: '',
+                                formatBytes(bytes) {
+                                    if (!bytes) return '0 KB';
+                                    if (bytes >= 1048576) return (bytes / 1048576).toFixed(2) + ' MB';
+                                    return Math.max(1, Math.round(bytes / 1024)) + ' KB';
+                                },
+                                async handleFileChange(event) {
+                                    const input = event.target;
+                                    const file = input.files && input.files[0];
+                                    this.errorMsg = '';
+                                    this.sizeInfo = '';
+                                    if (this.previewUrl) {
+                                        URL.revokeObjectURL(this.previewUrl);
+                                        this.previewUrl = '';
+                                    }
+                                    if (!file) return;
+                                    if (!file.type.startsWith('image/')) {
+                                        this.errorMsg = 'Harap pilih berkas gambar (JPG, PNG, atau WEBP).';
+                                        input.value = '';
+                                        return;
+                                    }
+
+                                    this.compressing = true;
+                                    const origSize = file.size;
+
+                                    try {
+                                        const img = await new Promise((resolve, reject) => {
+                                            const image = new Image();
+                                            image.onload = () => resolve(image);
+                                            image.onerror = reject;
+                                            image.src = URL.createObjectURL(file);
+                                        });
+
+                                        const maxWidth = 1280;
+                                        let width = img.naturalWidth || img.width;
+                                        let height = img.naturalHeight || img.height;
+                                        if (width > maxWidth) {
+                                            height = Math.round((height * maxWidth) / width);
+                                            width = maxWidth;
+                                        }
+
+                                        const canvas = document.createElement('canvas');
+                                        canvas.width = width;
+                                        canvas.height = height;
+                                        const ctx = canvas.getContext('2d');
+                                        ctx.drawImage(img, 0, 0, width, height);
+                                        URL.revokeObjectURL(img.src);
+
+                                        let blob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/webp', 0.78));
+                                        let ext = 'webp';
+                                        let mime = 'image/webp';
+                                        if (!blob || blob.type !== 'image/webp') {
+                                            blob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/jpeg', 0.78));
+                                            ext = 'jpg';
+                                            mime = 'image/jpeg';
+                                        }
+
+                                        if (blob && blob.size < origSize && typeof DataTransfer !== 'undefined') {
+                                            const baseName = file.name.replace(/\.[^/.]+$/, '');
+                                            const compressedFile = new File([blob], baseName + '.' + ext, { type: mime, lastModified: Date.now() });
+                                            const dt = new DataTransfer();
+                                            dt.items.add(compressedFile);
+                                            input.files = dt.files;
+                                            this.previewUrl = URL.createObjectURL(compressedFile);
+                                            this.sizeInfo = 'Dikompres otomatis: ' + this.formatBytes(origSize) + ' → ' + this.formatBytes(compressedFile.size);
+                                        } else {
+                                            this.previewUrl = URL.createObjectURL(file);
+                                            this.sizeInfo = 'Ukuran berkas: ' + this.formatBytes(origSize);
+                                        }
+                                    } catch (e) {
+                                        this.previewUrl = URL.createObjectURL(file);
+                                        this.sizeInfo = 'Ukuran berkas: ' + this.formatBytes(origSize);
+                                    } finally {
+                                        this.compressing = false;
+                                    }
+                                }
+                            }"
                             class="flex-1 min-w-0 scroll-mt-6 rounded-md border border-slate-200 bg-slate-50/40 p-4 sm:p-5 lg:p-6 shadow-2xs transition-all space-y-4">
                             <div>
                                 <h2 class="text-base sm:text-lg lg:text-xl font-medium text-slate-700 tracking-wide leading-tight" style="font-family: 'Oswald', sans-serif;">
@@ -389,42 +471,119 @@
                                 </h2>
 
                                 <p class="text-sm sm:text-[15px] text-slate-600 mt-1 leading-relaxed">
-                                    Kumpulkan bukti kehadiran (screenshot sesi tatap muka) langsung ke folder Google Drive panitia.
+                                    Unggah tangkapan layar (screenshot) saat mengikuti sesi tatap muka Zoom. Gambar akan dikompres otomatis di perangkat Anda sebelum dikirim agar unggahan lebih cepat.
                                 </p>
                             </div>
 
-                            {{-- Akses Folder Google Drive Penyelenggara (Soft Solid Setema) --}}
-                            @if ($adminDriveLink)
-                                <div class="p-4 sm:p-5 rounded-md bg-[#EBF3FA] border border-[#C5DBEE] shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                                    <div class="flex items-start sm:items-center gap-3.5 min-w-0">
-                                        <div class="w-11 h-11 rounded-md bg-[#13416B] text-white flex items-center justify-center shrink-0 text-xl shadow-2xs">
-                                            <i class="fab fa-google-drive"></i>
+                            <div class="p-4 sm:p-5 rounded-md bg-white border border-slate-200 space-y-4 shadow-2xs">
+                                @if ($hasProof)
+                                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                                        <div class="flex items-start gap-3.5 min-w-0">
+                                            @if ($zoomProof->file_url)
+                                                <a href="{{ $zoomProof->file_url }}" target="_blank" rel="noopener noreferrer"
+                                                   class="w-16 h-16 rounded-md border border-slate-200 overflow-hidden shrink-0 bg-slate-100 block hover:opacity-90 transition-opacity"
+                                                   title="Klik untuk melihat ukuran penuh">
+                                                    <img src="{{ $zoomProof->file_url }}" alt="Bukti Zoom" class="w-full h-full object-cover">
+                                                </a>
+                                            @else
+                                                <div class="w-12 h-12 rounded-md bg-emerald-50 border border-emerald-200 text-emerald-600 flex items-center justify-center shrink-0">
+                                                    <i class="fas fa-check-circle text-xl"></i>
+                                                </div>
+                                            @endif
+                                            <div class="space-y-1 min-w-0">
+                                                <div class="flex flex-wrap items-center gap-2">
+                                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                                        <i class="fas fa-check-circle"></i>
+                                                        <span>Bukti Zoom Terkumpul</span>
+                                                    </span>
+                                                    @if ($zoomProof->submitted_at)
+                                                        <span class="text-xs text-slate-500">
+                                                            Diunggah {{ $zoomProof->submitted_at->translatedFormat('d M Y, H:i') }} WIB
+                                                        </span>
+                                                    @endif
+                                                </div>
+                                                @if ($zoomProof->file_url)
+                                                    <a href="{{ $zoomProof->file_url }}" target="_blank" rel="noopener noreferrer"
+                                                       class="inline-flex items-center gap-1.5 text-xs font-semibold text-[#13416B] hover:underline">
+                                                        <i class="fas fa-external-link-alt text-[10px]"></i>
+                                                        <span>Lihat Screenshot Penuh</span>
+                                                    </a>
+                                                @else
+                                                    <p class="text-xs text-slate-500">
+                                                        Riwayat pengumpulan bukti sudah tercatat (berkas gambar telah diarsipkan otomatis).
+                                                    </p>
+                                                @endif
+                                                @if ($zoomProof->notes)
+                                                    <p class="text-xs text-slate-600">{{ $zoomProof->notes }}</p>
+                                                @endif
+                                            </div>
                                         </div>
-                                        <div class="min-w-0 space-y-0.5">
-                                            <h4 class="text-sm sm:text-base font-bold text-[#13416B]">Folder Google Drive Panitia</h4>
-                                            <p class="text-xs sm:text-[13px] text-slate-600 leading-snug">
-                                                Kumpulkan berkas foto atau tangkapan layar sesi tatap muka Anda ke folder Google Drive panitia berikut.
-                                            </p>
-                                        </div>
+
+                                        @if ($zoomProof->file_url)
+                                            <button type="button" @click="showUploadForm = !showUploadForm"
+                                                class="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-md text-xs font-semibold text-[#13416B] bg-slate-100 hover:bg-slate-200 transition-colors shrink-0 cursor-pointer">
+                                                <span x-text="showUploadForm ? 'Batal' : 'Ganti Screenshot'"></span>
+                                            </button>
+                                        @endif
                                     </div>
-                                    <a href="{{ $adminDriveLink }}" target="_blank" rel="noopener noreferrer"
-                                        class="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-md text-xs sm:text-sm font-bold text-white bg-[#13416B] hover:bg-[#0f3354] shadow-xs transition-all shrink-0 whitespace-nowrap cursor-pointer">
-                                        <i class="fab fa-google-drive text-sm"></i>
-                                        <span>Buka Google Drive</span>
-                                        <i class="fas fa-external-link-alt text-2xs ml-0.5 opacity-80"></i>
-                                    </a>
-                                </div>
-                            @else
-                                <div class="p-4 rounded-md bg-slate-100 text-slate-700 border border-slate-200 shadow-2xs flex items-center gap-3.5">
-                                    <div class="w-10 h-10 rounded-md bg-slate-200 text-slate-500 flex items-center justify-center shrink-0 text-lg">
-                                        <i class="fab fa-google-drive"></i>
+                                @endif
+
+                                <form x-show="showUploadForm" x-cloak
+                                      action="{{ route('user.course.section.upload-zoom-proof', ['slug' => $courseSlug, 'sectionId' => $sectionId]) }}"
+                                      method="POST"
+                                      enctype="multipart/form-data"
+                                      class="space-y-3.5 {{ $hasProof ? 'pt-4 border-t border-slate-100' : '' }}">
+                                    @csrf
+
+                                    <div class="space-y-2">
+                                        <label class="block text-xs sm:text-sm font-bold text-slate-700">
+                                            Pilih Screenshot Bukti Mengikuti Zoom <span class="text-rose-500">*</span>
+                                        </label>
+                                        <input type="file"
+                                               name="proof_file"
+                                               accept="image/jpeg,image/png,image/webp"
+                                               required
+                                               @change="handleFileChange($event)"
+                                               class="block w-full text-xs sm:text-sm text-slate-600 file:mr-3 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-xs sm:file:text-sm file:font-bold file:bg-[#13416B] file:text-white hover:file:bg-[#0f3354] border border-slate-300 rounded-md p-1.5 bg-slate-50 cursor-pointer">
+                                        <p class="text-[11px] sm:text-xs text-slate-500">
+                                            Format JPG, PNG, atau WEBP. Otomatis dikompres menjadi ringan (~100 KB) di browser sebelum dikirim.
+                                        </p>
+                                        <template x-if="errorMsg">
+                                            <p class="text-xs font-semibold text-rose-600" x-text="errorMsg"></p>
+                                        </template>
+                                        <template x-if="compressing">
+                                            <p class="text-xs font-semibold text-[#13416B]">Sedang mengompres gambar...</p>
+                                        </template>
+                                        <template x-if="previewUrl && !compressing">
+                                            <div class="flex items-center gap-3 p-2.5 rounded-md bg-emerald-50/70 border border-emerald-200">
+                                                <img :src="previewUrl" alt="Preview" class="w-14 h-14 rounded object-cover border border-emerald-200 shrink-0">
+                                                <div class="min-w-0">
+                                                    <p class="text-xs font-bold text-emerald-800">Siap diunggah</p>
+                                                    <p class="text-xs text-emerald-700" x-text="sizeInfo"></p>
+                                                </div>
+                                            </div>
+                                        </template>
                                     </div>
+
                                     <div>
-                                        <p class="text-xs sm:text-sm font-bold text-slate-700">Tautan Google Drive Belum Tersedia</p>
-                                        <p class="text-xs text-slate-500 mt-0.5">Tautan folder Google Drive untuk pengumpulan bukti presensi belum diatur oleh penyelenggara.</p>
+                                        <label class="block text-xs font-semibold text-slate-700 mb-1">
+                                            Keterangan <span class="text-slate-400 font-normal">(Opsional)</span>
+                                        </label>
+                                        <input type="text" name="notes" value="{{ old('notes') }}"
+                                               placeholder="Contoh: Hadir sesi Zoom pagi hingga selesai"
+                                               class="w-full px-3 py-2 text-xs sm:text-sm rounded-md border border-slate-300 focus:border-[#13416B] focus:ring-1 focus:ring-[#13416B] outline-none">
                                     </div>
-                                </div>
-                            @endif
+
+                                    <div class="flex justify-end">
+                                        <button type="submit"
+                                                :disabled="compressing"
+                                                class="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-md text-xs sm:text-sm font-bold text-white bg-emerald-600 hover:bg-emerald-700 disabled:opacity-60 transition-colors shadow-2xs cursor-pointer">
+                                            <i class="fas fa-upload text-xs"></i>
+                                            <span x-text="compressing ? 'Mengompres...' : '{{ $hasProof ? 'Simpan Screenshot Baru' : 'Unggah Bukti Zoom' }}'"></span>
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
                         </div>
                     </div>
                 @endif
