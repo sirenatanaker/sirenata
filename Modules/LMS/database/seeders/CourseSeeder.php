@@ -47,7 +47,7 @@ class CourseSeeder extends Seeder
                     'zoom_attendance_code'  => 'MAKRO99',
                     'zoom_scheduled_at'     => now()->subDays(1)->setTime(9, 0),
                     'zoom_end_at'           => now()->subDays(1)->setTime(12, 0),
-                    'quota'                 => 60,
+                    'quota'                 => 100,
                     'description'           => 'Pelatihan intensif penyusunan dokumen perencanaan tenaga kerja makro lima tahunan.',
                 ],
             ],
@@ -72,7 +72,7 @@ class CourseSeeder extends Seeder
                     'zoom_attendance_code'  => 'IPK88',
                     'zoom_scheduled_at'     => now()->addDays(2)->setTime(9, 0),
                     'zoom_end_at'           => now()->addDays(2)->setTime(11, 30),
-                    'quota'                 => 50,
+                    'quota'                 => 100,
                     'description'           => 'Panduan pengukuran 9 indikator utama penyusun Indeks Pembangunan Ketenagakerjaan.',
                 ],
             ],
@@ -97,7 +97,7 @@ class CourseSeeder extends Seeder
                     'zoom_attendance_code'  => 'MERIT77',
                     'zoom_scheduled_at'     => now()->addDays(9)->setTime(9, 0),
                     'zoom_end_at'           => now()->addDays(9)->setTime(12, 0),
-                    'quota'                 => 75,
+                    'quota'                 => 100,
                     'description'           => 'Sosialisasi dan asistensi penerapan 8 aspek sistem merit di instansi pemerintah daerah.',
                 ],
             ],
@@ -116,12 +116,12 @@ class CourseSeeder extends Seeder
                     'end_date'              => now()->subDays(5)->setTime(16, 0),
                     'registration_start_at' => now()->subDays(30)->setTime(8, 0),
                     'registration_end_at'   => now()->subDays(21)->setTime(23, 59),
-                    'assessment_start_at'   => now()->subDays(5)->setTime(16, 0),
-                    'assessment_end_at'     => now()->subDays(2)->setTime(23, 59),
+                    'assessment_start_at'   => now()->subDays(4)->setTime(8, 0),
+                    'assessment_end_at'     => now()->subDays(1)->setTime(23, 59),
                     'zoom_url'              => 'https://zoom.us/j/9998887776',
                     'zoom_meeting_id'       => '999 8887 7776',
                     'zoom_passcode'         => 'AUDIT2026',
-                    'quota'                 => 50,
+                    'quota'                 => 100,
                     'description'           => 'Pelatihan pengawasan norma kerja dan SMK3 sektor industri manufaktur dan jasa.',
                 ],
             ],
@@ -400,11 +400,29 @@ class CourseSeeder extends Seeder
 
             // Buat atau perbarui Bimtek Event jika kursus ini memiliki program Bimtek
             if (!empty($item['bimtek'])) {
+                $bimtekPayload = $item['bimtek'];
+                $execStart = $bimtekPayload['start_date'] ?? null;
+                $execEnd = $bimtekPayload['end_date'] ?? $execStart;
+
+                // Pastikan urutan fase selalu konsisten: Pendaftaran < Pelaksanaan < Evaluasi & PPSDM
+                if ($execStart && empty($bimtekPayload['registration_start_at'])) {
+                    $bimtekPayload['registration_start_at'] = $execStart->copy()->subDays(10)->setTime(8, 0);
+                }
+                if ($execStart && empty($bimtekPayload['registration_end_at'])) {
+                    $bimtekPayload['registration_end_at'] = $execStart->copy()->subDay()->setTime(23, 59);
+                }
+                if ($execEnd && empty($bimtekPayload['assessment_start_at'])) {
+                    $bimtekPayload['assessment_start_at'] = $execEnd->copy()->addDay()->setTime(8, 0);
+                }
+                if ($execEnd && empty($bimtekPayload['assessment_end_at'])) {
+                    $bimtekPayload['assessment_end_at'] = $execEnd->copy()->addDays(4)->setTime(23, 59);
+                }
+
                 BimtekEvent::updateOrCreate(
                     [
-                        'batch_code' => $item['bimtek']['batch_code'],
+                        'batch_code' => $bimtekPayload['batch_code'],
                     ],
-                    array_merge($item['bimtek'], [
+                    array_merge($bimtekPayload, [
                         'course_id' => $course->id,
                     ])
                 );

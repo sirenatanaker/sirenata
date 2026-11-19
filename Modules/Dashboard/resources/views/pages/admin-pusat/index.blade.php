@@ -898,7 +898,7 @@
                             </div>
                             <div class="space-y-1 text-[11px]">
                                 <div class="flex items-center justify-between gap-2">
-                                    <span class="inline-flex items-center gap-1.5 text-blue-100"><span class="w-2 h-2 rounded-xs bg-sky-400"></span>Pendaftaran</span>
+                                    <span class="inline-flex items-center gap-1.5 text-blue-100"><span class="w-2 h-2 rounded-xs bg-sky-300"></span>Pendaftaran</span>
                                     <span class="font-semibold text-white tabular-nums">${escapeHtml(ev.reg_label)}</span>
                                 </div>
                                 <div class="flex items-center justify-between gap-2">
