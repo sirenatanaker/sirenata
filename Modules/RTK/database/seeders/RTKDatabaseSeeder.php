@@ -11,6 +11,7 @@ class RTKDatabaseSeeder extends Seeder
         $this->call([
             RTKNSeeder::class,
             RTKDProvinceSeeder::class,
+            RTKDProvinceApprovedSeeder::class,
             RTKDRegencySeeder::class,
         ]);
     }

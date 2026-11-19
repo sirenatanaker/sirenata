@@ -46,31 +46,29 @@ class DashbordController extends Controller
                 ]);
             }
 
-            if ($request->has('sdm_year')) {
-                $year = (int) $request->input('sdm_year');
+            if ($request->has('event_year')) {
+                $year = (int) $request->input('event_year');
                 return response()->json([
-                    'sdmPerProvinsi' => $this->adminPusatDashboardService->getSdmPerProvinsi($year),
-                    'sdmMonthlyTrend' => $this->adminPusatDashboardService->getSdmMonthlyTrend($year),
+                    'lmsEventOverview' => $this->adminPusatDashboardService->getLmsEventOverview($year),
                 ]);
             }
 
-            $defaultYear = (int) $request->input('sdm_year', (int) date('Y'));
+            $defaultYear = (int) $request->input('event_year', (int) date('Y'));
             return response()->json([
-                'sdmPerProvinsi' => $this->adminPusatDashboardService->getSdmPerProvinsi($defaultYear),
-                'sdmMonthlyTrend' => $this->adminPusatDashboardService->getSdmMonthlyTrend($defaultYear),
+                'lmsEventOverview' => $this->adminPusatDashboardService->getLmsEventOverview($defaultYear),
                 'rtkMasaAktifPerProvinsi' => $this->adminPusatDashboardService->getRtkMasaAktifPerProvinsi($request->input('rtk_year', 'all')),
                 'rtkMasaBerakhirPerProvinsi' => $this->adminPusatDashboardService->getRtkMasaBerakhirPerProvinsi($request->input('rtk_end_year', 'all')),
             ]);
         }
 
         // 2. Full Page View
-        $selectedSdmYear = (int) $request->input('sdm_year', (int) date('Y'));
+        $selectedEventYear = $request->filled('event_year') ? (int) $request->input('event_year') : null;
         $selectedRtkYear = $request->input('rtk_year', 'all');
         $selectedRtkEndYear = $request->input('rtk_end_year', 'all');
 
         $data = $this->adminPusatDashboardService->getDashboardData(
             $user,
-            $selectedSdmYear,
+            $selectedEventYear,
             $selectedRtkYear,
             $selectedRtkEndYear
         );

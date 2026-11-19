@@ -6,6 +6,10 @@ use App\Models\User;
 use Creasi\Nusa\Models\Province;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Modules\LMS\Models\BimtekEvent;
+use Modules\LMS\Models\CertificateSubmission;
+use Modules\LMS\Models\PostTest;
+use Modules\LMS\Models\PostTestResult;
 use Modules\Project\Models\Project;
 use Modules\RTK\Enums\RTKStatusVerification;
 use Modules\RTK\Enums\StatusDocument;
@@ -21,12 +25,13 @@ class AdminPusatDashboardService
      */
     public function getDashboardData(
         User $user,
-        ?int $selectedSdmYear = null,
+        ?int $selectedEventYear = null,
         string|int $selectedRtkYear = 'all',
         string|int $selectedRtkEndYear = 'all'
     ): array {
         $currentYear = (int) date('Y');
-        $selectedSdmYear = $selectedSdmYear ?: $currentYear;
+        $selectedEventYear = $currentYear;
+        $lmsEventYears = [$currentYear];
 
         // 1. Stats Admin & Activity
         $totalAdminPusat = User::role('admin-pusat')->count();
@@ -39,14 +44,8 @@ class AdminPusatDashboardService
         $genderMale = UserProfile::where('gender', 'male')->count();
         $genderFemale = UserProfile::where('gender', 'female')->count();
 
-        // 3. SDM Years options
-        $sdmYears = [];
-        for ($y = $currentYear; $y >= $currentYear - 15; $y--) {
-            $sdmYears[] = $y;
-        }
-
-        // 4. SDM per Provinsi
-        $sdmPerProvinsi = $this->getSdmPerProvinsi($selectedSdmYear);
+        // 3. Pantauan Operasional LMS by Event
+        $lmsEventOverview = $this->getLmsEventOverview($selectedEventYear);
 
         // 5. Masa Aktif RTK per Provinsi
         $availableRtkYears = RencanaTenagaKerja::where('type', TypeRtk::PROVINSI->value)
@@ -114,13 +113,12 @@ class AdminPusatDashboardService
             'aktivitasAdmin' => $aktivitasAdmin,
             'genderMale' => $genderMale,
             'genderFemale' => $genderFemale,
-            'sdmPerProvinsi' => $sdmPerProvinsi,
-            'sdmMonthlyTrend' => $this->getSdmMonthlyTrend($selectedSdmYear),
+            'lmsEventOverview' => $lmsEventOverview,
+            'lmsEventYears' => $lmsEventYears,
+            'selectedEventYear' => $selectedEventYear,
             'rtkMasaAktifPerProvinsi' => $rtkMasaAktifPerProvinsi,
             'rtkMasaBerakhirPerProvinsi' => $rtkMasaBerakhirPerProvinsi,
             'rtkStatusDistribution' => $rtkStatusDistribution,
-            'sdmYears' => $sdmYears,
-            'selectedSdmYear' => $selectedSdmYear,
             'selectedRtkYear' => $selectedRtkYear,
             'selectedRtkEndYear' => $selectedRtkEndYear,
             'rtkYearsOptions' => $rtkYearsOptions,
@@ -128,6 +126,256 @@ class AdminPusatDashboardService
             'initialPendingApprovals' => $initialPendingApprovals,
             'hasMorePendingApprovals' => $hasMorePendingApprovals,
             'totalPendingApprovals' => $allPendingApprovals->count(),
+        ];
+    }
+
+    /**
+     * Daftar tahun pelaksanaan Bimtek Event (selalu menyertakan tahun berjalan).
+     */
+    public function getLmsEventYears(): array
+    {
+        $currentYear = (int) date('Y');
+
+        $years = BimtekEvent::query()
+            ->selectRaw('YEAR(COALESCE(start_date, created_at)) as year')
+            ->distinct()
+            ->pluck('year')
+            ->filter()
+            ->map(fn($y) => (int) $y)
+            ->push($currentYear)
+            ->unique()
+            ->sortDesc()
+            ->values()
+            ->all();
+
+        return $years;
+    }
+
+    /**
+     * Ringkasan operasional LMS by Event untuk Admin Pusat pada tahun terpilih.
+     */
+    public function getLmsEventOverview(int $year): array
+    {
+        $events = BimtekEvent::with('course')
+            ->where(function ($q) use ($year) {
+                $q->whereYear('start_date', $year)
+                  ->orWhere(function ($q2) use ($year) {
+                      $q2->whereNull('start_date')->whereYear('created_at', $year);
+                  });
+            })
+            ->orderByDesc('start_date')
+            ->orderByDesc('created_at')
+            ->get();
+
+        if ($events->isEmpty()) {
+            return [
+                'year' => $year,
+                'summary' => [
+                    'total_events'              => 0,
+                    'ongoing_events'            => 0,
+                    'open_registration_events'  => 0,
+                    'completed_events'          => 0,
+                    'total_participants'        => 0,
+                    'total_completed'           => 0,
+                    'pending_evaluations'       => 0,
+                    'ready_for_ppsdm'           => 0,
+                    'pending_ppsdm_submissions' => 0,
+                    'total_certified'           => 0,
+                ],
+                'chart'             => [],
+                'events'            => [],
+                'ppsdm_submissions' => [],
+            ];
+        }
+
+        $eventIds = $events->pluck('id')->all();
+        $courseIds = $events->pluck('course_id')->filter()->unique()->values()->all();
+
+        // Batch 1: seluruh enrollment peserta pada kursus terkait
+        $enrollments = !empty($courseIds)
+            ? DB::table('course_student')
+                ->whereIn('course_id', $courseIds)
+                ->select('course_id', 'bimtek_event_id', 'user_id', 'status', 'cert_submission_status', 'official_cert_number', 'certificate_file')
+                ->get()
+                ->groupBy('course_id')
+            : collect();
+
+        // Batch 2: evaluasi non-CBT (essay & file_upload) dan jawaban yang masih butuh pemeriksaan/publikasi
+        $manualPostTests = !empty($courseIds)
+            ? PostTest::whereIn('course_id', $courseIds)
+                ->whereIn('type', ['essay', 'file_upload'])
+                ->select('id', 'course_id')
+                ->get()
+                ->groupBy('course_id')
+            : collect();
+
+        $allManualPtIds = $manualPostTests->flatten()->pluck('id')->all();
+        $pendingResultsByPt = !empty($allManualPtIds)
+            ? PostTestResult::whereIn('post_test_id', $allManualPtIds)
+                ->whereIn('grading_status', ['PENDING', 'QUEUED', 'PROCESSING', 'FAILED', 'MANUAL_REVIEW', 'DRAFT_GRADED'])
+                ->select('post_test_id', 'user_id')
+                ->get()
+                ->groupBy('post_test_id')
+            : collect();
+
+        // Batch 3: pengajuan PPSDM aktif (menunggu nomor atau penerbitan PDF)
+        $activeSubmissions = CertificateSubmission::with('bimtekEvent')
+            ->whereIn('bimtek_event_id', $eventIds)
+            ->whereIn('status', ['submitted_to_ppsdm', 'numbered'])
+            ->latest('submitted_at')
+            ->get();
+
+        $summary = [
+            'total_events'              => $events->count(),
+            'ongoing_events'            => 0,
+            'open_registration_events'  => 0,
+            'completed_events'          => 0,
+            'total_participants'        => 0,
+            'total_completed'           => 0,
+            'pending_evaluations'       => 0,
+            'ready_for_ppsdm'           => 0,
+            'pending_ppsdm_submissions' => $activeSubmissions->count(),
+            'total_certified'           => 0,
+        ];
+
+        $eventItems = [];
+
+        foreach ($events as $ev) {
+            $courseEnrolls = $enrollments->get($ev->course_id, collect())
+                ->filter(fn($row) => $row->bimtek_event_id === $ev->id || $row->bimtek_event_id === null);
+
+            $enrolledUserIds = $courseEnrolls->pluck('user_id')->unique()->all();
+            $registered = count($enrolledUserIds);
+            $completed = $courseEnrolls->where('status', 'completed')->count();
+            $certified = $courseEnrolls->filter(fn($r) => !empty($r->official_cert_number) || !empty($r->certificate_file))->count();
+            $readyPpsdm = $courseEnrolls->filter(fn($r) =>
+                $r->status === 'completed'
+                && empty($r->official_cert_number)
+                && $r->cert_submission_status !== 'diajukan_ke_ppsdm'
+            )->count();
+
+            $coursePts = $manualPostTests->get($ev->course_id, collect());
+            $pendingEval = 0;
+            if ($coursePts->isNotEmpty() && !empty($enrolledUserIds)) {
+                $userLookup = array_flip($enrolledUserIds);
+                foreach ($coursePts as $pt) {
+                    $ptPending = $pendingResultsByPt->get($pt->id, collect());
+                    foreach ($ptPending as $res) {
+                        if (isset($userLookup[$res->user_id])) {
+                            $pendingEval++;
+                        }
+                    }
+                }
+            }
+
+            $badge = $ev->status_badge;
+            $statusLabel = (string) ($badge['label'] ?? 'Draft');
+            $statusKey = match ($statusLabel) {
+                'Sedang Berlangsung' => 'ongoing',
+                'Pendaftaran Buka'   => 'open_registration',
+                'Selesai'            => 'completed',
+                default              => 'other',
+            };
+
+            if ($statusKey === 'ongoing') {
+                $summary['ongoing_events']++;
+            } elseif ($statusKey === 'open_registration') {
+                $summary['open_registration_events']++;
+            } elseif ($statusKey === 'completed') {
+                $summary['completed_events']++;
+            }
+
+            $summary['total_participants'] += $registered;
+            $summary['total_completed'] += $completed;
+            $summary['pending_evaluations'] += $pendingEval;
+            $summary['ready_for_ppsdm'] += $readyPpsdm;
+            $summary['total_certified'] += $certified;
+
+            $regStart = $ev->registration_start_at ?? $ev->start_date?->copy()->subDays(7);
+            $regEnd   = $ev->registration_end_at ?? $ev->start_date?->copy()->subDay();
+            $execStart = $ev->start_date;
+            $execEnd   = $ev->end_date ?? $ev->start_date;
+            $evalStart = $ev->assessment_start_at ?? $execEnd;
+            $evalEnd   = $ev->assessment_end_at ?? $execEnd?->copy()->addDays(3);
+
+            // Pastikan setiap fase memiliki rentang valid (end >= start)
+            if ($regStart && $regEnd && $regEnd->lt($regStart)) {
+                $regEnd = $regStart->copy();
+            }
+            if ($execStart && $execEnd && $execEnd->lt($execStart)) {
+                $execEnd = $execStart->copy();
+            }
+            if ($evalStart && $evalEnd && $evalEnd->lt($evalStart)) {
+                $evalEnd = $evalStart->copy();
+            }
+
+            $fmtRange = function ($s, $e): string {
+                if (!$s) return '-';
+                if (!$e || $s->isSameDay($e)) return $s->translatedFormat('d M Y');
+                if ($s->month === $e->month && $s->year === $e->year) {
+                    return $s->format('d') . ' – ' . $e->translatedFormat('d M Y');
+                }
+                return $s->translatedFormat('d M') . ' – ' . $e->translatedFormat('d M Y');
+            };
+
+            $schedule = $fmtRange($execStart, $execEnd);
+
+            $eventItems[] = [
+                'id'           => $ev->id,
+                'batch_name'   => $ev->batch_name,
+                'course_name'  => $ev->course?->name ?? '-',
+                'schedule'     => $schedule,
+                'status_key'   => $statusKey,
+                'status_label' => $statusLabel,
+                'status_class' => $badge['class'] ?? 'bg-slate-100 text-slate-700',
+                'quota'        => $ev->quota ? (int) $ev->quota : null,
+                'registered'   => $registered,
+                'completed'    => $completed,
+                'certified'    => $certified,
+                'pending_eval' => $pendingEval,
+                'ready_ppsdm'  => $readyPpsdm,
+                'reg_start'    => $regStart?->format('Y-m-d'),
+                'reg_end'      => $regEnd?->format('Y-m-d'),
+                'reg_label'    => $fmtRange($regStart, $regEnd),
+                'exec_start'   => $execStart?->format('Y-m-d'),
+                'exec_end'     => $execEnd?->format('Y-m-d'),
+                'exec_label'   => $fmtRange($execStart, $execEnd),
+                'eval_start'   => $evalStart?->format('Y-m-d'),
+                'eval_end'     => $evalEnd?->format('Y-m-d'),
+                'eval_label'   => $fmtRange($evalStart, $evalEnd),
+                'sort_date'    => $execStart?->format('Y-m-d') ?? $regStart?->format('Y-m-d') ?? '9999-12-31',
+                'url'          => route('admin-pusat.management-course.bimtek-events.show', $ev->id),
+                'eval_url'     => route('admin-pusat.management-course.bimtek-events.show', ['bimtek_event' => $ev->id, 'tab' => 'evaluation']),
+                'ppsdm_url'    => route('admin-pusat.management-course.bimtek-events.show', ['bimtek_event' => $ev->id, 'tab' => 'graduation']),
+            ];
+        }
+
+        // Urutkan kronologis berdasarkan tanggal mulai pelaksanaan agar Gantt Chart membentuk tangga rapi
+        $ganttEvents = collect($eventItems)
+            ->sortBy('sort_date')
+            ->values()
+            ->all();
+
+        $ppsdmList = $activeSubmissions->map(function ($sub) {
+            $b = $sub->status_badge;
+            return [
+                'id'              => $sub->id,
+                'submission_code' => $sub->submission_code,
+                'batch_name'      => $sub->bimtekEvent?->batch_name ?? '-',
+                'total_graduates' => (int) $sub->total_graduates,
+                'status_label'    => $b['label'] ?? 'Diproses',
+                'status_class'    => $b['class'] ?? 'bg-amber-50 text-amber-700 border-amber-200',
+                'url'             => route('admin-pusat.management-course.certificate-submissions.show', $sub->id),
+            ];
+        })->values()->all();
+
+        return [
+            'year'              => $year,
+            'today'             => now()->format('Y-m-d'),
+            'today_label'       => now()->translatedFormat('d M Y'),
+            'summary'           => $summary,
+            'events'            => $ganttEvents,
+            'ppsdm_submissions' => $ppsdmList,
         ];
     }
 

@@ -83,7 +83,7 @@
 
             {{-- KIRI: GRAFIK MASA BERLAKU RTK --}}
             <section
-                class="lg:col-span-7 xl:col-span-7 bg-white rounded-md border border-slate-200 shadow-sm overflow-hidden flex flex-col">
+                class="lg:col-span-8 xl:col-span-8 bg-white rounded-md border border-slate-200 shadow-sm overflow-hidden flex flex-col">
                 <header
                     class="px-5 sm:px-6 py-4 border-b border-slate-100 flex flex-col sm:flex-row sm:items-start justify-between gap-4">
                     <div>
@@ -108,10 +108,10 @@
                 </header>
 
                 {{-- Legenda status masa berlaku --}}
-                <div class="px-5 sm:px-6 pt-4 flex flex-wrap items-center gap-x-5 gap-y-2 text-xs text-slate-600">
-                    <span class="inline-flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-sm bg-[#13416B]"></span>Masih berlaku</span>
-                    <span class="inline-flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-sm bg-amber-500"></span>Segera berakhir (&le; 1 tahun)</span>
-                    <span class="inline-flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-sm bg-slate-400"></span>Sudah berakhir</span>
+                <div class="px-5 sm:px-6 pt-4 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-slate-600">
+                    <span class="inline-flex items-center gap-1.5"><span class="w-3 h-3 rounded-sm bg-[#13416B]"></span>Masih berlaku</span>
+                    <span class="inline-flex items-center gap-1.5"><span class="w-3 h-3 rounded-sm bg-amber-500"></span>Segera berakhir (&le; 1 tahun)</span>
+                    <span class="inline-flex items-center gap-1.5"><span class="w-3 h-3 rounded-sm bg-slate-400"></span>Sudah berakhir</span>
                     <span class="inline-flex items-center gap-1.5"><span class="inline-block w-4 border-t-2 border-dashed border-red-500"></span>Tahun ini ({{ now()->year }})</span>
                 </div>
 
@@ -150,18 +150,17 @@
 
             {{-- KANAN: PERLU PERSETUJUAN --}}
             <section id="pendingSection"
-                class="lg:col-span-5 xl:col-span-5 bg-white rounded-md border border-slate-200 shadow-sm overflow-hidden flex flex-col scroll-mt-6">
-                <header class="relative px-5 sm:px-6 py-4 border-b border-slate-100">
-                    {{-- Badge Total Mojok Kanan Atas seperti di Card Kursus (Lebih Besar & Jelas) --}}
-                    <span
-                        class="absolute top-0 right-0 z-10 px-3.5 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-bold text-white bg-amber-500 shadow-xs flex items-center gap-1.5 rounded-none rounded-bl-xl">
-                        Total {{ $totalPendingApprovals }}
-                    </span>
-
-                    <div class="flex items-center gap-3 min-w-0 pr-28 sm:pr-36">
-                        <h2 class="text-base sm:text-lg font-semibold text-slate-900">Perlu Persetujuan</h2>
+                class="lg:col-span-4 xl:col-span-4 bg-white rounded-md border border-slate-200 shadow-sm overflow-hidden flex flex-col scroll-mt-6">
+                <header class="px-5 sm:px-6 py-4 border-b border-slate-100">
+                    <div class="flex items-center justify-between gap-3">
+                        <div class="flex items-center gap-2.5 min-w-0">
+                            <h2 class="text-base sm:text-lg font-semibold text-slate-900">Perlu Persetujuan</h2>
+                            <span class="inline-flex items-center justify-center min-w-[24px] h-6 px-2 rounded-full text-xs font-bold text-white tabular-nums shadow-2xs {{ $totalPendingApprovals > 0 ? 'bg-amber-500' : 'bg-emerald-500' }}">
+                                {{ number_format($totalPendingApprovals, 0, ',', '.') }}
+                            </span>
+                        </div>
                     </div>
-                    <p class="text-sm text-slate-500 mt-2">RTKD (provinsi) &amp; Projek Daerah yang menunggu persetujuan</p>
+                    <p class="text-sm text-slate-500 mt-1">RTKD (provinsi) &amp; Projek Daerah yang menunggu persetujuan</p>
                 </header>
 
                 {{-- Satu-satunya elemen yang scroll, dipakai untuk infinite scroll --}}
@@ -195,95 +194,91 @@
         </div>
 
         {{-- ========================================================= --}}
-        {{-- 3. DISTRIBUSI PENDAFTAR E-LEARNING                        --}}
+        {{-- 3. GANTT CHART PERIODE EVENT (LMS BY EVENT)               --}}
         {{-- ========================================================= --}}
+        @php
+            $lmsSummary = $lmsEventOverview['summary'] ?? [];
+            $lmsHasEvents = !empty($lmsEventOverview['events']);
+            $todayFormatted = $lmsEventOverview['today_label'] ?? now()->translatedFormat('d M Y');
+        @endphp
         <section class="bg-white rounded-md border border-slate-200 shadow-sm overflow-hidden">
             <header
-                class="px-5 sm:px-6 py-4 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                class="px-5 sm:px-6 py-4 border-b border-slate-100 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
                 <div>
-                    <h2 class="text-base sm:text-lg font-semibold text-slate-900">Distribusi Pendaftar E-Learning</h2>
-                    <p class="text-sm text-slate-500">Tren registrasi bulanan dan sebaran peserta per daerah</p>
+                    <h2 class="text-base sm:text-lg font-semibold text-slate-900">Gantt Chart Periode Event ({{ $selectedEventYear }})</h2>
+                    <p class="text-sm text-slate-500">Linimasa jadwal pendaftaran, pelaksanaan Zoom, dan evaluasi seluruh gelombang pelatihan tahun ini</p>
                 </div>
 
-                <div class="w-full sm:w-auto sm:max-w-xs shrink-0">
-                    <label for="sdmYearFilter" class="sr-only">Filter tahun registrasi</label>
-                    <select id="sdmYearFilter"
-                        class="w-full text-sm border-slate-200 rounded-md focus:ring-[#13416B] focus:border-[#13416B] text-ellipsis overflow-hidden cursor-pointer bg-white disabled:opacity-60">
-                        @foreach ($sdmYears as $year)
-                            <option value="{{ $year }}" {{ $selectedSdmYear == $year ? 'selected' : '' }}>
-                                Tahun Registrasi {{ $year }}
-                            </option>
-                        @endforeach
+                <div class="flex flex-wrap items-center gap-2.5 shrink-0">
+                    <label for="eventStatusFilter" class="sr-only">Filter status event</label>
+                    <select id="eventStatusFilter"
+                        class="text-sm border-slate-200 rounded-md focus:ring-[#13416B] focus:border-[#13416B] cursor-pointer bg-white">
+                        <option value="all">Semua Status</option>
+                        <option value="ongoing">Sedang Berlangsung</option>
+                        <option value="open_registration">Pendaftaran Buka</option>
+                        <option value="completed">Selesai</option>
                     </select>
+
+                    <a href="{{ route('admin-pusat.management-course.bimtek-events.index') }}"
+                       class="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs sm:text-sm font-bold text-white bg-[#13416B] hover:bg-[#0f3354] rounded-md transition-colors shadow-2xs">
+                        <span>Kelola Periode Event</span>
+                    </a>
                 </div>
             </header>
 
-            <div class="p-5 sm:p-6">
-                {{-- Ringkasan 3 Metrik Relevan --}}
-                <div id="sdmSummary" class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6">
-                    {{-- 1. Total Peserta --}}
-                    <div class="rounded-md bg-[#13416B] px-4 py-3">
-                        <p class="text-xs font-semibold uppercase tracking-wider text-white/80">Total Peserta Terdaftar</p>
-                        <p id="sdmTotal" class="mt-1 text-2xl font-extrabold text-white tabular-nums">0</p>
-                    </div>
-                    {{-- 2. Daerah Aktif Terjangkau --}}
-                    <div class="rounded-md bg-[#547996] px-4 py-3">
-                        <p class="text-xs font-semibold uppercase tracking-wider text-white/85">Wilayah Terjangkau</p>
-                        <p class="mt-1 flex items-baseline gap-2">
-                            <span id="sdmActiveRegions" class="text-2xl font-extrabold text-white tabular-nums">0</span>
-                            <span class="text-xs font-semibold text-white/85">Provinsi</span>
-                        </p>
-                    </div>
-                    {{-- 3. Rata-rata per Wilayah --}}
-                    <div class="rounded-md bg-[#8BB1CC] px-4 py-3">
-                        <p class="text-xs font-semibold uppercase tracking-wider text-white/90">Rata-rata per Wilayah</p>
-                        <p class="mt-1 flex items-baseline gap-2">
-                            <span id="sdmAvgRegion" class="text-2xl font-extrabold text-white tabular-nums">0</span>
-                            <span class="text-xs font-semibold text-white/90">Peserta</span>
-                        </p>
-                    </div>
+            {{-- Legenda Fase --}}
+            <div class="px-5 sm:px-6 py-3 border-b border-slate-100 bg-slate-50/50">
+                <div class="flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-slate-600">
+                    <span class="inline-flex items-center gap-1.5">
+                        <span class="w-3 h-3 rounded-xs bg-sky-300"></span>Pendaftaran
+                    </span>
+                    <span class="inline-flex items-center gap-1.5">
+                        <span class="w-3 h-3 rounded-xs bg-[#2B6496]"></span>Pelaksanaan &amp; Live Zoom
+                    </span>
+                    <span class="inline-flex items-center gap-1.5">
+                        <span class="w-3 h-3 rounded-xs bg-amber-400"></span>Evaluasi &amp; Pengajuan PPSDM
+                    </span>
+                    <span class="inline-flex items-center gap-1.5">
+                        <span class="inline-block w-4 border-t-2 border-dashed border-red-500"></span>Hari Ini ({{ $todayFormatted }})
+                    </span>
                 </div>
+            </div>
 
-                <p id="sdmError" class="hidden mb-3 text-xs text-red-600 bg-red-50 border border-red-200 rounded-md px-3 py-2">
-                    Gagal memuat data pendaftar. Coba pilih ulang tahun atau muat ulang halaman.
+            <div class="p-5 sm:p-6">
+                <p id="lmsEventError" class="hidden mb-3 text-xs text-red-600 bg-red-50 border border-red-200 rounded-md px-3 py-2">
+                    Gagal memuat data periode event LMS. Coba pilih ulang tahun atau muat ulang halaman.
                 </p>
 
-                {{-- Layout Dua Kolom: Kiri Tren Bulanan, Kanan Sebaran Daerah --}}
-                <div id="sdmContentGrid" class="grid grid-cols-1 lg:grid-cols-12 gap-6 {{ $sdmPerProvinsi->count() > 0 ? '' : 'hidden' }}">
-                    {{-- Kiri: Chart.js Tren Pendaftaran Bulanan --}}
-                    <div class="lg:col-span-7 xl:col-span-8 flex flex-col">
-                        <div class="flex items-center justify-between mb-2">
-                            <h3 class="text-sm font-semibold text-slate-800">Tren Pendaftaran Peserta (<span id="sdmTrendYearLabel">Tahun {{ $selectedSdmYear }}</span>)</h3>
-                            <span id="sdmTrendPeakNote" class="text-xs text-slate-500">Laju registrasi bulanan</span>
-                        </div>
-                        <div class="relative w-full h-[320px] sm:h-[360px] bg-slate-50/50 rounded-md border border-slate-100 p-3 sm:p-4">
-                            <canvas id="sdmTrendChart"></canvas>
-                        </div>
-                    </div>
-
-                    {{-- Kanan: Leaderboard Sebaran Wilayah --}}
-                    <div class="lg:col-span-5 xl:col-span-4 flex flex-col">
-                        <div class="flex items-center justify-between mb-2">
-                            <h3 class="text-sm font-semibold text-slate-800">Peringkat Sebaran Wilayah</h3>
-                            <span class="text-xs text-slate-500">Berdasarkan total peserta</span>
-                        </div>
-                        <div id="sdmListContainer"
-                            class="space-y-1.5 max-h-[360px] overflow-y-auto pr-1 custom-scrollbar">
+                {{-- Kontainer Gantt Chart --}}
+                <div id="ganttWrapper"
+                     class="border border-slate-200 rounded-md overflow-hidden bg-white {{ $lmsHasEvents ? '' : 'hidden' }}">
+                    <div id="ganttScrollArea" class="overflow-x-auto overflow-y-auto max-h-[540px] custom-scrollbar relative">
+                        <div id="ganttInner" class="min-w-[880px] relative">
+                            {{-- Header Bulan & Tanggal (Sticky Top) --}}
+                            <div id="ganttHeader" class="sticky top-0 z-30 bg-slate-50 border-b border-slate-200"></div>
+                            {{-- Baris-Baris Event --}}
+                            <div id="ganttRows" class="divide-y divide-slate-100 relative"></div>
                         </div>
                     </div>
                 </div>
 
-                <div id="sdmEmptyState"
-                    class="bg-slate-50 rounded-md p-10 text-center border border-dashed border-slate-200 {{ $sdmPerProvinsi->count() > 0 ? 'hidden' : '' }}">
+                {{-- Empty State --}}
+                <div id="lmsEmptyState"
+                    class="bg-slate-50 rounded-md p-10 text-center border border-dashed border-slate-200 {{ $lmsHasEvents ? 'hidden' : '' }}">
                     <div
                         class="w-12 h-12 bg-white border border-slate-200 rounded-md flex items-center justify-center mx-auto mb-3 text-slate-400">
-                        <i class="fas fa-users-slash text-lg"></i>
+                        <i class="fas fa-calendar-xmark text-lg"></i>
                     </div>
-                    <p class="text-sm font-semibold text-slate-700">Belum Ada Pendaftar</p>
-                    <p class="text-xs text-slate-500 mt-1">Belum ada pengguna yang mendaftar pada tahun tersebut.</p>
+                    <p class="text-sm font-semibold text-slate-700">Tidak Ada Periode Event</p>
+                    <p class="text-xs text-slate-500 mt-1">Belum ada gelombang Bimtek yang sesuai dengan filter tahun atau status yang dipilih.</p>
                 </div>
             </div>
         </section>
+
+        {{-- Floating Tooltip Gantt Chart --}}
+        <div id="ganttTooltip"
+             class="fixed z-[100] hidden pointer-events-none w-72 bg-[#13416B] text-white rounded-md shadow-xl border border-white/15 p-3.5 text-xs space-y-2">
+        </div>
 
     </div>
 
@@ -347,7 +342,7 @@
                 //    jadi tetap terlihat saat label sumbu Y di-scroll.
                 //    Warna batang menunjukkan status masa berlaku.
                 // =========================================================
-                const RTK_MIN_ROW_HEIGHT = 50;
+                const RTK_MIN_ROW_HEIGHT = 54;
                 const RTK_AXIS_HEIGHT = 28;
                 const CURRENT_YEAR = new Date().getFullYear();
 
@@ -513,13 +508,15 @@
                                     },
                                     ticks: {
                                         font: {
-                                            size: 11,
+                                            size: 13,
+                                            weight: '500',
                                             family: "'Inter', sans-serif"
                                         },
+                                        color: '#334155',
                                         autoSkip: false
                                     },
                                     afterFit: (scaleInstance) => {
-                                        scaleInstance.width = window.innerWidth >= 640 ? 160 : 120;
+                                        scaleInstance.width = window.innerWidth >= 640 ? 185 : 135;
                                     }
                                 }
                             }
@@ -659,8 +656,8 @@
                         return `
                             <div class="flex items-center justify-between gap-3">
                                 <span class="text-xs text-slate-500 shrink-0">${caption}</span>
-                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium text-white ${tone.bg}">
-                                    <i class="fas ${tone.icon} text-white"></i>${escapeHtml(label)}
+                                <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium text-white ${tone.bg}">
+                                    ${escapeHtml(label)}
                                 </span>
                             </div>`;
                     };
@@ -668,7 +665,6 @@
                     const cardTemplate = (raw) => {
                         const item = normalize(raw);
                         const isRtk = item.type === 'rtk';
-                        const typeIcon = isRtk ? 'fa-file-signature' : 'fa-diagram-project';
                         const statuses = isRtk ? `
                             <div class="mt-3 space-y-2">
                                 ${statusRow('Verifikasi', item.verif)}
@@ -677,14 +673,11 @@
 
                         return `
                             <article class="p-4 rounded-md bg-slate-50 transition-colors duration-200 hover:bg-slate-100">
-                                <div class="flex items-center justify-between gap-2">
-                                    <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md border text-xs font-medium ${item.badge}">
-                                        <i class="fas ${typeIcon} text-[10px]"></i>${escapeHtml(item.category)}
-                                    </span>
-                                    <span class="text-xs text-slate-500 shrink-0"><i class="far fa-clock mr-1"></i>${escapeHtml(item.date)}</span>
+                                <div class="flex items-start justify-between gap-2">
+                                    <h3 class="text-sm font-semibold text-slate-900 line-clamp-2" title="${escapeHtml(item.title)}">${escapeHtml(item.title)}</h3>
+                                    <span class="text-xs text-slate-500 shrink-0 whitespace-nowrap pt-0.5"><i class="far fa-clock mr-1"></i>${escapeHtml(item.date)}</span>
                                 </div>
-                                <h3 class="mt-3 text-sm font-semibold text-slate-900 line-clamp-2" title="${escapeHtml(item.title)}">${escapeHtml(item.title)}</h3>
-                                <p class="mt-0.5 text-xs text-slate-500 truncate">${escapeHtml(item.subtitle)}</p>
+                                <p class="mt-1 text-xs text-slate-500 truncate">${escapeHtml(item.subtitle)} - <span class="font-semibold text-[#13416B]">${escapeHtml(item.category)}</span></p>
                                 ${statuses}
                                 <div class="flex justify-end mt-3 pt-3 border-t border-slate-200/60">
                                     <a href="${escapeHtml(item.url)}" class="inline-flex items-center text-sm font-semibold text-[#13416B] hover:text-[#547996] transition-colors">
@@ -760,218 +753,305 @@
                 })();
 
                 // =========================================================
-                // 3. DISTRIBUSI & TREN PENDAFTAR E-LEARNING
+                // 3. GANTT CHART PERIODE EVENT (LMS BY EVENT)
                 // =========================================================
-                const SdmSection = (() => {
-                    const contentGridEl = $('sdmContentGrid');
-                    const listEl = $('sdmListContainer');
-                    const emptyEl = $('sdmEmptyState');
-                    const errorEl = $('sdmError');
-                    const canvasEl = $('sdmTrendChart');
-                    let trendChart = null;
+                const LmsGanttSection = (() => {
+                    const wrapperEl = $('ganttWrapper');
+                    const headerEl = $('ganttHeader');
+                    const rowsEl = $('ganttRows');
+                    const emptyEl = $('lmsEmptyState');
+                    const errorEl = $('lmsEventError');
+                    const tooltipEl = $('ganttTooltip');
+
+                    const MONTH_SHORT = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+                    const DAY_MS = 86400000;
+
+                    let currentOverview = null;
+                    let currentStatusFilter = 'all';
                     let requestId = 0;
 
-                    const MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
-                    const MONTH_FULL = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
-
-                    const rankClass = (index) => index < 3 ?
-                        'bg-[#13416B] text-white' :
-                        'bg-slate-100 text-slate-600 font-semibold';
-
-                    const rowTemplate = (item, index, maxTotal, grandTotal) => {
-                        const pct = maxTotal > 0 ? ((item.total / maxTotal) * 100) : 0;
-                        const share = grandTotal > 0 ? ((item.total / grandTotal) * 100).toFixed(1).replace('.', ',') : '0';
-
-                        return `
-                            <div class="p-2.5 rounded-md transition-colors duration-200 hover:bg-slate-50">
-                                <div class="flex items-center gap-3">
-                                    <span class="w-6 h-6 rounded-md flex items-center justify-center text-xs tabular-nums shrink-0 ${rankClass(index)}">${index + 1}</span>
-                                    <div class="flex-1 min-w-0">
-                                        <div class="flex items-baseline justify-between gap-2 mb-1">
-                                            <span class="text-xs sm:text-sm font-semibold text-slate-800 truncate" title="${escapeHtml(item.province_name)}">${escapeHtml(item.province_name)}</span>
-                                            <span class="shrink-0 text-xs text-slate-500">
-                                                <strong class="font-bold text-[#13416B] tabular-nums">${formatNumber(item.total)}</strong>
-                                                <span class="text-slate-400 ml-0.5">(${share}%)</span>
-                                            </span>
-                                        </div>
-                                        <div class="w-full h-1.5 rounded-full bg-slate-100 overflow-hidden">
-                                            <div class="bg-[#13416B] h-full rounded-full transition-all duration-500 ease-out" style="width: ${pct}%"></div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>`;
+                    const parseIsoDate = (iso) => {
+                        if (!iso) return null;
+                        const [y, m, d] = iso.split('-').map(Number);
+                        return Date.UTC(y, m - 1, d);
                     };
 
-                    function buildTrendChart(monthlyData) {
-                        if (!canvasEl) return;
-                        const ctx = canvasEl.getContext('2d');
-                        
-                        const gradient = ctx.createLinearGradient(0, 0, 0, 300);
-                        gradient.addColorStop(0, 'rgba(19, 65, 107, 0.22)');
-                        gradient.addColorStop(1, 'rgba(19, 65, 107, 0.01)');
+                    const formatTick = (ms) => {
+                        const dt = new Date(ms);
+                        return `${dt.getUTCDate()} ${MONTH_SHORT[dt.getUTCMonth()]}`;
+                    };
 
-                        trendChart = new Chart(ctx, {
-                            type: 'line',
-                            data: {
-                                labels: MONTH_NAMES,
-                                datasets: [{
-                                    label: 'Pendaftar Baru',
-                                    data: monthlyData,
-                                    borderColor: '#13416B',
-                                    borderWidth: 2.5,
-                                    backgroundColor: gradient,
-                                    fill: true,
-                                    tension: 0.35,
-                                    pointBackgroundColor: '#13416B',
-                                    pointBorderColor: '#ffffff',
-                                    pointBorderWidth: 2,
-                                    pointRadius: 4,
-                                    pointHoverRadius: 6,
-                                    pointHoverBackgroundColor: '#13416B',
-                                    pointHoverBorderColor: '#ffffff',
-                                    pointHoverBorderWidth: 2.5,
-                                }]
-                            },
-                            options: {
-                                responsive: true,
-                                maintainAspectRatio: false,
-                                interaction: {
-                                    intersect: false,
-                                    mode: 'index',
-                                },
-                                plugins: {
-                                    legend: { display: false },
-                                    tooltip: {
-                                        backgroundColor: 'rgba(19, 65, 107, 0.95)',
-                                        padding: 10,
-                                        cornerRadius: 6,
-                                        titleFont: { size: 12, weight: 'bold' },
-                                        bodyFont: { size: 12 },
-                                        callbacks: {
-                                            title: (items) => MONTH_FULL[items[0].dataIndex] || items[0].label,
-                                            label: (item) => ` Pendaftar: ${formatNumber(item.raw)} peserta`
-                                        }
-                                    }
-                                },
-                                scales: {
-                                    x: {
-                                        grid: { display: false },
-                                        ticks: {
-                                            font: { size: 11, family: "'Inter', sans-serif" },
-                                            color: '#64748b'
-                                        }
-                                    },
-                                    y: {
-                                        beginAtZero: true,
-                                        grid: {
-                                            color: '#f1f5f9',
-                                            drawTicks: false
-                                        },
-                                        ticks: {
-                                            precision: 0,
-                                            font: { size: 11, family: "'Inter', sans-serif" },
-                                            color: '#64748b'
-                                        }
-                                    }
+                    function computeDomain(events, todayMs) {
+                        let minMs = Infinity;
+                        let maxMs = -Infinity;
+
+                        events.forEach((ev) => {
+                            [ev.reg_start, ev.reg_end, ev.exec_start, ev.exec_end, ev.eval_start, ev.eval_end].forEach((d) => {
+                                const ms = parseIsoDate(d);
+                                if (ms !== null) {
+                                    if (ms < minMs) minMs = ms;
+                                    if (ms > maxMs) maxMs = ms;
                                 }
-                            }
-                        });
-                    }
-
-                    function updateTrendChart(monthlyData) {
-                        if (!trendChart) {
-                            buildTrendChart(monthlyData);
-                            return;
-                        }
-                        trendChart.data.datasets[0].data = monthlyData;
-                        trendChart.resize();
-                        trendChart.update();
-                    }
-
-                    function renderSummary(regions, monthlyData) {
-                        const total = regions.reduce((sum, i) => sum + Number(i.total || 0), 0);
-                        const activeCount = regions.filter(i => Number(i.total || 0) > 0).length;
-                        const avgPerRegion = activeCount > 0 ? Math.round(total / activeCount) : 0;
-
-                        let peakMonthIndex = -1;
-                        let peakVal = 0;
-                        monthlyData.forEach((val, idx) => {
-                            if (val > peakVal) {
-                                peakVal = val;
-                                peakMonthIndex = idx;
-                            }
-                        });
-
-                        const peakNoteEl = $('sdmTrendPeakNote');
-                        if (peakNoteEl) {
-                            peakNoteEl.textContent = peakMonthIndex >= 0 && peakVal > 0 
-                                ? `Puncak di bulan ${MONTH_FULL[peakMonthIndex]} (${formatNumber(peakVal)} peserta)`
-                                : 'Laju registrasi bulanan';
-                        }
-
-                        $('sdmTotal').textContent = formatNumber(total);
-                        $('sdmActiveRegions').textContent = formatNumber(activeCount);
-                        $('sdmAvgRegion').textContent = formatNumber(avgPerRegion);
-
-                        return total;
-                    }
-
-                    function render(regionData, monthlyData = []) {
-                        const list = toList(regionData);
-                        const months = Array.isArray(monthlyData) && monthlyData.length === 12 
-                            ? monthlyData 
-                            : Array(12).fill(0);
-                        const hasData = list.length > 0 || months.some(v => v > 0);
-
-                        show(contentGridEl, hasData);
-                        show(emptyEl, !hasData);
-
-                        const grandTotal = renderSummary(list, months);
-
-                        if (hasData) {
-                            requestAnimationFrame(() => {
-                                updateTrendChart(months);
                             });
+                        });
+
+                        if (!isFinite(minMs) || !isFinite(maxMs)) {
+                            const y = currentOverview?.year || new Date().getFullYear();
+                            return { minMs: Date.UTC(y, 0, 1), maxMs: Date.UTC(y, 11, 31) };
                         }
+
+                        // Pastikan hari ini masuk rentang jika masih dekat dengan periode event
+                        if (todayMs && todayMs >= minMs - 14 * DAY_MS && todayMs <= maxMs + 14 * DAY_MS) {
+                            minMs = Math.min(minMs, todayMs);
+                            maxMs = Math.max(maxMs, todayMs);
+                        }
+
+                        // Padding 2 hari kiri & kanan agar bar ujung tidak terpotong
+                        minMs -= 2 * DAY_MS;
+                        maxMs += 3 * DAY_MS;
+                        if (maxMs <= minMs) maxMs = minMs + 14 * DAY_MS;
+
+                        return { minMs, maxMs };
+                    }
+
+                    function buildTicks(minMs, maxMs) {
+                        const totalDays = Math.max(1, Math.round((maxMs - minMs) / DAY_MS));
+                        const ticks = [];
+
+                        if (totalDays > 180) {
+                            // Tick per awal bulan
+                            const startDt = new Date(minMs);
+                            let y = startDt.getUTCFullYear();
+                            let m = startDt.getUTCMonth();
+                            while (Date.UTC(y, m, 1) <= maxMs) {
+                                const ms = Date.UTC(y, m, 1);
+                                if (ms >= minMs) {
+                                    ticks.push({ ms, label: `${MONTH_SHORT[m]} ${y}` });
+                                }
+                                m++;
+                                if (m > 11) { m = 0; y++; }
+                            }
+                        } else {
+                            const stepDays = totalDays <= 45 ? 5 : (totalDays <= 110 ? 7 : 14);
+                            for (let ms = minMs; ms <= maxMs; ms += stepDays * DAY_MS) {
+                                ticks.push({ ms, label: formatTick(ms) });
+                            }
+                        }
+
+                        // Segment bulan untuk baris header atas
+                        const months = [];
+                        const sDt = new Date(minMs);
+                        let y = sDt.getUTCFullYear();
+                        let m = sDt.getUTCMonth();
+                        while (Date.UTC(y, m, 1) <= maxMs) {
+                            const mStart = Math.max(minMs, Date.UTC(y, m, 1));
+                            const nextM = m === 11 ? Date.UTC(y + 1, 0, 1) : Date.UTC(y, m + 1, 1);
+                            const mEnd = Math.min(maxMs, nextM);
+                            if (mEnd > mStart) {
+                                months.push({
+                                    label: `${MONTH_SHORT[m]} ${y}`,
+                                    leftPct: ((mStart - minMs) / (maxMs - minMs)) * 100,
+                                    widthPct: ((mEnd - mStart) / (maxMs - minMs)) * 100,
+                                });
+                            }
+                            m++;
+                            if (m > 11) { m = 0; y++; }
+                        }
+
+                        return { ticks, months };
+                    }
+
+                    function calcSegment(startIso, endIso, minMs, spanMs) {
+                        const s = parseIsoDate(startIso);
+                        const e = parseIsoDate(endIso);
+                        if (s === null || e === null) return null;
+                        // Tambah 1 hari pada end agar tanggal akhir bersifat inklusif secara visual
+                        const endInclusive = Math.max(s + DAY_MS, e + DAY_MS);
+                        const clampedS = Math.max(minMs, s);
+                        const clampedE = Math.min(minMs + spanMs, endInclusive);
+                        if (clampedE <= clampedS) return null;
+
+                        const left = ((clampedS - minMs) / spanMs) * 100;
+                        const width = Math.max(1.2, ((clampedE - clampedS) / spanMs) * 100);
+                        return { left, width: Math.min(width, 100 - left) };
+                    }
+
+                    function positionTooltip(clientX, clientY) {
+                        if (!tooltipEl || tooltipEl.classList.contains('hidden')) return;
+                        const pad = 14;
+                        const rect = tooltipEl.getBoundingClientRect();
+                        let x = clientX + pad;
+                        let y = clientY + pad;
+                        if (x + rect.width > window.innerWidth - 10) x = clientX - rect.width - pad;
+                        if (y + rect.height > window.innerHeight - 10) y = clientY - rect.height - pad;
+                        tooltipEl.style.left = `${Math.max(8, x)}px`;
+                        tooltipEl.style.top = `${Math.max(8, y)}px`;
+                    }
+
+                    function showTooltip(ev, clientX, clientY) {
+                        if (!tooltipEl) return;
+                        const quotaText = ev.quota ? `${formatNumber(ev.registered)} / ${formatNumber(ev.quota)}` : formatNumber(ev.registered);
+                        tooltipEl.innerHTML = `
+                            <div class="border-b border-white/15 pb-2">
+                                <p class="font-bold text-white leading-snug">${escapeHtml(ev.batch_name)}</p>
+                                <p class="text-[11px] text-blue-200 mt-0.5">${escapeHtml(ev.course_name)}</p>
+                            </div>
+                            <div class="space-y-1 text-[11px]">
+                                <div class="flex items-center justify-between gap-2">
+                                    <span class="inline-flex items-center gap-1.5 text-blue-100"><span class="w-2 h-2 rounded-xs bg-sky-400"></span>Pendaftaran</span>
+                                    <span class="font-semibold text-white tabular-nums">${escapeHtml(ev.reg_label)}</span>
+                                </div>
+                                <div class="flex items-center justify-between gap-2">
+                                    <span class="inline-flex items-center gap-1.5 text-blue-100"><span class="w-2 h-2 rounded-xs bg-white"></span>Pelaksanaan</span>
+                                    <span class="font-semibold text-white tabular-nums">${escapeHtml(ev.exec_label)}</span>
+                                </div>
+                                <div class="flex items-center justify-between gap-2">
+                                    <span class="inline-flex items-center gap-1.5 text-blue-100"><span class="w-2 h-2 rounded-xs bg-amber-400"></span>Evaluasi &amp; PPSDM</span>
+                                    <span class="font-semibold text-white tabular-nums">${escapeHtml(ev.eval_label)}</span>
+                                </div>
+                            </div>
+                            <div class="pt-2 border-t border-white/15 flex items-center justify-between text-[11px] text-blue-100 tabular-nums">
+                                <span>Peserta: <strong class="text-white">${quotaText}</strong></span>
+                                <span>Tuntas: <strong class="text-emerald-300">${formatNumber(ev.completed)}</strong></span>
+                                <span>Terbit: <strong class="text-amber-300">${formatNumber(ev.certified)}</strong></span>
+                            </div>`;
+                        tooltipEl.classList.remove('hidden');
+                        positionTooltip(clientX, clientY);
+                    }
+
+                    function hideTooltip() {
+                        if (tooltipEl) tooltipEl.classList.add('hidden');
+                    }
+
+                    function render(overview) {
+                        currentOverview = overview || {};
+
+                        const allEvents = toList(currentOverview.events);
+                        const filtered = currentStatusFilter === 'all'
+                            ? allEvents
+                            : allEvents.filter((e) => e.status_key === currentStatusFilter);
+
+                        const hasData = filtered.length > 0;
+                        show(wrapperEl, hasData);
+                        show(emptyEl, !hasData);
+                        hideTooltip();
 
                         if (!hasData) return;
 
-                        const sorted = [...list].sort((a, b) => b.total - a.total);
-                        const maxTotal = Math.max(...sorted.map((i) => i.total), 1);
-                        listEl.innerHTML = sorted.map((item, i) => rowTemplate(item, i, maxTotal, grandTotal)).join('');
+                        const todayMs = parseIsoDate(currentOverview.today);
+                        const { minMs, maxMs } = computeDomain(filtered, todayMs);
+                        const spanMs = maxMs - minMs;
+                        const { ticks, months } = buildTicks(minMs, maxMs);
+
+                        const todayInRange = todayMs !== null && todayMs >= minMs && todayMs <= maxMs;
+                        const todayPct = todayInRange ? ((todayMs - minMs) / spanMs) * 100 : null;
+
+                        // Render Sticky Header (Bulan + Ticks Tanggal)
+                        const monthBandsHtml = months.map((m) => `
+                            <div class="absolute top-0 bottom-0 flex items-center px-2 border-r border-slate-200/80 text-xs font-bold uppercase tracking-wider text-[#13416B] truncate"
+                                 style="left:${m.leftPct}%;width:${m.widthPct}%">
+                                ${escapeHtml(m.label)}
+                            </div>`).join('');
+
+                        const tickLabelsHtml = ticks.map((t) => {
+                            const pct = ((t.ms - minMs) / spanMs) * 100;
+                            return `
+                                <span class="absolute top-1 text-xs font-medium text-slate-600 -translate-x-1/2 whitespace-nowrap"
+                                      style="left:${pct}%">
+                                    ${escapeHtml(t.label)}
+                                </span>`;
+                        }).join('');
+
+                        const todayHeadBadge = todayInRange
+                            ? `<div class="absolute top-0 bottom-0 border-l-2 border-dashed border-red-500 z-20 pointer-events-none" style="left:${todayPct}%">
+                                   <span class="absolute -top-0.5 left-1 px-1.5 py-0.5 rounded bg-red-500 text-white text-[11px] font-bold whitespace-nowrap shadow-2xs">Hari Ini</span>
+                               </div>`
+                            : '';
+
+                        headerEl.innerHTML = `
+                            <div class="grid grid-cols-[280px_1fr] lg:grid-cols-[330px_1fr]">
+                                <div class="px-4 py-3 border-r border-slate-200 flex items-center bg-slate-50">
+                                    <span class="text-sm font-bold uppercase tracking-wider text-slate-700">Gelombang Event</span>
+                                </div>
+                                <div class="relative bg-slate-50">
+                                    <div class="relative h-8 border-b border-slate-200/80 overflow-hidden">${monthBandsHtml}</div>
+                                    <div class="relative h-7 overflow-hidden">${tickLabelsHtml}</div>
+                                    ${todayHeadBadge}
+                                </div>
+                            </div>`;
+
+                        // Gridlines & Garis Hari Ini yang konsisten di tiap baris
+                        const gridLinesHtml = ticks.map((t) => {
+                            const pct = ((t.ms - minMs) / spanMs) * 100;
+                            return `<div class="absolute top-0 bottom-0 border-l border-slate-100 pointer-events-none" style="left:${pct}%"></div>`;
+                        }).join('');
+
+                        const todayLineHtml = todayInRange
+                            ? `<div class="absolute top-0 bottom-0 border-l-2 border-dashed border-red-500/80 z-20 pointer-events-none" style="left:${todayPct}%"></div>`
+                            : '';
+
+                        // Render Baris Gantt per Event
+                        rowsEl.innerHTML = filtered.map((ev, idx) => {
+                            const regSeg = calcSegment(ev.reg_start, ev.reg_end, minMs, spanMs);
+                            const execSeg = calcSegment(ev.exec_start, ev.exec_end, minMs, spanMs);
+                            const evalSeg = calcSegment(ev.eval_start, ev.eval_end, minMs, spanMs);
+
+                            const regBar = regSeg
+                                ? `<a href="${escapeHtml(ev.url)}" class="absolute top-1/2 -translate-y-1/2 h-4 rounded-md bg-sky-300 hover:bg-sky-400 transition-colors z-10" style="left:${regSeg.left}%;width:${regSeg.width}%"></a>`
+                                : '';
+                            const evalBar = evalSeg
+                                ? `<a href="${escapeHtml(ev.eval_url)}" class="absolute top-1/2 -translate-y-1/2 h-4 rounded-md bg-amber-400 hover:bg-amber-500 transition-colors z-10" style="left:${evalSeg.left}%;width:${evalSeg.width}%"></a>`
+                                : '';
+                            const execBar = execSeg
+                                ? `<a href="${escapeHtml(ev.url)}" class="absolute top-1/2 -translate-y-1/2 h-7 rounded-md bg-[#2B6496] hover:bg-[#1B568A] shadow-2xs transition-colors z-15 flex items-center px-2 overflow-hidden" style="left:${execSeg.left}%;width:${execSeg.width}%">
+                                       <span class="text-xs font-semibold text-white truncate">${execSeg.width >= 12 ? escapeHtml(ev.exec_label) : ''}</span>
+                                   </a>`
+                                : '';
+
+                            const hasPendingEval = Number(ev.pending_eval || 0) > 0;
+                            const hasReadyPpsdm = Number(ev.ready_ppsdm || 0) > 0;
+
+                            return `
+                                <div class="gantt-row grid grid-cols-[280px_1fr] lg:grid-cols-[330px_1fr] hover:bg-blue-50/35 transition-colors" data-idx="${idx}">
+                                    <div class="px-4 py-3 border-r border-slate-200 min-w-0 flex flex-col justify-center gap-1.5">
+                                        <a href="${escapeHtml(ev.url)}"
+                                           class="text-sm sm:text-[15px] font-semibold text-slate-900 hover:text-[#13416B] line-clamp-2 leading-snug"
+                                           title="${escapeHtml(ev.batch_name)}">
+                                            ${escapeHtml(ev.batch_name)}
+                                        </a>
+                                        <div class="flex flex-wrap items-center gap-1.5 text-xs">
+                                            <span class="inline-flex px-2 py-0.5 rounded font-bold ${escapeHtml(ev.status_class)}">${escapeHtml(ev.status_label)}</span>
+                                            <span class="text-slate-600 font-semibold tabular-nums">${formatNumber(ev.registered)} Peserta</span>
+                                            ${hasPendingEval ? `<a href="${escapeHtml(ev.eval_url)}" class="px-2 py-0.5 rounded bg-amber-100 text-amber-800 hover:bg-amber-200 font-bold tabular-nums">${formatNumber(ev.pending_eval)} Dinilai</a>` : ''}
+                                            ${hasReadyPpsdm ? `<a href="${escapeHtml(ev.ppsdm_url)}" class="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 hover:bg-emerald-200 font-bold tabular-nums">${formatNumber(ev.ready_ppsdm)} PPSDM</a>` : ''}
+                                        </div>
+                                    </div>
+                                    <div class="relative min-h-[68px] overflow-hidden">
+                                        ${gridLinesHtml}
+                                        ${todayLineHtml}
+                                        ${regBar}
+                                        ${evalBar}
+                                        ${execBar}
+                                    </div>
+                                </div>`;
+                        }).join('');
+
+                        // Bind hover tooltip untuk setiap baris Gantt
+                        rowsEl.querySelectorAll('.gantt-row').forEach((rowEl) => {
+                            const ev = filtered[Number(rowEl.dataset.idx)];
+                            if (!ev) return;
+                            rowEl.addEventListener('mouseenter', (e) => showTooltip(ev, e.clientX, e.clientY));
+                            rowEl.addEventListener('mousemove', (e) => positionTooltip(e.clientX, e.clientY));
+                            rowEl.addEventListener('mouseleave', hideTooltip);
+                        });
                     }
 
-                    async function loadYear(year) {
-                        const current = ++requestId;
-                        const select = $('sdmYearFilter');
-                        select.disabled = true;
-                        if (contentGridEl) contentGridEl.classList.add('opacity-50');
-                        show(errorEl, false);
-
-                        const labelEl = $('sdmTrendYearLabel');
-                        if (labelEl) labelEl.textContent = 'Tahun ' + year;
-
-                        try {
-                            const res = await fetchDashboard({
-                                sdm_year: year
-                            });
-                            if (current !== requestId) return;
-                            render(res.sdmPerProvinsi, res.sdmMonthlyTrend);
-                        } catch (err) {
-                            console.error('Gagal memuat data SDM:', err);
-                            if (current === requestId) show(errorEl, true);
-                        } finally {
-                            if (current === requestId) {
-                                select.disabled = false;
-                                if (contentGridEl) contentGridEl.classList.remove('opacity-50');
-                            }
-                        }
+                    function setStatusFilter(status) {
+                        currentStatusFilter = status;
+                        if (currentOverview) render(currentOverview);
                     }
 
-                    return {
-                        render,
-                        loadYear
-                    };
+                    return { render, setStatusFilter };
                 })();
 
                 // =========================================================
@@ -979,10 +1059,10 @@
                 // =========================================================
                 renderRtk(toList(@json($rtkMasaAktifPerProvinsi->values())));
                 PendingApprovals.init(@json(collect($initialPendingApprovals)->values()));
-                SdmSection.render(@json($sdmPerProvinsi->values()), @json($sdmMonthlyTrend));
+                LmsGanttSection.render(@json($lmsEventOverview));
 
                 $('rtkYearFilter').addEventListener('change', (e) => loadRtk(e.target.value));
-                $('sdmYearFilter').addEventListener('change', (e) => SdmSection.loadYear(e.target.value));
+                $('eventStatusFilter').addEventListener('change', (e) => LmsGanttSection.setStatusFilter(e.target.value));
             });
         </script>
     @endpush
