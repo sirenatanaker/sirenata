@@ -31,6 +31,21 @@
                 default   => 1,
             };
             $eventTitleShort = $selectedEvent ? preg_replace('/\bbatch\b/i', 'Gelombang', $selectedEvent->batch_name) : null;
+
+            $step2Subtitle = 'Agenda Evaluasi';
+            if ($selectedPostTest) {
+                if ($selectedPostTest->course_section_id) {
+                    $eventSections = $selectedEvent?->course?->sections?->values() ?? collect();
+                    $secIdx = $eventSections->search(fn($s) => (string) $s->id === (string) $selectedPostTest->course_section_id);
+                    $rawAgendaTitle = $selectedPostTest->section?->name ?? $selectedPostTest->title ?? '';
+                    $dayNum = $secIdx !== false
+                        ? ($secIdx + 1)
+                        : (preg_match('/(?:modul|hari)\s*(\d+)/i', $rawAgendaTitle, $m) ? (int) $m[1] : 1);
+                    $step2Subtitle = "Agenda Hari-{$dayNum}";
+                } else {
+                    $step2Subtitle = 'Evaluasi Akhir';
+                }
+            }
         @endphp
 
         <div class="p-5 sm:p-6 rounded-md bg-[#13416B] text-white shadow-sm space-y-5">
@@ -111,7 +126,7 @@
                         </span>
                         <div class="min-w-0 flex-1">
                             <div class="text-xs font-bold text-emerald-300 leading-tight">Langkah 2 — Selesai</div>
-                            <div class="text-sm sm:text-[15px] font-bold text-white truncate group-hover:underline mt-0.5">{{ $selectedPostTest?->title ?? 'Agenda Evaluasi' }}</div>
+                            <div class="text-sm sm:text-[15px] font-bold text-white truncate group-hover:underline mt-0.5">{{ $step2Subtitle }}</div>
                         </div>
                     </a>
                 @elseif ($stepNumber === 2)
@@ -418,9 +433,8 @@
             @if ($isManualTest && $selectedPostTest->has_auto_grading && ($pendingCount ?? 0) > 0)
                 <div class="bg-emerald-50/80 border border-emerald-200 rounded-md p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-2xs">
                     <div class="space-y-0.5">
-                        <p class="text-sm sm:text-base font-bold text-emerald-800 flex items-center gap-2">
-                            <i class="fas fa-robot"></i>
-                            <span>Tersedia {{ $pendingCount }} Jawaban Belum Dinilai</span>
+                        <p class="text-sm sm:text-base font-bold text-emerald-800">
+                            Tersedia {{ $pendingCount }} Jawaban Belum Dinilai
                         </p>
                         <p class="text-xs sm:text-sm text-slate-600">
                             Anda dapat menjalankan koreksi otomatis terhadap kunci jawaban untuk seluruh peserta yang belum dinilai, atau menguji satu per satu di bawah ini.
@@ -450,39 +464,46 @@
                         $studentName = $sub->user?->profile?->full_name ?? $sub->user?->name ?? 'Peserta';
                         $studentInstansi = $sub->user?->profile?->instansi;
                         $submittedAt = $sub->completed_at ?? $sub->updated_at;
+                        $rowNumber = ($submissions->firstItem() ?? 1) + $loop->index;
                     @endphp
 
                     @if ($isManualTest)
                         <div x-data="{ expanded: false, scoreVal: {{ $isGraded ? (int) ($sub->score ?? 0) : "''" }}, isPassedVal: '{{ $sub->is_passed ? '1' : '0' }}' }">
                             <div @click="expanded = !expanded"
                                  class="p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 cursor-pointer hover:bg-slate-50/70 transition-colors select-none">
-                                <div class="space-y-2 min-w-0 flex-1">
-                                    <div>
-                                        <div class="flex flex-wrap items-center gap-x-2 gap-y-0.5">
-                                            <h3 class="text-base sm:text-lg font-bold text-slate-900 leading-snug">{{ $studentName }}</h3>
-                                            @if ($studentInstansi)
-                                                <span class="text-xs sm:text-sm text-slate-500">({{ $studentInstansi }})</span>
+                                <div class="flex items-start gap-3 sm:gap-4 min-w-0 flex-1">
+                                    <span class="text-base sm:text-lg font-bold text-slate-500 tabular-nums shrink-0 leading-snug w-7 text-right">
+                                        {{ $rowNumber }}.
+                                    </span>
+
+                                    <div class="space-y-2 min-w-0 flex-1">
+                                        <div>
+                                            <div class="flex flex-wrap items-center gap-x-2 gap-y-0.5">
+                                                <h3 class="text-base sm:text-lg font-bold text-slate-900 leading-snug">{{ $studentName }}</h3>
+                                                @if ($studentInstansi)
+                                                    <span class="text-xs sm:text-sm text-slate-500">({{ $studentInstansi }})</span>
+                                                @endif
+                                            </div>
+                                            @if ($sub->user?->email)
+                                                <p class="text-sm sm:text-[15px] font-medium text-slate-600 mt-0.5">{{ $sub->user->email }}</p>
                                             @endif
                                         </div>
-                                        @if ($sub->user?->email)
-                                            <p class="text-sm sm:text-[15px] font-medium text-slate-600 mt-0.5">{{ $sub->user->email }}</p>
-                                        @endif
-                                    </div>
 
-                                    {{-- Badge Kotak Info Sejajar Step 1 --}}
-                                    <div class="inline-flex flex-wrap items-center gap-x-3 gap-y-1 px-3.5 py-2 rounded-md bg-slate-50 border border-slate-200 text-xs sm:text-sm text-slate-600">
-                                        @if ($isGraded)
-                                            <span class="font-bold {{ $sub->is_passed ? 'text-emerald-600' : 'text-rose-600' }}">
-                                                Nilai {{ $sub->score ?? 0 }}
-                                            </span>
-                                        @else
-                                            <span class="font-bold text-amber-600">Menunggu Penilaian</span>
-                                        @endif
+                                        {{-- Badge Kotak Info Sejajar Step 1 --}}
+                                        <div class="inline-flex flex-wrap items-center gap-x-3 gap-y-1 px-3.5 py-2 rounded-md bg-slate-50 border border-slate-200 text-xs sm:text-sm text-slate-600">
+                                            @if ($isGraded)
+                                                <span class="font-bold {{ $sub->is_passed ? 'text-emerald-600' : 'text-rose-600' }}">
+                                                    Nilai {{ $sub->score ?? 0 }}
+                                                </span>
+                                            @else
+                                                <span class="font-bold text-amber-600">Menunggu Penilaian</span>
+                                            @endif
 
-                                        @if ($submittedAt)
-                                            <span class="text-slate-300 select-none">—</span>
-                                            <span class="font-medium">Dikumpulkan {{ $submittedAt->translatedFormat('d M Y, H:i') }} WIB</span>
-                                        @endif
+                                            @if ($submittedAt)
+                                                <span class="text-slate-300 select-none">—</span>
+                                                <span class="font-medium">Dikumpulkan {{ $submittedAt->translatedFormat('d M Y, H:i') }} WIB</span>
+                                            @endif
+                                        </div>
                                     </div>
                                 </div>
 
@@ -667,18 +688,24 @@
                     @else
                         {{-- Tampilan Ringkas Hasil Pilihan Ganda (CBT) --}}
                         <div class="p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                            <div class="space-y-1 min-w-0">
-                                <div class="flex flex-wrap items-center gap-x-2">
-                                    <h3 class="text-base sm:text-lg font-bold text-slate-900">{{ $studentName }}</h3>
-                                    @if ($studentInstansi)
-                                        <span class="text-xs sm:text-sm text-slate-500">({{ $studentInstansi }})</span>
-                                    @endif
-                                </div>
-                                <div class="text-xs sm:text-sm text-slate-500">
-                                    {{ $sub->user?->email ?? '-' }}
-                                    @if ($submittedAt)
-                                        — Selesai {{ $submittedAt->translatedFormat('d M Y, H:i') }} WIB
-                                    @endif
+                            <div class="flex items-start gap-3 sm:gap-4 min-w-0 flex-1">
+                                <span class="text-base sm:text-lg font-bold text-slate-500 tabular-nums shrink-0 leading-snug w-7 text-right">
+                                    {{ $rowNumber }}.
+                                </span>
+
+                                <div class="space-y-1 min-w-0 flex-1">
+                                    <div class="flex flex-wrap items-center gap-x-2">
+                                        <h3 class="text-base sm:text-lg font-bold text-slate-900">{{ $studentName }}</h3>
+                                        @if ($studentInstansi)
+                                            <span class="text-xs sm:text-sm text-slate-500">({{ $studentInstansi }})</span>
+                                        @endif
+                                    </div>
+                                    <div class="text-xs sm:text-sm text-slate-500">
+                                        {{ $sub->user?->email ?? '-' }}
+                                        @if ($submittedAt)
+                                            — Selesai {{ $submittedAt->translatedFormat('d M Y, H:i') }} WIB
+                                        @endif
+                                    </div>
                                 </div>
                             </div>
                             <div class="text-sm sm:text-base font-bold {{ $sub->is_passed ? 'text-emerald-600' : 'text-rose-600' }} shrink-0">
