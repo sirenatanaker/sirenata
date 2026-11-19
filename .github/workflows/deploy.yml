@@ -68,5 +68,6 @@ jobs:
           docker exec -u www-data elearning_app php artisan view:cache
           docker exec -u www-data elearning_app php artisan event:cache
 
-          # 7. Restart queue worker
+          # 7. Pastikan container queue worker menyala di latar belakang & reload dengan kode terbaru
+          docker compose up -d queue_grading || true
           docker exec -u www-data elearning_app php artisan queue:restart

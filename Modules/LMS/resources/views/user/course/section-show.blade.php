@@ -528,7 +528,8 @@
                                                         </div>
                                                         <div>
                                                             @php
-                                                                $isSecAssignGraded = ($evalResult?->status ?? '') === 'graded';
+                                                                // Human-in-the-Loop: nilai hanya tampil ke peserta jika PUBLISHED
+                                                                $isSecAssignGraded = ($evalResult?->grading_status ?? '') === 'PUBLISHED';
                                                                 $isSecAssignPassed = (bool) ($evalResult?->is_passed ?? true);
                                                             @endphp
                                                             <div class="flex items-center gap-2 flex-wrap">
@@ -561,11 +562,13 @@
                                                                 <span>Lihat Berkas Saya</span>
                                                             </a>
                                                         @endif
-                                                        <button type="button" @click="isReuploading = true"
-                                                            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-bold text-slate-600 hover:bg-slate-100 border border-slate-200 cursor-pointer">
-                                                            <i class="fas fa-redo text-xs"></i>
-                                                            <span>Unggah Ulang (Revisi)</span>
-                                                        </button>
+                                                        @if (empty($postTestBab?->is_submission_locked))
+                                                            <button type="button" @click="isReuploading = true"
+                                                                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-bold text-slate-600 hover:bg-slate-100 border border-slate-200 cursor-pointer">
+                                                                <i class="fas fa-redo text-xs"></i>
+                                                                <span>Unggah Ulang (Revisi)</span>
+                                                            </button>
+                                                        @endif
                                                     </div>
                                                 </div>
                                             </div>

@@ -10,9 +10,18 @@ use Illuminate\Support\Str;
 use Modules\LMS\Models\Course;
 use Modules\LMS\Models\CourseSection;
 use Modules\LMS\Models\PostTest;
+use Modules\LMS\Services\Grading\DocumentExtractorService;
+use Modules\LMS\Services\Grading\TextPreprocessorService;
 
 class PostTestService
 {
+    public function __construct(
+        private ?DocumentExtractorService $extractor = null,
+        private ?TextPreprocessorService $preprocessor = null,
+    ) {
+        $this->extractor ??= app(DocumentExtractorService::class);
+        $this->preprocessor ??= app(TextPreprocessorService::class);
+    }
     public function findOrFail(string $id): PostTest
     {
         return PostTest::findOrFail($id);
@@ -187,20 +196,24 @@ class PostTestService
             $adminFilePath = null;
             $adminFileName = null;
             $adminFileSize = null;
+            $templateExtractedText = null;
             $answerKeyFilePath = null;
             $answerKeyFileName = null;
             $answerKeyFileSize = null;
+            $keyExtractedText = null;
 
             if ($type === 'file_upload') {
                 if ($adminFile) {
                     $adminFileName = $adminFile->getClientOriginalName();
                     $adminFileSize = $this->formatFileSize($adminFile->getSize());
                     $adminFilePath = $adminFile->store('assignments/soal', 'public');
+                    $templateExtractedText = $this->extractReferenceTextOnce($adminFilePath);
                 }
                 if ($answerKeyFile) {
                     $answerKeyFileName = $answerKeyFile->getClientOriginalName();
                     $answerKeyFileSize = $this->formatFileSize($answerKeyFile->getSize());
                     $answerKeyFilePath = $answerKeyFile->store('assignments/kunci', 'public');
+                    $keyExtractedText = $this->extractReferenceTextOnce($answerKeyFilePath);
                 }
             }
 
@@ -208,22 +221,30 @@ class PostTestService
                 ? ((int) ($data['passing_score'] ?? 0) ?: 75)
                 : (int) ($data['passing_score'] ?? 70);
 
+            $rubricJson = $this->parseRubricInput($data['rubric_json'] ?? ($data['rubric_json_text'] ?? null));
+            $gradingType = $this->resolveAdminGradingType($type, $data['grading_type'] ?? null, $adminFilePath, $answerKeyFilePath, $rubricJson);
+
             $postTest = PostTest::create([
-                'course_section_id'    => $data['course_section_id'] ?? null,
-                'course_id'            => $data['course_id'] ?? null,
-                'title'                => $title,
-                'description'          => $data['description'] ?? null,
-                'passing_score'        => $passingScore,
-                'duration'             => ($type === 'file_upload') ? 0 : ($data['duration'] ?? 30),
-                'type'                 => $type,
-                'admin_file_path'      => $adminFilePath,
-                'admin_file_name'      => $adminFileName,
-                'admin_file_size'      => $adminFileSize,
-                'answer_key_file_path' => $answerKeyFilePath,
-                'answer_key_file_name' => $answerKeyFileName,
-                'answer_key_file_size' => $answerKeyFileSize,
-                'instructions'         => ($type === 'file_upload') ? ($data['instructions'] ?? null) : null,
-                'max_words'            => ($type === 'essay') ? ($data['max_words'] ?? 500) : null,
+                'course_section_id'       => $data['course_section_id'] ?? null,
+                'course_id'               => $data['course_id'] ?? null,
+                'title'                   => $title,
+                'description'             => $data['description'] ?? null,
+                'passing_score'           => $passingScore,
+                'passing_grade'           => $passingScore,
+                'duration'                => ($type === 'file_upload') ? 0 : ($data['duration'] ?? 30),
+                'type'                    => $type,
+                'grading_type'            => $gradingType,
+                'rubric_json'             => $rubricJson,
+                'admin_file_path'         => $adminFilePath,
+                'admin_file_name'         => $adminFileName,
+                'admin_file_size'         => $adminFileSize,
+                'template_extracted_text' => $templateExtractedText,
+                'answer_key_file_path'    => $answerKeyFilePath,
+                'answer_key_file_name'    => $answerKeyFileName,
+                'answer_key_file_size'    => $answerKeyFileSize,
+                'key_extracted_text'      => $keyExtractedText,
+                'instructions'            => ($type === 'file_upload') ? ($data['instructions'] ?? null) : null,
+                'max_words'               => ($type === 'essay') ? ($data['max_words'] ?? 500) : null,
             ]);
 
             if ($type === 'multiple_choice' && !empty($data['questions'])) {
@@ -289,9 +310,11 @@ class PostTestService
             $adminFilePath = $postTest->admin_file_path;
             $adminFileName = $postTest->admin_file_name;
             $adminFileSize = $postTest->admin_file_size;
+            $templateExtractedText = $postTest->template_extracted_text;
             $answerKeyFilePath = $postTest->answer_key_file_path;
             $answerKeyFileName = $postTest->answer_key_file_name;
             $answerKeyFileSize = $postTest->answer_key_file_size;
+            $keyExtractedText = $postTest->key_extracted_text;
 
             if ($type === 'file_upload') {
                 if ($adminFile) {
@@ -301,6 +324,7 @@ class PostTestService
                     $adminFileName = $adminFile->getClientOriginalName();
                     $adminFileSize = $this->formatFileSize($adminFile->getSize());
                     $adminFilePath = $adminFile->store('assignments/soal', 'public');
+                    $templateExtractedText = $this->extractReferenceTextOnce($adminFilePath);
                 }
                 if ($answerKeyFile) {
                     if ($postTest->answer_key_file_path && Storage::disk('public')->exists($postTest->answer_key_file_path)) {
@@ -309,6 +333,7 @@ class PostTestService
                     $answerKeyFileName = $answerKeyFile->getClientOriginalName();
                     $answerKeyFileSize = $this->formatFileSize($answerKeyFile->getSize());
                     $answerKeyFilePath = $answerKeyFile->store('assignments/kunci', 'public');
+                    $keyExtractedText = $this->extractReferenceTextOnce($answerKeyFilePath);
                 }
             } else {
                 if ($postTest->admin_file_path && Storage::disk('public')->exists($postTest->admin_file_path)) {
@@ -320,29 +345,41 @@ class PostTestService
                 $adminFilePath = null;
                 $adminFileName = null;
                 $adminFileSize = null;
+                $templateExtractedText = null;
                 $answerKeyFilePath = null;
                 $answerKeyFileName = null;
                 $answerKeyFileSize = null;
+                $keyExtractedText = null;
             }
 
             $passingScore = ($type === 'file_upload')
                 ? ((int) ($data['passing_score'] ?? 0) ?: 75)
                 : (int) ($data['passing_score'] ?? 70);
 
+            $rubricJson = array_key_exists('rubric_json', $data) || array_key_exists('rubric_json_text', $data)
+                ? $this->parseRubricInput($data['rubric_json'] ?? ($data['rubric_json_text'] ?? null))
+                : $postTest->rubric_json;
+            $gradingType = $this->resolveAdminGradingType($type, $data['grading_type'] ?? null, $adminFilePath, $answerKeyFilePath, $rubricJson);
+
             $postTest->update([
-                'title'                => $title,
-                'description'          => $data['description'] ?? null,
-                'passing_score'        => $passingScore,
-                'duration'             => ($type === 'file_upload') ? 0 : ($data['duration'] ?? 30),
-                'type'                 => $type,
-                'admin_file_path'      => $adminFilePath,
-                'admin_file_name'      => $adminFileName,
-                'admin_file_size'      => $adminFileSize,
-                'answer_key_file_path' => $answerKeyFilePath,
-                'answer_key_file_name' => $answerKeyFileName,
-                'answer_key_file_size' => $answerKeyFileSize,
-                'instructions'         => ($type === 'file_upload') ? ($data['instructions'] ?? null) : null,
-                'max_words'            => ($type === 'essay') ? ($data['max_words'] ?? 500) : null,
+                'title'                   => $title,
+                'description'             => $data['description'] ?? null,
+                'passing_score'           => $passingScore,
+                'passing_grade'           => $passingScore,
+                'duration'                => ($type === 'file_upload') ? 0 : ($data['duration'] ?? 30),
+                'type'                    => $type,
+                'grading_type'            => $gradingType,
+                'rubric_json'             => $rubricJson,
+                'admin_file_path'         => $adminFilePath,
+                'admin_file_name'         => $adminFileName,
+                'admin_file_size'         => $adminFileSize,
+                'template_extracted_text' => $templateExtractedText,
+                'answer_key_file_path'    => $answerKeyFilePath,
+                'answer_key_file_name'    => $answerKeyFileName,
+                'answer_key_file_size'    => $answerKeyFileSize,
+                'key_extracted_text'      => $keyExtractedText,
+                'instructions'            => ($type === 'file_upload') ? ($data['instructions'] ?? null) : null,
+                'max_words'               => ($type === 'essay') ? ($data['max_words'] ?? 500) : null,
             ]);
 
             // Hapus pertanyaan & pilihan lama
@@ -889,6 +926,70 @@ class PostTestService
         }
 
         return '';
+    }
+
+    private function extractReferenceTextOnce(string $relativePath): ?string
+    {
+        $ext = strtolower(pathinfo($relativePath, PATHINFO_EXTENSION));
+        if (!in_array($ext, ['pdf', 'docx', 'txt'], true)) {
+            return null;
+        }
+
+        $extracted = $this->extractor->extractFromPublicDisk($relativePath);
+        $clean = $this->preprocessor->normalize($extracted['text']);
+
+        return $clean !== '' ? $clean : null;
+    }
+
+    private function parseRubricInput(mixed $input): ?array
+    {
+        if (is_array($input)) {
+            return !empty($input) ? $input : null;
+        }
+
+        if (is_string($input) && trim($input) !== '') {
+            $decoded = json_decode(trim($input), true);
+            if (is_array($decoded) && !empty($decoded)) {
+                return $decoded;
+            }
+        }
+
+        return null;
+    }
+
+    private function resolveAdminGradingType(
+        string $type,
+        ?string $requested,
+        ?string $adminFilePath,
+        ?string $answerKeyFilePath,
+        ?array $rubricJson
+    ): string {
+        $valid = [
+            PostTest::GRADING_AUTO_EXCEL,
+            PostTest::GRADING_AUTO_AI_ESSAY,
+            PostTest::GRADING_AUTO_AI_REPORT,
+            PostTest::GRADING_MANUAL,
+        ];
+
+        if ($requested && in_array($requested, $valid, true)) {
+            return $requested;
+        }
+
+        if ($type === 'essay') {
+            return PostTest::GRADING_AUTO_AI_ESSAY;
+        }
+
+        if ($type === 'file_upload') {
+            $ext = strtolower(pathinfo((string) ($answerKeyFilePath ?: $adminFilePath), PATHINFO_EXTENSION));
+            if (in_array($ext, ['xlsx', 'xls', 'csv'], true) && $answerKeyFilePath) {
+                return PostTest::GRADING_AUTO_EXCEL;
+            }
+            if (in_array($ext, ['pdf', 'docx', 'txt'], true) && ($answerKeyFilePath || !empty($rubricJson))) {
+                return PostTest::GRADING_AUTO_AI_REPORT;
+            }
+        }
+
+        return PostTest::GRADING_MANUAL;
     }
 
     private function formatFileSize(int $sizeBytes): string

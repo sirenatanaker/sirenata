@@ -12,6 +12,22 @@ services:
         networks:
             - elearning_network
 
+    queue_grading:
+        image: elearning-app
+        container_name: elearning_queue
+        restart: unless-stopped
+        user: www-data
+        command: php artisan queue:work --queue=ai-grading,default --tries=4 --sleep=3 --timeout=90 --max-time=3600
+        volumes:
+            - .:/var/www
+            - ./docker/php/custom.ini:/usr/local/etc/php/conf.d/custom.ini
+        depends_on:
+            - app
+            - elearning_db
+            - elearning_redis
+        networks:
+            - elearning_network
+
     nginx:
         image: nginx:stable-alpine
         container_name: elearning_nginx

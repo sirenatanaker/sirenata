@@ -774,6 +774,40 @@
                                     placeholder="Tuliskan petunjuk pengerjaan tugas, kriteria penulisan, atau format dokumen yang wajib diserahkan oleh peserta..."
                                     class="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm focus:border-[#13416B] focus:ring-1 focus:ring-[#13416B] leading-relaxed transition shadow-2xs">{{ old('instructions', $postTest->instructions ?? '') }}</textarea>
                             </div>
+
+                            <!-- MODE PENILAIAN & RUBRIK JSON (OPSIONAL) -->
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2 border-t border-slate-100">
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-700 mb-1.5">
+                                        Mesin Penilaian Otomatis
+                                    </label>
+                                    <select name="grading_type" :disabled="evalType !== 'file_upload'"
+                                        class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm focus:border-[#13416B] focus:ring-1 focus:ring-[#13416B]">
+                                        <option value="">Deteksi Otomatis dari Format Berkas</option>
+                                        <option value="AUTO_EXCEL" @selected(old('grading_type', $postTest->grading_type) === 'AUTO_EXCEL')>AUTO_EXCEL (100% Lokal, 0 Kuota AI)</option>
+                                        <option value="AUTO_AI_REPORT" @selected(old('grading_type', $postTest->grading_type) === 'AUTO_AI_REPORT')>AUTO_AI_REPORT (Laporan PDF + Gemini Queue)</option>
+                                        <option value="MANUAL" @selected(old('grading_type', $postTest->grading_type) === 'MANUAL')>MANUAL (Penilaian Instruktur)</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-700 mb-1.5">
+                                        Passing Grade / KKM (0 - 100)
+                                    </label>
+                                    <input type="number" name="passing_score" min="0" max="100"
+                                        :disabled="evalType !== 'file_upload'"
+                                        value="{{ old('passing_score', (int) $postTest->effectivePassingGrade()) }}"
+                                        class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm focus:border-[#13416B] focus:ring-1 focus:ring-[#13416B]" />
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-1.5">
+                                    Rubrik Penilaian Terstruktur JSON <span class="text-slate-400 font-normal">(Opsional — total bobot = 100)</span>
+                                </label>
+                                <textarea name="rubric_json_text" :disabled="evalType !== 'file_upload'" rows="3"
+                                    placeholder='Contoh Laporan PDF: [{"criterion_name":"Analisis Data","max_score":40,"description":"Ketajaman analisis indikator"},{"criterion_name":"Rekomendasi","max_score":60,"description":"Solusi implementatif"}]'
+                                    class="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-xs font-mono focus:border-[#13416B] focus:ring-1 focus:ring-[#13416B]">{{ old('rubric_json_text', !empty($postTest->rubric_json) ? json_encode($postTest->rubric_json, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) : '') }}</textarea>
+                            </div>
                         </div>
                     </div>
 

@@ -50,6 +50,8 @@ class StorePostTestRequest extends FormRequest
 
         $rules = [
             'type'              => ['required', 'string', 'in:multiple_choice,essay,file_upload'],
+            'grading_type'      => ['nullable', 'string', 'in:AUTO_EXCEL,AUTO_AI_ESSAY,AUTO_AI_REPORT,MANUAL'],
+            'rubric_json_text'  => ['nullable', 'string'],
             'course_slug'       => ['required', 'string'],
             'course_section_id' => ['nullable', 'uuid'],
             'course_id'         => ['nullable', 'uuid'],

@@ -65,7 +65,13 @@ Route::prefix('admin-pusat')->middleware(['auth', 'role:admin-pusat'])->name('ad
         });
 
         Route::get('post-test-submissions', [PostTestSubmissionController::class, 'index'])->name('post-test-submissions.index');
-        Route::post('post-test-submissions/auto-grade-bulk', [PostTestSubmissionController::class, 'autoGradeBulk'])->name('post-test-submissions.auto-grade-bulk');
+        Route::post('post-test-submissions/batch/start', [PostTestSubmissionController::class, 'startBatch'])->name('post-test-submissions.batch.start');
+        Route::get('post-test-submissions/batch/{batchId}/status', [PostTestSubmissionController::class, 'batchStatus'])->name('post-test-submissions.batch.status');
+        Route::post('post-test-submissions/batch/{batchId}/resume', [PostTestSubmissionController::class, 'resumeBatch'])->name('post-test-submissions.batch.resume');
+        Route::post('post-test-submissions/batch/{batchId}/retry-failed', [PostTestSubmissionController::class, 'retryFailed'])->name('post-test-submissions.batch.retry-failed');
+        Route::post('post-test-submissions/publish', [PostTestSubmissionController::class, 'publishGrades'])->name('post-test-submissions.publish');
+        Route::post('post-test-submissions/toggle-lock', [PostTestSubmissionController::class, 'toggleLock'])->name('post-test-submissions.toggle-lock');
+        Route::post('post-test-submissions/auto-grade-bulk', [PostTestSubmissionController::class, 'startBatch'])->name('post-test-submissions.auto-grade-bulk');
         Route::post('post-test-submissions/{id}/auto-grade', [PostTestSubmissionController::class, 'autoGrade'])->name('post-test-submissions.auto-grade');
         Route::post('post-test-submissions/{id}/grade', [PostTestSubmissionController::class, 'grade'])->name('post-test-submissions.grade');
 

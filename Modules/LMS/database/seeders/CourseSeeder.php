@@ -540,15 +540,19 @@ class CourseSeeder extends Seeder
                         $postTestService = app(PostTestService::class);
                         foreach ($allPostTests as $pt) {
                             $row = [
-                                'id'           => (string) Str::uuid(),
-                                'user_id'      => $student->id,
-                                'post_test_id' => $pt->id,
-                                'score'        => 90,
-                                'is_passed'    => 1,
-                                'status'       => 'graded',
-                                'completed_at' => now()->subDay(),
-                                'created_at'   => now()->subDay(),
-                                'updated_at'   => now()->subDay(),
+                                'id'             => (string) Str::uuid(),
+                                'user_id'        => $student->id,
+                                'post_test_id'   => $pt->id,
+                                'score'          => 90,
+                                'ai_score'       => 90,
+                                'final_score'    => 90,
+                                'is_passed'      => 1,
+                                'status'         => 'graded',
+                                'grading_status' => 'PUBLISHED',
+                                'graded_at'      => now()->subDay(),
+                                'completed_at'   => now()->subDay(),
+                                'created_at'     => now()->subDay(),
+                                'updated_at'     => now()->subDay(),
                             ];
 
                             if ($pt->is_essay) {
@@ -560,8 +564,11 @@ class CourseSeeder extends Seeder
                                 $autoEval = $postTestService->autoGradeEssay($pt, $essayResponses);
                                 $row['answers'] = json_encode($essayResponses);
                                 $row['score'] = $autoEval['score'];
+                                $row['ai_score'] = $autoEval['score'];
+                                $row['final_score'] = $autoEval['score'];
                                 $row['is_passed'] = $autoEval['is_passed'] ? 1 : 0;
-                                $row['status'] = $autoEval['status'];
+                                $row['status'] = 'graded';
+                                $row['grading_status'] = 'PUBLISHED';
                                 $row['notes'] = $autoEval['notes'];
                             } elseif ($pt->is_file_upload) {
                                 $samplePath = 'assignments/demo/Jawaban_Peserta_Sempurna_100.xlsx';
@@ -569,8 +576,11 @@ class CourseSeeder extends Seeder
                                 $row['file_path'] = $samplePath;
                                 $row['file_name'] = 'Kertas_Kerja_' . Str::slug(Str::limit($course->name, 20, ''), '_') . '.xlsx';
                                 $row['score'] = $autoEval['score'];
+                                $row['ai_score'] = $autoEval['score'];
+                                $row['final_score'] = $autoEval['score'];
                                 $row['is_passed'] = $autoEval['is_passed'] ? 1 : 0;
-                                $row['status'] = $autoEval['status'];
+                                $row['status'] = 'graded';
+                                $row['grading_status'] = 'PUBLISHED';
                                 $row['notes'] = $autoEval['notes'];
                             }
 
@@ -610,37 +620,37 @@ class CourseSeeder extends Seeder
                                                 'Langkah strategis pertama dalam perencanaan ini adalah melakukan pemetaan regulasi di tingkat pusat dan daerah, dilanjutkan dengan pengumpulan data primer dari sektor prioritas, analisis kebutuhan kompetensi, validasi indikator, serta penyusunan proyeksi tenaga kerja lima tahunan.',
                                                 'Mitigasi risiko terhadap kendala lapangan ditempuh melalui sinkronisasi data antarinstansi, koordinasi lintas unit secara berkala, standardisasi SOP pelaporan, audit kepatuhan rutin, serta langkah mitigasi risiko sejak tahap awal.',
                                             ];
-                                            $studentNote = '[Kasus Uji 1 - Jawaban Lengkap] Memuat seluruh 5 poin kunci pada tiap nomor secara terstruktur.';
+                                            $studentNote = 'Jawaban seluruh soal sudah saya lengkapi sesuai materi modul. Mohon koreksinya.';
                                         } elseif ($studentIdx === 1) {
                                             $essayResponses = [
                                                 'Tahap awal implementasi berfokus pada pemetaan regulasi yang berlaku, pengumpulan data primer langsung dari daerah, analisis kebutuhan sektoral, serta validasi indikator capaian program.',
                                                 'Untuk mengatasi kendala di lapangan diperlukan sinkronisasi data terpadu, koordinasi lintas unit kerja, standardisasi SOP kerja, serta audit kepatuhan secara berkala.',
                                             ];
-                                            $studentNote = '[Kasus Uji 2 - Jawaban Baik 4/5 Poin] Sebagian besar poin kunci terpenuhi dengan kalimat wajar.';
+                                            $studentNote = 'Saya sudah menyelesaikan seluruh soal uraian, mohon arahan jika ada poin yang masih perlu dilengkapi.';
                                         } elseif ($studentIdx === 2) {
                                             $essayResponses = [
                                                 'Strategi implementasi dimulai dari inventarisasi peraturan daerah yang relevan, survei langsung kepada pelaku usaha, telaah keperluan SDM sektoral, pengecekan tolok ukur kinerja, dan estimasi kebutuhan angkatan kerja jangka menengah.',
                                                 'Penanganan hambatan operasional dilakukan melalui penyelarasan basis data antarlembaga, sinergi antarbidang teknis, penyusunan prosedur baku layanan, pemeriksaan kepatuhan berkala, serta pengendalian potensi kendala di daerah.',
                                             ];
-                                            $studentNote = '[Kasus Uji 3 - Parafrase/Sinonim] Substansi jawaban benar namun menggunakan sinonim/parafrase (menguji keterbatasan non-AI).';
+                                            $studentNote = 'Jawaban saya susun menggunakan bahasa dan istilah dari pengalaman kerja di instansi kami.';
                                         } elseif ($studentIdx === 3) {
                                             $essayResponses = [
                                                 'Implementasi dilakukan dengan melakukan pemetaan regulasi terlebih dahulu lalu melanjutkan pengumpulan data primer sesuai panduan modul.',
                                                 'Kendala koordinasi di lapangan dapat dikurangi dengan sinkronisasi data berkala serta koordinasi lintas unit.',
                                             ];
-                                            $studentNote = '[Kasus Uji 4 - Jawaban Setengah Lengkap] Hanya memuat 2 poin kunci pada tiap nomor.';
+                                            $studentNote = 'Mohon maaf, uraian saya buat ringkas pada poin-poin utama karena keterbatasan waktu.';
                                         } elseif ($studentIdx === 4) {
                                             $essayResponses = [
                                                 'Kami telah mempelajari materi pembelajaran dan mendiskusikan rencana penerapannya bersama rekan tim di kantor.',
                                                 'Semua kendala yang muncul sebaiknya dibicarakan dalam rapat evaluasi bulanan agar segera selesai.',
                                             ];
-                                            $studentNote = '[Kasus Uji 5 - Tidak Relevan / Sangat Singkat] Tidak menyebutkan konsep/poin kunci jawaban.';
+                                            $studentNote = 'Saya sudah berusaha menjawab sesuai pemahaman saya dari sesi diskusi kelas.';
                                         } elseif ($studentIdx === 5) {
                                             $essayResponses = [
                                                 'pemetaan regulasi, pengumpulan data primer, analisis kebutuhan, validasi indikator, proyeksi tenaga kerja',
                                                 'sinkronisasi data, koordinasi lintas unit, standardisasi SOP, audit kepatuhan, mitigasi risiko',
                                             ];
-                                            $studentNote = '[Kasus Uji 6 - Hanya Daftar Kata Kunci] Berisi daftar kata kunci persis tanpa uraian kalimat (menguji batas otomasi kata kunci).';
+                                            $studentNote = 'Saya menuliskan poin-poin inti jawaban secara ringkas. Mohon masukannya.';
                                         } elseif ($studentIdx === 6) {
                                             $essayResponses = [
                                                 'Langkah strategis implementasi dimulai dari pemetaan regulasi, pengumpulan data primer, analisis kebutuhan tenaga kerja, validasi indikator, serta penyusunan proyeksi tenaga kerja yang akurat.',
@@ -657,59 +667,64 @@ class CourseSeeder extends Seeder
 
                                         if ($isUngradedDummy) {
                                             DB::table('post_test_results')->insert([
-                                                'id'           => (string) Str::uuid(),
-                                                'user_id'      => $student->id,
-                                                'post_test_id' => $pt->id,
-                                                'answers'      => json_encode($essayResponses),
-                                                'score'        => 0,
-                                                'is_passed'    => 0,
-                                                'status'       => 'submitted',
-                                                'notes'        => $studentNote,
-                                                'completed_at' => now()->subHours(2 + $studentIdx),
-                                                'created_at'   => now()->subHours(2 + $studentIdx),
-                                                'updated_at'   => now()->subHours(2 + $studentIdx),
+                                                'id'             => (string) Str::uuid(),
+                                                'user_id'        => $student->id,
+                                                'post_test_id'   => $pt->id,
+                                                'answers'        => json_encode($essayResponses),
+                                                'score'          => 0,
+                                                'is_passed'      => 0,
+                                                'status'         => 'submitted',
+                                                'grading_status' => 'PENDING',
+                                                'notes'          => $studentNote,
+                                                'completed_at'   => now()->subHours(2 + $studentIdx),
+                                                'created_at'     => now()->subHours(2 + $studentIdx),
+                                                'updated_at'     => now()->subHours(2 + $studentIdx),
                                             ]);
                                         } else {
                                             $autoEval = $postTestService->autoGradeEssay($pt, $essayResponses);
                                             DB::table('post_test_results')->insert([
-                                                'id'           => (string) Str::uuid(),
-                                                'user_id'      => $student->id,
-                                                'post_test_id' => $pt->id,
-                                                'answers'      => json_encode($essayResponses),
-                                                'score'        => $autoEval['score'],
-                                                'is_passed'    => $autoEval['is_passed'] ? 1 : 0,
-                                                'status'       => $autoEval['status'],
-                                                'notes'        => $autoEval['notes'],
-                                                'completed_at' => now()->subHours(2 + $studentIdx),
-                                                'created_at'   => now()->subHours(2 + $studentIdx),
-                                                'updated_at'   => now()->subHours(2 + $studentIdx),
+                                                'id'             => (string) Str::uuid(),
+                                                'user_id'        => $student->id,
+                                                'post_test_id'   => $pt->id,
+                                                'answers'        => json_encode($essayResponses),
+                                                'score'          => $autoEval['score'],
+                                                'ai_score'       => $autoEval['score'],
+                                                'final_score'    => $autoEval['score'],
+                                                'is_passed'      => $autoEval['is_passed'] ? 1 : 0,
+                                                'status'         => 'graded',
+                                                'grading_status' => 'PUBLISHED',
+                                                'notes'          => $autoEval['notes'],
+                                                'graded_at'      => now()->subHour(),
+                                                'completed_at'   => now()->subHours(2 + $studentIdx),
+                                                'created_at'     => now()->subHours(2 + $studentIdx),
+                                                'updated_at'     => now()->subHours(2 + $studentIdx),
                                             ]);
                                         }
                                     } elseif ($pt->is_file_upload) {
                                         if ($studentIdx === 0) {
                                             $sampleFile = 'assignments/demo/Jawaban_Peserta_Sempurna_100.xlsx';
                                             $displayFile = 'Uji_1_Sempurna_10_dari_10.xlsx';
-                                            $studentNote = '[Kasus Uji 1 - Cocok Sempurna] Seluruh 10 sel jawaban D2:E6 persis sesuai kunci jawaban.';
+                                            $studentNote = 'Berkas perhitungan Excel sudah saya lengkapi seluruhnya sesuai template. Mohon koreksinya.';
                                         } elseif ($studentIdx === 1) {
                                             $sampleFile = 'assignments/demo/Jawaban_Peserta_Format_Berbeda.xlsx';
                                             $displayFile = 'Uji_2_Beda_Kapital_Spasi_DesimalKoma.xlsx';
-                                            $studentNote = '[Kasus Uji 2 - Normalisasi Format] Isi benar, namun memakai huruf kecil/kapital berbeda, spasi ganda, angka sebagai teks, dan desimal koma 1,25.';
+                                            $studentNote = 'Data perhitungan sudah saya isi semua, namun format angka desimal pada komputer saya menggunakan tanda koma.';
                                         } elseif ($studentIdx === 2) {
                                             $sampleFile = 'assignments/demo/Jawaban_Peserta_Sebagian_80.xlsx';
                                             $displayFile = 'Uji_3_Sebagian_80_Lulus.xlsx';
-                                            $studentNote = '[Kasus Uji 3 - Sebagian Salah 8/10] Sel D5 dan E6 tidak sesuai kunci (uji lulus di atas KKM 75).';
+                                            $studentNote = 'Seluruh kolom tabel telah diisi, mohon koreksinya apabila masih ada kekeliruan pada beberapa baris perhitungan.';
                                         } elseif ($studentIdx === 3) {
                                             $sampleFile = 'assignments/demo/Jawaban_Peserta_Sebagian_70.xlsx';
                                             $displayFile = 'Uji_4_Ambang_KKM_70_Revisi.xlsx';
-                                            $studentNote = '[Kasus Uji 4 - Ambang KKM 7/10] 7 sel benar (skor 70), tepat di bawah KKM 75.';
+                                            $studentNote = 'Saya sudah mengisi tabel perhitungan, namun masih ragu pada beberapa sel terakhir. Mohon review dari fasilitator.';
                                         } elseif ($studentIdx === 4) {
                                             $sampleFile = 'assignments/demo/Jawaban_Peserta_Sinonim.xlsx';
                                             $displayFile = 'Uji_5_Teks_Sinonim_50.xlsx';
-                                            $studentNote = '[Kasus Uji 5 - Sinonim Teks] Angka D2:D6 benar semua, namun teks E2:E6 memakai kalimat sinonim (menguji keterbatasan non-AI).';
+                                            $studentNote = 'Angka perhitungan sudah saya sesuaikan dengan data soal dan keterangan saya tulis dengan bahasa sendiri.';
                                         } elseif ($studentIdx === 5) {
                                             $sampleFile = 'assignments/demo/Jawaban_Peserta_Kosong.xlsx';
                                             $displayFile = 'Uji_6_Template_Kosong_0.xlsx';
-                                            $studentNote = '[Kasus Uji 6 - Template Belum Diisi] Mengunggah template kosong tanpa isian sel D2:E6.';
+                                            $studentNote = 'Mohon maaf, saya terlanjur mengunggah file template sebelum isian tabelnya tersimpan.';
                                         } elseif ($studentIdx === 6) {
                                             $sampleFile = 'assignments/demo/Jawaban_Peserta_Sempurna_100.xlsx';
                                             $displayFile = 'Pembanding_SudahDinilai_100.xlsx';
@@ -722,34 +737,39 @@ class CourseSeeder extends Seeder
 
                                         if ($isUngradedDummy) {
                                             DB::table('post_test_results')->insert([
-                                                'id'           => (string) Str::uuid(),
-                                                'user_id'      => $student->id,
-                                                'post_test_id' => $pt->id,
-                                                'file_path'    => $sampleFile,
-                                                'file_name'    => $displayFile,
-                                                'score'        => 0,
-                                                'is_passed'    => 0,
-                                                'status'       => 'submitted',
-                                                'notes'        => $studentNote,
-                                                'completed_at' => now()->subHours(1 + $studentIdx),
-                                                'created_at'   => now()->subHours(1 + $studentIdx),
-                                                'updated_at'   => now()->subHours(1 + $studentIdx),
+                                                'id'             => (string) Str::uuid(),
+                                                'user_id'        => $student->id,
+                                                'post_test_id'   => $pt->id,
+                                                'file_path'      => $sampleFile,
+                                                'file_name'      => $displayFile,
+                                                'score'          => 0,
+                                                'is_passed'      => 0,
+                                                'status'         => 'submitted',
+                                                'grading_status' => 'PENDING',
+                                                'notes'          => $studentNote,
+                                                'completed_at'   => now()->subHours(1 + $studentIdx),
+                                                'created_at'     => now()->subHours(1 + $studentIdx),
+                                                'updated_at'     => now()->subHours(1 + $studentIdx),
                                             ]);
                                         } else {
                                             $autoEval = $postTestService->autoGradeFileUpload($pt, $sampleFile);
                                             DB::table('post_test_results')->insert([
-                                                'id'           => (string) Str::uuid(),
-                                                'user_id'      => $student->id,
-                                                'post_test_id' => $pt->id,
-                                                'file_path'    => $sampleFile,
-                                                'file_name'    => $displayFile,
-                                                'score'        => $autoEval['score'],
-                                                'is_passed'    => $autoEval['is_passed'] ? 1 : 0,
-                                                'status'       => $autoEval['status'],
-                                                'notes'        => $autoEval['notes'],
-                                                'completed_at' => now()->subHours(1 + $studentIdx),
-                                                'created_at'   => now()->subHours(1 + $studentIdx),
-                                                'updated_at'   => now()->subHours(1 + $studentIdx),
+                                                'id'             => (string) Str::uuid(),
+                                                'user_id'        => $student->id,
+                                                'post_test_id'   => $pt->id,
+                                                'file_path'      => $sampleFile,
+                                                'file_name'      => $displayFile,
+                                                'score'          => $autoEval['score'],
+                                                'ai_score'       => $autoEval['score'],
+                                                'final_score'    => $autoEval['score'],
+                                                'is_passed'      => $autoEval['is_passed'] ? 1 : 0,
+                                                'status'         => 'graded',
+                                                'grading_status' => 'PUBLISHED',
+                                                'notes'          => $autoEval['notes'],
+                                                'graded_at'      => now()->subHour(),
+                                                'completed_at'   => now()->subHours(1 + $studentIdx),
+                                                'created_at'     => now()->subHours(1 + $studentIdx),
+                                                'updated_at'     => now()->subHours(1 + $studentIdx),
                                             ]);
                                         }
                                     }

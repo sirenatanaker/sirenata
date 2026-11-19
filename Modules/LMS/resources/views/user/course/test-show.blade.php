@@ -89,7 +89,8 @@
                     {{-- ======================================================= --}}
                     @if ($isEssayDone && !request()->query('retake'))
                         @php
-                            $isEssayGraded = ($evalResult?->status ?? '') === 'graded';
+                            // Human-in-the-Loop: nilai baru tampil ke peserta setelah Admin mempublikasikan (PUBLISHED)
+                            $isEssayGraded = ($evalResult?->grading_status ?? '') === 'PUBLISHED';
                             $isEssayPassed = (bool) ($evalResult?->is_passed ?? true);
                         @endphp
                         <div class="bg-white p-5 sm:p-8 lg:p-10 text-left space-y-6 animate-fadeIn">
@@ -119,10 +120,16 @@
                                         </div>
                                     </div>
 
-                                    <a href="?retake=1" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 transition-colors shadow-2xs whitespace-nowrap">
-                                        <i class="fas fa-edit text-xs text-slate-500"></i>
-                                        <span>Edit Jawaban Uraian</span>
-                                    </a>
+                                    @if (empty($postTest->is_submission_locked))
+                                        <a href="?retake=1" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 transition-colors shadow-2xs whitespace-nowrap">
+                                            <i class="fas fa-edit text-xs text-slate-500"></i>
+                                            <span>Edit Jawaban Uraian</span>
+                                        </a>
+                                    @else
+                                        <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold text-slate-500 bg-white border border-slate-200 whitespace-nowrap">
+                                            <i class="fas fa-lock text-[11px]"></i> Pengumpulan Dikunci
+                                        </span>
+                                    @endif
                                 </div>
 
                                 @if ($isEssayGraded && !empty($evalResult?->notes))
@@ -272,7 +279,8 @@
                         {{-- 2. Formulir / Status Pengumpulan Jawaban --}}
                         @if ($isAssignmentDone && !request()->query('retake'))
                             @php
-                                $isAssignGraded = ($evalResult?->status ?? '') === 'graded';
+                                // Human-in-the-Loop: nilai baru tampil ke peserta setelah PUBLISHED
+                                $isAssignGraded = ($evalResult?->grading_status ?? '') === 'PUBLISHED';
                                 $isAssignPassed = (bool) ($evalResult?->is_passed ?? true);
                             @endphp
                             <div class="p-5 rounded-xl {{ $isAssignGraded && !$isAssignPassed ? 'bg-amber-50 border-amber-200' : 'bg-emerald-50 border-emerald-200' }} border space-y-4">
@@ -318,10 +326,12 @@
                                                 <span>Lihat Berkas Saya</span>
                                             </a>
                                         @endif
-                                        <a href="?retake=1" class="px-4 py-2 rounded-lg text-xs font-bold bg-white text-slate-700 hover:bg-slate-100 border border-slate-200 inline-flex items-center gap-1.5 shadow-2xs">
-                                            <i class="fas fa-redo"></i>
-                                            <span>Unggah Ulang (Revisi)</span>
-                                        </a>
+                                        @if (empty($postTest->is_submission_locked))
+                                            <a href="?retake=1" class="px-4 py-2 rounded-lg text-xs font-bold bg-white text-slate-700 hover:bg-slate-100 border border-slate-200 inline-flex items-center gap-1.5 shadow-2xs">
+                                                <i class="fas fa-redo"></i>
+                                                <span>Unggah Ulang (Revisi)</span>
+                                            </a>
+                                        @endif
                                     </div>
                                 </div>
                             </div>

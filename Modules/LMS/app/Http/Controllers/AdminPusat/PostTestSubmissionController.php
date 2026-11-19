@@ -4,40 +4,50 @@ namespace Modules\LMS\Http\Controllers\AdminPusat;
 
 use App\Http\Controllers\Controller;
 use Devrabiul\ToastMagic\Facades\ToastMagic;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 use Modules\LMS\Models\BimtekEvent;
+use Modules\LMS\Models\GradingBatch;
 use Modules\LMS\Models\PostTest;
 use Modules\LMS\Models\PostTestResult;
 use Modules\LMS\Services\CourseService;
-use Modules\LMS\Services\PostTestService;
+use Modules\LMS\Services\Grading\AiGradingService;
+use Modules\LMS\Services\Grading\DocumentExtractorService;
+use Modules\LMS\Services\Grading\ExcelGraderService;
+use Modules\LMS\Services\Grading\GradingBatchService;
+use Modules\LMS\Services\Grading\TextPreprocessorService;
 
 class PostTestSubmissionController extends Controller
 {
     public function __construct(
         private CourseService $courseService,
-        private PostTestService $postTestService,
+        private GradingBatchService $gradingBatchService,
+        private ExcelGraderService $excelGrader,
+        private AiGradingService $aiGradingService,
+        private DocumentExtractorService $documentExtractor,
+        private TextPreprocessorService $textPreprocessor,
     ) {}
 
     /**
-     * Alur 3 langkah pengelolaan jawaban evaluasi Admin Pusat:
+     * Alur 3 langkah pengelolaan & triage penilaian evaluasi Admin Pusat:
      * 1. Pilih Event Bimtek
-     * 2. Pilih Agenda Harian atau Evaluasi Akhir (jika sudah ada data)
-     * 3. Lihat & nilai hasil evaluasi peserta pada agenda/evaluasi terpilih
+     * 2. Pilih Agenda Harian atau Evaluasi Akhir
+     * 3. Dashboard Batch, Triage, Edit Manual, & Publikasi Nilai
      */
     public function index(Request $request): View
     {
         $bimtekEventId = $request->query('bimtek_event_id');
         $postTestId    = $request->query('post_test_id');
         $courseId      = $request->query('course_id');
-        $status        = $request->query('status', 'all'); // 'all' | 'submitted' | 'graded'
+        $status        = (string) $request->query('status', 'all');
         $search        = trim((string) $request->query('search', ''));
 
         $manualTypes = ['essay', 'uraian', 'file_upload', 'upload'];
 
-        // Resolusi otomatis jika diakses lewat pintasan Detail Kursus (?course_id=...&post_test_id=...)
         $selectedPostTest = $postTestId
             ? PostTest::with(['questions', 'section', 'course'])->find($postTestId)
             : null;
@@ -104,7 +114,7 @@ class PostTestSubmissionController extends Controller
             $resultStats = ($allEventUserIds->isNotEmpty() && $allPostTestIds->isNotEmpty())
                 ? PostTestResult::whereIn('user_id', $allEventUserIds)
                     ->whereIn('post_test_id', $allPostTestIds)
-                    ->get(['post_test_id', 'user_id', 'status'])
+                    ->get(['post_test_id', 'user_id', 'status', 'grading_status'])
                 : collect();
 
             $events->getCollection()->transform(function ($ev) use ($participantsByEvent, $postTestsByCourse, $resultStats, $manualTypes) {
@@ -118,7 +128,7 @@ class PostTestSubmissionController extends Controller
                 $ev->submissions_count = $matching->count();
                 $ev->pending_count = $matching->filter(function ($r) use ($manualTestIds) {
                     return in_array($r->post_test_id, $manualTestIds, true)
-                        && ($r->status === 'submitted' || is_null($r->status));
+                        && $r->grading_status !== PostTestResult::GRADING_PUBLISHED;
                 })->count();
 
                 return $ev;
@@ -137,7 +147,6 @@ class PostTestSubmissionController extends Controller
             ]);
         }
 
-        // Ambil user IDs peserta yang terdaftar pada event terpilih
         $eventParticipantIds = DB::table('course_student')
             ->where('bimtek_event_id', $selectedEvent->id)
             ->pluck('user_id');
@@ -145,7 +154,7 @@ class PostTestSubmissionController extends Controller
         $eventParticipantsCount = $eventParticipantIds->count();
 
         // =========================================================================
-        // LANGKAH 2: PILIH AGENDA HARIAN / EVALUASI AKHIR PADA EVENT TERPILIH
+        // LANGKAH 2: PILIH AGENDA HARIAN / EVALUASI AKHIR
         // =========================================================================
         if (!$selectedPostTest) {
             $sections = $selectedEvent->course?->sections ?? collect();
@@ -167,7 +176,7 @@ class PostTestSubmissionController extends Controller
             $resultsByTest = ($eventParticipantIds->isNotEmpty() && $relevantTestIds->isNotEmpty())
                 ? PostTestResult::whereIn('user_id', $eventParticipantIds)
                     ->whereIn('post_test_id', $relevantTestIds)
-                    ->get(['post_test_id', 'status'])
+                    ->get(['post_test_id', 'status', 'grading_status'])
                     ->groupBy('post_test_id')
                 : collect();
 
@@ -178,10 +187,10 @@ class PostTestSubmissionController extends Controller
 
                 $submittedCount = $rows->count();
                 $pendingCount = $isManual
-                    ? $rows->filter(fn($r) => $r->status === 'submitted' || is_null($r->status))->count()
+                    ? $rows->filter(fn($r) => $r->grading_status !== PostTestResult::GRADING_PUBLISHED)->count()
                     : 0;
                 $gradedCount = $isManual
-                    ? $rows->filter(fn($r) => $r->status === 'graded')->count()
+                    ? $rows->filter(fn($r) => $r->grading_status === PostTestResult::GRADING_PUBLISHED)->count()
                     : $submittedCount;
 
                 $cleanTitle = trim((string) preg_replace('/^(modul|hari)\s*\d+\s*[:\-–]\s*/i', '', $section->name));
@@ -190,20 +199,20 @@ class PostTestSubmissionController extends Controller
                     : null;
 
                 return (object) [
-                    'day_number'        => $index + 1,
-                    'day_date'          => $dayDate,
-                    'section'           => $section,
-                    'title'             => $cleanTitle !== '' ? $cleanTitle : $section->name,
-                    'post_test'         => $pt,
-                    'format_label'      => match ($pt?->type) {
+                    'day_number'         => $index + 1,
+                    'day_date'           => $dayDate,
+                    'section'            => $section,
+                    'title'              => $cleanTitle !== '' ? $cleanTitle : $section->name,
+                    'post_test'          => $pt,
+                    'format_label'       => match ($pt?->type) {
                         'essay', 'uraian'       => 'Uraian',
                         'file_upload', 'upload' => 'Upload Berkas',
                         default                 => $pt ? 'Pilihan Ganda' : 'Belum Ada Evaluasi',
                     },
-                    'submitted_count'   => $submittedCount,
-                    'pending_count'     => $pendingCount,
-                    'graded_count'      => $gradedCount,
-                    'total_participants'=> $eventParticipantsCount,
+                    'submitted_count'    => $submittedCount,
+                    'pending_count'      => $pendingCount,
+                    'graded_count'       => $gradedCount,
+                    'total_participants' => $eventParticipantsCount,
                 ];
             });
 
@@ -221,10 +230,10 @@ class PostTestSubmissionController extends Controller
                 },
                 'submitted_count'    => $finalSubmittedCount,
                 'pending_count'      => $finalIsManual
-                    ? $finalRows->filter(fn($r) => $r->status === 'submitted' || is_null($r->status))->count()
+                    ? $finalRows->filter(fn($r) => $r->grading_status !== PostTestResult::GRADING_PUBLISHED)->count()
                     : 0,
                 'graded_count'       => $finalIsManual
-                    ? $finalRows->filter(fn($r) => $r->status === 'graded')->count()
+                    ? $finalRows->filter(fn($r) => $r->grading_status === PostTestResult::GRADING_PUBLISHED)->count()
                     : $finalSubmittedCount,
                 'total_participants' => $eventParticipantsCount,
             ];
@@ -243,24 +252,48 @@ class PostTestSubmissionController extends Controller
         }
 
         // =========================================================================
-        // LANGKAH 3: DAFTAR HASIL & PENILAIAN EVALUASI PADA AGENDA / EVALUASI AKHIR
+        // LANGKAH 3: DASHBOARD TRIAGE, BATCH PROGRESS & PUBLIKASI
         // =========================================================================
         $isManualTest = in_array($selectedPostTest->type, $manualTypes, true);
 
-        $submissionsQuery = PostTestResult::query()
-            ->with(['user.profile'])
+        $baseScopeQuery = PostTestResult::query()
             ->where('post_test_id', $selectedPostTest->id);
 
         if ($eventParticipantIds->isNotEmpty()) {
-            $submissionsQuery->whereIn('user_id', $eventParticipantIds);
+            $baseScopeQuery->whereIn('user_id', $eventParticipantIds);
         } else {
-            $submissionsQuery->whereRaw('1 = 0');
+            $baseScopeQuery->whereRaw('1 = 0');
         }
 
+        $triageRows = (clone $baseScopeQuery)->get(['grading_status', 'needs_manual_review', 'ai_score', 'final_score']);
+        $triageCounts = [
+            'all'          => $triageRows->count(),
+            'pending'      => $triageRows->whereIn('grading_status', [PostTestResult::GRADING_PENDING, PostTestResult::GRADING_QUEUED, PostTestResult::GRADING_PROCESSING])->count(),
+            'pure_pending' => $triageRows->where('grading_status', PostTestResult::GRADING_PENDING)->count(),
+            'needs_review' => $triageRows->filter(fn($r) => $r->grading_status === PostTestResult::GRADING_MANUAL_REVIEW || ($r->needs_manual_review && $r->grading_status === PostTestResult::GRADING_DRAFT_GRADED))->count(),
+            'failed'       => $triageRows->where('grading_status', PostTestResult::GRADING_FAILED)->count(),
+            'draft_ready'  => $triageRows->filter(fn($r) => in_array($r->grading_status, [PostTestResult::GRADING_DRAFT_GRADED, PostTestResult::GRADING_MANUAL_REVIEW], true) && (!is_null($r->final_score) || !is_null($r->ai_score)))->count(),
+            'published'    => $triageRows->where('grading_status', PostTestResult::GRADING_PUBLISHED)->count(),
+        ];
+
+        $submissionsQuery = (clone $baseScopeQuery)->with(['user.profile']);
+
         if ($isManualTest) {
-            $submissionsQuery
-                ->when($status === 'submitted', fn($q) => $q->where(fn($sq) => $sq->where('status', 'submitted')->orWhereNull('status')))
-                ->when($status === 'graded', fn($q) => $q->where('status', 'graded'));
+            match ($status) {
+                'pending', 'submitted' => $submissionsQuery->whereIn('grading_status', [
+                    PostTestResult::GRADING_PENDING,
+                    PostTestResult::GRADING_QUEUED,
+                    PostTestResult::GRADING_PROCESSING,
+                ]),
+                'needs_review' => $submissionsQuery->where(function ($q) {
+                    $q->where('grading_status', PostTestResult::GRADING_MANUAL_REVIEW)
+                        ->orWhere(fn($sq) => $sq->where('grading_status', PostTestResult::GRADING_DRAFT_GRADED)->where('needs_manual_review', true));
+                }),
+                'failed' => $submissionsQuery->where('grading_status', PostTestResult::GRADING_FAILED),
+                'draft_graded' => $submissionsQuery->where('grading_status', PostTestResult::GRADING_DRAFT_GRADED),
+                'published', 'graded' => $submissionsQuery->where('grading_status', PostTestResult::GRADING_PUBLISHED),
+                default => null,
+            };
         }
 
         $submissionsQuery
@@ -272,18 +305,21 @@ class PostTestSubmissionController extends Controller
                             ->orWhere('instansi', 'like', "%{$search}%"));
                 });
             })
-            ->orderByRaw("CASE WHEN status = 'graded' THEN 1 ELSE 0 END ASC")
+            ->orderByRaw("CASE
+                WHEN grading_status = 'FAILED' THEN 0
+                WHEN grading_status = 'MANUAL_REVIEW' OR (grading_status = 'DRAFT_GRADED' AND needs_manual_review = 1) THEN 1
+                WHEN grading_status IN ('PENDING', 'QUEUED', 'PROCESSING') THEN 2
+                WHEN grading_status = 'DRAFT_GRADED' THEN 3
+                ELSE 4 END ASC")
             ->orderByDesc('completed_at')
             ->orderByDesc('updated_at');
 
         $submissions = $submissionsQuery->paginate(15)->withQueryString();
 
-        $pendingCount = ($isManualTest && $eventParticipantIds->isNotEmpty())
-            ? PostTestResult::where('post_test_id', $selectedPostTest->id)
-                ->whereIn('user_id', $eventParticipantIds)
-                ->where(fn($q) => $q->where('status', 'submitted')->orWhereNull('status'))
-                ->count()
-            : 0;
+        $activeBatch = GradingBatch::where('post_test_id', $selectedPostTest->id)
+            ->when($selectedEvent->id, fn($q) => $q->where(fn($sq) => $sq->where('bimtek_event_id', $selectedEvent->id)->orWhereNull('bimtek_event_id')))
+            ->latest('started_at')
+            ->first();
 
         return view('lms::admin-pusat.post-test-submissions.index', [
             'step'             => 'results',
@@ -294,14 +330,181 @@ class PostTestSubmissionController extends Controller
             'finalEvaluation'  => null,
             'submissions'      => $submissions,
             'isManualTest'     => $isManualTest,
-            'pendingCount'     => $pendingCount,
+            'pendingCount'     => $triageCounts['pure_pending'],
+            'triageCounts'     => $triageCounts,
+            'activeBatch'      => $activeBatch,
             'search'           => $search,
             'status'           => $status,
         ]);
     }
 
     /**
-     * Simpan nilai, status kelulusan, dan catatan instruktur untuk jawaban evaluasi peserta.
+     * Fase 3: Admin trigger batch penilaian otomatis ("Mulai Penilaian Otomatis").
+     */
+    public function startBatch(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'bimtek_event_id' => 'required|string',
+            'post_test_id'    => 'required|string',
+        ]);
+
+        $postTest = PostTest::with('questions')->findOrFail($validated['post_test_id']);
+        $gradingType = $postTest->resolvedGradingType();
+
+        if (in_array($gradingType, [PostTest::GRADING_AUTO_AI_ESSAY, PostTest::GRADING_AUTO_AI_REPORT], true)
+            && trim((string) config('grading.gemini.api_key', '')) === '') {
+            ToastMagic::error('GEMINI_API_KEY belum diisi di .env. Silakan konfigurasi API key Gemini terlebih dahulu untuk penilaian otomatis AI.');
+
+            return redirect()->back();
+        }
+
+        $batch = $this->gradingBatchService->startBatch(
+            $postTest,
+            $validated['bimtek_event_id'],
+            $request->user()?->id
+        );
+
+        if ($batch->total_targets === 0) {
+            ToastMagic::info('Tidak ada jawaban peserta berstatus menunggu penilaian (PENDING).');
+
+            return redirect()->back();
+        }
+
+        $isExcel = $gradingType === PostTest::GRADING_AUTO_EXCEL;
+        $title = $isExcel ? 'Penilaian Otomatis Excel Selesai (Draf)' : 'Batch Penilaian AI Dimulai';
+        $message = $isExcel
+            ? "Seluruh {$batch->processed_count} berkas Excel berhasil dinilai 100% lokal (0 kuota AI) sebagai draf. Tinjau hasil lalu klik Publikasikan Nilai."
+            : "Pengumpulan peserta telah dikunci dan {$batch->total_targets} jawaban diproses melalui antrean (queue: ai-grading). Pantau progres di dashboard lalu tinjau draf sebelum dipublikasikan.";
+
+        ToastMagic::success($title);
+
+        return redirect()->back()->with('grading_popup', [
+            'title'        => $title,
+            'method'       => $isExcel ? 'Penilaian Excel Lokal (0 AI)' : 'Batch Antrean AI',
+            'student_name' => "{$batch->total_targets} Peserta",
+            'score'        => null,
+            'is_passed'    => null,
+            'summary'      => "Status Batch: {$batch->status}",
+            'message'      => $message,
+        ]);
+    }
+
+    /**
+     * Fase 5: Polling status batch (ringan, tiap 5–10 detik).
+     */
+    public function batchStatus(string $batchId): JsonResponse
+    {
+        $batch = GradingBatch::findOrFail($batchId);
+
+        return response()->json([
+            'id'                    => $batch->id,
+            'status'                => $batch->status,
+            'total_targets'         => $batch->total_targets,
+            'processed_count'       => $batch->processed_count,
+            'failed_count'          => $batch->failed_count,
+            'consecutive_429_count' => $batch->consecutive_429_count,
+            'progress_percent'      => $batch->progress_percent,
+            'started_at'            => $batch->started_at?->toIso8601String(),
+            'finished_at'           => $batch->finished_at?->toIso8601String(),
+        ]);
+    }
+
+    /**
+     * Fase 5: Lanjutkan batch berstatus PAUSED_QUOTA (hanya memproses sisa PENDING).
+     */
+    public function resumeBatch(string $batchId): RedirectResponse
+    {
+        $batch = GradingBatch::findOrFail($batchId);
+        $updated = $this->gradingBatchService->resumeBatch($batch);
+
+        ToastMagic::success('Batch penilaian otomatis berhasil dilanjutkan.');
+
+        return redirect()->back()->with('grading_popup', [
+            'title'        => 'Batch Dilanjutkan',
+            'method'       => 'Resume Quota Batch',
+            'student_name' => "Batch {$updated->status}",
+            'score'        => null,
+            'is_passed'    => null,
+            'summary'      => "{$updated->processed_count} / {$updated->total_targets} selesai",
+            'message'      => 'Sisa jawaban peserta berstatus PENDING telah didorong kembali ke antrean ai-grading.',
+        ]);
+    }
+
+    /**
+     * Fase 5: Ulangi hanya peserta yang berstatus FAILED (idempoten).
+     */
+    public function retryFailed(string $batchId): RedirectResponse
+    {
+        $batch = GradingBatch::findOrFail($batchId);
+        $updated = $this->gradingBatchService->retryFailed($batch);
+
+        ToastMagic::success('Jawaban yang gagal telah didorong ulang ke antrean penilaian.');
+
+        return redirect()->back()->with('grading_popup', [
+            'title'        => 'Ulangi Penilaian Gagal',
+            'method'       => 'Retry Failed Only',
+            'student_name' => "Batch {$updated->status}",
+            'score'        => null,
+            'is_passed'    => null,
+            'summary'      => "{$updated->processed_count} / {$updated->total_targets} selesai",
+            'message'      => 'Hanya jawaban berstatus FAILED yang dimasukkan ulang ke antrean (draf/nilai terpublikasi tidak tersentuh).',
+        ]);
+    }
+
+    /**
+     * Fase 5: Publikasikan semua draf nilai ke peserta (PUBLISHED) + perbarui progres kursus.
+     */
+    public function publishGrades(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'bimtek_event_id' => 'required|string',
+            'post_test_id'    => 'required|string',
+        ]);
+
+        $postTest = PostTest::findOrFail($validated['post_test_id']);
+        $publishedCount = $this->gradingBatchService->publishGrades($postTest, $validated['bimtek_event_id']);
+
+        if ($publishedCount === 0) {
+            ToastMagic::info('Tidak ada draf nilai yang siap dipublikasikan.');
+
+            return redirect()->back();
+        }
+
+        ToastMagic::success("Berhasil mempublikasikan nilai untuk {$publishedCount} peserta.");
+
+        return redirect()->back()->with('grading_popup', [
+            'title'        => 'Nilai Berhasil Dipublikasikan',
+            'method'       => 'Publikasi Massal',
+            'student_name' => "{$publishedCount} Peserta",
+            'score'        => null,
+            'is_passed'    => null,
+            'summary'      => 'Status: PUBLISHED',
+            'message'      => "Nilai akhir untuk {$publishedCount} peserta kini telah tampil di halaman peserta dan disinkronkan dengan progres kelulusan.",
+        ]);
+    }
+
+    /**
+     * Kunci / buka kunci pengumpulan peserta pada evaluasi ini.
+     */
+    public function toggleLock(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'post_test_id' => 'required|string',
+        ]);
+
+        $postTest = PostTest::findOrFail($validated['post_test_id']);
+        $postTest->update(['is_submission_locked' => !$postTest->is_submission_locked]);
+
+        $msg = $postTest->is_submission_locked
+            ? 'Pengumpulan peserta dikunci.'
+            : 'Pengumpulan peserta dibuka kembali.';
+        ToastMagic::success($msg);
+
+        return redirect()->back();
+    }
+
+    /**
+     * Edit nilai manual / review triage oleh Admin (simpan sebagai draf atau langsung publikasikan).
      */
     public function grade(Request $request, string $id): RedirectResponse
     {
@@ -309,44 +512,70 @@ class PostTestSubmissionController extends Controller
         $postTest = $result->postTest;
 
         $validated = $request->validate([
-            'score'     => 'required|integer|min:0|max:100',
-            'is_passed' => 'required|boolean',
-            'notes'     => 'nullable|string|max:1000',
+            'score'       => 'required|numeric|min:0|max:100',
+            'is_passed'   => 'required|boolean',
+            'notes'       => 'nullable|string|max:2000',
+            'publish_now' => 'nullable|boolean',
         ], [
             'score.required'     => 'Nilai evaluasi wajib diisi.',
-            'score.integer'      => 'Nilai evaluasi harus berupa angka bulat.',
+            'score.numeric'      => 'Nilai evaluasi harus berupa angka.',
             'score.min'          => 'Nilai minimal adalah 0.',
             'score.max'          => 'Nilai maksimal adalah 100.',
             'is_passed.required' => 'Status kelulusan wajib ditentukan.',
         ]);
 
+        $publishNow = $request->boolean('publish_now', true);
+        $finalScore = round((float) $validated['score'], 2);
         $feedback = trim((string) ($validated['notes'] ?? ''));
 
-        $result->update([
-            'score'     => (int) $validated['score'],
-            'is_passed' => (bool) $validated['is_passed'],
-            'notes'     => $feedback !== '' ? $feedback : ($result->status === 'graded' ? null : $result->notes),
-            'status'    => 'graded',
-        ]);
+        $existingFeedbackJson = is_array($result->ai_feedback_json) ? $result->ai_feedback_json : [];
+        if ($feedback !== '') {
+            $existingFeedbackJson['overall_feedback'] = $feedback;
+        }
 
-        $course = $postTest?->course ?? $postTest?->section?->course;
-        $this->syncStudentCourseProgress($course, $result->user_id);
+        $updates = [
+            'final_score'         => $finalScore,
+            'ai_feedback_json'    => !empty($existingFeedbackJson) ? $existingFeedbackJson : $result->ai_feedback_json,
+            'needs_manual_review' => false,
+            'graded_at'           => now(),
+        ];
+
+        if ($publishNow) {
+            $finalNote = $feedback !== '' ? $feedback : trim((string) ($existingFeedbackJson['overall_feedback'] ?? ''));
+            $updates['score'] = (int) round($finalScore);
+            $updates['is_passed'] = (bool) $validated['is_passed'];
+            $updates['status'] = 'graded';
+            $updates['grading_status'] = PostTestResult::GRADING_PUBLISHED;
+            $updates['notes'] = $finalNote !== '' ? $finalNote : null;
+        } else {
+            $updates['grading_status'] = PostTestResult::GRADING_DRAFT_GRADED;
+        }
+
+        $result->update($updates);
+
+        if ($publishNow) {
+            $course = $postTest?->course ?? $postTest?->section?->course;
+            $this->syncStudentCourseProgress($course, $result->user_id);
+        }
 
         $studentName = $result->user?->profile?->full_name ?? $result->user?->name ?? 'Peserta';
-        ToastMagic::success('Penilaian dan umpan balik evaluasi peserta berhasil disimpan.');
+        $title = $publishNow ? 'Penilaian Disimpan & Dipublikasikan' : 'Draf Penilaian Disimpan';
+        ToastMagic::success($title);
 
         return redirect()->back()->with('grading_popup', [
-            'title'        => 'Penilaian Berhasil Disimpan',
-            'method'       => 'Penilaian Manual',
+            'title'        => $title,
+            'method'       => 'Penilaian Manual Instruktur',
             'student_name' => $studentName,
-            'score'        => (int) $validated['score'],
+            'score'        => $finalScore,
             'is_passed'    => (bool) $validated['is_passed'],
-            'message'      => 'Nilai dan umpan balik evaluasi peserta berhasil disimpan.',
+            'message'      => $publishNow
+                ? 'Nilai akhir peserta berhasil disimpan dan dipublikasikan ke halaman peserta.'
+                : 'Draf nilai peserta berhasil disimpan. Klik Publikasikan Nilai saat siap ditampilkan ke peserta.',
         ]);
     }
 
     /**
-     * Jalankan koreksi otomatis sistem untuk satu hasil evaluasi peserta.
+     * Koreksi otomatis satuan oleh Admin (hasil disimpan sebagai DRAFT_GRADED untuk triage).
      */
     public function autoGrade(string $id): RedirectResponse
     {
@@ -357,141 +586,121 @@ class PostTestSubmissionController extends Controller
             'postTest.section.course',
         ])->findOrFail($id);
 
-        $eval = $this->runAutoGradeOnResult($result);
-
-        if (!$eval) {
-            ToastMagic::error('Koreksi otomatis tidak dapat dijalankan karena kunci jawaban belum tersedia atau berkas tidak ditemukan.');
-
-            return redirect()->back();
-        }
-
-        $studentName = $result->user?->profile?->full_name ?? $result->user?->name ?? 'Peserta';
-        $statusLabel = $eval['is_passed'] ? 'Lulus' : 'Perlu Revisi';
-        ToastMagic::success("Koreksi otomatis berhasil: Skor {$eval['score']} ({$statusLabel}).");
-
-        return redirect()->back()->with('grading_popup', [
-            'title'        => 'Koreksi Otomatis Berhasil',
-            'method'       => 'Koreksi Otomatis Sistem',
-            'student_name' => $studentName,
-            'score'        => (int) $eval['score'],
-            'is_passed'    => (bool) $eval['is_passed'],
-            'message'      => $eval['notes'] ?? 'Jawaban peserta berhasil dikoreksi otomatis oleh sistem.',
-        ]);
-    }
-
-    /**
-     * Jalankan koreksi otomatis secara massal untuk seluruh jawaban yang belum dinilai pada evaluasi terpilih.
-     */
-    public function autoGradeBulk(Request $request): RedirectResponse
-    {
-        $validated = $request->validate([
-            'bimtek_event_id' => 'required|string',
-            'post_test_id'    => 'required|string',
-        ]);
-
-        $eventParticipantIds = DB::table('course_student')
-            ->where('bimtek_event_id', $validated['bimtek_event_id'])
-            ->pluck('user_id');
-
-        if ($eventParticipantIds->isEmpty()) {
-            ToastMagic::info('Tidak ada peserta terdaftar pada event ini.');
-
-            return redirect()->back();
-        }
-
-        $pendingResults = PostTestResult::with([
-            'postTest.questions',
-            'postTest.course',
-            'postTest.section.course',
-        ])
-            ->where('post_test_id', $validated['post_test_id'])
-            ->whereIn('user_id', $eventParticipantIds)
-            ->where(fn($q) => $q->where('status', 'submitted')->orWhereNull('status'))
-            ->get();
-
-        if ($pendingResults->isEmpty()) {
-            ToastMagic::info('Tidak ada jawaban peserta yang menunggu penilaian.');
-
-            return redirect()->back();
-        }
-
-        $gradedCount = 0;
-        $passedCount = 0;
-        $revisiCount = 0;
-
-        foreach ($pendingResults as $res) {
-            $eval = $this->runAutoGradeOnResult($res);
-            if ($eval) {
-                $gradedCount++;
-                if ($eval['is_passed']) {
-                    $passedCount++;
-                } else {
-                    $revisiCount++;
-                }
-            }
-        }
-
-        if ($gradedCount === 0) {
-            ToastMagic::error('Koreksi otomatis tidak dapat dijalankan karena kunci jawaban belum dikonfigurasi pada evaluasi ini.');
-
-            return redirect()->back();
-        }
-
-        ToastMagic::success("Koreksi otomatis selesai untuk {$gradedCount} peserta ({$passedCount} Lulus, {$revisiCount} Perlu Revisi).");
-
-        return redirect()->back()->with('grading_popup', [
-            'title'        => 'Koreksi Otomatis Massal Selesai',
-            'method'       => 'Koreksi Otomatis Sistem',
-            'student_name' => "{$gradedCount} Peserta",
-            'score'        => null,
-            'is_passed'    => null,
-            'summary'      => "{$passedCount} Lulus, {$revisiCount} Perlu Revisi",
-            'message'      => "Seluruh {$gradedCount} jawaban peserta yang menunggu penilaian telah berhasil dikoreksi otomatis oleh sistem.",
-        ]);
-    }
-
-    private function runAutoGradeOnResult(PostTestResult $result): ?array
-    {
         $postTest = $result->postTest;
         if (!$postTest) {
-            return null;
+            ToastMagic::error('Data evaluasi tidak ditemukan.');
+
+            return redirect()->back();
         }
 
-        if ($postTest->is_file_upload) {
-            $eval = $this->postTestService->autoGradeFileUpload($postTest, (string) $result->file_path);
-        } elseif ($postTest->is_essay) {
-            $eval = $this->postTestService->autoGradeEssay($postTest, is_array($result->answers) ? $result->answers : []);
-        } else {
-            return null;
-        }
+        $gradingType = $postTest->resolvedGradingType();
+        $passingGrade = $postTest->effectivePassingGrade();
 
-        if (empty($eval['auto_graded'])) {
-            return null;
-        }
+        try {
+            if ($gradingType === PostTest::GRADING_AUTO_EXCEL) {
+                $disk = Storage::disk('public');
+                if (empty($postTest->answer_key_file_path) || !$disk->exists($postTest->answer_key_file_path)
+                    || empty($result->file_path) || !$disk->exists($result->file_path)) {
+                    ToastMagic::error('Berkas Excel peserta atau kunci jawaban tidak ditemukan.');
 
-        $existingNote = trim((string) ($result->notes ?? ''));
-        $participantNote = '';
-        if ($existingNote !== '') {
-            if (preg_match('/Catatan Peserta:\s*(.+)$/s', $existingNote, $matches)) {
-                $participantNote = trim($matches[1]);
-            } elseif (!str_contains($existingNote, '[Koreksi Otomatis Sistem]')) {
-                $participantNote = $existingNote;
+                    return redirect()->back();
+                }
+
+                $templatePath = ($postTest->admin_file_path && $disk->exists($postTest->admin_file_path))
+                    ? $disk->path($postTest->admin_file_path)
+                    : null;
+
+                $eval = $this->excelGrader->grade(
+                    $disk->path($postTest->answer_key_file_path),
+                    $disk->path($result->file_path),
+                    $templatePath,
+                    is_array($postTest->rubric_json) ? $postTest->rubric_json : [],
+                    $passingGrade
+                );
+
+                $score = (float) $eval['score'];
+                $triage = $this->aiGradingService->evaluateAutoTriage($score, $passingGrade, $eval['feedback_json'], false);
+                $feedbackJson = array_merge($eval['feedback_json'], [
+                    'passing_grade'  => $passingGrade,
+                    'triage_reasons' => $triage['reasons'],
+                ]);
+                $methodLabel = 'Penilaian Otomatis Excel Lokal (Draf)';
+                $summaryMessage = $eval['summary_note'];
+            } elseif ($gradingType === PostTest::GRADING_AUTO_AI_ESSAY) {
+                $snapshot = $this->gradingBatchService->buildRubricSnapshot($postTest);
+                $aiResult = $this->aiGradingService->gradeEssay($postTest, is_array($result->answers) ? $result->answers : [], $snapshot);
+                $score = (float) $aiResult['score'];
+                $triage = $this->aiGradingService->evaluateAutoTriage($score, $passingGrade, $aiResult, false);
+                $feedbackJson = array_merge($aiResult, [
+                    'grader'         => $gradingType,
+                    'passing_grade'  => $passingGrade,
+                    'triage_reasons' => $triage['reasons'],
+                ]);
+                $methodLabel = 'Koreksi Otomatis AI Uraian (Draf)';
+                $summaryMessage = $aiResult['overall_feedback'] ?: 'Draf penilaian AI berhasil dibuat.';
+            } elseif ($gradingType === PostTest::GRADING_AUTO_AI_REPORT) {
+                $cleanText = trim((string) ($result->extracted_text ?? ''));
+                $isTruncated = (bool) $result->is_truncated;
+
+                if ($cleanText === '' && !empty($result->file_path)) {
+                    $extracted = $this->documentExtractor->extractFromPublicDisk((string) $result->file_path);
+                    $preprocessed = $this->textPreprocessor->preprocess($extracted['text'], $postTest->template_extracted_text);
+                    $cleanText = $preprocessed['text'];
+                    $isTruncated = $preprocessed['is_truncated'];
+                    $result->update(['extracted_text' => $cleanText, 'is_truncated' => $isTruncated]);
+                }
+
+                $snapshot = $this->gradingBatchService->buildRubricSnapshot($postTest);
+                $aiResult = $this->aiGradingService->gradeReport($postTest, $cleanText, $snapshot);
+                $score = (float) $aiResult['score'];
+                $triage = $this->aiGradingService->evaluateAutoTriage($score, $passingGrade, $aiResult, $isTruncated);
+                $feedbackJson = array_merge($aiResult, [
+                    'grader'         => $gradingType,
+                    'passing_grade'  => $passingGrade,
+                    'triage_reasons' => $triage['reasons'],
+                ]);
+                $methodLabel = 'Koreksi Otomatis AI Laporan (Draf)';
+                $summaryMessage = $aiResult['overall_feedback'] ?: 'Draf penilaian AI berhasil dibuat.';
+            } else {
+                ToastMagic::error('Evaluasi ini disetel untuk penilaian manual.');
+
+                return redirect()->back();
             }
+
+            $result->update([
+                'ai_score'            => $score,
+                'final_score'         => $score,
+                'ai_feedback_json'    => $feedbackJson,
+                'needs_manual_review' => $triage['needs_manual_review'],
+                'grading_status'      => PostTestResult::GRADING_DRAFT_GRADED,
+                'last_error_message'  => null,
+                'graded_at'           => now(),
+            ]);
+
+            $studentName = $result->user?->profile?->full_name ?? $result->user?->name ?? 'Peserta';
+            $isPassed = $score >= $passingGrade;
+
+            ToastMagic::success("Draf penilaian otomatis berhasil dibuat: Skor {$score}");
+
+            return redirect()->back()->with('grading_popup', [
+                'title'        => 'Draf Koreksi Otomatis Berhasil',
+                'method'       => $methodLabel,
+                'student_name' => $studentName,
+                'score'        => $score,
+                'is_passed'    => $isPassed,
+                'message'      => $summaryMessage,
+            ]);
+        } catch (\Throwable $e) {
+            $result->update([
+                'grading_status'      => PostTestResult::GRADING_FAILED,
+                'needs_manual_review' => true,
+                'last_error_message'  => $e->getMessage(),
+            ]);
+
+            ToastMagic::error('Koreksi otomatis gagal: ' . $e->getMessage());
+
+            return redirect()->back();
         }
-
-        $finalNotes = trim(($eval['notes'] ?? '') . ($participantNote !== '' ? "\nCatatan Peserta: " . $participantNote : ''));
-
-        $result->update([
-            'score'     => (int) $eval['score'],
-            'is_passed' => (bool) $eval['is_passed'],
-            'notes'     => $finalNotes !== '' ? $finalNotes : null,
-            'status'    => 'graded',
-        ]);
-
-        $course = $postTest->course ?? $postTest->section?->course;
-        $this->syncStudentCourseProgress($course, $result->user_id);
-
-        return $eval;
     }
 
     private function syncStudentCourseProgress($course, int|string|null $userId): void
