@@ -321,7 +321,9 @@ class CertificateSubmissionController extends Controller
             'status'              => 'numbered',
         ]);
 
-        return back()->with('success', 'Nomor registrasi resmi sertifikat dari PPSDM berhasil disimpan!');
+        return redirect()
+            ->route('admin-pusat.management-course.certificate-submissions.show', ['id' => $submission->id, 'step' => 'publish'])
+            ->with('success', 'Nomor registrasi resmi sertifikat dari PPSDM berhasil disimpan!');
     }
 
     /**
@@ -399,6 +401,8 @@ class CertificateSubmissionController extends Controller
 
         $submission->update(['status' => 'completed']);
 
-        return back()->with('success', "Alhamdulillah! Sebanyak {$generatedCount} e-Sertifikat resmi berhasil diterbitkan dengan nomor PPSDM!");
+        return redirect()
+            ->route('admin-pusat.management-course.certificate-submissions.show', ['id' => $submission->id, 'step' => 'publish'])
+            ->with('success', "Sebanyak {$generatedCount} e-Sertifikat resmi berhasil diterbitkan dengan nomor PPSDM!");
     }
 }

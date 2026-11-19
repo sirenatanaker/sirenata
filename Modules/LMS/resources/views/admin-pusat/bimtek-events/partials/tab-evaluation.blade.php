@@ -129,222 +129,224 @@
             @endif
         </div>
     @else
-        {{-- Sub-Header Evaluasi Terpilih & Tombol Kembali --}}
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white rounded-md border border-slate-200 p-4 shadow-2xs">
-            <div class="min-w-0">
-                <p class="text-xs font-bold uppercase tracking-wider text-[#13416B]">
-                    {{ $selectedPostTest->course_section_id ? 'Evaluasi Harian' : 'Evaluasi Akhir' }}
-                </p>
-                <h2 class="text-base sm:text-lg font-bold text-slate-900 mt-0.5 wrap-break-word">
-                    {{ $selectedPostTestHeaderTitle }}
-                </h2>
+        {{-- Container Master Detail Evaluasi (Sub-Header + Filter + Kontrol Otomatis + Daftar Peserta + Paginasi) --}}
+        <div class="bg-white rounded-md border border-slate-200 shadow-2xs overflow-hidden">
+            {{-- 1. Sub-Header Evaluasi Terpilih & Tombol Kembali --}}
+            <div class="p-4 sm:p-5 border-b border-slate-200 bg-slate-50/50 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div class="min-w-0">
+                    <p class="text-xs font-bold uppercase tracking-wider text-[#13416B]">
+                        {{ $selectedPostTest->course_section_id ? 'Evaluasi Harian' : 'Evaluasi Akhir' }}
+                    </p>
+                    <h2 class="text-base sm:text-lg font-bold text-slate-900 mt-0.5 wrap-break-word">
+                        {{ $selectedPostTestHeaderTitle }}
+                    </h2>
+                </div>
+                <a href="{{ route('admin-pusat.management-course.bimtek-events.show', ['bimtek_event' => $event->id, 'tab' => 'evaluation']) }}"
+                   class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-md text-xs sm:text-sm font-bold text-[#13416B] bg-white hover:bg-slate-100 border border-slate-200 transition-colors shrink-0">
+                    <i class="fas fa-arrow-left text-xs"></i>
+                    <span>Kembali ke Daftar Evaluasi</span>
+                </a>
             </div>
-            <a href="{{ route('admin-pusat.management-course.bimtek-events.show', ['bimtek_event' => $event->id, 'tab' => 'evaluation']) }}"
-               class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-md text-xs sm:text-sm font-bold text-[#13416B] bg-slate-100 hover:bg-slate-200 transition-colors shrink-0">
-                <i class="fas fa-arrow-left text-xs"></i>
-                <span>Kembali ke Daftar Evaluasi</span>
-            </a>
-        </div>
 
-        {{-- Filter & Pencarian Peserta Evaluasi --}}
-        <form action="{{ route('admin-pusat.management-course.bimtek-events.show', $event->id) }}" method="GET"
-              class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 bg-white p-3.5 rounded-md border border-slate-200 shadow-2xs">
-            <input type="hidden" name="tab" value="evaluation">
-            <input type="hidden" name="post_test_id" value="{{ $selectedPostTest->id }}">
+            {{-- 2. Bar Pencarian & Filter Peserta Evaluasi --}}
+            <form action="{{ route('admin-pusat.management-course.bimtek-events.show', $event->id) }}" method="GET"
+                  class="p-4 border-b border-slate-200 bg-white flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
+                <input type="hidden" name="tab" value="evaluation">
+                <input type="hidden" name="post_test_id" value="{{ $selectedPostTest->id }}">
 
-            <input type="text"
-                   name="eval_search"
-                   value="{{ $evalSearch }}"
-                   placeholder="Cari nama, email, atau instansi peserta..."
-                   class="flex-1 px-3.5 py-2.5 text-sm sm:text-[15px] rounded-md border border-slate-300 focus:border-[#13416B] focus:ring-1 focus:ring-[#13416B] outline-none">
+                <input type="text"
+                       name="eval_search"
+                       value="{{ $evalSearch }}"
+                       placeholder="Cari nama, email, atau instansi peserta..."
+                       class="flex-1 px-3.5 py-2.5 text-sm sm:text-[15px] rounded-md border border-slate-300 focus:border-[#13416B] focus:ring-1 focus:ring-[#13416B] outline-none">
 
-            @if ($isManualTest)
-                <select name="eval_status" onchange="this.form.submit()"
-                        class="px-3.5 py-2.5 text-sm sm:text-[15px] rounded-md border border-slate-300 bg-white focus:border-[#13416B] focus:ring-1 focus:ring-[#13416B] outline-none">
-                    <option value="all" @selected($evalStatus === 'all')>Semua Status ({{ $triageCounts['all'] }})</option>
-                    <option value="pending" @selected(in_array($evalStatus, ['pending', 'submitted'], true))>Menunggu Dinilai ({{ $triageCounts['pending'] }})</option>
-                    <option value="needs_review" @selected($evalStatus === 'needs_review')>Perlu Review Manual ({{ $triageCounts['needs_review'] }})</option>
-                    <option value="failed" @selected($evalStatus === 'failed')>Gagal AI ({{ $triageCounts['failed'] }})</option>
-                    <option value="draft_graded" @selected($evalStatus === 'draft_graded')>Siap Publikasi / Draf ({{ $triageCounts['draft_ready'] }})</option>
-                    <option value="published" @selected(in_array($evalStatus, ['published', 'graded'], true))>Dipublikasikan ({{ $triageCounts['published'] }})</option>
-                </select>
-            @endif
-
-            <div class="flex items-center gap-2 shrink-0">
-                @if ($evalSearch !== '' || ($evalStatus !== 'all' && $evalStatus !== ''))
-                    <a href="{{ route('admin-pusat.management-course.bimtek-events.show', ['bimtek_event' => $event->id, 'tab' => 'evaluation', 'post_test_id' => $selectedPostTest->id]) }}"
-                       class="px-4 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-100 rounded-md border border-slate-200">
-                        Reset
-                    </a>
+                @if ($isManualTest)
+                    <select name="eval_status" onchange="this.form.submit()"
+                            class="px-3.5 py-2.5 text-sm sm:text-[15px] rounded-md border border-slate-300 bg-white focus:border-[#13416B] focus:ring-1 focus:ring-[#13416B] outline-none">
+                        <option value="all" @selected($evalStatus === 'all')>Semua Status ({{ $triageCounts['all'] }})</option>
+                        <option value="pending" @selected(in_array($evalStatus, ['pending', 'submitted'], true))>Menunggu Dinilai ({{ $triageCounts['pending'] }})</option>
+                        <option value="needs_review" @selected($evalStatus === 'needs_review')>Perlu Review Manual ({{ $triageCounts['needs_review'] }})</option>
+                        <option value="failed" @selected($evalStatus === 'failed')>Gagal AI ({{ $triageCounts['failed'] }})</option>
+                        <option value="draft_graded" @selected($evalStatus === 'draft_graded')>Siap Publikasi / Draf ({{ $triageCounts['draft_ready'] }})</option>
+                        <option value="published" @selected(in_array($evalStatus, ['published', 'graded'], true))>Dipublikasikan ({{ $triageCounts['published'] }})</option>
+                    </select>
                 @endif
-                <button type="submit"
-                        class="px-5 py-2.5 text-sm font-bold text-white bg-[#13416B] hover:bg-[#0f3354] rounded-md transition-colors cursor-pointer">
-                    Terapkan
-                </button>
-            </div>
-        </form>
 
-        {{-- Panel Kontrol Otomatis & Publikasi (Solid Biru Royal #1B568A) --}}
-        @if ($isManualTest)
-            @php
-                $batchObj = $activeBatch ?? null;
-                $batchPollUrl = $batchObj
-                    ? route('admin-pusat.management-course.post-test-submissions.batch.status', $batchObj->id)
-                    : '';
-            @endphp
+                <div class="flex items-center gap-2 shrink-0">
+                    @if ($evalSearch !== '' || ($evalStatus !== 'all' && $evalStatus !== ''))
+                        <a href="{{ route('admin-pusat.management-course.bimtek-events.show', ['bimtek_event' => $event->id, 'tab' => 'evaluation', 'post_test_id' => $selectedPostTest->id]) }}"
+                           class="px-4 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-100 rounded-md border border-slate-200">
+                            Reset
+                        </a>
+                    @endif
+                    <button type="submit"
+                            class="px-5 py-2.5 text-sm font-bold text-white bg-[#13416B] hover:bg-[#0f3354] rounded-md transition-colors cursor-pointer">
+                        Terapkan
+                    </button>
+                </div>
+            </form>
 
-            <div class="bg-[#1B568A] text-white rounded-md p-4 sm:p-5 space-y-3.5 shadow-sm"
-                 x-data="{
-                     batchStatus: '{{ $batchObj?->status ?? '' }}',
-                     processed: {{ (int) ($batchObj?->processed_count ?? 0) }},
-                     failed: {{ (int) ($batchObj?->failed_count ?? 0) }},
-                     total: {{ (int) ($batchObj?->total_targets ?? 0) }},
-                     progress: {{ (int) ($batchObj?->progress_percent ?? 0) }},
-                     pollUrl: '{{ $batchPollUrl }}',
-                     timer: null,
-                     init() {
-                         if (this.batchStatus === 'RUNNING' && this.pollUrl) {
-                             this.timer = setInterval(() => this.fetchStatus(), 6000);
-                         }
-                     },
-                     async fetchStatus() {
-                         try {
-                             const res = await fetch(this.pollUrl, { headers: { 'Accept': 'application/json' } });
-                             if (!res.ok) return;
-                             const data = await res.json();
-                             this.batchStatus = data.status;
-                             this.processed = data.processed_count;
-                             this.failed = data.failed_count;
-                             this.total = data.total_targets;
-                             this.progress = data.progress_percent;
-                             if (data.status !== 'RUNNING' && this.timer) {
-                                 clearInterval(this.timer);
-                                 window.location.reload();
+            {{-- 2b. Panel Kontrol Otomatis & Publikasi (Terintegrasi di dalam Container Master) --}}
+            @if ($isManualTest)
+                @php
+                    $batchObj = $activeBatch ?? null;
+                    $batchPollUrl = $batchObj
+                        ? route('admin-pusat.management-course.post-test-submissions.batch.status', $batchObj->id)
+                        : '';
+                @endphp
+
+                <div class="bg-[#1B568A] text-white px-4 sm:px-5 py-4 border-b border-[#13416B] space-y-3.5"
+                     x-data="{
+                         batchStatus: '{{ $batchObj?->status ?? '' }}',
+                         processed: {{ (int) ($batchObj?->processed_count ?? 0) }},
+                         failed: {{ (int) ($batchObj?->failed_count ?? 0) }},
+                         total: {{ (int) ($batchObj?->total_targets ?? 0) }},
+                         progress: {{ (int) ($batchObj?->progress_percent ?? 0) }},
+                         pollUrl: '{{ $batchPollUrl }}',
+                         timer: null,
+                         init() {
+                             if (this.batchStatus === 'RUNNING' && this.pollUrl) {
+                                 this.timer = setInterval(() => this.fetchStatus(), 6000);
                              }
-                         } catch (e) {}
-                     }
-                 }">
-                <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
-                    <div class="space-y-1">
-                        <p class="text-sm sm:text-base font-bold text-white">
-                            @if ($triageCounts['pure_pending'] > 0)
-                                Tersedia {{ $triageCounts['pure_pending'] }} Jawaban Belum Dinilai
-                            @elseif ($triageCounts['draft_ready'] > 0)
-                                {{ $triageCounts['draft_ready'] }} Draf Nilai Siap Ditinjau &amp; Dipublikasikan
-                            @else
-                                Kontrol Penilaian Otomatis &amp; Publikasi
-                            @endif
-                        </p>
-                        <p class="text-xs sm:text-sm text-blue-100 leading-relaxed">
-                            <span>
-                                {{ $selectedPostTest->course_section_id ? 'Evaluasi Harian' : 'Evaluasi Akhir' }}
-                                — Format {{ $selectedPostTest->is_essay ? 'Uraian / Esai' : 'Upload Berkas' }}
-                            </span>
-                            @if ($triageCounts['needs_review'] > 0)
-                                <span class="text-white/40 mx-1.5 select-none">—</span>
-                                <span class="font-semibold text-amber-200">{{ $triageCounts['needs_review'] }} Perlu Review Manual</span>
-                            @endif
-                        </p>
-                    </div>
+                         },
+                         async fetchStatus() {
+                             try {
+                                 const res = await fetch(this.pollUrl, { headers: { 'Accept': 'application/json' } });
+                                 if (!res.ok) return;
+                                 const data = await res.json();
+                                 this.batchStatus = data.status;
+                                 this.processed = data.processed_count;
+                                 this.failed = data.failed_count;
+                                 this.total = data.total_targets;
+                                 this.progress = data.progress_percent;
+                                 if (data.status !== 'RUNNING' && this.timer) {
+                                     clearInterval(this.timer);
+                                     window.location.reload();
+                                 }
+                             } catch (e) {}
+                         }
+                     }">
+                    <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
+                        <div class="space-y-1">
+                            <p class="text-sm sm:text-base font-bold text-white">
+                                @if ($triageCounts['pure_pending'] > 0)
+                                    Tersedia {{ $triageCounts['pure_pending'] }} Jawaban Belum Dinilai
+                                @elseif ($triageCounts['draft_ready'] > 0)
+                                    {{ $triageCounts['draft_ready'] }} Draf Nilai Siap Ditinjau &amp; Dipublikasikan
+                                @else
+                                    Kontrol Penilaian Otomatis &amp; Publikasi
+                                @endif
+                            </p>
+                            <p class="text-xs sm:text-sm text-blue-100 leading-relaxed">
+                                <span>
+                                    {{ $selectedPostTest->course_section_id ? 'Evaluasi Harian' : 'Evaluasi Akhir' }}
+                                    — Format {{ $selectedPostTest->is_essay ? 'Uraian / Esai' : 'Upload Berkas' }}
+                                </span>
+                                @if ($triageCounts['needs_review'] > 0)
+                                    <span class="text-white/40 mx-1.5 select-none">—</span>
+                                    <span class="font-semibold text-amber-200">{{ $triageCounts['needs_review'] }} Perlu Review Manual</span>
+                                @endif
+                            </p>
+                        </div>
 
-                    <div class="flex flex-wrap items-center gap-2 shrink-0">
-                        @if ($selectedPostTest->has_auto_grading && $triageCounts['pure_pending'] > 0)
-                            <form action="{{ route('admin-pusat.management-course.post-test-submissions.batch.start') }}" method="POST">
+                        <div class="flex flex-wrap items-center gap-2 shrink-0">
+                            @if ($selectedPostTest->has_auto_grading && $triageCounts['pure_pending'] > 0)
+                                <form action="{{ route('admin-pusat.management-course.post-test-submissions.batch.start') }}" method="POST">
+                                    @csrf
+                                    <input type="hidden" name="bimtek_event_id" value="{{ $event->id }}">
+                                    <input type="hidden" name="post_test_id" value="{{ $selectedPostTest->id }}">
+                                    <button type="submit"
+                                            class="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-md text-xs sm:text-sm font-bold text-white bg-emerald-500 hover:bg-emerald-600 transition-colors shadow-2xs cursor-pointer">
+                                        <i class="fas fa-wand-magic-sparkles"></i>
+                                        <span>Mulai Penilaian Otomatis ({{ $triageCounts['pure_pending'] }})</span>
+                                    </button>
+                                </form>
+                            @endif
+
+                            @if ($batchObj && $batchObj->status === 'PAUSED_QUOTA')
+                                <form action="{{ route('admin-pusat.management-course.post-test-submissions.batch.resume', $batchObj->id) }}" method="POST">
+                                    @csrf
+                                    <button type="submit"
+                                            class="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-md text-xs sm:text-sm font-bold text-white bg-amber-500 hover:bg-amber-600 transition-colors shadow-2xs cursor-pointer">
+                                        <i class="fas fa-play"></i>
+                                        <span>Lanjutkan Batch</span>
+                                    </button>
+                                </form>
+                            @endif
+
+                            @if ($batchObj && $triageCounts['failed'] > 0)
+                                <form action="{{ route('admin-pusat.management-course.post-test-submissions.batch.retry-failed', $batchObj->id) }}" method="POST">
+                                    @csrf
+                                    <button type="submit"
+                                            class="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-md text-xs sm:text-sm font-bold text-white bg-rose-500 hover:bg-rose-600 transition-colors shadow-2xs cursor-pointer">
+                                        <i class="fas fa-rotate-right"></i>
+                                        <span>Ulangi yang Gagal ({{ $triageCounts['failed'] }})</span>
+                                    </button>
+                                </form>
+                            @endif
+
+                            @if ($triageCounts['draft_ready'] > 0)
+                                <button type="button"
+                                        @click="$dispatch('open-modal', 'confirm-publish-grades')"
+                                        class="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-md text-xs sm:text-sm font-bold text-[#13416B] bg-white hover:bg-blue-50 transition-colors shadow-2xs cursor-pointer">
+                                    <i class="fas fa-paper-plane"></i>
+                                    <span>Publikasikan Semua Nilai ({{ $triageCounts['draft_ready'] }})</span>
+                                </button>
+                            @endif
+
+                            <form action="{{ route('admin-pusat.management-course.post-test-submissions.toggle-lock') }}" method="POST">
                                 @csrf
-                                <input type="hidden" name="bimtek_event_id" value="{{ $event->id }}">
                                 <input type="hidden" name="post_test_id" value="{{ $selectedPostTest->id }}">
                                 <button type="submit"
-                                        class="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-md text-xs sm:text-sm font-bold text-white bg-emerald-500 hover:bg-emerald-600 transition-colors shadow-2xs cursor-pointer">
-                                    <i class="fas fa-wand-magic-sparkles"></i>
-                                    <span>Mulai Penilaian Otomatis ({{ $triageCounts['pure_pending'] }})</span>
+                                        class="inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-md text-xs sm:text-sm font-semibold text-white bg-white/15 hover:bg-white/25 border border-white/25 transition-colors cursor-pointer">
+                                    <i class="fas {{ $selectedPostTest->is_submission_locked ? 'fa-lock-open' : 'fa-lock' }} text-xs"></i>
+                                    <span>{{ $selectedPostTest->is_submission_locked ? 'Buka Kunci' : 'Kunci Pengumpulan' }}</span>
                                 </button>
                             </form>
-                        @endif
-
-                        @if ($batchObj && $batchObj->status === 'PAUSED_QUOTA')
-                            <form action="{{ route('admin-pusat.management-course.post-test-submissions.batch.resume', $batchObj->id) }}" method="POST">
-                                @csrf
-                                <button type="submit"
-                                        class="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-md text-xs sm:text-sm font-bold text-white bg-amber-500 hover:bg-amber-600 transition-colors shadow-2xs cursor-pointer">
-                                    <i class="fas fa-play"></i>
-                                    <span>Lanjutkan Batch</span>
-                                </button>
-                            </form>
-                        @endif
-
-                        @if ($batchObj && $triageCounts['failed'] > 0)
-                            <form action="{{ route('admin-pusat.management-course.post-test-submissions.batch.retry-failed', $batchObj->id) }}" method="POST">
-                                @csrf
-                                <button type="submit"
-                                        class="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-md text-xs sm:text-sm font-bold text-white bg-rose-500 hover:bg-rose-600 transition-colors shadow-2xs cursor-pointer">
-                                    <i class="fas fa-rotate-right"></i>
-                                    <span>Ulangi yang Gagal ({{ $triageCounts['failed'] }})</span>
-                                </button>
-                            </form>
-                        @endif
-
-                        @if ($triageCounts['draft_ready'] > 0)
-                            <button type="button"
-                                    @click="$dispatch('open-modal', 'confirm-publish-grades')"
-                                    class="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-md text-xs sm:text-sm font-bold text-[#13416B] bg-white hover:bg-blue-50 transition-colors shadow-2xs cursor-pointer">
-                                <i class="fas fa-paper-plane"></i>
-                                <span>Publikasikan Semua Nilai ({{ $triageCounts['draft_ready'] }})</span>
-                            </button>
-                        @endif
-
-                        <form action="{{ route('admin-pusat.management-course.post-test-submissions.toggle-lock') }}" method="POST">
-                            @csrf
-                            <input type="hidden" name="post_test_id" value="{{ $selectedPostTest->id }}">
-                            <button type="submit"
-                                    class="inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-md text-xs sm:text-sm font-semibold text-white bg-white/15 hover:bg-white/25 border border-white/25 transition-colors cursor-pointer">
-                                <i class="fas {{ $selectedPostTest->is_submission_locked ? 'fa-lock-open' : 'fa-lock' }} text-xs"></i>
-                                <span>{{ $selectedPostTest->is_submission_locked ? 'Buka Kunci' : 'Kunci Pengumpulan' }}</span>
-                            </button>
-                        </form>
+                        </div>
                     </div>
+
+                    @if ($batchObj && in_array($batchObj->status, ['RUNNING', 'PAUSED_QUOTA'], true))
+                        <div class="pt-3 border-t border-white/15 space-y-2">
+                            <div class="flex flex-wrap items-center justify-between gap-2 text-xs sm:text-sm">
+                                <span class="font-semibold text-blue-100">
+                                    @if ($batchObj->status === 'PAUSED_QUOTA')
+                                        <span class="text-amber-200 font-semibold">Dijeda sementara — Kuota harian/RPM tercapai, tekan Lanjutkan Batch saat siap</span>
+                                    @else
+                                        <span>Sedang memproses penilaian otomatis...</span>
+                                    @endif
+                                </span>
+                                <span class="font-bold text-white tabular-nums">
+                                    <span x-text="processed"></span> / <span x-text="total"></span> selesai
+                                    <template x-if="failed > 0">
+                                        <span class="text-rose-200 ml-1">(<span x-text="failed"></span> gagal)</span>
+                                    </template>
+                                </span>
+                            </div>
+                            <div class="w-full h-2 rounded-full bg-white/20 overflow-hidden">
+                                <div class="h-full bg-emerald-400 transition-all duration-300" :style="`width: ${progress}%`"></div>
+                            </div>
+                        </div>
+                    @endif
                 </div>
+            @endif
 
-                @if ($batchObj && in_array($batchObj->status, ['RUNNING', 'PAUSED_QUOTA'], true))
-                    <div class="pt-3 border-t border-white/15 space-y-2">
-                        <div class="flex flex-wrap items-center justify-between gap-2 text-xs sm:text-sm">
-                            <span class="font-semibold text-blue-100">
-                                @if ($batchObj->status === 'PAUSED_QUOTA')
-                                    <span class="text-amber-200 font-semibold">Dijeda sementara — Kuota harian/RPM tercapai, tekan Lanjutkan Batch saat siap</span>
-                                @else
-                                    <span>Sedang memproses penilaian otomatis...</span>
-                                @endif
-                            </span>
-                            <span class="font-bold text-white tabular-nums">
-                                <span x-text="processed"></span> / <span x-text="total"></span> selesai
-                                <template x-if="failed > 0">
-                                    <span class="text-rose-200 ml-1">(<span x-text="failed"></span> gagal)</span>
-                                </template>
-                            </span>
-                        </div>
-                        <div class="w-full h-2 rounded-full bg-white/20 overflow-hidden">
-                            <div class="h-full bg-emerald-400 transition-all duration-300" :style="`width: ${progress}%`"></div>
-                        </div>
-                    </div>
-                @endif
-            </div>
-        @endif
-
-        {{-- Daftar Jawaban Peserta --}}
-        @php
-            $resolveFileIcon = function (?string $filename): array {
-                $ext = strtolower(pathinfo((string) $filename, PATHINFO_EXTENSION));
-                return match ($ext) {
-                    'xlsx', 'xls', 'csv' => ['icon' => 'fa-file-excel', 'color' => 'text-emerald-600'],
-                    'pdf'                => ['icon' => 'fa-file-pdf', 'color' => 'text-rose-600'],
-                    'doc', 'docx'        => ['icon' => 'fa-file-word', 'color' => 'text-blue-600'],
-                    'ppt', 'pptx'        => ['icon' => 'fa-file-powerpoint', 'color' => 'text-orange-500'],
-                    'zip', 'rar', '7z'   => ['icon' => 'fa-file-archive', 'color' => 'text-amber-600'],
-                    default              => ['icon' => 'fa-file-alt', 'color' => 'text-slate-500'],
+            {{-- 3. Daftar Jawaban Peserta Bernomor --}}
+            @php
+                $resolveFileIcon = function (?string $filename): array {
+                    $ext = strtolower(pathinfo((string) $filename, PATHINFO_EXTENSION));
+                    return match ($ext) {
+                        'xlsx', 'xls', 'csv' => ['icon' => 'fa-file-excel', 'color' => 'text-emerald-600'],
+                        'pdf'                => ['icon' => 'fa-file-pdf', 'color' => 'text-rose-600'],
+                        'doc', 'docx'        => ['icon' => 'fa-file-word', 'color' => 'text-blue-600'],
+                        'ppt', 'pptx'        => ['icon' => 'fa-file-powerpoint', 'color' => 'text-orange-500'],
+                        'zip', 'rar', '7z'   => ['icon' => 'fa-file-archive', 'color' => 'text-amber-600'],
+                        default              => ['icon' => 'fa-file-alt', 'color' => 'text-slate-500'],
+                    };
                 };
-            };
-        @endphp
+            @endphp
 
-        <div class="bg-white rounded-md border border-slate-200 shadow-2xs overflow-hidden divide-y divide-slate-200">
+            <div class="divide-y divide-slate-200">
             @forelse ($evalSubmissions as $sub)
                 @php
                     $isEssay = (bool) $selectedPostTest->is_essay;
@@ -685,17 +687,20 @@
                         </div>
                     </div>
                 @endif
-            @empty
-                <div class="p-12 text-center text-slate-500 space-y-1">
-                    <p class="text-base font-bold text-slate-700">Belum ada hasil evaluasi dari peserta gelombang ini</p>
-                    <p class="text-sm text-slate-400">Jawaban peserta akan muncul di sini setelah mereka menyelesaikan evaluasi terkait.</p>
-                </div>
-            @endforelse
-        </div>
+                @empty
+                    <div class="p-12 text-center text-slate-500 space-y-1">
+                        <p class="text-base font-bold text-slate-700">Belum ada hasil evaluasi dari peserta gelombang ini</p>
+                        <p class="text-sm text-slate-400">Jawaban peserta akan muncul di sini setelah mereka menyelesaikan evaluasi terkait.</p>
+                    </div>
+                @endforelse
+            </div>
 
-        @if ($evalSubmissions && $evalSubmissions->hasPages())
-            <div>{{ $evalSubmissions->links() }}</div>
-        @endif
+            @if ($evalSubmissions && $evalSubmissions->hasPages())
+                <div class="p-4 border-t border-slate-200 bg-slate-50/40">
+                    {{ $evalSubmissions->links() }}
+                </div>
+            @endif
+        </div>
 
         @if ($isManualTest && ($triageCounts['draft_ready'] ?? 0) > 0)
             <x-modal name="confirm-publish-grades" title="Konfirmasi Publikasi Nilai" maxWidth="sm:max-w-md">

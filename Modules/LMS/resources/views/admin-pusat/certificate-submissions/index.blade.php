@@ -1,5 +1,5 @@
 <x-dashboard::layouts.dashboard title="Pengajuan Sertifikat PPSDM - Admin Pusat">
-    <div class="w-full p-3 sm:p-6 space-y-4 sm:space-y-6">
+    <div class="p-3 sm:p-6 max-w-[1600px] mx-auto space-y-4 sm:space-y-6">
 
         {{-- Filter Card & Tabel --}}
         <x-dashboard::filter-card
@@ -9,7 +9,7 @@
 
             <x-slot name="actions">
                 <a href="{{ route('admin-pusat.management-course.certificate-submissions.create') }}"
-                   class="inline-flex items-center gap-1.5 px-4 py-2 text-sm sm:text-[15px] font-bold text-white bg-[#13416B] hover:bg-[#0e2c48] rounded-lg transition-colors shadow-2xs">
+                   class="inline-flex items-center gap-1.5 px-4 py-2 text-sm sm:text-[15px] font-bold text-white bg-[#13416B] hover:bg-[#0f3354] rounded-md transition-colors shadow-2xs">
                     <i class="fas fa-plus text-xs sm:text-sm"></i>
                     <span>Buat Pengajuan Baru</span>
                 </a>
@@ -17,9 +17,9 @@
 
             <x-slot name="filter_inputs">
                 {{-- Status --}}
-                <div class="w-full sm:w-48">
+                <div class="w-full sm:w-52">
                     <label class="block text-xs sm:text-sm font-medium text-slate-500 mb-1">Status Pengajuan</label>
-                    <select name="status" class="w-full px-3 py-2 rounded-lg border border-slate-300 text-sm sm:text-[15px]">
+                    <select name="status" class="w-full px-3 py-2 rounded-md border border-slate-300 text-sm sm:text-[15px]">
                         <option value="">Semua Status</option>
                         <option value="draft" @selected(request('status') === 'draft')>Draft</option>
                         <option value="submitted_to_ppsdm" @selected(request('status') === 'submitted_to_ppsdm')>Diajukan ke PPSDM</option>
@@ -35,7 +35,7 @@
                         <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs sm:text-sm"></i>
                         <input type="text" name="search" value="{{ request('search') }}"
                                placeholder="Cari kode usulan, nomor nota dinas, atau nama bimtek..."
-                               class="w-full pl-9 pr-3 py-2 rounded-lg border border-slate-300 text-sm sm:text-[15px]">
+                               class="w-full pl-9 pr-3 py-2 rounded-md border border-slate-300 text-sm sm:text-[15px]">
                     </div>
                 </div>
             </x-slot>
@@ -43,81 +43,81 @@
             <div class="overflow-x-auto">
                 <table class="w-full text-left border-collapse">
                     <thead>
-                        <tr class="bg-slate-50 border-b border-slate-200 text-xs sm:text-[13px] font-bold text-slate-600 uppercase tracking-wider">
-                            <th class="py-3 px-3.5 w-12 text-center">No.</th>
-                            <th class="py-3 px-3.5 min-w-[200px]">Kode Usulan & No. Nota</th>
-                            <th class="py-3 px-3.5 min-w-[220px]">Bimtek / Kursus</th>
-                            <th class="py-3 px-3.5 min-w-[120px] text-center">Jml Lulusan</th>
-                            <th class="py-3 px-3.5 min-w-[140px]">Tanggal Pengajuan</th>
-                            <th class="py-3 px-3.5 min-w-[150px] text-center">Status</th>
-                            <th class="py-3 px-3.5 w-24 text-center">Aksi</th>
+                        <tr class="bg-slate-50 border-b border-slate-200 text-xs font-bold text-slate-600 uppercase tracking-wider">
+                            <th class="py-3 px-4 w-12 text-center">No.</th>
+                            <th class="py-3 px-4 min-w-[210px]">Kode Usulan &amp; No. Nota</th>
+                            <th class="py-3 px-4 min-w-[240px]">Bimtek / Kursus</th>
+                            <th class="py-3 px-4 min-w-[130px] text-center">Jml Lulusan</th>
+                            <th class="py-3 px-4 min-w-[155px]">Tanggal Pengajuan</th>
+                            <th class="py-3 px-4 min-w-[165px] text-center">Status</th>
+                            <th class="py-3 px-4 w-28 text-center">Aksi</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-slate-100 text-sm sm:text-[15px]">
+                    <tbody class="divide-y divide-slate-100 text-base">
                         @forelse ($submissions as $index => $item)
                             <tr class="hover:bg-slate-50/70 transition-colors">
-                                <td class="py-3 px-3.5 text-center text-xs sm:text-sm font-semibold text-slate-400">
+                                <td class="py-3.5 px-4 text-center text-sm sm:text-base font-semibold text-slate-400">
                                     {{ $submissions->firstItem() + $index }}
                                 </td>
-                                <td class="py-3 px-3.5">
+                                <td class="py-3.5 px-4">
                                     <a href="{{ route('admin-pusat.management-course.certificate-submissions.show', $item->id) }}"
                                        class="font-bold text-slate-900 hover:text-[#13416B] transition-colors font-mono">
                                         {{ $item->submission_code }}
                                     </a>
                                     @if ($item->submission_letter_number)
-                                        <p class="text-xs sm:text-[13px] text-slate-500 mt-0.5">
+                                        <p class="text-sm text-slate-500 mt-0.5">
                                             Nota: <strong class="text-slate-700">{{ $item->submission_letter_number }}</strong>
                                         </p>
                                     @endif
                                 </td>
-                                <td class="py-3 px-3.5">
+                                <td class="py-3.5 px-4">
                                     <p class="font-bold text-slate-800 line-clamp-1">
                                         {{ $item->bimtekEvent?->batch_name ?? '-' }}
                                     </p>
-                                    <p class="text-xs sm:text-[13px] text-slate-400 line-clamp-1">
+                                    <p class="text-sm text-slate-500 line-clamp-1">
                                         {{ $item->bimtekEvent?->course?->name ?? '-' }}
                                     </p>
                                 </td>
-                                <td class="py-3 px-3.5 text-center">
-                                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs sm:text-sm font-extrabold bg-[#13416B]/10 text-[#13416B] tabular-nums">
+                                <td class="py-3.5 px-4 text-center">
+                                    <span class="inline-flex items-center px-2.5 py-1 rounded-md text-sm font-bold bg-[#DCEBF8] text-[#13416B] border border-[#BBD6EE] tabular-nums">
                                         {{ $item->total_graduates }} ASN
                                     </span>
                                 </td>
-                                <td class="py-3 px-3.5">
-                                    <p class="font-bold text-slate-800 text-xs sm:text-sm tabular-nums">
-                                        {{ $item->submitted_at ? $item->submitted_at->format('d M Y') : '-' }}
+                                <td class="py-3.5 px-4">
+                                    <p class="font-bold text-slate-800 text-sm tabular-nums">
+                                        {{ $item->submitted_at ? $item->submitted_at->translatedFormat('d M Y') : '-' }}
                                     </p>
-                                    <p class="text-xs sm:text-[13px] text-slate-400">
+                                    <p class="text-sm text-slate-500">
                                         Oleh: {{ $item->submitter?->name ?? 'Admin' }}
                                     </p>
                                 </td>
-                                <td class="py-3 px-3.5 text-center">
+                                <td class="py-3.5 px-4 text-center">
                                     @php $badge = $item->status_badge; @endphp
-                                    <span class="inline-flex px-2.5 py-0.5 rounded-full text-xs sm:text-sm font-semibold border {{ $badge['class'] }}">
+                                    <span class="inline-flex px-2.5 py-1 rounded-md text-sm font-bold border {{ $badge['class'] }}">
                                         {{ $badge['label'] }}
                                     </span>
                                 </td>
-                                <td class="py-3 px-3.5 text-center">
+                                <td class="py-3.5 px-4 text-center">
                                     <a href="{{ route('admin-pusat.management-course.certificate-submissions.show', $item->id) }}"
-                                       class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs sm:text-sm font-bold text-[#13416B] bg-[#13416B]/10 hover:bg-[#13416B]/20 transition-colors">
+                                       class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-md text-sm font-bold text-[#13416B] bg-slate-100 hover:bg-[#13416B] hover:text-white transition-colors">
                                         <span>Buka</span>
-                                        <i class="fas fa-arrow-right text-xs"></i>
+                                        <i class="fas fa-chevron-right text-xs"></i>
                                     </a>
                                 </td>
                             </tr>
                         @empty
                             <tr>
                                 <td colspan="7" class="py-12 px-4 text-center">
-                                    <div class="max-w-xs mx-auto space-y-2">
-                                        <div class="w-12 h-12 bg-slate-100 rounded-full flex items-center justify-center mx-auto text-slate-400">
+                                    <div class="max-w-sm mx-auto space-y-2">
+                                        <div class="w-12 h-12 bg-slate-100 rounded-md flex items-center justify-center mx-auto text-slate-400">
                                             <i class="fas fa-file-circle-check text-xl"></i>
                                         </div>
-                                        <p class="text-base font-semibold text-slate-700">Belum Ada Pengajuan ke PPSDM</p>
-                                        <p class="text-xs sm:text-sm text-slate-500">
+                                        <p class="text-base font-bold text-slate-700">Belum Ada Pengajuan ke PPSDM</p>
+                                        <p class="text-sm text-slate-500">
                                             Peserta yang telah lulus Bimtek Online dapat diajukan secara terpusat ke PPSDM untuk mendapatkan nomor registrasi resmi sertifikat.
                                         </p>
                                         <a href="{{ route('admin-pusat.management-course.certificate-submissions.create') }}"
-                                           class="inline-block mt-2 px-3.5 py-1.5 text-xs sm:text-sm font-bold text-white bg-[#13416B] rounded-lg">
+                                           class="inline-block mt-2 px-4 py-2 text-sm font-bold text-white bg-[#13416B] hover:bg-[#0f3354] rounded-md transition-colors">
                                             Buat Pengajuan Pertama
                                         </a>
                                     </div>
@@ -129,7 +129,7 @@
             </div>
 
             @if ($submissions->hasPages())
-                <div class="px-4 py-3 border-t border-slate-100 bg-slate-50/50">
+                <div class="px-4 py-3 border-t border-slate-200 bg-slate-50/40">
                     {{ $submissions->links() }}
                 </div>
             @endif
