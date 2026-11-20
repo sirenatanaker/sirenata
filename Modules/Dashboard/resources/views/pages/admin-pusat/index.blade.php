@@ -236,7 +236,7 @@
                         <span class="w-3 h-3 rounded-xs bg-[#2B6496]"></span>Pelaksanaan &amp; Live Zoom
                     </span>
                     <span class="inline-flex items-center gap-1.5">
-                        <span class="w-3 h-3 rounded-xs bg-amber-400"></span>Evaluasi &amp; Pengajuan PPSDM
+                        <span class="w-3 h-3 rounded-xs bg-emerald-500"></span>Evaluasi &amp; Pengajuan PPSDM
                     </span>
                     <span class="inline-flex items-center gap-1.5">
                         <span class="inline-block w-4 border-t-2 border-dashed border-red-500"></span>Hari Ini ({{ $todayFormatted }})
@@ -906,7 +906,7 @@
                                     <span class="font-semibold text-white tabular-nums">${escapeHtml(ev.exec_label)}</span>
                                 </div>
                                 <div class="flex items-center justify-between gap-2">
-                                    <span class="inline-flex items-center gap-1.5 text-blue-100"><span class="w-2 h-2 rounded-xs bg-amber-400"></span>Evaluasi &amp; PPSDM</span>
+                                    <span class="inline-flex items-center gap-1.5 text-blue-100"><span class="w-2 h-2 rounded-xs bg-emerald-400"></span>Evaluasi &amp; PPSDM</span>
                                     <span class="font-semibold text-white tabular-nums">${escapeHtml(ev.eval_label)}</span>
                                 </div>
                             </div>
@@ -990,20 +990,29 @@
                             ? `<div class="absolute top-0 bottom-0 border-l-2 border-dashed border-red-500/80 z-20 pointer-events-none" style="left:${todayPct}%"></div>`
                             : '';
 
-                        // Render Baris Gantt per Event
+                        // Warna badge status disamakan dengan warna 3 batang Gantt (sky-300, #2B6496, emerald-500)
+                        const SOFT_STATUS_BADGE = {
+                            open_registration: 'bg-sky-300 text-sky-950',
+                            ongoing: 'bg-[#2B6496] text-white',
+                            completed: 'bg-emerald-500 text-white',
+                            other: 'bg-slate-400 text-white',
+                        };
+
+                        // Render Baris Gantt per Event (tinggi ketiga bar seragam h-7, warna palet sky-300 / #2B6496 / emerald-500)
                         rowsEl.innerHTML = filtered.map((ev, idx) => {
                             const regSeg = calcSegment(ev.reg_start, ev.reg_end, minMs, spanMs);
                             const execSeg = calcSegment(ev.exec_start, ev.exec_end, minMs, spanMs);
                             const evalSeg = calcSegment(ev.eval_start, ev.eval_end, minMs, spanMs);
+                            const badgeCls = SOFT_STATUS_BADGE[ev.status_key] || SOFT_STATUS_BADGE.other;
 
                             const regBar = regSeg
-                                ? `<a href="${escapeHtml(ev.url)}" class="absolute top-1/2 -translate-y-1/2 h-4 rounded-md bg-sky-300 hover:bg-sky-400 transition-colors z-10" style="left:${regSeg.left}%;width:${regSeg.width}%"></a>`
+                                ? `<a href="${escapeHtml(ev.url)}" class="absolute top-1/2 -translate-y-1/2 h-7 rounded-md bg-sky-300 hover:bg-sky-400 ring-1 ring-white transition-colors z-10" style="left:${regSeg.left}%;width:${regSeg.width}%"></a>`
                                 : '';
                             const evalBar = evalSeg
-                                ? `<a href="${escapeHtml(ev.eval_url)}" class="absolute top-1/2 -translate-y-1/2 h-4 rounded-md bg-amber-400 hover:bg-amber-500 transition-colors z-10" style="left:${evalSeg.left}%;width:${evalSeg.width}%"></a>`
+                                ? `<a href="${escapeHtml(ev.eval_url)}" class="absolute top-1/2 -translate-y-1/2 h-7 rounded-md bg-emerald-500 hover:bg-emerald-600 ring-1 ring-white transition-colors z-10" style="left:${evalSeg.left}%;width:${evalSeg.width}%"></a>`
                                 : '';
                             const execBar = execSeg
-                                ? `<a href="${escapeHtml(ev.url)}" class="absolute top-1/2 -translate-y-1/2 h-7 rounded-md bg-[#2B6496] hover:bg-[#1B568A] shadow-2xs transition-colors z-15 flex items-center px-2 overflow-hidden" style="left:${execSeg.left}%;width:${execSeg.width}%">
+                                ? `<a href="${escapeHtml(ev.url)}" class="absolute top-1/2 -translate-y-1/2 h-7 rounded-md bg-[#2B6496] hover:bg-[#1B568A] ring-1 ring-white shadow-2xs transition-colors z-15 flex items-center px-2 overflow-hidden" style="left:${execSeg.left}%;width:${execSeg.width}%">
                                        <span class="text-xs font-semibold text-white truncate">${execSeg.width >= 12 ? escapeHtml(ev.exec_label) : ''}</span>
                                    </a>`
                                 : '';
@@ -1020,7 +1029,7 @@
                                             ${escapeHtml(ev.batch_name)}
                                         </a>
                                         <div class="flex flex-wrap items-center gap-1.5 text-xs">
-                                            <span class="inline-flex px-2 py-0.5 rounded font-bold ${escapeHtml(ev.status_class)}">${escapeHtml(ev.status_label)}</span>
+                                            <span class="inline-flex px-2 py-0.5 rounded font-bold ${badgeCls}">${escapeHtml(ev.status_label)}</span>
                                             <span class="text-slate-600 font-semibold tabular-nums">${formatNumber(ev.registered)} Peserta</span>
                                             ${hasPendingEval ? `<a href="${escapeHtml(ev.eval_url)}" class="px-2 py-0.5 rounded bg-amber-100 text-amber-800 hover:bg-amber-200 font-bold tabular-nums">${formatNumber(ev.pending_eval)} Dinilai</a>` : ''}
                                             ${hasReadyPpsdm ? `<a href="${escapeHtml(ev.ppsdm_url)}" class="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 hover:bg-emerald-200 font-bold tabular-nums">${formatNumber(ev.ready_ppsdm)} PPSDM</a>` : ''}
