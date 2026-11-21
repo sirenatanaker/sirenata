@@ -46,7 +46,7 @@
                         <tr class="bg-slate-50 border-b border-slate-200 text-xs font-bold text-slate-600 uppercase tracking-wider">
                             <th class="py-3 px-4 w-12 text-center">No.</th>
                             <th class="py-3 px-4 min-w-[210px]">Kode Usulan &amp; No. Nota</th>
-                            <th class="py-3 px-4 min-w-[240px]">Bimtek / Kursus</th>
+                            <th class="py-3 px-4 min-w-[240px]">Acara &amp; Kursus</th>
                             <th class="py-3 px-4 min-w-[130px] text-center">Jml Lulusan</th>
                             <th class="py-3 px-4 min-w-[155px]">Tanggal Pengajuan</th>
                             <th class="py-3 px-4 min-w-[165px] text-center">Status</th>
@@ -71,16 +71,16 @@
                                     @endif
                                 </td>
                                 <td class="py-3.5 px-4">
-                                    <p class="font-bold text-slate-800 line-clamp-1">
+                                    <p class="font-bold text-slate-800 line-clamp-2 leading-snug">
                                         {{ $item->bimtekEvent?->batch_name ?? '-' }}
                                     </p>
-                                    <p class="text-sm text-slate-500 line-clamp-1">
+                                    <p class="text-sm text-slate-500 line-clamp-1 mt-0.5">
                                         {{ $item->bimtekEvent?->course?->name ?? '-' }}
                                     </p>
                                 </td>
                                 <td class="py-3.5 px-4 text-center">
-                                    <span class="inline-flex items-center px-2.5 py-1 rounded-md text-sm font-bold bg-[#DCEBF8] text-[#13416B] border border-[#BBD6EE] tabular-nums">
-                                        {{ $item->total_graduates }} ASN
+                                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs sm:text-sm font-bold bg-[#13416B] text-white tabular-nums">
+                                        {{ $item->total_graduates }} Peserta
                                     </span>
                                 </td>
                                 <td class="py-3.5 px-4">
@@ -93,16 +93,18 @@
                                 </td>
                                 <td class="py-3.5 px-4 text-center">
                                     @php $badge = $item->status_badge; @endphp
-                                    <span class="inline-flex px-2.5 py-1 rounded-md text-sm font-bold border {{ $badge['class'] }}">
+                                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs sm:text-sm font-bold {{ $badge['class'] }}">
                                         {{ $badge['label'] }}
                                     </span>
                                 </td>
                                 <td class="py-3.5 px-4 text-center">
-                                    <a href="{{ route('admin-pusat.management-course.certificate-submissions.show', $item->id) }}"
-                                       class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-md text-sm font-bold text-[#13416B] bg-slate-100 hover:bg-[#13416B] hover:text-white transition-colors">
-                                        <span>Buka</span>
-                                        <i class="fas fa-chevron-right text-xs"></i>
-                                    </a>
+                                    <div class="flex items-center justify-center gap-1.5">
+                                        <a href="{{ route('admin-pusat.management-course.certificate-submissions.show', $item->id) }}"
+                                           title="Detail &amp; Kelola Pengajuan Sertifikat"
+                                           class="inline-flex items-center justify-center w-8 h-8 rounded-lg text-[#13416B] bg-[#13416B]/10 hover:bg-[#13416B]/20 transition-colors">
+                                            <i class="fas fa-eye text-xs sm:text-sm"></i>
+                                        </a>
+                                    </div>
                                 </td>
                             </tr>
                         @empty

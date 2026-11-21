@@ -224,7 +224,7 @@
                                         :disabled="selectedIds.length === 0"
                                         class="inline-flex items-center gap-2 px-5 py-2.5 text-xs sm:text-sm font-bold text-white bg-[#13416B] hover:bg-[#0f3354] disabled:opacity-50 disabled:cursor-not-allowed rounded-md transition-colors shadow-2xs cursor-pointer">
                                     <i class="fas fa-paper-plane text-xs"></i>
-                                    <span>Ajukan ke PPSDM (<span x-text="selectedIds.length"></span> ASN)</span>
+                                    <span>Ajukan ke PPSDM (<span x-text="selectedIds.length"></span> Peserta)</span>
                                 </button>
                             </div>
                         </div>

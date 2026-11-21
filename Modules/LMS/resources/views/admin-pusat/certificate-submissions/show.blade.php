@@ -70,22 +70,7 @@
                         {{ $submission->bimtekEvent?->batch_name ?? $submission->submission_code }}
                     </h1>
                     <div class="flex flex-wrap items-center gap-x-2.5 gap-y-1.5 text-sm sm:text-base text-slate-200">
-                        <span>Kursus: <strong class="text-white">{{ $submission->bimtekEvent?->course?->name ?? '-' }}</strong></span>
-                        <span class="text-white/40 select-none">•</span>
-                        <span>Kode Pengajuan: <strong class="text-white font-mono">{{ $submission->submission_code }}</strong></span>
-                    </div>
-                    <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs sm:text-sm text-blue-200 pt-0.5">
-                        @if ($submission->submitted_at)
-                            <span>Diajukan: <strong class="text-white">{{ $submission->submitted_at->translatedFormat('d M Y, H:i') }} WIB</strong></span>
-                        @endif
-                        @if ($submission->submission_letter_number)
-                            <span class="text-white/35 select-none">•</span>
-                            <span>Nota Dinas: <strong class="text-white">{{ $submission->submission_letter_number }}</strong></span>
-                        @endif
-                        @if ($submission->ppsdm_decree_number)
-                            <span class="text-white/35 select-none">•</span>
-                            <span>SK PPSDM: <strong class="text-white">{{ $submission->ppsdm_decree_number }}</strong></span>
-                        @endif
+                        <span class="font-medium text-white">{{ $submission->bimtekEvent?->course?->name ?? '-' }}</span>
                     </div>
                 </div>
 
@@ -191,10 +176,23 @@
             {{-- Card Tabel Pratinjau Peserta --}}
             <div class="bg-white rounded-md border border-slate-200 shadow-2xs overflow-hidden">
                 <div class="px-4 sm:px-5 py-3.5 border-b border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-2 bg-slate-50/60">
-                    <div>
+                    <div class="space-y-0.5">
                         <h3 class="text-base font-bold text-slate-800">Pratinjau Daftar Peserta yang Akan Diekspor</h3>
+                        @if ($submission->submitted_at || $submission->submission_letter_number)
+                            <div class="flex flex-wrap items-center gap-x-2.5 gap-y-0.5 text-xs sm:text-sm text-slate-500">
+                                @if ($submission->submitted_at)
+                                    <span>Diajukan: <strong class="text-slate-700">{{ $submission->submitted_at->translatedFormat('d M Y, H:i') }} WIB</strong></span>
+                                @endif
+                                @if ($submission->submitted_at && $submission->submission_letter_number)
+                                    <span class="text-slate-300 select-none">•</span>
+                                @endif
+                                @if ($submission->submission_letter_number)
+                                    <span>Nota Dinas: <strong class="text-slate-700">{{ $submission->submission_letter_number }}</strong></span>
+                                @endif
+                            </div>
+                        @endif
                         @if ($submission->notes)
-                            <p class="text-xs sm:text-sm text-slate-500 mt-0.5">Catatan pengajuan: {{ $submission->notes }}</p>
+                            <p class="text-xs sm:text-sm text-slate-500">Catatan pengajuan: {{ $submission->notes }}</p>
                         @endif
                     </div>
                     <span class="text-xs sm:text-sm font-semibold text-slate-500 shrink-0">
@@ -283,9 +281,16 @@
             {{-- Card Tabel Daftar Nomor Sertifikat --}}
             <div class="bg-white rounded-md border border-slate-200 shadow-2xs overflow-hidden">
                 <div class="px-4 sm:px-5 py-3.5 border-b border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-2 bg-slate-50/60">
-                    <h3 class="text-base font-bold text-slate-800">
-                        Daftar Nomor Sertifikat Peserta
-                    </h3>
+                    <div class="space-y-0.5">
+                        <h3 class="text-base font-bold text-slate-800">
+                            Daftar Nomor Sertifikat Peserta
+                        </h3>
+                        @if ($submission->ppsdm_decree_number)
+                            <p class="text-xs sm:text-sm text-slate-500">
+                                SK PPSDM: <strong class="text-slate-700">{{ $submission->ppsdm_decree_number }}</strong>
+                            </p>
+                        @endif
+                    </div>
                     <span class="text-xs sm:text-sm font-semibold text-slate-500">
                         {{ $numberedCount }} / {{ $totalStudents }} peserta sudah bernomor
                     </span>

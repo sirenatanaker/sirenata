@@ -65,11 +65,11 @@ class CertificateSubmission extends Model
     public function getStatusBadgeAttribute(): array
     {
         return match ($this->status) {
-            'draft'               => ['label' => 'Draft Usulan', 'class' => 'bg-slate-100 text-slate-700 border-slate-200'],
-            'submitted_to_ppsdm'  => ['label' => 'Diajukan ke PPSDM', 'class' => 'bg-amber-50 text-amber-700 border-amber-200'],
-            'numbered'            => ['label' => 'Nomor Telah Terbit', 'class' => 'bg-blue-50 text-blue-700 border-blue-200'],
-            'completed'           => ['label' => 'Sertifikat Diterbitkan', 'class' => 'bg-emerald-50 text-emerald-700 border-emerald-200'],
-            default               => ['label' => ucfirst($this->status), 'class' => 'bg-slate-100 text-slate-700 border-slate-200'],
+            'draft'               => ['label' => 'Draft Usulan', 'class' => 'bg-slate-500 text-white'],
+            'submitted_to_ppsdm'  => ['label' => 'Diajukan ke PPSDM', 'class' => 'bg-amber-500 text-white'],
+            'numbered'            => ['label' => 'Nomor Telah Terbit', 'class' => 'bg-blue-600 text-white'],
+            'completed'           => ['label' => 'Sertifikat Diterbitkan', 'class' => 'bg-emerald-600 text-white'],
+            default               => ['label' => ucfirst($this->status), 'class' => 'bg-slate-500 text-white'],
         };
     }
 }
