@@ -1,4 +1,4 @@
-<x-dashboard::layouts.dashboard title="Kuesioner Evaluasi Bimtek - Admin Pusat">
+<x-dashboard::layouts.dashboard title="Penilaian Narasumber - Admin Pusat">
     <div class="w-full p-0 sm:p-6 lg:p-8 max-w-[1600px] mx-auto space-y-4 sm:space-y-6">
 
         {{-- Navigasi Tab (Pertanyaan vs Rekap Respon) --}}

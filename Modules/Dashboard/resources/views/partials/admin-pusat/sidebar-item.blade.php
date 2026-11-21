@@ -417,7 +417,7 @@
                     {{ $isEvaluationQuestionsActive
                         ? 'text-[#13416B] bg-[#13416B]/10 font-bold'
                         : 'text-slate-500 hover:bg-slate-100 hover:text-[#13416B]' }}">
-                    Kuesioner Evaluasi
+                    Penilaian Narasumber
                 </a>
             </li>
         </ul>
@@ -448,7 +448,7 @@
                     <a href="{{ route('admin-pusat.management-course.evaluation-questions.index') }}"
                         class="block px-3.5 py-2.5 rounded-lg text-sm leading-snug break-words font-semibold transition-colors
                         {{ $isEvaluationQuestionsActive ? 'text-[#13416B] bg-[#13416B]/10 font-bold' : 'text-slate-600 hover:bg-slate-100 hover:text-[#13416B]' }}">
-                        Kuesioner Evaluasi
+                        Penilaian Narasumber
                     </a>
                 </li>
             </ul>
