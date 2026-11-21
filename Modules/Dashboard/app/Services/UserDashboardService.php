@@ -3,6 +3,7 @@
 namespace Modules\Dashboard\Services;
 
 use App\Models\User;
+use App\Support\SmartCache;
 use Illuminate\Support\Collection;
 use Modules\LMS\Models\Category;
 use Modules\LMS\Models\Course;
@@ -23,135 +24,151 @@ class UserDashboardService
     ) {}
 
     /**
-     * Get aggregated user dashboard data.
+     * Get aggregated user dashboard data (SmartCached per-user + auto-invalidated on LMS/profile changes).
      */
     public function getDashboardData(User $user): array
     {
-        $profile = UserProfile::firstOrCreate(['user_id' => $user->id]);
-        $provinces = Province::all();
-        $stats = $this->courseService->myCourseStats();
+        return SmartCache::remember(
+            [
+                SmartCache::DOMAIN_LMS_EVENTS,
+                SmartCache::DOMAIN_LMS_COURSES,
+                SmartCache::DOMAIN_LMS_SUBMISSIONS,
+                SmartCache::DOMAIN_LMS_LIBRARY,
+                SmartCache::userDomain($user->id),
+            ],
+            "user_dashboard:{$user->id}",
+            180,
+            function () use ($user): array {
+                $profile = UserProfile::firstOrCreate(['user_id' => $user->id]);
+                $provinces = Province::all();
+                $stats = $this->courseService->myCourseStats();
 
-        // 1. Thumbnail untuk last course
-        $lastCourse = $this->courseService->getLastAccessedCourse();
-        if ($lastCourse) {
-            $dbLastCourse = Course::with('category')->where('slug', $lastCourse->slug)->first();
-            if ($dbLastCourse) {
-                $lastCourse->description = $dbLastCourse->description;
-                $lastCourse->category = $dbLastCourse->category;
-                $lastCourse->category_name = $dbLastCourse->category ? $dbLastCourse->category->name : null;
-                $lastCourse->thumbnail = $dbLastCourse->thumbnail;
-            }
-        }
-
-        // 2. Thumbnail & Kategori untuk recent courses
-        $recentCourses = $user->enrolledCourses()->with('category')->latest()->take(5)->get();
-        $recentCourses->transform(function ($course) {
-            $dbCourse = Course::with('category')->where('slug', $course->slug)->first();
-            if ($dbCourse) {
-                $course->description = $dbCourse->description;
-                $course->thumbnail = $dbCourse->thumbnail;
-                $course->category = $dbCourse->category;
-            }
-            return $course;
-        });
-
-        // 3. Chart data by course
-        $myCourses = $user->enrolledCourses()->get();
-        $chartDataByCourse = [];
-
-        if ($myCourses->count() > 0) {
-            $courseIds = $myCourses->pluck('id');
-
-            $allPostTests = PostTest::whereIn('course_id', $courseIds)->orderBy('id')->get();
-            $postTestIds = $allPostTests->pluck('id');
-
-            $userResults = PostTestResult::selectRaw('post_test_id, MAX(score) as user_score')
-                ->where('user_id', $user->id)
-                ->whereIn('post_test_id', $postTestIds)
-                ->groupBy('post_test_id')
-                ->pluck('user_score', 'post_test_id');
-
-            foreach ($myCourses as $c) {
-                $courseTests = $allPostTests->where('course_id', $c->id);
-
-                $labels = [];
-                $uScores = [];
-
-                foreach ($courseTests as $test) {
-                    $labels[] = $test->title;
-                    $uScores[] = $userResults[$test->id] ?? 0;
+                // 1. Thumbnail untuk last course
+                $lastCourse = $this->courseService->getLastAccessedCourse();
+                if ($lastCourse) {
+                    $dbLastCourse = Course::with('category')->where('slug', $lastCourse->slug)->first();
+                    if ($dbLastCourse) {
+                        $lastCourse->description = $dbLastCourse->description;
+                        $lastCourse->category = $dbLastCourse->category;
+                        $lastCourse->category_name = $dbLastCourse->category ? $dbLastCourse->category->name : null;
+                        $lastCourse->thumbnail = $dbLastCourse->thumbnail;
+                    }
                 }
 
-                $chartDataByCourse[$c->id] = [
-                    'course_id' => $c->id,
-                    'course_name' => $c->name,
-                    'labels' => $labels,
-                    'user_scores' => $uScores,
+                // 2. Thumbnail & Kategori untuk recent courses (tanpa N+1 query berulang)
+                $recentCourses = $user->enrolledCourses()->with('category')->latest()->take(5)->get();
+
+                // 3. Chart data by course
+                $myCourses = $user->enrolledCourses()->get();
+                $chartDataByCourse = [];
+
+                if ($myCourses->count() > 0) {
+                    $courseIds = $myCourses->pluck('id');
+
+                    $allPostTests = PostTest::whereIn('course_id', $courseIds)->orderBy('id')->get();
+                    $postTestIds = $allPostTests->pluck('id');
+
+                    $userResults = PostTestResult::selectRaw('post_test_id, MAX(score) as user_score')
+                        ->where('user_id', $user->id)
+                        ->whereIn('post_test_id', $postTestIds)
+                        ->groupBy('post_test_id')
+                        ->pluck('user_score', 'post_test_id');
+
+                    foreach ($myCourses as $c) {
+                        $courseTests = $allPostTests->where('course_id', $c->id);
+
+                        $labels = [];
+                        $uScores = [];
+
+                        foreach ($courseTests as $test) {
+                            $labels[] = $test->title;
+                            $uScores[] = $userResults[$test->id] ?? 0;
+                        }
+
+                        $chartDataByCourse[$c->id] = [
+                            'course_id' => $c->id,
+                            'course_name' => $c->name,
+                            'labels' => $labels,
+                            'user_scores' => $uScores,
+                        ];
+                    }
+                }
+
+                // 4. Last accessed library
+                $lastAccessedLibrary = Library::select('libraries.*', 'user_library_history.last_accessed_at')
+                    ->join('user_library_history', 'libraries.id', '=', 'user_library_history.library_id')
+                    ->where('user_library_history.user_id', $user->id)
+                    ->with('libraryCategory')
+                    ->orderBy('user_library_history.last_accessed_at', 'desc')
+                    ->first();
+
+                if ($lastAccessedLibrary) {
+                    if ($lastAccessedLibrary->video_path) {
+                        $lastAccessedLibrary->type = 'video';
+                        $lastAccessedLibrary->icon = 'fas fa-video';
+                    } elseif ($lastAccessedLibrary->file_path) {
+                        $lastAccessedLibrary->type = 'document';
+                        $lastAccessedLibrary->icon = 'fas fa-file-pdf';
+                    } elseif ($lastAccessedLibrary->external_link) {
+                        $lastAccessedLibrary->type = 'link';
+                        $lastAccessedLibrary->icon = 'fas fa-link';
+                    } else {
+                        $lastAccessedLibrary->type = 'other';
+                        $lastAccessedLibrary->icon = 'fas fa-book-open';
+                    }
+                }
+
+                return [
+                    'profile' => $profile,
+                    'provinces' => $provinces,
+                    'stats' => $stats,
+                    'lastCourse' => $lastCourse,
+                    'recentCourses' => $recentCourses,
+                    'chartDataByCourse' => $chartDataByCourse,
+                    'lastLibrary' => $lastAccessedLibrary,
                 ];
             }
-        }
-
-        // 4. Last accessed library
-        $lastAccessedLibrary = Library::select('libraries.*', 'user_library_history.last_accessed_at')
-            ->join('user_library_history', 'libraries.id', '=', 'user_library_history.library_id')
-            ->where('user_library_history.user_id', $user->id)
-            ->with('libraryCategory')
-            ->orderBy('user_library_history.last_accessed_at', 'desc')
-            ->first();
-
-        if ($lastAccessedLibrary) {
-            if ($lastAccessedLibrary->video_path) {
-                $lastAccessedLibrary->type = 'video';
-                $lastAccessedLibrary->icon = 'fas fa-video';
-            } elseif ($lastAccessedLibrary->file_path) {
-                $lastAccessedLibrary->type = 'document';
-                $lastAccessedLibrary->icon = 'fas fa-file-pdf';
-            } elseif ($lastAccessedLibrary->external_link) {
-                $lastAccessedLibrary->type = 'link';
-                $lastAccessedLibrary->icon = 'fas fa-link';
-            } else {
-                $lastAccessedLibrary->type = 'other';
-                $lastAccessedLibrary->icon = 'fas fa-book-open';
-            }
-        }
-
-        return [
-            'profile' => $profile,
-            'provinces' => $provinces,
-            'stats' => $stats,
-            'lastCourse' => $lastCourse,
-            'recentCourses' => $recentCourses,
-            'chartDataByCourse' => $chartDataByCourse,
-            'lastLibrary' => $lastAccessedLibrary,
-        ];
+        );
     }
 
     /**
-     * Get user profile page data.
+     * Get user profile page data (SmartCached per-user + auto-invalidated).
      */
     public function getProfileData(User $user): array
     {
-        $provinces = Province::all();
+        $cached = SmartCache::remember(
+            [
+                SmartCache::DOMAIN_LMS_COURSES,
+                SmartCache::DOMAIN_LMS_SUBMISSIONS,
+                SmartCache::userDomain($user->id),
+            ],
+            "user_profile:{$user->id}",
+            180,
+            function () use ($user): array {
+                $provinces = Province::all();
 
-        $certificates = $user->enrolledCourses()
-            ->wherePivot('status', 'completed')
-            ->orderByDesc('course_student.certificate_issued_at')
-            ->get()
-            ->filter(fn ($course) => ! empty($course->pivot->certificate_code))
-            ->values();
+                $certificates = $user->enrolledCourses()
+                    ->wherePivot('status', 'completed')
+                    ->orderByDesc('course_student.certificate_issued_at')
+                    ->get()
+                    ->filter(fn ($course) => ! empty($course->pivot->certificate_code))
+                    ->values();
 
-        $stats = [
-            'enrolled' => $user->enrolledCourses()->count(),
-            'completed' => $user->enrolledCourses()->wherePivot('status', 'completed')->count(),
-            'certificates' => $certificates->count(),
-        ];
+                $stats = [
+                    'enrolled' => $user->enrolledCourses()->count(),
+                    'completed' => $user->enrolledCourses()->wherePivot('status', 'completed')->count(),
+                    'certificates' => $certificates->count(),
+                ];
 
-        return [
-            'user' => $user,
-            'provinces' => $provinces,
-            'certificates' => $certificates,
-            'stats' => $stats,
-        ];
+                return [
+                    'provinces' => $provinces,
+                    'certificates' => $certificates,
+                    'stats' => $stats,
+                ];
+            }
+        );
+
+        return array_merge(['user' => $user], $cached);
     }
 
     /**

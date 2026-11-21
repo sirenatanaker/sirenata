@@ -33,7 +33,7 @@
         }
     @endphp
 
-    <div class="w-full p-4 sm:p-6 lg:p-8 max-w-400 mx-auto space-y-6"
+    <div class="w-full p-0 sm:p-6 lg:p-8 max-w-400 mx-auto space-y-4 sm:space-y-6"
          x-data="{
              activeStep: '{{ $requestedStep }}',
              setStep(step) {
@@ -66,7 +66,7 @@
         <div class="p-5 sm:p-6 rounded-md bg-[#13416B] text-white shadow-sm space-y-5">
             <div class="flex flex-col lg:flex-row lg:items-start justify-between gap-4 border-b border-white/15 pb-4">
                 <div class="space-y-2 min-w-0">
-                    <h1 class="text-xl sm:text-2xl lg:text-3xl font-semibold text-white tracking-wide" style="font-family: 'Oswald', sans-serif;">
+                    <h1 class="text-xl sm:text-2xl lg:text-3xl font-semibold tracking-wide" style="font-family: 'Oswald', sans-serif; color: #FCD34D;">
                         {{ $submission->bimtekEvent?->batch_name ?? $submission->submission_code }}
                     </h1>
                     <div class="flex flex-wrap items-center gap-x-2.5 gap-y-1.5 text-sm sm:text-base text-slate-200">
@@ -157,7 +157,7 @@
                         </span>
                         <p :class="activeStep === 'publish' ? 'text-slate-500' : 'text-blue-100'"
                            class="text-xs truncate mt-0.5">
-                            {{ $pdfCount > 0 ? "{$pdfCount} / {$totalStudents} PDF diterbitkan" : 'Generate PDF & QR Validasi Resmi' }}
+                            {{ $pdfCount > 0 ? "{$pdfCount} / {$totalStudents} PDF diterbitkan" : 'Generate PDF e-Sertifikat Resmi' }}
                         </p>
                     </div>
                 </button>

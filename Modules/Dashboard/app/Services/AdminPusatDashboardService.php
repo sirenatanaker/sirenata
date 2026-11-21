@@ -3,6 +3,7 @@
 namespace Modules\Dashboard\Services;
 
 use App\Models\User;
+use App\Support\SmartCache;
 use Creasi\Nusa\Models\Province;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -33,73 +34,78 @@ class AdminPusatDashboardService
         $selectedEventYear = $currentYear;
         $lmsEventYears = [$currentYear];
 
-        // 1. Stats Admin & Activity
-        $totalAdminPusat = User::role('admin-pusat')->count();
-        $adminAktif = User::role(['admin-province', 'admin-kab-kota'])->count();
-        $aktivitasAdmin = Activity::whereMonth('created_at', now()->month)
-            ->whereYear('created_at', now()->year)
-            ->count();
+        // 1 & 2. Stats Admin, Activity, Gender, dan RTK Status & Options (di-cache di domain dashboard_rtk)
+        $coreStats = SmartCache::remember(
+            SmartCache::DOMAIN_DASHBOARD_RTK,
+            "admin_pusat_core_stats:{$currentYear}",
+            300,
+            function () use ($currentYear) {
+                $totalAdminPusat = User::role('admin-pusat')->count();
+                $adminAktif = User::role(['admin-province', 'admin-kab-kota'])->count();
+                $aktivitasAdmin = Activity::whereMonth('created_at', now()->month)
+                    ->whereYear('created_at', now()->year)
+                    ->count();
 
-        // 2. Gender distribution
-        $genderMale = UserProfile::where('gender', 'male')->count();
-        $genderFemale = UserProfile::where('gender', 'female')->count();
+                $genderMale = UserProfile::where('gender', 'male')->count();
+                $genderFemale = UserProfile::where('gender', 'female')->count();
+
+                $availableRtkEndYears = RencanaTenagaKerja::where('type', TypeRtk::PROVINSI->value)
+                    ->berlaku()
+                    ->pluck('end_date')
+                    ->unique()
+                    ->sortDesc()
+                    ->values()
+                    ->toArray();
+
+                $rtkStatusDistribution = DB::table('rencana_tenaga_kerjas')
+                    ->select('status_verification as status', DB::raw('count(*) as total'))
+                    ->where(function ($query) {
+                        $query->where('status_verification', '!=', RTKStatusVerification::PENDING->value)
+                            ->orWhere(function ($q) {
+                                $q->where('status_verification', RTKStatusVerification::PENDING->value)
+                                    ->where('is_active', true)
+                                    ->whereIn('type', [
+                                        TypeRtk::PROVINSI->value,
+                                        TypeRtk::KAB_KOTA->value,
+                                    ]);
+                            });
+                    })
+                    ->groupBy('status_verification')
+                    ->pluck('total', 'status');
+
+                $maxOptionYear = !empty($availableRtkEndYears) ? max($availableRtkEndYears) : $currentYear;
+                $minOptionYear = $currentYear;
+                $rtkYearsOptions = [];
+                for ($y = $maxOptionYear; $y >= $minOptionYear; $y--) {
+                    $rtkYearsOptions[] = $y;
+                }
+
+                $minAvailableEndYear = !empty($availableRtkEndYears) ? min($availableRtkEndYears) : $currentYear;
+                $maxAvailableEndYear = !empty($availableRtkEndYears) ? max($availableRtkEndYears) : $currentYear;
+                $rtkEndYearsOptions = [];
+                for ($y = $maxAvailableEndYear; $y >= $minAvailableEndYear; $y--) {
+                    $rtkEndYearsOptions[] = $y;
+                }
+
+                return compact(
+                    'totalAdminPusat',
+                    'adminAktif',
+                    'aktivitasAdmin',
+                    'genderMale',
+                    'genderFemale',
+                    'rtkStatusDistribution',
+                    'rtkYearsOptions',
+                    'rtkEndYearsOptions'
+                );
+            }
+        );
 
         // 3. Pantauan Operasional LMS by Event
         $lmsEventOverview = $this->getLmsEventOverview($selectedEventYear);
 
-        // 5. Masa Aktif RTK per Provinsi
-        $availableRtkYears = RencanaTenagaKerja::where('type', TypeRtk::PROVINSI->value)
-            ->berlaku()
-            ->pluck('start_date')
-            ->unique()
-            ->sortDesc()
-            ->values()
-            ->toArray();
-
+        // 5 & 6. Masa Aktif & Masa Berakhir RTK per Provinsi
         $rtkMasaAktifPerProvinsi = $this->getRtkMasaAktifPerProvinsi($selectedRtkYear);
-
-        // 6. Masa Berakhir RTK per Provinsi
-        $availableRtkEndYears = RencanaTenagaKerja::where('type', TypeRtk::PROVINSI->value)
-            ->berlaku()
-            ->pluck('end_date')
-            ->unique()
-            ->sortDesc()
-            ->values()
-            ->toArray();
-
         $rtkMasaBerakhirPerProvinsi = $this->getRtkMasaBerakhirPerProvinsi($selectedRtkEndYear);
-
-        // 7. Status Distribusi RTK
-        $rtkStatusDistribution = DB::table('rencana_tenaga_kerjas')
-            ->select('status_verification as status', DB::raw('count(*) as total'))
-            ->where(function ($query) {
-                $query->where('status_verification', '!=', RTKStatusVerification::PENDING->value)
-                    ->orWhere(function ($q) {
-                        $q->where('status_verification', RTKStatusVerification::PENDING->value)
-                            ->where('is_active', true)
-                            ->whereIn('type', [
-                                TypeRtk::PROVINSI->value,
-                                TypeRtk::KAB_KOTA->value,
-                            ]);
-                    });
-            })
-            ->groupBy('status_verification')
-            ->pluck('total', 'status');
-
-        // 8. Year Filter Options
-        $maxOptionYear = !empty($availableRtkEndYears) ? max($availableRtkEndYears) : $currentYear;
-        $minOptionYear = $currentYear;
-        $rtkYearsOptions = [];
-        for ($y = $maxOptionYear; $y >= $minOptionYear; $y--) {
-            $rtkYearsOptions[] = $y;
-        }
-
-        $minAvailableEndYear = !empty($availableRtkEndYears) ? min($availableRtkEndYears) : $currentYear;
-        $maxAvailableEndYear = !empty($availableRtkEndYears) ? max($availableRtkEndYears) : $currentYear;
-        $rtkEndYearsOptions = [];
-        for ($y = $maxAvailableEndYear; $y >= $minAvailableEndYear; $y--) {
-            $rtkEndYearsOptions[] = $y;
-        }
 
         // 9. Pending Approvals
         $allPendingApprovals = $this->getAllPendingApprovals();
@@ -108,21 +114,21 @@ class AdminPusatDashboardService
 
         return [
             'user' => $user,
-            'totalAdminPusat' => $totalAdminPusat,
-            'adminAktif' => $adminAktif,
-            'aktivitasAdmin' => $aktivitasAdmin,
-            'genderMale' => $genderMale,
-            'genderFemale' => $genderFemale,
+            'totalAdminPusat' => $coreStats['totalAdminPusat'],
+            'adminAktif' => $coreStats['adminAktif'],
+            'aktivitasAdmin' => $coreStats['aktivitasAdmin'],
+            'genderMale' => $coreStats['genderMale'],
+            'genderFemale' => $coreStats['genderFemale'],
             'lmsEventOverview' => $lmsEventOverview,
             'lmsEventYears' => $lmsEventYears,
             'selectedEventYear' => $selectedEventYear,
             'rtkMasaAktifPerProvinsi' => $rtkMasaAktifPerProvinsi,
             'rtkMasaBerakhirPerProvinsi' => $rtkMasaBerakhirPerProvinsi,
-            'rtkStatusDistribution' => $rtkStatusDistribution,
+            'rtkStatusDistribution' => $coreStats['rtkStatusDistribution'],
             'selectedRtkYear' => $selectedRtkYear,
             'selectedRtkEndYear' => $selectedRtkEndYear,
-            'rtkYearsOptions' => $rtkYearsOptions,
-            'rtkEndYearsOptions' => $rtkEndYearsOptions,
+            'rtkYearsOptions' => $coreStats['rtkYearsOptions'],
+            'rtkEndYearsOptions' => $coreStats['rtkEndYearsOptions'],
             'initialPendingApprovals' => $initialPendingApprovals,
             'hasMorePendingApprovals' => $hasMorePendingApprovals,
             'totalPendingApprovals' => $allPendingApprovals->count(),
@@ -155,6 +161,18 @@ class AdminPusatDashboardService
      * Ringkasan operasional LMS by Event untuk Admin Pusat pada tahun terpilih.
      */
     public function getLmsEventOverview(int $year): array
+    {
+        return SmartCache::remember(
+            [SmartCache::DOMAIN_LMS_EVENTS, SmartCache::DOMAIN_LMS_COURSES, SmartCache::DOMAIN_LMS_SUBMISSIONS],
+            "lms_event_overview:{$year}:" . now()->format('Y-m-d'),
+            300,
+            function () use ($year) {
+                return $this->buildLmsEventOverview($year);
+            }
+        );
+    }
+
+    private function buildLmsEventOverview(int $year): array
     {
         $events = BimtekEvent::with('course')
             ->where(function ($q) use ($year) {
@@ -443,26 +461,33 @@ class AdminPusatDashboardService
      */
     public function getRtkMasaAktifPerProvinsi(string|int $selectedRtkYear): Collection
     {
-        $queryRtk = RencanaTenagaKerja::where('type', TypeRtk::PROVINSI->value)->berlaku();
+        return SmartCache::remember(
+            SmartCache::DOMAIN_DASHBOARD_RTK,
+            "rtk_masa_aktif:{$selectedRtkYear}:" . date('Y'),
+            600,
+            function () use ($selectedRtkYear) {
+                $queryRtk = RencanaTenagaKerja::where('type', TypeRtk::PROVINSI->value)->berlaku();
 
-        if ($selectedRtkYear !== 'all') {
-            $queryRtk->where('end_date', '>=', (int) $selectedRtkYear);
-        }
+                if ($selectedRtkYear !== 'all') {
+                    $queryRtk->where('end_date', '>=', (int) $selectedRtkYear);
+                }
 
-        $rtkProvinsi = $queryRtk->get();
-        $rtkProvinceCodes = $rtkProvinsi->pluck('province_code')->toArray();
-        $rtkProvinceNames = Province::whereIn('code', $rtkProvinceCodes)->pluck('name', 'code');
+                $rtkProvinsi = $queryRtk->get();
+                $rtkProvinceCodes = $rtkProvinsi->pluck('province_code')->toArray();
+                $rtkProvinceNames = Province::whereIn('code', $rtkProvinceCodes)->pluck('name', 'code');
 
-        return $rtkProvinsi->groupBy('province_code')->map(function ($items, $code) use ($rtkProvinceNames) {
-            $rtk = $items->first();
-            return (object) [
-                'province_name' => $rtkProvinceNames[$code] ?? 'Unknown',
-                'sisa_tahun' => max(0, (int) $rtk->end_date - (int) date('Y')),
-                'start_date' => (int) $rtk->start_date,
-                'end_date' => (int) $rtk->end_date,
-                'total' => $items->count(),
-            ];
-        })->sortBy('province_name')->values();
+                return $rtkProvinsi->groupBy('province_code')->map(function ($items, $code) use ($rtkProvinceNames) {
+                    $rtk = $items->first();
+                    return (object) [
+                        'province_name' => $rtkProvinceNames[$code] ?? 'Unknown',
+                        'sisa_tahun' => max(0, (int) $rtk->end_date - (int) date('Y')),
+                        'start_date' => (int) $rtk->start_date,
+                        'end_date' => (int) $rtk->end_date,
+                        'total' => $items->count(),
+                    ];
+                })->sortBy('province_name')->values();
+            }
+        );
     }
 
     /**
@@ -470,32 +495,51 @@ class AdminPusatDashboardService
      */
     public function getRtkMasaBerakhirPerProvinsi(string|int $selectedRtkEndYear): Collection
     {
-        $queryRtkEnd = RencanaTenagaKerja::where('type', TypeRtk::PROVINSI->value)->berlaku();
+        return SmartCache::remember(
+            SmartCache::DOMAIN_DASHBOARD_RTK,
+            "rtk_masa_berakhir:{$selectedRtkEndYear}:" . date('Y'),
+            600,
+            function () use ($selectedRtkEndYear) {
+                $queryRtkEnd = RencanaTenagaKerja::where('type', TypeRtk::PROVINSI->value)->berlaku();
 
-        if ($selectedRtkEndYear !== 'all') {
-            $queryRtkEnd->where('end_date', (int) $selectedRtkEndYear);
-        }
+                if ($selectedRtkEndYear !== 'all') {
+                    $queryRtkEnd->where('end_date', (int) $selectedRtkEndYear);
+                }
 
-        $rtkProvinsiEnd = $queryRtkEnd->get();
-        $rtkEndProvinceCodes = $rtkProvinsiEnd->pluck('province_code')->toArray();
-        $rtkEndProvinceNames = Province::whereIn('code', $rtkEndProvinceCodes)->pluck('name', 'code');
+                $rtkProvinsiEnd = $queryRtkEnd->get();
+                $rtkEndProvinceCodes = $rtkProvinsiEnd->pluck('province_code')->toArray();
+                $rtkEndProvinceNames = Province::whereIn('code', $rtkEndProvinceCodes)->pluck('name', 'code');
 
-        return $rtkProvinsiEnd->groupBy('province_code')->map(function ($items, $code) use ($rtkEndProvinceNames) {
-            $rtk = $items->first();
-            return (object) [
-                'province_name' => $rtkEndProvinceNames[$code] ?? 'Unknown',
-                'sisa_tahun' => max(0, (int) $rtk->end_date - (int) date('Y')),
-                'start_date' => (int) $rtk->start_date,
-                'end_date' => (int) $rtk->end_date,
-                'total' => $items->count(),
-            ];
-        })->sortBy('province_name')->values();
+                return $rtkProvinsiEnd->groupBy('province_code')->map(function ($items, $code) use ($rtkEndProvinceNames) {
+                    $rtk = $items->first();
+                    return (object) [
+                        'province_name' => $rtkEndProvinceNames[$code] ?? 'Unknown',
+                        'sisa_tahun' => max(0, (int) $rtk->end_date - (int) date('Y')),
+                        'start_date' => (int) $rtk->start_date,
+                        'end_date' => (int) $rtk->end_date,
+                        'total' => $items->count(),
+                    ];
+                })->sortBy('province_name')->values();
+            }
+        );
     }
 
     /**
      * Get all pending approvals (Projects + RTK).
      */
     public function getAllPendingApprovals(): Collection
+    {
+        return SmartCache::remember(
+            SmartCache::DOMAIN_DASHBOARD_RTK,
+            'admin_pusat_pending_approvals',
+            300,
+            function () {
+                return $this->buildPendingApprovals();
+            }
+        );
+    }
+
+    private function buildPendingApprovals(): Collection
     {
         $pendingProjects = Project::whereIn(DB::raw('LOWER(status)'), ['draft'])
             ->get()

@@ -99,6 +99,41 @@ class CertificateService
         $certificate->delete();
     }
 
+    /**
+     * Konversi file gambar di disk public menjadi base64 data URI agar 100% terbaca oleh DomPDF
+     * tanpa bergantung pada URL HTTP / path relatif di Windows maupun Linux.
+     */
+    public function resolveImageDataUri(?string $relativePath): ?string
+    {
+        if (empty($relativePath) || !Storage::disk('public')->exists($relativePath)) {
+            return null;
+        }
+
+        $fullPath = Storage::disk('public')->path($relativePath);
+        $contents = @file_get_contents($fullPath);
+        if ($contents === false) {
+            return null;
+        }
+
+        $mime = @mime_content_type($fullPath) ?: 'image/png';
+
+        // DomPDF memiliki dukungan terbatas untuk WebP; konversi otomatis ke PNG bila GD tersedia.
+        if ($mime === 'image/webp' && function_exists('imagecreatefromwebp')) {
+            $img = @imagecreatefromwebp($fullPath);
+            if ($img !== false) {
+                ob_start();
+                imagepng($img);
+                $pngData = ob_get_clean();
+                imagedestroy($img);
+                if ($pngData !== false) {
+                    return 'data:image/png;base64,' . base64_encode($pngData);
+                }
+            }
+        }
+
+        return 'data:' . $mime . ';base64,' . base64_encode($contents);
+    }
+
     public function generateStudentCertificate(User $user, string $slug): array
     {
         $course = Course::where('slug', $slug)->firstOrFail();
@@ -142,8 +177,8 @@ class CertificateService
         } while ($codeExists);
 
         $issuedAt = now();
-        $backgroundUrl = $activeSetting->background_image ? Storage::url($activeSetting->background_image) : null;
-        $signatureUrl = $activeSetting->signature_image ? Storage::url($activeSetting->signature_image) : null;
+        $backgroundUrl = $this->resolveImageDataUri($activeSetting->background_image);
+        $signatureUrl = $this->resolveImageDataUri($activeSetting->signature_image);
         $completedDate = Carbon::parse($issuedAt)->translatedFormat('d F Y');
         $fullName = $user->siapkerja_id ? $user->name : ($user->profile?->full_name ?? $user->name);
 
@@ -159,10 +194,9 @@ class CertificateService
             'signature_url'    => $signatureUrl,
             'signer_name'      => $activeSetting->signer_name,
             'signer_title'     => $activeSetting->signer_title,
-            'verification_url' => route('verify-certificate', $certificateCode),
         ]);
 
-        $pdf->setPaper('a5', 'landscape');
+        $pdf->setPaper('a4', 'landscape');
         $pdf->getDomPDF()->set_option('isRemoteEnabled', true);
 
         $pdfFileName = 'certificates/pdfs/cert-' . $course->slug . '-' . $user->id . '.pdf';

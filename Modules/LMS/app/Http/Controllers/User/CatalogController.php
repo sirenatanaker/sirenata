@@ -3,6 +3,7 @@
 namespace Modules\LMS\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
+use App\Support\SmartCache;
 use Devrabiul\ToastMagic\Facades\ToastMagic;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -20,36 +21,59 @@ class CatalogController extends Controller
     public function index(Request $request): View
     {
         $search = $request->get('search');
-        $selectedCategories = $request->get('categories', []);
+        $selectedCategories = (array) $request->get('categories', []);
         $waveStatus = $request->get('status', $request->get('type', 'all'));
         $programType = $waveStatus;
+        $page = (int) $request->get('page', 1);
+        $userId = auth()->id();
 
-        $excludedCourseIds = $this->courseService->getExcludedCatalogCourseIds();
-        $enrolledCourseIds = $this->courseService->getEnrolledCourseIds();
-        $courses = $this->courseService->getCatalogCourses(12, $search, $selectedCategories, $waveStatus);
-        $categories = $this->categoryService->getCategoriesForCatalog($excludedCourseIds);
+        $cacheKey = 'user_catalog:' . md5(json_encode([
+            'uid'        => $userId,
+            'search'     => $search,
+            'categories' => $selectedCategories,
+            'status'     => $waveStatus,
+            'page'       => $page,
+        ]));
 
-        // Ambil ID Bimtek Event yang sudah diikuti oleh user yang sedang login
-        $userBimtekEventIds = [];
-        if (auth()->check()) {
-            $userBimtekEventIds = \Illuminate\Support\Facades\DB::table('course_student')
-                ->where('user_id', auth()->id())
-                ->whereNotNull('bimtek_event_id')
-                ->pluck('bimtek_event_id')
-                ->toArray();
-        }
+        $cached = SmartCache::remember(
+            [
+                SmartCache::DOMAIN_LMS_EVENTS,
+                SmartCache::DOMAIN_LMS_COURSES,
+                SmartCache::userDomain($userId),
+            ],
+            $cacheKey,
+            180,
+            function () use ($search, $selectedCategories, $waveStatus, $userId): array {
+                $excludedCourseIds = $this->courseService->getExcludedCatalogCourseIds();
+                $enrolledCourseIds = $this->courseService->getEnrolledCourseIds();
+                $courses = $this->courseService->getCatalogCourses(12, $search, $selectedCategories, $waveStatus);
+                $categories = $this->categoryService->getCategoriesForCatalog($excludedCourseIds);
 
-        return view('lms::user.katalog.index', compact(
-            'courses',
-            'excludedCourseIds',
-            'enrolledCourseIds',
-            'userBimtekEventIds',
+                $userBimtekEventIds = [];
+                if ($userId) {
+                    $userBimtekEventIds = \Illuminate\Support\Facades\DB::table('course_student')
+                        ->where('user_id', $userId)
+                        ->whereNotNull('bimtek_event_id')
+                        ->pluck('bimtek_event_id')
+                        ->toArray();
+                }
+
+                return compact(
+                    'courses',
+                    'excludedCourseIds',
+                    'enrolledCourseIds',
+                    'userBimtekEventIds',
+                    'categories'
+                );
+            }
+        );
+
+        return view('lms::user.katalog.index', array_merge($cached, compact(
             'search',
-            'categories',
             'selectedCategories',
             'programType',
             'waveStatus'
-        ));
+        )));
     }
 
     public function enroll(Request $request, string $slug): RedirectResponse

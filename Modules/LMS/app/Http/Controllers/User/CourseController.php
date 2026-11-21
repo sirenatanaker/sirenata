@@ -3,6 +3,7 @@
 namespace Modules\LMS\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
+use App\Support\SmartCache;
 use Devrabiul\ToastMagic\Facades\ToastMagic;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -44,13 +45,37 @@ class CourseController extends Controller
         private ExcelGraderService $excelGrader,
     ) {}
 
+    private function userLmsDomains(?string $userId = null): array
+    {
+        return [
+            SmartCache::DOMAIN_LMS_EVENTS,
+            SmartCache::DOMAIN_LMS_COURSES,
+            SmartCache::DOMAIN_LMS_SUBMISSIONS,
+            SmartCache::userDomain($userId ?? auth()->id()),
+        ];
+    }
+
+    private function cachedMyCourses(Request $request, string $tab): array
+    {
+        $page = (int) $request->get('page', 1);
+        $perPage = (int) $request->get('row_per_page', 11);
+        $userId = (string) auth()->id();
+
+        return SmartCache::remember(
+            $this->userLmsDomains($userId),
+            "user_my_courses:{$userId}:tab={$tab}:p={$page}:pp={$perPage}",
+            180,
+            fn () => $this->courseService->myCourses(
+                page: $page,
+                perPage: $perPage,
+                tab: $tab,
+            )
+        );
+    }
+
     public function allMyCourse(Request $request): View
     {
-        $result = $this->courseService->myCourses(
-            page: (int) $request->get('page', 1),
-            perPage: (int) $request->get('row_per_page', 11),
-            tab: 'all',
-        );
+        $result = $this->cachedMyCourses($request, 'all');
 
         return view('lms::user.course.my-course', [
             'courses' => $result['data'],
@@ -63,11 +88,7 @@ class CourseController extends Controller
 
     public function myCourseProgress(Request $request): View
     {
-        $result = $this->courseService->myCourses(
-            page: (int) $request->get('page', 1),
-            perPage: (int) $request->get('row_per_page', 11),
-            tab: 'progress',
-        );
+        $result = $this->cachedMyCourses($request, 'progress');
 
         return view('lms::user.course.my-course-progress', [
             'courses' => $result['data'],
@@ -80,11 +101,7 @@ class CourseController extends Controller
 
     public function myCourseFinish(Request $request): View
     {
-        $result = $this->courseService->myCourses(
-            page: (int) $request->get('page', 1),
-            perPage: (int) $request->get('row_per_page', 11),
-            tab: 'finish',
-        );
+        $result = $this->cachedMyCourses($request, 'finish');
 
         return view('lms::user.course.my-course-completed', [
             'courses' => $result['data'],
@@ -97,19 +114,34 @@ class CourseController extends Controller
 
     public function myCourseDetail(string $slug): View
     {
-        $result = $this->courseService->getCourseDetailSlug($slug);
+        $userId = (string) auth()->id();
+
+        $cached = SmartCache::remember(
+            $this->userLmsDomains($userId),
+            "user_course_detail:{$userId}:{$slug}",
+            120,
+            function () use ($slug, $userId): array {
+                $result = $this->courseService->getCourseDetailSlug($slug);
+                $sectionProofs = [];
+                if ($userId !== '') {
+                    $sectionProofs = SectionZoomProof::where('user_id', $userId)
+                        ->pluck('status', 'course_section_id')
+                        ->toArray();
+                }
+
+                return [
+                    'result'        => $result,
+                    'sectionProofs' => $sectionProofs,
+                ];
+            }
+        );
+
+        $result = $cached['result'];
+        $sectionProofs = $cached['sectionProofs'];
         $course = $result['data'] ?? null;
 
         if (!$course) {
             abort(404, 'Course tidak ditemukan');
-        }
-
-        $userId = auth()->id();
-        $sectionProofs = [];
-        if ($userId) {
-            $sectionProofs = SectionZoomProof::where('user_id', $userId)
-                ->pluck('status', 'course_section_id')
-                ->toArray();
         }
 
         return view('lms::user.course.my-course-detail', [
@@ -155,54 +187,80 @@ class CourseController extends Controller
 
     public function showSection(Request $request, string $slug, string $sectionId): View|RedirectResponse
     {
-        $result = $this->courseService->getCourseDetailSlug($slug);
-        $course = $result['data'] ?? null;
+        $userId = (string) ($request->user()?->id ?? auth()->id());
 
-        if (!$course) {
-            abort(404, 'Course tidak ditemukan');
-        }
+        $cached = SmartCache::remember(
+            $this->userLmsDomains($userId),
+            "user_section_show:{$userId}:{$slug}:{$sectionId}",
+            120,
+            function () use ($request, $slug, $sectionId): array {
+                $result = $this->courseService->getCourseDetailSlug($slug);
+                $course = $result['data'] ?? null;
+                if (!$course) {
+                    return ['status' => 'not_found_course'];
+                }
 
-        $sections = collect(data_get($course, 'sections', []));
-        $section = $sections->first(function ($s) use ($sectionId) {
-            return (string) (data_get($s, 'id') ?? data_get($s, 'section_id')) === (string) $sectionId;
-        });
+                $sections = collect(data_get($course, 'sections', []));
+                $section = $sections->first(function ($s) use ($sectionId) {
+                    return (string) (data_get($s, 'id') ?? data_get($s, 'section_id')) === (string) $sectionId;
+                });
 
-        if (!$section) {
-            abort(404, 'Modul tidak ditemukan');
-        }
+                if (!$section) {
+                    return ['status' => 'not_found_section'];
+                }
 
-        $sectionIndex = $sections->search(function ($s) use ($sectionId) {
-            return (string) (data_get($s, 'id') ?? data_get($s, 'section_id')) === (string) $sectionId;
-        });
+                $sectionIndex = $sections->search(function ($s) use ($sectionId) {
+                    return (string) (data_get($s, 'id') ?? data_get($s, 'section_id')) === (string) $sectionId;
+                });
 
-        $isLocked = data_get($section, 'is_locked', false);
-        $isWaitingForStart = data_get($course, 'is_waiting_for_start', false);
+                $isWaitingForStart = (bool) data_get($course, 'is_waiting_for_start', false);
+                $isLocked = (bool) data_get($section, 'is_locked', false);
 
-        if ($isWaitingForStart) {
-            ToastMagic::error('Kelas pelatihan belum dimulai. Modul akan terbuka sesuai jadwal pelaksanaan.');
-            return redirect()->route('user.course.my-course.detail', $slug);
-        }
+                if ($isWaitingForStart) {
+                    return ['status' => 'waiting_for_start'];
+                }
 
-        if ($isLocked) {
-            ToastMagic::error('Modul ini masih terkunci. Selesaikan modul sebelumnya terlebih dahulu.');
-            return redirect()->route('user.course.my-course.detail', $slug);
-        }
+                if ($isLocked) {
+                    return ['status' => 'locked'];
+                }
 
-        $sectionDetail = $this->courseService->getSectionDetailForUser(
-            $course,
-            $section,
-            $course->active_bimtek,
-            $request->user(),
-            $sectionIndex !== false ? (int) $sectionIndex : 0
+                $sectionDetail = $this->courseService->getSectionDetailForUser(
+                    $course,
+                    $section,
+                    $course->active_bimtek,
+                    $request->user(),
+                    $sectionIndex !== false ? (int) $sectionIndex : 0
+                );
+
+                return [
+                    'status'        => 'ok',
+                    'course'        => $course,
+                    'section'       => $section,
+                    'sectionIndex'  => $sectionIndex !== false ? (int) $sectionIndex : 0,
+                    'sectionDetail' => $sectionDetail,
+                ];
+            }
         );
 
-        return view('lms::user.course.section-show', array_merge([
-            'course'       => $course,
-            'section'      => $section,
-            'sectionIndex' => $sectionIndex !== false ? (int) $sectionIndex : 0,
-            'slug'         => $slug,
-            'activeBimtek' => $course->active_bimtek,
-        ], $sectionDetail));
+        return match ($cached['status']) {
+            'not_found_course'  => abort(404, 'Course tidak ditemukan'),
+            'not_found_section' => abort(404, 'Modul tidak ditemukan'),
+            'waiting_for_start' => (function () use ($slug) {
+                ToastMagic::error('Kelas pelatihan belum dimulai. Modul akan terbuka sesuai jadwal pelaksanaan.');
+                return redirect()->route('user.course.my-course.detail', $slug);
+            })(),
+            'locked' => (function () use ($slug) {
+                ToastMagic::error('Modul ini masih terkunci. Selesaikan modul sebelumnya terlebih dahulu.');
+                return redirect()->route('user.course.my-course.detail', $slug);
+            })(),
+            default => view('lms::user.course.section-show', array_merge([
+                'course'       => $cached['course'],
+                'section'      => $cached['section'],
+                'sectionIndex' => $cached['sectionIndex'],
+                'slug'         => $slug,
+                'activeBimtek' => $cached['course']->active_bimtek,
+            ], $cached['sectionDetail'])),
+        };
     }
 
     public function submitAssignment(Request $request, string $slug, string $sectionId): RedirectResponse
@@ -464,6 +522,11 @@ class CourseController extends Controller
             ->update([
                 'zoom_joined_at' => now(),
             ]);
+
+        SmartCache::bump([
+            SmartCache::userDomain($request->user()->id),
+            SmartCache::DOMAIN_LMS_EVENTS,
+        ]);
 
         return redirect()->away($zoomUrl);
     }
@@ -816,37 +879,64 @@ class CourseController extends Controller
 
     public function showContent(string $slug, string $contentId): View|RedirectResponse
     {
-        $result = $this->courseService->getCourseDetailSlug($slug);
-        $courseData = $result['data'] ?? null;
-        $content = $this->courseService->getStudentContentForShow($contentId);
+        $userId = (string) auth()->id();
 
-        if ($courseData && !empty($courseData->is_waiting_for_start)) {
-            $startDateStr = $courseData->active_bimtek?->start_date
-                ? $courseData->active_bimtek->start_date->translatedFormat('d F Y')
-                : 'jadwal pelaksanaan';
-            ToastMagic::error("Materi pembelajaran belum dapat diakses. Kelas pelatihan akan dibuka serentak pada {$startDateStr}.");
+        $cached = SmartCache::remember(
+            $this->userLmsDomains($userId),
+            "user_content_show:{$userId}:{$slug}:{$contentId}",
+            120,
+            function () use ($slug, $contentId, $userId): array {
+                $result = $this->courseService->getCourseDetailSlug($slug);
+                $courseData = $result['data'] ?? null;
+                $content = $this->courseService->getStudentContentForShow($contentId);
 
+                if ($courseData && !empty($courseData->is_waiting_for_start)) {
+                    $startDateStr = $courseData->active_bimtek?->start_date
+                        ? $courseData->active_bimtek->start_date->translatedFormat('d F Y')
+                        : 'jadwal pelaksanaan';
+
+                    return [
+                        'status'       => 'waiting_for_start',
+                        'startDateStr' => $startDateStr,
+                    ];
+                }
+
+                if (!$this->courseService->canAccessContent($content)) {
+                    return ['status' => 'locked'];
+                }
+
+                $nextUrl = $this->getNextItemRoute($content, $userId);
+
+                $backToSectionUrl = !empty(data_get($content, 'course_section_id'))
+                    ? route('user.course.section.show', ['slug' => $slug ?? data_get($courseData, 'slug', ''), 'sectionId' => data_get($content, 'course_section_id')])
+                    : route('user.course.my-course.detail', $slug ?? data_get($courseData, 'slug', ''));
+
+                return [
+                    'status'           => 'ok',
+                    'course'           => $courseData,
+                    'content'          => $content,
+                    'nextUrl'          => $nextUrl,
+                    'backToSectionUrl' => $backToSectionUrl,
+                ];
+            }
+        );
+
+        if ($cached['status'] === 'waiting_for_start') {
+            ToastMagic::error("Materi pembelajaran belum dapat diakses. Kelas pelatihan akan dibuka serentak pada {$cached['startDateStr']}.");
             return redirect()->route('user.course.my-course.detail', $slug);
         }
 
-        if (!$this->courseService->canAccessContent($content)) {
+        if ($cached['status'] === 'locked') {
             ToastMagic::error('Topik ini masih terkunci. Selesaikan topik sebelumnya terlebih dahulu.');
-
             return redirect()->route('user.course.my-course.detail', $slug);
         }
-
-        $nextUrl = $this->getNextItemRoute($content, (string) auth()->id());
-
-        $backToSectionUrl = !empty(data_get($content, 'course_section_id'))
-            ? route('user.course.section.show', ['slug' => $slug ?? data_get($courseData, 'slug', ''), 'sectionId' => data_get($content, 'course_section_id')])
-            : route('user.course.my-course.detail', $slug ?? data_get($courseData, 'slug', ''));
 
         return view('lms::user.course.content-show', [
-            'course'           => $result['data'] ?? null,
-            'content'          => $content,
+            'course'           => $cached['course'],
+            'content'          => $cached['content'],
             'slug'             => $slug,
-            'nextUrl'          => $nextUrl,
-            'backToSectionUrl' => $backToSectionUrl,
+            'nextUrl'          => $cached['nextUrl'],
+            'backToSectionUrl' => $cached['backToSectionUrl'],
         ]);
     }
 

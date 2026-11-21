@@ -3,6 +3,7 @@
 namespace Modules\LMS\Http\Controllers\AdminPusat\Course;
 
 use App\Http\Controllers\Controller;
+use App\Support\SmartCache;
 use Devrabiul\ToastMagic\Facades\ToastMagic;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -21,16 +22,33 @@ class CourseController extends Controller
 
     public function index(Request $request): View
     {
-        $result = $this->courseService->allCourses(
-            page: (int) $request->get('page', 1),
-            perPage: $request->integer('row_per_page', 12),
-            search: $request->get('search'),
-            categoryId: $request->get('category_id'),
+        $page = max(1, (int) $request->get('page', 1));
+        $perPage = $request->integer('row_per_page', 12);
+        $search = $request->get('search');
+        $categoryId = $request->get('category_id');
+
+        $cached = SmartCache::remember(
+            [SmartCache::DOMAIN_LMS_COURSES, SmartCache::DOMAIN_LMS_EVENTS],
+            'admin_courses_index:' . md5(json_encode([$page, $perPage, $search, $categoryId])),
+            300,
+            function () use ($page, $perPage, $search, $categoryId) {
+                return [
+                    'result' => $this->courseService->allCourses(
+                        page: $page,
+                        perPage: $perPage,
+                        search: $search,
+                        categoryId: $categoryId,
+                    ),
+                    'categories' => $this->categoryService->getAllOrdered(),
+                ];
+            }
         );
+
+        $result = $cached['result'];
 
         return view('lms::admin-pusat.course.index', [
             'courses'    => collect(json_decode(json_encode($result['data']))),
-            'categories' => $this->categoryService->getAllOrdered(),
+            'categories' => $cached['categories'],
             'meta'       => $result['meta'],
             'links'      => $result['links'],
             'success'    => $result['success'],

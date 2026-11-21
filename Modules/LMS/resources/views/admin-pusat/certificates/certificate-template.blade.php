@@ -61,7 +61,7 @@
             left: 0;
             width: 1122px;
             height: 793px;
-            z-index: -1;
+            z-index: 0;
         ">
     @else
         {{-- Default Background --}}
@@ -70,7 +70,7 @@
             top: 0; left: 0; right: 0; bottom: 0;
             background: radial-gradient(circle, #ffffff 60%, #f4f6f9 100%);
             border: 15px double #b89c49;
-            z-index: -1;
+            z-index: 0;
         ">
             <div style="position: absolute; top: 20px; left: 20px; width: 60px; height: 60px; border-top: 3px solid #b89c49; border-left: 3px solid #b89c49;"></div>
             <div style="position: absolute; top: 20px; right: 20px; width: 60px; height: 60px; border-top: 3px solid #b89c49; border-right: 3px solid #b89c49;"></div>
@@ -154,7 +154,7 @@
         ">pada tanggal {{ $tanggal_selesai ?? '__ ________ ____' }}</p>
     </div>
 
-    {{-- Nomor Sertifikat & QR Code Verifikasi --}}
+    {{-- Nomor Sertifikat --}}
     <div style="
         position: absolute;
         bottom: 45px;
@@ -162,39 +162,26 @@
         z-index: 2;
         text-align: left;
     ">
-        <table style="border: none; margin: 0; padding: 0;">
-            <tr>
-                @if(!empty($verification_url))
-                    <td style="padding-right: 12px; vertical-align: middle;">
-                        <img src="https://api.qrserver.com/v1/create-qr-code/?size=60x60&data={{ urlencode($verification_url) }}"
-                             alt="QR Verifikasi"
-                             style="width: 55px; height: 55px; border: 1px solid #cbd5e1; padding: 2px; background: white;">
-                    </td>
-                @endif
-                <td style="vertical-align: middle;">
-                    <p style="
-                        font-size: 10px;
-                        color: #718096;
-                        margin: 0 0 2px 0;
-                        text-transform: uppercase;
-                        letter-spacing: 1.5px;
-                        font-weight: 500;
-                    ">Nomor Sertifikat (PPSDM)</p>
-                    <p style="
-                        font-size: 11px;
-                        font-weight: 700;
-                        color: #1a2e40;
-                        margin: 0 0 2px 0;
-                        letter-spacing: 0.5px;
-                    ">{{ $nomor_sertifikat ?? 'CERT-XXXX-XXX-000' }}</p>
-                    @if(!empty($certificate_code))
-                        <p style="font-size: 8.5px; color: #94a3b8; margin: 0; font-family: monospace;">
-                            ID: {{ $certificate_code }}
-                        </p>
-                    @endif
-                </td>
-            </tr>
-        </table>
+        <p style="
+            font-size: 10px;
+            color: #718096;
+            margin: 0 0 2px 0;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            font-weight: 500;
+        ">Nomor Sertifikat (PPSDM)</p>
+        <p style="
+            font-size: 11px;
+            font-weight: 700;
+            color: #1a2e40;
+            margin: 0 0 2px 0;
+            letter-spacing: 0.5px;
+        ">{{ $nomor_sertifikat ?? 'CERT-XXXX-XXX-000' }}</p>
+        @if(!empty($certificate_code))
+            <p style="font-size: 8.5px; color: #94a3b8; margin: 0; font-family: monospace;">
+                ID: {{ $certificate_code }}
+            </p>
+        @endif
     </div>
 
     {{-- Tanda Tangan --}}
@@ -207,13 +194,17 @@
         text-align: center;
     ">
         @if($signature_url)
-            <img src="{{ $signature_url }}" alt="Tanda Tangan" style="
-                height: 70px;
-                display: block;
-                margin: 0 auto 5px auto;
-            ">
+            <div style="height: 75px; line-height: 75px; margin-bottom: 4px; text-align: center;">
+                <img src="{{ $signature_url }}" alt="Tanda Tangan" style="
+                    height: 70px;
+                    width: auto;
+                    max-width: 180px;
+                    display: inline-block;
+                    vertical-align: bottom;
+                ">
+            </div>
         @else
-            <div style="height: 75px;"></div>
+            <div style="height: 75px; margin-bottom: 4px;"></div>
         @endif
 
         <div style="

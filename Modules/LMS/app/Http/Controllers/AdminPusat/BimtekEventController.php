@@ -3,6 +3,7 @@
 namespace Modules\LMS\Http\Controllers\AdminPusat;
 
 use App\Http\Controllers\Controller;
+use App\Support\SmartCache;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -28,27 +29,54 @@ class BimtekEventController extends Controller
      */
     public function index(Request $request)
     {
-        $query = BimtekEvent::with(['course'])->latest();
+        $search = trim((string) $request->input('search'));
+        $status = (string) $request->input('status', '');
+        $type = (string) $request->input('execution_type', '');
+        $page = max(1, (int) $request->input('page', 1));
+        $perPage = 10;
 
-        if ($search = trim((string) $request->input('search'))) {
-            $query->where(function ($q) use ($search) {
-                $q->where('batch_name', 'like', "%{$search}%")
-                  ->orWhere('batch_code', 'like', "%{$search}%")
-                  ->orWhereHas('course', function ($c) use ($search) {
-                      $c->where('name', 'like', "%{$search}%");
-                  });
-            });
-        }
+        $cached = SmartCache::remember(
+            [SmartCache::DOMAIN_LMS_EVENTS, SmartCache::DOMAIN_LMS_COURSES],
+            "bimtek_events_index:" . md5(json_encode([$search, $status, $type, $page, $perPage])),
+            300,
+            function () use ($search, $status, $type, $page, $perPage) {
+                $query = BimtekEvent::with(['course'])->latest();
 
-        if ($status = $request->input('status')) {
-            $query->where('status', $status);
-        }
+                if ($search !== '') {
+                    $query->where(function ($q) use ($search) {
+                        $q->where('batch_name', 'like', "%{$search}%")
+                          ->orWhere('batch_code', 'like', "%{$search}%")
+                          ->orWhereHas('course', function ($c) use ($search) {
+                              $c->where('name', 'like', "%{$search}%");
+                          });
+                    });
+                }
 
-        if ($type = $request->input('execution_type')) {
-            $query->where('execution_type', $type);
-        }
+                if ($status !== '') {
+                    $query->where('status', $status);
+                }
 
-        $events = $query->paginate(10)->withQueryString();
+                if ($type !== '') {
+                    $query->where('execution_type', $type);
+                }
+
+                $total = (clone $query)->count();
+                $items = $query->forPage($page, $perPage)->get();
+
+                return compact('items', 'total');
+            }
+        );
+
+        $events = new LengthAwarePaginator(
+            $cached['items'],
+            $cached['total'],
+            $perPage,
+            $page,
+            [
+                'path'  => $request->url(),
+                'query' => $request->query(),
+            ]
+        );
 
         return view('lms::admin-pusat.bimtek-events.index', compact('events'));
     }
@@ -355,12 +383,92 @@ class BimtekEventController extends Controller
      */
     public function show(Request $request, $id)
     {
-        $event = BimtekEvent::with([
-            'course.sections' => fn($q) => $q->orderBy('position'),
-            'certificateSubmissions',
-            'sessions'        => fn($q) => $q->orderBy('session_number')->orderBy('session_date')->orderBy('start_time'),
-            'sessions.attendances',
-        ])->findOrFail($id);
+        $snapshot = SmartCache::remember(
+            [SmartCache::DOMAIN_LMS_EVENTS, SmartCache::DOMAIN_LMS_COURSES, SmartCache::DOMAIN_LMS_SUBMISSIONS],
+            "bimtek_event_show_snapshot:{$id}",
+            300,
+            function () use ($id) {
+                $event = BimtekEvent::with([
+                    'course.sections' => fn($q) => $q->orderBy('position'),
+                    'certificateSubmissions',
+                    'sessions'        => fn($q) => $q->orderBy('session_number')->orderBy('session_date')->orderBy('start_time'),
+                    'sessions.attendances',
+                ])->findOrFail($id);
+
+                $sectionIds = ($event->course?->sections ?? collect())->pluck('id')->all();
+
+                $participants = DB::table('course_student')
+                    ->join('users', 'users.id', '=', 'course_student.user_id')
+                    ->leftJoin('user_profiles', 'user_profiles.user_id', '=', 'users.id')
+                    ->where('course_student.course_id', $event->course_id)
+                    ->where(function ($q) use ($event) {
+                        $q->where('course_student.bimtek_event_id', $event->id)
+                          ->orWhereNull('course_student.bimtek_event_id');
+                    })
+                    ->select(
+                        'users.id as user_id',
+                        DB::raw('COALESCE(user_profiles.full_name, users.name) as user_name'),
+                        'users.email as user_email',
+                        'user_profiles.instansi as user_instansi',
+                        'course_student.progress',
+                        'course_student.status',
+                        'course_student.completed_at',
+                        'course_student.bimtek_event_id',
+                        'course_student.zoom_joined_at',
+                        'course_student.zoom_attended',
+                        'course_student.zoom_attended_at',
+                        'course_student.cert_submission_status',
+                        'course_student.official_cert_number',
+                        'course_student.certificate_code',
+                        'course_student.certificate_file'
+                    )
+                    ->orderBy('user_name')
+                    ->get();
+
+                $participantIds = $participants->pluck('user_id')->unique()->values();
+
+                $allSessionAttendances = BimtekSessionAttendance::where('bimtek_event_id', $event->id)->get();
+
+                $allProofs = (!empty($sectionIds) && $participantIds->isNotEmpty())
+                    ? SectionZoomProof::whereIn('course_section_id', $sectionIds)
+                        ->whereIn('user_id', $participantIds)
+                        ->get()
+                    : collect();
+
+                $coursePostTests = PostTest::with('questions')
+                    ->where('course_id', $event->course_id)
+                    ->get();
+
+                $allResults = ($coursePostTests->isNotEmpty() && $participantIds->isNotEmpty())
+                    ? PostTestResult::whereIn('post_test_id', $coursePostTests->pluck('id'))
+                        ->whereIn('user_id', $participantIds)
+                        ->get()
+                    : collect();
+
+                $evaluations = BimtekInstructorEvaluation::with('user')
+                    ->where('bimtek_event_id', $event->id)
+                    ->latest()
+                    ->get();
+
+                return compact(
+                    'event',
+                    'participants',
+                    'allSessionAttendances',
+                    'allProofs',
+                    'coursePostTests',
+                    'allResults',
+                    'evaluations'
+                );
+            }
+        );
+
+        $event = $snapshot['event'];
+        $participants = $snapshot['participants']->map(fn($p) => clone $p);
+        $allSessionAttendances = $snapshot['allSessionAttendances'];
+        $allProofs = $snapshot['allProofs'];
+        $coursePostTests = $snapshot['coursePostTests'];
+        $allResults = $snapshot['allResults'];
+        $evaluations = $snapshot['evaluations'];
 
         $activeTab = (string) $request->query('tab', 'overview');
         if (!in_array($activeTab, ['overview', 'attendance', 'evaluation', 'graduation'], true)) {
@@ -378,66 +486,18 @@ class BimtekEventController extends Controller
         $totalAgendaDays = $sections->count();
         $totalSessionsCount = $sessions->count();
 
-        // Ambil daftar peserta yang terdaftar pada gelombang ini
-        $participants = DB::table('course_student')
-            ->join('users', 'users.id', '=', 'course_student.user_id')
-            ->leftJoin('user_profiles', 'user_profiles.user_id', '=', 'users.id')
-            ->where('course_student.course_id', $event->course_id)
-            ->where(function ($q) use ($event) {
-                $q->where('course_student.bimtek_event_id', $event->id)
-                  ->orWhereNull('course_student.bimtek_event_id');
-            })
-            ->select(
-                'users.id as user_id',
-                DB::raw('COALESCE(user_profiles.full_name, users.name) as user_name'),
-                'users.email as user_email',
-                'user_profiles.instansi as user_instansi',
-                'course_student.progress',
-                'course_student.status',
-                'course_student.completed_at',
-                'course_student.bimtek_event_id',
-                'course_student.zoom_joined_at',
-                'course_student.zoom_attended',
-                'course_student.zoom_attended_at',
-                'course_student.cert_submission_status',
-                'course_student.official_cert_number',
-                'course_student.certificate_code',
-                'course_student.certificate_file'
-            )
-            ->orderBy('user_name')
-            ->get();
-
         $participantIds = $participants->pluck('user_id')->unique()->values();
         $enrollmentByUser = $participants->keyBy('user_id');
 
-        // Presensi multi-sesi & bukti Zoom per hari
-        $allSessionAttendances = BimtekSessionAttendance::where('bimtek_event_id', $event->id)->get();
         $sessionAttByUser = $allSessionAttendances->groupBy('user_id');
         $sessionAttBySession = $allSessionAttendances->groupBy('bimtek_event_session_id');
 
-        $allProofs = (!empty($sectionIds) && $participantIds->isNotEmpty())
-            ? SectionZoomProof::whereIn('course_section_id', $sectionIds)
-                ->whereIn('user_id', $participantIds)
-                ->get()
-            : collect();
         $proofsBySection = $allProofs->groupBy('course_section_id');
         $proofsByUser = $allProofs->groupBy('user_id');
 
-        // Evaluasi (PostTest harian & akhir) beserta hasilnya untuk event ini
         $manualTypes = ['essay', 'uraian', 'file_upload', 'upload'];
-        $coursePostTests = PostTest::with('questions')
-            ->where('course_id', $event->course_id)
-            ->get();
-
-        $resultsByTest = collect();
-        $resultsByUser = collect();
-        if ($coursePostTests->isNotEmpty() && $participantIds->isNotEmpty()) {
-            $allResults = PostTestResult::whereIn('post_test_id', $coursePostTests->pluck('id'))
-                ->whereIn('user_id', $participantIds)
-                ->get();
-            $resultsByTest = $allResults->groupBy('post_test_id');
-            $resultsByUser = $allResults->groupBy('user_id');
-        }
+        $resultsByTest = $allResults->groupBy('post_test_id');
+        $resultsByUser = $allResults->groupBy('user_id');
 
         // Hitung total evaluasi non-pilgan yang masih menunggu penilaian / draf belum dipublikasikan
         $pendingEvalTotal = 0;
@@ -448,12 +508,6 @@ class BimtekEventController extends Controller
                     ->count();
             }
         }
-
-        // Evaluasi narasumber & penyelenggaraan
-        $evaluations = BimtekInstructorEvaluation::with('user')
-            ->where('bimtek_event_id', $event->id)
-            ->latest()
-            ->get();
 
         $evaluationsCount = $evaluations->count();
         $evaluationsByUser = $evaluations->keyBy('user_id');

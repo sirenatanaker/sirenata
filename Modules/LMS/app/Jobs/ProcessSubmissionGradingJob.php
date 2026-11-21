@@ -148,6 +148,8 @@ class ProcessSubmissionGradingJob implements ShouldQueue
             $this->handleRateLimitException($submission, $batch, $batchService, $e);
         } catch (\Throwable $e) {
             $this->handleNonQuotaFailure($submission, $batch, $batchService, $e);
+        } finally {
+            \App\Support\SmartCache::bump([\App\Support\SmartCache::DOMAIN_LMS_EVENTS]);
         }
     }
 

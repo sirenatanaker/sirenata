@@ -18,6 +18,10 @@ return Application::configure(basePath: dirname(__DIR__))
         // X-Forwarded-For, dll terbaca dengan benar — mencegah InvalidStateException SSO
         $middleware->trustProxies(at: '*');
 
+        $middleware->web(append: [
+            \App\Http\Middleware\AutoInvalidateSmartCache::class,
+        ]);
+
         $middleware->alias([
             'role' => \Spatie\Permission\Middleware\RoleMiddleware::class,
             'permission' => \Spatie\Permission\Middleware\PermissionMiddleware::class,

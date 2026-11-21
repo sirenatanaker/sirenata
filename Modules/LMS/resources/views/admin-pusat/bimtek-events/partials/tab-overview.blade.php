@@ -34,11 +34,11 @@
                     </p>
                 </div>
                 @if ($regState === 'active')
-                    <span class="px-3 py-1 rounded-md text-sm font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">Sedang Dibuka</span>
+                    <span class="px-3 py-1 rounded text-sm font-bold bg-[#0B5CFF] text-white" style="background-color: #0B5CFF;">Sedang Dibuka</span>
                 @elseif ($regState === 'done')
-                    <span class="px-3 py-1 rounded-md text-sm font-bold bg-slate-100 text-slate-600">Selesai</span>
+                    <span class="px-3 py-1 rounded text-sm font-bold bg-emerald-600 text-white">Selesai</span>
                 @else
-                    <span class="px-3 py-1 rounded-md text-sm font-bold bg-slate-100 text-slate-500">Mendatang</span>
+                    <span class="px-3 py-1 rounded text-sm font-bold bg-slate-100 text-slate-500 border border-slate-200">Mendatang</span>
                 @endif
             </div>
 
@@ -69,11 +69,11 @@
                     </p>
                 </div>
                 @if ($execState === 'active')
-                    <span class="px-3 py-1 rounded-md text-sm font-bold bg-blue-50 text-[#13416B] border border-blue-200">Sedang Berlangsung</span>
+                    <span class="px-3 py-1 rounded text-sm font-bold bg-amber-500 text-white">Sedang Berlangsung</span>
                 @elseif ($execState === 'done')
-                    <span class="px-3 py-1 rounded-md text-sm font-bold bg-slate-100 text-slate-600">Selesai</span>
+                    <span class="px-3 py-1 rounded text-sm font-bold bg-emerald-600 text-white">Selesai</span>
                 @else
-                    <span class="px-3 py-1 rounded-md text-sm font-bold bg-slate-100 text-slate-500">Mendatang</span>
+                    <span class="px-3 py-1 rounded text-sm font-bold bg-slate-100 text-slate-500 border border-slate-200">Mendatang</span>
                 @endif
             </div>
 
@@ -144,11 +144,11 @@
                     </p>
                 </div>
                 @if ($evalState === 'active')
-                    <span class="px-3 py-1 rounded-md text-sm font-bold bg-purple-50 text-purple-700 border border-purple-200">Masa Evaluasi</span>
+                    <span class="px-3 py-1 rounded text-sm font-bold bg-amber-500 text-white">Masa Evaluasi</span>
                 @elseif ($evalState === 'done')
-                    <span class="px-3 py-1 rounded-md text-sm font-bold bg-slate-100 text-slate-600">Selesai</span>
+                    <span class="px-3 py-1 rounded text-sm font-bold bg-emerald-600 text-white">Selesai</span>
                 @else
-                    <span class="px-3 py-1 rounded-md text-sm font-bold bg-slate-100 text-slate-500">Mendatang</span>
+                    <span class="px-3 py-1 rounded text-sm font-bold bg-slate-100 text-slate-500 border border-slate-200">Mendatang</span>
                 @endif
             </div>
 

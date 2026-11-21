@@ -22,7 +22,7 @@
         </style>
     @endpush
 
-    <div class="w-full p-4 sm:p-6 lg:p-8 max-w-400 mx-auto space-y-6">
+    <div class="w-full p-0 sm:p-6 lg:p-8 max-w-400 mx-auto space-y-4 sm:space-y-6">
 
         {{-- Breadcrumb Navigation --}}
         <nav class="flex" aria-label="Breadcrumb">
@@ -67,13 +67,9 @@
         <div class="p-5 sm:p-6 rounded-md bg-[#13416B] text-white shadow-sm space-y-5">
             <div class="flex flex-col lg:flex-row lg:items-start justify-between gap-4 border-b border-white/15 pb-4">
                 <div class="space-y-2 min-w-0">
-                    <h1 class="text-xl sm:text-2xl lg:text-3xl font-semibold text-white tracking-wide" style="font-family: 'Oswald', sans-serif;">{{ $event->batch_name }}</h1>
+                    <h1 class="text-xl sm:text-2xl lg:text-3xl font-semibold tracking-wide" style="font-family: 'Oswald', sans-serif; color: #FCD34D;">{{ $event->batch_name }}</h1>
                     <div class="flex flex-wrap items-center gap-x-2.5 gap-y-1.5 text-sm sm:text-base text-slate-200">
-                        <span class="px-3 py-1 rounded text-sm font-bold {{ $eventBadge['class'] }}">
-                            {{ $eventBadge['label'] }}
-                        </span>
-                        <span class="text-white/40 select-none">|</span>
-                        <span>Master Kursus: <strong class="text-white">{{ $event->course?->name ?? '-' }}</strong></span>
+                        <span class="font-medium text-white">{{ $event->course?->name ?? '-' }}</span>
                     </div>
                 </div>
 
@@ -149,7 +145,7 @@
                             'num'        => '3',
                             'label'      => 'Penilaian Evaluasi',
                             'sub'        => $pendingEvalTotal > 0 ? "{$pendingEvalTotal} Menunggu Dinilai" : 'Harian & Evaluasi Akhir',
-                            'badge'      => $pendingEvalTotal > 0 ? ['text' => $pendingEvalTotal, 'cls' => 'bg-amber-500 text-white'] : null,
+                            'badge'      => null,
                             'arrowClass' => 'timeline-arrow-mid rounded-md lg:rounded-none',
                         ],
                         [

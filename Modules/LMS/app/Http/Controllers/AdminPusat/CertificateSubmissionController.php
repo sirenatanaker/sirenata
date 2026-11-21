@@ -4,9 +4,11 @@ namespace Modules\LMS\Http\Controllers\AdminPusat;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Support\SmartCache;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -24,38 +26,70 @@ class CertificateSubmissionController extends Controller
      */
     public function index(Request $request)
     {
-        $query = CertificateSubmission::with(['bimtekEvent.course', 'submitter'])->latest();
+        $search = trim((string) $request->input('search'));
+        $status = (string) $request->input('status', '');
+        $page = max(1, (int) $request->input('page', 1));
+        $perPage = 10;
 
-        if ($search = trim((string) $request->input('search'))) {
-            $query->where(function ($q) use ($search) {
-                $q->where('submission_code', 'like', "%{$search}%")
-                  ->orWhere('submission_letter_number', 'like', "%{$search}%")
-                  ->orWhere('ppsdm_decree_number', 'like', "%{$search}%")
-                  ->orWhereHas('bimtekEvent', function ($b) use ($search) {
-                      $b->where('batch_name', 'like', "%{$search}%");
-                  });
-            });
-        }
+        $cached = SmartCache::remember(
+            [SmartCache::DOMAIN_LMS_SUBMISSIONS, SmartCache::DOMAIN_LMS_EVENTS],
+            'cert_submissions_index:' . md5(json_encode([$search, $status, $page, $perPage])),
+            300,
+            function () use ($search, $status, $page, $perPage) {
+                $query = CertificateSubmission::with(['bimtekEvent.course', 'submitter'])->latest();
 
-        if ($status = $request->input('status')) {
-            $query->where('status', $status);
-        }
+                if ($search !== '') {
+                    $query->where(function ($q) use ($search) {
+                        $q->where('submission_code', 'like', "%{$search}%")
+                          ->orWhere('submission_letter_number', 'like', "%{$search}%")
+                          ->orWhere('ppsdm_decree_number', 'like', "%{$search}%")
+                          ->orWhereHas('bimtekEvent', function ($b) use ($search) {
+                              $b->where('batch_name', 'like', "%{$search}%");
+                          });
+                    });
+                }
 
-        $submissions = $query->paginate(10)->withQueryString();
+                if ($status !== '') {
+                    $query->where('status', $status);
+                }
 
-        // Metrik Ringkasan
-        $totalSubmissions = CertificateSubmission::count();
-        $pendingSubmissions = CertificateSubmission::where('status', 'submitted_to_ppsdm')->count();
-        $completedSubmissions = CertificateSubmission::where('status', 'completed')->count();
-        $totalCertifiedASN = DB::table('course_student')->whereNotNull('official_cert_number')->count();
+                $total = (clone $query)->count();
+                $items = $query->forPage($page, $perPage)->get();
 
-        return view('lms::admin-pusat.certificate-submissions.index', compact(
-            'submissions',
-            'totalSubmissions',
-            'pendingSubmissions',
-            'completedSubmissions',
-            'totalCertifiedASN'
-        ));
+                $totalSubmissions = CertificateSubmission::count();
+                $pendingSubmissions = CertificateSubmission::where('status', 'submitted_to_ppsdm')->count();
+                $completedSubmissions = CertificateSubmission::where('status', 'completed')->count();
+                $totalCertifiedASN = DB::table('course_student')->whereNotNull('official_cert_number')->count();
+
+                return compact(
+                    'items',
+                    'total',
+                    'totalSubmissions',
+                    'pendingSubmissions',
+                    'completedSubmissions',
+                    'totalCertifiedASN'
+                );
+            }
+        );
+
+        $submissions = new LengthAwarePaginator(
+            $cached['items'],
+            $cached['total'],
+            $perPage,
+            $page,
+            [
+                'path'  => $request->url(),
+                'query' => $request->query(),
+            ]
+        );
+
+        return view('lms::admin-pusat.certificate-submissions.index', [
+            'submissions'          => $submissions,
+            'totalSubmissions'     => $cached['totalSubmissions'],
+            'pendingSubmissions'   => $cached['pendingSubmissions'],
+            'completedSubmissions' => $cached['completedSubmissions'],
+            'totalCertifiedASN'    => $cached['totalCertifiedASN'],
+        ]);
     }
 
     /**
@@ -179,27 +213,39 @@ class CertificateSubmissionController extends Controller
      */
     public function show($id)
     {
-        $submission = CertificateSubmission::with(['bimtekEvent.course', 'submitter'])->findOrFail($id);
+        $cached = SmartCache::remember(
+            [SmartCache::DOMAIN_LMS_SUBMISSIONS, SmartCache::DOMAIN_LMS_EVENTS],
+            "cert_submission_show:{$id}",
+            300,
+            function () use ($id) {
+                $submission = CertificateSubmission::with(['bimtekEvent.course', 'submitter'])->findOrFail($id);
 
-        $students = DB::table('course_student')
-            ->join('users', 'users.id', '=', 'course_student.user_id')
-            ->where('course_student.cert_submission_id', $submission->id)
-            ->select(
-                'users.id as user_id',
-                'users.name as user_name',
-                'users.email as user_email',
-                'course_student.progress',
-                'course_student.status',
-                'course_student.completed_at',
-                'course_student.zoom_attended',
-                'course_student.official_cert_number',
-                'course_student.certificate_code',
-                'course_student.certificate_file'
-            )
-            ->orderBy('users.name')
-            ->get();
+                $students = DB::table('course_student')
+                    ->join('users', 'users.id', '=', 'course_student.user_id')
+                    ->where('course_student.cert_submission_id', $submission->id)
+                    ->select(
+                        'users.id as user_id',
+                        'users.name as user_name',
+                        'users.email as user_email',
+                        'course_student.progress',
+                        'course_student.status',
+                        'course_student.completed_at',
+                        'course_student.zoom_attended',
+                        'course_student.official_cert_number',
+                        'course_student.certificate_code',
+                        'course_student.certificate_file'
+                    )
+                    ->orderBy('users.name')
+                    ->get();
 
-        return view('lms::admin-pusat.certificate-submissions.show', compact('submission', 'students'));
+                return compact('submission', 'students');
+            }
+        );
+
+        return view('lms::admin-pusat.certificate-submissions.show', [
+            'submission' => $cached['submission'],
+            'students'   => $cached['students'],
+        ]);
     }
 
     /**
@@ -322,7 +368,7 @@ class CertificateSubmissionController extends Controller
         ]);
 
         return redirect()
-            ->route('admin-pusat.management-course.certificate-submissions.show', ['id' => $submission->id, 'step' => 'publish'])
+            ->route('admin-pusat.management-course.certificate-submissions.show', ['certificate_submission' => $submission->id, 'step' => 'publish'])
             ->with('success', 'Nomor registrasi resmi sertifikat dari PPSDM berhasil disimpan!');
     }
 
@@ -348,6 +394,8 @@ class CertificateSubmissionController extends Controller
         }
 
         $generatedCount = 0;
+        $backgroundUrl = $certService->resolveImageDataUri($activeSetting->background_image);
+        $signatureUrl = $certService->resolveImageDataUri($activeSetting->signature_image);
 
         foreach ($students as $st) {
             $user = User::find($st->user_id);
@@ -356,8 +404,6 @@ class CertificateSubmissionController extends Controller
             $course = $submission->bimtekEvent->course;
             $certificateCode = $st->certificate_code ?: ('CERT-PPSDM-' . date('Y') . '-' . strtoupper(Str::random(6)));
             $issuedAt = now();
-            $backgroundUrl = $activeSetting->background_image ? Storage::url($activeSetting->background_image) : null;
-            $signatureUrl = $activeSetting->signature_image ? Storage::url($activeSetting->signature_image) : null;
             $completedDate = Carbon::parse($st->completed_at ?: $issuedAt)->translatedFormat('d F Y');
             $fullName = $user->profile?->full_name ?? $user->name;
 
@@ -372,10 +418,9 @@ class CertificateSubmissionController extends Controller
                 'signature_url'        => $signatureUrl,
                 'signer_name'          => $activeSetting->signer_name,
                 'signer_title'         => $activeSetting->signer_title,
-                'verification_url'     => route('verify-certificate', $certificateCode),
             ]);
 
-            $pdf->setPaper('a5', 'landscape');
+            $pdf->setPaper('a4', 'landscape');
             $pdf->getDomPDF()->set_option('isRemoteEnabled', true);
 
             $pdfFileName = 'certificates/pdfs/cert-' . $course->slug . '-' . $user->id . '.pdf';
@@ -402,7 +447,7 @@ class CertificateSubmissionController extends Controller
         $submission->update(['status' => 'completed']);
 
         return redirect()
-            ->route('admin-pusat.management-course.certificate-submissions.show', ['id' => $submission->id, 'step' => 'publish'])
+            ->route('admin-pusat.management-course.certificate-submissions.show', ['certificate_submission' => $submission->id, 'step' => 'publish'])
             ->with('success', "Sebanyak {$generatedCount} e-Sertifikat resmi berhasil diterbitkan dengan nomor PPSDM!");
     }
 }
