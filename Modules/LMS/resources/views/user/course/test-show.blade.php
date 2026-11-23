@@ -27,26 +27,25 @@
                 </div>
 
                 {{-- Header Title --}}
+                @php
+                    $rawTestTitle = trim((string) ($postTest->title ?? ''));
+                    $fallbackCourseTitle = data_get($course, 'course_name') ?? data_get($course, 'name');
+                    if ($evalType === 'uraian') {
+                        $displayTestTitle = $rawTestTitle !== ''
+                            ? (preg_match('/^evaluasi/i', $rawTestTitle) ? $rawTestTitle : 'Evaluasi Uraian : ' . $rawTestTitle)
+                            : 'Evaluasi Uraian : ' . $fallbackCourseTitle;
+                    } elseif ($evalType === 'upload') {
+                        $displayTestTitle = $rawTestTitle !== ''
+                            ? (preg_match('/^(penugasan|evaluasi)/i', $rawTestTitle) ? $rawTestTitle : 'Penugasan Berkas : ' . $rawTestTitle)
+                            : 'Penugasan Berkas : ' . $fallbackCourseTitle;
+                    } else {
+                        $displayTestTitle = $rawTestTitle !== '' ? $rawTestTitle : 'Evaluasi : ' . $fallbackCourseTitle;
+                    }
+                @endphp
                 <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                     <div>
-                        <span class="inline-block px-2.5 py-1 text-[8px] md:text-[10px] font-bold uppercase tracking-wider text-white bg-[#13416B] rounded-lg mb-3 shadow-sm border border-[#0f3354]">
-                            @if ($evalType === 'uraian')
-                                Lembar Evaluasi Uraian / Esai
-                            @elseif ($evalType === 'upload')
-                                Lembar Penugasan Berkas Modul
-                            @else
-                                Lembar Evaluasi Pilihan Ganda (CBT)
-                            @endif
-                        </span>
-
                         <h1 class="text-md sm:text-2xl font-extrabold text-slate-900 leading-tight mb-2">
-                            @if ($evalType === 'uraian')
-                                Evaluasi Uraian : {{ $postTest->title ?? (data_get($course, 'course_name') ?? data_get($course, 'name')) }}
-                            @elseif ($evalType === 'upload')
-                                Penugasan Berkas : {{ $postTest->title ?? (data_get($course, 'course_name') ?? data_get($course, 'name')) }}
-                            @else
-                                {{ $postTest->title ?? ('Evaluasi : ' . (data_get($course, 'course_name') ?? data_get($course, 'name'))) }}
-                            @endif
+                            {{ $displayTestTitle }}
                         </h1>
                         <p class="text-xs md:text-sm text-slate-500 leading-relaxed max-w-3xl">
                             @if ($evalType === 'uraian')
@@ -94,23 +93,23 @@
                             $isEssayPassed = (bool) ($evalResult?->is_passed ?? true);
                         @endphp
                         <div class="bg-white p-5 sm:p-8 lg:p-10 text-left space-y-6 animate-fadeIn">
-                            <div class="p-5 rounded-lg {{ $isEssayGraded ? ($isEssayPassed ? 'bg-emerald-50 border-emerald-200' : 'bg-amber-50 border-amber-200') : 'bg-emerald-50 border-emerald-200' }} border space-y-3">
+                            <div class="p-5 rounded-md {{ $isEssayGraded ? ($isEssayPassed ? 'bg-emerald-50 border-emerald-200' : 'bg-amber-50 border-amber-200') : 'bg-emerald-50 border-emerald-200' }} border space-y-3 text-left">
                                 <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                                    <div class="flex items-center gap-3.5">
+                                    <div class="flex items-center gap-3.5 text-left">
                                         <div class="w-12 h-12 rounded-full {{ $isEssayGraded && !$isEssayPassed ? 'bg-amber-100 text-amber-600 border-amber-200' : 'bg-emerald-100 text-emerald-600 border-emerald-200' }} flex items-center justify-center shrink-0 border">
                                             <i class="fas {{ $isEssayGraded && !$isEssayPassed ? 'fa-exclamation-circle' : 'fa-check-circle' }} text-2xl"></i>
                                         </div>
-                                        <div>
+                                        <div class="text-left">
                                             <div class="flex items-center gap-2 flex-wrap">
                                                 <h2 class="text-base sm:text-lg font-extrabold text-slate-800">
                                                     {{ $isEssayGraded ? 'Evaluasi Uraian Telah Dinilai' : 'Jawaban Uraian Berhasil Dikirim' }}
                                                 </h2>
                                                 @if ($isEssayGraded)
-                                                    <span class="text-[10px] font-bold {{ $isEssayPassed ? 'text-emerald-700 border-emerald-200' : 'text-rose-700 border-rose-200' }} bg-white border px-2 py-0.5 rounded">
+                                                    <span class="text-[10px] font-bold {{ $isEssayPassed ? 'text-emerald-700 border-emerald-200' : 'text-rose-700 border-rose-200' }} bg-white border px-2 py-0.5 rounded-md">
                                                         Nilai: {{ $evalResult?->score ?? 0 }} ({{ $isEssayPassed ? 'Lulus' : 'Perlu Revisi' }})
                                                     </span>
                                                 @else
-                                                    <span class="text-[10px] font-bold text-amber-700 bg-white border border-amber-200 px-2 py-0.5 rounded">Menunggu Penilaian</span>
+                                                    <span class="text-[10px] font-bold text-amber-700 bg-white border border-amber-200 px-2 py-0.5 rounded-md">Menunggu Penilaian</span>
                                                 @endif
                                             </div>
                                             <p class="text-xs sm:text-sm text-slate-600 mt-0.5">
@@ -120,27 +119,27 @@
                                         </div>
                                     </div>
 
-                                    @if (empty($postTest->is_submission_locked))
-                                        <a href="?retake=1" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 transition-colors shadow-2xs whitespace-nowrap">
+                                    @if (!$isEssayGraded && empty($postTest->is_submission_locked))
+                                        <a href="?retake=1" class="inline-flex items-center gap-2 px-4 py-2 rounded-md text-xs font-bold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 transition-colors shadow-2xs whitespace-nowrap">
                                             <i class="fas fa-edit text-xs text-slate-500"></i>
                                             <span>Edit Jawaban Uraian</span>
                                         </a>
-                                    @else
-                                        <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold text-slate-500 bg-white border border-slate-200 whitespace-nowrap">
+                                    @elseif (!$isEssayGraded && !empty($postTest->is_submission_locked))
+                                        <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-bold text-slate-500 bg-white border border-slate-200 whitespace-nowrap">
                                             <i class="fas fa-lock text-[11px]"></i> Pengumpulan Dikunci
                                         </span>
                                     @endif
                                 </div>
 
                                 @if ($isEssayGraded && !empty($evalResult?->notes))
-                                    <div class="p-3.5 rounded-lg bg-white/90 border border-slate-200/80 text-xs sm:text-sm text-slate-700 leading-relaxed">
+                                    <div class="p-3.5 rounded-md bg-white/90 border border-slate-200/80 text-xs sm:text-sm text-slate-700 leading-relaxed text-left">
                                         <span class="font-bold text-[#13416B] block mb-0.5">Catatan / Umpan Balik Instruktur:</span>
                                         <span>{{ $evalResult->notes }}</span>
                                     </div>
                                 @endif
                             </div>
 
-                            <div class="space-y-6 pt-2">
+                            <div class="space-y-6 pt-2 text-left">
                                 <div class="flex items-center justify-between pb-3 border-b border-slate-100">
                                     <h3 class="text-xs font-bold uppercase tracking-wider text-slate-500">
                                         Salinan Jawaban Anda ({{ count($postTest->questions) }} Soal)
@@ -153,17 +152,15 @@
                                 @foreach ($postTest->questions as $qIdx => $question)
                                     <div class="space-y-2 text-left">
                                         <div class="flex items-start gap-3">
-                                            <span class="w-7 h-7 rounded-lg bg-[#13416B] text-white flex items-center justify-center text-xs font-extrabold shrink-0 mt-0.5 border border-[#0f3354] shadow-xs">
+                                            <span class="w-7 h-7 rounded-md bg-[#13416B] text-white flex items-center justify-center text-xs font-extrabold shrink-0 mt-0.5 border border-[#0f3354] shadow-xs">
                                                 {{ $qIdx + 1 }}
                                             </span>
-                                            <div class="flex-1 min-w-0 prose max-w-none text-slate-800 text-sm sm:text-base font-bold leading-snug">
+                                            <div class="flex-1 min-w-0 prose max-w-none text-slate-800 text-sm sm:text-base font-bold leading-snug text-left">
                                                 {!! strip_tags($question->question) === $question->question ? nl2br(e($question->question)) : $question->question !!}
                                             </div>
                                         </div>
-                                        <div class="pl-0 sm:pl-10">
-                                            <div class="p-4 rounded-lg bg-slate-50 border border-slate-200 text-xs sm:text-sm text-slate-800 leading-relaxed whitespace-pre-wrap">
-                                                {{ data_get($evalResult?->answers, $qIdx, '-') }}
-                                            </div>
+                                        <div class="pl-0 sm:pl-10 text-left">
+                                            <div class="p-4 rounded-md bg-slate-50 border border-slate-200 text-xs sm:text-sm text-slate-800 leading-relaxed text-left whitespace-pre-wrap">{{ trim((string) data_get($evalResult?->answers, $qIdx, '-')) }}</div>
                                         </div>
                                     </div>
 
@@ -171,13 +168,6 @@
                                         <hr class="border-slate-100 my-4" />
                                     @endif
                                 @endforeach
-                            </div>
-
-                            <div class="flex items-center justify-end pt-6 border-t border-slate-100">
-                                <a href="?retake=1" class="px-5 py-2.5 rounded-lg text-xs sm:text-sm font-bold bg-[#13416B] text-white hover:bg-[#0f3354] transition-colors inline-flex items-center gap-2 shadow-sm">
-                                    <i class="fas fa-edit text-xs"></i>
-                                    <span>Edit Jawaban Uraian</span>
-                                </a>
                             </div>
                         </div>
                     @else

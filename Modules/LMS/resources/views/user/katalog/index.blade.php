@@ -650,7 +650,7 @@
                                     <div class="grid grid-cols-2 gap-2 pt-2 border-t border-slate-200/80">
                                         <div>
                                             <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Gelombang / Angkatan</span>
-                                            <p class="font-bold text-[#13416B] mt-0.5 truncate" x-text="selected.bimtekBatchName"></p>
+                                            <p class="font-bold text-[#13416B] mt-0.5 line-clamp-2 leading-snug" :title="selected.bimtekBatchName" x-text="selected.bimtekBatchName"></p>
                                         </div>
                                         <div>
                                             <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Kuota</span>

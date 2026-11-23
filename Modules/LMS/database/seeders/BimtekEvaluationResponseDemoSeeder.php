@@ -132,9 +132,24 @@ class BimtekEvaluationResponseDemoSeeder extends Seeder
                 continue;
             }
 
-            $enrolledUserIds = DB::table('course_student')
-                ->where('bimtek_event_id', $event->id)
-                ->pluck('user_id');
+            $demoUserId = DB::table('users')
+                ->where('email', 'user.pusat@gmail.com')
+                ->value('id');
+
+            $enrolledQuery = DB::table('course_student')
+                ->where('bimtek_event_id', $event->id);
+
+            if ($statusLabel !== 'Selesai') {
+                // Untuk event yang masih berjalan, jangan pernah isi kuesioner atas nama akun demo yang belum 100%
+                if ($demoUserId) {
+                    $enrolledQuery->where(function ($q) use ($demoUserId) {
+                        $q->where('user_id', '!=', $demoUserId)
+                            ->orWhere('progress', '>=', 100);
+                    });
+                }
+            }
+
+            $enrolledUserIds = $enrolledQuery->pluck('user_id');
 
             if ($enrolledUserIds->isEmpty()) {
                 continue;

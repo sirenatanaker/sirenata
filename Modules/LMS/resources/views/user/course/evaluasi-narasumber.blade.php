@@ -32,25 +32,24 @@
                         </div>
 
                         {{-- Info Persyaratan Sertifikat Tuntas --}}
-                        <div class="p-4 rounded-lg bg-emerald-50/70 border border-emerald-200 text-left max-w-md mx-auto space-y-1">
-                            <div class="flex items-center gap-2 text-emerald-800 font-bold text-sm sm:text-base">
-                                <i class="fas fa-award text-emerald-600"></i>
-                                <span>Syarat Kelulusan Terpenuhi</span>
+                        <div class="w-full p-4 rounded-md bg-emerald-50/70 border border-emerald-200 text-left space-y-1">
+                            <div class="text-emerald-800 font-bold text-sm sm:text-base">
+                                Syarat Kelulusan Terpenuhi
                             </div>
                             <p class="text-xs sm:text-sm text-emerald-700 leading-relaxed">
                                 Tahap evaluasi narasumber & sarana bimtek telah tuntas. Anda dapat kembali ke halaman kursus untuk memantau status penerbitan e-sertifikat Anda.
                             </p>
                         </div>
 
-                        {{-- Tombol Aksi --}}
-                        <div class="pt-3 flex flex-col sm:flex-row items-center justify-center gap-3">
+                        {{-- Tombol Aksi (Kiri & Kanan Pojok) --}}
+                        <div class="w-full pt-3 flex flex-col sm:flex-row items-center justify-between gap-3">
                             <a href="{{ $backToUrl }}"
-                               class="w-full sm:w-auto px-6 py-2.5 rounded-lg text-sm sm:text-[15px] font-bold text-white bg-[#13416B] hover:bg-[#0f3354] transition-colors shadow-2xs inline-flex items-center justify-center gap-2">
+                               class="w-full sm:w-auto px-6 py-2.5 rounded-md text-sm sm:text-[15px] font-bold text-white bg-[#13416B] hover:bg-[#0f3354] transition-colors shadow-2xs inline-flex items-center justify-center gap-2">
                                 <i class="fas fa-arrow-left text-xs"></i>
                                 <span>Kembali ke Halaman Kursus</span>
                             </a>
                             <a href="{{ route('user.course.my-course.evaluasi-narasumber', ['slug' => $courseSlug, 'edit' => 1]) }}"
-                               class="w-full sm:w-auto px-5 py-2.5 rounded-lg text-sm sm:text-[15px] font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 transition-colors inline-flex items-center justify-center gap-2">
+                               class="w-full sm:w-auto px-5 py-2.5 rounded-md text-sm sm:text-[15px] font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 transition-colors inline-flex items-center justify-center gap-2">
                                 <i class="fas fa-pen text-xs"></i>
                                 <span>Ubah / Perbarui Jawaban</span>
                             </a>

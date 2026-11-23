@@ -667,11 +667,6 @@
                                                 <h3 class="text-base sm:text-lg lg:text-xl font-medium text-white leading-snug tracking-wide" style="font-family: 'Oswald', sans-serif;">
                                                     Evaluasi Narasumber & Penyelenggaraan
                                                 </h3>
-                                                @if ($isEvaluasiNarasumberCompleted)
-                                                    <span class="inline-flex items-center gap-1 text-[11px] font-bold text-white bg-emerald-600 border border-emerald-500 px-2 py-0.5 rounded-md">
-                                                        <i class="fas fa-check-circle text-white text-xs"></i> Sudah Diisi
-                                                    </span>
-                                                @endif
                                             </div>
 
                                             <p class="text-xs sm:text-sm text-white/90 mt-1.5 leading-relaxed max-w-full lg:max-w-[90%]">
@@ -814,7 +809,7 @@
                     @evaluasi-narasumber-submitted.window="evalNarasumberDone = true"
                     x-data="{
                         showRequirementsModal: false,
-                        evalNarasumberDone: {{ $isEvaluasiNarasumberCompleted ? 'true' : 'false' }}
+                        evalNarasumberDone: {{ ($isEvaluasiNarasumberCompleted && !$isEvaluasiNarasumberLocked) ? 'true' : 'false' }}
                     }"
                     class="bg-white rounded-none sm:rounded-md shadow-sm border-y border-x-0 sm:border sm:border-x border-slate-200 p-4 sm:p-6 mb-0 md:mb-4 relative">
 

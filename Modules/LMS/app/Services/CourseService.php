@@ -721,6 +721,10 @@ class CourseService
                 ? false 
                 : ($isWaitingForStart || !$isLastDayReached || ($hasZoom && !$isZoomAttended));
 
+            if ($isEvaluasiNarasumberLocked) {
+                $isEvaluasiNarasumberCompleted = false;
+            }
+
             $evaluasiNarasumberLockReason = 'Evaluasi narasumber dibuka pada hari terakhir setelah sesi tatap muka (Zoom) dihadiri.';
             if ($isWaitingForStart) {
                 $evaluasiNarasumberLockReason = 'Evaluasi narasumber dibuka setelah periode pelaksanaan pelatihan resmi dimulai.';
@@ -957,9 +961,10 @@ class CourseService
         }
 
         $currentEvalType = match ($postTestBab?->type) {
-            'essay'       => 'uraian',
-            'file_upload' => 'upload',
-            default       => ($sectionIndex % 2 === 0 ? 'uraian' : 'upload'),
+            'essay'           => 'uraian',
+            'file_upload'     => 'upload',
+            'multiple_choice' => 'pilgan',
+            default           => ($sectionIndex % 2 === 0 ? 'uraian' : 'upload'),
         };
 
         $isAssignmentDone = (bool) ($evalResult && ($evalResult->file_path || $evalResult->status === 'submitted' || $evalResult->completed_at));
@@ -1689,6 +1694,18 @@ class CourseService
         [$completed, $passed] = $this->userProgressIds();
 
         if (in_array($test->id, $passed)) {
+            return true;
+        }
+
+        if (Auth::id() && DB::table('post_test_results')
+            ->where('user_id', Auth::id())
+            ->where('post_test_id', $test->id)
+            ->where(function ($q) {
+                $q->whereNotNull('completed_at')
+                    ->orWhere('status', 'submitted')
+                    ->orWhereNotNull('file_path');
+            })
+            ->exists()) {
             return true;
         }
 

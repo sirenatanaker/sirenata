@@ -1,7 +1,6 @@
 <x-dashboard::layouts.dashboard title="Dashboard Pembelajaran">
     @push('styles')
         <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
         <style>
             #instansiForm .select2-container .select2-selection--single {
                 height: 44px;
@@ -20,18 +19,23 @@
                 right: 8px;
             }
 
-            #chartScrollContainer::-webkit-scrollbar {
+            #chartScrollContainer::-webkit-scrollbar,
+            .custom-scrollbar::-webkit-scrollbar {
                 width: 6px;
+                height: 6px;
             }
-            #chartScrollContainer::-webkit-scrollbar-track {
+            #chartScrollContainer::-webkit-scrollbar-track,
+            .custom-scrollbar::-webkit-scrollbar-track {
                 background: #f8fafc;
                 border-radius: 4px;
             }
-            #chartScrollContainer::-webkit-scrollbar-thumb {
+            #chartScrollContainer::-webkit-scrollbar-thumb,
+            .custom-scrollbar::-webkit-scrollbar-thumb {
                 background: #cbd5e1;
                 border-radius: 4px;
             }
-            #chartScrollContainer::-webkit-scrollbar-thumb:hover {
+            #chartScrollContainer::-webkit-scrollbar-thumb:hover,
+            .custom-scrollbar::-webkit-scrollbar-thumb:hover {
                 background: #94a3b8;
             }
         </style>
@@ -57,9 +61,8 @@
 
                 <div class="relative z-10 flex items-center justify-between gap-3">
                     <div>
-                        <p class="text-white/85 text-xs sm:text-sm font-bold uppercase mb-1 tracking-wider">Total Kursus</p>
-                        <h3 class="text-2xl sm:text-3xl font-extrabold text-white">{{ $stats['total'] }}</h3>
-                        <p class="text-[10px] sm:text-xs text-white/80 mt-1">Seluruh kursus pada sistem</p>
+                        <p class="text-white/85 text-xs sm:text-sm font-bold uppercase mb-1 tracking-wider">Pelatihan Diikuti</p>
+                        <h3 class="text-2xl sm:text-3xl font-extrabold text-white">{{ $eventStats['total_enrolled'] ?? $stats['total'] }}</h3>
                     </div>
 
                     <!-- Badge Putih Solid, Ikon Topi Toga / Edukasi -->
@@ -85,9 +88,8 @@
 
                 <div class="relative z-10 flex items-center justify-between gap-3">
                     <div>
-                        <p class="text-white/85 text-xs sm:text-sm font-bold uppercase mb-1 tracking-wider">Rata-rata Progress</p>
+                        <p class="text-white/85 text-xs sm:text-sm font-bold uppercase mb-1 tracking-wider">Rata-rata Progres</p>
                         <h3 class="text-2xl sm:text-3xl font-extrabold text-white">{{ $stats['avg_progress'] }}%</h3>
-                        <p class="text-[10px] sm:text-xs text-white/80 mt-1">Tingkat penyelesaian topik</p>
                     </div>
 
                     <!-- Badge Putih Solid, Ikon Tren Progress -->
@@ -99,9 +101,9 @@
                 </div>
             </div>
 
-            <!-- Kursus Selesai (Light Blue) -->
+            <!-- Pelatihan Selesai (Emerald Green) -->
             <div
-                class="relative overflow-hidden bg-[#8BB1CC] rounded-md p-5 sm:p-6 shadow-md transition-all duration-300 hover:shadow-lg hover:-translate-y-1 group z-0">
+                class="relative overflow-hidden bg-emerald-600 rounded-md p-5 sm:p-6 shadow-md transition-all duration-300 hover:shadow-lg hover:-translate-y-1 group z-0">
                 <!-- Efek Dekoratif Bubbles Geometris Profesional -->
                 <div class="absolute inset-0 pointer-events-none z-0">
                     <div class="absolute -top-12 -right-10 w-44 h-44 border-[16px] border-white/10 rounded-full group-hover:scale-105 transition-transform duration-500"></div>
@@ -113,13 +115,12 @@
 
                 <div class="relative z-10 flex items-center justify-between gap-3">
                     <div>
-                        <p class="text-white/85 text-xs sm:text-sm font-bold uppercase mb-1 tracking-wider">Kursus Selesai</p>
+                        <p class="text-white/85 text-xs sm:text-sm font-bold uppercase mb-1 tracking-wider">Pelatihan Selesai</p>
                         <h3 class="text-2xl sm:text-3xl font-extrabold text-white">{{ $stats['selesai'] }}</h3>
-                        <p class="text-[10px] sm:text-xs text-white/80 mt-1">Kursus yang telah dituntaskan</p>
                     </div>
 
                     <!-- Badge Putih Solid, Ikon Piala Prestasi -->
-                    <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-white text-[#2b658d] flex items-center justify-center shrink-0 shadow-sm group-hover:scale-105 transition-transform duration-300">
+                    <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-white text-emerald-600 flex items-center justify-center shrink-0 shadow-sm group-hover:scale-105 transition-transform duration-300">
                         <svg class="w-6 h-6 sm:w-7 sm:h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 18.75h-9m9 0a3 3 0 0 1 3 3h-15a3 3 0 0 1 3-3m9 0v-3.375c0-.621-.503-1.125-1.125-1.125h-.871M7.5 18.75v-3.375c0-.621.504-1.125 1.125-1.125h.872m5.004 0A6.002 6.002 0 0 0 18 9.75V6A2.25 2.25 0 0 0 15.75 3.75H8.25A2.25 2.25 0 0 0 6 6v3.75a6.002 6.002 0 0 0 3.504 5.625m4.992 0a6.01 6.01 0 0 1-4.992 0M6 6.75H4.875A2.625 2.625 0 0 0 2.25 9.375V9.75a5.25 5.25 0 0 0 4.125 5.143M18 6.75h1.125a2.625 2.625 0 0 1 2.625 2.625V9.75a5.25 5.25 0 0 1-4.125 5.143" />
                         </svg>
@@ -128,372 +129,232 @@
             </div>
         </div>
 
-        <!-- ======================================================= -->
-        <!-- 2. BALANCED 2-COLUMN GRID (PREVIOUS CARDS, BALANCED)    -->
-        <!-- ======================================================= -->
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-6">
-
-            <!-- ===================================== -->
-            <!-- KOLOM KIRI (7 COLS): RESUME & CHART   -->
-            <!-- ===================================== -->
-            <div class="lg:col-span-7 flex flex-col gap-5 sm:gap-6 lg:h-full min-h-0">
-
-                <!-- CARD 1: Lanjutkan Belajar -->
-                <div class="bg-white rounded-md p-4 sm:p-5 shadow-sm shrink-0">
-                    <!-- Header Card -->
-                    <div class="mb-3.5 pb-2.5 sm:pb-3 border-b border-slate-100 shrink-0">
-                        <h2 class="text-lg sm:text-xl font-extrabold text-slate-800">Lanjutkan Belajar</h2>
-                        <p class="text-xs sm:text-sm text-slate-500">Aktivitas pembelajaran terakhir Anda</p>
-                    </div>
-
-                    @if ($lastCourse)
-                        @php
-                            $lThumb = $lastCourse->thumbnail
-                                ? (str_starts_with($lastCourse->thumbnail, 'http')
-                                    ? $lastCourse->thumbnail
-                                    : asset('storage/' . $lastCourse->thumbnail))
-                                : 'https://ui-avatars.com/api/?name=' .
-                                    urlencode(substr($lastCourse->name, 0, 2)) .
-                                    '&background=13416B&color=fff';
-                            if (str_contains($lThumb, 'ui-avatars.com') && !str_contains($lThumb, 'font-size')) {
-                                $lThumb .= '&font-size=0.33';
-                            }
-
-                            // Warna progress: 100% hijau, sedang berprogress amber
-                            $lPct = (int) ($lastCourse->progress ?? 0);
-                            if ($lPct >= 100) {
-                                $lBar = 'bg-emerald-500';
-                                $lText = 'text-emerald-600';
-                            } else {
-                                $lBar = 'bg-amber-500';
-                                $lText = 'text-amber-600';
-                            }
-                        @endphp
-
-                        <div
-                            class="relative bg-slate-50/70 rounded-md shadow-xs flex flex-row overflow-hidden transition-all hover:bg-slate-100/80 hover:shadow-sm mb-1 group">
-
-                            {{-- Badge Kategori di Resolusi Mobile (Dibuat sama seperti badge desktop: mojok kanan atas dengan sudut rounded-bl-md) --}}
-                            <span class="sm:hidden absolute top-0 right-0 z-10 max-w-[70%] px-2 sm:px-2.5 py-1 text-[8px] sm:text-[9px] font-bold uppercase tracking-wider text-white bg-[#13416B] shadow-xs flex items-center gap-1 rounded-none rounded-bl-md">
-                                <i class="fas fa-tag text-[7.5px] sm:text-[8.5px] flex-shrink-0"></i>
-                                <span class="truncate">{{ $lastCourse->category?->name ?? ($lastCourse->category_name ?? 'Umum') }}</span>
-                            </span>
-
-                            <!-- Thumbnail Kiri (Persegi Panjang Landscape, lebih lebar di resolusi desktop) -->
-                            <div class="hidden sm:block sm:w-48 md:w-56 lg:w-64 xl:w-72 2xl:w-80 shrink-0 bg-slate-100 relative overflow-hidden">
-                                <img src="{{ $lThumb }}" alt="{{ $lastCourse->name }}"
-                                    class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
-
-                                {{-- Badge Kategori (Mojok Kanan Atas Thumbnail seperti dicard kursus lainnya) --}}
-                                <span class="absolute top-0 right-0 z-10 max-w-[85%] px-2 sm:px-2.5 py-1 text-[8px] sm:text-[9px] font-bold uppercase tracking-wider text-white bg-[#13416B] shadow-xs flex items-center gap-1 rounded-none rounded-bl-md">
-                                    <i class="fas fa-tag text-[7.5px] sm:text-[8.5px] flex-shrink-0"></i>
-                                    <span class="truncate">{{ $lastCourse->category?->name ?? ($lastCourse->category_name ?? 'Umum') }}</span>
-                                </span>
-                            </div>
-
-                            <!-- Konten Teks & Progress Kanan -->
-                            <div class="min-w-0 flex-1 flex flex-col justify-between p-3 sm:p-4">
-                                <div class="mb-2 pr-16 sm:pr-0">
-                                    <span
-                                        class="text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-wider block mb-1">Aktivitas
-                                        Terakhir</span>
-                                    <h3 class="font-bold text-slate-800 text-base sm:text-lg line-clamp-2 mb-1.5 leading-snug">
-                                        {{ $lastCourse->name }}
-                                    </h3>
-                                    <p class="text-xs sm:text-sm text-slate-500 line-clamp-2 leading-relaxed">
-                                        {{ $lastCourse->description ?? 'Lanjutkan pembelajaran Anda pada kursus ini.' }}
-                                    </p>
-                                </div>
-
-                                <div class="mt-auto">
-                                    <div
-                                        class="flex items-center justify-between text-[10px] sm:text-xs text-slate-500 mb-1 font-medium">
-                                        <span>Progress</span>
-                                        <span class="font-bold {{ $lText }}">{{ $lastCourse->progress }}%</span>
-                                    </div>
-
-                                    <div
-                                        class="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden shadow-inner mb-3">
-                                        <div class="{{ $lBar }} h-full rounded-full transition-all duration-300"
-                                            style="width: {{ $lastCourse->progress }}%"></div>
-                                    </div>
-
-                                    @if ($lPct >= 100)
-                                        <a href="{{ route('user.course.my-course.detail', $lastCourse->slug) }}"
-                                            class="flex items-center justify-center gap-2 w-full bg-emerald-600 text-white hover:bg-emerald-700 px-4 py-2 sm:py-2.5 rounded-md font-bold transition-all shadow-xs text-xs sm:text-sm group">
-                                            <i class="fas fa-award text-xs sm:text-sm"></i>
-                                            <span>Lihat Sertifikat</span>
-                                        </a>
-                                    @elseif ($lPct <= 0)
-                                        <a href="{{ route('user.course.my-course.detail', $lastCourse->slug) }}?target=auto"
-                                            class="flex items-center justify-center gap-2 w-full bg-emerald-600 text-white hover:bg-emerald-700 px-4 py-2 sm:py-2.5 rounded-md font-bold transition-all shadow-xs text-xs sm:text-sm group">
-                                            <i class="fas fa-play text-[10px] sm:text-xs group-hover:scale-110 transition-transform"></i>
-                                            <span>Mulai Belajar</span>
-                                        </a>
-                                    @else
-                                        <a href="{{ route('user.course.my-course.detail', $lastCourse->slug) }}?target=auto"
-                                            class="flex items-center justify-center w-full bg-amber-500 text-white hover:bg-amber-600 px-4 py-2 sm:py-2.5 rounded-md font-bold transition-all shadow-xs text-xs sm:text-sm group">
-                                            <span>Lanjutkan Belajar</span>
-                                        </a>
-                                    @endif
-                                </div>
-                            </div>
-                        </div>
-                    @else
-                        <div
-                            class="bg-slate-50 rounded-xl p-6 text-center my-2 flex flex-col justify-center items-center">
-                            <div
-                                class="w-12 h-12 bg-white rounded-full flex items-center justify-center mb-2 shadow-sm text-slate-400 border border-slate-100">
-                                <i class="fas fa-book-open text-lg"></i>
-                            </div>
-                            <p class="text-xs font-semibold text-slate-700 mb-3">Belum ada aktivitas belajar</p>
-                            <a href="{{ route('user.catalog.index') }}"
-                                class="inline-flex items-center justify-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-lg text-[#13416B] text-xs font-bold hover:bg-slate-50 shadow-sm transition-all">
-                                <span>Lihat Katalog Kursus</span>
-                                <i class="fas fa-arrow-right text-[10px]"></i>
-                            </a>
-                        </div>
-                    @endif
+        <!-- ========================================================= -->
+        <!-- 2. GANTT CHART JADWAL PELATIHAN (LMS BY EVENT)            -->
+        <!-- ========================================================= -->
+        @php
+            $ganttYear = $userEventGantt['year'] ?? now()->year;
+            $ganttHasEvents = !empty($userEventGantt['events']);
+            $ganttTodayLabel = $userEventGantt['today_label'] ?? now()->translatedFormat('d M Y');
+        @endphp
+        <section class="bg-white rounded-md border border-slate-200 shadow-sm overflow-hidden">
+            <header class="px-4 sm:px-6 py-4 border-b border-slate-100 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                <div>
+                    <h2 class="text-base sm:text-lg font-extrabold text-slate-800">
+                        Gantt Chart Jadwal Pelatihan ({{ $ganttYear }})
+                    </h2>
+                    <p class="text-xs sm:text-sm text-slate-500">
+                        Linimasa pendaftaran, pelaksanaan Live Zoom, dan evaluasi gelombang pelatihan Anda
+                    </p>
                 </div>
 
-                <!-- CARD 2: Evaluasi Anda per Kursus (Analitik) -->
-                <div class="bg-white rounded-md p-5 sm:p-6 shadow-sm border border-slate-200 flex flex-col lg:flex-1 min-h-0">
-                    <div
-                        class="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-4 pb-4 border-b border-slate-100 shrink-0">
-                        <div class="flex items-center gap-3">
-                            <div>
-                                <h2 class="text-base lg:text-lg font-extrabold text-slate-800">Evaluasi Anda per Kursus</h2>
-                                <p class="text-[11px] sm:text-xs text-slate-500">Nilai akhir dari post-test yang telah Anda
-                                    kerjakan</p>
-                            </div>
-                        </div>
+                <div class="flex flex-wrap items-center gap-2.5 shrink-0">
+                    <label for="userGanttStatusFilter" class="sr-only">Filter status pelatihan</label>
+                    <select id="userGanttStatusFilter"
+                        class="text-xs sm:text-sm border-slate-200 rounded-md focus:ring-[#13416B] focus:border-[#13416B] cursor-pointer bg-white">
+                        <option value="all">Semua Status</option>
+                        <option value="open_registration">Periode Pendaftaran</option>
+                        <option value="ongoing">Periode Pelaksanaan</option>
+                        <option value="evaluation">Periode Evaluasi</option>
+                        <option value="completed">Selesai</option>
+                    </select>
 
-                        @if (isset($chartDataByCourse) && count($chartDataByCourse) > 0)
-                            <div class="w-full sm:w-auto sm:max-w-xs shrink-0">
-                                <select id="courseChartFilter"
-                                    class="w-full text-sm border-slate-200 rounded-lg focus:ring-[#13416B] focus:border-[#13416B] text-ellipsis overflow-hidden pr-8 cursor-pointer shadow-sm">
-                                    @foreach ($chartDataByCourse as $cId => $cData)
-                                        <option value="{{ $cId }}">{{ $cData['course_name'] }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                        @endif
-                    </div>
-
-                    @if (isset($chartDataByCourse) && count($chartDataByCourse) > 0)
-                        <div class="flex-1 flex flex-col min-h-0 justify-between">
-                            <!-- Area Scroll Vertikal (Hanya Label Sumbu Y dan Data Batang yang ter-scroll) -->
-                            <div id="chartScrollContainer" class="relative w-full overflow-y-auto overflow-x-hidden flex-1 min-h-[160px] max-h-[300px] lg:max-h-none pr-1">
-                                <div id="chartCanvasWrapper" class="relative w-full">
-                                    <canvas id="postTestChart"></canvas>
-                                </div>
-                            </div>
-
-                            <!-- Sumbu X Tetap / Fixed di Bawah (Angka 0, 20, 40, 60, 80, 100 tidak ikut ter-scroll) -->
-                            <div id="chartXAxisWrapper" class="relative w-full h-6 shrink-0 border-t border-slate-200">
-                                <canvas id="postTestXAxis" class="w-full h-full block"></canvas>
-                            </div>
-
-                            <!-- Penanda KKM & Status Kelulusan -->
-                            <div
-                                class="flex flex-wrap items-center gap-x-5 gap-y-1.5 mt-2 pt-2.5 border-t border-slate-100 text-[11px] text-slate-500 shrink-0">
-                                <span class="flex items-center gap-1.5"><span
-                                        class="w-2.5 h-2.5 rounded-sm bg-emerald-500"></span> Lulus (≥ KKM)</span>
-                                <span class="flex items-center gap-1.5"><span
-                                        class="w-2.5 h-2.5 rounded-sm bg-amber-500"></span> Di bawah KKM</span>
-                                <span class="flex items-center gap-1.5"><span
-                                        class="inline-block h-3 border-l-2 border-slate-500"></span> Penanda KKM tiap evaluasi</span>
-                            </div>
-                        </div>
-                    @else
-                        <div class="bg-slate-50 rounded-xl p-10 text-center border border-dashed border-slate-200 my-auto">
-                            <div
-                                class="w-14 h-14 bg-white rounded-full flex items-center justify-center mx-auto mb-3 shadow-sm text-slate-400">
-                                <i class="fas fa-chart-area text-xl"></i>
-                            </div>
-                            <p class="text-sm font-semibold text-slate-700">Belum ada data evaluasi</p>
-                            <p class="text-xs text-slate-500 mt-1">Daftar dan selesaikan modul kursus untuk memunculkan
-                                laporan analitik evaluasi.</p>
-                        </div>
-                    @endif
+                    <a href="{{ route('user.catalog.index') }}"
+                       class="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs sm:text-sm font-bold text-white bg-[#13416B] hover:bg-[#0f3354] rounded-md transition-colors shadow-2xs">
+                        <span>Jelajahi Katalog</span>
+                    </a>
                 </div>
+            </header>
 
+            {{-- Legenda Fase --}}
+            <div class="px-4 sm:px-6 py-3 border-b border-slate-100 bg-slate-50/50">
+                <div class="flex flex-wrap items-center gap-x-5 gap-y-2 text-xs sm:text-sm text-slate-600">
+                    <span class="inline-flex items-center gap-1.5">
+                        <span class="w-3 h-3 rounded-xs bg-sky-300"></span>Pendaftaran
+                    </span>
+                    <span class="inline-flex items-center gap-1.5">
+                        <span class="w-3 h-3 rounded-xs bg-[#2B6496]"></span>Pelaksanaan &amp; Live Zoom
+                    </span>
+                    <span class="inline-flex items-center gap-1.5">
+                        <span class="w-3 h-3 rounded-xs bg-emerald-500"></span>Evaluasi &amp; Sertifikasi
+                    </span>
+                    <span class="inline-flex items-center gap-1.5">
+                        <span class="inline-block w-4 border-t-2 border-dashed border-red-500"></span>Hari Ini ({{ $ganttTodayLabel }})
+                    </span>
+                </div>
             </div>
 
-            <!-- ===================================== -->
-            <!-- KOLOM KANAN (5 COLS): KURSUS & LIB    -->
-            <!-- ===================================== -->
-            <div class="lg:col-span-5 flex flex-col gap-5 sm:gap-6 lg:h-full min-h-0">
-
-                <!-- CARD 3: Kursus Saya (Menyesuaikan Tinggi & Card ke-4 Mengintip Blur) -->
-                <div class="bg-white rounded-none sm:rounded-md p-4 sm:p-6 shadow-none sm:shadow-sm flex flex-col lg:flex-1 w-full min-h-0">
-                    <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-100 shrink-0">
-                        <div>
-                            <h2 class="text-lg sm:text-xl font-extrabold text-slate-800">Kursus Saya</h2>
-                            <p class="text-xs sm:text-sm text-slate-500">Daftar kursus yang Anda ikuti</p>
+            <div class="p-4 sm:p-6">
+                {{-- Kontainer Gantt Chart --}}
+                <div id="userGanttWrapper"
+                     class="border border-slate-200 rounded-md overflow-hidden bg-white {{ $ganttHasEvents ? '' : 'hidden' }}">
+                    <div id="userGanttScrollArea" class="overflow-x-auto overflow-y-auto max-h-[480px] custom-scrollbar relative">
+                        <div id="userGanttInner" class="min-w-[880px] relative">
+                            <div id="userGanttHeader" class="sticky top-0 z-30 bg-slate-50 border-b border-slate-200"></div>
+                            <div id="userGanttRows" class="divide-y divide-slate-100 relative"></div>
                         </div>
-                        <a href="{{ route('user.course.my-course') }}"
-                            class="text-xs sm:text-sm font-semibold text-[#13416B] hover:text-[#0f3354] hover:underline transition-colors shrink-0">
-                            Lihat semua kursus
-                        </a>
+                    </div>
+                </div>
+
+                {{-- Empty State --}}
+                <div id="userGanttEmptyState"
+                     class="bg-slate-50 rounded-md p-10 text-center border border-dashed border-slate-200 {{ $ganttHasEvents ? 'hidden' : '' }}">
+                    <div class="w-12 h-12 bg-white border border-slate-200 rounded-md flex items-center justify-center mx-auto mb-3 text-slate-400">
+                        <i class="fas fa-calendar-xmark text-lg"></i>
+                    </div>
+                    <p class="text-sm font-semibold text-slate-700">Tidak Ada Jadwal Pelatihan</p>
+                    <p class="text-xs text-slate-500 mt-1">Ubah filter status atau jelajahi katalog untuk mengikuti gelombang pelatihan.</p>
+                </div>
+            </div>
+        </section>
+
+        {{-- Floating Tooltip Gantt Chart --}}
+        <div id="userGanttTooltip"
+             class="fixed z-[100] hidden pointer-events-none w-72 bg-[#13416B] text-white rounded-md shadow-xl border border-white/15 p-3.5 text-xs space-y-2">
+        </div>
+
+        <!-- ======================================================= -->
+        <!-- 3. AGENDA & GELOMBANG DIBUKA (2-COLUMN BALANCED GRID)   -->
+        <!-- ======================================================= -->
+        <div id="dashboardBottomGrid" class="grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-6 items-stretch">
+
+            <!-- KOLOM KIRI (6 COLS): Agenda & Tindak Lanjut Terdekat -->
+            <div class="lg:col-span-6 flex flex-col min-h-0">
+                <div
+                    class="bg-white rounded-md p-5 sm:p-6 shadow-sm border border-slate-200 flex flex-col flex-1 min-h-0">
+                    <div class="mb-4 pb-4 border-b border-slate-100 shrink-0">
+                        <h2 class="text-base sm:text-lg font-bold text-slate-800">Agenda &amp; Tindak Lanjut</h2>
+                        <p class="text-xs sm:text-sm text-slate-500 truncate mt-0.5">Tindakan penting yang perlu segera diselesaikan</p>
                     </div>
 
-                    <!-- Area daftar kursus yang di set relatif dan menyembunyikan elemen berlebih -->
-                    <div class="relative flex-1">
-                        <div class="space-y-3.5 sm:space-y-3 flex flex-col">
-                            @forelse ($recentCourses->take(4) as $course)
-                                @php
-                                    $rThumb = $course->thumbnail
-                                        ? (str_starts_with($course->thumbnail, 'http')
-                                            ? $course->thumbnail
-                                            : asset('storage/' . $course->thumbnail))
-                                        : 'https://ui-avatars.com/api/?name=' .
-                                            urlencode(substr($course->name, 0, 2)) .
-                                            '&background=13416B&color=fff';
-                                    if (
-                                        str_contains($rThumb, 'ui-avatars.com') &&
-                                        !str_contains($rThumb, 'font-size')
-                                    ) {
-                                        $rThumb .= '&font-size=0.33';
-                                    }
+                    @if (isset($actionItems) && $actionItems->count() > 0)
+                        <div class="overflow-y-auto custom-scrollbar flex-1 min-h-[280px] max-h-[396px] pr-1 space-y-3">
+                                @foreach ($actionItems as $item)
+                                    @php
+                                        $iconBg = match ($item['type']) {
+                                            'zoom'        => 'bg-[#13416B] text-white',
+                                            'evaluation'  => 'bg-amber-500 text-white',
+                                            'narasumber'  => 'bg-[#547996] text-white',
+                                            'certificate' => 'bg-emerald-600 text-white',
+                                            default       => 'bg-slate-600 text-white',
+                                        };
+                                    @endphp
+                                    <a href="{{ $item['url'] }}"
+                                        class="flex items-center gap-3.5 p-4 rounded-md border border-slate-200/80 bg-slate-50/50 hover:bg-white hover:border-[#13416B]/40 hover:shadow-xs transition-all group">
+                                        <div class="w-10 h-10 rounded-md {{ $iconBg }} flex items-center justify-center shrink-0 text-sm shadow-2xs">
+                                            <i class="{{ $item['icon'] }}"></i>
+                                        </div>
 
-                                    // Warna progress: 100% hijau, sedang berprogress amber
-                                    $rPct = (int) ($course->pivot->progress ?? 0);
-                                    if ($rPct >= 100) {
-                                        $rBar = 'bg-emerald-500';
-                                        $rText = 'text-emerald-600';
-                                    } else {
-                                        $rBar = 'bg-amber-500';
-                                        $rText = 'text-amber-600';
-                                    }
-                                @endphp
-
-                                <!-- Tambahan "shrink-0" memastikan card kursus tidak memipih/gepeng meskipun meluber -->
-                                <a href="{{ route('user.course.my-course.detail', $course->slug) }}"
-                                    @if ($loop->index === 3) aria-hidden="true" tabindex="-1" @endif
-                                    class="shrink-0 flex flex-row gap-3 sm:gap-4 bg-transparent sm:bg-slate-50/70 rounded-none sm:rounded-xl p-0 sm:p-4 border-b border-slate-100 sm:border-b-0 pb-3.5 sm:pb-0 transition-all duration-200 hover:bg-slate-100/90 hover:shadow-xs group items-start {{ $loop->index === 3 ? 'max-h-[76px] overflow-hidden pointer-events-none select-none' : '' }}">
-
-                                    <div
-                                        class="w-28 sm:w-36 aspect-video shrink-0 rounded-md overflow-hidden bg-slate-100 relative shadow-xs">
-                                        <img src="{{ $rThumb }}" alt="{{ $course->name }}"
-                                            class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
-
-                                        {{-- Badge Kategori di Pojok Kanan Atas Thumbnail --}}
-                                        <span
-                                            class="absolute top-0 right-0 z-10 max-w-[85%] px-1.5 sm:px-2 py-0.5 text-[7px] sm:text-[8px] font-bold uppercase tracking-wider text-white bg-[#13416B] shadow-xs flex items-center gap-1 rounded-none rounded-bl-md">
-                                            <i class="fas fa-tag text-[6.5px] sm:text-[7.5px] flex-shrink-0"></i>
-                                            <span class="truncate">{{ $course->category?->name ?? 'Umum' }}</span>
-                                        </span>
-                                    </div>
-
-                                    <div class="min-w-0 flex-1 flex flex-col justify-between h-full w-full py-0.5">
-                                        <div>
-                                            <h3
-                                                class="font-bold text-slate-800 text-sm sm:text-base line-clamp-2 leading-snug group-hover:text-[#13416B] transition-colors mb-1">
-                                                {{ $course->name }}
+                                        <div class="min-w-0 flex-1">
+                                            @if (!empty($item['batch_name']))
+                                                <p class="text-xs font-semibold text-[#547996] truncate" title="{{ $item['batch_name'] }}">
+                                                    {{ $item['batch_name'] }}
+                                                </p>
+                                            @endif
+                                            <h3 class="text-sm sm:text-base font-semibold text-slate-800 group-hover:text-[#13416B] transition-colors line-clamp-2 leading-snug {{ !empty($item['batch_name']) ? 'mt-0.5' : '' }}" title="{{ $item['title'] }}">
+                                                {{ $item['title'] }}
                                             </h3>
-
-                                            <p
-                                                class="line-clamp-2 text-xs text-slate-500 mb-2 leading-relaxed">
-                                                {{ $course->description ?? 'Deskripsi kursus tidak tersedia.' }}
+                                            <p class="text-xs sm:text-sm text-slate-500 truncate mt-1" title="{{ $item['subtitle'] }}">
+                                                {{ $item['subtitle'] }}
                                             </p>
                                         </div>
 
-                                        <div>
-                                            <div
-                                                class="flex items-center justify-between text-[10px] sm:text-xs text-slate-500 mb-1 font-medium">
-                                                <span>Progress</span>
-                                                <span class="font-bold {{ $rText }}">{{ $course->pivot->progress }}%</span>
-                                            </div>
-                                            <div
-                                                class="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden shadow-inner">
-                                                <div class="{{ $rBar }} h-full rounded-full transition-all duration-300"
-                                                    style="width: {{ $course->pivot->progress }}%"></div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </a>
-                            @empty
-                                <div
-                                    class="text-center py-10 bg-slate-50 rounded-xl">
-                                    <p class="text-xs font-semibold text-slate-600">Belum ada kursus yang diikuti.</p>
-                                </div>
-                            @endforelse
-                        </div>
-
-                        {{-- Kursus ke-4 dst. hanya mengintip (terpotong + blur) --}}
-                        @if ($recentCourses->count() > 3)
-                            <div class="pointer-events-none absolute inset-x-0 bottom-0 h-14">
-                                <div
-                                    class="absolute inset-0 backdrop-blur-[1px] [mask-image:linear-gradient(to_top,black,transparent)] [-webkit-mask-image:linear-gradient(to_top,black,transparent)]">
-                                </div>
-                                <div
-                                    class="absolute inset-0 bg-gradient-to-t from-white/90 via-white/30 to-transparent">
-                                </div>
+                                        <span class="inline-flex items-center gap-1 text-xs sm:text-sm font-bold text-[#13416B] group-hover:translate-x-0.5 transition-transform shrink-0 pl-1">
+                                            <span>{{ $item['action_text'] }}</span>
+                                            <i class="fas fa-chevron-right text-[10px]"></i>
+                                        </span>
+                                    </a>
+                                @endforeach
                             </div>
-                        @endif
-                    </div>
+                    @else
+                        <div class="flex-1 flex flex-col items-center justify-center bg-slate-50 rounded-md p-8 text-center border border-dashed border-slate-200 min-h-[280px]">
+                            <div class="w-12 h-12 bg-white rounded-md border border-slate-200 flex items-center justify-center mx-auto mb-3 text-emerald-500">
+                                <i class="fas fa-check-circle text-lg"></i>
+                            </div>
+                            <p class="text-base font-semibold text-slate-700">Semua agenda sudah tuntas</p>
+                            <p class="text-sm text-slate-500 mt-1 max-w-xs">Tidak ada sesi Zoom atau evaluasi tertunda saat ini.</p>
+                        </div>
+                    @endif
                 </div>
+            </div>
 
-                <!-- CARD 4: Terakhir Dilihat (Perpustakaan) -->
+            <!-- KOLOM KANAN (6 COLS): Gelombang Pendaftaran Dibuka (Katalog) -->
+            <div class="lg:col-span-6 flex flex-col min-h-0">
                 <div
-                    class="bg-white rounded-none sm:rounded-md p-4 sm:p-5 shadow-none sm:shadow-sm border-0 sm:border border-slate-200 flex flex-col justify-between shrink-0">
-                    <div>
-                        <div class="mb-3 pb-3 border-b border-slate-100 shrink-0">
-                            <h2 class="text-base md:text-lg font-extrabold text-slate-800">Terakhir Dilihat</h2>
-                            <p class="text-[11px] sm:text-xs text-slate-500">Koleksi perpustakaan terakhir diakses</p>
-                        </div>
+                    class="bg-white rounded-md p-5 sm:p-6 shadow-sm border border-slate-200 flex flex-col flex-1 min-h-0">
+                    <div class="mb-4 pb-4 border-b border-slate-100 shrink-0">
+                        <h2 class="text-base sm:text-lg font-bold text-slate-800">Gelombang Pendaftaran Dibuka</h2>
+                        <p class="text-xs sm:text-sm text-slate-500 truncate mt-0.5">Pelatihan di Katalog yang masih membuka kuota pendaftaran</p>
+                    </div>
 
-                        @if (isset($lastLibrary) && $lastLibrary)
-                            <a href="{{ route('user.library.index') }}?open={{ $lastLibrary->id }}"
-                                class="flex items-stretch gap-3 sm:gap-4 p-0 sm:p-4 rounded-none sm:rounded-xl border-0 sm:border border-slate-100 bg-transparent sm:bg-slate-50 hover:bg-slate-100 hover:border-slate-300 transition-all group">
-
-                                <div
-                                    class="w-20 min-h-[6.5rem] sm:min-h-[5.5rem] self-stretch rounded-md overflow-hidden shrink-0 shadow-sm relative bg-white border border-slate-200 flex items-center justify-center">
-                                    @if ($lastLibrary->cover_image)
-                                        <img src="{{ $lastLibrary->cover_image_url }}"
-                                            alt="Cover" class="absolute inset-0 w-full h-full object-cover">
-                                        <div
-                                            class="absolute bottom-1 right-1 w-5 h-5 bg-[#13416B] text-white rounded-full flex items-center justify-center text-[10px] shadow-sm">
-                                            <i class="{{ $lastLibrary->icon }}"></i>
+                    @if (isset($openRegistrationEvents) && $openRegistrationEvents->count() > 0)
+                        <div class="flex-1 flex flex-col min-h-0 justify-between">
+                            <div class="overflow-y-auto custom-scrollbar flex-1 min-h-[280px] max-h-[354px] pr-1 space-y-3">
+                                @foreach ($openRegistrationEvents as $ev)
+                                    @php
+                                        $quotaPct = $ev['quota_pct'];
+                                        $quotaBarCls = match (true) {
+                                            $quotaPct !== null && $quotaPct >= 80 => 'bg-amber-500',
+                                            $quotaPct !== null && $quotaPct >= 50 => 'bg-emerald-500',
+                                            default                               => 'bg-sky-500',
+                                        };
+                                    @endphp
+                                    <a href="{{ $ev['url'] }}"
+                                        class="block p-4 rounded-md border border-slate-200/80 bg-slate-50/50 hover:bg-white hover:border-[#13416B]/40 hover:shadow-xs transition-all group">
+                                        <div class="min-w-0">
+                                            <p class="text-xs font-semibold text-[#547996] truncate" title="{{ $ev['batch_name'] }}">
+                                                {{ $ev['batch_name'] }}
+                                            </p>
+                                            <h3 class="text-sm sm:text-base font-semibold text-slate-800 group-hover:text-[#13416B] transition-colors line-clamp-2 leading-snug mt-0.5" title="{{ $ev['course_name'] }}">
+                                                {{ $ev['course_name'] }}
+                                            </h3>
                                         </div>
-                                    @else
-                                        <i
-                                            class="{{ $lastLibrary->icon }} text-[#547996] text-2xl group-hover:scale-110 transition-transform"></i>
-                                    @endif
-                                </div>
 
-                                <div class="flex-1 min-w-0 py-0.5 flex flex-col justify-start">
-                                    <div class="flex justify-between items-center sm:items-start mb-1.5">
-                                        <span
-                                            class="inline-block truncate max-w-[55%] sm:max-w-none px-2 sm:px-2.5 py-0.5 text-[9px] sm:text-[10px] font-extrabold rounded-md bg-[#547996]/10 text-[#547996] border border-[#547996]/20">
-                                            {{ $lastLibrary->libraryCategory->name ?? 'Kategori Umum' }}
-                                        </span>
-                                        <span class="text-[9px] sm:text-[11px] text-slate-400 font-medium shrink-0">
-                                            {{ \Carbon\Carbon::parse($lastLibrary->last_accessed_at)->diffForHumans() }}
-                                        </span>
-                                    </div>
-                                    <h3
-                                        class="text-xs sm:text-base font-bold text-slate-800 leading-snug line-clamp-2 group-hover:text-[#13416B] transition-colors mb-1">
-                                        {{ $lastLibrary->title }}
-                                    </h3>
-                                    <p class="line-clamp-2 text-[10px] sm:text-xs text-slate-500 leading-relaxed">
-                                        {{ $lastLibrary->description ?? 'Tidak ada deskripsi' }}
-                                    </p>
-                                </div>
-                            </a>
-                        @else
-                            <div class="text-center py-6 bg-slate-50 rounded-xl border border-dashed border-slate-200">
-                                <p class="text-xs font-semibold text-slate-600 mb-2">Belum ada riwayat baca.</p>
-                                <a href="{{ route('user.library.index') }}"
-                                    class="text-xs font-bold text-[#13416B] hover:underline">
-                                    Jelajahi Perpustakaan
+                                        @if ($quotaPct !== null)
+                                            <div class="mt-3 flex items-center gap-3">
+                                                <div class="flex-1 h-2 bg-slate-200 rounded-full overflow-hidden">
+                                                    <div class="h-full rounded-full transition-all {{ $quotaBarCls }}" style="width: {{ $quotaPct }}%"></div>
+                                                </div>
+                                                <span class="text-xs sm:text-sm font-semibold text-slate-600 tabular-nums shrink-0">
+                                                    Sisa <strong class="text-slate-800">{{ $ev['remaining_quota'] }}</strong>/{{ $ev['quota'] }}
+                                                </span>
+                                            </div>
+                                        @endif
+
+                                        <div class="mt-2.5 flex items-center justify-between gap-2 text-xs sm:text-sm">
+                                            <span class="inline-flex items-center gap-1.5 text-slate-500 truncate">
+                                                <i class="far fa-calendar text-xs shrink-0"></i>
+                                                <span class="truncate">Pelaksanaan: {{ $ev['exec_label'] }}</span>
+                                            </span>
+                                            <span class="font-bold text-[#13416B] group-hover:translate-x-0.5 transition-transform shrink-0">
+                                                Daftar <i class="fas fa-chevron-right text-[10px] ml-0.5"></i>
+                                            </span>
+                                        </div>
+                                    </a>
+                                @endforeach
+                            </div>
+
+                            <div class="flex flex-wrap items-center justify-between gap-x-4 gap-y-1.5 mt-2.5 pt-3 border-t border-slate-100 text-xs sm:text-sm text-slate-500 shrink-0">
+                                <span>Tersedia <strong class="text-slate-700">{{ $openRegistrationEvents->count() }}</strong> gelombang pendaftaran terbuka</span>
+                                <a href="{{ route('user.catalog.index') }}" class="font-bold text-[#13416B] hover:underline">
+                                    Jelajahi Semua Katalog
                                 </a>
                             </div>
-                        @endif
-                    </div>
+                        </div>
+                    @else
+                        <div class="flex-1 flex flex-col items-center justify-center bg-slate-50 rounded-md p-8 text-center border border-dashed border-slate-200 min-h-[280px]">
+                            <div class="w-12 h-12 bg-white rounded-md border border-slate-200 flex items-center justify-center mx-auto mb-3 text-slate-400">
+                                <i class="fas fa-calendar-check text-lg"></i>
+                            </div>
+                            <p class="text-base font-semibold text-slate-700">Belum ada gelombang baru dibuka</p>
+                            <p class="text-sm text-slate-500 mt-1 max-w-xs">Seluruh gelombang terbuka saat ini sudah Anda ikuti atau masa pendaftarannya telah berakhir.</p>
+                            <a href="{{ route('user.catalog.index') }}"
+                                class="mt-3 inline-flex items-center gap-1.5 px-4 py-2 text-sm font-bold text-white bg-[#13416B] hover:bg-[#0f3354] rounded-md transition-colors">
+                                Lihat Katalog
+                            </a>
+                        </div>
+                    @endif
                 </div>
-
             </div>
 
         </div>
@@ -664,346 +525,329 @@
         <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
         <script>
             document.addEventListener('DOMContentLoaded', function() {
-                const ctx = document.getElementById('postTestChart');
+                // =========================================================
+                // GANTT CHART JADWAL PELATIHAN USER (LMS BY EVENT)
+                // =========================================================
+                const UserEventGantt = (() => {
+                    const wrapperEl = document.getElementById('userGanttWrapper');
+                    const headerEl = document.getElementById('userGanttHeader');
+                    const rowsEl = document.getElementById('userGanttRows');
+                    const emptyEl = document.getElementById('userGanttEmptyState');
+                    const tooltipEl = document.getElementById('userGanttTooltip');
+                    const statusSelect = document.getElementById('userGanttStatusFilter');
 
-                // Warna batang berdasarkan hasil: lulus = hijau, di bawah KKM = kuning.
-                // KKM berbeda untuk setiap evaluasi, jadi dibaca per batang.
-                const COLOR_PASS = '#10b981';
-                const COLOR_FAIL = '#f59e0b';
-                const DEFAULT_KKM = 70; // cadangan jika data evaluasi tidak membawa nilai KKM
+                    if (!wrapperEl || !headerEl || !rowsEl) return;
 
-                // Urutan KKM harus sejajar dengan labels/user_scores.
-                // Sumber (berurutan): passing_scores[] -> kkms[] -> kkm (tunggal) -> DEFAULT_KKM
-                const getKkms = (courseData) => {
-                    const count = (courseData.user_scores || []).length;
-                    const list = courseData.passing_scores || courseData.kkms;
-                    const single = Number(courseData.kkm) || DEFAULT_KKM;
-                    return Array.from({ length: count }, (_, i) => {
-                        const v = Array.isArray(list) ? Number(list[i]) : NaN;
-                        return v > 0 ? v : single;
-                    });
-                };
-                const scoreColors = (scores, kkms) => scores.map((v, i) => (Number(v) >= kkms[i] ? COLOR_PASS : COLOR_FAIL));
+                    const MONTH_SHORT = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+                    const DAY_MS = 86400000;
+                    const data = @json($userEventGantt ?? []);
 
-                // Plugin: penanda KKM pada setiap batang + angka nilai di ujung batang
-                const kkmAndValuePlugin = {
-                    id: 'kkmAndValue',
-                    afterDatasetsDraw(chart, args, opts) {
-                        const {ctx, scales} = chart;
-                        const x = scales.x;
-                        const kkms = (opts && opts.kkms) || [];
-                        const meta = chart.getDatasetMeta(0);
-                        ctx.save();
+                    let currentStatus = statusSelect ? statusSelect.value : 'all';
 
-                        meta.data.forEach((bar, i) => {
-                            const value = chart.data.datasets[0].data[i];
-                            const kkm = kkms[i];
-                            const half = bar.height / 2;
-                            let textX = bar.x;
+                    const escapeHtml = (value) => String(value ?? '').replace(/[&<>"']/g, (c) => ({
+                        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+                    }[c]));
 
-                            if (kkm) {
-                                const kx = x.getPixelForValue(kkm);
-                                ctx.setLineDash([]);
-                                ctx.lineWidth = 2;
-                                ctx.strokeStyle = '#475569';
-                                ctx.beginPath();
-                                ctx.moveTo(kx, bar.y - half - 5);
-                                ctx.lineTo(kx, bar.y + half + 5);
-                                ctx.stroke();
+                    const parseIsoDate = (iso) => {
+                        if (!iso) return null;
+                        const [y, m, d] = iso.split('-').map(Number);
+                        return Date.UTC(y, m - 1, d);
+                    };
 
-                                ctx.fillStyle = '#64748b';
-                                ctx.font = '600 9px sans-serif';
-                                ctx.textAlign = 'center';
-                                ctx.textBaseline = 'bottom';
-                                ctx.fillText('KKM ' + kkm, kx, bar.y - half - 6);
-                                textX = Math.max(bar.x, kx);
-                            }
+                    const formatTick = (ms) => {
+                        const dt = new Date(ms);
+                        return `${dt.getUTCDate()} ${MONTH_SHORT[dt.getUTCMonth()]}`;
+                    };
 
-                            ctx.fillStyle = '#334155';
-                            ctx.font = '700 11px sans-serif';
-                            ctx.textAlign = 'left';
-                            ctx.textBaseline = 'middle';
-                            ctx.fillText(value, textX + 6, bar.y);
+                    function computeDomain(events, todayMs) {
+                        let minMs = Infinity;
+                        let maxMs = -Infinity;
+
+                        events.forEach((ev) => {
+                            [ev.reg_start, ev.reg_end, ev.exec_start, ev.exec_end, ev.eval_start, ev.eval_end].forEach((d) => {
+                                const ms = parseIsoDate(d);
+                                if (ms !== null) {
+                                    if (ms < minMs) minMs = ms;
+                                    if (ms > maxMs) maxMs = ms;
+                                }
+                            });
                         });
 
-                        ctx.restore();
+                        if (!isFinite(minMs) || !isFinite(maxMs)) {
+                            const y = data.year || new Date().getFullYear();
+                            return { minMs: Date.UTC(y, 0, 1), maxMs: Date.UTC(y, 11, 31) };
+                        }
+
+                        if (todayMs && todayMs >= minMs - 14 * DAY_MS && todayMs <= maxMs + 14 * DAY_MS) {
+                            minMs = Math.min(minMs, todayMs);
+                            maxMs = Math.max(maxMs, todayMs);
+                        }
+
+                        minMs -= 2 * DAY_MS;
+                        maxMs += 3 * DAY_MS;
+                        if (maxMs <= minMs) maxMs = minMs + 14 * DAY_MS;
+
+                        return { minMs, maxMs };
                     }
-                };
 
-                function formatMultilineLabel(text) {
-                    if (!text) return text;
-                    const maxChars = window.innerWidth >= 640 ? 30 : 18;
-                    const words = text.split(' ');
-                    let lines = [];
-                    let currentLine = '';
+                    function buildTicks(minMs, maxMs) {
+                        const totalDays = Math.max(1, Math.round((maxMs - minMs) / DAY_MS));
+                        const ticks = [];
 
-                    words.forEach(word => {
-                        if ((currentLine + word).length > maxChars) {
-                            if (currentLine.trim() !== '') lines.push(currentLine.trim());
-                            currentLine = word + ' ';
+                        if (totalDays > 180) {
+                            const startDt = new Date(minMs);
+                            let y = startDt.getUTCFullYear();
+                            let m = startDt.getUTCMonth();
+                            while (Date.UTC(y, m, 1) <= maxMs) {
+                                const ms = Date.UTC(y, m, 1);
+                                if (ms >= minMs) ticks.push({ ms, label: `${MONTH_SHORT[m]} ${y}` });
+                                m++;
+                                if (m > 11) { m = 0; y++; }
+                            }
                         } else {
-                            currentLine += word + ' ';
-                        }
-                    });
-                    if (currentLine.trim() !== '') lines.push(currentLine.trim());
-                    return lines;
-                }
-
-                if (ctx && @json(isset($chartDataByCourse) ? count($chartDataByCourse) : 0) > 0) {
-                    const allChartData = @json($chartDataByCourse ?? []);
-
-                    const courseKeys = Object.keys(allChartData);
-                    let currentCourseId = courseKeys[0];
-                    let currentData = allChartData[currentCourseId];
-
-                    let currentKkms = getKkms(currentData);
-                    const dynamicColors = scoreColors(currentData.user_scores, currentKkms);
-
-                    const postTestChart = new Chart(ctx.getContext('2d'), {
-                        type: 'bar',
-                        plugins: [
-                            kkmAndValuePlugin,
-                            {
-                                id: 'fixedXAxisTrigger',
-                                afterRender() {
-                                    setTimeout(drawFixedXAxis, 15);
-                                }
-                            }
-                        ],
-                        data: {
-                            labels: (currentData.labels || []).map(label => formatMultilineLabel(label)),
-                            datasets: [{
-                                label: 'Skor Anda',
-                                data: currentData.user_scores,
-                                backgroundColor: dynamicColors,
-                                borderRadius: 6,
-                                maxBarThickness: 36,
-                                barPercentage: 0.72,
-                                categoryPercentage: 0.88
-                            }]
-                        },
-                        options: {
-                            indexAxis: 'y',
-                            responsive: true,
-                            maintainAspectRatio: false,
-                            layout: {
-                                padding: {
-                                    top: 12,
-                                    bottom: 6,
-                                    right: 32
-                                }
-                            },
-                            plugins: {
-                                kkmAndValue: {
-                                    kkms: currentKkms
-                                },
-                                legend: {
-                                    display: false
-                                },
-                                tooltip: {
-                                    mode: 'index',
-                                    intersect: false,
-                                    backgroundColor: 'rgba(15, 23, 42, 0.9)',
-                                    titleFont: {
-                                        size: 13
-                                    },
-                                    bodyFont: {
-                                        size: 12
-                                    },
-                                    padding: 10,
-                                    cornerRadius: 8,
-                                    callbacks: {
-                                        title: function(context) {
-                                            return context[0].label.replaceAll(',', ' ');
-                                        },
-                                        label: function(context) {
-                                            const kkm = postTestChart.options.plugins.kkmAndValue.kkms[context.dataIndex];
-                                            const status = Number(context.parsed.x) >= kkm ? 'Lulus' : 'Di bawah KKM';
-                                            return 'Skor Anda: ' + context.parsed.x + ' • KKM: ' + kkm + ' (' + status + ')';
-                                        }
-                                    }
-                                }
-                            },
-                            scales: {
-                                x: {
-                                    beginAtZero: true,
-                                    max: 100,
-                                    grid: {
-                                        color: '#f1f5f9'
-                                    },
-                                    ticks: {
-                                        display: false
-                                    },
-                                    border: {
-                                        display: false
-                                    }
-                                },
-                                y: {
-                                    grid: {
-                                        display: false
-                                    },
-                                    ticks: {
-                                        font: {
-                                            size: 11,
-                                            family: "'Inter', sans-serif",
-                                            lineHeight: 1.3
-                                        },
-                                        autoSkip: false,
-                                        padding: 8
-                                    },
-                                    afterFit: function(scaleInstance) {
-                                        if (window.innerWidth >= 640) {
-                                            if (scaleInstance.width < 160) {
-                                                scaleInstance.width = 160;
-                                            }
-                                        } else {
-                                            if (scaleInstance.width < 110) {
-                                                scaleInstance.width = 110;
-                                            }
-                                        }
-                                    }
-                                }
-                            },
-                            interaction: {
-                                mode: 'index',
-                                axis: 'y',
-                                intersect: false
+                            const stepDays = totalDays <= 45 ? 5 : (totalDays <= 110 ? 7 : 14);
+                            for (let ms = minMs; ms <= maxMs; ms += stepDays * DAY_MS) {
+                                ticks.push({ ms, label: formatTick(ms) });
                             }
                         }
-                    });
 
-                    // Fungsi render sumbu X tetap (fixed scale 0, 20, 40, 60, 80, 100)
-                    function drawFixedXAxis() {
-                        const xCanvas = document.getElementById('postTestXAxis');
-                        if (!xCanvas || !postTestChart) return;
-
-                        const rect = xCanvas.getBoundingClientRect();
-                        if (rect.width === 0) return;
-
-                        const dpr = window.devicePixelRatio || 1;
-                        xCanvas.width = rect.width * dpr;
-                        xCanvas.height = rect.height * dpr;
-
-                        const ctxX = xCanvas.getContext('2d');
-                        ctxX.scale(dpr, dpr);
-                        ctxX.clearRect(0, 0, rect.width, rect.height);
-
-                        const xScale = postTestChart.scales.x;
-                        if (!xScale) return;
-
-                        const mainCanvasRect = postTestChart.canvas.getBoundingClientRect();
-                        const xOffset = mainCanvasRect.left - rect.left;
-
-                        ctxX.fillStyle = '#64748b';
-                        ctxX.font = '600 10px sans-serif';
-                        ctxX.textAlign = 'center';
-                        ctxX.textBaseline = 'top';
-
-                        const tickValues = [0, 20, 40, 60, 80, 100];
-                        tickValues.forEach(val => {
-                            const xPos = xScale.getPixelForValue(val) + xOffset;
-                            if (xPos >= 0 && xPos <= rect.width) {
-                                ctxX.strokeStyle = '#cbd5e1';
-                                ctxX.lineWidth = 1;
-                                ctxX.beginPath();
-                                ctxX.moveTo(xPos, 0);
-                                ctxX.lineTo(xPos, 4);
-                                ctxX.stroke();
-
-                                ctxX.fillText(val.toString(), xPos, 6);
+                        const months = [];
+                        const sDt = new Date(minMs);
+                        let y = sDt.getUTCFullYear();
+                        let m = sDt.getUTCMonth();
+                        while (Date.UTC(y, m, 1) <= maxMs) {
+                            const mStart = Math.max(minMs, Date.UTC(y, m, 1));
+                            const nextM = m === 11 ? Date.UTC(y + 1, 0, 1) : Date.UTC(y, m + 1, 1);
+                            const mEnd = Math.min(maxMs, nextM);
+                            if (mEnd > mStart) {
+                                months.push({
+                                    label: `${MONTH_SHORT[m]} ${y}`,
+                                    leftPct: ((mStart - minMs) / (maxMs - minMs)) * 100,
+                                    widthPct: ((mEnd - mStart) / (maxMs - minMs)) * 100,
+                                });
                             }
+                            m++;
+                            if (m > 11) { m = 0; y++; }
+                        }
+
+                        return { ticks, months };
+                    }
+
+                    function calcSegment(startIso, endIso, minMs, spanMs) {
+                        const s = parseIsoDate(startIso);
+                        const e = parseIsoDate(endIso);
+                        if (s === null || e === null) return null;
+                        const endInclusive = Math.max(s + DAY_MS, e + DAY_MS);
+                        const clampedS = Math.max(minMs, s);
+                        const clampedE = Math.min(minMs + spanMs, endInclusive);
+                        if (clampedE <= clampedS) return null;
+
+                        const left = ((clampedS - minMs) / spanMs) * 100;
+                        const width = Math.max(1.2, ((clampedE - clampedS) / spanMs) * 100);
+                        return { left, width: Math.min(width, 100 - left) };
+                    }
+
+                    function positionTooltip(clientX, clientY) {
+                        if (!tooltipEl || tooltipEl.classList.contains('hidden')) return;
+                        const pad = 14;
+                        const rect = tooltipEl.getBoundingClientRect();
+                        let x = clientX + pad;
+                        let y = clientY + pad;
+                        if (x + rect.width > window.innerWidth - 10) x = clientX - rect.width - pad;
+                        if (y + rect.height > window.innerHeight - 10) y = clientY - rect.height - pad;
+                        tooltipEl.style.left = `${Math.max(8, x)}px`;
+                        tooltipEl.style.top = `${Math.max(8, y)}px`;
+                    }
+
+                    function showTooltip(ev, clientX, clientY) {
+                        if (!tooltipEl) return;
+                        const userFooter = ev.is_enrolled
+                            ? `<span>Status Anda: <strong class="text-emerald-300">Terdaftar</strong></span>
+                               <span>Progres: <strong class="text-amber-300">${Number(ev.user_progress || 0)}%</strong></span>`
+                            : `<span>Status Anda: <strong class="text-sky-200">Belum Terdaftar</strong></span>
+                               <span class="text-amber-300 font-semibold">Klik untuk daftar</span>`;
+
+                        const zoomRow = ev.next_zoom_label
+                            ? `<div class="pt-1.5 border-t border-white/15 text-[11px] text-sky-200 flex items-center gap-1.5">
+                                   <i class="fas fa-video text-[10px]"></i>
+                                   <span class="truncate">${escapeHtml(ev.next_zoom_label)}</span>
+                               </div>`
+                            : '';
+
+                        tooltipEl.innerHTML = `
+                            <div class="border-b border-white/15 pb-2">
+                                <p class="font-bold text-white leading-snug">${escapeHtml(ev.batch_name)}</p>
+                                <p class="text-[11px] text-blue-200 mt-0.5">${escapeHtml(ev.course_name)}</p>
+                            </div>
+                            <div class="space-y-1 text-[11px]">
+                                <div class="flex items-center justify-between gap-2">
+                                    <span class="inline-flex items-center gap-1.5 text-blue-100"><span class="w-2 h-2 rounded-xs bg-sky-300"></span>Pendaftaran</span>
+                                    <span class="font-semibold text-white tabular-nums">${escapeHtml(ev.reg_label)}</span>
+                                </div>
+                                <div class="flex items-center justify-between gap-2">
+                                    <span class="inline-flex items-center gap-1.5 text-blue-100"><span class="w-2 h-2 rounded-xs bg-white"></span>Pelaksanaan</span>
+                                    <span class="font-semibold text-white tabular-nums">${escapeHtml(ev.exec_label)}</span>
+                                </div>
+                                <div class="flex items-center justify-between gap-2">
+                                    <span class="inline-flex items-center gap-1.5 text-blue-100"><span class="w-2 h-2 rounded-xs bg-emerald-400"></span>Evaluasi &amp; Sertifikasi</span>
+                                    <span class="font-semibold text-white tabular-nums">${escapeHtml(ev.eval_label)}</span>
+                                </div>
+                            </div>
+                            ${zoomRow}
+                            <div class="pt-2 border-t border-white/15 flex items-center justify-between text-[11px] text-blue-100 tabular-nums">
+                                ${userFooter}
+                            </div>`;
+                        tooltipEl.classList.remove('hidden');
+                        positionTooltip(clientX, clientY);
+                    }
+
+                    function hideTooltip() {
+                        if (tooltipEl) tooltipEl.classList.add('hidden');
+                    }
+
+                    function resolveDisplayStatus(ev, todayMs) {
+                        const progress = Number(ev.user_progress || 0);
+                        const execEndMs = parseIsoDate(ev.exec_end);
+                        const isPastExec = todayMs !== null && execEndMs !== null && todayMs > execEndMs;
+
+                        if (ev.status_key === 'completed' || isPastExec) {
+                            if (progress >= 100) {
+                                return { key: 'completed', label: 'Selesai', cls: 'bg-emerald-500 text-white' };
+                            }
+                            return { key: 'evaluation', label: 'Periode Evaluasi', cls: 'bg-emerald-500 text-white' };
+                        }
+                        if (ev.status_key === 'ongoing') {
+                            return { key: 'ongoing', label: 'Periode Pelaksanaan', cls: 'bg-[#2B6496] text-white' };
+                        }
+                        if (ev.status_key === 'open_registration') {
+                            return { key: 'open_registration', label: 'Periode Pendaftaran', cls: 'bg-sky-300 text-white' };
+                        }
+                        return { key: 'other', label: ev.status_label || 'Mendatang', cls: 'bg-slate-400 text-white' };
+                    }
+
+                    function render() {
+                        const todayMs = parseIsoDate(data.today);
+                        const allEvents = Array.isArray(data.events) ? data.events : Object.values(data.events || {});
+                        const baseEvents = data.has_enrolled ? allEvents.filter((ev) => ev.is_enrolled) : allEvents;
+                        const filtered = baseEvents.filter((ev) => {
+                            const st = resolveDisplayStatus(ev, todayMs);
+                            if (currentStatus !== 'all' && st.key !== currentStatus) return false;
+                            return true;
+                        });
+
+                        const hasData = filtered.length > 0;
+                        wrapperEl.classList.toggle('hidden', !hasData);
+                        if (emptyEl) emptyEl.classList.toggle('hidden', hasData);
+                        hideTooltip();
+                        if (!hasData) return;
+
+                        const { minMs, maxMs } = computeDomain(filtered, todayMs);
+                        const spanMs = maxMs - minMs;
+                        const { ticks, months } = buildTicks(minMs, maxMs);
+
+                        const todayInRange = todayMs !== null && todayMs >= minMs && todayMs <= maxMs;
+                        const todayPct = todayInRange ? ((todayMs - minMs) / spanMs) * 100 : null;
+
+                        const monthBandsHtml = months.map((m) => `
+                            <div class="absolute top-0 bottom-0 flex items-center px-2 border-r border-slate-200/80 text-xs font-bold uppercase tracking-wider text-[#13416B] truncate"
+                                 style="left:${m.leftPct}%;width:${m.widthPct}%">
+                                ${escapeHtml(m.label)}
+                            </div>`).join('');
+
+                        const tickLabelsHtml = ticks.map((t) => {
+                            const pct = ((t.ms - minMs) / spanMs) * 100;
+                            return `
+                                <span class="absolute top-1 text-xs font-medium text-slate-600 -translate-x-1/2 whitespace-nowrap"
+                                      style="left:${pct}%">
+                                    ${escapeHtml(t.label)}
+                                </span>`;
+                        }).join('');
+
+                        const todayHeadBadge = todayInRange
+                            ? `<div class="absolute top-0 bottom-0 border-l-2 border-dashed border-red-500 z-20 pointer-events-none" style="left:${todayPct}%">
+                                   <span class="absolute -top-0.5 left-1 px-1.5 py-0.5 rounded bg-red-500 text-white text-[11px] font-bold whitespace-nowrap shadow-2xs">Hari Ini</span>
+                               </div>`
+                            : '';
+
+                        headerEl.innerHTML = `
+                            <div class="grid grid-cols-[260px_1fr] lg:grid-cols-[330px_1fr]">
+                                <div class="px-4 py-3 border-r border-slate-200 flex items-center bg-slate-50">
+                                    <span class="text-xs sm:text-sm font-bold uppercase tracking-wider text-slate-700">Gelombang Pelatihan</span>
+                                </div>
+                                <div class="relative bg-slate-50">
+                                    <div class="relative h-8 border-b border-slate-200/80 overflow-hidden">${monthBandsHtml}</div>
+                                    <div class="relative h-7 overflow-hidden">${tickLabelsHtml}</div>
+                                    ${todayHeadBadge}
+                                </div>
+                            </div>`;
+
+                        const gridLinesHtml = ticks.map((t) => {
+                            const pct = ((t.ms - minMs) / spanMs) * 100;
+                            return `<div class="absolute top-0 bottom-0 border-l border-slate-100 pointer-events-none" style="left:${pct}%"></div>`;
+                        }).join('');
+
+                        const todayLineHtml = todayInRange
+                            ? `<div class="absolute top-0 bottom-0 border-l-2 border-dashed border-red-500/80 z-20 pointer-events-none" style="left:${todayPct}%"></div>`
+                            : '';
+
+                        rowsEl.innerHTML = filtered.map((ev, idx) => {
+                            const regSeg = calcSegment(ev.reg_start, ev.reg_end, minMs, spanMs);
+                            const execSeg = calcSegment(ev.exec_start, ev.exec_end, minMs, spanMs);
+                            const evalSeg = calcSegment(ev.eval_start, ev.eval_end, minMs, spanMs);
+                            const displayStatus = resolveDisplayStatus(ev, todayMs);
+
+                            const regBar = regSeg
+                                ? `<a href="${escapeHtml(ev.url)}" class="absolute top-1/2 -translate-y-1/2 h-7 rounded-md bg-sky-300 hover:bg-sky-400 ring-1 ring-white transition-colors z-10" style="left:${regSeg.left}%;width:${regSeg.width}%"></a>`
+                                : '';
+                            const evalBar = evalSeg
+                                ? `<a href="${escapeHtml(ev.url)}" class="absolute top-1/2 -translate-y-1/2 h-7 rounded-md bg-emerald-500 hover:bg-emerald-600 ring-1 ring-white transition-colors z-10" style="left:${evalSeg.left}%;width:${evalSeg.width}%"></a>`
+                                : '';
+                            const execBar = execSeg
+                                ? `<a href="${escapeHtml(ev.url)}" class="absolute top-1/2 -translate-y-1/2 h-7 rounded-md bg-[#2B6496] hover:bg-[#1B568A] ring-1 ring-white shadow-2xs transition-colors z-15 flex items-center px-2 overflow-hidden" style="left:${execSeg.left}%;width:${execSeg.width}%">
+                                       <span class="text-xs font-semibold text-white truncate">${execSeg.width >= 12 ? escapeHtml(ev.exec_label) : ''}</span>
+                                   </a>`
+                                : '';
+
+                            return `
+                                <div class="user-gantt-row grid grid-cols-[260px_1fr] lg:grid-cols-[330px_1fr] hover:bg-blue-50/35 transition-colors" data-idx="${idx}">
+                                    <div class="px-4 py-3 border-r border-slate-200 min-w-0 flex flex-col justify-center gap-1.5">
+                                        <a href="${escapeHtml(ev.url)}"
+                                           class="text-sm sm:text-[15px] font-semibold text-slate-900 hover:text-[#13416B] line-clamp-2 leading-snug"
+                                           title="${escapeHtml(ev.batch_name)}">
+                                            ${escapeHtml(ev.batch_name)}
+                                        </a>
+                                        <div class="flex flex-wrap items-center gap-1.5 text-xs">
+                                            <span class="inline-flex px-2 py-0.5 rounded font-bold ${displayStatus.cls}">${escapeHtml(displayStatus.label)}</span>
+                                        </div>
+                                    </div>
+                                    <div class="relative min-h-[68px] overflow-hidden">
+                                        ${gridLinesHtml}
+                                        ${todayLineHtml}
+                                        ${regBar}
+                                        ${evalBar}
+                                        ${execBar}
+                                    </div>
+                                </div>`;
+                        }).join('');
+
+                        rowsEl.querySelectorAll('.user-gantt-row').forEach((rowEl) => {
+                            const ev = filtered[Number(rowEl.dataset.idx)];
+                            if (!ev) return;
+                            rowEl.addEventListener('mouseenter', (e) => showTooltip(ev, e.clientX, e.clientY));
+                            rowEl.addEventListener('mousemove', (e) => positionTooltip(e.clientX, e.clientY));
+                            rowEl.addEventListener('mouseleave', hideTooltip);
                         });
                     }
 
-                    // Fungsi dinamis untuk menyesuaikan tinggi canvas:
-                    // 1. Mengatur jarak antar data evaluasi pada sumbu Y agar proporsional dan tidak ada ruang kosong terhadap sumbu X di bawah.
-                    // 2. Menyesuaikan tinggi canvas secara penuh dengan kontainer scroll yang tersedia agar data mendekati sumbu X.
-                    // 3. Jika data banyak, dialokasikan minimal 70px per bar dan kontainer scroll aktif secara vertikal.
-                    function updateChartHeight(labelsCount) {
-                        const scrollContainer = document.getElementById('chartScrollContainer');
-                        const canvasWrapper = document.getElementById('chartCanvasWrapper') || (ctx ? ctx.parentElement : null);
-                        if (!scrollContainer || !canvasWrapper) return;
-
-                        const count = typeof labelsCount === 'number'
-                            ? labelsCount
-                            : (postTestChart && postTestChart.data.labels ? postTestChart.data.labels.length : 1);
-
-                        const containerHeight = scrollContainer.clientHeight || 0;
-                        const minHeightByCount = count * 70;
-                        const finalHeight = Math.max(containerHeight, minHeightByCount, 180);
-
-                        canvasWrapper.style.height = finalHeight + 'px';
-
-                        if (postTestChart) {
-                            postTestChart.resize();
-                            drawFixedXAxis();
-                        }
-                    }
-
-                    const filterSelect = document.getElementById('courseChartFilter');
-                    if (filterSelect) {
-                        filterSelect.addEventListener('change', function() {
-                            const selectedId = this.value;
-                            const newData = allChartData[selectedId];
-
-                            if (newData) {
-                                currentCourseId = selectedId;
-                                currentData = newData;
-
-                                postTestChart.data.labels = (newData.labels || []).map(label => formatMultilineLabel(label));
-                                postTestChart.data.datasets[0].data = newData.user_scores;
-                                currentKkms = getKkms(newData);
-                                postTestChart.options.plugins.kkmAndValue.kkms = currentKkms;
-                                postTestChart.data.datasets[0].backgroundColor = scoreColors(newData.user_scores, currentKkms);
-
-                                updateChartHeight((newData.labels || []).length);
-                                postTestChart.update();
-                                setTimeout(drawFixedXAxis, 30);
-                            }
+                    if (statusSelect) {
+                        statusSelect.addEventListener('change', (e) => {
+                            currentStatus = e.target.value;
+                            render();
                         });
                     }
 
-                    // Inisialisasi tinggi chart awal dan sinkronisasi sumbu X
-                    updateChartHeight((currentData.labels || []).length);
-                    setTimeout(() => {
-                        updateChartHeight((currentData.labels || []).length);
-                        if (postTestChart) {
-                            postTestChart.resize();
-                            drawFixedXAxis();
-                        }
-                    }, 80);
-
-                    // ResizeObserver untuk memantau perubahan ukuran kontainer (misal: saat card lain selesai memuat gambar/font)
-                    if (window.ResizeObserver) {
-                        let roTimer;
-                        const ro = new ResizeObserver(() => {
-                            clearTimeout(roTimer);
-                            roTimer = setTimeout(() => {
-                                const count = currentData && currentData.labels ? currentData.labels.length : 1;
-                                updateChartHeight(count);
-                            }, 40);
-                        });
-                        const scrollContainer = document.getElementById('chartScrollContainer');
-                        if (scrollContainer) ro.observe(scrollContainer);
-                    }
-
-                    // Saat semua resource (termasuk gambar thumbnail kursus) selesai dimuat
-                    window.addEventListener('load', function() {
-                        const count = currentData && currentData.labels ? currentData.labels.length : 1;
-                        updateChartHeight(count);
-                    });
-
-                    // Resize listener saat window diubah ukurannya
-                    window.addEventListener('resize', function() {
-                        const count = currentData && currentData.labels ? currentData.labels.length : 1;
-                        updateChartHeight(count);
-                        if (postTestChart && currentData) {
-                            postTestChart.data.labels = (currentData.labels || []).map(label => formatMultilineLabel(label));
-                            postTestChart.resize();
-                        }
-                        setTimeout(drawFixedXAxis, 50);
-                    });
-                }
+                    render();
+                })();
             });
 
             @if (!$profile || empty($profile->instansi))

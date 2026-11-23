@@ -92,31 +92,31 @@
                             <div class="p-2.5 bg-white text-[#13416B] rounded-xl shrink-0 border border-slate-200 shadow-sm">
                                 <i class="far fa-folder-open text-lg"></i>
                             </div>
-                            <h2 class="text-base sm:text-lg font-bold text-slate-800 tracking-wide">Kurikulum / Modul Belajar</h2>
+                            <h2 class="text-base sm:text-lg font-bold text-slate-800 tracking-wide">Kurikulum / Agenda Hari</h2>
                         </div>
                         <button type="button" x-data @click="$dispatch('open-modal', 'course_sections-{{ $course->slug }}')"
                             class="px-3 sm:px-4 py-2 text-xs sm:text-sm font-bold text-white bg-[#13416B] rounded-xl hover:bg-[#0f3354] transition-colors shadow-sm flex items-center justify-center gap-2">
-                            <i class="fas fa-plus"></i> Tambah Bagian
+                            <i class="fas fa-plus"></i> Tambah Hari
                         </button>
                     </div>
 
-                    <!-- Modal Tambah Bagian (Section) -->
+                    <!-- Modal Tambah Hari (Section) -->
                     <x-modal name="course_sections-{{ $course->slug }}" title="" maxWidth="sm:max-w-xl">
                         <x-validation-errors class="mb-4" />
                         <form action="{{ route('admin-pusat.management-course.course-sections.store') }}" method="POST">
                             @csrf
                             <input type="hidden" name="course_slug" value="{{ $course->slug }}" />
                             <div class="mb-5">
-                                <h3 class="text-lg font-bold text-slate-800">Tambah Bagian Baru</h3>
-                                <p class="text-sm text-slate-500 mt-1">Buat struktur bagian (section) untuk materi course Anda.</p>
+                                <h3 class="text-lg font-bold text-slate-800">Tambah Hari Baru</h3>
+                                <p class="text-sm text-slate-500 mt-1">Buat struktur agenda hari pelaksanaan untuk materi kursus Anda.</p>
                             </div>
 
                             <div class="space-y-4">
                                 <div>
                                     <label class="block text-sm font-semibold text-slate-700 mb-1.5">
-                                        Nama Bagian <span class="text-red-500">*</span>
+                                        Nama Hari / Topik Agenda <span class="text-red-500">*</span>
                                     </label>
-                                    <input type="text" name="name" required placeholder="Contoh: Bab 1: Pengenalan Dasar"
+                                    <input type="text" name="name" required placeholder="Contoh: Hari 1: Pengenalan Dasar"
                                         class="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm focus:border-[#13416B] focus:ring-1 focus:ring-[#13416B] shadow-sm" />
                                 </div>
                             </div>
@@ -124,7 +124,7 @@
                                 <button type="button" x-data @click="$dispatch('close-modal', 'course_sections-{{ $course->slug }}')"
                                     class="px-5 py-2.5 text-sm font-bold text-slate-700 bg-white border border-slate-300 rounded-xl hover:bg-slate-50 transition-colors shadow-sm">Batal</button>
                                 <button type="submit"
-                                    class="px-5 py-2.5 text-sm font-bold text-white bg-[#13416B] rounded-xl hover:bg-[#0f3354] transition-colors shadow-sm">Simpan Bagian</button>
+                                    class="px-5 py-2.5 text-sm font-bold text-white bg-[#13416B] rounded-xl hover:bg-[#0f3354] transition-colors shadow-sm">Simpan Hari</button>
                             </div>
                         </form>
                     </x-modal>
@@ -143,7 +143,7 @@
                                                 </span>
                                                 <div>
                                                     <h3 class="font-bold text-slate-800 text-xs sm:text-base leading-snug">
-                                                        {{ $section->name }}
+                                                        {{ preg_replace('/^modul\b/i', 'Hari', (string) $section->name) }}
                                                     </h3>
                                                     <span class="text-[11px] font-medium text-slate-500 mt-0.5 block">
                                                         {{ count($section->contents) }} Topik Materi
