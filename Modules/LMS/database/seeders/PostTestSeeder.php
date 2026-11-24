@@ -66,7 +66,7 @@ class PostTestSeeder extends Seeder
                         'answer_key_file_path' => $isEssay ? null : $keyPath,
                         'answer_key_file_name' => $isEssay ? null : 'Kunci_Jawaban_Hari_' . ($index + 1) . '_' . substr($cleanSecName, 0, 25) . '.xlsx',
                         'answer_key_file_size' => $isEssay ? null : $keySize,
-                        'instructions'         => $isEssay ? null : 'Unduh template Excel kertas kerja dari penyelenggara, lengkapi sel jawaban pada kolom D dan E (baris 2–6), lalu unggah kembali berkas .xlsx Anda untuk dikoreksi otomatis oleh sistem.',
+                        'instructions'         => $isEssay ? null : 'Unduh template berkas soal di bawah ini, lengkapi seluruh sel isian sesuai petunjuk di dalam dokumen, lalu unggah kembali berkas jawaban Anda untuk penilaian otomatis.',
                         'max_words'            => $isEssay ? 500 : null,
                     ]
                 );
@@ -105,7 +105,7 @@ class PostTestSeeder extends Seeder
                     'answer_key_file_path' => $isFinalEssay ? null : $keyPath,
                     'answer_key_file_name' => $isFinalEssay ? null : 'Kunci_Evaluasi_Akhir_' . substr($cleanCourseName, 0, 25) . '.xlsx',
                     'answer_key_file_size' => $isFinalEssay ? null : $keySize,
-                    'instructions'         => $isFinalEssay ? null : 'Unduh template Excel evaluasi akhir di atas, lengkapi seluruh sel isian pada kolom D dan E (baris 2–6), lalu unggah kembali berkas .xlsx Anda untuk penilaian otomatis.',
+                    'instructions'         => $isFinalEssay ? null : 'Unduh template evaluasi akhir di bawah ini, lengkapi seluruh sel isian sesuai petunjuk di dalam dokumen, lalu unggah kembali berkas jawaban Anda untuk penilaian otomatis.',
                     'max_words'            => $isFinalEssay ? 600 : null,
                 ]
             );

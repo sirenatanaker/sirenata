@@ -472,8 +472,8 @@
                                     </template>
 
                                     {{-- Struktur Kurikulum --}}
-                                    <div>
-                                        <div class="flex items-center justify-between gap-2 mb-3">
+                                    <div :class="(selected && selected.isEvent && selected.timelineSteps) ? 'mt-7 sm:mt-8 pt-6 sm:pt-7 border-t border-slate-200/80' : ''">
+                                        <div class="flex items-center justify-between gap-2 mb-3.5">
                                             <h4 class="text-sm sm:text-base font-extrabold uppercase tracking-wider text-slate-800">Struktur Kurikulum</h4>
                                             <button type="button"
                                                     x-show="selected.sections && selected.sections.length > 0"

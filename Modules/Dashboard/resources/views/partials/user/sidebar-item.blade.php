@@ -14,7 +14,7 @@
                    md:active:scale-100
                    {{ $isDashboard
                        ? 'text-[#13416B] bg-[#13416B]/10 font-bold dark:bg-white/10 dark:text-sky-400'
-                       : 'font-medium text-slate-500 md:text-slate-700 hover:text-[#13416B] hover:bg-slate-100/70 dark:text-slate-400 dark:md:text-slate-200 dark:hover:text-white dark:hover:bg-slate-800/60' }}"
+                       : 'font-semibold text-slate-500 md:text-slate-700 hover:text-[#13416B] hover:bg-slate-100/70 dark:text-slate-400 dark:md:text-slate-200 dark:hover:text-white dark:hover:bg-slate-800/60' }}"
             :class="sidebarOpen 
                 ? 'md:w-full md:h-auto md:py-3.5 md:px-4 md:rounded-xl md:flex-row md:items-center md:justify-start md:gap-3.5' 
                 : 'md:w-12 md:h-12 md:mx-auto md:p-0 md:rounded-xl md:flex-col md:items-center md:justify-center'">
@@ -28,7 +28,7 @@
                     </svg>
                 @else
                     <!-- Outline House (Inactive) -->
-                    <svg class="w-5 h-5 md:w-6 md:h-6 text-slate-500 md:text-slate-600 group-hover:text-[#13416B] dark:text-slate-400 dark:group-hover:text-white" fill="none" viewBox="0 0 24 24" stroke-width="1.75" stroke="currentColor">
+                    <svg class="w-5 h-5 md:w-6 md:h-6 text-slate-500 md:text-slate-600 group-hover:text-[#13416B] dark:text-slate-400 dark:group-hover:text-white" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" d="m2.25 12 8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
                     </svg>
                 @endif
@@ -38,7 +38,7 @@
                 <span class="absolute bottom-1 w-1 h-1 rounded-full bg-[#13416B] dark:bg-sky-400 md:hidden"></span>
             @endif
 
-            <span class="hidden text-base {{ $isDashboard ? 'font-bold' : 'font-medium' }} text-left leading-snug whitespace-nowrap"
+            <span class="hidden text-base {{ $isDashboard ? 'font-bold' : 'font-semibold' }} text-left leading-snug whitespace-nowrap"
                   :class="sidebarOpen ? 'md:inline-block' : 'md:hidden'">Dashboard</span>
         </a>
     </li>
@@ -55,7 +55,7 @@
                    md:active:scale-100
                    {{ $isKatalog
                        ? 'text-[#13416B] bg-[#13416B]/10 font-bold dark:bg-white/10 dark:text-sky-400'
-                       : 'font-medium text-slate-500 md:text-slate-700 hover:text-[#13416B] hover:bg-slate-100/70 dark:text-slate-400 dark:md:text-slate-200 dark:hover:text-white dark:hover:bg-slate-800/60' }}"
+                       : 'font-semibold text-slate-500 md:text-slate-700 hover:text-[#13416B] hover:bg-slate-100/70 dark:text-slate-400 dark:md:text-slate-200 dark:hover:text-white dark:hover:bg-slate-800/60' }}"
             :class="sidebarOpen 
                 ? 'md:w-full md:h-auto md:py-3.5 md:px-4 md:rounded-xl md:flex-row md:items-center md:justify-start md:gap-3.5' 
                 : 'md:w-12 md:h-12 md:mx-auto md:p-0 md:rounded-xl md:flex-col md:items-center md:justify-center'">
@@ -68,7 +68,7 @@
                     </svg>
                 @else
                     <!-- Outline Book Open (Inactive) -->
-                    <svg class="w-5 h-5 md:w-6 md:h-6 text-slate-500 md:text-slate-600 group-hover:text-[#13416B] dark:text-slate-400 dark:group-hover:text-white" fill="none" viewBox="0 0 24 24" stroke-width="1.75" stroke="currentColor">
+                    <svg class="w-5 h-5 md:w-6 md:h-6 text-slate-500 md:text-slate-600 group-hover:text-[#13416B] dark:text-slate-400 dark:group-hover:text-white" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.966 8.966 0 0 0-6 2.292m0-14.25v14.25" />
                     </svg>
                 @endif
@@ -78,7 +78,7 @@
                 <span class="absolute bottom-1 w-1 h-1 rounded-full bg-[#13416B] dark:bg-sky-400 md:hidden"></span>
             @endif
 
-            <span class="hidden text-base {{ $isKatalog ? 'font-bold' : 'font-medium' }} text-left leading-snug whitespace-nowrap"
+            <span class="hidden text-base {{ $isKatalog ? 'font-bold' : 'font-semibold' }} text-left leading-snug whitespace-nowrap"
                   :class="sidebarOpen ? 'md:inline-block' : 'md:hidden'">Katalog</span>
         </a>
     </li>
@@ -95,7 +95,7 @@
                    md:active:scale-100
                    {{ $isKursus
                        ? 'text-[#13416B] bg-[#13416B]/10 font-bold dark:bg-white/10 dark:text-sky-400'
-                       : 'font-medium text-slate-500 md:text-slate-700 hover:text-[#13416B] hover:bg-slate-100/70 dark:text-slate-400 dark:md:text-slate-200 dark:hover:text-white dark:hover:bg-slate-800/60' }}"
+                       : 'font-semibold text-slate-500 md:text-slate-700 hover:text-[#13416B] hover:bg-slate-100/70 dark:text-slate-400 dark:md:text-slate-200 dark:hover:text-white dark:hover:bg-slate-800/60' }}"
             :class="sidebarOpen 
                 ? 'md:w-full md:h-auto md:py-3.5 md:px-4 md:rounded-xl md:flex-row md:items-center md:justify-start md:gap-3.5' 
                 : 'md:w-12 md:h-12 md:mx-auto md:p-0 md:rounded-xl md:flex-col md:items-center md:justify-center'">
@@ -110,7 +110,7 @@
                     </svg>
                 @else
                     <!-- Outline Academic Cap (Inactive) -->
-                    <svg class="w-6 h-6 md:w-6.5 md:h-6.5 text-slate-500 md:text-slate-600 group-hover:text-[#13416B] dark:text-slate-400 dark:group-hover:text-white" fill="none" viewBox="0 0 24 24" stroke-width="1.75" stroke="currentColor">
+                    <svg class="w-6 h-6 md:w-6.5 md:h-6.5 text-slate-500 md:text-slate-600 group-hover:text-[#13416B] dark:text-slate-400 dark:group-hover:text-white" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 14l9-5-9-5-9 5 9 5z" />
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0112 20.055a11.952 11.952 0 01-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 14v6" />
@@ -122,7 +122,7 @@
                 <span class="absolute bottom-1 w-1 h-1 rounded-full bg-[#13416B] dark:bg-sky-400 md:hidden"></span>
             @endif
 
-            <span class="hidden text-base {{ $isKursus ? 'font-bold' : 'font-medium' }} text-left leading-snug whitespace-nowrap"
+            <span class="hidden text-base {{ $isKursus ? 'font-bold' : 'font-semibold' }} text-left leading-snug whitespace-nowrap"
                   :class="sidebarOpen ? 'md:inline-block' : 'md:hidden'">Kursus Saya</span>
         </a>
     </li>
@@ -139,7 +139,7 @@
                    md:active:scale-100
                    {{ $isLibrary
                        ? 'text-[#13416B] bg-[#13416B]/10 font-bold dark:bg-white/10 dark:text-sky-400'
-                       : 'font-medium text-slate-500 md:text-slate-700 hover:text-[#13416B] hover:bg-slate-100/70 dark:text-slate-400 dark:md:text-slate-200 dark:hover:text-white dark:hover:bg-slate-800/60' }}"
+                       : 'font-semibold text-slate-500 md:text-slate-700 hover:text-[#13416B] hover:bg-slate-100/70 dark:text-slate-400 dark:md:text-slate-200 dark:hover:text-white dark:hover:bg-slate-800/60' }}"
             :class="sidebarOpen 
                 ? 'md:w-full md:h-auto md:py-3.5 md:px-4 md:rounded-xl md:flex-row md:items-center md:justify-start md:gap-3.5' 
                 : 'md:w-12 md:h-12 md:mx-auto md:p-0 md:rounded-xl md:flex-col md:items-center md:justify-center'">
@@ -152,7 +152,7 @@
                     </svg>
                 @else
                     <!-- Outline Bookmark (Inactive) -->
-                    <svg class="w-5 h-5 md:w-6 md:h-6 text-slate-500 md:text-slate-600 group-hover:text-[#13416B] dark:text-slate-400 dark:group-hover:text-white" fill="none" viewBox="0 0 24 24" stroke-width="1.75" stroke="currentColor">
+                    <svg class="w-5 h-5 md:w-6 md:h-6 text-slate-500 md:text-slate-600 group-hover:text-[#13416B] dark:text-slate-400 dark:group-hover:text-white" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0111.186 0z" />
                     </svg>
                 @endif
@@ -162,7 +162,7 @@
                 <span class="absolute bottom-1 w-1 h-1 rounded-full bg-[#13416B] dark:bg-sky-400 md:hidden"></span>
             @endif
 
-            <span class="hidden text-base {{ $isLibrary ? 'font-bold' : 'font-medium' }} text-left leading-snug whitespace-nowrap"
+            <span class="hidden text-base {{ $isLibrary ? 'font-bold' : 'font-semibold' }} text-left leading-snug whitespace-nowrap"
                   :class="sidebarOpen ? 'md:inline-block' : 'md:hidden'">Perpustakaan</span>
         </a>
     </li>
@@ -179,7 +179,7 @@
                    md:active:scale-100
                    {{ $isKalkulator
                        ? 'text-[#13416B] bg-[#13416B]/10 font-bold dark:bg-white/10 dark:text-sky-400'
-                       : 'font-medium text-slate-500 md:text-slate-700 hover:text-[#13416B] hover:bg-slate-100/70 dark:text-slate-400 dark:md:text-slate-200 dark:hover:text-white dark:hover:bg-slate-800/60' }}"
+                       : 'font-semibold text-slate-500 md:text-slate-700 hover:text-[#13416B] hover:bg-slate-100/70 dark:text-slate-400 dark:md:text-slate-200 dark:hover:text-white dark:hover:bg-slate-800/60' }}"
             :class="sidebarOpen 
                 ? 'md:w-full md:h-auto md:py-3.5 md:px-4 md:rounded-xl md:flex-row md:items-center md:justify-start md:gap-3.5' 
                 : 'md:w-12 md:h-12 md:mx-auto md:p-0 md:rounded-xl md:flex-col md:items-center md:justify-center'">
@@ -192,7 +192,7 @@
                     </svg>
                 @else
                     <!-- Outline Calculator (Inactive) -->
-                    <svg class="w-5 h-5 md:w-6 md:h-6 text-slate-500 md:text-slate-600 group-hover:text-[#13416B] dark:text-slate-400 dark:group-hover:text-white" fill="none" viewBox="0 0 24 24" stroke-width="1.75" stroke="currentColor">
+                    <svg class="w-5 h-5 md:w-6 md:h-6 text-slate-500 md:text-slate-600 group-hover:text-[#13416B] dark:text-slate-400 dark:group-hover:text-white" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                         <rect x="4" y="2.5" width="16" height="19" rx="2.5" />
                         <rect x="7" y="5.5" width="10" height="3" rx="0.75" />
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M8 16h.01M12 16h.01M16 16h.01" />
@@ -204,7 +204,7 @@
                 <span class="absolute bottom-1 w-1 h-1 rounded-full bg-[#13416B] dark:bg-sky-400 md:hidden"></span>
             @endif
 
-            <span class="hidden text-base {{ $isKalkulator ? 'font-bold' : 'font-medium' }} text-left leading-snug whitespace-nowrap"
+            <span class="hidden text-base {{ $isKalkulator ? 'font-bold' : 'font-semibold' }} text-left leading-snug whitespace-nowrap"
                   :class="sidebarOpen ? 'md:inline-block' : 'md:hidden'">Penghitung RTK</span>
         </a>
     </li>
@@ -227,7 +227,7 @@
                        md:active:scale-100
                        {{ $isTimKerja
                            ? 'text-[#13416B] bg-[#13416B]/10 font-bold dark:bg-white/10 dark:text-sky-400'
-                           : 'font-medium text-slate-500 md:text-slate-700 hover:text-[#13416B] hover:bg-slate-100/70 dark:text-slate-400 dark:md:text-slate-200 dark:hover:text-white dark:hover:bg-slate-800/60' }}"
+                           : 'font-semibold text-slate-500 md:text-slate-700 hover:text-[#13416B] hover:bg-slate-100/70 dark:text-slate-400 dark:md:text-slate-200 dark:hover:text-white dark:hover:bg-slate-800/60' }}"
                 :class="sidebarOpen 
                     ? 'md:w-full md:h-auto md:py-3.5 md:px-4 md:rounded-xl md:flex-row md:items-center md:justify-start md:gap-3.5' 
                     : 'md:w-12 md:h-12 md:mx-auto md:p-0 md:rounded-xl md:flex-col md:items-center md:justify-center'">
@@ -240,7 +240,7 @@
                         </svg>
                     @else
                         <!-- Outline Users (Inactive) -->
-                        <svg class="w-5 h-5 md:w-6 md:h-6 text-slate-500 md:text-slate-600 group-hover:text-[#13416B] dark:text-slate-400 dark:group-hover:text-white" fill="none" viewBox="0 0 24 24" stroke-width="1.75" stroke="currentColor">
+                        <svg class="w-5 h-5 md:w-6 md:h-6 text-slate-500 md:text-slate-600 group-hover:text-[#13416B] dark:text-slate-400 dark:group-hover:text-white" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 0 0 3.741-.479 3 3 0 0 0-4.682-2.72m.94 3.198.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0 1 12 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 0 1 6 18.719m12 0a5.971 5.971 0 0 0-.941-3.197m0 0A5.995 5.995 0 0 0 12 12.75a5.995 5.995 0 0 0-5.058 2.772m0 0a3 3 0 0 0-4.681 2.72 8.986 8.986 0 0 0 3.74.477m.94-3.197a5.971 5.971 0 0 0-.94 3.197M15 6.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm6 3a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Zm-13.5 0a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Z" />
                         </svg>
                     @endif
@@ -250,7 +250,7 @@
                     <span class="absolute bottom-1 w-1 h-1 rounded-full bg-[#13416B] dark:bg-sky-400 md:hidden"></span>
                 @endif
 
-                <span class="hidden text-base {{ $isTimKerja ? 'font-bold' : 'font-medium' }} text-left leading-snug whitespace-nowrap"
+                <span class="hidden text-base {{ $isTimKerja ? 'font-bold' : 'font-semibold' }} text-left leading-snug whitespace-nowrap"
                       :class="sidebarOpen ? 'md:inline-block' : 'md:hidden'">Tim Kerja</span>
             </a>
         </li>
@@ -268,7 +268,7 @@
                    md:active:scale-100
                    {{ $isProfile
                        ? 'text-[#13416B] bg-[#13416B]/10 font-bold dark:bg-white/10 dark:text-sky-400'
-                       : 'font-medium text-slate-500 md:text-slate-700 hover:text-[#13416B] hover:bg-slate-100/70 dark:text-slate-400 dark:md:text-slate-200 dark:hover:text-white dark:hover:bg-slate-800/60' }}"
+                       : 'font-semibold text-slate-500 md:text-slate-700 hover:text-[#13416B] hover:bg-slate-100/70 dark:text-slate-400 dark:md:text-slate-200 dark:hover:text-white dark:hover:bg-slate-800/60' }}"
             :class="sidebarOpen 
                 ? 'md:w-full md:h-auto md:py-3.5 md:px-4 md:rounded-xl md:flex-row md:items-center md:justify-start md:gap-3.5' 
                 : 'md:w-12 md:h-12 md:mx-auto md:p-0 md:rounded-xl md:flex-col md:items-center md:justify-center'">
@@ -281,7 +281,7 @@
                     </svg>
                 @else
                     <!-- Outline User (Inactive) -->
-                    <svg class="w-5 h-5 md:w-6 md:h-6 text-slate-500 md:text-slate-600 group-hover:text-[#13416B] dark:text-slate-400 dark:group-hover:text-white" fill="none" viewBox="0 0 24 24" stroke-width="1.75" stroke="currentColor">
+                    <svg class="w-5 h-5 md:w-6 md:h-6 text-slate-500 md:text-slate-600 group-hover:text-[#13416B] dark:text-slate-400 dark:group-hover:text-white" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
                     </svg>
                 @endif
@@ -291,7 +291,7 @@
                 <span class="absolute bottom-1 w-1 h-1 rounded-full bg-[#13416B] dark:bg-sky-400 md:hidden"></span>
             @endif
 
-            <span class="hidden text-base {{ $isProfile ? 'font-bold' : 'font-medium' }} text-left leading-snug whitespace-nowrap"
+            <span class="hidden text-base {{ $isProfile ? 'font-bold' : 'font-semibold' }} text-left leading-snug whitespace-nowrap"
                   :class="sidebarOpen ? 'md:inline-block' : 'md:hidden'">Profil Saya</span>
         </a>
     </li>

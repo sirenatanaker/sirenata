@@ -141,7 +141,7 @@
             <header class="px-4 sm:px-6 py-4 border-b border-slate-100 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
                 <div>
                     <h2 class="text-base sm:text-lg font-extrabold text-slate-800">
-                        Gantt Chart Jadwal Pelatihan ({{ $ganttYear }})
+                        Jadwal Pelatihan Terdaftar ({{ $ganttYear }})
                     </h2>
                     <p class="text-xs sm:text-sm text-slate-500">
                         Linimasa pendaftaran, pelaksanaan Live Zoom, dan evaluasi gelombang pelatihan Anda

@@ -260,7 +260,7 @@
                         <div class="flex items-start gap-3 sm:gap-3.5">
                             
                             <div>
-                                <h2 class="text-lg sm:text-xl font-medium text-slate-700 leading-tight tracking-wide" style="font-family: 'Oswald', sans-serif;">
+                                <h2 class="text-base sm:text-lg font-bold text-slate-800 leading-tight">
                                     {{ $isBimtekEvent ? 'Linimasa Kegiatan' : 'Daftar Modul Pembelajaran' }}
                                 </h2>
                                 <p class="text-[11px] sm:text-xs text-slate-500 mt-1">
@@ -814,15 +814,9 @@
                     class="bg-white rounded-none sm:rounded-md shadow-sm border-y border-x-0 sm:border sm:border-x border-slate-200 p-4 sm:p-6 mb-0 md:mb-4 relative">
 
                     {{-- Header Widget --}}
-                    <div class="flex items-center gap-3 mb-5 pb-4 border-b border-slate-100">
-                        <div
-                            class="w-10 h-10 flex items-center justify-center bg-[#13416B] text-white border border-[#13416B] rounded-md shrink-0 shadow-xs">
-                            <i class="fas fa-award"></i>
-                        </div>
-                        <div>
-                            <h3 class="text-base md:text-lg font-medium text-slate-700 tracking-wide" style="font-family: 'Oswald', sans-serif;">Sertifikat Kelulusan</h3>
-                            <p class="text-[11px] text-slate-500 mt-0.5">Dokumen resmi bukti penyelesaian kursus</p>
-                        </div>
+                    <div class="mb-5 pb-4 border-b border-slate-100">
+                        <h3 class="text-base md:text-lg font-bold text-slate-800">Sertifikat Kelulusan</h3>
+                        <p class="text-[11px] sm:text-xs text-slate-500 mt-0.5">Dokumen resmi bukti penyelesaian kursus</p>
                     </div>
 
                     @if ($isFullyCompleted)
