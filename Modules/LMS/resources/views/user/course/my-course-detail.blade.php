@@ -936,21 +936,21 @@
                         @endif
                     @else
                         {{-- STATE 3: BELUM SELESAI (TERKUNCI) --}}
-                        <div class="py-6 flex flex-col items-center justify-center text-center px-2">
+                        <div class="pt-4 pb-1 flex flex-col items-center justify-center">
                             <div
                                 class="w-16 h-16 shrink-0 bg-[#547996] border border-[#446680] text-white rounded-full flex items-center justify-center mb-4 text-2xl shadow-xs">
                                 <i class="fas fa-lock"></i>
                             </div>
-                            <p class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-600 text-white text-xs font-bold mb-2.5 shadow-xs">
+                            <p class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-600 text-white text-xs font-bold mb-3 shadow-xs">
                                 <i class="fas fa-lock text-[10px]" aria-hidden="true"></i>
                                 Sertifikat Terkunci
                             </p>
 
-                            <p class="text-xs text-slate-500 leading-relaxed max-w-[240px]">
+                            <p class="w-full text-center text-xs text-slate-500 leading-relaxed">
                                 @if ($isBimtekEvent)
-                                    Akses sertifikat terbuka otomatis setelah menyelesaikan seluruh agenda hari, evaluasi akhir, dan evaluasi narasumber.
+                                    Akses sertifikat terbuka setelah menyelesaikan seluruh agenda harian, evaluasi akhir, dan evaluasi narasumber.
                                 @else
-                                    Akses sertifikat terbuka otomatis setelah menyelesaikan seluruh materi modul dan evaluasi akhir.
+                                    Akses sertifikat terbuka setelah menyelesaikan seluruh materi modul dan evaluasi akhir.
                                 @endif
                             </p>
 
@@ -969,268 +969,221 @@
                     @php
                         $hasZoom = (bool) ($activeBimtek && $activeBimtek->zoom_url);
                         $hasProofUploaded = !empty($sectionProofs);
+                        $reqTotal = 1
+                            + ($hasZoom ? 2 : 0)
+                            + ($evaluasiAkhir ? 1 : 0)
+                            + ($isBimtekEvent ? 1 : 0);
+                        $reqDone = ($areAllTopicsCompleted ? 1 : 0)
+                            + ($hasZoom && $isZoomAttended ? 1 : 0)
+                            + ($hasZoom && $hasProofUploaded ? 1 : 0)
+                            + ($evaluasiAkhir && $isEvaluasiAkhirCompleted ? 1 : 0)
+                            + ($isBimtekEvent && $isEvaluasiNarasumberCompleted ? 1 : 0);
                     @endphp
                     <template x-teleport="body">
                         <div x-show="showRequirementsModal" x-cloak
                             @keydown.escape.window="showRequirementsModal = false"
-                            class="fixed inset-0 z-[100] overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4">
+                            class="fixed inset-0 z-[100] overflow-y-auto bg-slate-900/55 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4">
                             
                             {{-- Overlay Click to Dismiss --}}
                             <div class="fixed inset-0" @click="showRequirementsModal = false"></div>
 
-                        {{-- Panel Konten: Bottom Sheet di Mobile (items-end, rounded-t-2xl), Modal di Tablet/Desktop (rounded-lg) --}}
-                        <div
-                            x-show="showRequirementsModal"
-                            x-transition:enter="transition ease-out duration-300"
-                            x-transition:enter-start="opacity-0 translate-y-full sm:translate-y-4 sm:scale-95"
-                            x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
-                            x-transition:leave="transition ease-in duration-200"
-                            x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
-                            x-transition:leave-end="opacity-0 translate-y-full sm:translate-y-4 sm:scale-95"
-                            class="relative bg-white w-full sm:max-w-lg rounded-t-2xl sm:rounded-lg shadow-2xl border-t sm:border border-slate-200 p-5 sm:p-6 space-y-4 text-left max-h-[88vh] sm:max-h-[85vh] overflow-y-auto z-10">
-                            
-                            {{-- Drag Indicator Bar khusus Tampilan Mobile (Bottom Sheet UX) --}}
-                            <div class="sm:hidden w-12 h-1.5 bg-slate-300 rounded-full mx-auto -mt-2 mb-2"></div>
+                            {{-- Panel Konten: Bottom Sheet di Mobile, Modal Bersih di Tablet/Desktop --}}
+                            <div
+                                x-show="showRequirementsModal"
+                                x-transition:enter="transition ease-out duration-250"
+                                x-transition:enter-start="opacity-0 translate-y-full sm:translate-y-3 sm:scale-95"
+                                x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
+                                x-transition:leave="transition ease-in duration-200"
+                                x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
+                                x-transition:leave-end="opacity-0 translate-y-full sm:translate-y-3 sm:scale-95"
+                                class="relative bg-white w-full sm:max-w-lg rounded-t-2xl sm:rounded-lg shadow-2xl border-t sm:border border-slate-200/90 p-5 sm:p-6 space-y-5 text-left max-h-[88vh] sm:max-h-[85vh] overflow-y-auto z-10">
+                                
+                                {{-- Drag Indicator Bar khusus Mobile --}}
+                                <div class="sm:hidden w-12 h-1.5 bg-slate-300 rounded-full mx-auto -mt-2 mb-1"></div>
 
-                            {{-- Header Modal / Bottom Sheet --}}
-                            <div class="flex items-center justify-between pb-3 border-b border-slate-100">
-                                <div class="flex items-center gap-2.5">
-                                    <div class="w-8 h-8 rounded-md bg-[#13416B]/10 text-[#13416B] flex items-center justify-center text-sm font-bold">
-                                        <i class="fas fa-award"></i>
-                                    </div>
+                                {{-- Header Modal --}}
+                                <div class="flex items-start justify-between gap-3">
                                     <div>
-                                        <h4 class="text-base font-bold text-slate-800 leading-tight">Syarat Penerbitan Sertifikat</h4>
-                                        <p class="text-[11px] text-slate-500 mt-0.5">Pantau tahapan yang perlu diraih untuk kelulusan</p>
+                                        <h4 class="text-base sm:text-lg font-bold text-slate-800 leading-snug">Syarat Penerbitan Sertifikat</h4>
+                                        <p class="text-xs text-slate-500 mt-0.5">Selesaikan seluruh tahapan berikut untuk membuka akses e-Sertifikat</p>
+                                    </div>
+                                    <button type="button" @click="showRequirementsModal = false"
+                                        class="w-8 h-8 rounded-md text-slate-400 hover:text-slate-700 hover:bg-slate-100 flex items-center justify-center transition-colors cursor-pointer shrink-0">
+                                        <i class="fas fa-times text-sm"></i>
+                                    </button>
+                                </div>
+
+                                {{-- Progress Bar Langsung (Tanpa Card) --}}
+                                <div class="space-y-2 pb-4 border-b border-slate-100">
+                                    <div class="flex items-baseline justify-between gap-2">
+                                        <span class="text-xs sm:text-sm font-medium text-slate-600">
+                                            {{ $reqDone }} dari {{ $reqTotal }} syarat terpenuhi
+                                        </span>
+                                        <span class="text-sm sm:text-base font-extrabold text-[#13416B] tabular-nums">
+                                            {{ $currentProgress }}%
+                                        </span>
+                                    </div>
+                                    <div class="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
+                                        <div class="{{ $currentProgress >= 100 ? 'bg-emerald-500' : 'bg-sky-500' }} h-full rounded-full transition-all duration-500"
+                                            style="width: {{ $currentProgress }}%"></div>
                                     </div>
                                 </div>
-                                <button type="button" @click="showRequirementsModal = false"
-                                    class="text-slate-400 hover:text-slate-600 p-1.5 rounded-md transition-colors">
-                                    <i class="fas fa-times text-base"></i>
-                                </button>
-                            </div>
 
-                            {{-- Mini Overview Progress Bar --}}
-                            <div class="p-3.5 bg-slate-50 rounded-md border border-slate-200/80 space-y-2">
-                                <div class="flex justify-between items-center text-xs">
-                                    <span class="font-semibold text-slate-600">Progres Keseluruhan</span>
-                                    <span class="font-bold text-[#13416B]">{{ $currentProgress }}% Selesai</span>
-                                </div>
-                                <div class="w-full bg-slate-200 rounded-full h-2 overflow-hidden">
-                                    <div class="{{ $progressBarClass }} h-full rounded-full transition-all duration-500"
-                                        style="width: {{ $currentProgress }}%"></div>
-                                </div>
-                            </div>
-
-                            {{-- Daftar Tahapan Persyaratan: Desain Bersih & Elegan (Bukan Box Bertumpuk) --}}
-                            <div class="divide-y divide-slate-100 py-1">
-                                {{-- 1. Sesi Tatap Muka Online --}}
-                                @if ($hasZoom)
-                                    <div class="py-3.5 first:pt-1 last:pb-1 flex items-center justify-between gap-3">
-                                        <div class="flex items-start gap-3 min-w-0">
-                                            @if ($isZoomAttended)
-                                                <span class="w-6 h-6 rounded-full bg-emerald-600 text-white flex items-center justify-center shrink-0 text-[10px] mt-0.5 shadow-2xs">
-                                                    <i class="fas fa-check"></i>
-                                                </span>
-                                            @elseif ($isWaitingForStart)
-                                                <span class="w-6 h-6 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center shrink-0 text-[10px] mt-0.5 border border-slate-200">
-                                                    <i class="fas fa-lock text-[9px]"></i>
-                                                </span>
-                                            @else
-                                                <span class="w-6 h-6 rounded-full bg-[#13416B]/10 text-[#13416B] border border-[#13416B]/20 flex items-center justify-center shrink-0 text-[10px] font-bold mt-0.5">
-                                                    <i class="fas fa-video text-[9px]"></i>
-                                                </span>
-                                            @endif
-                                            <div class="min-w-0">
-                                                <p class="text-xs sm:text-sm font-bold text-slate-800 leading-snug">Sesi Tatap Muka (Zoom)</p>
-                                                <p class="text-[11px] text-slate-500 leading-tight mt-0.5">Hadir & isi presensi tatap muka daring</p>
-                                            </div>
-                                        </div>
-                                        <div class="shrink-0">
-                                            @if ($isZoomAttended)
-                                                <span class="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-md">
-                                                    <i class="fas fa-check text-[9px]"></i> Selesai
-                                                </span>
-                                            @elseif ($isWaitingForStart)
-                                                <span class="inline-flex items-center gap-1 text-[11px] font-medium text-slate-400 bg-slate-100 px-2.5 py-1 rounded-md">
-                                                    <i class="fas fa-lock text-[9px]"></i> Terkunci
-                                                </span>
-                                            @else
-                                                <a href="{{ route('user.course.section.show', ['slug' => $courseSlug, 'sectionId' => $firstIncompleteSectionId]) }}#sesi-zoom"
-                                                    class="inline-flex items-center gap-1 px-3 py-1.5 rounded-md text-xs font-bold text-white bg-[#1E568A] hover:bg-[#13416B] transition-colors shadow-2xs whitespace-nowrap">
-                                                    <span>Masuk</span>
-                                                    <i class="fas fa-arrow-right text-[9px]"></i>
-                                                </a>
-                                            @endif
-                                        </div>
-                                    </div>
-                                @endif
-
-                                {{-- 2. Materi Pembelajaran Mandiri --}}
-                                <div class="py-3.5 first:pt-1 last:pb-1 flex items-center justify-between gap-3">
-                                    <div class="flex items-start gap-3 min-w-0">
-                                        @if ($areAllTopicsCompleted)
-                                            <span class="w-6 h-6 rounded-full bg-emerald-600 text-white flex items-center justify-center shrink-0 text-[10px] mt-0.5 shadow-2xs">
-                                                <i class="fas fa-check"></i>
-                                            </span>
-                                        @elseif ($isWaitingForStart)
-                                            <span class="w-6 h-6 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center shrink-0 text-[10px] mt-0.5 border border-slate-200">
-                                                <i class="fas fa-lock text-[9px]"></i>
-                                            </span>
-                                        @else
-                                            <span class="w-6 h-6 rounded-full bg-[#13416B]/10 text-[#13416B] border border-[#13416B]/20 flex items-center justify-center shrink-0 text-[10px] font-bold mt-0.5">
-                                                <i class="fas fa-book-reader text-[9px]"></i>
-                                            </span>
-                                        @endif
+                                {{-- Daftar Tahapan Persyaratan (Berurutan & Bersih Tanpa Badge Ikon) --}}
+                                @php $reqStepNo = 0; @endphp
+                                <div class="divide-y divide-slate-100 -my-1">
+                                    {{-- 1. Materi Pembelajaran Mandiri --}}
+                                    @php $reqStepNo++; @endphp
+                                    <div class="py-3.5 first:pt-0 last:pb-0 flex items-center justify-between gap-4">
                                         <div class="min-w-0">
-                                            <p class="text-xs sm:text-sm font-bold text-slate-800 leading-snug">Materi Pembelajaran Mandiri</p>
-                                            <p class="text-[11px] text-slate-500 leading-tight mt-0.5">Tuntaskan seluruh topik ({{ $completedContents }}/{{ $totalContents }} selesai)</p>
+                                            <p class="text-sm font-semibold {{ $isWaitingForStart && !$areAllTopicsCompleted ? 'text-slate-400' : 'text-slate-800' }} leading-snug">
+                                                {{ $reqStepNo }}. Materi Pembelajaran Mandiri
+                                            </p>
+                                            <p class="text-xs text-slate-500 leading-relaxed mt-0.5">Tuntaskan seluruh topik ({{ $completedContents }}/{{ $totalContents }} selesai)</p>
                                         </div>
-                                    </div>
-                                    <div class="shrink-0">
-                                        @if ($areAllTopicsCompleted)
-                                            <span class="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-md">
-                                                <i class="fas fa-check text-[9px]"></i> Selesai
-                                            </span>
-                                        @elseif ($isWaitingForStart)
-                                            <span class="inline-flex items-center gap-1 text-[11px] font-medium text-slate-400 bg-slate-100 px-2.5 py-1 rounded-md">
-                                                <i class="fas fa-lock text-[9px]"></i> Terkunci
-                                            </span>
-                                        @else
-                                            <a href="{{ route('user.course.section.show', ['slug' => $courseSlug, 'sectionId' => $firstIncompleteSectionId]) }}"
-                                                class="inline-flex items-center gap-1 px-3 py-1.5 rounded-md text-xs font-bold text-white bg-[#1E568A] hover:bg-[#13416B] transition-colors shadow-2xs whitespace-nowrap">
-                                                <span>Pelajari</span>
-                                                <i class="fas fa-arrow-right text-[9px]"></i>
-                                            </a>
-                                        @endif
-                                    </div>
-                                </div>
-
-                                {{-- 3. Unggah Bukti Pelengkap Pelaksanaan --}}
-                                @if ($hasZoom)
-                                    <div class="py-3.5 first:pt-1 last:pb-1 flex items-center justify-between gap-3">
-                                        <div class="flex items-start gap-3 min-w-0">
-                                            @if ($hasProofUploaded)
-                                                <span class="w-6 h-6 rounded-full bg-emerald-600 text-white flex items-center justify-center shrink-0 text-[10px] mt-0.5 shadow-2xs">
-                                                    <i class="fas fa-check"></i>
+                                        <div class="shrink-0">
+                                            @if ($areAllTopicsCompleted)
+                                                <span class="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-600">
+                                                    <i class="fas fa-check-circle text-xs"></i> Selesai
                                                 </span>
                                             @elseif ($isWaitingForStart)
-                                                <span class="w-6 h-6 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center shrink-0 text-[10px] mt-0.5 border border-slate-200">
-                                                    <i class="fas fa-lock text-[9px]"></i>
+                                                <span class="inline-flex items-center gap-1.5 text-xs font-medium text-slate-400">
+                                                    <i class="fas fa-lock text-[11px]"></i> Terkunci
                                                 </span>
                                             @else
-                                                <span class="w-6 h-6 rounded-full bg-[#13416B]/10 text-[#13416B] border border-[#13416B]/20 flex items-center justify-center shrink-0 text-[10px] font-bold mt-0.5">
-                                                    <i class="fas fa-file-upload text-[9px]"></i>
-                                                </span>
-                                            @endif
-                                            <div class="min-w-0">
-                                                <p class="text-xs sm:text-sm font-bold text-slate-800 leading-snug">Bukti Pelengkap Pelaksanaan</p>
-                                                <p class="text-[11px] text-slate-500 leading-tight mt-0.5">Unggah bukti keikutsertaan atau surat tugas</p>
-                                            </div>
-                                        </div>
-                                        <div class="shrink-0">
-                                            @if ($hasProofUploaded)
-                                                <span class="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-md">
-                                                    <i class="fas fa-check text-[9px]"></i> Selesai
-                                                </span>
-                                            @elseif ($isWaitingForStart)
-                                                <span class="inline-flex items-center gap-1 text-[11px] font-medium text-slate-400 bg-slate-100 px-2.5 py-1 rounded-md">
-                                                    <i class="fas fa-lock text-[9px]"></i> Terkunci
-                                                </span>
-                                            @else
-                                                <a href="{{ route('user.course.section.show', ['slug' => $courseSlug, 'sectionId' => $firstIncompleteSectionId]) }}#bukti-zoom"
-                                                    class="inline-flex items-center gap-1 px-3 py-1.5 rounded-md text-xs font-bold text-white bg-[#1E568A] hover:bg-[#13416B] transition-colors shadow-2xs whitespace-nowrap">
-                                                    <span>Unggah</span>
-                                                    <i class="fas fa-arrow-right text-[9px]"></i>
+                                                <a href="{{ route('user.course.section.show', ['slug' => $courseSlug, 'sectionId' => $firstIncompleteSectionId]) }}"
+                                                    class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-md text-xs font-bold text-white bg-[#13416B] hover:bg-[#0f3354] transition-colors whitespace-nowrap">
+                                                    <span>Pelajari</span>
+                                                    <i class="fas fa-chevron-right text-[9px]"></i>
                                                 </a>
                                             @endif
                                         </div>
                                     </div>
-                                @endif
 
-                                {{-- 4. Evaluasi Akhir Materi (Post-Test) --}}
-                                @if ($evaluasiAkhir)
-                                    <div class="py-3.5 first:pt-1 last:pb-1 flex items-center justify-between gap-3">
-                                        <div class="flex items-start gap-3 min-w-0">
-                                            @if ($isEvaluasiAkhirCompleted)
-                                                <span class="w-6 h-6 rounded-full bg-emerald-600 text-white flex items-center justify-center shrink-0 text-[10px] mt-0.5 shadow-2xs">
-                                                    <i class="fas fa-check"></i>
-                                                </span>
-                                            @elseif ($isEvaluasiAkhirLocked || $isWaitingForStart || $isEventEnded)
-                                                <span class="w-6 h-6 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center shrink-0 text-[10px] mt-0.5 border border-slate-200">
-                                                    <i class="fas fa-lock text-[9px]"></i>
-                                                </span>
-                                            @else
-                                                <span class="w-6 h-6 rounded-full bg-[#13416B]/10 text-[#13416B] border border-[#13416B]/20 flex items-center justify-center shrink-0 text-[10px] font-bold mt-0.5">
-                                                    <i class="fas fa-file-signature text-[9px]"></i>
-                                                </span>
-                                            @endif
+                                    {{-- 2. Sesi Tatap Muka Online (Zoom) --}}
+                                    @if ($hasZoom)
+                                        @php $reqStepNo++; @endphp
+                                        <div class="py-3.5 first:pt-0 last:pb-0 flex items-center justify-between gap-4">
                                             <div class="min-w-0">
-                                                <p class="text-xs sm:text-sm font-bold text-slate-800 leading-snug">{{ $isCbtPostTest ? 'Evaluasi Akhir Komprehensif' : 'Tugas Akhir / Portofolio' }}</p>
-                                                <p class="text-[11px] text-slate-500 leading-tight mt-0.5">{{ $isCbtPostTest ? 'Lulus nilai minimal KKM: ' . data_get($evaluasiAkhir, 'passing_score', 0) : 'Pengumpulan tugas akhir via Google Drive' }}</p>
+                                                <p class="text-sm font-semibold {{ $isWaitingForStart && !$isZoomAttended ? 'text-slate-400' : 'text-slate-800' }} leading-snug">
+                                                    {{ $reqStepNo }}. Sesi Tatap Muka (Zoom)
+                                                </p>
+                                                <p class="text-xs text-slate-500 leading-relaxed mt-0.5">Hadir &amp; konfirmasi presensi tatap muka daring</p>
+                                            </div>
+                                            <div class="shrink-0">
+                                                @if ($isZoomAttended)
+                                                    <span class="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-600">
+                                                        <i class="fas fa-check-circle text-xs"></i> Selesai
+                                                    </span>
+                                                @elseif ($isWaitingForStart)
+                                                    <span class="inline-flex items-center gap-1.5 text-xs font-medium text-slate-400">
+                                                        <i class="fas fa-lock text-[11px]"></i> Terkunci
+                                                    </span>
+                                                @else
+                                                    <a href="{{ route('user.course.section.show', ['slug' => $courseSlug, 'sectionId' => $firstIncompleteSectionId]) }}#sesi-zoom"
+                                                        class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-md text-xs font-bold text-white bg-[#13416B] hover:bg-[#0f3354] transition-colors whitespace-nowrap">
+                                                        <span>Masuk</span>
+                                                        <i class="fas fa-chevron-right text-[9px]"></i>
+                                                    </a>
+                                                @endif
                                             </div>
                                         </div>
-                                        <div class="shrink-0">
-                                            @if ($isEvaluasiAkhirCompleted)
-                                                <span class="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-md">
-                                                    <i class="fas fa-check text-[9px]"></i> Selesai
-                                                </span>
-                                            @elseif ($isEvaluasiAkhirLocked || $isWaitingForStart || $isEventEnded)
-                                                <span class="inline-flex items-center gap-1 text-[11px] font-medium text-slate-400 bg-slate-100 px-2.5 py-1 rounded-md" title="Selesaikan materi terlebih dahulu">
-                                                    <i class="fas fa-lock text-[9px]"></i> Terkunci
-                                                </span>
-                                            @else
-                                                <a href="{{ route('user.course.test.show', ['slug' => $courseSlug, 'postTestId' => $evaluasiAkhir->id]) }}"
-                                                    class="inline-flex items-center gap-1 px-3 py-1.5 rounded-md text-xs font-bold text-white bg-[#1E568A] hover:bg-[#13416B] transition-colors shadow-2xs whitespace-nowrap">
-                                                    <span>{{ $isCbtPostTest ? 'Kerjakan' : 'Kumpulkan' }}</span>
-                                                    <i class="fas fa-arrow-right text-[9px]"></i>
-                                                </a>
-                                            @endif
-                                        </div>
-                                    </div>
-                                @endif
 
-                                {{-- 5. Evaluasi Narasumber & Penyelenggara (Khusus Bimtek) --}}
-                                @if ($isBimtekEvent)
-                                    <div class="py-3.5 first:pt-1 last:pb-1 flex items-center justify-between gap-3">
-                                        <div class="flex items-start gap-3 min-w-0">
-                                            <span x-show="evalNarasumberDone" class="w-6 h-6 rounded-full bg-emerald-600 text-white flex items-center justify-center shrink-0 text-[10px] mt-0.5 shadow-2xs">
-                                                <i class="fas fa-check"></i>
-                                            </span>
-                                            <span x-show="!evalNarasumberDone && {{ $isEvaluasiNarasumberLocked ? 'true' : 'false' }}"
-                                                title="{{ $evaluasiNarasumberLockReason }}"
-                                                class="w-6 h-6 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center shrink-0 text-[10px] mt-0.5 border border-slate-200">
-                                                <i class="fas fa-lock text-[9px]"></i>
-                                            </span>
-                                            <span x-show="!evalNarasumberDone && !{{ $isEvaluasiNarasumberLocked ? 'true' : 'false' }}" class="w-6 h-6 rounded-full bg-[#13416B]/10 text-[#13416B] border border-[#13416B]/20 flex items-center justify-center shrink-0 text-[10px] font-bold mt-0.5">
-                                                <i class="fas fa-chalkboard-teacher text-[9px]"></i>
-                                            </span>
+                                        {{-- 3. Bukti Kehadiran Zoom --}}
+                                        @php $reqStepNo++; @endphp
+                                        <div class="py-3.5 first:pt-0 last:pb-0 flex items-center justify-between gap-4">
                                             <div class="min-w-0">
-                                                <p class="text-xs sm:text-sm font-bold text-slate-800 leading-snug">Evaluasi Narasumber & Bimtek</p>
-                                                <p class="text-[11px] text-slate-500 leading-tight mt-0.5">Penilaian kualitas pengajar & fasilitas bimtek</p>
+                                                <p class="text-sm font-semibold {{ $isWaitingForStart && !$hasProofUploaded ? 'text-slate-400' : 'text-slate-800' }} leading-snug">
+                                                    {{ $reqStepNo }}. Bukti Kehadiran Zoom
+                                                </p>
+                                                <p class="text-xs text-slate-500 leading-relaxed mt-0.5">Unggah screenshot keikutsertaan sesi tatap muka</p>
+                                            </div>
+                                            <div class="shrink-0">
+                                                @if ($hasProofUploaded)
+                                                    <span class="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-600">
+                                                        <i class="fas fa-check-circle text-xs"></i> Selesai
+                                                    </span>
+                                                @elseif ($isWaitingForStart)
+                                                    <span class="inline-flex items-center gap-1.5 text-xs font-medium text-slate-400">
+                                                        <i class="fas fa-lock text-[11px]"></i> Terkunci
+                                                    </span>
+                                                @else
+                                                    <a href="{{ route('user.course.section.show', ['slug' => $courseSlug, 'sectionId' => $firstIncompleteSectionId]) }}#bukti-presensi"
+                                                        class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-md text-xs font-bold text-white bg-[#13416B] hover:bg-[#0f3354] transition-colors whitespace-nowrap">
+                                                        <span>Unggah</span>
+                                                        <i class="fas fa-chevron-right text-[9px]"></i>
+                                                    </a>
+                                                @endif
                                             </div>
                                         </div>
-                                        <div class="shrink-0">
-                                            <template x-if="evalNarasumberDone">
-                                                <span class="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-md">
-                                                    <i class="fas fa-check text-[9px]"></i> Selesai
-                                                </span>
-                                            </template>
-                                            <template x-if="!evalNarasumberDone && {{ $isEvaluasiNarasumberLocked ? 'true' : 'false' }}">
-                                                <span class="inline-flex items-center gap-1 text-[11px] font-medium text-slate-400 bg-slate-100 px-2.5 py-1 rounded-md"
-                                                    title="{{ $evaluasiNarasumberLockReason }}">
-                                                    <i class="fas fa-lock text-[9px]"></i> Terkunci
-                                                </span>
-                                            </template>
-                                            <template x-if="!evalNarasumberDone && !{{ $isEvaluasiNarasumberLocked ? 'true' : 'false' }}">
-                                                <a href="{{ route('user.course.my-course.evaluasi-narasumber', ['slug' => $courseSlug]) }}"
-                                                    class="inline-flex items-center gap-1 px-3 py-1.5 rounded-md text-xs font-bold text-white bg-[#1E568A] hover:bg-[#13416B] transition-colors shadow-2xs whitespace-nowrap">
-                                                    <span>Isi</span>
-                                                    <i class="fas fa-arrow-right text-[9px]"></i>
-                                                </a>
-                                            </template>
+                                    @endif
+
+                                    {{-- 4. Evaluasi Akhir Materi (Post-Test) --}}
+                                    @if ($evaluasiAkhir)
+                                        @php
+                                            $reqStepNo++;
+                                            $evalLockedState = $isEvaluasiAkhirLocked || $isWaitingForStart || $isEventEnded;
+                                        @endphp
+                                        <div class="py-3.5 first:pt-0 last:pb-0 flex items-center justify-between gap-4">
+                                            <div class="min-w-0">
+                                                <p class="text-sm font-semibold {{ $evalLockedState && !$isEvaluasiAkhirCompleted ? 'text-slate-400' : 'text-slate-800' }} leading-snug">
+                                                    {{ $reqStepNo }}. {{ $isCbtPostTest ? 'Evaluasi Akhir Komprehensif' : 'Evaluasi / Tugas Akhir' }}
+                                                </p>
+                                                <p class="text-xs text-slate-500 leading-relaxed mt-0.5">{{ $isCbtPostTest ? 'Lulus nilai minimal KKM: ' . data_get($evaluasiAkhir, 'passing_score', 0) : 'Selesaikan penugasan akhir pelatihan' }}</p>
+                                            </div>
+                                            <div class="shrink-0">
+                                                @if ($isEvaluasiAkhirCompleted)
+                                                    <span class="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-600">
+                                                        <i class="fas fa-check-circle text-xs"></i> Selesai
+                                                    </span>
+                                                @elseif ($evalLockedState)
+                                                    <span class="inline-flex items-center gap-1.5 text-xs font-medium text-slate-400" title="Selesaikan materi terlebih dahulu">
+                                                        <i class="fas fa-lock text-[11px]"></i> Terkunci
+                                                    </span>
+                                                @else
+                                                    <a href="{{ route('user.course.test.show', ['slug' => $courseSlug, 'postTestId' => $evaluasiAkhir->id]) }}"
+                                                        class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-md text-xs font-bold text-white bg-[#13416B] hover:bg-[#0f3354] transition-colors whitespace-nowrap">
+                                                        <span>{{ $isCbtPostTest ? 'Kerjakan' : 'Kumpulkan' }}</span>
+                                                        <i class="fas fa-chevron-right text-[9px]"></i>
+                                                    </a>
+                                                @endif
+                                            </div>
                                         </div>
-                                    </div>
-                                @endif
+                                    @endif
+
+                                    {{-- 5. Evaluasi Narasumber & Penyelenggara (Khusus Bimtek) --}}
+                                    @if ($isBimtekEvent)
+                                        @php $reqStepNo++; @endphp
+                                        <div class="py-3.5 first:pt-0 last:pb-0 flex items-center justify-between gap-4">
+                                            <div class="min-w-0">
+                                                <p class="text-sm font-semibold leading-snug"
+                                                   :class="(!evalNarasumberDone && {{ $isEvaluasiNarasumberLocked ? 'true' : 'false' }}) ? 'text-slate-400' : 'text-slate-800'">
+                                                    {{ $reqStepNo }}. Evaluasi Narasumber &amp; Penyelenggaraan
+                                                </p>
+                                                <p class="text-xs text-slate-500 leading-relaxed mt-0.5">Kuesioner penilaian pengajar &amp; fasilitas bimtek</p>
+                                            </div>
+                                            <div class="shrink-0">
+                                                <template x-if="evalNarasumberDone">
+                                                    <span class="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-600">
+                                                        <i class="fas fa-check-circle text-xs"></i> Selesai
+                                                    </span>
+                                                </template>
+                                                <template x-if="!evalNarasumberDone && {{ $isEvaluasiNarasumberLocked ? 'true' : 'false' }}">
+                                                    <span class="inline-flex items-center gap-1.5 text-xs font-medium text-slate-400"
+                                                        title="{{ $evaluasiNarasumberLockReason }}">
+                                                        <i class="fas fa-lock text-[11px]"></i> Terkunci
+                                                    </span>
+                                                </template>
+                                                <template x-if="!evalNarasumberDone && !{{ $isEvaluasiNarasumberLocked ? 'true' : 'false' }}">
+                                                    <a href="{{ route('user.course.my-course.evaluasi-narasumber', ['slug' => $courseSlug]) }}"
+                                                        class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-md text-xs font-bold text-white bg-[#13416B] hover:bg-[#0f3354] transition-colors whitespace-nowrap">
+                                                        <span>Isi</span>
+                                                        <i class="fas fa-chevron-right text-[9px]"></i>
+                                                    </a>
+                                                </template>
+                                            </div>
+                                        </div>
+                                    @endif
                                 </div>
                             </div>
                         </div>
