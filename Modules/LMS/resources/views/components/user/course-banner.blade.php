@@ -2,7 +2,7 @@
     'illustration' => 'images/modul_ilustrasi.webp',
 ])
 
-<div class="relative bg-[#13416B] rounded-md p-6 sm:p-8 lg:p-10 mb-6 sm:mb-8 flex items-center justify-between border border-blue-900/20 shadow-lg overflow-hidden min-h-[280px] sm:min-h-[280px] lg:min-h-[320px]">
+<div class="relative bg-[#13416B] rounded-md px-5 py-7 sm:p-8 lg:p-10 mb-6 sm:mb-8 flex items-center justify-between border border-blue-900/20 shadow-lg overflow-hidden min-h-[200px] sm:min-h-[280px] lg:min-h-[320px]">
     <!-- Efek Dekoratif Bubbles Geometris Profesional -->
     <div class="absolute inset-0 pointer-events-none z-0">
         <div class="absolute -top-24 -right-16 w-80 h-80 border-[30px] border-white/5 rounded-full"></div>
@@ -15,16 +15,16 @@
 
     <!-- Sisi Kiri: Teks Utama -->
     <div class="relative z-20 w-full sm:w-[60%] lg:w-[60%] text-left">
-        <span class="inline-flex items-center gap-2 px-3 py-1 bg-white/10 backdrop-blur-md rounded-md text-sm sm:text-base tracking-wider text-white border border-white/10 mb-4 shadow-sm" style="font-family: 'Kalam', cursive;">
-            Ruang Belajar Pegawai
+        <span class="inline-flex items-center gap-2 px-2.5 py-0.5 sm:px-3 sm:py-1 bg-white/10 backdrop-blur-md rounded-md text-xs sm:text-base tracking-wider text-white border border-white/10 mb-2 sm:mb-4 shadow-sm" style="font-family: 'Kalam', cursive;">
+            Ruang Belajar Saya
         </span>
 
-        <h1 class="text-2xl md:text-3xl lg:text-4xl text-white mb-4" style="font-family: 'Oswald', sans-serif;">
-            Pelatihan & Pengembangan Kompetensi
+        <h1 class="text-xl sm:text-3xl md:text-4xl lg:text-5xl text-white mb-2 sm:mb-4" style="font-family: 'Oswald', sans-serif;">
+            Kursus Saya
         </h1>
 
-        <p class="text-sm md:text-base text-blue-100/90 leading-relaxed max-w-xl lg:max-w-2xl font-medium">
-            Selesaikan modul pelatihan Anda, ikuti evaluasi dengan baik, dan raih sertifikat kelulusan untuk mendukung perjalanan karier serta profesionalisme Anda.
+        <p class="text-xs sm:text-sm md:text-base text-blue-100/90 leading-relaxed max-w-xl lg:max-w-2xl font-medium">
+            Pantau progres pelatihan yang sedang Anda ikuti, selesaikan materi serta evaluasi tepat waktu, dan unduh e-Sertifikat setelah dinyatakan lulus.
         </p>
     </div>
 
