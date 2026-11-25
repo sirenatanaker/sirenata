@@ -33,7 +33,7 @@ class CourseSeeder extends Seeder
                 'is_enrolled' => true,
                 'target_pct'  => 40,
                 'bimtek'      => [
-                    'batch_name'            => 'Bimtek Online Perencanaan Makro Angkatan I 2026',
+                    'batch_name'            => 'Gelombang 1 Nasional 2026',
                     'batch_code'            => 'PTK-MAKRO-2026-I',
                     'execution_type'        => 'online',
                     'status'                => 'ongoing',
@@ -58,7 +58,7 @@ class CourseSeeder extends Seeder
                 'is_enrolled' => true,
                 'target_pct'  => 20,
                 'bimtek'      => [
-                    'batch_name'            => 'Bimtek Pengukuran IPK Daerah Angkatan II',
+                    'batch_name'            => 'Gelombang 2 Sumatera 2026',
                     'batch_code'            => 'IPK-DAERAH-2026-II',
                     'execution_type'        => 'online',
                     'status'                => 'ongoing',
@@ -83,7 +83,7 @@ class CourseSeeder extends Seeder
                 'is_enrolled' => true,
                 'target_pct'  => 0,
                 'bimtek'      => [
-                    'batch_name'            => 'Bimtek Sistem Merit & Manajemen Talenta ASN 2026',
+                    'batch_name'            => 'Gelombang 1 Nasional 2026',
                     'batch_code'            => 'MERIT-ASN-2026',
                     'execution_type'        => 'online',
                     'status'                => 'open_registration',
@@ -108,7 +108,7 @@ class CourseSeeder extends Seeder
                 'is_enrolled' => true,
                 'target_pct'  => 100, // Selesai / Lulus
                 'bimtek'      => [
-                    'batch_name'            => 'Bimtek Pengawasan Ketenagakerjaan & K3 Sektoral 2026',
+                    'batch_name'            => 'Gelombang 1 Jawa 2026',
                     'batch_code'            => 'AUDIT-K3-2026-I',
                     'execution_type'        => 'online',
                     'status'                => 'completed',
@@ -137,7 +137,7 @@ class CourseSeeder extends Seeder
                 'description' => 'Metodologi identifikasi gap kompetensi dan perencanaan diklat pegawai berbasis kebutuhan riil industri dan standar kompetensi kerja.',
                 'is_enrolled' => false,
                 'bimtek'      => [
-                    'batch_name'            => 'Bimtek AKPK Berbasis SKKNI Gelombang 1',
+                    'batch_name'            => 'Gelombang 1 Sumatera 2026',
                     'batch_code'            => 'AKPK-B1-2026',
                     'execution_type'        => 'online',
                     'status'                => 'open_registration',
@@ -161,7 +161,7 @@ class CourseSeeder extends Seeder
                 'description' => 'Panduan perumusan dokumen rencana tenaga kerja daerah provinsi dan kab/kota berdasar analisis data demografi dan tren investasi lokal.',
                 'is_enrolled' => false,
                 'bimtek'      => [
-                    'batch_name'            => 'Bimtek Penyusunan RTK Provinsi & Kabupaten/Kota 2026',
+                    'batch_name'            => 'Gelombang 1 Jawa 2026',
                     'batch_code'            => 'RTKD-2026-I',
                     'execution_type'        => 'online',
                     'status'                => 'open_registration',
@@ -185,7 +185,7 @@ class CourseSeeder extends Seeder
                 'description' => 'Standar implementasi, pengawasan keselamatan kerja, audit kepatuhan SMK3, serta mitigasi risiko bahaya di lingkungan kerja.',
                 'is_enrolled' => false,
                 'bimtek'      => [
-                    'batch_name'            => 'Bimtek Auditor Internal SMK3 Angkatan III',
+                    'batch_name'            => 'Gelombang 3 Kalimantan 2026',
                     'batch_code'            => 'SMK3-A3-2026',
                     'execution_type'        => 'online',
                     'status'                => 'open_registration',
@@ -209,7 +209,7 @@ class CourseSeeder extends Seeder
                 'description' => 'Strategi pemanfaatan ekosistem platform pasar kerja daring guna mempertemukan pasokan pencari kerja dan lowongan industri secara presisi.',
                 'is_enrolled' => false,
                 'bimtek'      => [
-                    'batch_name'            => 'Bimtek Penguatan Layanan Digital Bursa Kerja 2026',
+                    'batch_name'            => 'Gelombang 1 Nasional 2026',
                     'batch_code'            => 'SIPKERJA-2026',
                     'execution_type'        => 'online',
                     'status'                => 'open_registration',
@@ -233,7 +233,7 @@ class CourseSeeder extends Seeder
                 'description' => 'Tinjauan yuridis regulasi ketenagakerjaan terkini, perikatan Perjanjian Kerja Bersama (PKB), dan teknik pencegahan perselisihan industrial.',
                 'is_enrolled' => false,
                 'bimtek'      => [
-                    'batch_name'            => 'Bimtek Mediasi & Penyelesaian Perselisihan Kerja Gelombang 2',
+                    'batch_name'            => 'Gelombang 2 Sulawesi 2026',
                     'batch_code'            => 'HKM-HI-B2',
                     'execution_type'        => 'online',
                     'status'                => 'open_registration',
@@ -257,7 +257,7 @@ class CourseSeeder extends Seeder
                 'description' => 'Mekanisme penempatan, perlindungan hukum, dan jaminan sosial bagi tenaga kerja Indonesia di luar negeri sesuai mandat UU No. 18 Tahun 2017.',
                 'is_enrolled' => false,
                 'bimtek'      => [
-                    'batch_name'            => 'Bimtek Penguatan Layanan Terpadu Satu Atap (LTSA) PPMI',
+                    'batch_name'            => 'Gelombang 1 Nasional 2026',
                     'batch_code'            => 'PPMI-LTSA-2026',
                     'execution_type'        => 'online',
                     'status'                => 'open_registration',
@@ -283,7 +283,7 @@ class CourseSeeder extends Seeder
                 'description' => 'Konsep dan teknik pengukuran efisiensi jam kerja, Total Factor Productivity (TFP), dan strategi peningkatan daya saing SDM berstandar global.',
                 'is_enrolled' => false,
                 'bimtek'      => [
-                    'batch_name'            => 'Bimtek Pengukuran Produktivitas Nasional Gelombang 1',
+                    'batch_name'            => 'Gelombang 1 Nasional 2026',
                     'batch_code'            => 'PROD-NAS-2026-I',
                     'execution_type'        => 'online',
                     'status'                => 'ongoing',
@@ -307,7 +307,7 @@ class CourseSeeder extends Seeder
                 'description' => 'Pengolahan dan pemodelan data analitik pasar kerja skala besar untuk perumusan intervensi kebijakan ketenagakerjaan berbasis bukti.',
                 'is_enrolled' => false,
                 'bimtek'      => [
-                    'batch_name'            => 'Bimtek Analitik Big Data Ketenagakerjaan Gelombang 1',
+                    'batch_name'            => 'Gelombang 1 Jawa 2026',
                     'batch_code'            => 'BIGDATA-2026-I',
                     'execution_type'        => 'online',
                     'status'                => 'ongoing',
@@ -331,7 +331,7 @@ class CourseSeeder extends Seeder
                 'description' => 'Prosedur investigasi akar penyebab (root cause analysis) insiden kerja serta tata cara rekayasa ergonomi stasiun kerja ramah operator.',
                 'is_enrolled' => false,
                 'bimtek'      => [
-                    'batch_name'            => 'Bimtek Investigasi Kecelakaan Kerja & Ergonomi Gelombang 1',
+                    'batch_name'            => 'Gelombang 1 Sumatera 2026',
                     'batch_code'            => 'IKK-ERGO-2026-I',
                     'execution_type'        => 'online',
                     'status'                => 'ongoing',
@@ -353,8 +353,28 @@ class CourseSeeder extends Seeder
                 'name'        => 'Metodologi Analisis Pasar Kerja & Proyeksi Pengangguran',
                 'category'    => 'Perkiraan',
                 'description' => 'Teknik pemodelan ekonometrika proyeksi penyerapan tenaga kerja sektoral, rasio elastisitas kesempatan kerja, dan estimasi angka TPT.',
-                'is_enrolled' => false,
-                'bimtek'      => null,
+                'is_enrolled' => true,
+                'target_pct'  => 75,
+                'bimtek'      => [
+                    'batch_name'            => 'Gelombang 1 Sulawesi 2026',
+                    'batch_code'            => 'PASAR-KERJA-2026-I',
+                    'execution_type'        => 'online',
+                    'status'                => 'ongoing',
+                    'start_date'            => now()->subDays(12)->setTime(8, 30),
+                    'end_date'              => now()->subDays(1)->setTime(16, 0),
+                    'registration_start_at' => now()->subDays(22)->setTime(8, 0),
+                    'registration_end_at'   => now()->subDays(13)->setTime(23, 59),
+                    'assessment_start_at'   => now()->subDays(1)->setTime(16, 1),
+                    'assessment_end_at'     => now()->addDays(4)->setTime(23, 59),
+                    'zoom_url'              => 'https://zoom.us/j/4447778881',
+                    'zoom_meeting_id'       => '444 7778 8810',
+                    'zoom_passcode'         => 'PASAR2026',
+                    'zoom_attendance_code'  => 'PK2026',
+                    'zoom_scheduled_at'     => now()->subDays(5)->setTime(9, 0),
+                    'zoom_end_at'           => now()->subDays(5)->setTime(12, 0),
+                    'quota'                 => 80,
+                    'description'           => 'Pelatihan pemodelan proyeksi pasar kerja dan evaluasi akhir penyusunan dokumen analisis ketenagakerjaan.',
+                ],
             ],
             [
                 'name'        => 'Kebijakan Pengupahan dan Struktur Skala Upah (SUSU)',

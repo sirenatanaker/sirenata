@@ -25,7 +25,7 @@ class CategoryService
         return Category::withCount([
             'courses' => function ($query) use ($enrolledCourseIds) {
                 $query->whereNotIn('id', $enrolledCourseIds)
-                    ->whereHas('bimtekEvents', fn($b) => $b->whereIn('status', ['open_registration', 'ongoing']));
+                    ->whereHas('bimtekEvents', fn($b) => $b->notCompleted());
             },
         ])->orderBy('name', 'asc')->get();
     }

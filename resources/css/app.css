@@ -5,6 +5,7 @@
 @source '../../storage/framework/views/*.php';
 @source '../**/*.blade.php';
 @source '../../Modules/**/*.blade.php';
+@source '../../Modules/LMS/app/Models/BimtekEvent.php';
 @source '../**/*.js';
 
 @custom-variant dark (&:where(.dark, .dark *));

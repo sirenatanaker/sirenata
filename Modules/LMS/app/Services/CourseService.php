@@ -367,15 +367,26 @@ class CourseService
                     $bimtekEvent = $course->bimtekEvents()->latest()->first();
                 }
 
+                // Tentukan fase timeline event bimtek jika ada
+                $curPhase = $bimtekEvent ? ($bimtekEvent->current_timeline_phase ?? []) : [];
+                $phaseKey = $bimtekEvent ? ($curPhase['phase'] ?? 'learning') : null;
+
+                $isUserCompleted = ($progress >= 100 || $course->pivot->status === 'completed');
+                $isEventCompleted = ($bimtekEvent && $phaseKey === 'completed');
+
                 // Penentuan Tab Status:
-                // 1. finish: progress >= 100 atau status pivot 'completed'
-                // 2. progress: belum selesai (kursus sedang berjalan / aktif)
-                if ($progress >= 100 || $course->pivot->status === 'completed') {
+                // 1. finish (Selesai): peserta sudah tuntas (100% / completed) atau periode event sudah berakhir
+                // 2. progress (Sedang Berlangsung): khusus periode pelaksanaan (learning) dan periode evaluasi (assessment)
+                // 3. upcoming: masih masa pendaftaran / belum masuk periode pelaksanaan
+                if ($isUserCompleted || $isEventCompleted) {
                     $tabStatus = 'finish';
-                    $computedStatus = 'completed';
-                } else {
+                    $computedStatus = $isUserCompleted ? 'completed' : ($progress > 0 ? 'in_progress' : 'enrolled');
+                } elseif (!$bimtekEvent || in_array($phaseKey, ['learning', 'assessment'], true)) {
                     $tabStatus = 'progress';
                     $computedStatus = $progress > 0 ? 'in_progress' : 'enrolled';
+                } else {
+                    $tabStatus = 'upcoming';
+                    $computedStatus = 'enrolled';
                 }
 
                 $thumbnailUrl = $course->thumbnail
@@ -1424,13 +1435,15 @@ class CourseService
         $now = now();
 
         $waveFilter = match ($waveStatus) {
-            'open_registration' => fn($q) => $q->where('status', 'open_registration')
+            'open_registration' => fn($q) => $q->notCompleted($now)
+                ->where('status', 'open_registration')
                 ->where(fn($sub) => $sub->whereNull('start_date')->orWhere('start_date', '>', $now)),
-            'ongoing' => fn($q) => $q->where(fn($sub) => $sub->where('status', 'ongoing')
-                ->orWhere(fn($sub2) => $sub2->where('status', 'open_registration')
-                    ->whereNotNull('start_date')
-                    ->where('start_date', '<=', $now))),
-            default => fn($q) => $q->whereIn('status', ['open_registration', 'ongoing']),
+            'ongoing' => fn($q) => $q->notCompleted($now)
+                ->where(fn($sub) => $sub->where('status', 'ongoing')
+                    ->orWhere(fn($sub2) => $sub2->where('status', 'open_registration')
+                        ->whereNotNull('start_date')
+                        ->where('start_date', '<=', $now))),
+            default => fn($q) => $q->notCompleted($now),
         };
 
         $query = Course::with([

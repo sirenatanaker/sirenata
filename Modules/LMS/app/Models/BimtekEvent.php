@@ -62,6 +62,74 @@ class BimtekEvent extends Model
         return is_null($this->quota) || $this->quota <= 0;
     }
 
+    /**
+     * Scope event yang masih aktif (belum selesai secara status maupun melewati batas akhir evaluasi/pelaksanaan).
+     */
+    public function scopeNotCompleted($query, $now = null)
+    {
+        $now = $now ? \Carbon\Carbon::parse($now) : now();
+
+        return $query->whereIn('status', ['open_registration', 'ongoing'])
+            ->where(function ($sub) use ($now) {
+                $sub->where(function ($s1) use ($now) {
+                    $s1->whereNotNull('assessment_end_at')
+                        ->where('assessment_end_at', '>=', $now);
+                })->orWhere(function ($s2) use ($now) {
+                    $s2->whereNull('assessment_end_at')
+                        ->where(function ($s3) use ($now) {
+                            $s3->whereNull('end_date')
+                                ->orWhere('end_date', '>=', $now->copy()->subDays(3));
+                        });
+                });
+            });
+    }
+
+    /**
+     * Subjudul standar kartu gelombang: "Gelombang [nomor] [wilayah] [tahun]"
+     */
+    public function getFormattedWaveSubtitleAttribute(): string
+    {
+        $rawName = trim((string) ($this->batch_name ?? ''));
+        $rawCode = trim((string) ($this->batch_code ?? ''));
+        $rawLoc  = trim((string) ($this->location_name ?? ''));
+
+        $romanToInt = [
+            'I' => 1, 'II' => 2, 'III' => 3, 'IV' => 4, 'V' => 5,
+            'VI' => 6, 'VII' => 7, 'VIII' => 8, 'IX' => 9, 'X' => 10,
+        ];
+
+        // 1. Nomor gelombang
+        $waveNumber = 1;
+        if (preg_match('/\b(?:Gelombang|Batch|Angkatan)\s+([0-9]+|[IVX]+)\b/i', $rawName, $m)) {
+            $token = strtoupper($m[1]);
+            $waveNumber = is_numeric($token) ? (int) $token : ($romanToInt[$token] ?? 1);
+        } elseif (preg_match('/(?:[-_](?:B|A|G)([0-9]+)|[-_](I{1,3}|IV|VI{0,3}|IX|X))$/i', $rawCode, $m)) {
+            $token = strtoupper(!empty($m[1]) ? $m[1] : $m[2]);
+            $waveNumber = is_numeric($token) ? (int) $token : ($romanToInt[$token] ?? 1);
+        }
+
+        // 2. Wilayah (ambil dari location_name jika ada, atau deteksi dari batch_name, default Nasional)
+        $region = 'Nasional';
+        if ($rawLoc !== '') {
+            $region = $rawLoc;
+        } elseif (preg_match('/\b(Sumatera|Sumatra|Jawa|Kalimantan|Sulawesi|Papua|Bali|Maluku|Nusa Tenggara|Aceh|Jakarta|Bandung|Surabaya|Medan|Makassar|Yogyakarta|Semarang|Nasional)\b/i', $rawName, $m)) {
+            $matched = strtolower($m[1]);
+            $region = $matched === 'sumatra' ? 'Sumatera' : ucwords($matched);
+        }
+
+        // 3. Tahun
+        $year = null;
+        if (preg_match('/\b(20\d{2})\b/', $rawName, $m)) {
+            $year = $m[1];
+        } elseif ($this->start_date) {
+            $year = $this->start_date->format('Y');
+        } else {
+            $year = now()->format('Y');
+        }
+
+        return "Gelombang {$waveNumber} {$region} {$year}";
+    }
+
     public function course(): BelongsTo
     {
         return $this->belongsTo(Course::class, 'course_id');
@@ -205,7 +273,20 @@ class BimtekEvent extends Model
             ];
         }
 
-        if ($this->status === 'ongoing' || ($execStart && $execEnd && $now->between($execStart, $execEnd))) {
+        if ($evalStart && $evalEnd && $now->between($evalStart, $evalEnd)) {
+            return [
+                'phase'      => 'assessment',
+                'step'       => 3,
+                'label'      => 'Evaluasi & Sertifikasi',
+                'badge'      => 'Masa Evaluasi',
+                'badge_bg'   => 'bg-teal-600',
+                'icon'       => 'fa-clock',
+                'date_range' => $evalStart->translatedFormat('d M') . ' - ' . $evalEnd->translatedFormat('d M Y'),
+                'is_active'  => true,
+            ];
+        }
+
+        if (($execStart && $execEnd && $now->between($execStart, $execEnd)) || $this->status === 'ongoing') {
             return [
                 'phase'      => 'learning',
                 'step'       => 2,
@@ -227,19 +308,6 @@ class BimtekEvent extends Model
                 'badge_bg'   => 'bg-[#0B5CFF]',
                 'icon'       => 'fa-clock',
                 'date_range' => $regStart->translatedFormat('d M') . ' - ' . $regEnd->translatedFormat('d M Y'),
-                'is_active'  => true,
-            ];
-        }
-
-        if ($evalStart && $evalEnd && $now->between($evalStart, $evalEnd)) {
-            return [
-                'phase'      => 'assessment',
-                'step'       => 3,
-                'label'      => 'Evaluasi & Sertifikasi',
-                'badge'      => 'Masa Evaluasi',
-                'badge_bg'   => 'bg-purple-600',
-                'icon'       => 'fa-clock',
-                'date_range' => $evalStart->translatedFormat('d M') . ' - ' . $evalEnd->translatedFormat('d M Y'),
                 'is_active'  => true,
             ];
         }
@@ -290,7 +358,7 @@ class BimtekEvent extends Model
             ],
             [
                 'step'        => 2,
-                'title'       => 'Pembelajaran Mandiri & Live Zoom',
+                'title'       => 'Pelaksanaan',
                 'subtitle'    => 'Pelajari materi topik di LMS dan ikuti tatap muka virtual Zoom interaktif',
                 'icon'        => 'fa-video',
                 'start_date'  => $execStart ? $execStart->translatedFormat('d M Y') : '-',
@@ -301,7 +369,7 @@ class BimtekEvent extends Model
             ],
             [
                 'step'        => 3,
-                'title'       => 'Evaluasi Akhir & Sertifikasi',
+                'title'       => 'Evaluasi Akhir',
                 'subtitle'    => 'Pengerjaan evaluasi akhir dan proses penerbitan e-Sertifikat resmi',
                 'icon'        => 'fa-award',
                 'start_date'  => $evalStart ? $evalStart->translatedFormat('d M Y') : '-',
