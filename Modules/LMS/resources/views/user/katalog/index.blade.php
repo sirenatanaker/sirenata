@@ -264,7 +264,7 @@
                                         <div class="w-10 h-1 bg-white/30 rounded-full"></div>
                                     </div>
 
-                                    <div class="px-5 sm:px-6 pt-3.5 sm:pt-5 pb-5 sm:pb-6">
+                                    <div class="px-5 sm:px-6 pt-4 sm:pt-5 pb-7 sm:pb-8">
                                         <div class="flex items-start justify-between gap-3.5 sm:gap-4">
                                             <div class="flex-1 min-w-0">
                                                 <template x-if="selected.isEvent && selected.bimtekBatchName">
@@ -289,7 +289,7 @@
 
                                 {{-- Tab Navigasi Konteks: Timeline & Jadwal vs Struktur Kurikulum --}}
                                 <template x-if="selected.isEvent && selected.timelineSteps && selected.timelineSteps.length > 0">
-                                    <div class="bg-white border-b border-slate-200 px-5 sm:px-6 shrink-0" role="tablist">
+                                    <div class="bg-white border-b border-slate-200 px-5 sm:px-6 pt-1.5 sm:pt-2 shrink-0" role="tablist">
                                         <div class="flex items-center gap-5 sm:gap-6 -mb-px">
                                             <button type="button"
                                                     role="tab"
@@ -505,13 +505,13 @@
                                 </div>
 
                                 {{-- Footer Modal: Aksi --}}
-                                <div class="px-4 sm:px-6 py-3 sm:py-4 border-t border-slate-100 bg-white shrink-0">
+                                <div class="px-5 sm:px-6 py-3.5 sm:py-4 border-t border-slate-100 bg-white shrink-0">
                                     {{-- KONDISI 1: SEDANG BERLANGSUNG / MENUNGGU BATCH BERIKUTNYA --}}
                                     <template x-if="selected.isEvent && !selected.isEnrolledInThisBimtek && (!selected.isRegistrationOpen || selected.bimtekStatus !== 'open_registration')">
                                         <div class="flex items-center justify-end w-full">
                                             <button type="button" disabled
-                                                    class="w-full sm:w-auto px-4 py-2 sm:py-2.5 text-sm sm:text-[15px] font-semibold rounded-md text-slate-400 bg-slate-100 border border-slate-200 cursor-not-allowed inline-flex items-center justify-center gap-1.5 shadow-none">
-                                                <i class="fas fa-lock text-xs"></i>
+                                                    class="px-4 py-2 sm:py-2.5 text-xs sm:text-[15px] font-semibold rounded-md text-slate-400 bg-slate-100 border border-slate-200 cursor-not-allowed inline-flex items-center justify-center gap-1.5 shadow-none">
+                                                <i class="fas fa-lock text-[10px] sm:text-xs"></i>
                                                 <span class="truncate">Pendaftaran Ditutup</span>
                                             </button>
                                         </div>
@@ -520,15 +520,15 @@
                                     {{-- KONDISI 2: SUDAH TERDAFTAR --}}
                                     <template x-if="selected.isEvent && selected.isEnrolledInThisBimtek">
                                         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2.5 sm:gap-3">
-                                            <div class="text-sm sm:text-[15px] text-emerald-700 font-semibold text-center sm:text-left flex items-center justify-center sm:justify-start gap-1.5">
+                                            <div class="text-xs sm:text-[15px] text-emerald-700 font-semibold text-left flex items-center justify-start gap-1.5">
                                                 <i class="fas fa-check-circle text-emerald-600"></i>
                                                 <span>Anda telah terdaftar pada gelombang ini.</span>
                                             </div>
                                             <div class="flex items-center justify-end w-full sm:w-auto shrink-0">
                                                 <a :href="selected.myCourseUrl"
-                                                   class="w-full sm:w-auto px-5 py-2 sm:py-2.5 text-sm sm:text-[15px] font-semibold rounded-md text-white bg-emerald-600 hover:bg-emerald-700 shadow-sm transition-all inline-flex items-center justify-center gap-1.5 text-center">
+                                                   class="px-4 sm:px-5 py-2 sm:py-2.5 text-xs sm:text-[15px] font-semibold rounded-md text-white bg-emerald-600 hover:bg-emerald-700 shadow-sm transition-all inline-flex items-center justify-center gap-1.5 text-center">
                                                     <span>Masuk Pelatihan</span>
-                                                    <i class="fas fa-arrow-up-right-from-square text-xs"></i>
+                                                    <i class="fas fa-arrow-up-right-from-square text-[10px] sm:text-xs"></i>
                                                 </a>
                                             </div>
                                         </div>
@@ -537,14 +537,14 @@
                                     {{-- KONDISI 3: BISA DAFTAR (OPEN REGISTRATION / MANDIRI) --}}
                                     <template x-if="(!selected.isEvent) || (selected.isEvent && !selected.isEnrolledInThisBimtek && selected.isRegistrationOpen && selected.bimtekStatus === 'open_registration')">
                                         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2.5 sm:gap-3">
-                                            <p class="text-sm sm:text-[15px] text-slate-600 font-medium text-center sm:text-left">
+                                            <p class="text-xs sm:text-[15px] text-slate-600 font-medium text-left">
                                                 <span x-text="selected.isEvent ? 'Tertarik mengikuti pelatihan ini? Pendaftaran masih dibuka.' : 'Apakah Anda ingin mendaftar kursus ini?'"></span>
                                             </p>
                                             <div class="flex items-center justify-end w-full sm:w-auto shrink-0">
                                                 <button type="button" @click="confirmOpen = true"
-                                                        class="w-full sm:w-auto px-5 py-2 sm:py-2.5 text-sm sm:text-[15px] font-semibold rounded-md text-white bg-amber-500 hover:bg-amber-600 shadow-sm transition-all inline-flex items-center justify-center gap-1.5 text-center cursor-pointer">
+                                                        class="px-5 py-2 sm:py-2.5 text-xs sm:text-[15px] font-semibold rounded-md text-white bg-amber-500 hover:bg-amber-600 shadow-sm transition-all inline-flex items-center justify-center gap-1.5 text-center cursor-pointer">
                                                     <span>Daftar</span>
-                                                    <i class="fas fa-arrow-up-right-from-square text-xs"></i>
+                                                    <i class="fas fa-arrow-up-right-from-square text-[10px] sm:text-xs"></i>
                                                 </button>
                                             </div>
                                         </div>
