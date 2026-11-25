@@ -214,12 +214,12 @@
                             <ul class="pt-1.5 space-y-1.5 list-disc pl-4 text-xs sm:text-[13px] text-slate-600 leading-relaxed marker:text-slate-400">
                                 @if ($formattedPeriod)
                                     <li>
-                                        Periode pelaksanaan berlangsung pada <span class="font-bold text-slate-800">{{ $formattedPeriod }}</span>@if ($isExecPeriodActive) <span class="font-semibold text-emerald-600">(sedang berlangsung)</span>@elseif ($execEndObj && $now->greaterThan($execEndObj)) <span class="text-slate-400">(telah selesai)</span>@elseif ($execStartObj && $now->lessThan($execStartObj)) <span class="text-slate-400">(menunggu jadwal)</span>@endif.
+                                        Periode pelaksanaan berlangsung pada <span class="font-bold text-slate-800">{{ $formattedPeriod }} </span>@if ($isExecPeriodActive)&nbsp;<span class="font-semibold text-emerald-600">(sedang berlangsung)</span>@elseif ($execEndObj && $now->greaterThan($execEndObj))&nbsp;<span class="text-slate-400">(telah selesai)</span>@elseif ($execStartObj && $now->lessThan($execStartObj))&nbsp;<span class="text-slate-400">(menunggu jadwal)</span>@endif.
                                     </li>
                                 @endif
                                 @if ($formattedEvaluationPeriod)
                                     <li>
-                                        Periode evaluasi berlangsung pada <span class="font-bold text-slate-800">{{ $formattedEvaluationPeriod }}</span>@if ($isEvalPeriodActive) <span class="font-semibold text-emerald-600">(sedang berlangsung)</span>@elseif ($evalEndObj && $now->greaterThan($evalEndObj)) <span class="text-slate-400">(telah selesai)</span>@elseif ($evalStartObj && $now->lessThan($evalStartObj)) <span class="text-slate-400">(menunggu jadwal)</span>@endif.
+                                        Periode evaluasi berlangsung pada <span class="font-bold text-slate-800">{{ $formattedEvaluationPeriod }} </span>@if ($isEvalPeriodActive)&nbsp;<span class="font-semibold text-emerald-600">(sedang berlangsung)</span>@elseif ($evalEndObj && $now->greaterThan($evalEndObj))&nbsp;<span class="text-slate-400">(telah selesai)</span>@elseif ($evalStartObj && $now->lessThan($evalStartObj))&nbsp;<span class="text-slate-400">(menunggu jadwal)</span>@endif.
                                     </li>
                                 @endif
                             </ul>
