@@ -202,8 +202,8 @@
                     <div class="w-12 h-12 bg-white border border-slate-200 rounded-md flex items-center justify-center mx-auto mb-3 text-slate-400">
                         <i class="fas fa-calendar-xmark text-lg"></i>
                     </div>
-                    <p class="text-sm font-semibold text-slate-700">Tidak Ada Jadwal Pelatihan</p>
-                    <p class="text-xs text-slate-500 mt-1">Ubah filter status atau jelajahi katalog untuk mengikuti gelombang pelatihan.</p>
+                    <p class="text-sm font-semibold text-slate-700">Belum Ada Pelatihan Terdaftar</p>
+                    <p class="text-xs text-slate-500 mt-1">Anda belum mendaftar pada gelombang pelatihan atau tidak ada pelatihan dengan status tersebut. Jelajahi katalog untuk mulai mendaftar.</p>
                 </div>
             </div>
         </section>
@@ -728,7 +728,7 @@
                     function render() {
                         const todayMs = parseIsoDate(data.today);
                         const allEvents = Array.isArray(data.events) ? data.events : Object.values(data.events || {});
-                        const baseEvents = data.has_enrolled ? allEvents.filter((ev) => ev.is_enrolled) : allEvents;
+                        const baseEvents = allEvents.filter((ev) => ev.is_enrolled);
                         const filtered = baseEvents.filter((ev) => {
                             const st = resolveDisplayStatus(ev, todayMs);
                             if (currentStatus !== 'all' && st.key !== currentStatus) return false;

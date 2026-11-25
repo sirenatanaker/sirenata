@@ -260,8 +260,9 @@ class UserDashboardService
                     }
                 }
 
-                // 4. Gantt Chart Jadwal Event untuk User (tahun berjalan + event yang diikuti)
+                // 4. Gantt Chart Jadwal Pelatihan Terdaftar (khusus kursus / event yang benar-benar diikuti user)
                 $ganttEvents = [];
+                $seenGanttCourseIds = [];
                 foreach ($allYearEvents as $ev) {
                     $course = $ev->course;
                     if (!$course) {
@@ -270,6 +271,14 @@ class UserDashboardService
 
                     $enr = $enrollByEventId->get($ev->id) ?? $enrollByCourseId->get($ev->course_id);
                     $isEnrolled = $enr !== null && ($enr->bimtek_event_id === $ev->id || $enr->bimtek_event_id === null);
+                    if (!$isEnrolled) {
+                        continue;
+                    }
+                    if ($enr->bimtek_event_id === null && isset($seenGanttCourseIds[$ev->course_id])) {
+                        continue;
+                    }
+                    $seenGanttCourseIds[$ev->course_id] = true;
+
                     $meta = $resolveEventMeta($ev);
 
                     $regStart  = $ev->registration_start_at ?? $ev->start_date?->copy()->subDays(7);
@@ -285,14 +294,14 @@ class UserDashboardService
 
                     $ganttEvents[] = [
                         'id'              => $ev->id,
-                        'batch_name'      => $ev->batch_name,
+                        'batch_name'      => preg_replace('/\bbatch\b/i', 'Gelombang', (string) $ev->batch_name),
                         'course_name'     => $course->name,
                         'status_key'      => $meta['status_key'],
                         'status_label'    => $meta['status_label'],
-                        'is_enrolled'     => $isEnrolled,
-                        'user_progress'   => $isEnrolled ? (int) ($enr->progress ?? 0) : 0,
-                        'user_completed'  => $isEnrolled && ($enr->status === 'completed' || (int) ($enr->progress ?? 0) >= 100),
-                        'is_certified'    => $isEnrolled && (!empty($enr->official_cert_number) || !empty($enr->certificate_file)),
+                        'is_enrolled'     => true,
+                        'user_progress'   => (int) ($enr->progress ?? 0),
+                        'user_completed'  => ($enr->status === 'completed' || (int) ($enr->progress ?? 0) >= 100),
+                        'is_certified'    => (!empty($enr->official_cert_number) || !empty($enr->certificate_file)),
                         'next_zoom_label' => $meta['next_zoom'],
                         'reg_start'       => $regStart?->format('Y-m-d'),
                         'reg_end'         => $regEnd?->format('Y-m-d'),
@@ -304,14 +313,12 @@ class UserDashboardService
                         'eval_end'        => $evalEnd?->format('Y-m-d'),
                         'eval_label'      => $fmtRange($evalStart, $evalEnd),
                         'sort_date'       => $execStart?->format('Y-m-d') ?? $regStart?->format('Y-m-d') ?? '9999-12-31',
-                        'url'             => $isEnrolled
-                            ? route('user.course.my-course.detail', $course->slug)
-                            : route('user.catalog.index', ['search' => $course->name]),
+                        'url'             => route('user.course.my-course.detail', $course->slug),
                     ];
                 }
 
                 $ganttEvents = collect($ganttEvents)->sortBy('sort_date')->values()->all();
-                $hasEnrolledInGantt = collect($ganttEvents)->contains('is_enrolled', true);
+                $hasEnrolledInGantt = !empty($ganttEvents);
 
                 $userEventGantt = [
                     'year'         => $currentYear,
