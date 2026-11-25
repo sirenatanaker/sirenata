@@ -54,7 +54,7 @@
 
        
         <div>
-            {{-- HEADER DAFTAR KURSUS & FILTER STATUS GELOMBANG --}}
+            {{-- TAB FILTER STATUS GELOMBANG (SELARAS DENGAN KURSUS SAYA) --}}
             @php
                 $activeWaveStatus = $waveStatus ?? request('status', 'all');
                 if (!in_array($activeWaveStatus, ['all', 'open_registration', 'ongoing'], true)) {
@@ -62,7 +62,7 @@
                 }
                 $statusOptions = [
                     'all' => [
-                        'label' => 'Semua Gelombang',
+                        'label' => 'Semua',
                         'url'   => route('user.catalog.index', request()->except(['page', 'status', 'type', 'categories'])),
                     ],
                     'open_registration' => [
@@ -74,87 +74,17 @@
                         'url'   => route('user.catalog.index', array_merge(request()->except(['page', 'type', 'categories']), ['status' => 'ongoing'])),
                     ],
                 ];
-                $isStatusFiltered = $activeWaveStatus !== 'all';
             @endphp
 
-            <div class="mb-5 sm:mb-6 border-b border-slate-200 pb-3.5 sm:pb-4">
-                {{-- Baris Atas: Judul & Tombol Filter (Sejajar di semua resolusi) --}}
-                <div class="flex flex-row items-center justify-between gap-3 sm:gap-4 {{ $isStatusFiltered ? 'mb-2.5 sm:mb-4' : 'mb-0' }}">
-                    {{-- Kiri: Teks --}}
-                    <div class="flex flex-col gap-0.5 sm:gap-1">
-                        <h2 class="text-base sm:text-xl font-extrabold text-slate-800 leading-tight">
-                            Jelajahi Program Pelatihan
-                        </h2>
-                        <p class="text-[11px] sm:text-sm font-medium text-slate-500">
-                            Ada <span class="text-[#13416B] font-bold">{{ $courses->total() }}</span> gelombang pelatihan yang tersedia.
-                        </p>
-                    </div>
-
-                    {{-- Kanan: Tombol Filter & Dropdown (Alpine.js) --}}
-                    <div x-data="{ openFilter: false }" class="relative z-30 shrink-0">
-                        <button type="button" @click="openFilter = !openFilter"
-                            class="flex items-center justify-center gap-1.5 sm:gap-2.5 px-3 py-1.5 sm:px-4 sm:py-2.5 bg-white border border-slate-300 rounded-md text-xs sm:text-sm font-semibold text-slate-700 hover:border-[#13416B]/50 hover:text-[#13416B] transition-all cursor-pointer"
-                            :class="{ 'border-[#13416B] text-[#13416B] ring-2 ring-[#13416B]/10': openFilter }">
-
-                            <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path>
-                            </svg>
-                            <span>Filter Kursus</span>
-
-                            @if($isStatusFiltered)
-                                <span class="flex items-center justify-center w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-amber-400 text-[9px] sm:text-2xs font-bold text-slate-900 ml-1">
-                                    1
-                                </span>
-                            @endif
-                        </button>
-
-                        {{-- Dropdown Menu --}}
-                        <div x-show="openFilter"
-                             @click.away="openFilter = false"
-                             x-transition:enter="transition ease-out duration-150"
-                             x-transition:enter-start="opacity-0 -translate-y-1"
-                             x-transition:enter-end="opacity-100 translate-y-0"
-                             x-transition:leave="transition ease-in duration-100"
-                             x-transition:leave-start="opacity-100 translate-y-0"
-                             x-transition:leave-end="opacity-0 -translate-y-1"
-                             class="absolute right-0 mt-2 w-[min(92vw,22rem)] bg-white rounded-md shadow-xl border border-slate-200 p-4 sm:p-5"
-                             style="display: none;">
-
-                            <div class="flex items-center justify-between mb-3.5">
-                                <h3 class="text-sm font-bold text-slate-800">Status Gelombang</h3>
-                                @if($isStatusFiltered)
-                                    <a href="{{ $statusOptions['all']['url'] }}" class="text-[11px] font-bold text-red-500 hover:text-red-700 hover:underline">Reset</a>
-                                @endif
-                            </div>
-
-                            <div class="flex flex-wrap gap-2">
-                                @foreach ($statusOptions as $key => $opt)
-                                    <a href="{{ $opt['url'] }}"
-                                       class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-[11px] sm:text-xs font-semibold transition-all {{ $activeWaveStatus === $key ? 'border-[#13416B] bg-[#13416B] text-white shadow-2xs' : 'border-slate-200 bg-white text-slate-600 hover:border-[#13416B]/40 hover:bg-slate-50' }}">
-                                        <span>{{ $opt['label'] }}</span>
-                                    </a>
-                                @endforeach
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                {{-- Chip Status Aktif --}}
-                @if($isStatusFiltered)
-                    <div class="flex flex-wrap items-center gap-2 mt-3 pt-3 border-t border-slate-100">
-                        <span class="text-xs text-slate-400 font-medium">Filter Status:</span>
-                        <a href="{{ $statusOptions['all']['url'] }}"
-                           class="inline-flex items-center gap-1.5 pl-2.5 pr-1.5 py-1 rounded-lg bg-[#13416B]/5 border border-[#13416B]/20 text-[11px] sm:text-xs font-semibold text-[#13416B] hover:bg-[#13416B]/10 transition-colors">
-                            {{ $statusOptions[$activeWaveStatus]['label'] }}
-                            <svg class="w-3 h-3 text-slate-400 hover:text-red-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12" />
-                            </svg>
+            <div class="mb-6 sm:mb-8 border-b border-slate-200 dark:border-slate-700/80">
+                <nav class="flex space-x-6 overflow-x-auto -mb-px">
+                    @foreach ($statusOptions as $key => $opt)
+                        <a href="{{ $opt['url'] }}"
+                           class="border-b-2 py-3 px-1 text-sm whitespace-nowrap transition-colors {{ $activeWaveStatus === $key ? 'border-[#13416B] text-[#13416B] dark:border-white dark:text-white font-bold' : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white hover:border-slate-300 dark:hover:border-slate-600 font-medium' }}">
+                            <span>{{ $opt['label'] }}{{ $activeWaveStatus === $key ? ' (' . $courses->total() . ')' : '' }}</span>
                         </a>
-                        <a href="{{ $statusOptions['all']['url'] }}" class="text-[11px] sm:text-xs font-semibold text-slate-400 hover:text-red-500 underline underline-offset-2 transition-colors ml-1">
-                            Hapus filter
-                        </a>
-                    </div>
-                @endif
+                    @endforeach
+                </nav>
             </div>
 
             {{-- ========================================== --}}
@@ -202,7 +132,7 @@
                         'isEvent'                => (bool) $activeB,
                         'isRegistrationOpen'     => $isRegistrationOpen,
                         'bimtekId'               => $activeB?->id,
-                        'bimtekBatchName'        => $activeB?->batch_name ? preg_replace('/\bbatch\b/i', 'Gelombang', $activeB->batch_name) : null,
+                        'bimtekBatchName'        => $activeB?->formatted_wave_subtitle,
                         'bimtekBatchCode'        => $activeB?->batch_code,
                         'bimtekStatus'           => $activeB?->status,
                         'bimtekStatusBadge'      => $activeB?->status_badge,
@@ -227,12 +157,23 @@
                     open: false,          // modal lihat kurikulum
                     confirmOpen: false,   // alert konfirmasi daftar
                     submitting: false,
+                    activeTab: 'timeline',
                     expandedSections: [0],
                     show(id) {
                         this.selected = this.courses[id];
-                        this.expandedSections = [0];
+                        this.activeTab = (this.selected && this.selected.isEvent && this.selected.timelineSteps && this.selected.timelineSteps.length > 0) ? 'timeline' : 'curriculum';
+                        this.expandedSections = (this.selected && this.selected.sections) ? this.selected.sections.map((_, i) => i) : [];
                         this.submitting = false;
                         this.open = true;
+                        this.$nextTick(() => {
+                            if (this.$refs.modalBody) this.$refs.modalBody.scrollTop = 0;
+                        });
+                    },
+                    setTab(tab) {
+                        this.activeTab = tab;
+                        this.$nextTick(() => {
+                            if (this.$refs.modalBody) this.$refs.modalBody.scrollTop = 0;
+                        });
                     },
                     askEnroll(id) {
                         const c = this.courses[id];
@@ -240,7 +181,7 @@
                             return;
                         }
                         this.selected = c;
-                        this.expandedSections = [0];
+                        this.expandedSections = (c && c.sections) ? c.sections.map((_, i) => i) : [];
                         this.submitting = false;
                         this.confirmOpen = true;
                     },
@@ -265,17 +206,6 @@
                             this.expandedSections.push(i);
                         }
                     },
-                    allExpanded() {
-                        return this.selected && this.selected.sections && this.selected.sections.length > 0 && this.expandedSections.length === this.selected.sections.length;
-                    },
-                    toggleAll() {
-                        if (!this.selected || !this.selected.sections) return;
-                        if (this.allExpanded()) {
-                            this.expandedSections = [];
-                        } else {
-                            this.expandedSections = this.selected.sections.map((_, i) => i);
-                        }
-                    },
                     topicLetter(index) {
                         const letters = 'abcdefghijklmnopqrstuvwxyz';
                         return letters[Number(index) % 26] ?? String(Number(index) + 1);
@@ -291,7 +221,7 @@
                         @endforeach
                     </div>
                 @else
-                    <div class="col-span-full flex flex-col items-center justify-center py-16 px-4 text-center bg-white rounded-2xl border border-dashed border-slate-200">
+                    <div class="col-span-full flex flex-col items-center justify-center py-16 px-4 text-center bg-white rounded-md border border-dashed border-slate-200">
                         <div class="w-16 h-16 bg-[#13416B]/5 rounded-full flex items-center justify-center mx-auto mb-4 border border-[#13416B]/10 text-[#13416B]/40">
                             <i class="fas fa-box-open text-2xl"></i>
                         </div>
@@ -322,61 +252,97 @@
                          x-transition:leave="transition ease-in duration-150"
                          x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
                          x-transition:leave-end="opacity-0 translate-y-6 sm:scale-95"
-                         class="relative w-full sm:max-w-xl md:max-w-2xl max-h-[92vh] sm:max-h-[85vh] flex flex-col bg-white rounded-t-2xl sm:rounded-2xl shadow-2xl border border-slate-100 overflow-hidden">
+                         class="relative w-full sm:max-w-xl md:max-w-2xl max-h-[92vh] sm:max-h-[85vh] flex flex-col bg-white rounded-t-md sm:rounded-md shadow-2xl ring-1 ring-slate-900/10 overflow-hidden">
 
                         <template x-if="selected">
                             <div class="flex flex-col min-h-0 flex-1">
 
-                                {{-- Drag handle bar untuk mobile --}}
-                                <div class="sm:hidden pt-2.5 pb-1 flex justify-center bg-white shrink-0">
-                                    <div class="w-10 h-1 bg-slate-200 rounded-full"></div>
-                                </div>
+                                {{-- Header Modal Biru: Drag Handle, Nama Event, Nama Kursus, Deskripsi & Close --}}
+                                <div class="bg-[#13416B] text-white shrink-0">
+                                    {{-- Drag handle bar untuk mobile --}}
+                                    <div class="sm:hidden pt-2.5 pb-1 flex justify-center">
+                                        <div class="w-10 h-1 bg-white/30 rounded-full"></div>
+                                    </div>
 
-                                {{-- Header Modal: Title, Meta & Close Button --}}
-                                <div class="px-5 sm:px-6 pt-4 sm:pt-5 pb-4 border-b border-slate-100 bg-white shrink-0">
-                                    <div class="flex items-start justify-between gap-3.5 sm:gap-4">
-                                        <div class="flex-1 min-w-0">
-                                            <template x-if="selected.isEvent && selected.bimtekBatchName">
-                                                <div class="flex items-center gap-2 text-xs sm:text-sm mb-1">
-                                                    <span class="font-semibold text-slate-600 text-xs sm:text-sm tracking-wide truncate" :title="selected.bimtekBatchName" x-text="selected.bimtekBatchName"></span>
-                                                </div>
-                                            </template>
+                                    <div class="px-5 sm:px-6 pt-3.5 sm:pt-5 pb-5 sm:pb-6">
+                                        <div class="flex items-start justify-between gap-3.5 sm:gap-4">
+                                            <div class="flex-1 min-w-0">
+                                                <template x-if="selected.isEvent && selected.bimtekBatchName">
+                                                    <div class="flex items-center gap-2 text-xs sm:text-sm mb-1.5">
+                                                        <span class="font-semibold text-sky-200 tracking-wide truncate" :title="selected.bimtekBatchName" x-text="selected.bimtekBatchName"></span>
+                                                    </div>
+                                                </template>
 
-                                            <h3 id="enroll-title" class="text-lg sm:text-xl font-bold text-slate-900 leading-snug line-clamp-2"
-                                                :title="selected.name" x-text="selected.name"></h3>
+                                                <h3 id="enroll-title" class="text-lg sm:text-xl font-bold text-white leading-snug line-clamp-2"
+                                                    :title="selected.name" x-text="selected.name"></h3>
 
-                                            <p class="text-sm sm:text-[15px] text-slate-500 leading-relaxed mt-1 line-clamp-2"
-                                               x-show="selected.description" x-text="selected.description"></p>
+                                                <p class="text-xs sm:text-sm text-blue-100/90 leading-relaxed mt-1.5 line-clamp-2"
+                                                   x-show="selected.description" x-text="selected.description"></p>
+                                            </div>
+                                            <button type="button" @click="close()" aria-label="Tutup"
+                                                    class="shrink-0 w-8 h-8 -mr-1 rounded-md flex items-center justify-center text-white/75 hover:text-white hover:bg-white/10 transition-colors cursor-pointer">
+                                                <i class="fas fa-times text-base"></i>
+                                            </button>
                                         </div>
-                                        <button type="button" @click="close()" aria-label="Tutup"
-                                                class="shrink-0 w-8 h-8 -mr-1 rounded-lg flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors">
-                                            <i class="fas fa-times text-base"></i>
-                                        </button>
                                     </div>
                                 </div>
 
-                                {{-- Body: Detail Kursus & Kurikulum (Scrollable) --}}
-                                <div class="flex-1 overflow-y-auto px-5 sm:px-6 py-4 sm:py-5 custom-scrollbar bg-slate-50/40 space-y-5">
+                                {{-- Tab Navigasi Konteks: Timeline & Jadwal vs Struktur Kurikulum --}}
+                                <template x-if="selected.isEvent && selected.timelineSteps && selected.timelineSteps.length > 0">
+                                    <div class="bg-white border-b border-slate-200 px-5 sm:px-6 shrink-0" role="tablist">
+                                        <div class="flex items-center gap-5 sm:gap-6 -mb-px">
+                                            <button type="button"
+                                                    role="tab"
+                                                    :aria-selected="activeTab === 'timeline'"
+                                                    @click="setTab('timeline')"
+                                                    class="relative py-3 sm:py-3.5 text-xs sm:text-sm border-b-2 transition-colors inline-flex items-center gap-2 cursor-pointer"
+                                                    :class="activeTab === 'timeline'
+                                                        ? 'border-[#13416B] text-[#13416B] font-bold'
+                                                        : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300 font-semibold'">
+                                                <i class="far fa-calendar-alt text-xs"></i>
+                                                <span>Timeline &amp; Jadwal</span>
+                                            </button>
 
-                                    {{-- Banner Notifikasi Jika Pendaftaran Gelombang Ini Ditutup (Disuruh Ikut Batch Berikutnya) --}}
-                                    <template x-if="selected && selected.isEvent && !selected.isEnrolledInThisBimtek && (!selected.isRegistrationOpen || selected.bimtekStatus !== 'open_registration')">
-                                        <div class="p-3.5 sm:p-4 rounded-xl bg-amber-50 border border-amber-200/90 flex items-start gap-3 text-amber-900 shadow-2xs">
-                                            <div class="w-8 h-8 rounded-lg bg-amber-100/80 border border-amber-200 text-amber-700 flex items-center justify-center shrink-0 mt-0.5">
-                                                <i class="fas fa-calendar-times text-sm"></i>
-                                            </div>
-                                            <div class="flex-1 min-w-0">
-                                                <h5 class="text-sm sm:text-base font-bold text-amber-900 mb-0.5">Pendaftaran Gelombang Ini Telah Ditutup</h5>
-                                                <p class="text-xs sm:text-sm text-amber-800/90 leading-relaxed">
-                                                    Kursus untuk gelombang ini sedang berlangsung atau masa pendaftaran telah berakhir. Anda dapat mengikuti kursus pada <strong>gelombang berikutnya</strong>.
-                                                </p>
-                                            </div>
+                                            <button type="button"
+                                                    role="tab"
+                                                    :aria-selected="activeTab === 'curriculum'"
+                                                    @click="setTab('curriculum')"
+                                                    class="relative py-3 sm:py-3.5 text-xs sm:text-sm border-b-2 transition-colors inline-flex items-center gap-2 cursor-pointer"
+                                                    :class="activeTab === 'curriculum'
+                                                        ? 'border-[#13416B] text-[#13416B] font-bold'
+                                                        : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300 font-semibold'">
+                                                <i class="fas fa-list-ul text-xs"></i>
+                                                <span>Struktur Kurikulum</span>
+                                                <span class="px-1.5 py-0.5 rounded-md text-[11px] font-semibold transition-colors"
+                                                      :class="activeTab === 'curriculum'
+                                                          ? 'bg-[#13416B]/10 text-[#13416B]'
+                                                          : 'bg-slate-100 text-slate-500'"
+                                                      x-text="(selected.topics || 0) + ' materi'"></span>
+                                            </button>
                                         </div>
-                                    </template>
+                                    </div>
+                                </template>
 
-                                    {{-- Timeline Pembelajaran (Khusus Event Pelatihan) --}}
-                                    <template x-if="selected && selected.isEvent && selected.timelineSteps">
-                                        <div>
-                                            <h4 class="text-sm sm:text-base font-extrabold uppercase tracking-wider text-slate-800 mb-3.5">Timeline Pembelajaran</h4>
+                                {{-- Body: Detail Kursus & Kurikulum (Scrollable, 1 Konteks per Tab) --}}
+                                <div x-ref="modalBody" class="flex-1 overflow-y-auto px-5 sm:px-6 py-4 sm:py-5 custom-scrollbar bg-slate-50/40">
+
+                                    {{-- TAB 1: TIMELINE & JADWAL --}}
+                                    <template x-if="selected && selected.isEvent && selected.timelineSteps && activeTab === 'timeline'">
+                                        <div class="space-y-4">
+                                            {{-- Banner Notifikasi Jika Pendaftaran Gelombang Ini Ditutup (Disuruh Ikut Batch Berikutnya) --}}
+                                            <template x-if="!selected.isEnrolledInThisBimtek && (!selected.isRegistrationOpen || selected.bimtekStatus !== 'open_registration')">
+                                                <div class="p-3.5 sm:p-4 rounded-md bg-amber-50 border border-amber-200/90 flex items-start gap-3 text-amber-900 shadow-2xs">
+                                                    <div class="w-8 h-8 rounded-md bg-amber-100/80 border border-amber-200 text-amber-700 flex items-center justify-center shrink-0 mt-0.5">
+                                                        <i class="fas fa-calendar-times text-sm"></i>
+                                                    </div>
+                                                    <div class="flex-1 min-w-0">
+                                                        <h5 class="text-sm sm:text-base font-bold text-amber-900 mb-0.5">Pendaftaran Gelombang Ini Telah Ditutup</h5>
+                                                        <p class="text-xs sm:text-sm text-amber-800/90 leading-relaxed">
+                                                            Kursus untuk gelombang ini sedang berlangsung atau masa pendaftaran telah berakhir. Anda dapat mengikuti kursus pada <strong>gelombang berikutnya</strong>.
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            </template>
 
                                             {{-- Stepper 3 Tahap Beralur --}}
                                             <div class="relative pl-9 sm:pl-10 space-y-3.5 sm:space-y-4 before:absolute before:left-3 sm:before:left-3.5 before:top-2 before:bottom-2 before:w-0.5 before:bg-slate-200">
@@ -386,7 +352,7 @@
                                                         <div class="absolute -left-9 sm:-left-10 top-3.5 w-6 h-6 sm:w-7 sm:h-7 rounded-full flex items-center justify-center text-xs sm:text-sm font-bold transition-all shadow-2xs"
                                                              :class="{
                                                                  'bg-emerald-600 text-white ring-3 ring-emerald-50': step.status === 'completed',
-                                                                 'bg-[#13416B] text-white ring-3 ring-blue-100': step.status === 'active',
+                                                                 'bg-[#0B5CFF] text-white ring-3 ring-blue-100': step.status === 'active',
                                                                  'bg-white text-slate-400 border-2 border-slate-300': step.status === 'upcoming'
                                                              }">
                                                             <template x-if="step.status === 'completed'">
@@ -398,9 +364,9 @@
                                                         </div>
 
                                                         {{-- Card Timeline Beralur --}}
-                                                        <div class="p-3.5 sm:p-4 rounded-xl border transition-all"
+                                                        <div class="p-3.5 sm:p-4 rounded-md border transition-all"
                                                              :class="{
-                                                                 'bg-white border-[#13416B]/30 shadow-xs': step.status === 'active',
+                                                                 'bg-white border-[#0B5CFF]/35 shadow-xs': step.status === 'active',
                                                                  'bg-slate-50/80 border-slate-200/80': step.status === 'completed',
                                                                  'bg-white border-slate-200/70': step.status === 'upcoming'
                                                              }">
@@ -471,91 +437,80 @@
                                         </div>
                                     </template>
 
-                                    {{-- Struktur Kurikulum --}}
-                                    <div :class="(selected && selected.isEvent && selected.timelineSteps) ? 'mt-7 sm:mt-8 pt-6 sm:pt-7 border-t border-slate-200/80' : ''">
-                                        <div class="flex items-center justify-between gap-2 mb-3.5">
-                                            <h4 class="text-sm sm:text-base font-extrabold uppercase tracking-wider text-slate-800">Struktur Kurikulum</h4>
-                                            <button type="button"
-                                                    x-show="selected.sections && selected.sections.length > 0"
-                                                    @click="toggleAll()"
-                                                    class="text-xs sm:text-sm font-semibold text-[#13416B] hover:underline cursor-pointer"
-                                                    x-text="allExpanded() ? 'Tutup Semua' : 'Buka Semua'"></button>
-                                        </div>
+                                    {{-- TAB 2: STRUKTUR KURIKULUM --}}
+                                    <template x-if="activeTab === 'curriculum' || !(selected && selected.isEvent && selected.timelineSteps && selected.timelineSteps.length > 0)">
+                                        <div>
+                                            <div class="space-y-2.5">
+                                                <template x-for="(section, i) in selected.sections" :key="i">
+                                                    <div class="bg-white rounded-md border transition-all duration-200 overflow-hidden"
+                                                         :class="isExpanded(i) ? 'border-slate-300 shadow-xs' : 'border-slate-200/80 hover:border-slate-300'">
 
-                                        <div class="space-y-2.5">
-                                            <template x-for="(section, i) in selected.sections" :key="i">
-                                                <div class="bg-white rounded-xl border transition-all duration-200 overflow-hidden"
-                                                     :class="isExpanded(i) ? 'border-slate-300 shadow-xs' : 'border-slate-200/80 hover:border-slate-300'">
+                                                        <button type="button"
+                                                                @click="toggleSection(i)"
+                                                                class="w-full flex items-center gap-3 px-3.5 sm:px-4 py-3 text-left transition-colors cursor-pointer select-none"
+                                                                :class="isExpanded(i) ? 'bg-slate-50/70' : 'hover:bg-slate-50/40'"
+                                                                :aria-expanded="isExpanded(i)">
 
-                                                    <button type="button"
-                                                            @click="toggleSection(i)"
-                                                            class="w-full flex items-center gap-3 px-3.5 sm:px-4 py-3 text-left transition-colors cursor-pointer select-none"
-                                                            :class="isExpanded(i) ? 'bg-slate-50/70' : 'hover:bg-slate-50/40'"
-                                                            :aria-expanded="isExpanded(i)">
+                                                            <span class="shrink-0 w-6 h-6 sm:w-7 sm:h-7 rounded-full text-xs sm:text-sm font-semibold flex items-center justify-center transition-colors"
+                                                                  :class="isExpanded(i) ? 'bg-[#0B5CFF] text-white shadow-xs' : 'bg-slate-100 text-slate-600'"
+                                                                  x-text="i + 1"></span>
 
-                                                        <span class="shrink-0 w-6 h-6 sm:w-7 sm:h-7 rounded-lg text-xs sm:text-sm font-semibold flex items-center justify-center transition-colors"
-                                                              :class="isExpanded(i) ? 'bg-[#13416B] text-white shadow-xs' : 'bg-slate-100 text-slate-600'"
-                                                              x-text="i + 1"></span>
+                                                            <span class="flex-1 min-w-0 text-sm sm:text-base font-semibold text-slate-800 leading-snug line-clamp-2 wrap-break-word"
+                                                                  :title="section.name"
+                                                                  x-text="section.name"></span>
 
-                                                        <span class="flex-1 min-w-0 text-sm sm:text-base font-semibold text-slate-800 leading-snug line-clamp-2 wrap-break-word"
-                                                              :title="section.name"
-                                                              x-text="section.name"></span>
-
-                                                        <div class="shrink-0 flex items-center gap-2">
-                                                            <span class="text-xs sm:text-[13px] font-medium text-slate-500"
-                                                                  x-text="section.contents.length + ' materi'"></span>
-                                                            <i class="fas fa-chevron-down text-xs text-slate-400 transition-transform duration-200"
-                                                               :class="{ 'rotate-180 text-slate-600': isExpanded(i) }"></i>
-                                                        </div>
-                                                    </button>
-
-                                                    <div x-show="isExpanded(i)"
-                                                         x-collapse
-                                                         x-cloak
-                                                         class="border-t border-slate-100 divide-y divide-slate-100 bg-slate-50/50">
-
-                                                        <!-- Daftar Materi Konten -->
-                                                        <template x-for="(content, j) in section.contents" :key="j">
-                                                            <div class="flex items-start gap-2 pl-9 sm:pl-12 pr-3.5 sm:pr-4 py-2.5 text-xs sm:text-sm">
-                                                                <span class="font-semibold text-slate-500 shrink-0 leading-snug"
-                                                                      x-text="(content.letter || topicLetter(j)) + '.'">
-                                                                </span>
-
-                                                                <span class="flex-1 min-w-0 font-medium text-slate-700 leading-snug line-clamp-2 wrap-break-word"
-                                                                      :title="content.name"
-                                                                      x-text="content.name"></span>
+                                                            <div class="shrink-0 flex items-center gap-2">
+                                                                <span class="text-xs sm:text-[13px] font-medium text-slate-500"
+                                                                      x-text="section.contents.length + ' materi'"></span>
+                                                                <i class="fas fa-chevron-down text-xs text-slate-400 transition-transform duration-200"
+                                                                   :class="{ 'rotate-180 text-slate-600': isExpanded(i) }"></i>
                                                             </div>
-                                                        </template>
+                                                        </button>
 
-                                                        <div x-show="section.contents.length === 0" class="py-3 text-center text-xs sm:text-sm italic text-slate-400">
-                                                            Belum ada topik materi pada bagian ini.
+                                                        <div x-show="isExpanded(i)"
+                                                             x-collapse
+                                                             x-cloak
+                                                             class="border-t border-slate-100 divide-y divide-slate-100 bg-slate-50/50">
+
+                                                            <!-- Daftar Materi Konten -->
+                                                            <template x-for="(content, j) in section.contents" :key="j">
+                                                                <div class="flex items-start gap-2 pl-9 sm:pl-12 pr-3.5 sm:pr-4 py-2.5 text-xs sm:text-sm">
+                                                                    <span class="font-semibold text-slate-500 shrink-0 leading-snug"
+                                                                          x-text="(content.letter || topicLetter(j)) + '.'">
+                                                                    </span>
+
+                                                                    <span class="flex-1 min-w-0 font-medium text-slate-700 leading-snug line-clamp-2 wrap-break-word"
+                                                                          :title="content.name"
+                                                                          x-text="content.name"></span>
+                                                                </div>
+                                                            </template>
+
+                                                            <div x-show="section.contents.length === 0" class="py-3 text-center text-xs sm:text-sm italic text-slate-400">
+                                                                Belum ada topik materi pada bagian ini.
+                                                            </div>
                                                         </div>
                                                     </div>
-                                                </div>
-                                            </template>
+                                                </template>
 
-                                            <div x-show="selected.sections.length === 0" class="py-10 text-center bg-white rounded-xl border border-dashed border-slate-200">
-                                                <div class="w-11 h-11 mx-auto mb-2.5 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center">
-                                                    <i class="fas fa-book-open text-base"></i>
+                                                <div x-show="selected.sections.length === 0" class="py-10 text-center bg-white rounded-md border border-dashed border-slate-200">
+                                                    <div class="w-11 h-11 mx-auto mb-2.5 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center">
+                                                        <i class="fas fa-book-open text-base"></i>
+                                                    </div>
+                                                    <p class="text-sm sm:text-base font-semibold text-slate-700">Kurikulum Belum Tersedia</p>
+                                                    <p class="text-xs sm:text-sm text-slate-400 mt-1">Materi untuk kursus ini sedang dalam tahap penyusunan.</p>
                                                 </div>
-                                                <p class="text-sm sm:text-base font-semibold text-slate-700">Kurikulum Belum Tersedia</p>
-                                                <p class="text-xs sm:text-sm text-slate-400 mt-1">Materi untuk kursus ini sedang dalam tahap penyusunan.</p>
                                             </div>
                                         </div>
-                                    </div>
+                                    </template>
                                 </div>
 
                                 {{-- Footer Modal: Aksi --}}
                                 <div class="px-4 sm:px-6 py-3 sm:py-4 border-t border-slate-100 bg-white shrink-0">
                                     {{-- KONDISI 1: SEDANG BERLANGSUNG / MENUNGGU BATCH BERIKUTNYA --}}
                                     <template x-if="selected.isEvent && !selected.isEnrolledInThisBimtek && (!selected.isRegistrationOpen || selected.bimtekStatus !== 'open_registration')">
-                                        <div class="flex items-center gap-2 justify-end w-full">
-                                            <button type="button" @click="close()"
-                                                    class="flex-1 sm:flex-none px-4 py-2 sm:py-2.5 text-sm sm:text-[15px] font-semibold rounded-xl text-slate-600 bg-white border border-slate-200 hover:bg-slate-50 transition-colors">
-                                                Tutup
-                                            </button>
+                                        <div class="flex items-center justify-end w-full">
                                             <button type="button" disabled
-                                                    class="flex-1 sm:flex-none px-4 py-2 sm:py-2.5 text-sm sm:text-[15px] font-semibold rounded-xl text-slate-400 bg-slate-100 border border-slate-200 cursor-not-allowed inline-flex items-center justify-center gap-1.5 shadow-none">
+                                                    class="w-full sm:w-auto px-4 py-2 sm:py-2.5 text-sm sm:text-[15px] font-semibold rounded-md text-slate-400 bg-slate-100 border border-slate-200 cursor-not-allowed inline-flex items-center justify-center gap-1.5 shadow-none">
                                                 <i class="fas fa-lock text-xs"></i>
                                                 <span class="truncate">Pendaftaran Ditutup</span>
                                             </button>
@@ -569,13 +524,9 @@
                                                 <i class="fas fa-check-circle text-emerald-600"></i>
                                                 <span>Anda telah terdaftar pada gelombang ini.</span>
                                             </div>
-                                            <div class="flex items-center gap-2 justify-end w-full sm:w-auto shrink-0">
-                                                <button type="button" @click="close()"
-                                                        class="flex-1 sm:flex-none px-4 py-2 sm:py-2.5 text-sm sm:text-[15px] font-semibold rounded-xl text-slate-600 bg-white border border-slate-200 hover:bg-slate-50 transition-colors">
-                                                    Tutup
-                                                </button>
+                                            <div class="flex items-center justify-end w-full sm:w-auto shrink-0">
                                                 <a :href="selected.myCourseUrl"
-                                                   class="flex-1 sm:flex-none px-5 py-2 sm:py-2.5 text-sm sm:text-[15px] font-semibold rounded-xl text-white bg-emerald-600 hover:bg-emerald-700 shadow-sm transition-all inline-flex items-center justify-center gap-1.5 text-center">
+                                                   class="w-full sm:w-auto px-5 py-2 sm:py-2.5 text-sm sm:text-[15px] font-semibold rounded-md text-white bg-emerald-600 hover:bg-emerald-700 shadow-sm transition-all inline-flex items-center justify-center gap-1.5 text-center">
                                                     <span>Masuk Pelatihan</span>
                                                     <i class="fas fa-arrow-up-right-from-square text-xs"></i>
                                                 </a>
@@ -589,13 +540,9 @@
                                             <p class="text-sm sm:text-[15px] text-slate-600 font-medium text-center sm:text-left">
                                                 <span x-text="selected.isEvent ? 'Tertarik mengikuti pelatihan ini? Pendaftaran masih dibuka.' : 'Apakah Anda ingin mendaftar kursus ini?'"></span>
                                             </p>
-                                            <div class="flex items-center gap-2 justify-end w-full sm:w-auto shrink-0">
-                                                <button type="button" @click="close()"
-                                                        class="flex-1 sm:flex-none px-4 py-2 sm:py-2.5 text-sm sm:text-[15px] font-semibold rounded-xl text-slate-600 bg-white border border-slate-200 hover:bg-slate-50 transition-colors">
-                                                    Tutup
-                                                </button>
+                                            <div class="flex items-center justify-end w-full sm:w-auto shrink-0">
                                                 <button type="button" @click="confirmOpen = true"
-                                                        class="flex-1 sm:flex-none px-5 py-2 sm:py-2.5 text-sm sm:text-[15px] font-semibold rounded-xl text-white bg-amber-500 hover:bg-amber-600 shadow-sm transition-all inline-flex items-center justify-center gap-1.5 text-center">
+                                                        class="w-full sm:w-auto px-5 py-2 sm:py-2.5 text-sm sm:text-[15px] font-semibold rounded-md text-white bg-amber-500 hover:bg-amber-600 shadow-sm transition-all inline-flex items-center justify-center gap-1.5 text-center cursor-pointer">
                                                     <span>Daftar</span>
                                                     <i class="fas fa-arrow-up-right-from-square text-xs"></i>
                                                 </button>
@@ -625,7 +572,7 @@
                          x-transition:leave="transition ease-in duration-150"
                          x-transition:leave-start="opacity-100 scale-100"
                          x-transition:leave-end="opacity-0 scale-95"
-                         class="relative w-full max-w-md bg-white rounded-2xl shadow-2xl p-6 sm:p-7 text-center">
+                         class="relative w-full max-w-md bg-white rounded-md shadow-2xl p-6 sm:p-7 text-center">
 
                         {{-- KONDISI A: MODAL KONFIRMASI EVENT BIMTEK --}}
                         <template x-if="selected && selected.isEvent">
@@ -642,7 +589,7 @@
                                 </p>
 
                                 {{-- Kartu Ringkasan Tiket Event --}}
-                                <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200 text-left text-xs space-y-2.5 mb-4">
+                                <div class="p-3.5 rounded-md bg-slate-50 border border-slate-200 text-left text-xs space-y-2.5 mb-4">
                                     <div>
                                         <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Materi Program</span>
                                         <p class="font-extrabold text-slate-900 mt-0.5 line-clamp-2" :title="selected.name" x-text="selected.name"></p>
@@ -665,7 +612,7 @@
                                     </div>
                                 </div>
 
-                                <div class="p-2.5 rounded-lg bg-emerald-50 border border-emerald-200/70 text-[11px] text-emerald-800 text-left mb-5 flex items-start gap-2">
+                                <div class="p-2.5 rounded-md bg-emerald-50 border border-emerald-200/70 text-[11px] text-emerald-800 text-left mb-5 flex items-start gap-2">
                                     <i class="fas fa-info-circle text-emerald-600 mt-0.5 shrink-0 text-sm"></i>
                                     <span>Pastikan Anda dapat mengikuti rangkaian jadwal pelaksanaan dan menuntaskan seluruh materi pembelajaran.</span>
                                 </div>
@@ -694,11 +641,11 @@
                                 <input type="hidden" name="bimtek_event_id" :value="selected.bimtekId">
                                 <div class="flex flex-col-reverse sm:flex-row gap-2">
                                     <button type="button" @click="cancelConfirm()" :disabled="submitting"
-                                            class="flex-1 px-4 py-2.5 text-xs sm:text-sm font-semibold rounded-xl text-slate-600 bg-white border border-slate-200 hover:bg-slate-50 transition-colors disabled:opacity-50">
+                                            class="flex-1 px-4 py-2.5 text-xs sm:text-sm font-semibold rounded-md text-slate-600 bg-white border border-slate-200 hover:bg-slate-50 transition-colors disabled:opacity-50">
                                         Batal
                                     </button>
                                     <button type="submit" :disabled="submitting"
-                                            class="flex-1 px-4 py-2.5 text-xs sm:text-sm font-semibold rounded-xl text-white bg-amber-500 hover:bg-amber-600 shadow-sm transition-colors inline-flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed">
+                                            class="flex-1 px-4 py-2.5 text-xs sm:text-sm font-semibold rounded-md text-white bg-amber-500 hover:bg-amber-600 shadow-sm transition-colors inline-flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed">
                                         <svg x-show="submitting" class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
                                             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                                             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
