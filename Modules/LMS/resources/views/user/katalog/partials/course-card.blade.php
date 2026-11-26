@@ -49,7 +49,7 @@
 @endphp
 
 <div @click="show('{{ $course->id }}')"
-    class="group flex flex-col h-full bg-transparent sm:bg-white sm:dark:bg-slate-800/90 rounded-none sm:rounded-md border-0 sm:border border-slate-200 dark:border-slate-700/80 shadow-none sm:shadow-sm hover:shadow-lg hover:border-[#13416B]/30 dark:hover:border-slate-500 hover:-translate-y-0.5 transition-all duration-300 overflow-hidden w-full cursor-pointer">
+    class="group flex flex-col h-full bg-white dark:bg-slate-800/90 rounded-md border border-slate-200 dark:border-slate-700/80 shadow-xs sm:shadow-sm hover:shadow-lg hover:border-[#13416B]/30 dark:hover:border-slate-500 hover:-translate-y-0.5 transition-all duration-300 overflow-hidden w-full cursor-pointer">
 
     {{-- Thumbnail Bersih + 1 Badge Status (Tanpa Overlay Teks di Dasar Gambar) --}}
     <div class="relative w-full aspect-[4/3] sm:aspect-video overflow-hidden bg-slate-100 dark:bg-slate-900/50 rounded-t-md">
@@ -66,7 +66,7 @@
         {{-- Badge Status Event di Pojok Kanan Atas --}}
         @if ($curPhase)
             @php $isDonePhase = ($curPhase['phase'] ?? '') === 'completed'; @endphp
-            <span class="absolute top-0 right-0 z-10 px-2.5 sm:px-3 py-1 text-[8px] sm:text-[10px] font-bold uppercase tracking-wider text-white {{ $curPhase['badge_bg'] ?? 'bg-[#0B5CFF]' }} shadow-xs flex items-center gap-1 rounded-none rounded-bl-md rounded-tr-md">
+            <span class="absolute top-0 right-0 z-10 px-2 sm:px-3 py-1 text-[8px] sm:text-[10px] font-bold uppercase tracking-wider text-white {{ $curPhase['badge_bg'] ?? 'bg-[#0B5CFF]' }} shadow-xs flex items-center gap-1 rounded-none rounded-bl-md rounded-tr-md">
                 <i class="{{ $isDonePhase ? 'fas fa-check-circle' : 'far fa-clock' }} text-[7px] sm:text-[9px]"></i>
                 <span>{{ $curPhase['badge'] ?? 'Pendaftaran Buka' }}</span>
             </span>
@@ -74,9 +74,9 @@
     </div>
 
     {{-- Konten Text Ringkas & Lega --}}
-    <div class="p-0 pt-3.5 sm:p-5 flex flex-col flex-1">
+    <div class="px-3 pt-4 pb-3.5 sm:p-5 flex flex-col flex-1">
         {{-- Label Gelombang Standar di Atas Judul: Gelombang [nomor] [wilayah] [tahun] --}}
-        <p class="text-xs sm:text-sm font-semibold text-[#547996] truncate mb-1.5" title="{{ $fullBatchName }}">
+        <p class="text-[11px] sm:text-sm font-semibold text-[#547996] truncate mb-2" title="{{ $fullBatchName }}">
             {{ $waveSubtitle }}
         </p>
 
@@ -87,7 +87,7 @@
         </h3>
 
         {{-- Info Jadwal Inti + Kuota / Jumlah Peserta di Bawahnya --}}
-        <div class="mt-3.5 sm:mt-4 flex flex-col gap-2 sm:gap-2.5 text-xs sm:text-sm text-slate-500 dark:text-slate-400">
+        <div class="mt-3.5 sm:mt-4 flex flex-col gap-2 sm:gap-2.5 text-[11px] sm:text-sm text-slate-500 dark:text-slate-400">
             <span class="inline-flex items-center gap-1.5 min-w-0 truncate">
                 <i class="far fa-calendar-alt shrink-0 text-slate-400 text-xs"></i>
                 <span class="truncate font-medium text-slate-600 dark:text-slate-300">{{ $timelineLine }}</span>
@@ -117,29 +117,29 @@
         </div>
 
         {{-- Footer Aksi --}}
-        <div class="mt-auto pt-3.5 sm:pt-4 flex items-center justify-start gap-2">
+        <div class="mt-auto pt-4 sm:pt-5 flex flex-wrap items-center justify-start gap-1.5 sm:gap-2">
             @if ($isEnrolledInThisBimtek)
                 <button type="button" @click.stop="show('{{ $course->id }}')"
-                    class="px-3.5 sm:px-4 py-2 text-xs sm:text-sm font-bold text-center rounded-md transition-colors bg-white text-[#13416B] border border-[#13416B]/30 hover:bg-[#13416B]/5 cursor-pointer">
+                    class="px-2.5 sm:px-4 py-1.5 sm:py-2 text-[11px] sm:text-sm font-bold text-center rounded-md transition-colors bg-white text-[#13416B] border border-[#13416B]/30 hover:bg-[#13416B]/5 cursor-pointer">
                     <span class="sm:hidden">Detail</span>
                     <span class="hidden sm:inline">Lihat Detail</span>
                 </button>
                 <a href="{{ route('user.course.my-course.detail', $course->slug) }}" @click.stop
-                   class="px-3.5 sm:px-4 py-2 text-xs sm:text-sm inline-flex items-center justify-center gap-1.5 font-bold text-center rounded-md transition-colors bg-emerald-600 text-white hover:bg-emerald-700 shadow-2xs">
+                   class="px-2.5 sm:px-4 py-1.5 sm:py-2 text-[11px] sm:text-sm inline-flex items-center justify-center gap-1.5 font-bold text-center rounded-md transition-colors bg-emerald-600 text-white hover:bg-emerald-700 shadow-2xs">
                     <span>Sudah Terdaftar</span>
-                    <i class="fas fa-arrow-up-right-from-square text-[10px] sm:text-xs"></i>
+                    <i class="fas fa-arrow-up-right-from-square text-[9px] sm:text-xs"></i>
                 </a>
             @elseif (!$isRegistrationOpen)
                 <button type="button" @click.stop="show('{{ $course->id }}')"
-                    class="px-4 sm:px-5 py-2 text-xs sm:text-sm font-bold text-center rounded-md transition-colors bg-white text-[#13416B] border border-[#13416B]/30 hover:bg-[#13416B]/5 cursor-pointer">
+                    class="px-3 sm:px-5 py-1.5 sm:py-2 text-[11px] sm:text-sm font-bold text-center rounded-md transition-colors bg-white text-[#13416B] border border-[#13416B]/30 hover:bg-[#13416B]/5 cursor-pointer">
                     <span class="sm:hidden">Detail</span>
                     <span class="hidden sm:inline">Lihat Detail</span>
                 </button>
             @else
                 <button type="button" @click.stop="askEnroll('{{ $course->id }}')"
-                    class="px-4 sm:px-5 py-2 text-xs sm:text-sm inline-flex items-center justify-center gap-1.5 font-bold text-center rounded-md transition-colors bg-amber-500 text-white border border-amber-500 hover:bg-amber-600 shadow-2xs cursor-pointer">
+                    class="px-3.5 sm:px-5 py-1.5 sm:py-2 text-[11px] sm:text-sm inline-flex items-center justify-center gap-1.5 font-bold text-center rounded-md transition-colors bg-amber-500 text-white border border-amber-500 hover:bg-amber-600 shadow-2xs cursor-pointer">
                     <span>Daftar</span>
-                    <i class="fas fa-arrow-up-right-from-square text-[10px] sm:text-xs"></i>
+                    <i class="fas fa-arrow-up-right-from-square text-[9px] sm:text-xs"></i>
                 </button>
             @endif
         </div>

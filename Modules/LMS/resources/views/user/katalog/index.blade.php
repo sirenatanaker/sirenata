@@ -215,7 +215,7 @@
                 @keydown.escape.window="onEscape()"
             >
                 @if ($courses->isNotEmpty())
-                    <div class="grid grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-y-6 gap-x-3 sm:gap-6 px-0 sm:px-4 md:px-0 items-stretch">
+                    <div class="grid grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-y-5 gap-x-3 sm:gap-6 items-stretch">
                         @foreach ($courses as $course)
                             @include('lms::user.katalog.partials.course-card', ['course' => $course])
                         @endforeach
@@ -252,7 +252,7 @@
                          x-transition:leave="transition ease-in duration-150"
                          x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
                          x-transition:leave-end="opacity-0 translate-y-6 sm:scale-95"
-                         class="relative w-full sm:max-w-xl md:max-w-2xl max-h-[92vh] sm:max-h-[85vh] flex flex-col bg-white rounded-t-md sm:rounded-md shadow-2xl ring-1 ring-slate-900/10 overflow-hidden">
+                         class="relative w-full sm:max-w-xl md:max-w-2xl max-h-[90dvh] sm:max-h-[85vh] flex flex-col bg-white rounded-t-md sm:rounded-md shadow-2xl ring-1 ring-slate-900/10 overflow-hidden">
 
                         <template x-if="selected">
                             <div class="flex flex-col min-h-0 flex-1">
@@ -557,7 +557,7 @@
 
                 {{-- ========== ALERT KONFIRMASI DAFTAR ========== --}}
                 <div x-show="confirmOpen" x-cloak style="display: none;"
-                     class="fixed inset-0 z-[60] flex items-center justify-center p-4"
+                     class="fixed inset-0 z-[60] flex items-center justify-center p-3 sm:p-4"
                      role="alertdialog" aria-modal="true" aria-labelledby="confirm-title">
 
                     <div x-show="confirmOpen"
@@ -572,49 +572,49 @@
                          x-transition:leave="transition ease-in duration-150"
                          x-transition:leave-start="opacity-100 scale-100"
                          x-transition:leave-end="opacity-0 scale-95"
-                         class="relative w-full max-w-md bg-white rounded-md shadow-2xl p-6 sm:p-7 text-center">
+                         class="relative w-full max-w-sm sm:max-w-md max-h-[90dvh] overflow-y-auto bg-white rounded-md shadow-2xl p-4 sm:p-6 text-center">
 
                         {{-- KONDISI A: MODAL KONFIRMASI EVENT BIMTEK --}}
                         <template x-if="selected && selected.isEvent">
                             <div>
-                                <div class="w-12 h-12 mx-auto mb-3.5 rounded-full bg-blue-50 text-[#13416B] border border-blue-100 flex items-center justify-center text-xl">
+                                <div class="w-10 h-10 sm:w-11 sm:h-11 mx-auto mb-2.5 sm:mb-3 rounded-full bg-blue-50 text-[#13416B] border border-blue-100 flex items-center justify-center text-base sm:text-lg">
                                     <i class="fas fa-calendar-check"></i>
                                 </div>
 
-                                <h3 id="confirm-title" class="text-lg sm:text-xl font-extrabold text-slate-800 mb-1">
+                                <h3 id="confirm-title" class="text-base sm:text-lg font-extrabold text-slate-800 mb-1">
                                     Daftar ke Pelatihan Ini?
                                 </h3>
-                                <p class="text-sm text-slate-500 leading-relaxed mb-4">
+                                <p class="text-xs sm:text-sm text-slate-500 leading-relaxed mb-3 sm:mb-4">
                                     Anda akan mendaftar ke gelombang pelatihan daring berikut ini.
                                 </p>
 
                                 {{-- Kartu Ringkasan Tiket Event --}}
-                                <div class="p-3.5 sm:p-4 rounded-md bg-slate-50 border border-slate-200 text-left text-sm space-y-2.5 mb-4">
+                                <div class="p-3 sm:p-3.5 rounded-md bg-slate-50 border border-slate-200 text-left text-xs sm:text-sm space-y-2 mb-3">
                                     <div>
-                                        <span class="text-xs font-bold text-slate-400 uppercase tracking-wider block">Materi Program</span>
-                                        <p class="font-extrabold text-slate-900 mt-0.5 line-clamp-2" :title="selected.name" x-text="selected.name"></p>
+                                        <span class="text-[11px] sm:text-xs font-bold text-slate-400 uppercase tracking-wider block">Materi Program</span>
+                                        <p class="font-bold text-slate-900 mt-0.5 line-clamp-2 leading-snug" :title="selected.name" x-text="selected.name"></p>
                                     </div>
                                     <div class="grid grid-cols-2 gap-2 pt-2 border-t border-slate-200/80">
                                         <div>
-                                            <span class="text-xs font-bold text-slate-400 uppercase tracking-wider block">Gelombang / Angkatan</span>
+                                            <span class="text-[11px] sm:text-xs font-bold text-slate-400 uppercase tracking-wider block">Gelombang</span>
                                             <p class="font-bold text-[#13416B] mt-0.5 line-clamp-2 leading-snug" :title="selected.bimtekBatchName" x-text="selected.bimtekBatchName"></p>
                                         </div>
                                         <div>
-                                            <span class="text-xs font-bold text-slate-400 uppercase tracking-wider block">Kuota</span>
+                                            <span class="text-[11px] sm:text-xs font-bold text-slate-400 uppercase tracking-wider block">Kuota</span>
                                             <p class="font-bold text-slate-800 mt-0.5" x-text="selected.bimtekQuota > 0 ? selected.bimtekQuota + ' Peserta' : 'Tanpa Batasan'"></p>
                                         </div>
                                     </div>
                                     <div class="pt-2 border-t border-slate-200/80">
-                                        <span class="text-xs font-bold text-slate-400 uppercase tracking-wider block">Jadwal Pelaksanaan</span>
-                                        <p class="font-semibold text-slate-800 mt-0.5">
+                                        <span class="text-[11px] sm:text-xs font-bold text-slate-400 uppercase tracking-wider block">Jadwal Pelaksanaan</span>
+                                        <p class="font-semibold text-slate-800 mt-0.5 leading-snug">
                                             <span x-text="selected.bimtekDates"></span> (<span x-text="selected.bimtekTime"></span>)
                                         </p>
                                     </div>
                                 </div>
 
-                                <div class="p-3 rounded-md bg-emerald-50 border border-emerald-200/70 text-xs sm:text-sm text-emerald-800 text-left mb-5 flex items-start gap-2.5">
-                                    <i class="fas fa-info-circle text-emerald-600 mt-0.5 shrink-0 text-base"></i>
-                                    <span>Pastikan Anda dapat mengikuti rangkaian jadwal pelaksanaan dan menuntaskan seluruh materi pembelajaran.</span>
+                                <div class="p-2.5 sm:p-3 rounded-md bg-emerald-50 border border-emerald-200/70 text-xs sm:text-sm text-emerald-800 text-left mb-3.5 sm:mb-4 flex items-start gap-2 leading-relaxed">
+                                    <i class="fas fa-info-circle text-emerald-600 mt-0.5 shrink-0 text-sm"></i>
+                                    <span>Pastikan Anda dapat mengikuti jadwal pelaksanaan dan menuntaskan seluruh materi.</span>
                                 </div>
                             </div>
                         </template>
@@ -622,12 +622,12 @@
                         {{-- KONDISI B: MODAL KONFIRMASI KURSUS MANDIRI BIASA --}}
                         <template x-if="selected && !selected.isEvent">
                             <div>
-                                <div class="w-12 h-12 mx-auto mb-3.5 rounded-full bg-amber-50 text-amber-500 border border-amber-100 flex items-center justify-center text-xl">
+                                <div class="w-10 h-10 sm:w-11 sm:h-11 mx-auto mb-2.5 sm:mb-3 rounded-full bg-amber-50 text-amber-500 border border-amber-100 flex items-center justify-center text-base sm:text-lg">
                                     <i class="fas fa-question"></i>
                                 </div>
 
-                                <h3 id="confirm-title" class="text-lg sm:text-xl font-bold text-slate-800 mb-1.5">Daftar ke kursus ini?</h3>
-                                <p class="text-sm sm:text-base text-slate-500 leading-relaxed mb-6">
+                                <h3 id="confirm-title" class="text-base sm:text-lg font-bold text-slate-800 mb-1">Daftar ke kursus ini?</h3>
+                                <p class="text-xs sm:text-sm text-slate-500 leading-relaxed mb-4">
                                     Kamu akan mendaftar ke
                                     <span class="font-semibold text-slate-700" x-text="selected ? selected.name : ''"></span>
                                     dan kursus ini akan langsung masuk ke daftar Kursus Saya.
@@ -639,27 +639,27 @@
                             <form :action="selected.enrollUrl" method="POST" @submit="submitting = true">
                                 @csrf
                                 <input type="hidden" name="bimtek_event_id" :value="selected.bimtekId">
-                                <div class="flex flex-col-reverse sm:flex-row gap-2">
+                                <div class="grid grid-cols-2 gap-2">
                                     <button type="button" @click="cancelConfirm()" :disabled="submitting"
-                                            class="flex-1 px-4 py-2.5 text-sm sm:text-base font-semibold rounded-md text-slate-600 bg-white border border-slate-200 hover:bg-slate-50 transition-colors disabled:opacity-50 cursor-pointer">
+                                            class="px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-semibold rounded-md text-slate-600 bg-white border border-slate-200 hover:bg-slate-50 transition-colors disabled:opacity-50 cursor-pointer">
                                         Batal
                                     </button>
                                     <button type="submit" :disabled="submitting"
-                                            class="flex-1 px-4 py-2.5 text-sm sm:text-base font-semibold rounded-md text-white bg-amber-500 hover:bg-amber-600 shadow-sm transition-colors inline-flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed cursor-pointer">
-                                        <svg x-show="submitting" class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+                                            class="px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-semibold rounded-md text-white bg-amber-500 hover:bg-amber-600 shadow-sm transition-colors inline-flex items-center justify-center gap-1.5 disabled:opacity-70 disabled:cursor-not-allowed cursor-pointer">
+                                        <svg x-show="submitting" class="animate-spin w-3.5 h-3.5" fill="none" viewBox="0 0 24 24">
                                             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                                             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
                                         </svg>
-                                        <span x-text="submitting ? 'Mendaftarkan...' : (selected.isEvent ? 'Ya, Daftar Pelatihan' : 'Ya, Daftar')"></span>
+                                        <span x-text="submitting ? 'Mendaftarkan...' : 'Ya, Daftar'"></span>
                                     </button>
                                 </div>
                             </form>
                         </template>
 
-                        <div x-show="!open && !submitting" class="mt-5 pt-4 border-t border-slate-100">
+                        <div x-show="!open && !submitting" class="mt-3 pt-3 border-t border-slate-100">
                             <button type="button" @click="confirmOpen = false; open = true"
-                                    class="inline-flex items-center gap-1.5 text-sm font-semibold text-[#13416B] hover:underline cursor-pointer">
-                                <i class="fas fa-list-ul text-xs"></i> Lihat detail dulu
+                                    class="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-[#13416B] hover:underline cursor-pointer">
+                                <i class="fas fa-list-ul text-[11px] sm:text-xs"></i> Lihat detail dulu
                             </button>
                         </div>
                     </div>
