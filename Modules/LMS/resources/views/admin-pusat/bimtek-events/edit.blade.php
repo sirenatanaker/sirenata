@@ -11,7 +11,7 @@
                     </a>
                 </li>
                 <li class="inline-flex items-center">
-                    <span class="text-xs sm:text-sm text-slate-300 mx-1.5">/</span>
+                    <i class="fas fa-chevron-right text-xs text-slate-300 mx-1.5"></i>
                     <span class="text-sm sm:text-base font-bold text-slate-900">
                         Edit Gelombang
                     </span>
@@ -131,7 +131,7 @@
                             Master Kursus / Kurikulum <span class="text-rose-500">*</span>
                         </label>
                         <select id="course_id" name="course_id" required
-                                class="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 text-sm sm:text-[15px] focus:ring-1 focus:ring-slate-900 focus:border-slate-900 bg-white">
+                                class="w-full px-3.5 py-2.5 rounded-md border border-slate-300 text-sm sm:text-[15px] focus:ring-1 focus:ring-slate-900 focus:border-slate-900 bg-white">
                             @foreach ($courses as $c)
                                 <option value="{{ $c->id }}" @selected(old('course_id', $event->course_id) == $c->id)>
                                     {{ $c->name }} ({{ count($courseAgendasMap[$c->id] ?? []) }} Agenda)
@@ -143,48 +143,48 @@
                         @enderror
                     </div>
 
-                    {{-- Template Penamaan Event: Gelombang [Nomor] [Wilayah] [Tahun] --}}
-                    <div class="p-4 rounded-md border border-slate-200 bg-slate-50/50 space-y-3">
-                        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1.5 border-b border-slate-200/70 pb-2.5">
+                    {{-- Template Penamaan Event: Gelombang [Nomor] [Wilayah] [Tahun] (Flat) --}}
+                    <div class="pt-6 border-t border-slate-100 space-y-3.5">
+                        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                             <div>
-                                <label class="block text-xs sm:text-sm font-bold text-slate-800 uppercase tracking-wider">
+                                <h3 class="text-xs sm:text-sm font-bold text-slate-800 uppercase tracking-wider">
                                     Penamaan Gelombang Event <span class="text-rose-500">*</span>
-                                </label>
+                                </h3>
                                 <p class="text-xs text-slate-500 mt-0.5">
                                     Format standar otomatis: <span class="font-semibold text-slate-700">Gelombang [Nomor] [Wilayah] [Tahun]</span>
                                 </p>
                             </div>
-                            <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-md bg-[#13416B]/10 border border-[#13416B]/20 text-xs sm:text-sm font-bold text-[#13416B] self-start sm:self-center">
-                                <span class="text-[11px] font-medium text-[#13416B]/70">Hasil:</span>
+                            <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-md bg-[#EBF3FA] text-xs sm:text-sm font-bold text-[#13416B] self-start sm:self-center">
+                                <span class="text-[11px] font-medium text-[#547996]">Hasil:</span>
                                 <span x-text="computedBatchName || 'Gelombang ...'"></span>
                             </div>
                         </div>
 
                         <input type="hidden" id="batch_name" name="batch_name" :value="computedBatchName">
 
-                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                             {{-- Nomor Gelombang --}}
                             <div>
-                                <label for="wave_number" class="block text-xs sm:text-sm font-semibold text-slate-700 mb-1">
+                                <label for="wave_number" class="block text-xs sm:text-sm font-semibold text-slate-700 mb-1.5">
                                     Nomor Gelombang <span class="text-rose-500">*</span>
                                 </label>
                                 <div class="flex items-center">
-                                    <span class="px-3 py-2 rounded-l-md border border-r-0 border-slate-300 bg-slate-100 text-xs sm:text-sm font-semibold text-slate-600 select-none">
+                                    <span class="px-3 py-2.5 rounded-l-md border border-r-0 border-slate-300 bg-slate-50 text-xs sm:text-sm font-semibold text-slate-600 select-none">
                                         Gelombang
                                     </span>
                                     <input type="number" id="wave_number" name="wave_number" x-model="waveNumber" min="1" max="99" required
                                            placeholder="1"
-                                           class="w-full px-3 py-2 rounded-r-md border border-slate-300 text-sm sm:text-[15px] bg-white focus:ring-1 focus:ring-slate-900 focus:border-slate-900">
+                                           class="w-full px-3 py-2.5 rounded-r-md border border-slate-300 text-sm sm:text-[15px] bg-white focus:ring-1 focus:ring-slate-900 focus:border-slate-900">
                                 </div>
                             </div>
 
                             {{-- Wilayah --}}
                             <div>
-                                <label for="wave_region" class="block text-xs sm:text-sm font-semibold text-slate-700 mb-1">
+                                <label for="wave_region" class="block text-xs sm:text-sm font-semibold text-slate-700 mb-1.5">
                                     Wilayah <span class="text-rose-500">*</span>
                                 </label>
                                 <select id="wave_region" name="wave_region" x-model="waveRegion" required
-                                        class="w-full px-3 py-2 rounded-md border border-slate-300 text-sm sm:text-[15px] bg-white focus:ring-1 focus:ring-slate-900 focus:border-slate-900">
+                                        class="w-full px-3 py-2.5 rounded-md border border-slate-300 text-sm sm:text-[15px] bg-white focus:ring-1 focus:ring-slate-900 focus:border-slate-900">
                                     <option value="Nasional">Nasional</option>
                                     <optgroup label="Provinsi">
                                         @foreach ($provinceOptions as $regionOpt)
@@ -202,12 +202,12 @@
 
                             {{-- Tahun --}}
                             <div>
-                                <label for="wave_year" class="block text-xs sm:text-sm font-semibold text-slate-700 mb-1">
+                                <label for="wave_year" class="block text-xs sm:text-sm font-semibold text-slate-700 mb-1.5">
                                     Tahun <span class="text-rose-500">*</span>
                                 </label>
                                 <input type="number" id="wave_year" name="wave_year" x-model="waveYear" min="2020" max="2099" required
                                        placeholder="{{ now()->format('Y') }}"
-                                       class="w-full px-3 py-2 rounded-md border border-slate-300 text-sm sm:text-[15px] bg-white focus:ring-1 focus:ring-slate-900 focus:border-slate-900">
+                                       class="w-full px-3 py-2.5 rounded-md border border-slate-300 text-sm sm:text-[15px] bg-white focus:ring-1 focus:ring-slate-900 focus:border-slate-900">
                             </div>
                         </div>
 
@@ -216,8 +216,8 @@
                         @enderror
                     </div>
 
-                    {{-- Kuota Peserta dengan Opsi Tanpa Batasan --}}
-                    <div>
+                    {{-- Kuota Peserta dengan Opsi Tanpa Batasan (Flat) --}}
+                    <div class="pt-6 border-t border-slate-100">
                         <div class="flex items-center justify-between mb-1.5">
                             <label for="quota" class="block text-xs sm:text-sm font-semibold text-slate-700">
                                 Kapasitas Kuota <span class="text-rose-500" x-show="!isUnlimited">*</span>
@@ -233,20 +233,20 @@
                             <input type="number" id="quota" name="quota"
                                    value="{{ old('quota', $event->quota ?: 100) }}" min="1"
                                    placeholder="Contoh: 100"
-                                   class="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 text-sm sm:text-[15px] focus:ring-1 focus:ring-slate-900 focus:border-slate-900">
+                                   class="w-full px-3.5 py-2.5 rounded-md border border-slate-300 text-sm sm:text-[15px] focus:ring-1 focus:ring-slate-900 focus:border-slate-900">
                             @error('quota')
                                 <p class="text-xs sm:text-sm text-rose-500 mt-1">{{ $message }}</p>
                             @enderror
                         </div>
                         <div x-show="isUnlimited" x-cloak
-                             class="px-3 py-2 bg-slate-50 border border-dashed border-slate-300 rounded-lg text-xs sm:text-sm text-slate-600">
+                             class="px-3.5 py-2.5 bg-slate-50 border border-dashed border-slate-300 rounded-md text-xs sm:text-sm text-slate-600">
                             Kapasitas peserta terbuka <strong>tanpa batasan kuota</strong>.
                         </div>
                     </div>
 
-                    {{-- Periode Pendaftaran Peserta (Clean, No Icon) --}}
-                    <div class="p-4 rounded-md border border-slate-200 bg-white space-y-3">
-                        <div class="flex items-center justify-between border-b border-slate-100 pb-2">
+                    {{-- Periode Pendaftaran Peserta (Flat) --}}
+                    <div class="pt-6 border-t border-slate-100 space-y-3.5">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
                             <h3 class="text-xs sm:text-sm font-bold text-slate-800 uppercase tracking-wider">Periode Pendaftaran Peserta</h3>
                             <span class="text-xs text-slate-500 font-medium">
                                 Jadwal calon peserta mendaftar mandiri di katalog
@@ -255,23 +255,23 @@
 
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
-                                <label for="registration_start_at" class="block text-xs sm:text-sm font-semibold text-slate-700 mb-1">
+                                <label for="registration_start_at" class="block text-xs sm:text-sm font-semibold text-slate-700 mb-1.5">
                                     Tanggal Buka Pendaftaran <span class="text-rose-500">*</span>
                                 </label>
                                 <input type="date" id="registration_start_at" name="registration_start_at"
                                        value="{{ old('registration_start_at', $event->registration_start_at ? $event->registration_start_at->format('Y-m-d') : ($event->start_date ? $event->start_date->copy()->subDays(7)->format('Y-m-d') : '')) }}" required
-                                       class="w-full px-3 py-2 rounded-lg border border-slate-300 text-sm sm:text-[15px] focus:ring-1 focus:ring-slate-900 focus:border-slate-900 bg-white transition-colors">
+                                       class="w-full px-3.5 py-2.5 rounded-md border border-slate-300 text-sm sm:text-[15px] focus:ring-1 focus:ring-slate-900 focus:border-slate-900 bg-white transition-colors">
                                 @error('registration_start_at')
                                     <p class="text-xs sm:text-sm text-rose-500 mt-1">{{ $message }}</p>
                                 @enderror
                             </div>
                             <div>
-                                <label for="registration_end_at" class="block text-xs sm:text-sm font-semibold text-slate-700 mb-1">
+                                <label for="registration_end_at" class="block text-xs sm:text-sm font-semibold text-slate-700 mb-1.5">
                                     Tanggal Tutup Pendaftaran <span class="text-rose-500">*</span>
                                 </label>
                                 <input type="date" id="registration_end_at" name="registration_end_at"
                                        value="{{ old('registration_end_at', $event->registration_end_at ? $event->registration_end_at->format('Y-m-d') : ($event->start_date ? $event->start_date->copy()->subDay()->format('Y-m-d') : '')) }}" required
-                                       class="w-full px-3 py-2 rounded-lg border border-slate-300 text-sm sm:text-[15px] focus:ring-1 focus:ring-slate-900 focus:border-slate-900 bg-white transition-colors">
+                                       class="w-full px-3.5 py-2.5 rounded-md border border-slate-300 text-sm sm:text-[15px] focus:ring-1 focus:ring-slate-900 focus:border-slate-900 bg-white transition-colors">
                                 @error('registration_end_at')
                                     <p class="text-xs sm:text-sm text-rose-500 mt-1">{{ $message }}</p>
                                 @enderror
@@ -294,9 +294,9 @@
                 {{-- LANGKAH 2: PERIODE PELAKSANAAN & LIVE ZOOM MULTI-SESI     --}}
                 {{-- ======================================================== --}}
                 <div x-show="step === 2" x-cloak class="space-y-6">
-                    {{-- Periode Pelaksanaan (Clean, No Icon) --}}
-                    <div class="p-4 rounded-md border border-slate-200 bg-white space-y-3">
-                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1 border-b border-slate-100 pb-2">
+                    {{-- Rentang Tanggal Pelaksanaan (Flat) --}}
+                    <div class="space-y-3.5">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
                             <h3 class="text-xs sm:text-sm font-bold text-slate-800 uppercase tracking-wider">Rentang Tanggal Pelaksanaan</h3>
                             <span id="exec-min-days-hint" class="text-xs text-slate-500 font-medium">
                                 Jadwal harus setelah periode pendaftaran
@@ -305,23 +305,23 @@
 
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
-                                <label for="start_date" class="block text-xs sm:text-sm font-semibold text-slate-700 mb-1">
+                                <label for="start_date" class="block text-xs sm:text-sm font-semibold text-slate-700 mb-1.5">
                                     Tanggal Mulai Pelaksanaan <span class="text-rose-500">*</span>
                                 </label>
                                 <input type="date" id="start_date" name="start_date"
                                        value="{{ old('start_date', $event->start_date ? $event->start_date->format('Y-m-d') : '') }}" required
-                                       class="w-full px-3 py-2 rounded-lg border border-slate-300 text-sm sm:text-[15px] focus:ring-1 focus:ring-slate-900 focus:border-slate-900 bg-white transition-colors">
+                                       class="w-full px-3.5 py-2.5 rounded-md border border-slate-300 text-sm sm:text-[15px] focus:ring-1 focus:ring-slate-900 focus:border-slate-900 bg-white transition-colors">
                                 @error('start_date')
                                     <p class="text-xs sm:text-sm text-rose-500 mt-1">{{ $message }}</p>
                                 @enderror
                             </div>
                             <div>
-                                <label for="end_date" class="block text-xs sm:text-sm font-semibold text-slate-700 mb-1">
+                                <label for="end_date" class="block text-xs sm:text-sm font-semibold text-slate-700 mb-1.5">
                                     Tanggal Selesai Pelaksanaan <span class="text-rose-500">*</span>
                                 </label>
                                 <input type="date" id="end_date" name="end_date"
                                        value="{{ old('end_date', $event->end_date ? $event->end_date->format('Y-m-d') : '') }}" required
-                                       class="w-full px-3 py-2 rounded-lg border border-slate-300 text-sm sm:text-[15px] focus:ring-1 focus:ring-slate-900 focus:border-slate-900 bg-white transition-colors">
+                                       class="w-full px-3.5 py-2.5 rounded-md border border-slate-300 text-sm sm:text-[15px] focus:ring-1 focus:ring-slate-900 focus:border-slate-900 bg-white transition-colors">
                                 @error('end_date')
                                     <p class="text-xs sm:text-sm text-rose-500 mt-1">{{ $message }}</p>
                                 @enderror
@@ -329,68 +329,58 @@
                         </div>
                     </div>
 
-                    {{-- SUB-CARD: DETAIL SESI ZOOM & MULTI-SESI (Biru Sirenata Kalem & Teks White) --}}
-                    <div id="card-zoom" class="p-4 sm:p-5 rounded-md bg-[#1E40AF] text-white shadow-sm space-y-4">
-                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1 border-b border-white/20 pb-2.5">
-                            <div>
-                                <span class="text-xs sm:text-sm font-bold text-white uppercase tracking-wider block">
-                                    Pengaturan Sesi Live Zoom & Presensi Harian (Multi-Sesi)
-                                </span>
-                                <span class="text-xs text-blue-100 font-medium">
-                                    Setiap hari pelaksanaan dapat memiliki jadwal tatap muka Zoom dan jam presensi tersendiri
+                    {{-- Informasi Ruang Meeting Zoom Utama (Flat) --}}
+                    <div id="card-zoom" class="pt-6 border-t border-slate-100 space-y-6">
+                        <div class="space-y-3.5">
+                            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+                                <h3 class="text-xs sm:text-sm font-bold text-slate-800 uppercase tracking-wider">
+                                    Informasi Ruang Meeting Zoom Utama
+                                </h3>
+                                <span id="zoom-status-badge" class="text-xs text-slate-500 font-medium">
+                                    Tautan Zoom yang digunakan peserta selama pelaksanaan
                                 </span>
                             </div>
-                            <span id="zoom-status-badge" class="text-xs text-blue-100 font-medium">
-                                Jadwal berada di dalam rentang tanggal pelaksanaan
-                            </span>
-                        </div>
-
-                        {{-- Ruang Pertemuan Utama / Global Meeting Room --}}
-                        <div class="space-y-3 bg-black/15 p-3.5 rounded-lg border border-white/10">
-                            <span class="text-xs sm:text-sm font-bold text-white uppercase tracking-wider block border-b border-white/10 pb-1.5">
-                                Informasi Ruang Meeting Zoom Utama
-                            </span>
 
                             <div>
-                                <label for="zoom_url" class="block text-xs sm:text-sm font-semibold text-white mb-1">
+                                <label for="zoom_url" class="block text-xs sm:text-sm font-semibold text-slate-700 mb-1.5">
                                     Link URL Meeting Zoom (Tautan Utama)
                                 </label>
                                 <input type="url" id="zoom_url" name="zoom_url" value="{{ old('zoom_url', $event->zoom_url) }}"
                                        placeholder="https://zoom.us/j/1234567890?pwd=..."
-                                       class="w-full px-3 py-2 rounded-lg border-0 text-sm sm:text-[15px] bg-white text-slate-900 focus:ring-2 focus:ring-white transition-colors">
+                                       class="w-full px-3.5 py-2.5 rounded-md border border-slate-300 text-sm sm:text-[15px] bg-white text-slate-900 focus:ring-1 focus:ring-slate-900 focus:border-slate-900 transition-colors">
                                 @error('zoom_url')
-                                    <p class="text-xs sm:text-sm text-rose-200 mt-1 font-semibold">{{ $message }}</p>
+                                    <p class="text-xs sm:text-sm text-rose-500 mt-1">{{ $message }}</p>
                                 @enderror
                             </div>
 
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div>
-                                    <label for="zoom_meeting_id" class="block text-xs sm:text-sm font-semibold text-white mb-1">
+                                    <label for="zoom_meeting_id" class="block text-xs sm:text-sm font-semibold text-slate-700 mb-1.5">
                                         Meeting ID (Opsional)
                                     </label>
                                     <input type="text" id="zoom_meeting_id" name="zoom_meeting_id" value="{{ old('zoom_meeting_id', $event->zoom_meeting_id) }}"
                                            placeholder="Contoh: 839 2039 1234"
-                                           class="w-full px-3 py-2 rounded-lg border-0 text-sm sm:text-[15px] bg-white text-slate-900 focus:ring-2 focus:ring-white">
+                                           class="w-full px-3.5 py-2.5 rounded-md border border-slate-300 text-sm sm:text-[15px] bg-white text-slate-900 focus:ring-1 focus:ring-slate-900 focus:border-slate-900">
                                 </div>
                                 <div>
-                                    <label for="zoom_passcode" class="block text-xs sm:text-sm font-semibold text-white mb-1">
+                                    <label for="zoom_passcode" class="block text-xs sm:text-sm font-semibold text-slate-700 mb-1.5">
                                         Passcode Zoom (Opsional)
                                     </label>
                                     <input type="text" id="zoom_passcode" name="zoom_passcode" value="{{ old('zoom_passcode', $event->zoom_passcode) }}"
                                            placeholder="Contoh: SPBE2026"
-                                           class="w-full px-3 py-2 rounded-lg border-0 text-sm sm:text-[15px] bg-white text-slate-900 focus:ring-2 focus:ring-white">
+                                           class="w-full px-3.5 py-2.5 rounded-md border border-slate-300 text-sm sm:text-[15px] bg-white text-slate-900 focus:ring-1 focus:ring-slate-900 focus:border-slate-900">
                                 </div>
                             </div>
                         </div>
 
-                        {{-- SEKSI MULTI-SESI ZOOM & PRESENSI 1-KE-1 SESUAI AGENDA MASTER KURSUS --}}
-                        <div class="space-y-3 pt-1">
-                            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-white/20 pb-2">
+                        {{-- SEKSI MULTI-SESI ZOOM & PRESENSI 1-KE-1 SESUAI AGENDA MASTER KURSUS (Flat) --}}
+                        <div class="pt-6 border-t border-slate-100 space-y-3.5">
+                            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                                 <div class="flex items-center gap-2 flex-wrap">
-                                    <span class="text-xs sm:text-sm font-bold text-white uppercase tracking-wider">
+                                    <h3 class="text-xs sm:text-sm font-bold text-slate-800 uppercase tracking-wider">
                                         Jadwal Sesi Zoom &amp; Presensi Per Agenda
-                                    </span>
-                                    <span id="sessions-count-badge" class="px-2 py-0.5 rounded text-xs font-bold bg-white/20 text-white">
+                                    </h3>
+                                    <span id="sessions-count-badge" class="px-2 py-0.5 rounded-md text-xs font-bold bg-slate-100 text-slate-700">
                                         0 Sesi
                                     </span>
                                 </div>
@@ -407,12 +397,12 @@
                             {{-- Container Daftar Sesi Dinamis --}}
                             <div id="sessions-container" class="space-y-3">
                                 {{-- Empty State jika belum ada sesi --}}
-                                <div id="sessions-empty-state" class="p-4 rounded-md border border-dashed border-white/30 text-center space-y-1.5 bg-black/10">
-                                    <p class="text-xs sm:text-sm text-white/90 font-medium">
+                                <div id="sessions-empty-state" class="p-5 rounded-md border border-dashed border-slate-300 text-center space-y-1 bg-slate-50/70">
+                                    <p class="text-xs sm:text-sm text-slate-700 font-semibold">
                                         Belum ada jadwal sesi Zoom yang dibuat.
                                     </p>
-                                    <p class="text-xs text-blue-100/80">
-                                        Klik <strong>"Generate Sesi Sesuai Agenda"</strong> untuk menyiapkan sesi Zoom otomatis 1-ke-1 sesuai jumlah agenda Master Kursus. Jika rentang pelaksanaan lebih panjang (mis. ada jeda belajar mandiri), Anda bebas menggeser tanggal tiap sesi di dalam rentang tersebut.
+                                    <p class="text-xs text-slate-500 max-w-xl mx-auto">
+                                        Klik <strong>"Generate Sesi Sesuai Agenda"</strong> untuk menyiapkan sesi Zoom otomatis 1-ke-1 sesuai jumlah agenda Master Kursus. Anda bebas menggeser tanggal tiap sesi di dalam rentang pelaksanaan.
                                     </p>
                                 </div>
                             </div>
@@ -434,10 +424,10 @@
                 {{-- LANGKAH 3: EVALUASI, SERTIFIKAT & KONFIRMASI AKHIR       --}}
                 {{-- ======================================================== --}}
                 <div x-show="step === 3" x-cloak class="space-y-6">
-                    {{-- Periode Evaluasi & Sertifikat (Clean, No Icon) --}}
-                    <div class="p-4 rounded-md border border-slate-200 bg-white space-y-3">
-                        <div class="flex items-center justify-between border-b border-slate-100 pb-2">
-                            <h3 class="text-xs sm:text-sm font-bold text-slate-800 uppercase tracking-wider">Periode Evaluasi & Batas Kelulusan</h3>
+                    {{-- Periode Evaluasi & Sertifikat (Flat) --}}
+                    <div class="space-y-3.5">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+                            <h3 class="text-xs sm:text-sm font-bold text-slate-800 uppercase tracking-wider">Periode Evaluasi &amp; Batas Kelulusan</h3>
                             <span class="text-xs text-slate-500 font-medium">
                                 Jadwal pengerjaan ujian dan penerbitan sertifikat
                             </span>
@@ -445,23 +435,23 @@
 
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
-                                <label for="assessment_start_at" class="block text-xs sm:text-sm font-semibold text-slate-700 mb-1">
+                                <label for="assessment_start_at" class="block text-xs sm:text-sm font-semibold text-slate-700 mb-1.5">
                                     Tanggal Mulai Evaluasi <span class="text-rose-500">*</span>
                                 </label>
                                 <input type="date" id="assessment_start_at" name="assessment_start_at"
                                        value="{{ old('assessment_start_at', $event->assessment_start_at ? $event->assessment_start_at->format('Y-m-d') : ($event->end_date ? $event->end_date->format('Y-m-d') : '')) }}" required
-                                       class="w-full px-3 py-2 rounded-lg border border-slate-300 text-sm sm:text-[15px] focus:ring-1 focus:ring-slate-900 focus:border-slate-900 bg-white transition-colors">
+                                       class="w-full px-3.5 py-2.5 rounded-md border border-slate-300 text-sm sm:text-[15px] focus:ring-1 focus:ring-slate-900 focus:border-slate-900 bg-white transition-colors">
                                 @error('assessment_start_at')
                                     <p class="text-xs sm:text-sm text-rose-500 mt-1">{{ $message }}</p>
                                 @enderror
                             </div>
                             <div>
-                                <label for="assessment_end_at" class="block text-xs sm:text-sm font-semibold text-slate-700 mb-1">
+                                <label for="assessment_end_at" class="block text-xs sm:text-sm font-semibold text-slate-700 mb-1.5">
                                     Tanggal Batas Akhir Evaluasi / Sertifikat <span class="text-rose-500">*</span>
                                 </label>
                                 <input type="date" id="assessment_end_at" name="assessment_end_at"
                                        value="{{ old('assessment_end_at', $event->assessment_end_at ? $event->assessment_end_at->format('Y-m-d') : ($event->end_date ? $event->end_date->copy()->addDays(3)->format('Y-m-d') : '')) }}" required
-                                       class="w-full px-3 py-2 rounded-lg border border-slate-300 text-sm sm:text-[15px] focus:ring-1 focus:ring-slate-900 focus:border-slate-900 bg-white transition-colors">
+                                       class="w-full px-3.5 py-2.5 rounded-md border border-slate-300 text-sm sm:text-[15px] focus:ring-1 focus:ring-slate-900 focus:border-slate-900 bg-white transition-colors">
                                 @error('assessment_end_at')
                                     <p class="text-xs sm:text-sm text-rose-500 mt-1">{{ $message }}</p>
                                 @enderror
@@ -931,10 +921,11 @@
                         if (agendas.length > 0) {
                             sessionsCountBadge.textContent = `${cards.length} / ${agendas.length} Agenda`;
                             sessionsCountBadge.className = cards.length === agendas.length
-                                ? 'px-2 py-0.5 rounded text-xs font-bold bg-emerald-500 text-white'
-                                : 'px-2 py-0.5 rounded text-xs font-bold bg-white/20 text-white';
+                                ? 'px-2 py-0.5 rounded-md text-xs font-bold bg-emerald-600 text-white'
+                                : 'px-2 py-0.5 rounded-md text-xs font-bold bg-slate-100 text-slate-700';
                         } else {
                             sessionsCountBadge.textContent = `${cards.length} Sesi`;
+                            sessionsCountBadge.className = 'px-2 py-0.5 rounded-md text-xs font-bold bg-slate-100 text-slate-700';
                         }
                     }
 
@@ -965,7 +956,7 @@
 
                 function createSessionCard(data = {}, index = 0) {
                     const card = document.createElement('div');
-                    card.className = 'session-card p-3.5 sm:p-4 rounded-lg bg-black/25 border border-white/20 space-y-3 transition-all';
+                    card.className = 'session-card p-4 rounded-md bg-slate-50/70 border border-slate-200 space-y-3.5 transition-all';
                     card.dataset.index = index;
 
                     const agendas = getSelectedCourseAgendas();
@@ -981,58 +972,58 @@
 
                     card.innerHTML = `
                         ${sessionId ? `<input type="hidden" name="sessions[${index}][id]" value="${escapeHtml(sessionId)}">` : ''}
-                        <div class="flex items-center justify-between gap-2 border-b border-white/15 pb-2 flex-wrap">
+                        <div class="flex items-center justify-between gap-2 pb-2.5 border-b border-slate-200/80 flex-wrap">
                             <div class="flex items-center gap-2 flex-1 min-w-0 flex-wrap">
-                                <span class="session-num-badge px-2 py-0.5 rounded text-xs font-bold bg-amber-400 text-slate-900 shrink-0">
+                                <span class="session-num-badge px-2.5 py-1 rounded-md text-xs font-bold bg-[#13416B] text-white shrink-0">
                                     Agenda Hari ${index + 1}
                                 </span>
                                 <input type="text" name="sessions[${index}][title]" value="${escapeHtml(titleVal)}" placeholder="Judul Sesi" required
-                                       class="session-title-input flex-1 min-w-[200px] px-2.5 py-1 text-xs sm:text-sm font-semibold rounded bg-white text-slate-900 border-0 focus:ring-2 focus:ring-white">
+                                       class="session-title-input flex-1 min-w-[200px] px-3 py-1.5 text-xs sm:text-sm font-semibold rounded-md bg-white text-slate-900 border border-slate-300 focus:ring-1 focus:ring-slate-900 focus:border-slate-900">
                             </div>
                         </div>
 
-                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
                             <div>
-                                <label class="block text-xs font-medium text-blue-100 mb-1">
-                                    Tanggal Sesi <span class="text-amber-300">*</span>
+                                <label class="block text-xs font-semibold text-slate-700 mb-1">
+                                    Tanggal Sesi <span class="text-rose-500">*</span>
                                 </label>
                                 <input type="date" name="sessions[${index}][session_date]" value="${escapeHtml(dateVal)}" required
-                                       class="session-date-input w-full px-2.5 py-1.5 text-xs sm:text-sm rounded bg-white text-slate-900 border-0 focus:ring-2 focus:ring-white">
+                                       class="session-date-input w-full px-3 py-2 text-xs sm:text-sm rounded-md bg-white text-slate-900 border border-slate-300 focus:ring-1 focus:ring-slate-900 focus:border-slate-900">
                             </div>
                             <div>
-                                <label class="block text-xs font-medium text-blue-100 mb-1">
-                                    Mulai Zoom <span class="text-amber-300">*</span>
+                                <label class="block text-xs font-semibold text-slate-700 mb-1">
+                                    Mulai Zoom <span class="text-rose-500">*</span>
                                 </label>
                                 <input type="datetime-local" name="sessions[${index}][start_time]" value="${escapeHtml(startVal)}" required
-                                       class="session-start-input w-full px-2.5 py-1.5 text-xs sm:text-sm rounded bg-white text-slate-900 border-0 focus:ring-2 focus:ring-white">
+                                       class="session-start-input w-full px-3 py-2 text-xs sm:text-sm rounded-md bg-white text-slate-900 border border-slate-300 focus:ring-1 focus:ring-slate-900 focus:border-slate-900">
                             </div>
                             <div>
-                                <label class="block text-xs font-medium text-blue-100 mb-1">
+                                <label class="block text-xs font-semibold text-slate-700 mb-1">
                                     Selesai Zoom (Opsional)
                                 </label>
                                 <input type="datetime-local" name="sessions[${index}][end_time]" value="${escapeHtml(endVal)}"
-                                       class="session-end-input w-full px-2.5 py-1.5 text-xs sm:text-sm rounded bg-white text-slate-900 border-0 focus:ring-2 focus:ring-white">
+                                       class="session-end-input w-full px-3 py-2 text-xs sm:text-sm rounded-md bg-white text-slate-900 border border-slate-300 focus:ring-1 focus:ring-slate-900 focus:border-slate-900">
                             </div>
                         </div>
 
-                        {{-- Rentang Jam Pembukaan Presensi Sesi Ini --}}
-                        <div class="p-2.5 rounded bg-black/20 border border-white/10 space-y-2">
+                        {{-- Rentang Jam Pembukaan Presensi Sesi Ini (Flat dengan Garis Tipis) --}}
+                        <div class="pt-3 border-t border-slate-200/80 space-y-2.5">
                             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1 text-xs">
-                                <span class="font-bold text-amber-300">
+                                <span class="font-bold text-slate-700">
                                     Jadwal Presensi Sesi Ini
                                 </span>
-                                <span class="text-blue-100 text-[11px]">Terkunci di dalam jam Zoom sesi ini</span>
+                                <span class="text-slate-500 text-[11px]">Berada di dalam jam Zoom sesi ini</span>
                             </div>
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                                 <div>
-                                    <label class="block text-[11px] text-blue-100 mb-0.5">Buka Presensi</label>
+                                    <label class="block text-xs font-medium text-slate-600 mb-1">Buka Presensi</label>
                                     <input type="datetime-local" name="sessions[${index}][attendance_start_at]" value="${escapeHtml(attStartVal)}"
-                                           class="session-att-start w-full px-2 py-1 text-xs sm:text-sm rounded bg-white text-slate-900 border-0 focus:ring-2 focus:ring-white">
+                                           class="session-att-start w-full px-3 py-2 text-xs sm:text-sm rounded-md bg-white text-slate-900 border border-slate-300 focus:ring-1 focus:ring-slate-900 focus:border-slate-900">
                                 </div>
                                 <div>
-                                    <label class="block text-[11px] text-blue-100 mb-0.5">Tutup Presensi</label>
+                                    <label class="block text-xs font-medium text-slate-600 mb-1">Tutup Presensi</label>
                                     <input type="datetime-local" name="sessions[${index}][attendance_end_at]" value="${escapeHtml(attEndVal)}"
-                                           class="session-att-end w-full px-2 py-1 text-xs sm:text-sm rounded bg-white text-slate-900 border-0 focus:ring-2 focus:ring-white">
+                                           class="session-att-end w-full px-3 py-2 text-xs sm:text-sm rounded-md bg-white text-slate-900 border border-slate-300 focus:ring-1 focus:ring-slate-900 focus:border-slate-900">
                                 </div>
                             </div>
                         </div>

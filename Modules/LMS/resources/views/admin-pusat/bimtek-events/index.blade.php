@@ -3,7 +3,7 @@
 
         {{-- Filter Card & Tabel --}}
         <x-dashboard::filter-card
-            title="Daftar Gelombang Periode Event"
+            title="Daftar Gelombang Periode Acara"
             :total="$events->total() . ' Gelombang'"
             :resetUrl="route('admin-pusat.management-course.bimtek-events.index')">
 
@@ -45,12 +45,12 @@
                     <thead>
                         <tr class="bg-slate-50 border-b border-slate-200 text-xs sm:text-[13px] font-bold text-slate-600 uppercase tracking-wider">
                             <th class="py-3 px-3.5 w-12 text-center">No.</th>
-                            <th class="py-3 px-3.5 min-w-[220px]">Gelombang & Kode</th>
+                            <th class="py-3 px-3.5 min-w-[220px]">Nama Acara</th>
                             <th class="py-3 px-3.5 min-w-[200px]">Master Kursus</th>
                             <th class="py-3 px-3.5 min-w-[170px]">Jadwal Pelaksanaan</th>
                             <th class="py-3 px-3.5 min-w-[110px]">Kuota</th>
                             <th class="py-3 px-3.5 min-w-[120px] text-center">Status</th>
-                            <th class="py-3 px-3.5 w-28 text-center">Aksi</th>
+                            <th class="py-3 px-3.5 min-w-[180px] text-center">Aksi</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-100 text-sm sm:text-[15px]">
@@ -65,9 +65,6 @@
                                        title="{{ $item->batch_name }}">
                                         {{ $item->batch_name }}
                                     </a>
-                                    <span class="inline-block mt-0.5 text-xs sm:text-[13px] font-mono font-medium text-slate-400">
-                                        {{ $item->batch_code }}
-                                    </span>
                                 </td>
                                 <td class="py-3 px-3.5">
                                     <p class="font-semibold text-slate-700 line-clamp-2 leading-snug" title="{{ $item->course?->name }}">
@@ -78,15 +75,6 @@
                                     <p class="font-bold text-slate-800 text-xs sm:text-sm tabular-nums">
                                         {{ $item->start_date ? $item->start_date->format('d M Y') : '-' }} s/d {{ $item->end_date ? $item->end_date->format('d M Y') : '-' }}
                                     </p>
-                                    @if ($item->zoom_scheduled_at)
-                                        <p class="text-xs sm:text-[13px] text-blue-600 font-semibold mt-0.5">
-                                            Zoom: {{ $item->zoom_schedule_formatted }}
-                                        </p>
-                                    @else
-                                        <p class="text-xs sm:text-[13px] text-slate-400 mt-0.5">
-                                            Pukul {{ $item->start_date ? $item->start_date->format('H:i') : '08:00' }} WIB
-                                        </p>
-                                    @endif
                                 </td>
                                 <td class="py-3 px-3.5">
                                     @if ($item->quota && $item->quota > 0)
@@ -112,13 +100,15 @@
                                     <div class="flex items-center justify-center gap-1.5">
                                         <a href="{{ route('admin-pusat.management-course.bimtek-events.show', $item->id) }}"
                                            title="Detail & Monitoring Peserta"
-                                           class="inline-flex items-center justify-center w-8 h-8 rounded-lg text-[#13416B] bg-[#13416B]/10 hover:bg-[#13416B]/20 transition-colors">
-                                            <i class="fas fa-eye text-xs sm:text-sm"></i>
+                                           class="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-md text-xs sm:text-sm font-semibold text-[#13416B] bg-[#13416B]/10 hover:bg-[#13416B]/20 transition-colors whitespace-nowrap">
+                                            <i class="fas fa-eye text-xs"></i>
+                                            <span>Pantau</span>
                                         </a>
                                         <a href="{{ route('admin-pusat.management-course.bimtek-events.edit', $item->id) }}"
                                            title="Edit Pengaturan"
-                                           class="inline-flex items-center justify-center w-8 h-8 rounded-lg text-amber-600 bg-amber-50 hover:bg-amber-100 transition-colors">
-                                            <i class="fas fa-pen text-xs sm:text-sm"></i>
+                                           class="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-md text-xs sm:text-sm font-semibold text-amber-700 bg-amber-50 hover:bg-amber-100 transition-colors whitespace-nowrap">
+                                            <i class="fas fa-pen text-xs"></i>
+                                            <span>Edit</span>
                                         </a>
                                     </div>
                                 </td>
