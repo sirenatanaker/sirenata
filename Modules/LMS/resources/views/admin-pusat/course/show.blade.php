@@ -26,7 +26,7 @@
             <!-- Bagian Kiri: Thumbnail -->
             <div class="w-full md:w-1/3 lg:w-1/4 shrink-0 rounded-md overflow-hidden bg-slate-100 aspect-video md:aspect-[4/3] relative border border-slate-200 flex items-center justify-center">
                 @if (!empty($course->thumbnail))
-                    <img src="{{ $course->thumbnail }}" alt="{{ $course->name }}" class="w-full h-full object-cover" />
+                    <img src="{{ str_starts_with($course->thumbnail, 'http') ? $course->thumbnail : asset('storage/' . $course->thumbnail) }}" alt="{{ $course->name }}" class="w-full h-full object-cover" />
                 @else
                     <div class="flex flex-col items-center justify-center text-slate-400 gap-2">
                         <i class="fas fa-image text-4xl"></i>
@@ -385,12 +385,12 @@
                 
                 <!-- Card Aksi -->
                 <div class="order-1 bg-white rounded-md shadow-sm border border-slate-200 p-3 sm:p-6">
-                    <h3 class="text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 sm:mb-4">Aksi Course</h3>
+                    <h3 class="text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 sm:mb-4">Aksi Kursus</h3>
                     <div class="space-y-3">
-                        <a href="{{ route('admin-pusat.management-course.courses.edit', $course->slug) }}"
-                            class="flex items-center justify-center w-full px-3 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-sm font-bold text-white bg-amber-500 rounded-md sm:rounded-xl hover:bg-amber-600 transition-colors shadow-sm gap-2">
-                            <i class="fas fa-edit"></i> Edit Informasi Course
-                        </a>
+                        <button type="button" x-data @click="$dispatch('open-modal', 'edit-course-{{ $course->slug }}')"
+                            class="flex items-center justify-center w-full px-3 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-sm font-bold text-white bg-amber-500 rounded-md sm:rounded-xl hover:bg-amber-600 transition-colors shadow-sm gap-2 cursor-pointer">
+                            <i class="fas fa-edit"></i> Edit Informasi Kursus
+                        </button>
                         <a href="{{ route('admin-pusat.management-course.courses.index') }}"
                             class="flex items-center justify-center w-full px-3 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-sm font-bold text-slate-700 bg-white border border-slate-300 rounded-md sm:rounded-xl hover:bg-slate-50 transition-colors shadow-sm">
                             Kembali ke Daftar
@@ -452,6 +452,131 @@
 
             </div>
         </div>
+    </div>
+
+    <!-- Modal Edit Informasi Master Kursus -->
+    @php
+        $currentBgColor = '13416B';
+        if (!empty($course->thumbnail) && str_starts_with($course->thumbnail, 'http')) {
+            parse_str((string) parse_url($course->thumbnail, PHP_URL_QUERY), $thumbQuery);
+            if (!empty($thumbQuery['background'])) {
+                $currentBgColor = $thumbQuery['background'];
+            }
+        }
+        $selectedBgColor = old('bg_color', $currentBgColor);
+        $initialThumbMode = old('thumb_mode', str_starts_with($course->thumbnail ?? '', 'http') ? 'auto' : 'upload');
+    @endphp
+    <div @if ($errors->any() && old('from_edit_modal')) x-data x-init="$nextTick(() => $dispatch('open-modal', 'edit-course-{{ $course->slug }}'))" @endif>
+        <x-modal name="edit-course-{{ $course->slug }}" title="Edit Informasi Master Kursus" maxWidth="sm:max-w-2xl">
+            <x-validation-errors class="mb-4" />
+
+            <form action="{{ route('admin-pusat.management-course.courses.update', $course->slug) }}" method="POST"
+                enctype="multipart/form-data" class="space-y-5 pt-2">
+                @csrf
+                @method('PUT')
+                <input type="hidden" name="redirect_to" value="show">
+                <input type="hidden" name="from_edit_modal" value="1">
+
+                <!-- Peruntukan Kursus -->
+                <div>
+                    <span class="block text-sm font-semibold text-slate-800 mb-2">Peruntukan Kursus <span class="text-red-500">*</span></span>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <label
+                            class="relative flex items-center gap-3 p-3.5 rounded-md border border-slate-200 cursor-pointer transition-all bg-white hover:border-[#13416B]/50 has-[:checked]:border-[#13416B] has-[:checked]:bg-[#13416B]/5">
+                            <input type="radio" name="audience" value="instansi"
+                                class="w-4 h-4 shrink-0 text-[#13416B] focus:ring-[#13416B]"
+                                @checked(old('audience', $course->audience ?? 'instansi') === 'instansi')>
+                            <span>
+                                <span class="block text-sm font-bold text-slate-800">Instansi / Lembaga</span>
+                                <span class="block text-xs text-slate-500">Untuk aparatur pemerintah</span>
+                            </span>
+                        </label>
+                        <label
+                            class="relative flex items-center gap-3 p-3.5 rounded-md border border-slate-200 cursor-pointer transition-all bg-white hover:border-[#13416B]/50 has-[:checked]:border-[#13416B] has-[:checked]:bg-[#13416B]/5">
+                            <input type="radio" name="audience" value="swasta"
+                                class="w-4 h-4 shrink-0 text-[#13416B] focus:ring-[#13416B]"
+                                @checked(old('audience', $course->audience ?? '') === 'swasta')>
+                            <span>
+                                <span class="block text-sm font-bold text-slate-800">Swasta</span>
+                                <span class="block text-xs text-slate-500">Untuk karyawan perusahaan</span>
+                            </span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Nama Kursus -->
+                <div>
+                    <x-form.input name="name" label="Nama Kursus" :value="old('name', $course->name)"
+                        placeholder="Contoh: Perencanaan Tenaga Kerja" required />
+                </div>
+
+                <!-- Thumbnail -->
+                <div class="space-y-3" x-data="{ mode: '{{ $initialThumbMode }}' }">
+                    <label class="block text-sm font-semibold text-slate-800">Thumbnail Kursus</label>
+
+                    <div class="flex flex-wrap items-center gap-4">
+                        <label class="flex items-center gap-2 cursor-pointer text-xs sm:text-sm font-medium text-slate-700">
+                            <input type="radio" name="thumb_mode" value="auto" x-model="mode"
+                                class="text-[#13416B] focus:ring-[#13416B]">
+                            <span>Otomatis (Inisial &amp; Warna)</span>
+                        </label>
+                        <label class="flex items-center gap-2 cursor-pointer text-xs sm:text-sm font-medium text-slate-700">
+                            <input type="radio" name="thumb_mode" value="upload" x-model="mode"
+                                class="text-[#13416B] focus:ring-[#13416B]">
+                            <span>Upload Gambar Baru</span>
+                        </label>
+                    </div>
+
+                    <div x-show="mode === 'auto'" class="pt-1 space-y-2.5">
+                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                            @foreach ([
+                                '13416B' => 'Navy',
+                                '547996' => 'Slate Blue',
+                                '8BB1CC' => 'Light Blue',
+                                '79A736' => 'Muted Green',
+                            ] as $hex => $label)
+                                <label
+                                    class="relative flex items-center justify-between p-2.5 rounded-md border border-slate-200 cursor-pointer transition-all bg-white hover:border-slate-300 has-[:checked]:border-[#13416B] has-[:checked]:bg-[#13416B]/5">
+                                    <div class="flex items-center gap-2">
+                                        <span class="w-4 h-4 rounded-sm shrink-0" style="background-color: #{{ $hex }}"></span>
+                                        <span class="text-xs font-semibold text-slate-700">{{ $label }}</span>
+                                    </div>
+                                    <input type="radio" name="bg_color" value="{{ $hex }}"
+                                        class="text-[#13416B] focus:ring-[#13416B] w-3.5 h-3.5"
+                                        @checked($selectedBgColor === $hex)>
+                                </label>
+                            @endforeach
+                        </div>
+                        <p class="text-xs text-slate-500">Thumbnail otomatis dibuat dari inisial nama kursus dan warna yang dipilih.</p>
+                    </div>
+
+                    <div x-show="mode === 'upload'" class="pt-1">
+                        <x-form.input type="file" name="thumbnail" accept="image/*"
+                            class="file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-[#13416B] file:text-white hover:file:bg-[#0f3354]" />
+                        <p class="text-xs text-slate-500 mt-1.5">Biarkan kosong jika tidak ingin mengubah gambar thumbnail saat ini (JPG/PNG maks. 2MB).</p>
+                    </div>
+                </div>
+
+                <!-- Deskripsi -->
+                <div>
+                    <x-form.textarea name="description" label="Deskripsi Kursus" rows="4"
+                        :value="old('description', $course->description)"
+                        placeholder="Tuliskan deskripsi lengkap mengenai kursus ini..." />
+                </div>
+
+                <!-- Footer Tombol -->
+                <div class="flex items-center justify-end gap-2.5 pt-4 border-t border-slate-100">
+                    <button type="button" @click="$dispatch('close-modal', 'edit-course-{{ $course->slug }}')"
+                        class="px-4 py-2 text-sm font-semibold text-slate-700 bg-white border border-slate-300 rounded-md hover:bg-slate-50 transition-colors cursor-pointer">
+                        Batal
+                    </button>
+                    <button type="submit"
+                        class="px-5 py-2 text-sm font-bold text-white bg-[#13416B] rounded-md hover:bg-[#0e2c48] transition-colors shadow-2xs cursor-pointer">
+                        Simpan Perubahan
+                    </button>
+                </div>
+            </form>
+        </x-modal>
     </div>
 
     @include('lms::admin-pusat.course.partials.guide-tour-detail')

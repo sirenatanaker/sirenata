@@ -104,16 +104,30 @@ class CourseController extends Controller
 
     public function update(UpdateCourseRequest $request, string $slug): RedirectResponse
     {
-        $payload = array_merge($request->validated(), ['slug' => $slug]);
+        $payload = array_merge($request->validated(), [
+            'slug'       => $slug,
+            'thumb_mode' => $request->input('thumb_mode'),
+        ]);
         $result = $this->courseService->updateCourse(
             data: $payload,
             thumbnailFile: $request->file('thumbnail'),
         );
 
         if ($result['success']) {
+            ToastMagic::success($result['message']);
+
+            if ($request->input('redirect_to') === 'show') {
+                $updatedSlug = $result['data']->slug ?? $slug;
+
+                return redirect()->route('admin-pusat.management-course.courses.show', $updatedSlug)
+                    ->with('success', $result['message']);
+            }
+
             return redirect()->route('admin-pusat.management-course.courses.index')
                 ->with('success', $result['message']);
         }
+
+        ToastMagic::error($result['message']);
 
         return back()->withInput()->with('error', $result['message']);
     }

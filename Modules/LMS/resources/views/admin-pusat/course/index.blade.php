@@ -51,7 +51,7 @@
                             <x-table.th>No.</x-table.th>
                             <x-table.th>Sampul</x-table.th>
                             <x-table.th>Nama Kursus</x-table.th>
-                            <x-table.th align="center">Aksi</x-table.th>
+                            <x-table.th align="center" class="min-w-[190px]">Aksi</x-table.th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-100 bg-white">
@@ -62,7 +62,7 @@
                                 </x-table.td>
                                 <x-table.td>
                                     @if (!empty($course->thumbnail))
-                                        <img src="{{ $course->thumbnail }}" alt="Sampul {{ $course->name }}"
+                                        <img src="{{ str_starts_with($course->thumbnail, 'http') ? $course->thumbnail : asset('storage/' . $course->thumbnail) }}" alt="Sampul {{ $course->name }}"
                                             class="w-20 h-14 rounded-md object-cover border border-slate-200">
                                     @else
                                         <div class="w-20 h-14 rounded-md bg-slate-100 text-slate-400 flex items-center justify-center">
@@ -79,22 +79,20 @@
                                     @endif
                                 </x-table.td>
                                 <x-table.td align="center">
-                                    <div class="flex items-center justify-center gap-1">
+                                    <div class="flex items-center justify-center gap-1.5">
                                         <a href="{{ route('admin-pusat.management-course.courses.show', $course->slug) }}"
-                                            class="inline-flex items-center justify-center rounded-lg p-2 text-[#13416B] hover:bg-blue-50"
-                                            title="Lihat detail kursus" aria-label="Lihat detail {{ $course->name }}">
-                                            <i class="fas fa-eye" aria-hidden="true"></i>
-                                        </a>
-                                        <a href="{{ route('admin-pusat.management-course.courses.edit', $course->slug) }}"
-                                            class="inline-flex items-center justify-center rounded-lg p-2 text-amber-600 hover:bg-amber-50"
-                                            title="Edit kursus" aria-label="Edit {{ $course->name }}">
-                                            <i class="fas fa-edit" aria-hidden="true"></i>
+                                            class="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-md text-xs sm:text-sm font-semibold text-[#13416B] bg-[#13416B]/10 hover:bg-[#13416B]/20 transition-colors whitespace-nowrap"
+                                            title="Kelola kurikulum dan informasi kursus" aria-label="Kelola {{ $course->name }}">
+                                            <i class="fas fa-folder-open text-xs" aria-hidden="true"></i>
+                                            <span>Kelola</span>
                                         </a>
                                         <x-modal-delete :id="$course->slug"
                                             message="Apakah Anda yakin ingin menghapus kursus {{ $course->name }}?"
                                             :item-name="$course->name"
                                             :route="route('admin-pusat.management-course.courses.destroy', $course->slug)"
-                                            :icon-only="true" />
+                                            button-text="Hapus"
+                                            button-icon="fas fa-trash-alt text-xs"
+                                            button-class="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-md text-xs sm:text-sm font-semibold text-red-600 bg-red-50 hover:bg-red-100 transition-colors whitespace-nowrap cursor-pointer" />
                                     </div>
                                 </x-table.td>
                             </tr>

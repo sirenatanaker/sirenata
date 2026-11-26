@@ -5,6 +5,7 @@
     'route',
     'itemName' => null,
     'buttonText' => 'Delete',
+    'buttonIcon' => null,
     'iconOnly' => false,
     'buttonClass' =>
         'text-white bg-danger box-border border border-transparent hover:bg-danger-strong focus:ring-4 focus:ring-danger-medium shadow-xs font-medium leading-5 rounded-base text-sm px-4 py-2.5 focus:outline-none cursor-pointer',
@@ -25,7 +26,10 @@
         @if ($iconOnly)
             <i class="fas fa-trash-alt text-sm"></i>
         @else
-            {{ $buttonText }}
+            @if ($buttonIcon)
+                <i class="{{ $buttonIcon }}" aria-hidden="true"></i>
+            @endif
+            <span>{{ $buttonText }}</span>
         @endif
     </button>
 

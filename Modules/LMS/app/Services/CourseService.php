@@ -548,7 +548,6 @@ class CourseService
         try {
             $user = Auth::user();
             $course = Course::with([
-                'category',
                 'sections.contents' => fn($q) => $q->orderBy('position'),
             ])->where('slug', $slug)->first();
 
@@ -1202,7 +1201,10 @@ class CourseService
                     Storage::disk('public')->delete($thumbnailPath);
                 }
                 $thumbnailPath = $thumbnailFile->store('courses/thumbnails', 'public');
-            } elseif (!empty($data['bg_color']) && str_starts_with($thumbnailPath ?? '', 'http')) {
+            } elseif (!empty($data['bg_color']) && (($data['thumb_mode'] ?? null) === 'auto' || str_starts_with($thumbnailPath ?? '', 'http'))) {
+                if ($thumbnailPath && Storage::disk('public')->exists($thumbnailPath) && !str_starts_with($thumbnailPath, 'http')) {
+                    Storage::disk('public')->delete($thumbnailPath);
+                }
                 $rawName = $data['name'] ?? $course->name;
                 $words = explode(' ', trim($rawName));
                 $initials = strtoupper(substr($words[0], 0, 1) . (isset($words[1]) ? substr($words[1], 0, 1) : ''));
