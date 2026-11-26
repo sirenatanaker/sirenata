@@ -26,6 +26,20 @@
             } elseif ($errors->has('start_date') || $errors->has('end_date') || $errors->has('zoom_url') || $errors->has('sessions') || $errors->has('sessions.*')) {
                 $initialStep = 2;
             }
+
+            $waveRegionOptions = [
+                'Nasional',
+                'Sumatera',
+                'Jawa',
+                'Kalimantan',
+                'Sulawesi',
+                'Bali & Nusa Tenggara',
+                'Maluku & Papua',
+            ];
+            $oldWaveNumber = old('wave_number', 1);
+            $oldWaveRegion = old('wave_region', 'Nasional');
+            $oldWaveRegionCustom = old('wave_region_custom', '');
+            $oldWaveYear = old('wave_year', now()->format('Y'));
         @endphp
 
         {{-- Form Card dengan Stepper Wizard Minimalis --}}
@@ -33,7 +47,11 @@
              x-data="bimtekFormWizard({
                  initialStep: {{ $initialStep }},
                  isUnlimitedQuota: {{ old('is_unlimited_quota') ? 'true' : 'false' }},
-                 isEdit: false
+                 isEdit: false,
+                 waveNumber: {{ (int) $oldWaveNumber }},
+                 waveRegion: @js($oldWaveRegion),
+                 waveRegionCustom: @js($oldWaveRegionCustom),
+                 waveYear: @js((string) $oldWaveYear)
              })">
 
             {{-- Stepper (Mirip Super Admin & Minim Icon) --}}
@@ -115,22 +133,79 @@
                         @enderror
                     </div>
 
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        {{-- Nama Gelombang --}}
-                        <div class="md:col-span-1">
-                            <label for="batch_name" class="block text-xs sm:text-sm font-semibold text-slate-700 mb-1.5">
-                                Nama Gelombang / Angkatan <span class="text-rose-500">*</span>
-                            </label>
-                            <input type="text" id="batch_name" name="batch_name" value="{{ old('batch_name') }}"
-                                   placeholder="Contoh: Bimtek SPBE Angkatan I 2026"
-                                   class="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 text-sm sm:text-[15px] focus:ring-1 focus:ring-slate-900 focus:border-slate-900">
-                            @error('batch_name')
-                                <p class="text-xs sm:text-sm text-rose-500 mt-1">{{ $message }}</p>
-                            @enderror
+                    {{-- Template Penamaan Event: Gelombang [Nomor] [Wilayah] [Tahun] --}}
+                    <div class="p-4 rounded-md border border-slate-200 bg-slate-50/50 space-y-3">
+                        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1.5 border-b border-slate-200/70 pb-2.5">
+                            <div>
+                                <label class="block text-xs sm:text-sm font-bold text-slate-800 uppercase tracking-wider">
+                                    Penamaan Gelombang Event <span class="text-rose-500">*</span>
+                                </label>
+                                <p class="text-xs text-slate-500 mt-0.5">
+                                    Format standar otomatis: <span class="font-semibold text-slate-700">Gelombang [Nomor] [Wilayah] [Tahun]</span>
+                                </p>
+                            </div>
+                            <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-md bg-[#13416B]/10 border border-[#13416B]/20 text-xs sm:text-sm font-bold text-[#13416B] self-start sm:self-center">
+                                <span class="text-[11px] font-medium text-[#13416B]/70">Hasil:</span>
+                                <span x-text="computedBatchName || 'Gelombang ...'"></span>
+                            </div>
                         </div>
 
+                        <input type="hidden" id="batch_name" name="batch_name" :value="computedBatchName">
+
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
+                            {{-- Nomor Gelombang --}}
+                            <div>
+                                <label for="wave_number" class="block text-xs sm:text-sm font-semibold text-slate-700 mb-1">
+                                    Nomor Gelombang <span class="text-rose-500">*</span>
+                                </label>
+                                <div class="flex items-center">
+                                    <span class="px-3 py-2 rounded-l-md border border-r-0 border-slate-300 bg-slate-100 text-xs sm:text-sm font-semibold text-slate-600 select-none">
+                                        Gelombang
+                                    </span>
+                                    <input type="number" id="wave_number" name="wave_number" x-model="waveNumber" min="1" max="99" required
+                                           placeholder="1"
+                                           class="w-full px-3 py-2 rounded-r-md border border-slate-300 text-sm sm:text-[15px] bg-white focus:ring-1 focus:ring-slate-900 focus:border-slate-900">
+                                </div>
+                            </div>
+
+                            {{-- Wilayah --}}
+                            <div>
+                                <label for="wave_region" class="block text-xs sm:text-sm font-semibold text-slate-700 mb-1">
+                                    Wilayah <span class="text-rose-500">*</span>
+                                </label>
+                                <select id="wave_region" name="wave_region" x-model="waveRegion" required
+                                        class="w-full px-3 py-2 rounded-md border border-slate-300 text-sm sm:text-[15px] bg-white focus:ring-1 focus:ring-slate-900 focus:border-slate-900">
+                                    @foreach ($waveRegionOptions as $regionOpt)
+                                        <option value="{{ $regionOpt }}">{{ $regionOpt }}</option>
+                                    @endforeach
+                                    <option value="__custom__">Wilayah Lainnya (Ketik Manual)...</option>
+                                </select>
+                                <div x-show="waveRegion === '__custom__'" x-cloak class="mt-2">
+                                    <input type="text" id="wave_region_custom" name="wave_region_custom" x-model="waveRegionCustom"
+                                           placeholder="Contoh: Jawa Barat, Jakarta, Aceh"
+                                           class="w-full px-3 py-2 rounded-md border border-slate-300 text-sm sm:text-[15px] bg-white focus:ring-1 focus:ring-slate-900 focus:border-slate-900">
+                                </div>
+                            </div>
+
+                            {{-- Tahun --}}
+                            <div>
+                                <label for="wave_year" class="block text-xs sm:text-sm font-semibold text-slate-700 mb-1">
+                                    Tahun <span class="text-rose-500">*</span>
+                                </label>
+                                <input type="number" id="wave_year" name="wave_year" x-model="waveYear" min="2020" max="2099" required
+                                       placeholder="{{ now()->format('Y') }}"
+                                       class="w-full px-3 py-2 rounded-md border border-slate-300 text-sm sm:text-[15px] bg-white focus:ring-1 focus:ring-slate-900 focus:border-slate-900">
+                            </div>
+                        </div>
+
+                        @error('batch_name')
+                            <p class="text-xs sm:text-sm text-rose-500 mt-1">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {{-- Kode Batch --}}
-                        <div class="md:col-span-1">
+                        <div>
                             <label for="batch_code" class="block text-xs sm:text-sm font-semibold text-slate-700 mb-1.5">
                                 Kode Registrasi Gelombang (Opsional)
                             </label>
@@ -140,7 +215,7 @@
                         </div>
 
                         {{-- Kuota Peserta dengan Opsi Tanpa Batasan --}}
-                        <div class="md:col-span-1">
+                        <div>
                             <div class="flex items-center justify-between mb-1.5">
                                 <label for="quota" class="block text-xs sm:text-sm font-semibold text-slate-700">
                                     Kapasitas Kuota <span class="text-rose-500" x-show="!isUnlimited">*</span>
@@ -534,6 +609,26 @@
                     step: config.initialStep || 1,
                     maxStepReached: config.isEdit ? 3 : (config.initialStep || 1),
                     isUnlimited: config.isUnlimitedQuota || false,
+                    waveNumber: config.waveNumber || 1,
+                    waveRegion: config.waveRegion || 'Nasional',
+                    waveRegionCustom: config.waveRegionCustom || '',
+                    waveYear: config.waveYear || String(new Date().getFullYear()),
+
+                    get effectiveWaveRegion() {
+                        return this.waveRegion === '__custom__'
+                            ? (this.waveRegionCustom || '').trim()
+                            : (this.waveRegion || '').trim();
+                    },
+
+                    get computedBatchName() {
+                        const num = parseInt(this.waveNumber, 10);
+                        const reg = this.effectiveWaveRegion;
+                        const yr = String(this.waveYear || '').trim();
+                        if (!num || num < 1 || !reg || !/^20\d{2}$/.test(yr)) {
+                            return '';
+                        }
+                        return `Gelombang ${num} ${reg} ${yr}`;
+                    },
 
                     init() {
                         window._bimtekWizard = this;
@@ -594,9 +689,25 @@
                                 showBimtekAlert('Silakan pilih Master Kursus / Kurikulum terlebih dahulu.', 'Peringatan', courseId);
                                 return false;
                             }
-                            if (batchName && !batchName.value.trim()) {
-                                showBimtekAlert('Silakan isi Nama Gelombang / Angkatan.', 'Peringatan', batchName);
+                            const waveNumberEl = document.getElementById('wave_number');
+                            const waveRegionEl = document.getElementById('wave_region');
+                            const waveRegionCustomEl = document.getElementById('wave_region_custom');
+                            const waveYearEl = document.getElementById('wave_year');
+
+                            if (!this.waveNumber || parseInt(this.waveNumber, 10) < 1) {
+                                showBimtekAlert('Silakan isi Nomor Gelombang minimal 1.', 'Peringatan', waveNumberEl);
                                 return false;
+                            }
+                            if (!this.effectiveWaveRegion) {
+                                showBimtekAlert('Silakan pilih atau ketik Wilayah gelombang.', 'Peringatan', this.waveRegion === '__custom__' ? waveRegionCustomEl : waveRegionEl);
+                                return false;
+                            }
+                            if (!/^20\d{2}$/.test(String(this.waveYear || '').trim())) {
+                                showBimtekAlert('Silakan isi Tahun gelombang dengan format 4 digit yang valid (contoh: 2026).', 'Peringatan', waveYearEl);
+                                return false;
+                            }
+                            if (batchName) {
+                                batchName.value = this.computedBatchName;
                             }
                             if (!this.isUnlimited && quota && (!quota.value || parseInt(quota.value) < 1)) {
                                 showBimtekAlert('Silakan tentukan kuota peserta (minimal 1) atau centang Tanpa Batas.', 'Peringatan', quota);

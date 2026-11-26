@@ -48,7 +48,8 @@
     $isQuotaLow = $remainingQuota !== null && ($remainingQuota <= 10 || ($quotaTotal > 0 && ($participantsCount / $quotaTotal) >= 0.8));
 @endphp
 
-<div class="group flex flex-col h-full bg-transparent sm:bg-white sm:dark:bg-slate-800/90 rounded-none sm:rounded-md border-0 sm:border border-slate-200 dark:border-slate-700/80 shadow-none sm:shadow-sm hover:shadow-lg hover:border-[#13416B]/30 dark:hover:border-slate-500 hover:-translate-y-0.5 transition-all duration-300 overflow-hidden w-full">
+<div @click="show('{{ $course->id }}')"
+    class="group flex flex-col h-full bg-transparent sm:bg-white sm:dark:bg-slate-800/90 rounded-none sm:rounded-md border-0 sm:border border-slate-200 dark:border-slate-700/80 shadow-none sm:shadow-sm hover:shadow-lg hover:border-[#13416B]/30 dark:hover:border-slate-500 hover:-translate-y-0.5 transition-all duration-300 overflow-hidden w-full cursor-pointer">
 
     {{-- Thumbnail Bersih + 1 Badge Status (Tanpa Overlay Teks di Dasar Gambar) --}}
     <div class="relative w-full aspect-[4/3] sm:aspect-video overflow-hidden bg-slate-100 dark:bg-slate-900/50 rounded-t-md">
@@ -118,24 +119,24 @@
         {{-- Footer Aksi --}}
         <div class="mt-auto pt-3.5 sm:pt-4 flex items-center justify-start gap-2">
             @if ($isEnrolledInThisBimtek)
-                <button type="button" @click="show('{{ $course->id }}')"
+                <button type="button" @click.stop="show('{{ $course->id }}')"
                     class="px-3.5 sm:px-4 py-2 text-xs sm:text-sm font-bold text-center rounded-md transition-colors bg-white text-[#13416B] border border-[#13416B]/30 hover:bg-[#13416B]/5 cursor-pointer">
                     <span class="sm:hidden">Detail</span>
                     <span class="hidden sm:inline">Lihat Detail</span>
                 </button>
-                <a href="{{ route('user.course.my-course.detail', $course->slug) }}"
+                <a href="{{ route('user.course.my-course.detail', $course->slug) }}" @click.stop
                    class="px-3.5 sm:px-4 py-2 text-xs sm:text-sm inline-flex items-center justify-center gap-1.5 font-bold text-center rounded-md transition-colors bg-emerald-600 text-white hover:bg-emerald-700 shadow-2xs">
                     <span>Sudah Terdaftar</span>
                     <i class="fas fa-arrow-up-right-from-square text-[10px] sm:text-xs"></i>
                 </a>
             @elseif (!$isRegistrationOpen)
-                <button type="button" @click="show('{{ $course->id }}')"
+                <button type="button" @click.stop="show('{{ $course->id }}')"
                     class="px-4 sm:px-5 py-2 text-xs sm:text-sm font-bold text-center rounded-md transition-colors bg-white text-[#13416B] border border-[#13416B]/30 hover:bg-[#13416B]/5 cursor-pointer">
                     <span class="sm:hidden">Detail</span>
                     <span class="hidden sm:inline">Lihat Detail</span>
                 </button>
             @else
-                <button type="button" @click="show('{{ $course->id }}')"
+                <button type="button" @click.stop="askEnroll('{{ $course->id }}')"
                     class="px-4 sm:px-5 py-2 text-xs sm:text-sm inline-flex items-center justify-center gap-1.5 font-bold text-center rounded-md transition-colors bg-amber-500 text-white border border-amber-500 hover:bg-amber-600 shadow-2xs cursor-pointer">
                     <span>Daftar</span>
                     <i class="fas fa-arrow-up-right-from-square text-[10px] sm:text-xs"></i>

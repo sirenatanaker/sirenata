@@ -181,6 +181,7 @@
                             return;
                         }
                         this.selected = c;
+                        this.activeTab = (c && c.isEvent && c.timelineSteps && c.timelineSteps.length > 0) ? 'timeline' : 'curriculum';
                         this.expandedSections = (c && c.sections) ? c.sections.map((_, i) => i) : [];
                         this.submitting = false;
                         this.confirmOpen = true;

@@ -100,6 +100,26 @@ class BimtekEventController extends Controller
             $request->merge(['quota' => null]);
         }
 
+        // Susun otomatis batch_name dari template "Gelombang [nomor] [wilayah] [tahun]" bila field template dikirim
+        if ($request->filled('wave_number') || $request->filled('wave_region') || $request->filled('wave_year')) {
+            $waveNum = max(1, (int) $request->input('wave_number', 1));
+            $waveRegionRaw = trim((string) $request->input('wave_region', ''));
+            $waveRegion = $waveRegionRaw === '__custom__'
+                ? trim((string) $request->input('wave_region_custom', ''))
+                : $waveRegionRaw;
+            $waveYear = trim((string) $request->input('wave_year', now()->format('Y')));
+
+            if ($waveRegion !== '' && preg_match('/^20\d{2}$/', $waveYear)) {
+                $mergePayload = [
+                    'batch_name' => "Gelombang {$waveNum} {$waveRegion} {$waveYear}",
+                ];
+                if (!$request->filled('location_name')) {
+                    $mergePayload['location_name'] = $waveRegion;
+                }
+                $request->merge($mergePayload);
+            }
+        }
+
         $hasRegStart = $request->filled('registration_start_at');
         $hasRegEnd = $request->filled('registration_end_at');
         $hasAssessmentStart = $request->filled('assessment_start_at');
@@ -887,6 +907,26 @@ class BimtekEventController extends Controller
         $isUnlimitedQuota = $request->boolean('is_unlimited_quota');
         if ($isUnlimitedQuota) {
             $request->merge(['quota' => null]);
+        }
+
+        // Susun otomatis batch_name dari template "Gelombang [nomor] [wilayah] [tahun]" bila field template dikirim
+        if ($request->filled('wave_number') || $request->filled('wave_region') || $request->filled('wave_year')) {
+            $waveNum = max(1, (int) $request->input('wave_number', 1));
+            $waveRegionRaw = trim((string) $request->input('wave_region', ''));
+            $waveRegion = $waveRegionRaw === '__custom__'
+                ? trim((string) $request->input('wave_region_custom', ''))
+                : $waveRegionRaw;
+            $waveYear = trim((string) $request->input('wave_year', now()->format('Y')));
+
+            if ($waveRegion !== '' && preg_match('/^20\d{2}$/', $waveYear)) {
+                $mergePayload = [
+                    'batch_name' => "Gelombang {$waveNum} {$waveRegion} {$waveYear}",
+                ];
+                if (!$request->filled('location_name')) {
+                    $mergePayload['location_name'] = $waveRegion;
+                }
+                $request->merge($mergePayload);
+            }
         }
 
         $hasRegStart = $request->filled('registration_start_at');

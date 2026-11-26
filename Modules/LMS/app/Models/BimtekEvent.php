@@ -93,6 +93,14 @@ class BimtekEvent extends Model
         $rawCode = trim((string) ($this->batch_code ?? ''));
         $rawLoc  = trim((string) ($this->location_name ?? ''));
 
+        // Jika batch_name sudah mengikuti template standar "Gelombang [nomor] [wilayah] [tahun]"
+        if (preg_match('/^Gelombang\s+(\d+)\s+(.+?)\s+(20\d{2})$/i', $rawName, $std)) {
+            $num = (int) $std[1];
+            $reg = trim($std[2]);
+            $yr  = $std[3];
+            return "Gelombang {$num} {$reg} {$yr}";
+        }
+
         $romanToInt = [
             'I' => 1, 'II' => 2, 'III' => 3, 'IV' => 4, 'V' => 5,
             'VI' => 6, 'VII' => 7, 'VIII' => 8, 'IX' => 9, 'X' => 10,
