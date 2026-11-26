@@ -130,144 +130,137 @@
         </div>
 
         <!-- ========================================================= -->
-        <!-- 2. GANTT CHART JADWAL PELATIHAN (LMS BY EVENT)            -->
+        <!-- 2. JADWAL PELATIHAN (70%) & AGENDA TINDAK LANJUT (30%)    -->
         <!-- ========================================================= -->
         @php
             $ganttYear = $userEventGantt['year'] ?? now()->year;
             $ganttHasEvents = !empty($userEventGantt['events']);
             $ganttTodayLabel = $userEventGantt['today_label'] ?? now()->translatedFormat('d M Y');
         @endphp
-        <section class="bg-white rounded-md border border-slate-200 shadow-sm overflow-hidden">
-            <header class="px-4 sm:px-6 py-4 border-b border-slate-100 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-                <div>
-                    <h2 class="text-base sm:text-lg font-extrabold text-slate-800">
-                        Jadwal Pelatihan Terdaftar ({{ $ganttYear }})
-                    </h2>
-                    <p class="text-xs sm:text-sm text-slate-500">
-                        Linimasa pendaftaran, pelaksanaan Live Zoom, dan evaluasi gelombang pelatihan Anda
-                    </p>
-                </div>
+        <div class="grid grid-cols-1 lg:grid-cols-10 gap-5 sm:gap-6 items-stretch">
 
-                <div class="flex flex-wrap items-center gap-2.5 shrink-0">
-                    <label for="userGanttStatusFilter" class="sr-only">Filter status pelatihan</label>
-                    <select id="userGanttStatusFilter"
-                        class="text-xs sm:text-sm border-slate-200 rounded-md focus:ring-[#13416B] focus:border-[#13416B] cursor-pointer bg-white">
-                        <option value="all">Semua Status</option>
-                        <option value="open_registration">Periode Pendaftaran</option>
-                        <option value="ongoing">Periode Pelaksanaan</option>
-                        <option value="evaluation">Periode Evaluasi</option>
-                        <option value="completed">Selesai</option>
-                    </select>
+            <!-- KOLOM KIRI (70%): Gantt Chart Jadwal Pelatihan Terdaftar -->
+            <section class="lg:col-span-7 bg-white rounded-md border border-slate-200 shadow-sm overflow-hidden flex flex-col min-w-0">
+                <header class="px-4 sm:px-6 py-4 border-b border-slate-100 flex flex-col xl:flex-row xl:items-center justify-between gap-4 shrink-0">
+                    <div class="min-w-0">
+                        <h2 class="text-base sm:text-lg font-extrabold text-slate-800">
+                            Jadwal Pelatihan Terdaftar ({{ $ganttYear }})
+                        </h2>
+                        <p class="text-xs sm:text-sm text-slate-500">
+                            Linimasa pendaftaran, pelaksanaan Live Zoom, dan evaluasi gelombang pelatihan Anda
+                        </p>
+                    </div>
 
-                    <a href="{{ route('user.catalog.index') }}"
-                       class="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs sm:text-sm font-bold text-white bg-[#13416B] hover:bg-[#0f3354] rounded-md transition-colors shadow-2xs">
-                        <span>Jelajahi Katalog</span>
-                    </a>
-                </div>
-            </header>
+                    <div class="flex flex-wrap items-center gap-2.5 shrink-0">
+                        <label for="userGanttStatusFilter" class="sr-only">Filter status pelatihan</label>
+                        <select id="userGanttStatusFilter"
+                            class="text-xs sm:text-sm border-slate-200 rounded-md focus:ring-[#13416B] focus:border-[#13416B] cursor-pointer bg-white">
+                            <option value="all">Semua Status</option>
+                            <option value="open_registration">Periode Pendaftaran</option>
+                            <option value="ongoing">Periode Pelaksanaan</option>
+                            <option value="evaluation">Periode Evaluasi</option>
+                            <option value="completed">Selesai</option>
+                        </select>
 
-            {{-- Legenda Fase --}}
-            <div class="px-4 sm:px-6 py-3 border-b border-slate-100 bg-slate-50/50">
-                <div class="flex flex-wrap items-center gap-x-5 gap-y-2 text-xs sm:text-sm text-slate-600">
-                    <span class="inline-flex items-center gap-1.5">
-                        <span class="w-3 h-3 rounded-xs bg-sky-300"></span>Pendaftaran
-                    </span>
-                    <span class="inline-flex items-center gap-1.5">
-                        <span class="w-3 h-3 rounded-xs bg-[#2B6496]"></span>Pelaksanaan &amp; Live Zoom
-                    </span>
-                    <span class="inline-flex items-center gap-1.5">
-                        <span class="w-3 h-3 rounded-xs bg-emerald-500"></span>Evaluasi &amp; Sertifikasi
-                    </span>
-                    <span class="inline-flex items-center gap-1.5">
-                        <span class="inline-block w-4 border-t-2 border-dashed border-red-500"></span>Hari Ini ({{ $ganttTodayLabel }})
-                    </span>
-                </div>
-            </div>
+                        <a href="{{ route('user.catalog.index') }}"
+                           class="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs sm:text-sm font-bold text-white bg-[#13416B] hover:bg-[#0f3354] rounded-md transition-colors shadow-2xs">
+                            <span>Jelajahi Katalog</span>
+                        </a>
+                    </div>
+                </header>
 
-            <div class="p-4 sm:p-6">
-                {{-- Kontainer Gantt Chart --}}
-                <div id="userGanttWrapper"
-                     class="border border-slate-200 rounded-md overflow-hidden bg-white {{ $ganttHasEvents ? '' : 'hidden' }}">
-                    <div id="userGanttScrollArea" class="overflow-x-auto overflow-y-auto max-h-[480px] custom-scrollbar relative">
-                        <div id="userGanttInner" class="min-w-[880px] relative">
-                            <div id="userGanttHeader" class="sticky top-0 z-30 bg-slate-50 border-b border-slate-200"></div>
-                            <div id="userGanttRows" class="divide-y divide-slate-100 relative"></div>
-                        </div>
+                {{-- Legenda Fase --}}
+                <div class="px-4 sm:px-6 py-3 border-b border-slate-100 bg-slate-50/50 shrink-0">
+                    <div class="flex flex-wrap items-center gap-x-5 gap-y-2 text-xs sm:text-sm text-slate-600">
+                        <span class="inline-flex items-center gap-1.5">
+                            <span class="w-3 h-3 rounded-xs bg-sky-300"></span>Pendaftaran
+                        </span>
+                        <span class="inline-flex items-center gap-1.5">
+                            <span class="w-3 h-3 rounded-xs bg-[#2B6496]"></span>Pelaksanaan &amp; Live Zoom
+                        </span>
+                        <span class="inline-flex items-center gap-1.5">
+                            <span class="w-3 h-3 rounded-xs bg-emerald-500"></span>Evaluasi &amp; Sertifikasi
+                        </span>
+                        <span class="inline-flex items-center gap-1.5">
+                            <span class="inline-block w-4 border-t-2 border-dashed border-red-500"></span>Hari Ini ({{ $ganttTodayLabel }})
+                        </span>
                     </div>
                 </div>
 
-                {{-- Empty State --}}
-                <div id="userGanttEmptyState"
-                     class="py-10 px-4 text-center {{ $ganttHasEvents ? 'hidden' : '' }}">
-                    <i class="fas fa-calendar-xmark text-3xl text-slate-300 mb-3 block"></i>
-                    <p class="text-sm sm:text-base font-semibold text-slate-700">Belum Ada Pelatihan Terdaftar</p>
-                    <p class="text-xs sm:text-sm text-slate-500 mt-1 max-w-md mx-auto">Anda belum mendaftar pada gelombang pelatihan atau tidak ada pelatihan dengan status tersebut. Jelajahi katalog untuk mulai mendaftar.</p>
+                <div class="p-4 sm:p-6 flex-1 flex flex-col">
+                    {{-- Kontainer Gantt Chart --}}
+                    <div id="userGanttWrapper"
+                         class="border border-slate-200 rounded-md overflow-hidden bg-white {{ $ganttHasEvents ? '' : 'hidden' }}">
+                        <div id="userGanttScrollArea" class="overflow-x-auto overflow-y-auto max-h-[480px] custom-scrollbar relative">
+                            <div id="userGanttInner" class="min-w-[880px] relative">
+                                <div id="userGanttHeader" class="sticky top-0 z-30 bg-slate-50 border-b border-slate-200"></div>
+                                <div id="userGanttRows" class="divide-y divide-slate-100 relative"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- Empty State --}}
+                    <div id="userGanttEmptyState"
+                         class="flex-1 flex flex-col items-center justify-center py-10 px-4 text-center {{ $ganttHasEvents ? 'hidden' : '' }}">
+                        <i class="fas fa-calendar-xmark text-3xl text-slate-300 mb-3 block"></i>
+                        <p class="text-sm sm:text-base font-semibold text-slate-700">Belum Ada Pelatihan Terdaftar</p>
+                        <p class="text-xs sm:text-sm text-slate-500 mt-1 max-w-md mx-auto">Anda belum mendaftar pada gelombang pelatihan atau tidak ada pelatihan dengan status tersebut. Jelajahi katalog untuk mulai mendaftar.</p>
+                    </div>
                 </div>
-            </div>
-        </section>
+            </section>
 
-        {{-- Floating Tooltip Gantt Chart --}}
-        <div id="userGanttTooltip"
-             class="fixed z-[100] hidden pointer-events-none w-72 bg-[#13416B] text-white rounded-md shadow-xl border border-white/15 p-3.5 text-xs space-y-2">
-        </div>
-
-        <!-- ======================================================= -->
-        <!-- 3. AGENDA & GELOMBANG DIBUKA (2-COLUMN BALANCED GRID)   -->
-        <!-- ======================================================= -->
-        <div id="dashboardBottomGrid" class="grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-6 items-stretch">
-
-            <!-- KOLOM KIRI (6 COLS): Agenda & Tindak Lanjut Terdekat -->
-            <div class="lg:col-span-6 flex flex-col min-h-0">
+            <!-- KOLOM KANAN (30%): Agenda & Tindak Lanjut Terdekat -->
+            <div class="lg:col-span-3 flex flex-col min-h-0 min-w-0">
                 <div
-                    class="bg-white rounded-md p-5 sm:p-6 shadow-sm border border-slate-200 flex flex-col flex-1 min-h-0">
+                    class="bg-white rounded-md p-4 sm:p-5 shadow-sm border border-slate-200 flex flex-col flex-1 min-h-0">
                     <div class="mb-4 pb-4 border-b border-slate-100 shrink-0">
                         <h2 class="text-base sm:text-lg font-bold text-slate-800">Agenda &amp; Tindak Lanjut</h2>
-                        <p class="text-xs sm:text-sm text-slate-500 truncate mt-0.5">Tindakan penting yang perlu segera diselesaikan</p>
+                        <p class="text-xs sm:text-sm text-slate-500 mt-0.5 leading-snug">Tindakan penting yang perlu segera diselesaikan</p>
                     </div>
 
                     @if (isset($actionItems) && $actionItems->count() > 0)
-                        <div class="overflow-y-auto custom-scrollbar flex-1 min-h-[280px] max-h-[396px] pr-1 space-y-3">
-                                @foreach ($actionItems as $item)
-                                    @php
-                                        $iconBg = match ($item['type']) {
-                                            'zoom'        => 'bg-[#13416B] text-white',
-                                            'evaluation'  => 'bg-amber-500 text-white',
-                                            'narasumber'  => 'bg-[#547996] text-white',
-                                            'certificate' => 'bg-emerald-600 text-white',
-                                            default       => 'bg-slate-600 text-white',
-                                        };
-                                    @endphp
-                                    <a href="{{ $item['url'] }}"
-                                        class="block p-4 rounded-md border border-slate-200/80 bg-slate-50/50 hover:bg-white hover:border-[#13416B]/40 hover:shadow-xs transition-all group">
-                                        <div class="flex items-start gap-3.5">
-                                            <div class="w-10 h-10 rounded-md {{ $iconBg }} flex items-center justify-center shrink-0 text-sm shadow-2xs mt-0.5">
-                                                <i class="{{ $item['icon'] }}"></i>
-                                            </div>
+                        <div class="overflow-y-auto custom-scrollbar flex-1 min-h-[280px] max-h-[480px] pr-1 space-y-3">
+                            @foreach ($actionItems as $item)
+                                @php
+                                    $iconBg = match ($item['type']) {
+                                        'zoom'        => 'bg-[#13416B] text-white',
+                                        'evaluation'  => 'bg-amber-500 text-white',
+                                        'narasumber'  => 'bg-[#547996] text-white',
+                                        'certificate' => 'bg-emerald-600 text-white',
+                                        default       => 'bg-slate-600 text-white',
+                                    };
+                                @endphp
+                                <a href="{{ $item['url'] }}"
+                                    class="block p-3.5 rounded-md border border-slate-200/80 bg-slate-50/50 hover:bg-white hover:border-[#13416B]/40 hover:shadow-xs transition-all group">
+                                    <div class="flex items-start gap-3">
+                                        <div class="w-9 h-9 rounded-md {{ $iconBg }} flex items-center justify-center shrink-0 text-sm shadow-2xs mt-0.5">
+                                            <i class="{{ $item['icon'] }}"></i>
+                                        </div>
 
-                                            <div class="min-w-0 flex-1">
-                                                @if (!empty($item['batch_name']))
-                                                    <p class="text-xs font-semibold text-[#547996] truncate" title="{{ $item['batch_name'] }}">
-                                                        {{ $item['batch_name'] }}
-                                                    </p>
-                                                @endif
-                                                <h3 class="text-sm sm:text-base font-semibold text-slate-800 group-hover:text-[#13416B] transition-colors line-clamp-2 leading-snug {{ !empty($item['batch_name']) ? 'mt-0.5' : '' }}" title="{{ $item['title'] }}">
-                                                    {{ $item['title'] }}
-                                                </h3>
-                                                <p class="text-xs sm:text-sm text-slate-500 truncate mt-1" title="{{ $item['subtitle'] }}">
-                                                    {{ $item['subtitle'] }}
+                                        <div class="min-w-0 flex-1">
+                                            @if (!empty($item['batch_name']))
+                                                <p class="text-xs font-semibold text-[#547996] truncate" title="{{ $item['batch_name'] }}">
+                                                    {{ $item['batch_name'] }}
                                                 </p>
-                                            </div>
+                                            @endif
+                                            <h3 class="text-sm font-semibold text-slate-800 group-hover:text-[#13416B] transition-colors line-clamp-2 leading-snug {{ !empty($item['batch_name']) ? 'mt-0.5' : '' }}" title="{{ $item['title'] }}">
+                                                {{ $item['title'] }}
+                                            </h3>
+                                            <p class="text-xs text-slate-500 truncate mt-1" title="{{ $item['subtitle'] }}">
+                                                {{ $item['subtitle'] }}
+                                            </p>
                                         </div>
+                                    </div>
 
-                                        <div class="mt-3 flex items-center justify-end">
-                                            <span class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-md text-xs sm:text-sm font-bold text-[#13416B] bg-[#13416B]/10 group-hover:bg-[#13416B] group-hover:text-white transition-colors">
-                                                <span>{{ $item['action_text'] }}</span>
-                                                <i class="fas fa-chevron-right text-[10px]"></i>
-                                            </span>
-                                        </div>
-                                    </a>
-                                @endforeach
-                            </div>
+                                    <div class="mt-3 flex items-center justify-end">
+                                        <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-bold text-[#13416B] bg-[#13416B]/10 group-hover:bg-[#13416B] group-hover:text-white transition-colors">
+                                            <span>{{ $item['action_text'] }}</span>
+                                            <i class="fas fa-chevron-right text-[10px]"></i>
+                                        </span>
+                                    </div>
+                                </a>
+                            @endforeach
+                        </div>
                     @else
                         <div class="flex-1 flex flex-col items-center justify-center py-10 px-4 text-center min-h-[240px]">
                             <i class="fas fa-check-circle text-3xl text-emerald-500 mb-3"></i>
@@ -278,85 +271,11 @@
                 </div>
             </div>
 
-            <!-- KOLOM KANAN (6 COLS): Gelombang Pendaftaran Dibuka (Katalog) -->
-            <div class="lg:col-span-6 flex flex-col min-h-0">
-                <div
-                    class="bg-white rounded-md p-5 sm:p-6 shadow-sm border border-slate-200 flex flex-col flex-1 min-h-0">
-                    <div class="mb-4 pb-4 border-b border-slate-100 shrink-0">
-                        <h2 class="text-base sm:text-lg font-bold text-slate-800">Gelombang Pendaftaran Dibuka</h2>
-                        <p class="text-xs sm:text-sm text-slate-500 truncate mt-0.5">Pelatihan di Katalog yang masih membuka kuota pendaftaran</p>
-                    </div>
+        </div>
 
-                    @if (isset($openRegistrationEvents) && $openRegistrationEvents->count() > 0)
-                        <div class="flex-1 flex flex-col min-h-0 justify-between">
-                            <div class="overflow-y-auto custom-scrollbar flex-1 min-h-[280px] max-h-[354px] pr-1 space-y-3">
-                                @foreach ($openRegistrationEvents as $ev)
-                                    @php
-                                        $quotaPct = $ev['quota_pct'];
-                                        $quotaBarCls = match (true) {
-                                            $quotaPct !== null && $quotaPct >= 80 => 'bg-amber-500',
-                                            $quotaPct !== null && $quotaPct >= 50 => 'bg-emerald-500',
-                                            default                               => 'bg-sky-500',
-                                        };
-                                    @endphp
-                                    <a href="{{ $ev['url'] }}"
-                                        class="block p-4 rounded-md border border-slate-200/80 bg-slate-50/50 hover:bg-white hover:border-[#13416B]/40 hover:shadow-xs transition-all group">
-                                        <div class="min-w-0">
-                                            <p class="text-xs font-semibold text-[#547996] truncate" title="{{ $ev['batch_name'] }}">
-                                                {{ $ev['batch_name'] }}
-                                            </p>
-                                            <h3 class="text-sm sm:text-base font-semibold text-slate-800 group-hover:text-[#13416B] transition-colors line-clamp-2 leading-snug mt-0.5" title="{{ $ev['course_name'] }}">
-                                                {{ $ev['course_name'] }}
-                                            </h3>
-                                        </div>
-
-                                        @if ($quotaPct !== null)
-                                            <div class="mt-3 flex items-center gap-3">
-                                                <div class="flex-1 h-2 bg-slate-200 rounded-full overflow-hidden">
-                                                    <div class="h-full rounded-full transition-all {{ $quotaBarCls }}" style="width: {{ $quotaPct }}%"></div>
-                                                </div>
-                                                <span class="text-xs sm:text-sm font-semibold text-slate-600 tabular-nums shrink-0">
-                                                    Sisa <strong class="text-slate-800">{{ $ev['remaining_quota'] }}</strong>/{{ $ev['quota'] }}
-                                                </span>
-                                            </div>
-                                        @endif
-
-                                        <div class="mt-2.5 flex items-center gap-1.5 text-xs sm:text-sm text-slate-500">
-                                            <i class="far fa-calendar text-xs shrink-0"></i>
-                                            <span class="truncate">Pelaksanaan: {{ $ev['exec_label'] }}</span>
-                                        </div>
-
-                                        <div class="mt-3 flex items-center justify-end">
-                                            <span class="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-md text-xs sm:text-sm font-bold text-white bg-amber-500 group-hover:bg-amber-600 transition-colors shadow-2xs">
-                                                <span>Daftar</span>
-                                                <i class="fas fa-arrow-up-right-from-square text-[10px] sm:text-xs"></i>
-                                            </span>
-                                        </div>
-                                    </a>
-                                @endforeach
-                            </div>
-
-                            <div class="flex flex-wrap items-center justify-between gap-x-4 gap-y-1.5 mt-2.5 pt-3 border-t border-slate-100 text-xs sm:text-sm text-slate-500 shrink-0">
-                                <span>Tersedia <strong class="text-slate-700">{{ $openRegistrationEvents->count() }}</strong> gelombang pendaftaran terbuka</span>
-                                <a href="{{ route('user.catalog.index') }}" class="font-bold text-[#13416B] hover:underline">
-                                    Jelajahi Semua Katalog
-                                </a>
-                            </div>
-                        </div>
-                    @else
-                        <div class="flex-1 flex flex-col items-center justify-center py-10 px-4 text-center min-h-[240px]">
-                            <i class="fas fa-calendar-check text-3xl text-slate-300 mb-3"></i>
-                            <p class="text-sm sm:text-base font-semibold text-slate-700">Belum ada gelombang baru dibuka</p>
-                            <p class="text-xs sm:text-sm text-slate-500 mt-1 max-w-xs">Seluruh gelombang terbuka saat ini sudah Anda ikuti atau masa pendaftarannya telah berakhir.</p>
-                            <a href="{{ route('user.catalog.index') }}"
-                                class="mt-4 inline-flex items-center gap-1.5 px-4 py-2 text-xs sm:text-sm font-bold text-white bg-[#13416B] hover:bg-[#0f3354] rounded-md transition-colors">
-                                Lihat Katalog
-                            </a>
-                        </div>
-                    @endif
-                </div>
-            </div>
-
+        {{-- Floating Tooltip Gantt Chart --}}
+        <div id="userGanttTooltip"
+             class="fixed z-[100] hidden pointer-events-none w-72 bg-[#13416B] text-white rounded-md shadow-xl border border-white/15 p-3.5 text-xs space-y-2">
         </div>
 
     </div>
