@@ -238,29 +238,33 @@
                                         };
                                     @endphp
                                     <a href="{{ $item['url'] }}"
-                                        class="flex items-center gap-3.5 p-4 rounded-md border border-slate-200/80 bg-slate-50/50 hover:bg-white hover:border-[#13416B]/40 hover:shadow-xs transition-all group">
-                                        <div class="w-10 h-10 rounded-md {{ $iconBg }} flex items-center justify-center shrink-0 text-sm shadow-2xs">
-                                            <i class="{{ $item['icon'] }}"></i>
-                                        </div>
+                                        class="block p-4 rounded-md border border-slate-200/80 bg-slate-50/50 hover:bg-white hover:border-[#13416B]/40 hover:shadow-xs transition-all group">
+                                        <div class="flex items-start gap-3.5">
+                                            <div class="w-10 h-10 rounded-md {{ $iconBg }} flex items-center justify-center shrink-0 text-sm shadow-2xs mt-0.5">
+                                                <i class="{{ $item['icon'] }}"></i>
+                                            </div>
 
-                                        <div class="min-w-0 flex-1">
-                                            @if (!empty($item['batch_name']))
-                                                <p class="text-xs font-semibold text-[#547996] truncate" title="{{ $item['batch_name'] }}">
-                                                    {{ $item['batch_name'] }}
+                                            <div class="min-w-0 flex-1">
+                                                @if (!empty($item['batch_name']))
+                                                    <p class="text-xs font-semibold text-[#547996] truncate" title="{{ $item['batch_name'] }}">
+                                                        {{ $item['batch_name'] }}
+                                                    </p>
+                                                @endif
+                                                <h3 class="text-sm sm:text-base font-semibold text-slate-800 group-hover:text-[#13416B] transition-colors line-clamp-2 leading-snug {{ !empty($item['batch_name']) ? 'mt-0.5' : '' }}" title="{{ $item['title'] }}">
+                                                    {{ $item['title'] }}
+                                                </h3>
+                                                <p class="text-xs sm:text-sm text-slate-500 truncate mt-1" title="{{ $item['subtitle'] }}">
+                                                    {{ $item['subtitle'] }}
                                                 </p>
-                                            @endif
-                                            <h3 class="text-sm sm:text-base font-semibold text-slate-800 group-hover:text-[#13416B] transition-colors line-clamp-2 leading-snug {{ !empty($item['batch_name']) ? 'mt-0.5' : '' }}" title="{{ $item['title'] }}">
-                                                {{ $item['title'] }}
-                                            </h3>
-                                            <p class="text-xs sm:text-sm text-slate-500 truncate mt-1" title="{{ $item['subtitle'] }}">
-                                                {{ $item['subtitle'] }}
-                                            </p>
+                                            </div>
                                         </div>
 
-                                        <span class="inline-flex items-center gap-1 text-xs sm:text-sm font-bold text-[#13416B] group-hover:translate-x-0.5 transition-transform shrink-0 pl-1">
-                                            <span>{{ $item['action_text'] }}</span>
-                                            <i class="fas fa-chevron-right text-[10px]"></i>
-                                        </span>
+                                        <div class="mt-3 flex items-center justify-end">
+                                            <span class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-md text-xs sm:text-sm font-bold text-[#13416B] bg-[#13416B]/10 group-hover:bg-[#13416B] group-hover:text-white transition-colors">
+                                                <span>{{ $item['action_text'] }}</span>
+                                                <i class="fas fa-chevron-right text-[10px]"></i>
+                                            </span>
+                                        </div>
                                     </a>
                                 @endforeach
                             </div>
@@ -317,13 +321,15 @@
                                             </div>
                                         @endif
 
-                                        <div class="mt-2.5 flex items-center justify-between gap-2 text-xs sm:text-sm">
-                                            <span class="inline-flex items-center gap-1.5 text-slate-500 truncate">
-                                                <i class="far fa-calendar text-xs shrink-0"></i>
-                                                <span class="truncate">Pelaksanaan: {{ $ev['exec_label'] }}</span>
-                                            </span>
-                                            <span class="font-bold text-[#13416B] group-hover:translate-x-0.5 transition-transform shrink-0">
-                                                Daftar <i class="fas fa-chevron-right text-[10px] ml-0.5"></i>
+                                        <div class="mt-2.5 flex items-center gap-1.5 text-xs sm:text-sm text-slate-500">
+                                            <i class="far fa-calendar text-xs shrink-0"></i>
+                                            <span class="truncate">Pelaksanaan: {{ $ev['exec_label'] }}</span>
+                                        </div>
+
+                                        <div class="mt-3 flex items-center justify-end">
+                                            <span class="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-md text-xs sm:text-sm font-bold text-white bg-amber-500 group-hover:bg-amber-600 transition-colors shadow-2xs">
+                                                <span>Daftar</span>
+                                                <i class="fas fa-arrow-up-right-from-square text-[10px] sm:text-xs"></i>
                                             </span>
                                         </div>
                                     </a>

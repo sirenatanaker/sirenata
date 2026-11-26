@@ -352,11 +352,30 @@ class UserDashboardService
 
                 $enrolledCoursesById = $myCourses->keyBy('id');
 
+                $resolveCardColor = function (?string $thumbnail, ?string $seed = null): string {
+                    if ($thumbnail && str_starts_with($thumbnail, 'http')) {
+                        $query = parse_url($thumbnail, PHP_URL_QUERY);
+                        if (is_string($query)) {
+                            parse_str($query, $params);
+                            $bg = ltrim((string) ($params['background'] ?? ''), '#');
+                            if (preg_match('/^[0-9A-Fa-f]{6}$/', $bg)) {
+                                return '#' . strtoupper($bg);
+                            }
+                        }
+                    }
+
+                    $palette = ['#13416B', '#547996', '#8BB1CC', '#79A736'];
+                    $idx = abs(crc32((string) ($seed ?? 'course'))) % count($palette);
+
+                    return $palette[$idx];
+                };
+
                 foreach ($userEnrollments as $enr) {
                     $course = $enrolledCoursesById->get($enr->course_id);
                     if (!$course) {
                         continue;
                     }
+                    $courseCardColor = $resolveCardColor($course->thumbnail, $course->id);
                     $ev = $enr->bimtek_event_id ? $eventsById->get($enr->bimtek_event_id) : null;
                     $meta = $resolveEventMeta($ev);
                     $batchLabel = $meta['batch_name']
@@ -393,6 +412,7 @@ class UserDashboardService
                                 'title'       => $course->name,
                                 'subtitle'    => ($isToday ? 'Zoom Hari Ini — ' : 'Live Zoom — ') . $timeLabel,
                                 'action_text' => 'Masuk',
+                                'card_color'  => $courseCardColor,
                                 'url'         => $courseUrl,
                             ];
                         } elseif ($ev->zoom_start_at && $ev->zoom_start_at->gte($now)) {
@@ -407,6 +427,7 @@ class UserDashboardService
                                 'title'       => $course->name,
                                 'subtitle'    => ($isToday ? 'Zoom Hari Ini — ' : 'Live Zoom — ') . $ev->zoom_start_at->translatedFormat('d M Y, H:i') . ' WIB',
                                 'action_text' => 'Masuk',
+                                'card_color'  => $courseCardColor,
                                 'url'         => $courseUrl,
                             ];
                         }
@@ -448,6 +469,7 @@ class UserDashboardService
                                 'title'       => $course->name,
                                 'subtitle'    => $subInfo,
                                 'action_text' => 'Kerjakan',
+                                'card_color'  => $courseCardColor,
                                 'url'         => $courseUrl,
                             ];
                         }
@@ -469,6 +491,7 @@ class UserDashboardService
                                 'title'       => $course->name,
                                 'subtitle'    => 'Evaluasi narasumber wajib diisi',
                                 'action_text' => 'Isi',
+                                'card_color'  => $courseCardColor,
                                 'url'         => route('user.course.my-course.evaluasi-narasumber', $course->slug),
                             ];
                         }
@@ -486,6 +509,7 @@ class UserDashboardService
                             'title'       => $course->name,
                             'subtitle'    => 'e-Sertifikat siap diunduh',
                             'action_text' => 'Unduh',
+                            'card_color'  => $courseCardColor,
                             'url'         => $courseUrl,
                         ];
                     }
@@ -532,7 +556,7 @@ class UserDashboardService
                     : collect();
 
                 $openRegistrationEvents = $openCandidateEvents
-                    ->map(function ($ev) use ($enrolledCountsByEvent, $fmtRange, $now) {
+                    ->map(function ($ev) use ($enrolledCountsByEvent, $fmtRange, $now, $resolveCardColor) {
                         $quota = (int) ($ev->quota ?? 0);
                         $enrolled = (int) ($enrolledCountsByEvent->get($ev->id) ?? 0);
                         $isFull = $quota > 0 && $enrolled >= $quota;
@@ -555,6 +579,7 @@ class UserDashboardService
                             'id'              => $ev->id,
                             'batch_name'      => preg_replace('/\bbatch\b/i', 'Gelombang', (string) $ev->batch_name),
                             'course_name'     => $ev->course->name,
+                            'card_color'      => $resolveCardColor($ev->course->thumbnail, $ev->course->id),
                             'reg_badge'       => $regBadge,
                             'is_urgent'       => !is_null($daysLeft) && $daysLeft <= 5,
                             'exec_label'      => $fmtRange($ev->start_date, $ev->end_date ?? $ev->start_date),

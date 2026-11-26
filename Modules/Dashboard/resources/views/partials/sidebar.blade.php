@@ -29,7 +29,7 @@
                 <button x-show="!sidebarOpen"
                     @click="typeof toggleSidebar === 'function' ? toggleSidebar() : (sidebarOpen = !sidebarOpen)"
                     type="button"
-                    class="w-10 h-10 flex items-center justify-center rounded-xl text-slate-600 hover:text-[#13416B] hover:bg-slate-100 transition-colors cursor-pointer shrink-0 focus:outline-none"
+                    class="w-10 h-10 flex items-center justify-center rounded-xl text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors cursor-pointer shrink-0 focus:outline-none"
                     title="Buka menu">
                     <i class="fa-solid fa-bars-staggered text-lg" aria-hidden="true"></i>
                 </button>
@@ -76,7 +76,7 @@
                 <button x-show="!sidebarOpen"
                     @click="typeof toggleSidebar === 'function' ? toggleSidebar() : (sidebarOpen = !sidebarOpen)"
                     type="button"
-                    class="w-10 h-10 flex items-center justify-center rounded-xl text-slate-600 hover:text-[#13416B] hover:bg-slate-100 transition-colors cursor-pointer shrink-0 focus:outline-none"
+                    class="w-10 h-10 flex items-center justify-center rounded-xl text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors cursor-pointer shrink-0 focus:outline-none"
                     title="Buka menu">
                     <i class="fa-solid fa-bars-staggered text-lg" aria-hidden="true"></i>
                 </button>
