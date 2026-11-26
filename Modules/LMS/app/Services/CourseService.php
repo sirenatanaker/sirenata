@@ -250,7 +250,6 @@ class CourseService
         $user = Auth::user();
 
         return $user->enrolledCourses()
-            ->with('category')
             ->orderByPivot('updated_at', 'desc')
             ->limit($limit)
             ->get();
@@ -350,7 +349,7 @@ class CourseService
             }
 
             $enrolledCourses = $user->enrolledCourses()
-                ->with(['category', 'sections.contents'])
+                ->with(['sections.contents'])
                 ->get();
 
             $allCoursesData = collect();
@@ -475,7 +474,6 @@ class CourseService
                     'is_ongoing_phase'      => $isOngoingPhase,
                     'is_waiting_for_start'  => $isWaitingForStart,
                     'batch_students_count'  => $batchStudentsCount,
-                    'category'              => $course->category ? (object) $course->category->toArray() : (object) ['name' => '-'],
                     'thumbnail'             => $course->thumbnail,
                     'thumbnail_url'         => $thumbnailUrl,
                     'description'           => $course->description,
@@ -1080,11 +1078,7 @@ class CourseService
     public function allCourses(int $page = 1, int $perPage = 12, ?string $search = null, ?string $categoryId = null): array
     {
         try {
-            $query = Course::with('category')->orderBy('created_at', self::DEFAULT_SORT);
-
-            if ($categoryId) {
-                $query->where('category_id', $categoryId);
-            }
+            $query = Course::orderBy('created_at', self::DEFAULT_SORT);
 
             if ($search) {
                 $query->where('name', 'like', "%{$search}%");
@@ -1097,10 +1091,8 @@ class CourseService
                 $resultData[] = [
                     'slug'           => $course->slug,
                     'name'           => $course->name,
-                    'category'       => ['name' => $course->category ? $course->category->name : '-'],
                     'thumbnail'      => $course->thumbnail,
                     'description'    => $course->description,
-                    'students_count' => method_exists($course, 'students') ? $course->students()->count() : 0,
                 ];
             }
 
@@ -1158,7 +1150,6 @@ class CourseService
             }
 
             $course = Course::create([
-                'category_id' => $data['category_id'],
                 'name'        => $data['name'],
                 'audience'    => $data['audience'] ?? 'instansi',
                 'description' => $data['description'] ?? '',
@@ -1221,7 +1212,6 @@ class CourseService
             }
 
             $course->update([
-                'category_id' => $data['category_id'] ?? $course->category_id,
                 'name'        => $data['name'] ?? $course->name,
                 'audience'    => $data['audience'] ?? $course->audience,
                 'description' => $data['description'] ?? $course->description,
@@ -1285,7 +1275,7 @@ class CourseService
     public function getCourseBySlug(string $slug): array
     {
         try {
-            $course = Course::with(['category', 'sections.contents'])->where('slug', $slug)->first();
+            $course = Course::with(['sections.contents'])->where('slug', $slug)->first();
 
             if (!$course) {
                 return [
@@ -1453,7 +1443,6 @@ class CourseService
         };
 
         $query = Course::with([
-            'category',
             'bimtekEvents' => fn($q) => $waveFilter($q)
                 ->withCount('participants')
                 ->orderByRaw(
@@ -1466,8 +1455,7 @@ class CourseService
                 ->orderBy('position'),
         ])
             ->withCount(['sections', 'students'])
-            ->when($search, fn($q) => $q->where('name', 'like', "%{$search}%"))
-            ->when(!empty($categoryIds), fn($q) => $q->whereIn('category_id', $categoryIds));
+            ->when($search, fn($q) => $q->where('name', 'like', "%{$search}%"));
 
         // Kecualikan kursus yang sudah didaftarkan / diselesaikan
         if (!empty($excludedCourseIds)) {

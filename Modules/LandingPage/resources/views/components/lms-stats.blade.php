@@ -7,7 +7,7 @@
 @php
     $lmsCourseCount = $lmsStats['courseCount'] ?? $courses->count();
     $lmsModuleCount = $lmsStats['moduleCount'] ?? 0;
-    $lmsCategoryCount = $lmsStats['categoryCount'] ?? 0;
+    $lmsEventCount = $lmsStats['eventCount'] ?? 0;
     $lmsParticipantCount = $lmsStats['participantCount'] ?? ($stats['participants'] ?? 1200);
 
     // Dekorasi halftone 1/4 elips
@@ -84,11 +84,11 @@
 
             <!-- Item 3 -->
             <div class="border-l-2 border-slate-700 pl-5 py-2 flex flex-col justify-between hover:border-amber-400 transition-colors duration-300">
-                <p class="text-xs font-semibold text-slate-400 mb-2">Kategori Topik</p>
+                <p class="text-xs font-semibold text-slate-400 mb-2">Gelombang Pelatihan</p>
                 <h4 class="text-4xl sm:text-5xl font-extrabold text-white mb-2 stat-counter tracking-tight"
-                    data-target="{{ $lmsCategoryCount }}" data-suffix=""
+                    data-target="{{ $lmsEventCount }}" data-suffix=""
                     style="font-family: 'Oswald', sans-serif;">0</h4>
-                <p class="text-xs text-slate-400 leading-relaxed">Bidang kompetensi mulai dari makro, mikro, hingga kebijakan ketenagakerjaan.</p>
+                <p class="text-xs text-slate-400 leading-relaxed">Periode bimbingan teknis daring terjadwal lintas wilayah.</p>
             </div>
 
             <!-- Item 4 -->

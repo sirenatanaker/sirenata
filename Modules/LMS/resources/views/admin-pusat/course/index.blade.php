@@ -1,38 +1,15 @@
-<x-dashboard::layouts.dashboard title="Daftar Course">
+<x-dashboard::layouts.dashboard title="Master Kursus">
     <div class="p-2 sm:p-6">
 
-        <x-dashboard::filter-card title="Daftar Course" :total="$meta['total'] ?? 0" :resetUrl="route('admin-pusat.management-course.courses.index')">
+        <x-dashboard::filter-card title="Master Kursus" :total="$meta['total'] ?? 0" :resetUrl="route('admin-pusat.management-course.courses.index')">
 
             <x-slot name="actions">
                 <x-button :href="route('admin-pusat.management-course.courses.create')" variant="primary" icon="fas fa-plus">
-                    Tambah Course
+                    Tambah Master Kursus
                 </x-button>
             </x-slot>
 
             <x-slot name="filter_inputs">
-
-                <!-- Kategori Course -->
-                <div class="w-full sm:w-48">
-                    <label class="block text-xs font-medium text-slate-500 mb-1">
-                        Kategori Course
-                    </label>
-
-                    <div class="relative">
-                        <i
-                            class="fas fa-layer-group absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
-
-                        <select name="category_id"
-                            class="pl-9 pr-3 py-2.5 w-full rounded-lg border border-slate-300 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
-                            <option value="">Semua Kategori</option>
-
-                            @foreach ($categories as $category)
-                                <option value="{{ $category->id }}" @selected(request('category_id') == $category->id)>
-                                    {{ $category->name }}
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
-                </div>
 
                 <!-- Per Page -->
                 <div class="w-full sm:w-40">
@@ -60,7 +37,7 @@
                         <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
 
                         <input type="text" name="search" value="{{ request('search') }}"
-                            placeholder="Cari nama course..."
+                            placeholder="Cari nama kursus..."
                             class="w-full pl-10 pr-4 py-2.5 rounded-lg border border-slate-300 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
                     </div>
                 </div>
@@ -74,40 +51,32 @@
                             <x-table.th>No.</x-table.th>
                             <x-table.th>Sampul</x-table.th>
                             <x-table.th>Nama Kursus</x-table.th>
-                            <x-table.th>Kategori</x-table.th>
-                            <x-table.th align="center">Peserta</x-table.th>
                             <x-table.th align="center">Aksi</x-table.th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-100 bg-white">
                         @forelse ($courses as $index => $course)
                             <tr class="hover:bg-slate-50 transition-colors">
-                                <x-table.td>
+                                <x-table.td class="text-sm sm:text-base font-medium text-slate-600">
                                     {{ (($meta['current_page'] ?? 1) - 1) * request('row_per_page', 12) + $index + 1 }}
                                 </x-table.td>
                                 <x-table.td>
                                     @if (!empty($course->thumbnail))
                                         <img src="{{ $course->thumbnail }}" alt="Sampul {{ $course->name }}"
-                                            class="w-16 h-11 rounded-md object-cover border border-slate-200">
+                                            class="w-20 h-14 rounded-md object-cover border border-slate-200">
                                     @else
-                                        <div class="w-16 h-11 rounded-md bg-slate-100 text-slate-400 flex items-center justify-center">
-                                            <i class="fas fa-image" aria-hidden="true"></i>
+                                        <div class="w-20 h-14 rounded-md bg-slate-100 text-slate-400 flex items-center justify-center">
+                                            <i class="fas fa-image text-lg" aria-hidden="true"></i>
                                         </div>
                                     @endif
                                 </x-table.td>
                                 <x-table.td>
-                                    <p class="font-semibold text-slate-800 line-clamp-1" title="{{ $course->name }}">{{ $course->name }}</p>
+                                    <p class="text-sm sm:text-base font-bold text-slate-800 line-clamp-1" title="{{ $course->name }}">{{ $course->name }}</p>
                                     @if ($course->description)
-                                        <p class="mt-1 max-w-xl text-xs text-slate-500 line-clamp-2">
+                                        <p class="mt-1 max-w-2xl text-xs sm:text-sm text-slate-500 line-clamp-2 leading-relaxed">
                                             {{ $course->description }}
                                         </p>
                                     @endif
-                                </x-table.td>
-                                <x-table.td>
-                                    <x-badge color="slate">{{ $course->category->name ?? 'Tanpa Kategori' }}</x-badge>
-                                </x-table.td>
-                                <x-table.td align="center">
-                                    {{ number_format($course->students_count ?? 0) }}
                                 </x-table.td>
                                 <x-table.td align="center">
                                     <div class="flex items-center justify-center gap-1">
@@ -131,7 +100,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <x-table.td colspan="6" align="center" class="py-12">
+                                <x-table.td colspan="4" align="center" class="py-12">
                                     <div class="flex flex-col items-center gap-3">
                                         <span class="w-12 h-12 flex items-center justify-center rounded-full bg-slate-100 text-slate-400">
                                             <i class="fas fa-book-open text-xl" aria-hidden="true"></i>

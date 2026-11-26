@@ -8,19 +8,17 @@ use Modules\LMS\Models\Course;
 class CourseService
 {
     public function queryCourses(
-        ?string $category_id = null,
         ?string $search = null,
     ) {
-        return Course::with(['category', 'benefits', 'testimonis', 'sections' , 'sections.contents'])
+        return Course::with(['benefits', 'testimonis', 'sections', 'sections.contents'])
                 ->withCount(['benefits', 'students', 'sections'])
-                ->when($category_id, fn($q) => $q->where('category_id', $category_id))
                 ->when($search, fn($q) => $q->where('name', 'like', "%{$search}%"))
                 ->latest();
     }
     
 
     public function queryCourseDetail(string $slug) {
-        return Course::with(['category', 'benefits', 'testimonis', 'sections' , 'sections.contents'])
+        return Course::with(['benefits', 'testimonis', 'sections', 'sections.contents'])
             ->withCount('students')
             ->where('slug', $slug)
             ->firstOrFail();
@@ -43,7 +41,6 @@ class CourseService
             $documentPath = $data['thumbnail']->store('courses/thumbnails', 'public');
         }
         return Course::create([
-            'category_id' => $data['category_id'],
             'name' => $data['name'],
             'thumbnail' => $documentPath,
             'description' => $data['description'],
@@ -60,7 +57,6 @@ class CourseService
             $documentPath = $data['thumbnail']->store('courses/thumbnails', 'public');
         }
         return $course->update([
-                'category_id' => $data['category_id'] ?? $course->category_id,
                 'name'        => $data['name'] ?? $course->name,
                 'thumbnail'   => $documentPath,
                 'description' => $data['description'] ?? $course->description,

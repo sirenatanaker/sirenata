@@ -18,7 +18,6 @@ class CourseResource extends JsonResource
             'slug'          => $this->slug,
             'thumbnail_url'     => $this->thumbnail_url,
             'description'   => $this->description,
-            'category'         => CategoryResource::make($this->whenLoaded('category')),
             'benefits_count'   => $this->whenCounted('benefits'),
             'students_count'   => $this->whenCounted('students'),
             'sections_count'   => $this->whenCounted('sections'),

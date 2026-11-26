@@ -4,7 +4,6 @@ namespace Modules\LMS\Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
-use Modules\LMS\Models\Category;
 
 class CourseFactory extends Factory
 {
@@ -39,7 +38,6 @@ class CourseFactory extends Factory
 
         $name = $this->faker->unique()->randomElement($courseName);
         return [
-            'category_id' => Category::inRandomOrder()->first()?->id,
             'name' => $name,
             'slug' => Str::slug($name),
             'thumbnail' => $this->faker->imageUrl(640, 480, 'cats'),

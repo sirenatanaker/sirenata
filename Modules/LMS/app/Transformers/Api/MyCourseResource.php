@@ -17,7 +17,6 @@ class MyCourseResource extends JsonResource
             'name'          => $this->name,
             'slug'          => $this->slug,
             'thumbnail_url' => $this->thumbnail_url,
-            'category'      => $this->category?->name,
             'status'        => $this->pivot->status,
             'progress'      => $this->pivot->progress,
             'completed_at'  => $this->pivot->completed_at,

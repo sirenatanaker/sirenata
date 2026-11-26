@@ -63,15 +63,15 @@
                 $statusOptions = [
                     'all' => [
                         'label' => 'Semua',
-                        'url'   => route('user.catalog.index', request()->except(['page', 'status', 'type', 'categories'])),
+                        'url'   => route('user.catalog.index', request()->except(['page', 'status', 'type'])),
                     ],
                     'open_registration' => [
                         'label' => 'Pendaftaran Buka',
-                        'url'   => route('user.catalog.index', array_merge(request()->except(['page', 'type', 'categories']), ['status' => 'open_registration'])),
+                        'url'   => route('user.catalog.index', array_merge(request()->except(['page', 'type']), ['status' => 'open_registration'])),
                     ],
                     'ongoing' => [
                         'label' => 'Sedang Berlangsung',
-                        'url'   => route('user.catalog.index', array_merge(request()->except(['page', 'type', 'categories']), ['status' => 'ongoing'])),
+                        'url'   => route('user.catalog.index', array_merge(request()->except(['page', 'type']), ['status' => 'ongoing'])),
                     ],
                 ];
             @endphp
@@ -118,7 +118,6 @@
                         'name'                   => $c->name,
                         'slug'                   => $c->slug,
                         'myCourseUrl'            => route('user.course.my-course.detail', $c->slug),
-                        'category'               => $c->category->name ?? 'Umum',
                         'description'            => $c->description,
                         'students'               => $c->students_count,
                         'modules'                => $c->sections_count,

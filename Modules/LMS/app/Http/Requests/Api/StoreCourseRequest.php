@@ -12,7 +12,6 @@ class StoreCourseRequest extends FormRequest
   public function rules(): array
     {
         return [
-            'category_id' => ['required', 'exists:categories,id'],
             'name'        => ['required', 'string', 'max:255'],
             // sometimes agar klien API lama yang belum mengirim tetap lolos (default di service: instansi).
             'audience'    => ['sometimes', 'in:instansi,swasta'],
@@ -37,7 +36,6 @@ class StoreCourseRequest extends FormRequest
     public function attributes(): array
     {
         return [
-            'category_id' => 'Kategori Course',
             'name' => 'Nama Course',
             'audience' => 'Peruntukan Course',
             'thumbnail' => 'Thumbnail Course',

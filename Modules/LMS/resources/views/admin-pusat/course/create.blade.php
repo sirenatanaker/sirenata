@@ -2,8 +2,8 @@
     <div class="p-2 sm:p-6">
         <!-- Breadcrumb Navigation -->
         <x-breadcrumb :home="route('admin-pusat.dashboard')" :items="[
-            ['label' => 'Daftar Course', 'url' => route('admin-pusat.management-course.courses.index')],
-            ['label' => 'Tambah Course'],
+            ['label' => 'Master Kursus', 'url' => route('admin-pusat.management-course.courses.index')],
+            ['label' => 'Tambah Master Kursus'],
         ]" />
 
         <x-validation-errors />
@@ -11,8 +11,8 @@
         <!-- Form Container -->
         <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
             <div class="px-6 py-4 border-b border-slate-200 bg-slate-50">
-                <h2 class="text-lg font-semibold text-slate-800">Informasi Course</h2>
-                <p class="text-sm text-slate-500">Lengkapi data di bawah ini untuk menambahkan course baru.</p>
+                <h2 class="text-lg font-semibold text-slate-800">Informasi Master Kursus</h2>
+                <p class="text-sm text-slate-500">Lengkapi data di bawah ini untuk menambahkan master kursus baru.</p>
             </div>
 
             <form action="{{ route('admin-pusat.management-course.courses.store') }}" method="POST"
@@ -20,11 +20,6 @@
                 @csrf
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    @include('lms::admin-pusat.course.partials.category-picker', [
-                        'categories' => $categories,
-                        'selectedCategoryId' => old('category_id', ''),
-                    ])
-
                     <!-- Peruntukan Course -->
                     <div class="col-span-1 md:col-span-2">
                         <span class="block text-sm font-semibold text-slate-800 mb-2">Peruntukan Course <span class="text-red-500">*</span></span>

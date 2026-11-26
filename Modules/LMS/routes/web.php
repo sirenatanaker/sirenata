@@ -10,7 +10,6 @@ use Modules\LMS\Http\Controllers\AdminPusat\BimtekEventController;
 use Modules\LMS\Http\Controllers\AdminPusat\CertificateSubmissionController;
 use Modules\LMS\Http\Controllers\PublicCertificateVerifierController;
 use Modules\LMS\Http\Controllers\AdminPusat\Course\CourseController;
-use Modules\LMS\Http\Controllers\AdminPusat\Course\CategoryController as AdminPusatCourseCategoryController;
 use Modules\LMS\Http\Controllers\AdminPusat\Course\CourseSectionController;
 use Modules\LMS\Http\Controllers\AdminPusat\Course\PostTestController;
 use Modules\LMS\Http\Controllers\AdminPusat\Course\SectionContentController;
@@ -40,9 +39,6 @@ Route::prefix('admin-pusat')->middleware(['auth', 'role:admin-pusat'])->name('ad
     });
 
     Route::prefix('management-course')->name('management-course.')->group(function () {
-        Route::post('categories', [AdminPusatCourseCategoryController::class, 'store'])->name('categories.store');
-        Route::put('categories/{category}', [AdminPusatCourseCategoryController::class, 'update'])->name('categories.update');
-        Route::delete('categories/{category}', [AdminPusatCourseCategoryController::class, 'destroy'])->name('categories.destroy');
         Route::resource('courses', CourseController::class);
         Route::resource('bimtek-events', BimtekEventController::class);
         Route::post('bimtek-events/{eventId}/toggle-attendance/{userId}', [BimtekEventController::class, 'toggleAttendance'])->name('bimtek-events.toggle-attendance');

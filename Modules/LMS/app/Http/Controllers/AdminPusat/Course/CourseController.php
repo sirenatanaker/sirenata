@@ -10,14 +10,12 @@ use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Modules\LMS\Http\Requests\Api\StoreCourseRequest;
 use Modules\LMS\Http\Requests\Api\UpdateCourseRequest;
-use Modules\LMS\Services\CategoryService;
 use Modules\LMS\Services\CourseService;
 
 class CourseController extends Controller
 {
     public function __construct(
         private CourseService $courseService,
-        private CategoryService $categoryService,
     ) {}
 
     public function index(Request $request): View
@@ -25,21 +23,18 @@ class CourseController extends Controller
         $page = max(1, (int) $request->get('page', 1));
         $perPage = $request->integer('row_per_page', 12);
         $search = $request->get('search');
-        $categoryId = $request->get('category_id');
 
         $cached = SmartCache::remember(
             [SmartCache::DOMAIN_LMS_COURSES, SmartCache::DOMAIN_LMS_EVENTS],
-            'admin_courses_index:' . md5(json_encode([$page, $perPage, $search, $categoryId])),
+            'admin_courses_index:' . md5(json_encode([$page, $perPage, $search])),
             300,
-            function () use ($page, $perPage, $search, $categoryId) {
+            function () use ($page, $perPage, $search) {
                 return [
                     'result' => $this->courseService->allCourses(
                         page: $page,
                         perPage: $perPage,
                         search: $search,
-                        categoryId: $categoryId,
                     ),
-                    'categories' => $this->categoryService->getAllOrdered(),
                 ];
             }
         );
@@ -48,7 +43,6 @@ class CourseController extends Controller
 
         return view('lms::admin-pusat.course.index', [
             'courses'    => collect(json_decode(json_encode($result['data']))),
-            'categories' => $cached['categories'],
             'meta'       => $result['meta'],
             'links'      => $result['links'],
             'success'    => $result['success'],
@@ -58,9 +52,7 @@ class CourseController extends Controller
 
     public function create(): View
     {
-        $categories = $this->categoryService->getAllOrdered();
-
-        return view('lms::admin-pusat.course.create', compact('categories'));
+        return view('lms::admin-pusat.course.create');
     }
 
     public function store(StoreCourseRequest $request): RedirectResponse
@@ -106,9 +98,8 @@ class CourseController extends Controller
         }
 
         $course = json_decode(json_encode($courseResponse['data']));
-        $categories = $this->categoryService->getAllOrdered();
 
-        return view('lms::admin-pusat.course.edit', compact('course', 'categories'));
+        return view('lms::admin-pusat.course.edit', compact('course'));
     }
 
     public function update(UpdateCourseRequest $request, string $slug): RedirectResponse

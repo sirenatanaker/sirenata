@@ -1,7 +1,6 @@
 <?php
 
 use App\Models\User;
-use Modules\LMS\Models\Category;
 use Modules\LMS\Models\Course;
 use Modules\Roles\Models\Role;
 
@@ -24,9 +23,7 @@ test('user profile page has no password section', function () {
 test('user profile lists earned certificates', function () {    $user = User::create(['name' => 'Sertifikat', 'email' => 'sertifikat@kemnaker.go.id', 'password' => 'password']);
     $user->assignRole('user');
 
-    $category = Category::create(['name' => 'Perencanaan', 'slug' => 'perencanaan']);
     $course = Course::create([
-        'category_id' => $category->id,
         'name' => 'Kursus Sertifikat',
         'slug' => 'kursus-sertifikat',
         'description' => 'Deskripsi.',

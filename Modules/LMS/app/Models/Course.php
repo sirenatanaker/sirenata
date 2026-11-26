@@ -24,7 +24,6 @@ class Course extends Model
      * The attributes that are mass assignable.
      */
     protected $fillable = [
-        'category_id',
         'name',
         'slug',
         'thumbnail',
@@ -69,16 +68,6 @@ class Course extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
-    }
-
-    /**
-     * Get the category that owns the Course
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
-     */
-    public function category(): BelongsTo
-    {
-        return $this->belongsTo(Category::class, 'category_id');
     }
 
     public function benefits(): HasMany

@@ -1,7 +1,6 @@
 <?php
 
 use App\Models\User;
-use Modules\LMS\Models\Category;
 use Modules\LMS\Models\CertificateSetting;
 use Modules\LMS\Models\Course;
 use Modules\Roles\Models\Role;
@@ -16,9 +15,7 @@ test('certificate cannot be reissued after it already exists', function () {
     $user->assignRole('user');
     $user->profile()->create(['full_name' => 'Lulus Asli']);
 
-    $category = Category::create(['name' => 'Perencanaan', 'slug' => 'perencanaan']);
     $course = Course::create([
-        'category_id' => $category->id,
         'name' => 'Kursus Lulus',
         'slug' => 'kursus-lulus',
         'description' => 'Deskripsi.',

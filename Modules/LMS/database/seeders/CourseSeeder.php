@@ -402,7 +402,6 @@ class CourseSeeder extends Seeder
 
         // 1. Simpan Data Kursus & Bimtek Events
         foreach ($courseData as $index => $item) {
-            $cat = Category::where('name', $item['category'])->first() ?? Category::first();
             $bgColor = $brandColors[$index % count($brandColors)];
 
             $words = explode(' ', trim($item['name']));
@@ -411,7 +410,6 @@ class CourseSeeder extends Seeder
             $course = Course::updateOrCreate(
                 ['slug' => Str::slug($item['name'])],
                 [
-                    'category_id' => $cat?->id,
                     'name'        => $item['name'],
                     'thumbnail'   => 'https://ui-avatars.com/api/?name=' . urlencode($safeName) . '&background=' . $bgColor . '&color=fff&size=512&bold=true&length=2',
                     'description' => $item['description'],

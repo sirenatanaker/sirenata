@@ -8,7 +8,6 @@ use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Modules\LMS\Models\BimtekEvent;
-use Modules\LMS\Models\Category;
 use Modules\LMS\Models\Course;
 use Modules\LMS\Models\Library;
 use Modules\LMS\Models\PostTest;
@@ -146,11 +145,9 @@ class UserDashboardService
                 // 1. Last accessed course + Event context
                 $lastCourse = $this->courseService->getLastAccessedCourse();
                 if ($lastCourse) {
-                    $dbLastCourse = Course::with('category')->where('slug', $lastCourse->slug)->first();
+                    $dbLastCourse = Course::where('slug', $lastCourse->slug)->first();
                     if ($dbLastCourse) {
                         $lastCourse->description = $dbLastCourse->description;
-                        $lastCourse->category = $dbLastCourse->category;
-                        $lastCourse->category_name = $dbLastCourse->category ? $dbLastCourse->category->name : null;
                         $lastCourse->thumbnail = $dbLastCourse->thumbnail;
 
                         $enr = $enrollByCourseId->get($dbLastCourse->id);
@@ -167,7 +164,6 @@ class UserDashboardService
 
                 // 2. Recent enrolled courses + Event context (prioritaskan yang sedang berlangsung dulu)
                 $recentCourses = $user->enrolledCourses()
-                    ->with('category')
                     ->latest('course_student.updated_at')
                     ->get()
                     ->map(function ($course) use ($enrollByCourseId, $eventsById, $resolveEventMeta) {
@@ -758,18 +754,14 @@ class UserDashboardService
         $enrolledCourses = Course::whereIn('id', $enrolledCourseIds)
             ->where(function ($query) use ($keyword) {
                 $query->where('name', 'like', "%{$keyword}%")
-                    ->orWhere('description', 'like', "%{$keyword}%")
-                    ->orWhereHas('category', function ($q) use ($keyword) {
-                        $q->where('name', 'like', "%{$keyword}%");
-                    });
+                    ->orWhere('description', 'like', "%{$keyword}%");
             })
-            ->with('category')
             ->limit(4)
             ->get()
             ->map(function ($item) use ($getInitials) {
                 return [
                     'title' => $item->name,
-                    'subtitle' => $item->category->name ?? 'Kategori Umum',
+                    'subtitle' => 'Kursus Saya',
                     'url' => route('user.course.my-course.detail', $item->slug),
                     'initials' => $getInitials($item->name),
                     'cover' => $item->thumbnail
@@ -782,18 +774,14 @@ class UserDashboardService
         $availableCatalogs = Course::whereNotIn('id', $enrolledCourseIds)
             ->where(function ($query) use ($keyword) {
                 $query->where('name', 'like', "%{$keyword}%")
-                    ->orWhere('description', 'like', "%{$keyword}%")
-                    ->orWhereHas('category', function ($q) use ($keyword) {
-                        $q->where('name', 'like', "%{$keyword}%");
-                    });
+                    ->orWhere('description', 'like', "%{$keyword}%");
             })
-            ->with('category')
             ->limit(4)
             ->get()
             ->map(function ($item) use ($getInitials) {
                 return [
                     'title' => $item->name,
-                    'subtitle' => 'Katalog: ' . ($item->category->name ?? 'Kategori Umum'),
+                    'subtitle' => 'Katalog Pelatihan',
                     'url' => route('user.course.index', $item->slug),
                     'initials' => $getInitials($item->name),
                     'cover' => $item->thumbnail
@@ -803,19 +791,7 @@ class UserDashboardService
                 ];
             });
 
-        // Pencarian Kategori Katalog Kursus
-        $catalogCategories = Category::where('name', 'like', "%{$keyword}%")
-            ->withCount('courses')
-            ->limit(3)
-            ->get()
-            ->map(function ($item) {
-                return [
-                    'id' => $item->id,
-                    'title' => $item->name,
-                    'subtitle' => ($item->courses_count ?? 0) . ' Kursus dalam Kategori',
-                    'url' => route('user.catalog.index', ['categories' => [$item->id]]),
-                ];
-            });
+        $catalogCategories = [];
 
         $libraries = Library::where('title', 'like', "%{$keyword}%")
             ->orWhere('description', 'like', "%{$keyword}%")

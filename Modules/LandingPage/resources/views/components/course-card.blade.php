@@ -37,15 +37,6 @@
                 {{ $initials }}
             </h2>
         @endif
-
-        <!-- Badge Kategori (Mojok Kanan Atas seperti di card kursus user) -->
-        @if ($course->category)
-            <span
-                class="absolute top-0 right-0 z-10 max-w-[85%] px-3 sm:px-3.5 py-1.5 text-[10px] sm:text-xs font-bold uppercase tracking-wider text-white bg-[#13416B] shadow-sm flex items-center gap-1.5 rounded-none rounded-bl-lg rounded-tr-md">
-                <i class="fas fa-tag text-[9px] sm:text-[10px] flex-shrink-0"></i>
-                <span class="truncate">{{ $course->category->name }}</span>
-            </span>
-        @endif
     </div>
 
     <!-- Detail Konten -->

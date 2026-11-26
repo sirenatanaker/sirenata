@@ -7,7 +7,7 @@
                 <li>
                     <a href="{{ route('admin-pusat.management-course.courses.index') }}"
                         class="text-sm font-medium text-slate-500 hover:text-[#13416B] transition-colors whitespace-nowrap">
-                        Daftar Course
+                        Master Kursus
                     </a>
                 </li>
                 <li>
@@ -40,7 +40,7 @@
                 <!-- Badges -->
                 <div class="flex flex-wrap items-center gap-2 mb-3">
                     <span class="px-3 py-1 text-[10px] sm:text-xs font-bold uppercase tracking-wider text-[#13416B] bg-[#13416B]/10 border border-[#13416B]/20 rounded-md">
-                        {{ $course->category->name ?? 'Tanpa Kategori' }}
+                        {{ ($course->audience ?? 'instansi') === 'swasta' ? 'Swasta' : 'Instansi / Lembaga' }}
                     </span>
                     <button type="button" onclick="window.startCourseDetailTour && window.startCourseDetailTour()"
                         class="ml-auto inline-flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-bold text-[#13416B] bg-[#13416B]/10 border border-[#13416B]/20 rounded-lg hover:bg-[#13416B]/20 transition-colors">
@@ -66,8 +66,8 @@
                     <h3 class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Informasi Tambahan</h3>
                     <ul class="divide-y divide-slate-100">
                         <li class="flex justify-between items-center gap-2 py-2">
-                            <span class="text-xs font-medium text-slate-500">Kategori</span>
-                            <span class="text-xs font-bold text-[#13416B] text-right">{{ $course->category->name ?? '-' }}</span>
+                            <span class="text-xs font-medium text-slate-500">Peruntukan</span>
+                            <span class="text-xs font-bold text-[#13416B] text-right">{{ ($course->audience ?? 'instansi') === 'swasta' ? 'Swasta' : 'Instansi / Lembaga' }}</span>
                         </li>
                         <li class="flex justify-between items-center gap-2 py-2">
                             <span class="text-xs font-medium text-slate-500">Dibuat Pada</span>
@@ -426,8 +426,8 @@
                     <div class="p-0">
                         <ul class="divide-y divide-slate-100">
                             <li class="flex justify-between items-center gap-2 px-3 sm:px-6 py-2.5 sm:py-3.5 hover:bg-slate-50 transition-colors">
-                                <span class="text-xs sm:text-sm font-medium text-slate-500">Kategori</span>
-                                <span class="text-xs sm:text-sm font-bold text-[#13416B] text-right">{{ $course->category->name ?? '-' }}</span>
+                                <span class="text-xs sm:text-sm font-medium text-slate-500">Peruntukan</span>
+                                <span class="text-xs sm:text-sm font-bold text-[#13416B] text-right">{{ ($course->audience ?? 'instansi') === 'swasta' ? 'Swasta' : 'Instansi / Lembaga' }}</span>
                             </li>
                             <li class="flex justify-between items-center gap-2 px-3 sm:px-6 py-2.5 sm:py-3.5 hover:bg-slate-50 transition-colors">
                                 <span class="text-xs sm:text-sm font-medium text-slate-500">Dibuat Pada</span>

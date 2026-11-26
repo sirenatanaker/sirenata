@@ -3,16 +3,12 @@
 use App\Livewire\Dashboard\SuperAdmin\UserManagementTable;
 use App\Models\User;
 use Livewire\Livewire;
-use Modules\LMS\Models\Category;
 use Modules\LMS\Models\Course;
 use Modules\LMS\Services\CourseService;
 use Modules\Roles\Models\Role;
 
 test('courses default to instansi audience', function () {
-    $category = Category::create(['name' => 'Perencanaan', 'slug' => 'perencanaan']);
-
     $result = app(CourseService::class)->storeCourse([
-        'category_id' => $category->id,
         'name' => 'Kursus A',
         'description' => 'Deskripsi kursus A.',
     ]);
@@ -22,10 +18,7 @@ test('courses default to instansi audience', function () {
 });
 
 test('courses can target swasta audience', function () {
-    $category = Category::create(['name' => 'Praktik', 'slug' => 'praktik']);
-
     $result = app(CourseService::class)->storeCourse([
-        'category_id' => $category->id,
         'name' => 'Kursus B',
         'description' => 'Deskripsi kursus B.',
         'audience' => 'swasta',

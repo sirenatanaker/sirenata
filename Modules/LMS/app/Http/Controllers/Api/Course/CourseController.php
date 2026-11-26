@@ -36,10 +36,8 @@ class CourseController extends Controller
         try {
             $row_per_page = $request->input('row_per_page', 10);
             $search = $request->input('search');
-            $category_id = $request->input('category_id');
 
             $courses = $this->courseService->queryCourses(
-                category_id: $category_id,
                 search: $search,
             )->paginate($row_per_page);
 
@@ -104,7 +102,7 @@ class CourseController extends Controller
             return ResponseHelper::success(
                 status: true,
                 message: 'Course created successfully',
-                result: new CourseResource($course->load('category', 'user')),
+                result: new CourseResource($course->load('user')),
                 statusCode: 201
             );
         } catch (\Exception $th) {
@@ -134,7 +132,7 @@ class CourseController extends Controller
             return ResponseHelper::success(
                 status: true,
                 message: 'Course updated successfully',
-                result: new CourseResource($course->fresh(['category', 'user'])),
+                result: new CourseResource($course->fresh(['user'])),
                 statusCode: 200
             );
         } catch (\Exception $e) {

@@ -12,7 +12,6 @@ class UpdateCourseRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'category_id' => ['sometimes', 'exists:categories,id'],
             'name'        => ['sometimes', 'string', 'max:255'],
             'audience'    => ['sometimes', 'in:instansi,swasta'],
         
@@ -36,7 +35,6 @@ class UpdateCourseRequest extends FormRequest
     public function attributes(): array
     {
         return [
-            'category_id' => 'Kategori Course',
             'name' => 'Nama Course',
             'audience' => 'Peruntukan Course',
             'thumbnail' => 'Thumbnail Course',

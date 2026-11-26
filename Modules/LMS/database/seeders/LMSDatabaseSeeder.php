@@ -9,7 +9,6 @@ class LMSDatabaseSeeder extends Seeder
     public function run(): void
     {
         $this->call([
-            CategorySeeder::class,
             CourseSeeder::class,
             CourseSectionSeeder::class,
             PostTestSeeder::class,

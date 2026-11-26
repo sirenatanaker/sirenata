@@ -1,7 +1,6 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use Modules\LMS\Http\Controllers\Api\Category\CategoryController;
 use Modules\LMS\Http\Controllers\Api\Course\CourseBenefitController;
 use Modules\LMS\Http\Controllers\Api\Course\CourseController;
 use Modules\LMS\Http\Controllers\Api\Course\CourseMentorController;
@@ -22,11 +21,6 @@ Route::prefix('v1')->group(function () {
 
     Route::prefix('courses/{slug}')->group(function () {
         Route::get('/sections', [CourseSectionController::class, 'index']);
-    });
-
-    Route::prefix('categories')->group(function () {
-        Route::get('/', [CategoryController::class, 'index']);
-        Route::get('/{category:slug}', [CategoryController::class, 'show']);
     });
 
     Route::middleware('auth:sanctum')->group(function () {
@@ -96,12 +90,6 @@ Route::prefix('v1')->group(function () {
             Route::prefix('contents')->group(function () {
                 Route::put('/{content}/update', [SectionContentController::class, 'update']);
                 Route::delete('/{content}/delete', [SectionContentController::class, 'destroy']);
-            });
-
-            Route::prefix('categories')->group(function () {
-                Route::post('/', [CategoryController::class, 'store']);
-                Route::put('/{category:slug}/update', [CategoryController::class, 'update']);
-                Route::delete('/{category:slug}/delete', [CategoryController::class, 'destroy']);
             });
         });
     });

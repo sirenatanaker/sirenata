@@ -108,7 +108,7 @@ class CourseStudentService
     public function myCourses(int $perPage = 12, string $status = 'semua')
     {
         $query = auth()->user()->enrolledCourses()
-            ->with(['category', 'benefits', 'testimonis']);
+            ->with(['benefits', 'testimonis']);
 
         if ($status === 'completed') {
             $query->wherePivot('status', 'completed');

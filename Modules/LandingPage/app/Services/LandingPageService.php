@@ -5,6 +5,7 @@ namespace Modules\LandingPage\Services;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
+use Modules\LMS\Models\BimtekEvent;
 use Modules\LMS\Models\Course;
 use Modules\MasterData\Models\Province;
 use Modules\MasterData\Models\Regency;
@@ -34,7 +35,7 @@ class LandingPageService
             'moduleCount'      => (int) $courses->sum(
                 fn($course) => $course->sections_count ?? (isset($course->sections) ? count($course->sections) : 0)
             ),
-            'categoryCount'    => $courses->pluck('category_id')->filter()->unique()->count(),
+            'eventCount'       => $this->safeModelCount(BimtekEvent::class),
             'participantCount' => $stats['participants'],
         ];
 
@@ -87,7 +88,7 @@ class LandingPageService
                 return collect();
             }
 
-            return Course::with(['category', 'sections.contents'])
+            return Course::with(['sections.contents'])
                 ->latest()
                 ->get();
         } catch (\Throwable) {
