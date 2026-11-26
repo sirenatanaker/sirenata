@@ -41,10 +41,10 @@
 @endphp
 
 <a href="{{ route('user.course.my-course.detail', $course->slug) }}"
-    class="group flex flex-col h-full bg-white dark:bg-slate-800/90 rounded-md border border-slate-200 dark:border-slate-700/80 shadow-xs sm:shadow-sm hover:shadow-lg hover:border-[#13416B]/30 dark:hover:border-slate-500 hover:-translate-y-0.5 transition-all duration-300 overflow-hidden">
+    class="group flex flex-col h-full bg-transparent sm:bg-white sm:dark:bg-slate-800/90 rounded-none sm:rounded-md border-0 sm:border border-slate-200 dark:border-slate-700/80 shadow-none sm:shadow-sm hover:shadow-lg hover:border-[#13416B]/30 dark:hover:border-slate-500 hover:-translate-y-0.5 transition-all duration-300 overflow-hidden">
 
     {{-- Thumbnail Bersih + 1 Badge Status (4 Jenis Fase) --}}
-    <div class="relative w-full aspect-[4/3] sm:aspect-video overflow-hidden bg-slate-100 dark:bg-slate-900/50 rounded-t-md">
+    <div class="relative w-full aspect-[4/3] sm:aspect-video overflow-hidden bg-slate-100 dark:bg-slate-900/50 rounded-md sm:rounded-b-none sm:rounded-t-md">
         @if (!empty($course->thumbnail_url))
             <img src="{{ $course->thumbnail_url }}"
                 alt="{{ $course->course_name ?? $course->name }}"
@@ -75,7 +75,7 @@
     </div>
 
     {{-- Konten Text Ringkas & Lega --}}
-    <div class="px-3 pt-4 pb-3.5 sm:p-5 flex flex-col flex-1">
+    <div class="px-0 pt-4 pb-0 sm:p-5 flex flex-col flex-1">
         {{-- Label Gelombang Standar di Atas Judul: Gelombang [nomor] [wilayah] [tahun] --}}
         @if ($waveSubtitle)
             <p class="text-[11px] sm:text-sm font-semibold text-[#547996] truncate mb-2" title="{{ $fullBatchName }}">

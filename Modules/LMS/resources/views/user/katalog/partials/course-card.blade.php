@@ -49,10 +49,10 @@
 @endphp
 
 <div @click="show('{{ $course->id }}')"
-    class="group flex flex-col h-full bg-white dark:bg-slate-800/90 rounded-md border border-slate-200 dark:border-slate-700/80 shadow-xs sm:shadow-sm hover:shadow-lg hover:border-[#13416B]/30 dark:hover:border-slate-500 hover:-translate-y-0.5 transition-all duration-300 overflow-hidden w-full cursor-pointer">
+    class="group flex flex-col h-full bg-transparent sm:bg-white sm:dark:bg-slate-800/90 rounded-none sm:rounded-md border-0 sm:border border-slate-200 dark:border-slate-700/80 shadow-none sm:shadow-sm hover:shadow-lg hover:border-[#13416B]/30 dark:hover:border-slate-500 hover:-translate-y-0.5 transition-all duration-300 overflow-hidden w-full cursor-pointer">
 
     {{-- Thumbnail Bersih + 1 Badge Status (Tanpa Overlay Teks di Dasar Gambar) --}}
-    <div class="relative w-full aspect-[4/3] sm:aspect-video overflow-hidden bg-slate-100 dark:bg-slate-900/50 rounded-t-md">
+    <div class="relative w-full aspect-[4/3] sm:aspect-video overflow-hidden bg-slate-100 dark:bg-slate-900/50 rounded-md sm:rounded-b-none sm:rounded-t-md">
         @if (!empty($thumbnailUrl))
             <img src="{{ $thumbnailUrl }}"
                 alt="{{ $course->name }}"
@@ -74,7 +74,7 @@
     </div>
 
     {{-- Konten Text Ringkas & Lega --}}
-    <div class="px-3 pt-4 pb-3.5 sm:p-5 flex flex-col flex-1">
+    <div class="px-0 pt-4 pb-0 sm:p-5 flex flex-col flex-1">
         {{-- Label Gelombang Standar di Atas Judul: Gelombang [nomor] [wilayah] [tahun] --}}
         <p class="text-[11px] sm:text-sm font-semibold text-[#547996] truncate mb-2" title="{{ $fullBatchName }}">
             {{ $waveSubtitle }}
@@ -121,8 +121,7 @@
             @if ($isEnrolledInThisBimtek)
                 <button type="button" @click.stop="show('{{ $course->id }}')"
                     class="px-2.5 sm:px-4 py-1.5 sm:py-2 text-[11px] sm:text-sm font-bold text-center rounded-md transition-colors bg-white text-[#13416B] border border-[#13416B]/30 hover:bg-[#13416B]/5 cursor-pointer">
-                    <span class="sm:hidden">Detail</span>
-                    <span class="hidden sm:inline">Lihat Detail</span>
+                    Lihat detail
                 </button>
                 <a href="{{ route('user.course.my-course.detail', $course->slug) }}" @click.stop
                    class="px-2.5 sm:px-4 py-1.5 sm:py-2 text-[11px] sm:text-sm inline-flex items-center justify-center gap-1.5 font-bold text-center rounded-md transition-colors bg-emerald-600 text-white hover:bg-emerald-700 shadow-2xs">
@@ -132,8 +131,7 @@
             @elseif (!$isRegistrationOpen)
                 <button type="button" @click.stop="show('{{ $course->id }}')"
                     class="px-3 sm:px-5 py-1.5 sm:py-2 text-[11px] sm:text-sm font-bold text-center rounded-md transition-colors bg-white text-[#13416B] border border-[#13416B]/30 hover:bg-[#13416B]/5 cursor-pointer">
-                    <span class="sm:hidden">Detail</span>
-                    <span class="hidden sm:inline">Lihat Detail</span>
+                    Lihat detail
                 </button>
             @else
                 <button type="button" @click.stop="askEnroll('{{ $course->id }}')"

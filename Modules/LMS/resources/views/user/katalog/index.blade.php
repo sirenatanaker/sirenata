@@ -76,11 +76,11 @@
                 ];
             @endphp
 
-            <div class="mb-6 sm:mb-8 border-b border-slate-200 dark:border-slate-700/80">
-                <nav class="flex space-x-6 overflow-x-auto -mb-px">
+            <div class="mb-4 sm:mb-8 border-b border-slate-200 dark:border-slate-700/80">
+                <nav class="flex space-x-4 sm:space-x-6 overflow-x-auto -mb-px">
                     @foreach ($statusOptions as $key => $opt)
                         <a href="{{ $opt['url'] }}"
-                           class="border-b-2 py-3 px-1 text-sm whitespace-nowrap transition-colors {{ $activeWaveStatus === $key ? 'border-[#13416B] text-[#13416B] dark:border-white dark:text-white font-bold' : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white hover:border-slate-300 dark:hover:border-slate-600 font-medium' }}">
+                           class="border-b-2 py-2 sm:py-3 px-0.5 sm:px-1 text-xs sm:text-sm whitespace-nowrap transition-colors {{ $activeWaveStatus === $key ? 'border-[#13416B] text-[#13416B] dark:border-white dark:text-white font-bold' : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white hover:border-slate-300 dark:hover:border-slate-600 font-medium' }}">
                             <span>{{ $opt['label'] }}{{ $activeWaveStatus === $key ? ' (' . $courses->total() . ')' : '' }}</span>
                         </a>
                     @endforeach
