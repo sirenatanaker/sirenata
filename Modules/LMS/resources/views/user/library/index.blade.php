@@ -12,7 +12,7 @@
         {{-- HEADER PERPUSTAKAAN DENGAN ILUSTRASI PAPAN --}}
         {{-- ========================================== --}}
         <div
-            class="relative bg-[#13416B] rounded-md p-6 sm:p-8 lg:p-10 mb-6 sm:mb-8 flex items-center justify-between border border-blue-900/20 shadow-lg overflow-hidden min-h-[280px] sm:min-h-[280px] lg:min-h-[320px]">
+            class="relative bg-[#13416B] rounded-md px-5 py-7 sm:p-8 lg:p-10 mb-6 sm:mb-8 flex items-center justify-between border border-blue-900/20 shadow-lg overflow-hidden min-h-[200px] sm:min-h-[280px] lg:min-h-[320px]">
 
             <!-- Efek Dekoratif Bubbles Geometris Profesional -->
             <div class="absolute inset-0 pointer-events-none z-0">
@@ -38,14 +38,14 @@
             <div class="relative z-20 w-full sm:w-[55%] lg:w-[60%] order-1 text-left">
 
                 <span
-                    class="inline-flex items-center gap-2 px-3 py-1 bg-white/10 backdrop-blur-md rounded-md text-sm sm:text-base tracking-wider text-white border border-white/10 mb-4 shadow-sm"
+                    class="inline-flex items-center gap-2 px-2.5 py-0.5 sm:px-3 sm:py-1 bg-white/10 backdrop-blur-md rounded-md text-xs sm:text-base tracking-wider text-white border border-white/10 mb-2 sm:mb-4 shadow-sm"
                     style="font-family: 'Kalam', cursive;">
                     Pusat Sumber Belajar
                 </span>
-                <h1 class="text-2xl md:text-3xl lg:text-4xl text-white mb-4" style="font-family: 'Oswald', sans-serif;">
+                <h1 class="text-xl sm:text-3xl md:text-4xl lg:text-5xl text-white mb-2 sm:mb-4" style="font-family: 'Oswald', sans-serif;">
                     Koleksi Pustaka & Referensi
                 </h1>
-                <p class="text-sm md:text-base text-blue-100/80 leading-relaxed max-w-xl mx-0 font-medium">
+                <p class="text-xs sm:text-sm md:text-base text-blue-100/90 leading-relaxed max-w-xl lg:max-w-2xl mx-0 font-medium">
                     Jelajahi berbagai modul pembelajaran, bahan bacaan, dokumen peraturan, hingga video yang dirancang
                     khusus untuk meningkatkan kompetensi Anda.
                 </p>
