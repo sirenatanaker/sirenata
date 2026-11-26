@@ -11,25 +11,22 @@
         <div>
             <x-lms::user.course-tabs active="all" :total="$meta['total'] ?? 0" />
 
-            <div class="grid grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-y-8 gap-x-3 sm:gap-6 items-stretch">
-                @forelse ($courses as $course)
-                    <x-lms::user.course-card :course="$course" />
-                @empty
-                    <div class="col-span-full flex flex-col items-center justify-center py-16 px-4 text-center bg-white dark:bg-slate-800/90 rounded-md border border-dashed border-slate-200 dark:border-slate-700">
+            <x-lms::user.infinite-course-grid
+                :courses="$courses"
+                :hasMore="$hasMore ?? false"
+                :nextPage="$nextPage ?? null"
+                :fetchUrl="route('user.course.my-course')"
+            >
+                <x-slot name="empty">
+                    <div class="flex flex-col items-center justify-center py-16 px-4 text-center bg-white dark:bg-slate-800/90 rounded-md border border-dashed border-slate-200 dark:border-slate-700">
                         <div class="w-16 h-16 bg-slate-50 dark:bg-slate-700/60 rounded-full flex items-center justify-center mx-auto mb-4 border border-slate-100 dark:border-slate-600 text-slate-300 dark:text-slate-400">
                             <i class="fas fa-folder-open text-2xl"></i>
                         </div>
                         <h3 class="text-base font-bold text-slate-800 dark:text-white mb-1">Belum Ada Pelatihan</h3>
                         <p class="text-sm text-slate-500 dark:text-slate-300 max-w-sm">Anda belum mendaftar di pelatihan mana pun. Mulai eksplorasi di halaman katalog.</p>
                     </div>
-                @endforelse
-            </div>
-
-            @if (!empty($courses) && count($courses) > 0)
-                <div class="mt-8 flex justify-center">
-                    <x-api-pagination :meta="$meta" />
-                </div>
-            @endif
+                </x-slot>
+            </x-lms::user.infinite-course-grid>
         </div>
     </div>
 </x-dashboard::layouts.dashboard>

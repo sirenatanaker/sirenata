@@ -90,74 +90,21 @@
             {{-- ========================================== --}}
             {{-- GRID KURSUS + MODAL KONFIRMASI PENDAFTARAN --}}
             {{-- ========================================== --}}
-            @php
-                // Payload ringan untuk modal (tanpa query tambahan per kartu)
-                $coursePayload = $courses->mapWithKeys(function ($c) use ($enrolledCourseIds, $userBimtekEventIds) {
-                    $sections = $c->sections->values()->map(function ($s, $i) {
-                        $rawName = (string) ($s->name ?? $s->title ?? '');
-                        $cleanName = trim((string) preg_replace('/^(modul|hari)\s*(ke[\-\s]*)?\d+\s*[:\-–]\s*/i', '', $rawName));
-
-                        return [
-                            'name'     => $cleanName !== '' ? $cleanName : ($rawName !== '' ? $rawName : 'Bagian ' . ($i + 1)),
-                            'contents' => $s->contents->values()->map(fn($ct, $idx) => [
-                                'letter' => chr(97 + ($idx % 26)),
-                                'name'   => $ct->name,
-                                'type'   => $ct->video ? 'video' : ($ct->document ? 'document' : 'text'),
-                            ])->values(),
-                        ];
-                    });
-
-                    $activeB = $c->bimtekEvents->first();
-                    $isEnrolledInCourse = in_array($c->id, $enrolledCourseIds);
-                    $isEnrolledInThisBimtek = $activeB && in_array($activeB->id, $userBimtekEventIds);
-                    $curPhase = $activeB?->current_timeline_phase ?? [];
-                    $phaseKey = $curPhase['phase'] ?? ($activeB?->status === 'open_registration' ? 'registration' : 'learning');
-                    $isRegistrationOpen = ($phaseKey === 'registration' && $activeB?->status === 'open_registration');
-
-                    return [$c->id => [
-                        'name'                   => $c->name,
-                        'slug'                   => $c->slug,
-                        'myCourseUrl'            => route('user.course.my-course.detail', $c->slug),
-                        'description'            => $c->description,
-                        'students'               => $c->students_count,
-                        'modules'                => $c->sections_count,
-                        'topics'                 => $sections->sum(fn($s) => count($s['contents'])),
-                        'thumbnail'              => ! empty($c->thumbnail)
-                            ? (str_starts_with($c->thumbnail, 'http') ? $c->thumbnail : asset('storage/' . $c->thumbnail))
-                            : null,
-                        'audienceLabel'          => ($c->audience ?? 'instansi') === 'swasta' ? 'Swasta' : 'Instansi',
-                        'sections'               => $sections,
-                        'enrollUrl'              => route('user.catalog.enroll', $c->slug),
-                        'isEvent'                => (bool) $activeB,
-                        'isRegistrationOpen'     => $isRegistrationOpen,
-                        'bimtekId'               => $activeB?->id,
-                        'bimtekBatchName'        => $activeB?->formatted_wave_subtitle,
-                        'bimtekBatchCode'        => $activeB?->batch_code,
-                        'bimtekStatus'           => $activeB?->status,
-                        'bimtekStatusBadge'      => $activeB?->status_badge,
-                        'bimtekExecutionType'    => $activeB?->execution_type,
-                        'bimtekDates'            => $activeB ? ($activeB->start_date ? $activeB->start_date->format('d M') : '-') . ' s/d ' . ($activeB->end_date ? $activeB->end_date->format('d M Y') : '-') : null,
-                        'bimtekTime'             => $activeB?->start_date ? $activeB->start_date->format('H:i') . ' WIB' : '08:00 WIB',
-                        'bimtekQuota'            => (int) ($activeB?->quota ?? 0),
-                        'bimtekParticipants'     => (int) ($activeB?->participants_count ?? 0),
-                        'bimtekQuotaPct'         => ($activeB?->quota ?? 0) > 0 ? min(100, (int) round((($activeB?->participants_count ?? 0) / $activeB->quota) * 100)) : 0,
-                        'timelineSteps'          => $activeB ? $activeB->timeline_steps : [],
-                        'currentTimelinePhase'   => $activeB ? $activeB->current_timeline_phase : null,
-                        'isEnrolledInCourse'     => $isEnrolledInCourse,
-                        'isEnrolledInThisBimtek'  => $isEnrolledInThisBimtek,
-                    ]];
-                });
-            @endphp
-
             <div
                 x-data="{
-                    courses: @js($coursePayload),
+                    courses: @js($coursePayload ?? []),
                     selected: null,
                     open: false,          // modal lihat kurikulum
                     confirmOpen: false,   // alert konfirmasi daftar
                     submitting: false,
                     activeTab: 'timeline',
                     expandedSections: [0],
+                    hasMore: @js((bool) ($hasMore ?? false)),
+                    nextPage: @js($nextPage ?? null),
+                    loadingMore: false,
+                    loadError: false,
+                    catalogBaseUrl: @js(route('user.catalog.index')),
+                    scrollObserver: null,
                     isMobileViewport: window.innerWidth < 640,
                     sheetHeight: 75,
                     sheetDragging: false,
@@ -166,6 +113,67 @@
                     sheetLastY: 0,
                     sheetLastTime: 0,
                     sheetVelocity: 0,
+                    init() {
+                        this.$nextTick(() => this.setupInfiniteScroll());
+                    },
+                    setupInfiniteScroll() {
+                        if (!this.hasMore || !this.$refs.scrollSentinel) return;
+                        if (this.scrollObserver) this.scrollObserver.disconnect();
+                        this.scrollObserver = new IntersectionObserver((entries) => {
+                            if (entries.some((e) => e.isIntersecting)) {
+                                this.loadMore();
+                            }
+                        }, { rootMargin: '250px 0px' });
+                        this.scrollObserver.observe(this.$refs.scrollSentinel);
+                    },
+                    async loadMore() {
+                        if (this.loadingMore || !this.hasMore || !this.nextPage) return;
+                        this.loadingMore = true;
+                        this.loadError = false;
+                        try {
+                            const url = new URL(this.catalogBaseUrl, window.location.origin);
+                            const currentParams = new URLSearchParams(window.location.search);
+                            currentParams.forEach((v, k) => {
+                                if (k !== 'page' && k !== 'partial') url.searchParams.set(k, v);
+                            });
+                            url.searchParams.set('page', String(this.nextPage));
+                            url.searchParams.set('partial', '1');
+
+                            const res = await fetch(url.toString(), {
+                                headers: {
+                                    'X-Requested-With': 'XMLHttpRequest',
+                                    'Accept': 'application/json',
+                                },
+                            });
+                            if (!res.ok) throw new Error('Gagal memuat data');
+                            const data = await res.json();
+
+                            if (data.payload) {
+                                this.courses = Object.assign({}, this.courses, data.payload);
+                            }
+                            if (data.html && this.$refs.courseGrid) {
+                                this.$refs.courseGrid.insertAdjacentHTML('beforeend', data.html);
+                            }
+
+                            this.hasMore = Boolean(data.hasMore);
+                            this.nextPage = data.nextPage ?? null;
+
+                            if (!this.hasMore && this.scrollObserver) {
+                                this.scrollObserver.disconnect();
+                            } else if (this.hasMore) {
+                                this.$nextTick(() => {
+                                    const sentinel = this.$refs.scrollSentinel;
+                                    if (sentinel && sentinel.getBoundingClientRect().top <= window.innerHeight + 250) {
+                                        this.loadMore();
+                                    }
+                                });
+                            }
+                        } catch (e) {
+                            this.loadError = true;
+                        } finally {
+                            this.loadingMore = false;
+                        }
+                    },
                     sheetStyle() {
                         if (!this.isMobileViewport) return '';
                         return `height: ${this.sheetHeight}dvh; max-height: 100dvh; transition: ${this.sheetDragging ? 'none' : 'height 220ms cubic-bezier(0.22, 1, 0.36, 1), border-radius 220ms ease'};`;
@@ -298,10 +306,29 @@
                 @mouseup.window="endSheetDrag()"
             >
                 @if ($courses->isNotEmpty())
-                    <div class="grid grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-y-8 gap-x-3 sm:gap-6 items-stretch">
+                    <div x-ref="courseGrid" class="grid grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-y-8 gap-x-3 sm:gap-6 items-stretch">
                         @foreach ($courses as $course)
                             @include('lms::user.katalog.partials.course-card', ['course' => $course])
                         @endforeach
+                    </div>
+
+                    {{-- Sentinel & Indikator Infinite Scroll --}}
+                    <div x-ref="scrollSentinel" class="mt-8 flex flex-col items-center justify-center min-h-[2.5rem]">
+                        <div x-show="loadingMore" x-cloak class="inline-flex items-center gap-2.5 text-xs sm:text-sm font-medium text-slate-500">
+                            <svg class="animate-spin w-4 h-4 text-[#13416B]" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+                            </svg>
+                            <span>Memuat pelatihan lainnya...</span>
+                        </div>
+
+                        <div x-show="loadError && hasMore && !loadingMore" x-cloak class="text-center">
+                            <button type="button" @click="loadMore()"
+                                class="inline-flex items-center gap-1.5 px-4 py-2 text-xs sm:text-sm font-semibold text-[#13416B] bg-white border border-slate-200 rounded-md hover:bg-slate-50 transition-colors cursor-pointer">
+                                <i class="fas fa-rotate-right text-xs"></i>
+                                <span>Gagal memuat. Coba lagi</span>
+                            </button>
+                        </div>
                     </div>
                 @else
                     <div class="col-span-full flex flex-col items-center justify-center py-16 px-4 text-center bg-white rounded-md border border-dashed border-slate-200">
@@ -745,13 +772,6 @@
                     </div>
                 </div>
             </div>
-
-            {{-- Pagination --}}
-            @if ($courses->hasPages())
-                <div class="mt-8 flex justify-center [&_nav]:text-sm">
-                    {{ $courses->links('pagination::tailwind') }}
-                </div>
-            @endif
         </div>
     </div>
 </x-dashboard::layouts.dashboard>

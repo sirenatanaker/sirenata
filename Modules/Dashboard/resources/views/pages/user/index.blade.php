@@ -198,12 +198,10 @@
 
                 {{-- Empty State --}}
                 <div id="userGanttEmptyState"
-                     class="bg-slate-50 rounded-md p-10 text-center border border-dashed border-slate-200 {{ $ganttHasEvents ? 'hidden' : '' }}">
-                    <div class="w-12 h-12 bg-white border border-slate-200 rounded-md flex items-center justify-center mx-auto mb-3 text-slate-400">
-                        <i class="fas fa-calendar-xmark text-lg"></i>
-                    </div>
-                    <p class="text-sm font-semibold text-slate-700">Belum Ada Pelatihan Terdaftar</p>
-                    <p class="text-xs text-slate-500 mt-1">Anda belum mendaftar pada gelombang pelatihan atau tidak ada pelatihan dengan status tersebut. Jelajahi katalog untuk mulai mendaftar.</p>
+                     class="py-10 px-4 text-center {{ $ganttHasEvents ? 'hidden' : '' }}">
+                    <i class="fas fa-calendar-xmark text-3xl text-slate-300 mb-3 block"></i>
+                    <p class="text-sm sm:text-base font-semibold text-slate-700">Belum Ada Pelatihan Terdaftar</p>
+                    <p class="text-xs sm:text-sm text-slate-500 mt-1 max-w-md mx-auto">Anda belum mendaftar pada gelombang pelatihan atau tidak ada pelatihan dengan status tersebut. Jelajahi katalog untuk mulai mendaftar.</p>
                 </div>
             </div>
         </section>
@@ -267,12 +265,10 @@
                                 @endforeach
                             </div>
                     @else
-                        <div class="flex-1 flex flex-col items-center justify-center bg-slate-50 rounded-md p-8 text-center border border-dashed border-slate-200 min-h-[280px]">
-                            <div class="w-12 h-12 bg-white rounded-md border border-slate-200 flex items-center justify-center mx-auto mb-3 text-emerald-500">
-                                <i class="fas fa-check-circle text-lg"></i>
-                            </div>
-                            <p class="text-base font-semibold text-slate-700">Semua agenda sudah tuntas</p>
-                            <p class="text-sm text-slate-500 mt-1 max-w-xs">Tidak ada sesi Zoom atau evaluasi tertunda saat ini.</p>
+                        <div class="flex-1 flex flex-col items-center justify-center py-10 px-4 text-center min-h-[240px]">
+                            <i class="fas fa-check-circle text-3xl text-emerald-500 mb-3"></i>
+                            <p class="text-sm sm:text-base font-semibold text-slate-700">Semua agenda sudah tuntas</p>
+                            <p class="text-xs sm:text-sm text-slate-500 mt-1 max-w-xs">Tidak ada sesi Zoom atau evaluasi tertunda saat ini.</p>
                         </div>
                     @endif
                 </div>
@@ -342,14 +338,12 @@
                             </div>
                         </div>
                     @else
-                        <div class="flex-1 flex flex-col items-center justify-center bg-slate-50 rounded-md p-8 text-center border border-dashed border-slate-200 min-h-[280px]">
-                            <div class="w-12 h-12 bg-white rounded-md border border-slate-200 flex items-center justify-center mx-auto mb-3 text-slate-400">
-                                <i class="fas fa-calendar-check text-lg"></i>
-                            </div>
-                            <p class="text-base font-semibold text-slate-700">Belum ada gelombang baru dibuka</p>
-                            <p class="text-sm text-slate-500 mt-1 max-w-xs">Seluruh gelombang terbuka saat ini sudah Anda ikuti atau masa pendaftarannya telah berakhir.</p>
+                        <div class="flex-1 flex flex-col items-center justify-center py-10 px-4 text-center min-h-[240px]">
+                            <i class="fas fa-calendar-check text-3xl text-slate-300 mb-3"></i>
+                            <p class="text-sm sm:text-base font-semibold text-slate-700">Belum ada gelombang baru dibuka</p>
+                            <p class="text-xs sm:text-sm text-slate-500 mt-1 max-w-xs">Seluruh gelombang terbuka saat ini sudah Anda ikuti atau masa pendaftarannya telah berakhir.</p>
                             <a href="{{ route('user.catalog.index') }}"
-                                class="mt-3 inline-flex items-center gap-1.5 px-4 py-2 text-sm font-bold text-white bg-[#13416B] hover:bg-[#0f3354] rounded-md transition-colors">
+                                class="mt-4 inline-flex items-center gap-1.5 px-4 py-2 text-xs sm:text-sm font-bold text-white bg-[#13416B] hover:bg-[#0f3354] rounded-md transition-colors">
                                 Lihat Katalog
                             </a>
                         </div>
@@ -810,17 +804,20 @@
 
                             return `
                                 <div class="user-gantt-row grid grid-cols-[260px_1fr] lg:grid-cols-[330px_1fr] hover:bg-blue-50/35 transition-colors" data-idx="${idx}">
-                                    <div class="px-4 py-3 border-r border-slate-200 min-w-0 flex flex-col justify-center gap-1.5">
-                                        <a href="${escapeHtml(ev.url)}"
-                                           class="text-sm sm:text-[15px] font-semibold text-slate-900 hover:text-[#13416B] line-clamp-2 leading-snug"
-                                           title="${escapeHtml(ev.batch_name)}">
+                                    <div class="px-4 py-3 border-r border-slate-200 min-w-0 flex flex-col justify-center gap-1">
+                                        <p class="text-xs font-semibold text-[#547996] truncate" title="${escapeHtml(ev.batch_name)}">
                                             ${escapeHtml(ev.batch_name)}
+                                        </p>
+                                        <a href="${escapeHtml(ev.url)}"
+                                           class="text-sm sm:text-[15px] font-bold text-slate-900 hover:text-[#13416B] line-clamp-2 leading-snug"
+                                           title="${escapeHtml(ev.course_name)}">
+                                            ${escapeHtml(ev.course_name)}
                                         </a>
-                                        <div class="flex flex-wrap items-center gap-1.5 text-xs">
+                                        <div class="flex flex-wrap items-center gap-1.5 text-xs pt-0.5">
                                             <span class="inline-flex px-2 py-0.5 rounded font-bold ${displayStatus.cls}">${escapeHtml(displayStatus.label)}</span>
                                         </div>
                                     </div>
-                                    <div class="relative min-h-[68px] overflow-hidden">
+                                    <div class="relative min-h-[84px] overflow-hidden">
                                         ${gridLinesHtml}
                                         ${todayLineHtml}
                                         ${regBar}

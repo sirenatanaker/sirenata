@@ -57,8 +57,8 @@ class CourseController extends Controller
 
     private function cachedMyCourses(Request $request, string $tab): array
     {
-        $page = (int) $request->get('page', 1);
-        $perPage = (int) $request->get('row_per_page', 11);
+        $page = max(1, (int) $request->get('page', 1));
+        $perPage = (int) $request->get('row_per_page', 10);
         $userId = (string) auth()->id();
 
         return SmartCache::remember(
@@ -73,56 +73,55 @@ class CourseController extends Controller
         );
     }
 
-    public function allMyCourse(Request $request): View
+    private function myCourseResponse(Request $request, string $tab, string $viewName): View|JsonResponse
     {
-        $result = $this->cachedMyCourses($request, 'all');
+        $result = $this->cachedMyCourses($request, $tab);
+        $currentPage = (int) ($result['meta']['current_page'] ?? 1);
+        $lastPage = (int) ($result['meta']['last_page'] ?? 1);
+        $hasMore = $currentPage < $lastPage;
+        $nextPage = $hasMore ? $currentPage + 1 : null;
 
-        return view('lms::user.course.my-course', [
-            'courses' => $result['data'],
-            'meta'    => $result['meta'],
-            'links'   => $result['links'],
-            'success' => $result['success'],
-            'message' => $result['message'],
+        if ($request->boolean('partial')) {
+            $html = view('lms::user.course.partials.course-cards', [
+                'courses' => $result['data'],
+            ])->render();
+
+            return response()->json([
+                'html'     => $html,
+                'hasMore'  => $hasMore,
+                'nextPage' => $nextPage,
+            ]);
+        }
+
+        return view($viewName, [
+            'courses'  => $result['data'],
+            'meta'     => $result['meta'],
+            'links'    => $result['links'],
+            'success'  => $result['success'],
+            'message'  => $result['message'],
+            'hasMore'  => $hasMore,
+            'nextPage' => $nextPage,
         ]);
     }
 
-    public function myCourseUpcoming(Request $request): View
+    public function allMyCourse(Request $request): View|JsonResponse
     {
-        $result = $this->cachedMyCourses($request, 'upcoming');
-
-        return view('lms::user.course.my-course-upcoming', [
-            'courses' => $result['data'],
-            'meta'    => $result['meta'],
-            'links'   => $result['links'],
-            'success' => $result['success'],
-            'message' => $result['message'],
-        ]);
+        return $this->myCourseResponse($request, 'all', 'lms::user.course.my-course');
     }
 
-    public function myCourseProgress(Request $request): View
+    public function myCourseUpcoming(Request $request): View|JsonResponse
     {
-        $result = $this->cachedMyCourses($request, 'progress');
-
-        return view('lms::user.course.my-course-progress', [
-            'courses' => $result['data'],
-            'meta'    => $result['meta'],
-            'links'   => $result['links'],
-            'success' => $result['success'],
-            'message' => $result['message'],
-        ]);
+        return $this->myCourseResponse($request, 'upcoming', 'lms::user.course.my-course-upcoming');
     }
 
-    public function myCourseFinish(Request $request): View
+    public function myCourseProgress(Request $request): View|JsonResponse
     {
-        $result = $this->cachedMyCourses($request, 'finish');
+        return $this->myCourseResponse($request, 'progress', 'lms::user.course.my-course-progress');
+    }
 
-        return view('lms::user.course.my-course-completed', [
-            'courses' => $result['data'],
-            'meta'    => $result['meta'],
-            'links'   => $result['links'],
-            'success' => $result['success'],
-            'message' => $result['message'],
-        ]);
+    public function myCourseFinish(Request $request): View|JsonResponse
+    {
+        return $this->myCourseResponse($request, 'finish', 'lms::user.course.my-course-completed');
     }
 
     public function myCourseDetail(string $slug): View
