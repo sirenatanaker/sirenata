@@ -582,39 +582,39 @@
                                     <i class="fas fa-calendar-check"></i>
                                 </div>
 
-                                <h3 id="confirm-title" class="text-base sm:text-lg font-extrabold text-slate-800 mb-1">
+                                <h3 id="confirm-title" class="text-lg sm:text-xl font-extrabold text-slate-800 mb-1">
                                     Daftar ke Pelatihan Ini?
                                 </h3>
-                                <p class="text-xs text-slate-500 leading-relaxed mb-4">
-                                    Anda akan mendaftar ke gelombang pelatihan daring resmi kementerian:
+                                <p class="text-sm text-slate-500 leading-relaxed mb-4">
+                                    Anda akan mendaftar ke gelombang pelatihan daring berikut ini.
                                 </p>
 
                                 {{-- Kartu Ringkasan Tiket Event --}}
-                                <div class="p-3.5 rounded-md bg-slate-50 border border-slate-200 text-left text-xs space-y-2.5 mb-4">
+                                <div class="p-3.5 sm:p-4 rounded-md bg-slate-50 border border-slate-200 text-left text-sm space-y-2.5 mb-4">
                                     <div>
-                                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Materi Program</span>
+                                        <span class="text-xs font-bold text-slate-400 uppercase tracking-wider block">Materi Program</span>
                                         <p class="font-extrabold text-slate-900 mt-0.5 line-clamp-2" :title="selected.name" x-text="selected.name"></p>
                                     </div>
                                     <div class="grid grid-cols-2 gap-2 pt-2 border-t border-slate-200/80">
                                         <div>
-                                            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Gelombang / Angkatan</span>
+                                            <span class="text-xs font-bold text-slate-400 uppercase tracking-wider block">Gelombang / Angkatan</span>
                                             <p class="font-bold text-[#13416B] mt-0.5 line-clamp-2 leading-snug" :title="selected.bimtekBatchName" x-text="selected.bimtekBatchName"></p>
                                         </div>
                                         <div>
-                                            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Kuota</span>
+                                            <span class="text-xs font-bold text-slate-400 uppercase tracking-wider block">Kuota</span>
                                             <p class="font-bold text-slate-800 mt-0.5" x-text="selected.bimtekQuota > 0 ? selected.bimtekQuota + ' Peserta' : 'Tanpa Batasan'"></p>
                                         </div>
                                     </div>
                                     <div class="pt-2 border-t border-slate-200/80">
-                                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Jadwal Pelaksanaan</span>
+                                        <span class="text-xs font-bold text-slate-400 uppercase tracking-wider block">Jadwal Pelaksanaan</span>
                                         <p class="font-semibold text-slate-800 mt-0.5">
                                             <span x-text="selected.bimtekDates"></span> (<span x-text="selected.bimtekTime"></span>)
                                         </p>
                                     </div>
                                 </div>
 
-                                <div class="p-2.5 rounded-md bg-emerald-50 border border-emerald-200/70 text-[11px] text-emerald-800 text-left mb-5 flex items-start gap-2">
-                                    <i class="fas fa-info-circle text-emerald-600 mt-0.5 shrink-0 text-sm"></i>
+                                <div class="p-3 rounded-md bg-emerald-50 border border-emerald-200/70 text-xs sm:text-sm text-emerald-800 text-left mb-5 flex items-start gap-2.5">
+                                    <i class="fas fa-info-circle text-emerald-600 mt-0.5 shrink-0 text-base"></i>
                                     <span>Pastikan Anda dapat mengikuti rangkaian jadwal pelaksanaan dan menuntaskan seluruh materi pembelajaran.</span>
                                 </div>
                             </div>
@@ -627,8 +627,8 @@
                                     <i class="fas fa-question"></i>
                                 </div>
 
-                                <h3 id="confirm-title" class="text-base sm:text-lg font-bold text-slate-800 mb-1.5">Daftar ke kursus ini?</h3>
-                                <p class="text-xs sm:text-sm text-slate-500 leading-relaxed mb-6">
+                                <h3 id="confirm-title" class="text-lg sm:text-xl font-bold text-slate-800 mb-1.5">Daftar ke kursus ini?</h3>
+                                <p class="text-sm sm:text-base text-slate-500 leading-relaxed mb-6">
                                     Kamu akan mendaftar ke
                                     <span class="font-semibold text-slate-700" x-text="selected ? selected.name : ''"></span>
                                     dan kursus ini akan langsung masuk ke daftar Kursus Saya.
@@ -642,11 +642,11 @@
                                 <input type="hidden" name="bimtek_event_id" :value="selected.bimtekId">
                                 <div class="flex flex-col-reverse sm:flex-row gap-2">
                                     <button type="button" @click="cancelConfirm()" :disabled="submitting"
-                                            class="flex-1 px-4 py-2.5 text-xs sm:text-sm font-semibold rounded-md text-slate-600 bg-white border border-slate-200 hover:bg-slate-50 transition-colors disabled:opacity-50">
+                                            class="flex-1 px-4 py-2.5 text-sm sm:text-base font-semibold rounded-md text-slate-600 bg-white border border-slate-200 hover:bg-slate-50 transition-colors disabled:opacity-50 cursor-pointer">
                                         Batal
                                     </button>
                                     <button type="submit" :disabled="submitting"
-                                            class="flex-1 px-4 py-2.5 text-xs sm:text-sm font-semibold rounded-md text-white bg-amber-500 hover:bg-amber-600 shadow-sm transition-colors inline-flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed">
+                                            class="flex-1 px-4 py-2.5 text-sm sm:text-base font-semibold rounded-md text-white bg-amber-500 hover:bg-amber-600 shadow-sm transition-colors inline-flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed cursor-pointer">
                                         <svg x-show="submitting" class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
                                             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                                             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
@@ -659,8 +659,8 @@
 
                         <div x-show="!open && !submitting" class="mt-5 pt-4 border-t border-slate-100">
                             <button type="button" @click="confirmOpen = false; open = true"
-                                    class="inline-flex items-center gap-1.5 text-xs font-semibold text-[#13416B] hover:underline">
-                                <i class="fas fa-list-ul text-[11px]"></i> Lihat detail dulu
+                                    class="inline-flex items-center gap-1.5 text-sm font-semibold text-[#13416B] hover:underline cursor-pointer">
+                                <i class="fas fa-list-ul text-xs"></i> Lihat detail dulu
                             </button>
                         </div>
                     </div>

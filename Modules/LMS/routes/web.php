@@ -127,6 +127,7 @@ Route::prefix('user')->middleware(['auth', 'role:user'])->name('user.')->group(f
 
     Route::prefix('course')->name('course.')->controller(UserCourseController::class)->group(function () {
         Route::get('/my-course', 'allMyCourse')->name('my-course');
+        Route::get('/my-course/upcoming', 'myCourseUpcoming')->name('my-course.upcoming');
         Route::get('/my-course/progress', 'myCourseProgress')->name('my-course.progress');
         Route::get('/my-course/finish', 'myCourseFinish')->name('my-course.finish');
         Route::get('/my-course/{slug}', 'myCourseDetail')->name('my-course.detail');

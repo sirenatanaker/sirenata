@@ -86,6 +86,19 @@ class CourseController extends Controller
         ]);
     }
 
+    public function myCourseUpcoming(Request $request): View
+    {
+        $result = $this->cachedMyCourses($request, 'upcoming');
+
+        return view('lms::user.course.my-course-upcoming', [
+            'courses' => $result['data'],
+            'meta'    => $result['meta'],
+            'links'   => $result['links'],
+            'success' => $result['success'],
+            'message' => $result['message'],
+        ]);
+    }
+
     public function myCourseProgress(Request $request): View
     {
         $result = $this->cachedMyCourses($request, 'progress');

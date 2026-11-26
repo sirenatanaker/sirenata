@@ -287,7 +287,7 @@ class BimtekEvent extends Model
                 'step'       => 3,
                 'label'      => 'Evaluasi & Sertifikasi',
                 'badge'      => 'Masa Evaluasi',
-                'badge_bg'   => 'bg-teal-600',
+                'badge_bg'   => 'bg-amber-500',
                 'icon'       => 'fa-clock',
                 'date_range' => $evalStart->translatedFormat('d M') . ' - ' . $evalEnd->translatedFormat('d M Y'),
                 'is_active'  => true,
@@ -356,7 +356,7 @@ class BimtekEvent extends Model
         return [
             [
                 'step'        => 1,
-                'title'       => 'Pendaftaran & Registrasi',
+                'title'       => 'Periode Pendaftaran',
                 'subtitle'    => 'Pendaftaran gelombang peserta Pelatihan',
                 'icon'        => 'fa-user-check',
                 'start_date'  => $regStart ? $regStart->translatedFormat('d M Y') : '-',
@@ -366,7 +366,7 @@ class BimtekEvent extends Model
             ],
             [
                 'step'        => 2,
-                'title'       => 'Pelaksanaan',
+                'title'       => 'Periode Pelaksanaan',
                 'subtitle'    => 'Pelajari materi topik di LMS dan ikuti tatap muka virtual Zoom interaktif',
                 'icon'        => 'fa-video',
                 'start_date'  => $execStart ? $execStart->translatedFormat('d M Y') : '-',
@@ -377,7 +377,7 @@ class BimtekEvent extends Model
             ],
             [
                 'step'        => 3,
-                'title'       => 'Evaluasi Akhir',
+                'title'       => 'Periode Evaluasi Akhir',
                 'subtitle'    => 'Pengerjaan evaluasi akhir dan proses penerbitan e-Sertifikat resmi',
                 'icon'        => 'fa-award',
                 'start_date'  => $evalStart ? $evalStart->translatedFormat('d M Y') : '-',

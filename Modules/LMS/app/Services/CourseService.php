@@ -489,6 +489,12 @@ class CourseService
                 ]);
             }
 
+            // Urutkan kartu: Menunggu Pelaksanaan (upcoming) -> Sedang Berlangsung (progress) -> Selesai (finish)
+            $tabOrder = ['upcoming' => 0, 'progress' => 1, 'finish' => 2];
+            $allCoursesData = $allCoursesData
+                ->sortBy(fn($item) => $tabOrder[$item->tab_status] ?? 9)
+                ->values();
+
             // Filter berdasarkan activeTab
             $filtered = $allCoursesData;
             if ($activeTab && $activeTab !== 'all') {
