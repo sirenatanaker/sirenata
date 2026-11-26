@@ -245,15 +245,15 @@
             </div>
         </div>
 
-        {{-- Grid Layout (Materi & Sertifikat) --}}
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+        {{-- Grid Layout (Materi & Sertifikat — di mobile menyatu dalam 1 card Linimasa) --}}
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-0 lg:gap-6 items-start">
 
             {{-- Left column: List Modul & Evaluasi Akhir --}}
-            <div class="lg:col-span-2 space-y-6">
+            <div class="lg:col-span-2 lg:space-y-6">
 
-                <!-- PERBAIKAN: rounded-none border-x-0 di mobile -->
+                <!-- Di mobile menyatu di bagian atas dengan Sertifikat di bawah; di desktop card terpisah -->
                 <div id="agenda-pelaksanaan"
-                    class="bg-white rounded-none sm:rounded-md shadow-sm border-y border-x-0 sm:border border-slate-200 p-4 sm:p-6 scroll-mt-6">
+                    class="bg-white rounded-none sm:rounded-t-md lg:rounded-md shadow-none lg:shadow-sm border-t border-b-0 border-x-0 sm:border-x sm:border-t lg:border border-slate-200 p-4 pb-6 sm:p-6 scroll-mt-6">
 
                     <div
                         class="flex items-center justify-between mb-5 sm:mb-6 pb-4 border-b border-slate-100 gap-3 sm:gap-4">
@@ -495,37 +495,35 @@
                                             </p>
 
                                             <div class="mt-4 sm:mt-5 flex flex-wrap items-center gap-2.5 justify-start">
-                                                @if ($isCbtPostTest)
-                                                    @if ($isEvaluasiAkhirCompleted)
-                                                        <a href="{{ route('user.course.test.show', ['slug' => $courseSlug, 'postTestId' => $evaluasiAkhir->id]) }}"
-                                                            class="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-md text-xs sm:text-sm font-bold bg-white hover:bg-slate-100 text-[#13416B] transition-all shadow-sm">
-                                                            <i class="fas fa-eye text-xs"></i> Lihat Hasil
-                                                        </a>
-                                                    @elseif ($isWaitingForStart)
-                                                        <button type="button" disabled
-                                                            title="Evaluasi dibuka saat periode pelaksanaan pelatihan resmi dimulai"
-                                                            class="inline-flex items-center justify-center gap-1.5 px-5 py-2.5 rounded-md text-xs sm:text-sm font-bold bg-white/15 text-white/75 border border-white/25 cursor-not-allowed select-none">
-                                                            <i class="fas fa-lock text-xs"></i> Evaluasi Terkunci
-                                                        </button>
-                                                    @elseif (!$isEvaluasiAkhirLocked && !$isEventEnded)
-                                                        <button type="button" @click="showStartEvaluasiModal = true"
-                                                            class="inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-md text-xs sm:text-sm font-bold bg-white hover:bg-slate-100 text-[#13416B] shadow-sm transition-all cursor-pointer">
-                                                            <i class="fas fa-play text-xs"></i> Mulai Evaluasi
-                                                        </button>
-                                                    @elseif ($isEventEnded && !$isEvaluasiAkhirCompleted)
-                                                        <div class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-md text-xs font-semibold bg-white/15 text-white/75 border border-white/25">
-                                                            <i class="fas fa-clock text-white/75"></i>
-                                                            <span>Periode Pelatihan Telah Berakhir</span>
-                                                        </div>
-                                                    @else
-                                                        <button type="button" disabled
-                                                            title="Selesaikan materi terlebih dahulu"
-                                                            class="inline-flex items-center justify-center gap-1.5 px-5 py-2.5 rounded-md text-xs sm:text-sm font-bold bg-white/15 text-white/75 border border-white/25 cursor-not-allowed select-none">
-                                                            <i class="fas fa-lock text-xs"></i> Evaluasi Terkunci
-                                                        </button>
-                                                    @endif
+                                                @if ($isEvaluasiAkhirCompleted)
+                                                    <a href="{{ route('user.course.test.show', ['slug' => $courseSlug, 'postTestId' => $evaluasiAkhir->id]) }}"
+                                                        class="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-md text-xs sm:text-sm font-bold bg-white hover:bg-slate-100 text-[#13416B] transition-all shadow-sm">
+                                                        <i class="fas fa-eye text-xs"></i> Lihat Hasil
+                                                    </a>
+                                                @elseif ($isWaitingForStart)
+                                                    <button type="button" disabled
+                                                        title="Evaluasi dibuka saat periode pelaksanaan pelatihan resmi dimulai"
+                                                        class="inline-flex items-center justify-center gap-1.5 px-5 py-2.5 rounded-md text-xs sm:text-sm font-bold bg-white/15 text-white/75 border border-white/25 cursor-not-allowed select-none">
+                                                        <i class="fas fa-lock text-xs"></i> Evaluasi Terkunci
+                                                    </button>
+                                                @elseif ($isEventEnded)
+                                                    <div class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-md text-xs font-semibold bg-white/15 text-white/75 border border-white/25">
+                                                        <i class="fas fa-clock text-white/75"></i>
+                                                        <span>Periode Pelatihan Telah Berakhir</span>
+                                                    </div>
+                                                @elseif ($isEvaluasiAkhirLocked)
+                                                    <button type="button" disabled
+                                                        title="Selesaikan seluruh materi dan kegiatan sebelumnya terlebih dahulu"
+                                                        class="inline-flex items-center justify-center gap-1.5 px-5 py-2.5 rounded-md text-xs sm:text-sm font-bold bg-white/15 text-white/75 border border-white/25 cursor-not-allowed select-none">
+                                                        <i class="fas fa-lock text-xs"></i> Evaluasi Terkunci
+                                                    </button>
+                                                @elseif ($isCbtPostTest)
+                                                    <button type="button" @click="showStartEvaluasiModal = true"
+                                                        class="inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-md text-xs sm:text-sm font-bold bg-white hover:bg-slate-100 text-[#13416B] shadow-sm transition-all cursor-pointer">
+                                                        <i class="fas fa-play text-xs"></i> Mulai Evaluasi
+                                                    </button>
                                                 @else
-                                                    {{-- Penugasan Akhir via Google Drive --}}
+                                                    {{-- Penugasan Akhir via Google Drive / Upload Berkas (hanya terbuka saat tidak terkunci) --}}
                                                     @if ($adminDriveLink)
                                                         <a href="{{ $adminDriveLink }}" target="_blank" rel="noopener noreferrer"
                                                             class="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-md text-xs sm:text-sm font-bold bg-white hover:bg-slate-100 text-[#13416B] shadow-sm transition-all">
@@ -802,19 +800,18 @@
                 </div>
             </div>
 
-            {{-- Right Column: Side Widget (Sertifikat & Info) --}}
+            {{-- Right Column: Side Widget (di mobile menyatu ke dalam card Linimasa; di desktop sticky sidebar) --}}
             <div class="space-y-0 lg:sticky lg:top-24 lg:self-start">
-                <!-- PERBAIKAN: rounded-none border-x-0 di mobile -->
                 <div data-tour="sertifikat"
                     @evaluasi-narasumber-submitted.window="evalNarasumberDone = true"
                     x-data="{
                         showRequirementsModal: false,
                         evalNarasumberDone: {{ ($isEvaluasiNarasumberCompleted && !$isEvaluasiNarasumberLocked) ? 'true' : 'false' }}
                     }"
-                    class="bg-white rounded-none sm:rounded-md shadow-sm border-y border-x-0 sm:border sm:border-x border-slate-200 p-4 sm:p-6 mb-0 md:mb-4 relative">
+                    class="bg-white rounded-none sm:rounded-b-md lg:rounded-md shadow-none lg:shadow-sm border-b border-t-0 border-x-0 sm:border-x sm:border-b lg:border border-slate-200 px-4 pt-0 pb-6 sm:px-6 sm:pb-6 lg:p-6 mb-0 lg:mb-4 relative">
 
-                    {{-- Header Widget --}}
-                    <div class="mb-5 pb-4 border-b border-slate-100">
+                    {{-- Header Widget (dengan pemisah halus dari Linimasa di mobile) --}}
+                    <div class="pt-6 border-t border-t-slate-200/80 lg:pt-0 lg:border-t-0 mb-5 pb-4 border-b border-b-slate-100">
                         <h3 class="text-base md:text-lg font-bold text-slate-800">Sertifikat Kelulusan</h3>
                         <p class="text-[11px] sm:text-xs text-slate-500 mt-0.5">Dokumen resmi bukti penyelesaian kursus</p>
                     </div>
