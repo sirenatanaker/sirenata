@@ -66,8 +66,8 @@
         {{-- Badge Status Event di Pojok Kanan Atas --}}
         @if ($curPhase)
             @php $isDonePhase = ($curPhase['phase'] ?? '') === 'completed'; @endphp
-            <span class="absolute top-0 right-0 z-10 px-2 sm:px-3 py-1 text-[8px] sm:text-[10px] font-bold uppercase tracking-wider text-white {{ $curPhase['badge_bg'] ?? 'bg-[#0B5CFF]' }} shadow-xs flex items-center gap-1 rounded-none rounded-bl-md rounded-tr-md">
-                <i class="{{ $isDonePhase ? 'fas fa-check-circle' : 'far fa-clock' }} text-[7px] sm:text-[9px]"></i>
+            <span class="absolute top-0 right-0 z-10 px-2.5 sm:px-3 py-1 text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-white {{ $curPhase['badge_bg'] ?? 'bg-[#0B5CFF]' }} shadow-xs flex items-center gap-1 rounded-none rounded-bl-md rounded-tr-md">
+                <i class="{{ $isDonePhase ? 'fas fa-check-circle' : 'far fa-clock' }} text-[8px] sm:text-[9px]"></i>
                 <span>{{ $curPhase['badge'] ?? 'Pendaftaran Buka' }}</span>
             </span>
         @endif
@@ -76,18 +76,18 @@
     {{-- Konten Text Ringkas & Lega --}}
     <div class="px-0 pt-4 pb-0 sm:p-5 flex flex-col flex-1">
         {{-- Label Gelombang Standar di Atas Judul: Gelombang [nomor] [wilayah] [tahun] --}}
-        <p class="text-[11px] sm:text-sm font-semibold text-[#547996] truncate mb-2" title="{{ $fullBatchName }}">
+        <p class="text-xs sm:text-sm font-semibold text-[#547996] truncate mb-2" title="{{ $fullBatchName }}">
             {{ $waveSubtitle }}
         </p>
 
         {{-- 1 Judul Utama (Nama Kursus) --}}
-        <h3 class="text-xs sm:text-base font-bold text-slate-800 dark:text-white leading-snug group-hover:text-[#13416B] dark:group-hover:text-slate-200 transition-colors line-clamp-2 min-h-[2rem] sm:min-h-[2.75rem]"
+        <h3 class="text-sm sm:text-base font-bold text-slate-800 dark:text-white leading-snug group-hover:text-[#13416B] dark:group-hover:text-slate-200 transition-colors line-clamp-2 min-h-[2.5rem] sm:min-h-[2.75rem]"
             title="{{ $course->name }}">
             {{ $course->name }}
         </h3>
 
         {{-- Info Jadwal Inti + Kuota / Jumlah Peserta di Bawahnya --}}
-        <div class="mt-3.5 sm:mt-4 flex flex-col gap-2 sm:gap-2.5 text-[11px] sm:text-sm text-slate-500 dark:text-slate-400">
+        <div class="mt-3.5 sm:mt-4 flex flex-col gap-2 sm:gap-2.5 text-xs sm:text-sm text-slate-500 dark:text-slate-400">
             <span class="inline-flex items-center gap-1.5 min-w-0 truncate">
                 <i class="far fa-calendar-alt shrink-0 text-slate-400 text-xs"></i>
                 <span class="truncate font-medium text-slate-600 dark:text-slate-300">{{ $timelineLine }}</span>
@@ -120,24 +120,24 @@
         <div class="mt-auto pt-4 sm:pt-5 flex flex-wrap items-center justify-start gap-1.5 sm:gap-2">
             @if ($isEnrolledInThisBimtek)
                 <button type="button" @click.stop="show('{{ $course->id }}')"
-                    class="px-2.5 sm:px-4 py-1.5 sm:py-2 text-[11px] sm:text-sm font-bold text-center rounded-md transition-colors bg-white text-[#13416B] border border-[#13416B]/30 hover:bg-[#13416B]/5 cursor-pointer">
+                    class="px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-bold text-center rounded-md transition-colors bg-white text-[#13416B] border border-[#13416B]/30 hover:bg-[#13416B]/5 cursor-pointer">
                     Lihat detail
                 </button>
                 <a href="{{ route('user.course.my-course.detail', $course->slug) }}" @click.stop
-                   class="px-2.5 sm:px-4 py-1.5 sm:py-2 text-[11px] sm:text-sm inline-flex items-center justify-center gap-1.5 font-bold text-center rounded-md transition-colors bg-emerald-600 text-white hover:bg-emerald-700 shadow-2xs">
+                   class="px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm inline-flex items-center justify-center gap-1.5 font-bold text-center rounded-md transition-colors bg-emerald-600 text-white hover:bg-emerald-700 shadow-2xs">
                     <span>Sudah Terdaftar</span>
-                    <i class="fas fa-arrow-up-right-from-square text-[9px] sm:text-xs"></i>
+                    <i class="fas fa-arrow-up-right-from-square text-[10px] sm:text-xs"></i>
                 </a>
             @elseif (!$isRegistrationOpen)
                 <button type="button" @click.stop="show('{{ $course->id }}')"
-                    class="px-3 sm:px-5 py-1.5 sm:py-2 text-[11px] sm:text-sm font-bold text-center rounded-md transition-colors bg-white text-[#13416B] border border-[#13416B]/30 hover:bg-[#13416B]/5 cursor-pointer">
+                    class="px-3.5 sm:px-5 py-1.5 sm:py-2 text-xs sm:text-sm font-bold text-center rounded-md transition-colors bg-white text-[#13416B] border border-[#13416B]/30 hover:bg-[#13416B]/5 cursor-pointer">
                     Lihat detail
                 </button>
             @else
                 <button type="button" @click.stop="askEnroll('{{ $course->id }}')"
-                    class="px-3.5 sm:px-5 py-1.5 sm:py-2 text-[11px] sm:text-sm inline-flex items-center justify-center gap-1.5 font-bold text-center rounded-md transition-colors bg-amber-500 text-white border border-amber-500 hover:bg-amber-600 shadow-2xs cursor-pointer">
+                    class="px-4 sm:px-5 py-1.5 sm:py-2 text-xs sm:text-sm inline-flex items-center justify-center gap-1.5 font-bold text-center rounded-md transition-colors bg-amber-500 text-white border border-amber-500 hover:bg-amber-600 shadow-2xs cursor-pointer">
                     <span>Daftar</span>
-                    <i class="fas fa-arrow-up-right-from-square text-[9px] sm:text-xs"></i>
+                    <i class="fas fa-arrow-up-right-from-square text-[10px] sm:text-xs"></i>
                 </button>
             @endif
         </div>

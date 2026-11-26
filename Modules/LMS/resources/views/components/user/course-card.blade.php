@@ -57,18 +57,18 @@
 
         {{-- Badge Status Event di Pojok Kanan Atas (3 Status Konsisten dengan Tab) --}}
         @if ($cardType === 'finished')
-            <span class="absolute top-0 right-0 z-10 px-2 sm:px-3 py-1 text-[8px] sm:text-[10px] font-bold uppercase tracking-wider text-white bg-emerald-600 shadow-xs flex items-center gap-1 rounded-none rounded-bl-md rounded-tr-md">
-                <i class="fas fa-check-circle text-[7px] sm:text-[9px]"></i>
+            <span class="absolute top-0 right-0 z-10 px-2.5 sm:px-3 py-1 text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-white bg-emerald-600 shadow-xs flex items-center gap-1 rounded-none rounded-bl-md rounded-tr-md">
+                <i class="fas fa-check-circle text-[8px] sm:text-[9px]"></i>
                 <span>Selesai</span>
             </span>
         @elseif ($cardType === 'waiting')
-            <span class="absolute top-0 right-0 z-10 px-2 sm:px-3 py-1 text-[8px] sm:text-[10px] font-bold uppercase tracking-wider text-white bg-[#0B5CFF] shadow-xs flex items-center gap-1 rounded-none rounded-bl-md rounded-tr-md">
-                <i class="far fa-clock text-[7px] sm:text-[9px]"></i>
+            <span class="absolute top-0 right-0 z-10 px-2.5 sm:px-3 py-1 text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-white bg-[#0B5CFF] shadow-xs flex items-center gap-1 rounded-none rounded-bl-md rounded-tr-md">
+                <i class="far fa-clock text-[8px] sm:text-[9px]"></i>
                 <span>Menunggu Pelaksanaan</span>
             </span>
         @else
-            <span class="absolute top-0 right-0 z-10 px-2 sm:px-3 py-1 text-[8px] sm:text-[10px] font-bold uppercase tracking-wider text-white bg-amber-500 shadow-xs flex items-center gap-1 rounded-none rounded-bl-md rounded-tr-md">
-                <i class="far fa-clock text-[7px] sm:text-[9px]"></i>
+            <span class="absolute top-0 right-0 z-10 px-2.5 sm:px-3 py-1 text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-white bg-amber-500 shadow-xs flex items-center gap-1 rounded-none rounded-bl-md rounded-tr-md">
+                <i class="far fa-clock text-[8px] sm:text-[9px]"></i>
                 <span>Sedang Berlangsung</span>
             </span>
         @endif
@@ -78,19 +78,19 @@
     <div class="px-0 pt-4 pb-0 sm:p-5 flex flex-col flex-1">
         {{-- Label Gelombang Standar di Atas Judul: Gelombang [nomor] [wilayah] [tahun] --}}
         @if ($waveSubtitle)
-            <p class="text-[11px] sm:text-sm font-semibold text-[#547996] truncate mb-2" title="{{ $fullBatchName }}">
+            <p class="text-xs sm:text-sm font-semibold text-[#547996] truncate mb-2" title="{{ $fullBatchName }}">
                 {{ $waveSubtitle }}
             </p>
         @endif
 
         {{-- 1 Judul Utama (Nama Kursus) --}}
-        <h3 class="text-xs sm:text-base font-bold text-slate-800 dark:text-white leading-snug group-hover:text-[#13416B] dark:group-hover:text-slate-200 transition-colors line-clamp-2 min-h-[2rem] sm:min-h-[2.75rem]"
+        <h3 class="text-sm sm:text-base font-bold text-slate-800 dark:text-white leading-snug group-hover:text-[#13416B] dark:group-hover:text-slate-200 transition-colors line-clamp-2 min-h-[2.5rem] sm:min-h-[2.75rem]"
             title="{{ $course->course_name ?? $course->name }}">
             {{ $course->course_name ?? $course->name }}
         </h3>
 
         {{-- Info Ringkas Kontekstual (Timeline + Jumlah Peserta) --}}
-        <div class="mt-3.5 sm:mt-4 flex flex-col gap-2 sm:gap-2.5 text-[11px] sm:text-sm text-slate-500 dark:text-slate-400">
+        <div class="mt-3.5 sm:mt-4 flex flex-col gap-2 sm:gap-2.5 text-xs sm:text-sm text-slate-500 dark:text-slate-400">
             @if ($cardType === 'finished')
                 <p class="inline-flex items-center gap-1.5 font-medium text-slate-500 truncate">
                     <i class="far fa-calendar-alt shrink-0 text-xs text-slate-400"></i>
@@ -127,25 +127,25 @@
         {{-- Footer Tombol Aksi --}}
         <div class="mt-auto pt-4 sm:pt-5">
             @if ($cardType === 'finished')
-                <div class="w-full inline-flex items-center justify-center gap-1.5 px-2.5 sm:px-4 py-2 text-[11px] sm:text-sm font-bold text-center rounded-md transition-colors bg-emerald-600 text-white border border-emerald-600 shadow-2xs group-hover:bg-emerald-700 group-hover:border-emerald-700">
+                <div class="w-full inline-flex items-center justify-center gap-1.5 px-3 sm:px-4 py-2 text-xs sm:text-sm font-bold text-center rounded-md transition-colors bg-emerald-600 text-white border border-emerald-600 shadow-2xs group-hover:bg-emerald-700 group-hover:border-emerald-700">
                     <i class="far fa-folder-open text-[10px] sm:text-xs"></i>
                     <span>Lihat Materi</span>
                 </div>
             @elseif ($cardType === 'waiting')
-                <div class="w-full inline-flex items-center justify-center gap-1.5 px-2.5 sm:px-4 py-2 text-[11px] sm:text-sm font-bold text-center rounded-md transition-colors bg-[#0B5CFF] text-white border border-[#0B5CFF] shadow-2xs group-hover:bg-blue-700 group-hover:border-blue-700">
+                <div class="w-full inline-flex items-center justify-center gap-1.5 px-3 sm:px-4 py-2 text-xs sm:text-sm font-bold text-center rounded-md transition-colors bg-[#0B5CFF] text-white border border-[#0B5CFF] shadow-2xs group-hover:bg-blue-700 group-hover:border-blue-700">
                     <span>Buka Pelatihan</span>
                 </div>
             @elseif ($cardType === 'evaluation')
-                <div class="w-full inline-flex items-center justify-center gap-1.5 px-2.5 sm:px-4 py-2 text-[11px] sm:text-sm font-bold text-center rounded-md transition-colors bg-amber-500 text-white border border-amber-500 shadow-2xs group-hover:bg-amber-600 group-hover:border-amber-600">
+                <div class="w-full inline-flex items-center justify-center gap-1.5 px-3 sm:px-4 py-2 text-xs sm:text-sm font-bold text-center rounded-md transition-colors bg-amber-500 text-white border border-amber-500 shadow-2xs group-hover:bg-amber-600 group-hover:border-amber-600">
                     <span>Lanjutkan Evaluasi</span>
                 </div>
             @elseif ($pct <= 0)
-                <div class="w-full inline-flex items-center justify-center gap-1.5 px-2.5 sm:px-4 py-2 text-[11px] sm:text-sm font-bold text-center rounded-md transition-colors bg-amber-500 text-white border border-amber-500 shadow-2xs group-hover:bg-amber-600 group-hover:border-amber-600">
+                <div class="w-full inline-flex items-center justify-center gap-1.5 px-3 sm:px-4 py-2 text-xs sm:text-sm font-bold text-center rounded-md transition-colors bg-amber-500 text-white border border-amber-500 shadow-2xs group-hover:bg-amber-600 group-hover:border-amber-600">
                     <i class="fas fa-play text-[10px] sm:text-xs"></i>
                     <span>Mulai Belajar</span>
                 </div>
             @else
-                <div class="w-full inline-flex items-center justify-center gap-1.5 px-2.5 sm:px-4 py-2 text-[11px] sm:text-sm font-bold text-center rounded-md transition-colors bg-amber-500 text-white border border-amber-500 shadow-2xs group-hover:bg-amber-600 group-hover:border-amber-600">
+                <div class="w-full inline-flex items-center justify-center gap-1.5 px-3 sm:px-4 py-2 text-xs sm:text-sm font-bold text-center rounded-md transition-colors bg-amber-500 text-white border border-amber-500 shadow-2xs group-hover:bg-amber-600 group-hover:border-amber-600">
                     <span>Lanjutkan Belajar</span>
                 </div>
             @endif

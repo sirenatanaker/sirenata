@@ -358,20 +358,20 @@
                                         <div class="flex items-start justify-between gap-3 sm:gap-4">
                                             <div class="flex-1 min-w-0">
                                                 <template x-if="selected.isEvent && selected.bimtekBatchName">
-                                                    <div class="flex items-center gap-2 text-[11px] sm:text-sm mb-1 sm:mb-1.5">
+                                                    <div class="flex items-center gap-2 text-xs sm:text-sm mb-1 sm:mb-1.5">
                                                         <span class="font-semibold text-sky-200 tracking-wide truncate" :title="selected.bimtekBatchName" x-text="selected.bimtekBatchName"></span>
                                                     </div>
                                                 </template>
 
-                                                <h3 id="enroll-title" class="text-sm sm:text-xl font-bold text-white leading-snug line-clamp-2"
+                                                <h3 id="enroll-title" class="text-base sm:text-xl font-bold text-white leading-snug line-clamp-2"
                                                     :title="selected.name" x-text="selected.name"></h3>
 
-                                                <p class="text-[11px] sm:text-sm text-blue-100/90 leading-relaxed mt-1 sm:mt-1.5 line-clamp-2"
+                                                <p class="text-xs sm:text-sm text-blue-100/90 leading-relaxed mt-1 sm:mt-1.5 line-clamp-2"
                                                    x-show="selected.description" x-text="selected.description"></p>
                                             </div>
                                             <button type="button" @click="close()" aria-label="Tutup"
-                                                    class="shrink-0 w-7 h-7 sm:w-8 sm:h-8 -mr-1 rounded-md flex items-center justify-center text-white/75 hover:text-white hover:bg-white/10 transition-colors cursor-pointer">
-                                                <i class="fas fa-times text-sm sm:text-base"></i>
+                                                    class="shrink-0 w-8 h-8 -mr-1 rounded-md flex items-center justify-center text-white/75 hover:text-white hover:bg-white/10 transition-colors cursor-pointer">
+                                                <i class="fas fa-times text-base"></i>
                                             </button>
                                         </div>
                                     </div>
@@ -385,11 +385,11 @@
                                                     role="tab"
                                                     :aria-selected="activeTab === 'timeline'"
                                                     @click="setTab('timeline')"
-                                                    class="relative py-2.5 sm:py-3.5 text-[11px] sm:text-sm border-b-2 transition-colors inline-flex items-center gap-1.5 sm:gap-2 cursor-pointer"
+                                                    class="relative py-2.5 sm:py-3.5 text-xs sm:text-sm border-b-2 transition-colors inline-flex items-center gap-1.5 sm:gap-2 cursor-pointer"
                                                     :class="activeTab === 'timeline'
                                                         ? 'border-[#13416B] text-[#13416B] font-bold'
                                                         : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300 font-semibold'">
-                                                <i class="far fa-calendar-alt text-[11px] sm:text-xs"></i>
+                                                <i class="far fa-calendar-alt text-xs"></i>
                                                 <span>Timeline &amp; Jadwal</span>
                                             </button>
 
@@ -397,13 +397,13 @@
                                                     role="tab"
                                                     :aria-selected="activeTab === 'curriculum'"
                                                     @click="setTab('curriculum')"
-                                                    class="relative py-2.5 sm:py-3.5 text-[11px] sm:text-sm border-b-2 transition-colors inline-flex items-center gap-1.5 sm:gap-2 cursor-pointer"
+                                                    class="relative py-2.5 sm:py-3.5 text-xs sm:text-sm border-b-2 transition-colors inline-flex items-center gap-1.5 sm:gap-2 cursor-pointer"
                                                     :class="activeTab === 'curriculum'
                                                         ? 'border-[#13416B] text-[#13416B] font-bold'
                                                         : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300 font-semibold'">
-                                                <i class="fas fa-list-ul text-[11px] sm:text-xs"></i>
+                                                <i class="fas fa-list-ul text-xs"></i>
                                                 <span>Struktur Kurikulum</span>
-                                                <span class="px-1.5 py-0.5 rounded-md text-[10px] sm:text-[11px] font-semibold transition-colors"
+                                                <span class="px-1.5 py-0.5 rounded-md text-[11px] font-semibold transition-colors"
                                                       :class="activeTab === 'curriculum'
                                                           ? 'bg-[#13416B]/10 text-[#13416B]'
                                                           : 'bg-slate-100 text-slate-500'"
@@ -414,20 +414,20 @@
                                 </template>
 
                                 {{-- Body: Detail Kursus & Kurikulum (Scrollable, 1 Konteks per Tab) --}}
-                                <div x-ref="modalBody" class="flex-1 min-h-0 overflow-y-auto overscroll-contain px-4 sm:px-6 py-3.5 sm:py-5 custom-scrollbar bg-slate-50/40">
+                                <div x-ref="modalBody" class="flex-1 min-h-0 overflow-y-auto overscroll-contain px-4 sm:px-6 py-4 sm:py-5 custom-scrollbar bg-slate-50/40">
 
                                     {{-- TAB 1: TIMELINE & JADWAL --}}
                                     <template x-if="selected && selected.isEvent && selected.timelineSteps && activeTab === 'timeline'">
-                                        <div class="space-y-3 sm:space-y-4">
+                                        <div class="space-y-3.5 sm:space-y-4">
                                             {{-- Banner Notifikasi Jika Pendaftaran Gelombang Ini Ditutup (Disuruh Ikut Batch Berikutnya) --}}
                                             <template x-if="!selected.isEnrolledInThisBimtek && (!selected.isRegistrationOpen || selected.bimtekStatus !== 'open_registration')">
-                                                <div class="p-3 sm:p-4 rounded-md bg-amber-50 border border-amber-200/90 flex items-start gap-2.5 sm:gap-3 text-amber-900 shadow-2xs">
-                                                    <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-md bg-amber-100/80 border border-amber-200 text-amber-700 flex items-center justify-center shrink-0 mt-0.5">
-                                                        <i class="fas fa-calendar-times text-xs sm:text-sm"></i>
+                                                <div class="p-3.5 sm:p-4 rounded-md bg-amber-50 border border-amber-200/90 flex items-start gap-2.5 sm:gap-3 text-amber-900 shadow-2xs">
+                                                    <div class="w-8 h-8 rounded-md bg-amber-100/80 border border-amber-200 text-amber-700 flex items-center justify-center shrink-0 mt-0.5">
+                                                        <i class="fas fa-calendar-times text-sm"></i>
                                                     </div>
                                                     <div class="flex-1 min-w-0">
-                                                        <h5 class="text-xs sm:text-base font-bold text-amber-900 mb-0.5">Pendaftaran Gelombang Ini Telah Ditutup</h5>
-                                                        <p class="text-[11px] sm:text-sm text-amber-800/90 leading-relaxed">
+                                                        <h5 class="text-sm sm:text-base font-bold text-amber-900 mb-0.5">Pendaftaran Gelombang Ini Telah Ditutup</h5>
+                                                        <p class="text-xs sm:text-sm text-amber-800/90 leading-relaxed">
                                                             Kursus untuk gelombang ini sedang berlangsung atau masa pendaftaran telah berakhir. Anda dapat mengikuti kursus pada <strong>gelombang berikutnya</strong>.
                                                         </p>
                                                     </div>
@@ -435,18 +435,18 @@
                                             </template>
 
                                             {{-- Stepper 3 Tahap Beralur --}}
-                                            <div class="relative pl-7 sm:pl-10 space-y-3 sm:space-y-4 before:absolute before:left-2.5 sm:before:left-3.5 before:top-2 before:bottom-2 before:w-0.5 before:bg-slate-200">
+                                            <div class="relative pl-8 sm:pl-10 space-y-3.5 sm:space-y-4 before:absolute before:left-3 sm:before:left-3.5 before:top-2 before:bottom-2 before:w-0.5 before:bg-slate-200">
                                                 <template x-for="(step, idx) in selected.timelineSteps" :key="idx">
                                                     <div class="relative">
                                                         {{-- Dot / Icon Step --}}
-                                                        <div class="absolute -left-7 sm:-left-10 top-3 sm:top-3.5 w-5 h-5 sm:w-7 sm:h-7 rounded-full flex items-center justify-center text-[11px] sm:text-sm font-bold transition-all shadow-2xs"
+                                                        <div class="absolute -left-8 sm:-left-10 top-3.5 w-6 h-6 sm:w-7 sm:h-7 rounded-full flex items-center justify-center text-xs sm:text-sm font-bold transition-all shadow-2xs"
                                                              :class="{
                                                                  'bg-emerald-600 text-white ring-3 ring-emerald-50': step.status === 'completed',
                                                                  'bg-[#0B5CFF] text-white ring-3 ring-blue-100': step.status === 'active',
                                                                  'bg-white text-slate-400 border-2 border-slate-300': step.status === 'upcoming'
                                                              }">
                                                             <template x-if="step.status === 'completed'">
-                                                                <i class="fas fa-check text-[9px] sm:text-xs"></i>
+                                                                <i class="fas fa-check text-[10px] sm:text-xs"></i>
                                                             </template>
                                                             <template x-if="step.status !== 'completed'">
                                                                 <span x-text="step.step"></span>
@@ -454,14 +454,14 @@
                                                         </div>
 
                                                         {{-- Card Timeline Beralur --}}
-                                                        <div class="p-3 sm:p-4 rounded-md border transition-all"
+                                                        <div class="p-3.5 sm:p-4 rounded-md border transition-all"
                                                              :class="{
                                                                  'bg-white border-[#0B5CFF]/35 shadow-xs': step.status === 'active',
                                                                  'bg-slate-50/80 border-slate-200/80': step.status === 'completed',
                                                                  'bg-white border-slate-200/70': step.status === 'upcoming'
                                                              }">
-                                                            <div class="font-bold text-sm sm:text-[17px] text-slate-800 leading-snug" x-text="step.title"></div>
-                                                            <ul class="mt-2 sm:mt-2.5 space-y-1 sm:space-y-1.5 list-disc pl-4 text-[11px] sm:text-sm text-slate-600 leading-relaxed marker:text-slate-400">
+                                                            <div class="font-bold text-base sm:text-[17px] text-slate-800 leading-snug" x-text="step.title"></div>
+                                                            <ul class="mt-2 sm:mt-2.5 space-y-1.5 list-disc pl-4 text-xs sm:text-sm text-slate-600 leading-relaxed marker:text-slate-400">
                                                                 <template x-if="step.step === 1">
                                                                     <li class="contents">
                                                                         <ul class="space-y-1.5 list-disc">
@@ -504,8 +504,8 @@
                                                                 </template>
                                                             </ul>
                                                             <template x-if="step.step === 1 && selected.isRegistrationOpen && selected.bimtekQuota > 0">
-                                                                <div class="mt-2.5 sm:mt-3 pt-2 sm:pt-2.5 border-t border-slate-100">
-                                                                    <div class="flex items-center justify-between gap-2 text-[11px] sm:text-xs mb-1.5">
+                                                                <div class="mt-3 pt-2.5 border-t border-slate-100">
+                                                                    <div class="flex items-center justify-between gap-2 text-xs mb-1.5">
                                                                         <span class="font-semibold text-slate-600">
                                                                             Keterisian Kuota (<span x-text="selected.bimtekParticipants + '/' + selected.bimtekQuota + ' Peserta'"></span>)
                                                                         </span>
@@ -537,22 +537,22 @@
 
                                                         <button type="button"
                                                                 @click="toggleSection(i)"
-                                                                class="w-full flex items-center gap-2.5 sm:gap-3 px-3 sm:px-4 py-2.5 sm:py-3 text-left transition-colors cursor-pointer select-none"
+                                                                class="w-full flex items-center gap-3 px-3.5 sm:px-4 py-3 text-left transition-colors cursor-pointer select-none"
                                                                 :class="isExpanded(i) ? 'bg-slate-50/70' : 'hover:bg-slate-50/40'"
                                                                 :aria-expanded="isExpanded(i)">
 
-                                                            <span class="shrink-0 w-5 h-5 sm:w-7 sm:h-7 rounded-full text-[11px] sm:text-sm font-semibold flex items-center justify-center transition-colors"
+                                                            <span class="shrink-0 w-6 h-6 sm:w-7 sm:h-7 rounded-full text-xs sm:text-sm font-semibold flex items-center justify-center transition-colors"
                                                                   :class="isExpanded(i) ? 'bg-[#0B5CFF] text-white shadow-xs' : 'bg-slate-100 text-slate-600'"
                                                                   x-text="i + 1"></span>
 
-                                                            <span class="flex-1 min-w-0 text-xs sm:text-base font-semibold text-slate-800 leading-snug line-clamp-2 wrap-break-word"
+                                                            <span class="flex-1 min-w-0 text-sm sm:text-base font-semibold text-slate-800 leading-snug line-clamp-2 wrap-break-word"
                                                                   :title="section.name"
                                                                   x-text="section.name"></span>
 
-                                                            <div class="shrink-0 flex items-center gap-1.5 sm:gap-2">
-                                                                <span class="text-[11px] sm:text-[13px] font-medium text-slate-500"
+                                                            <div class="shrink-0 flex items-center gap-2">
+                                                                <span class="text-xs sm:text-[13px] font-medium text-slate-500"
                                                                       x-text="section.contents.length + ' materi'"></span>
-                                                                <i class="fas fa-chevron-down text-[11px] sm:text-xs text-slate-400 transition-transform duration-200"
+                                                                <i class="fas fa-chevron-down text-xs text-slate-400 transition-transform duration-200"
                                                                    :class="{ 'rotate-180 text-slate-600': isExpanded(i) }"></i>
                                                             </div>
                                                         </button>
@@ -564,7 +564,7 @@
 
                                                             <!-- Daftar Materi Konten -->
                                                             <template x-for="(content, j) in section.contents" :key="j">
-                                                                <div class="flex items-start gap-2 pl-8 sm:pl-12 pr-3 sm:pr-4 py-2 sm:py-2.5 text-[11px] sm:text-sm">
+                                                                <div class="flex items-start gap-2 pl-9 sm:pl-12 pr-3.5 sm:pr-4 py-2.5 text-xs sm:text-sm">
                                                                     <span class="font-semibold text-slate-500 shrink-0 leading-snug"
                                                                           x-text="(content.letter || topicLetter(j)) + '.'">
                                                                     </span>
@@ -600,8 +600,8 @@
                                     <template x-if="selected.isEvent && !selected.isEnrolledInThisBimtek && (!selected.isRegistrationOpen || selected.bimtekStatus !== 'open_registration')">
                                         <div class="flex items-center justify-end w-full">
                                             <button type="button" disabled
-                                                    class="px-3.5 sm:px-4 py-1.5 sm:py-2.5 text-xs sm:text-[15px] font-semibold rounded-md text-slate-400 bg-slate-100 border border-slate-200 cursor-not-allowed inline-flex items-center justify-center gap-1.5 shadow-none">
-                                                <i class="fas fa-lock text-[10px] sm:text-xs"></i>
+                                                    class="px-4 py-2 sm:py-2.5 text-sm sm:text-[15px] font-semibold rounded-md text-slate-400 bg-slate-100 border border-slate-200 cursor-not-allowed inline-flex items-center justify-center gap-1.5 shadow-none">
+                                                <i class="fas fa-lock text-xs"></i>
                                                 <span class="truncate">Pendaftaran Ditutup</span>
                                             </button>
                                         </div>
@@ -610,15 +610,15 @@
                                     {{-- KONDISI 2: SUDAH TERDAFTAR --}}
                                     <template x-if="selected.isEvent && selected.isEnrolledInThisBimtek">
                                         <div class="flex items-center justify-between gap-3">
-                                            <div class="min-w-0 flex-1 text-[11px] sm:text-[15px] text-emerald-700 font-semibold text-left flex items-center justify-start gap-1.5 leading-snug">
+                                            <div class="min-w-0 flex-1 text-xs sm:text-[15px] text-emerald-700 font-semibold text-left flex items-center justify-start gap-1.5 leading-snug">
                                                 <i class="fas fa-check-circle text-emerald-600 shrink-0"></i>
                                                 <span>Anda telah terdaftar pada gelombang ini.</span>
                                             </div>
                                             <div class="flex items-center justify-end shrink-0">
                                                 <a :href="selected.myCourseUrl"
-                                                   class="px-3.5 sm:px-5 py-1.5 sm:py-2.5 text-xs sm:text-[15px] font-semibold rounded-md text-white bg-emerald-600 hover:bg-emerald-700 shadow-sm transition-all inline-flex items-center justify-center gap-1.5 text-center whitespace-nowrap">
+                                                   class="px-4 sm:px-5 py-2 sm:py-2.5 text-sm sm:text-[15px] font-semibold rounded-md text-white bg-emerald-600 hover:bg-emerald-700 shadow-sm transition-all inline-flex items-center justify-center gap-1.5 text-center whitespace-nowrap">
                                                     <span>Masuk Pelatihan</span>
-                                                    <i class="fas fa-arrow-up-right-from-square text-[10px] sm:text-xs"></i>
+                                                    <i class="fas fa-arrow-up-right-from-square text-xs"></i>
                                                 </a>
                                             </div>
                                         </div>
@@ -628,9 +628,9 @@
                                     <template x-if="(!selected.isEvent) || (selected.isEvent && !selected.isEnrolledInThisBimtek && selected.isRegistrationOpen && selected.bimtekStatus === 'open_registration')">
                                         <div class="flex items-center justify-end w-full">
                                             <button type="button" @click="confirmOpen = true"
-                                                    class="px-4 sm:px-5 py-1.5 sm:py-2.5 text-xs sm:text-[15px] font-semibold rounded-md text-white bg-amber-500 hover:bg-amber-600 shadow-sm transition-all inline-flex items-center justify-center gap-1.5 text-center whitespace-nowrap cursor-pointer">
+                                                    class="px-4 sm:px-5 py-2 sm:py-2.5 text-sm sm:text-[15px] font-semibold rounded-md text-white bg-amber-500 hover:bg-amber-600 shadow-sm transition-all inline-flex items-center justify-center gap-1.5 text-center whitespace-nowrap cursor-pointer">
                                                 <span>Daftar</span>
-                                                <i class="fas fa-arrow-up-right-from-square text-[10px] sm:text-xs"></i>
+                                                <i class="fas fa-arrow-up-right-from-square text-xs"></i>
                                             </button>
                                         </div>
                                     </template>
@@ -674,7 +674,7 @@
                                 </p>
 
                                 {{-- Kartu Ringkasan Tiket Event --}}
-                                <div class="p-3 sm:p-3.5 rounded-md bg-slate-50 border border-slate-200 text-left text-xs sm:text-sm space-y-2 mb-3">
+                                <div class="p-3 sm:p-3.5 rounded-md bg-slate-50 border border-slate-200 text-left text-xs sm:text-sm space-y-2 mb-4">
                                     <div>
                                         <span class="text-[11px] sm:text-xs font-bold text-slate-400 uppercase tracking-wider block">Materi Program</span>
                                         <p class="font-bold text-slate-900 mt-0.5 line-clamp-2 leading-snug" :title="selected.name" x-text="selected.name"></p>
@@ -695,11 +695,6 @@
                                             <span x-text="selected.bimtekDates"></span> (<span x-text="selected.bimtekTime"></span>)
                                         </p>
                                     </div>
-                                </div>
-
-                                <div class="p-2.5 sm:p-3 rounded-md bg-emerald-50 border border-emerald-200/70 text-xs sm:text-sm text-emerald-800 text-left mb-3.5 sm:mb-4 flex items-start gap-2 leading-relaxed">
-                                    <i class="fas fa-info-circle text-emerald-600 mt-0.5 shrink-0 text-sm"></i>
-                                    <span>Pastikan Anda dapat mengikuti jadwal pelaksanaan dan menuntaskan seluruh materi.</span>
                                 </div>
                             </div>
                         </template>
