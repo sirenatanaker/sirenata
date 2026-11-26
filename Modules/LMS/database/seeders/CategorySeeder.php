@@ -3,6 +3,7 @@
 namespace Modules\LMS\Database\Seeders;
 
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 use Modules\LMS\Models\Category;
 
@@ -13,6 +14,9 @@ class CategorySeeder extends Seeder
      */
     public function run(): void
     {
+        if (! Schema::hasTable('categories')) {
+            return;
+        }
         // Category::factory()->count(5)->create();
         $categories = [
             'Praktik',

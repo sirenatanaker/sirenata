@@ -8,7 +8,6 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Modules\LMS\Models\BimtekEvent;
-use Modules\LMS\Models\Category;
 use Modules\LMS\Models\Course;
 use Modules\LMS\Models\PostTest;
 use Modules\LMS\Models\StudentContentProgress;
@@ -18,9 +17,6 @@ class CourseSeeder extends Seeder
 {
     public function run(): void
     {
-        // Pastikan kategori dasar tersedia
-        $this->call(CategorySeeder::class);
-
         // 16 Kursus Realistis: 4 Kursus Saya (Enrolled) & 12 Katalog (Un-enrolled)
         $courseData = [
             // =========================================================================
