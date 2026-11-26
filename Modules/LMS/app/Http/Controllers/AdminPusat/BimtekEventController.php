@@ -21,6 +21,7 @@ use Modules\LMS\Models\GradingBatch;
 use Modules\LMS\Models\PostTest;
 use Modules\LMS\Models\PostTestResult;
 use Modules\LMS\Models\SectionZoomProof;
+use Modules\MasterData\Models\Province;
 
 class BimtekEventController extends Controller
 {
@@ -82,12 +83,50 @@ class BimtekEventController extends Controller
     }
 
     /**
+     * Siapkan peta agenda (CourseSection) per kursus untuk sinkronisasi 1-ke-1 dengan sesi Zoom.
+     */
+    private function buildCourseAgendasMap($courses): array
+    {
+        $map = [];
+        foreach ($courses as $course) {
+            $sections = $course->sections ?? collect();
+            $map[$course->id] = $sections->values()->map(function ($sec, $idx) {
+                $rawName = trim((string) ($sec->name ?? $sec->title ?? ''));
+                $cleanName = trim((string) preg_replace('/^(?:Modul|Hari(?:\s+ke-?)?)\s*\d+\s*[:\-—–]\s*/i', '', $rawName));
+
+                return [
+                    'id'     => $sec->id,
+                    'number' => $idx + 1,
+                    'name'   => $cleanName !== '' ? $cleanName : ($rawName !== '' ? $rawName : 'Agenda Hari ' . ($idx + 1)),
+                ];
+            })->all();
+        }
+
+        return $map;
+    }
+
+    /**
+     * Daftar pilihan wilayah gelombang: Nasional + seluruh provinsi resmi dari MasterData\Province.
+     */
+    private function getWaveRegionOptions(): array
+    {
+        $provinces = Province::orderBy('name')->pluck('name')->all();
+
+        return array_values(array_unique(array_merge(['Nasional'], $provinces)));
+    }
+
+    /**
      * Show form to create a new Bimtek Event.
      */
     public function create()
     {
-        $courses = Course::orderBy('name')->get(['id', 'name', 'slug']);
-        return view('lms::admin-pusat.bimtek-events.create', compact('courses'));
+        $courses = Course::with(['sections' => fn($q) => $q->orderBy('position')->orderBy('id')])
+            ->orderBy('name')
+            ->get(['id', 'name', 'slug']);
+        $courseAgendasMap = $this->buildCourseAgendasMap($courses);
+        $waveRegionOptions = $this->getWaveRegionOptions();
+
+        return view('lms::admin-pusat.bimtek-events.create', compact('courses', 'courseAgendasMap', 'waveRegionOptions'));
     }
 
     /**
@@ -236,8 +275,24 @@ class BimtekEventController extends Controller
                 }
             }
 
-            // 3. Validasi Multi-Sesi Zoom & Presensi Harian (Skenario 1)
+            // 3. Validasi Kesesuaian Durasi & Sesi Zoom 1-ke-1 dengan Agenda Master Kursus
+            $selectedCourseId = $request->input('course_id');
+            $agendaCount = $selectedCourseId
+                ? (int) Course::where('id', $selectedCourseId)->withCount('sections')->value('sections_count')
+                : 0;
+
+            if ($agendaCount > 0 && $execStart && $execEnd && $execEnd >= $execStart) {
+                $execDays = \Carbon\Carbon::parse($execStart)->diffInDays(\Carbon\Carbon::parse($execEnd)) + 1;
+                if ($execDays < $agendaCount) {
+                    $v->errors()->add('end_date', "Durasi pelaksanaan minimal {$agendaCount} hari sesuai jumlah agenda pada Master Kursus yang dipilih.");
+                }
+            }
+
             $sessions = $request->input('sessions', []);
+            if ($agendaCount > 0 && is_array($sessions) && count($sessions) > 0 && count($sessions) !== $agendaCount) {
+                $v->errors()->add('sessions', 'Jumlah sesi Zoom (' . count($sessions) . ") harus sesuai dengan jumlah agenda pada Master Kursus ({$agendaCount} agenda).");
+            }
+
             if (is_array($sessions)) {
                 foreach ($sessions as $i => $s) {
                     $idx = $i + 1;
@@ -893,8 +948,13 @@ class BimtekEventController extends Controller
     public function edit($id)
     {
         $event = BimtekEvent::with('sessions')->findOrFail($id);
-        $courses = Course::orderBy('name')->get(['id', 'name', 'slug']);
-        return view('lms::admin-pusat.bimtek-events.edit', compact('event', 'courses'));
+        $courses = Course::with(['sections' => fn($q) => $q->orderBy('position')->orderBy('id')])
+            ->orderBy('name')
+            ->get(['id', 'name', 'slug']);
+        $courseAgendasMap = $this->buildCourseAgendasMap($courses);
+        $waveRegionOptions = $this->getWaveRegionOptions();
+
+        return view('lms::admin-pusat.bimtek-events.edit', compact('event', 'courses', 'courseAgendasMap', 'waveRegionOptions'));
     }
 
     /**
@@ -939,7 +999,7 @@ class BimtekEventController extends Controller
         $validator = \Illuminate\Support\Facades\Validator::make($request->all(), [
             'course_id'                => 'required|exists:courses,id',
             'batch_name'               => 'required|string|max:255',
-            'batch_code'               => 'required|string|max:100|unique:bimtek_events,batch_code,' . $event->id,
+            'batch_code'               => 'nullable|string|max:100|unique:bimtek_events,batch_code,' . $event->id,
             'quota'                    => $isUnlimitedQuota ? 'nullable' : 'required|integer|min:1',
 
             // 1. Periode Pendaftaran (Hanya Tanggal - Wajib)
@@ -1045,8 +1105,24 @@ class BimtekEventController extends Controller
                 }
             }
 
-            // 3. Validasi Multi-Sesi Zoom & Presensi Harian (Skenario 1)
+            // 3. Validasi Kesesuaian Durasi & Sesi Zoom 1-ke-1 dengan Agenda Master Kursus
+            $selectedCourseId = $request->input('course_id');
+            $agendaCount = $selectedCourseId
+                ? (int) Course::where('id', $selectedCourseId)->withCount('sections')->value('sections_count')
+                : 0;
+
+            if ($agendaCount > 0 && $execStart && $execEnd && $execEnd >= $execStart) {
+                $execDays = \Carbon\Carbon::parse($execStart)->diffInDays(\Carbon\Carbon::parse($execEnd)) + 1;
+                if ($execDays < $agendaCount) {
+                    $v->errors()->add('end_date', "Durasi pelaksanaan minimal {$agendaCount} hari sesuai jumlah agenda pada Master Kursus yang dipilih.");
+                }
+            }
+
             $sessions = $request->input('sessions', []);
+            if ($agendaCount > 0 && is_array($sessions) && count($sessions) > 0 && count($sessions) !== $agendaCount) {
+                $v->errors()->add('sessions', 'Jumlah sesi Zoom (' . count($sessions) . ") harus sesuai dengan jumlah agenda pada Master Kursus ({$agendaCount} agenda).");
+            }
+
             if (is_array($sessions)) {
                 foreach ($sessions as $i => $s) {
                     $idx = $i + 1;
@@ -1127,6 +1203,10 @@ class BimtekEventController extends Controller
         $validated['execution_type'] = $request->input('execution_type', $event->execution_type ?: 'online');
 
         $validated['quota'] = $isUnlimitedQuota ? null : (int) $request->input('quota');
+
+        if (empty($validated['batch_code'])) {
+            $validated['batch_code'] = $event->batch_code ?: ('BIMTEK-' . date('Y') . '-' . strtoupper(Str::random(4)));
+        }
 
         // Status dihitung otomatis sesuai rentang periode tanggal
         $validated['status'] = BimtekEvent::determineStatusFromDates(

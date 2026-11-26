@@ -27,23 +27,16 @@
                 $initialStep = 2;
             }
 
-            $waveRegionOptions = [
-                'Nasional',
-                'Sumatera',
-                'Jawa',
-                'Kalimantan',
-                'Sulawesi',
-                'Bali & Nusa Tenggara',
-                'Maluku & Papua',
-            ];
+            $waveRegionOptions = $waveRegionOptions ?? ['Nasional'];
+            $provinceOptions = array_values(array_filter($waveRegionOptions, fn($r) => $r !== 'Nasional'));
             $oldWaveNumber = old('wave_number', 1);
             $oldWaveRegion = old('wave_region', 'Nasional');
             $oldWaveRegionCustom = old('wave_region_custom', '');
             $oldWaveYear = old('wave_year', now()->format('Y'));
         @endphp
 
-        {{-- Form Card dengan Stepper Wizard Minimalis --}}
-        <div class="bg-white rounded-md border border-slate-200 shadow-2xs p-6 sm:p-8"
+        {{-- Form Card dengan Header Biru & Stepper Wizard --}}
+        <div class="bg-white rounded-md border border-slate-200 shadow-2xs overflow-hidden"
              x-data="bimtekFormWizard({
                  initialStep: {{ $initialStep }},
                  isUnlimitedQuota: {{ old('is_unlimited_quota') ? 'true' : 'false' }},
@@ -54,66 +47,71 @@
                  waveYear: @js((string) $oldWaveYear)
              })">
 
-            {{-- Stepper (Mirip Super Admin & Minim Icon) --}}
-            <div class="mb-8 flex items-center gap-2 sm:gap-3">
-                <div class="flex items-center gap-2 cursor-pointer" @click="goToStep(1)">
-                    <div class="flex h-8 w-8 items-center justify-center rounded-full text-sm sm:text-base font-bold"
-                         :class="step === 1 ? 'bg-indigo-600 text-white' : (step > 1 ? 'bg-emerald-500 text-white' : 'bg-slate-200 text-slate-500')">
-                        1
-                    </div>
-                    <span class="text-sm sm:text-base font-semibold"
-                          :class="step === 1 ? 'text-slate-900' : 'text-slate-500'">
-                        Pendaftaran
-                    </span>
+            {{-- Header Biru Terpisah dari Form --}}
+            <div class="bg-[#13416B] text-white px-6 sm:px-8 py-5 sm:py-6">
+                <div class="mb-5">
+                    <h1 class="text-lg sm:text-xl font-bold text-white tracking-wide">
+                        Buka Periode Gelombang Baru
+                    </h1>
+                    <p class="text-xs sm:text-sm text-blue-100/90 mt-1">
+                        Atur master kursus, penamaan gelombang, jadwal pelaksanaan &amp; sesi Zoom, serta periode evaluasi.
+                    </p>
                 </div>
 
-                <div class="h-0.5 flex-1 rounded-full"
-                     :class="step >= 2 ? 'bg-emerald-500' : 'bg-slate-200'"></div>
-
-                <div class="flex items-center gap-2 cursor-pointer" @click="goToStep(2)">
-                    <div class="flex h-8 w-8 items-center justify-center rounded-full text-sm sm:text-base font-bold"
-                         :class="step === 2 ? 'bg-indigo-600 text-white' : (step > 2 ? 'bg-emerald-500 text-white' : 'bg-slate-200 text-slate-500')">
-                        2
+                {{-- Stepper 3 Langkah --}}
+                <div class="pt-4 border-t border-white/15 flex items-center gap-2 sm:gap-3">
+                    <div class="flex items-center gap-2 cursor-pointer" @click="goToStep(1)">
+                        <div class="flex h-8 w-8 items-center justify-center rounded-full text-sm sm:text-base font-bold transition-all"
+                             :class="step === 1 ? 'bg-amber-400 text-slate-900 ring-4 ring-amber-400/20' : (step > 1 ? 'bg-emerald-500 text-white' : 'bg-white/15 text-blue-100 border border-white/25')">
+                            1
+                        </div>
+                        <span class="text-xs sm:text-sm md:text-base transition-colors"
+                              :class="step === 1 ? 'text-white font-bold' : (step > 1 ? 'text-blue-100 font-semibold' : 'text-blue-200/75 font-medium')">
+                            Periode Pendaftaran
+                        </span>
                     </div>
-                    <span class="text-sm sm:text-base font-semibold"
-                          :class="step === 2 ? 'text-slate-900' : 'text-slate-500'">
-                        Pelaksanaan & Zoom
-                    </span>
-                </div>
 
-                <div class="h-0.5 flex-1 rounded-full"
-                     :class="step >= 3 ? 'bg-emerald-500' : 'bg-slate-200'"></div>
+                    <div class="h-0.5 flex-1 rounded-full transition-colors"
+                         :class="step >= 2 ? 'bg-emerald-400' : 'bg-white/20'"></div>
 
-                <div class="flex items-center gap-2 cursor-pointer" @click="goToStep(3)">
-                    <div class="flex h-8 w-8 items-center justify-center rounded-full text-sm sm:text-base font-bold"
-                         :class="step === 3 ? 'bg-indigo-600 text-white' : 'bg-slate-200 text-slate-500'">
-                        3
+                    <div class="flex items-center gap-2 cursor-pointer" @click="goToStep(2)">
+                        <div class="flex h-8 w-8 items-center justify-center rounded-full text-sm sm:text-base font-bold transition-all"
+                             :class="step === 2 ? 'bg-amber-400 text-slate-900 ring-4 ring-amber-400/20' : (step > 2 ? 'bg-emerald-500 text-white' : 'bg-white/15 text-blue-100 border border-white/25')">
+                            2
+                        </div>
+                        <span class="text-xs sm:text-sm md:text-base transition-colors"
+                              :class="step === 2 ? 'text-white font-bold' : (step > 2 ? 'text-blue-100 font-semibold' : 'text-blue-200/75 font-medium')">
+                            Periode Pelaksanaan
+                        </span>
                     </div>
-                    <span class="text-sm sm:text-base font-semibold"
-                          :class="step === 3 ? 'text-slate-900' : 'text-slate-500'">
-                        Evaluasi & Selesai
-                    </span>
+
+                    <div class="h-0.5 flex-1 rounded-full transition-colors"
+                         :class="step >= 3 ? 'bg-emerald-400' : 'bg-white/20'"></div>
+
+                    <div class="flex items-center gap-2 cursor-pointer" @click="goToStep(3)">
+                        <div class="flex h-8 w-8 items-center justify-center rounded-full text-sm sm:text-base font-bold transition-all"
+                             :class="step === 3 ? 'bg-amber-400 text-slate-900 ring-4 ring-amber-400/20' : 'bg-white/15 text-blue-100 border border-white/25'">
+                            3
+                        </div>
+                        <span class="text-xs sm:text-sm md:text-base transition-colors"
+                              :class="step === 3 ? 'text-white font-bold' : 'text-blue-200/75 font-medium'">
+                            Periode Evaluasi
+                        </span>
+                    </div>
                 </div>
             </div>
 
-            <x-validation-errors />
+            {{-- Body Form Putih --}}
+            <div class="p-6 sm:p-8 bg-white">
+                <x-validation-errors />
 
-            <form action="{{ route('admin-pusat.management-course.bimtek-events.store') }}" method="POST" id="bimtekForm" novalidate>
+                <form action="{{ route('admin-pusat.management-course.bimtek-events.store') }}" method="POST" id="bimtekForm" novalidate>
                 @csrf
 
                 {{-- ======================================================== --}}
                 {{-- LANGKAH 1: INFORMASI GELOMBANG & PERIODE PENDAFTARAN     --}}
                 {{-- ======================================================== --}}
                 <div x-show="step === 1" x-cloak class="space-y-6">
-                    <div class="border-b border-slate-100 pb-3">
-                        <h2 class="text-sm sm:text-base font-bold text-slate-800 uppercase tracking-wider">
-                            Langkah 1: Informasi Kursus, Gelombang & Pendaftaran
-                        </h2>
-                        <p class="text-xs sm:text-sm text-slate-500 mt-1">
-                            Pilih master kursus yang dibuka, tentukan nama gelombang, kapasitas kuota, dan jadwal pendaftaran.
-                        </p>
-                    </div>
-
                     {{-- Pilih Master Kursus --}}
                     <div>
                         <label for="course_id" class="block text-xs sm:text-sm font-semibold text-slate-700 mb-1.5">
@@ -124,7 +122,7 @@
                             <option value="">-- Pilih Kursus yang Akan Dijadikan Bimtek --</option>
                             @foreach ($courses as $c)
                                 <option value="{{ $c->id }}" @selected(old('course_id') == $c->id)>
-                                    {{ $c->name }}
+                                    {{ $c->name }} ({{ count($courseAgendasMap[$c->id] ?? []) }} Agenda)
                                 </option>
                             @endforeach
                         </select>
@@ -175,9 +173,12 @@
                                 </label>
                                 <select id="wave_region" name="wave_region" x-model="waveRegion" required
                                         class="w-full px-3 py-2 rounded-md border border-slate-300 text-sm sm:text-[15px] bg-white focus:ring-1 focus:ring-slate-900 focus:border-slate-900">
-                                    @foreach ($waveRegionOptions as $regionOpt)
-                                        <option value="{{ $regionOpt }}">{{ $regionOpt }}</option>
-                                    @endforeach
+                                    <option value="Nasional">Nasional</option>
+                                    <optgroup label="Provinsi">
+                                        @foreach ($provinceOptions as $regionOpt)
+                                            <option value="{{ $regionOpt }}">{{ $regionOpt }}</option>
+                                        @endforeach
+                                    </optgroup>
                                     <option value="__custom__">Wilayah Lainnya (Ketik Manual)...</option>
                                 </select>
                                 <div x-show="waveRegion === '__custom__'" x-cloak class="mt-2">
@@ -203,43 +204,31 @@
                         @enderror
                     </div>
 
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {{-- Kode Batch --}}
-                        <div>
-                            <label for="batch_code" class="block text-xs sm:text-sm font-semibold text-slate-700 mb-1.5">
-                                Kode Registrasi Gelombang (Opsional)
+                    {{-- Kuota Peserta dengan Opsi Tanpa Batasan --}}
+                    <div>
+                        <div class="flex items-center justify-between mb-1.5">
+                            <label for="quota" class="block text-xs sm:text-sm font-semibold text-slate-700">
+                                Kapasitas Kuota <span class="text-rose-500" x-show="!isUnlimited">*</span>
                             </label>
-                            <input type="text" id="batch_code" name="batch_code" value="{{ old('batch_code') }}"
-                                   placeholder="Otomatis jika dikosongkan (BIMTEK-XXXX)"
-                                   class="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 text-sm sm:text-[15px] focus:ring-1 focus:ring-slate-900 focus:border-slate-900 font-mono">
+                            <label class="inline-flex items-center gap-1.5 cursor-pointer select-none">
+                                <input type="checkbox" name="is_unlimited_quota" value="1"
+                                       x-model="isUnlimited"
+                                       class="rounded border-slate-300 text-[#13416B] focus:ring-[#13416B] h-3.5 w-3.5">
+                                <span class="text-xs sm:text-sm text-slate-600 font-medium">Tanpa Batas</span>
+                            </label>
                         </div>
-
-                        {{-- Kuota Peserta dengan Opsi Tanpa Batasan --}}
-                        <div>
-                            <div class="flex items-center justify-between mb-1.5">
-                                <label for="quota" class="block text-xs sm:text-sm font-semibold text-slate-700">
-                                    Kapasitas Kuota <span class="text-rose-500" x-show="!isUnlimited">*</span>
-                                </label>
-                                <label class="inline-flex items-center gap-1.5 cursor-pointer select-none">
-                                    <input type="checkbox" name="is_unlimited_quota" value="1"
-                                           x-model="isUnlimited"
-                                           class="rounded border-slate-300 text-[#13416B] focus:ring-[#13416B] h-3.5 w-3.5">
-                                    <span class="text-xs sm:text-sm text-slate-600 font-medium">Tanpa Batas</span>
-                                </label>
-                            </div>
-                            <div x-show="!isUnlimited">
-                                <input type="number" id="quota" name="quota"
-                                       value="{{ old('quota', 100) }}" min="1"
-                                       placeholder="Contoh: 100"
-                                       class="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 text-sm sm:text-[15px] focus:ring-1 focus:ring-slate-900 focus:border-slate-900">
-                                @error('quota')
-                                    <p class="text-xs sm:text-sm text-rose-500 mt-1">{{ $message }}</p>
-                                @enderror
-                            </div>
-                            <div x-show="isUnlimited" x-cloak
-                                 class="px-3 py-2 bg-slate-50 border border-dashed border-slate-300 rounded-lg text-xs sm:text-sm text-slate-600">
-                                Kapasitas peserta terbuka <strong>tanpa batasan kuota</strong>.
-                            </div>
+                        <div x-show="!isUnlimited">
+                            <input type="number" id="quota" name="quota"
+                                   value="{{ old('quota', 100) }}" min="1"
+                                   placeholder="Contoh: 100"
+                                   class="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 text-sm sm:text-[15px] focus:ring-1 focus:ring-slate-900 focus:border-slate-900">
+                            @error('quota')
+                                <p class="text-xs sm:text-sm text-rose-500 mt-1">{{ $message }}</p>
+                            @enderror
+                        </div>
+                        <div x-show="isUnlimited" x-cloak
+                             class="px-3 py-2 bg-slate-50 border border-dashed border-slate-300 rounded-lg text-xs sm:text-sm text-slate-600">
+                            Kapasitas peserta terbuka <strong>tanpa batasan kuota</strong>.
                         </div>
                     </div>
 
@@ -293,20 +282,11 @@
                 {{-- LANGKAH 2: PERIODE PELAKSANAAN & LIVE ZOOM MULTI-SESI     --}}
                 {{-- ======================================================== --}}
                 <div x-show="step === 2" x-cloak class="space-y-6">
-                    <div class="border-b border-slate-100 pb-3">
-                        <h2 class="text-sm sm:text-base font-bold text-slate-800 uppercase tracking-wider">
-                            Langkah 2: Periode Pelaksanaan & Live Zoom Harian
-                        </h2>
-                        <p class="text-xs sm:text-sm text-slate-500 mt-1">
-                            Atur rentang tanggal pelaksanaan pelatihan, link ruang Zoom utama, dan jadwal sesi tatap muka harian beserta jam presensinya.
-                        </p>
-                    </div>
-
                     {{-- Periode Pelaksanaan (Clean, No Icon) --}}
                     <div class="p-4 rounded-md border border-slate-200 bg-white space-y-3">
-                        <div class="flex items-center justify-between border-b border-slate-100 pb-2">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1 border-b border-slate-100 pb-2">
                             <h3 class="text-xs sm:text-sm font-bold text-slate-800 uppercase tracking-wider">Rentang Tanggal Pelaksanaan</h3>
-                            <span class="text-xs text-slate-500 font-medium">
+                            <span id="exec-min-days-hint" class="text-xs text-slate-500 font-medium">
                                 Jadwal harus setelah periode pendaftaran
                             </span>
                         </div>
@@ -389,12 +369,12 @@
                             </div>
                         </div>
 
-                        {{-- SEKSI MULTI-SESI ZOOM & PRESENSI PER HARI --}}
+                        {{-- SEKSI MULTI-SESI ZOOM & PRESENSI 1-KE-1 SESUAI AGENDA MASTER KURSUS --}}
                         <div class="space-y-3 pt-1">
                             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-white/20 pb-2">
-                                <div class="flex items-center gap-2">
+                                <div class="flex items-center gap-2 flex-wrap">
                                     <span class="text-xs sm:text-sm font-bold text-white uppercase tracking-wider">
-                                        Daftar Sesi Zoom & Presensi Per Hari
+                                        Jadwal Sesi Zoom &amp; Presensi Per Agenda
                                     </span>
                                     <span id="sessions-count-badge" class="px-2 py-0.5 rounded text-xs font-bold bg-white/20 text-white">
                                         0 Sesi
@@ -403,13 +383,9 @@
 
                                 <div class="flex items-center gap-2 flex-wrap">
                                     <x-button type="button" id="btn-auto-generate-sessions"
-                                              title="Buat sesi Zoom dan presensi otomatis per hari berdasarkan rentang tanggal pelaksanaan"
+                                              title="Buat jadwal sesi Zoom & presensi otomatis 1-ke-1 mengikuti daftar agenda pada Master Kursus"
                                               variant="warning" size="sm" rounded="md">
-                                        Generate Sesi Otomatis
-                                    </x-button>
-                                    <x-button type="button" id="btn-add-session"
-                                              variant="white" size="sm" rounded="md">
-                                        Tambah Sesi
+                                        Generate Sesi Sesuai Agenda
                                     </x-button>
                                 </div>
                             </div>
@@ -419,10 +395,10 @@
                                 {{-- Empty State jika belum ada sesi --}}
                                 <div id="sessions-empty-state" class="p-4 rounded-md border border-dashed border-white/30 text-center space-y-1.5 bg-black/10">
                                     <p class="text-xs sm:text-sm text-white/90 font-medium">
-                                        Belum ada sesi harian yang ditambahkan.
+                                        Belum ada jadwal sesi Zoom yang dibuat.
                                     </p>
                                     <p class="text-xs text-blue-100/80">
-                                        Klik <strong>"Generate Sesi Otomatis"</strong> di atas untuk membuat jadwal Zoom & presensi secara otomatis sesuai rentang hari pelaksanaan bimtek.
+                                        Klik <strong>"Generate Sesi Sesuai Agenda"</strong> untuk menyiapkan sesi Zoom otomatis 1-ke-1 sesuai jumlah agenda Master Kursus. Jika rentang pelaksanaan lebih panjang (mis. ada jeda belajar mandiri), Anda bebas menggeser tanggal tiap sesi di dalam rentang tersebut.
                                     </p>
                                 </div>
                             </div>
@@ -444,15 +420,6 @@
                 {{-- LANGKAH 3: EVALUASI, SERTIFIKAT & KONFIRMASI AKHIR       --}}
                 {{-- ======================================================== --}}
                 <div x-show="step === 3" x-cloak class="space-y-6">
-                    <div class="border-b border-slate-100 pb-3">
-                        <h2 class="text-sm sm:text-base font-bold text-slate-800 uppercase tracking-wider">
-                            Langkah 3: Periode Evaluasi, Sertifikat & Ringkasan Akhir
-                        </h2>
-                        <p class="text-xs sm:text-sm text-slate-500 mt-1">
-                            Atur batas waktu pengerjaan evaluasi peserta dan tinjau linimasa gelombang secara keseluruhan sebelum menyimpan data.
-                        </p>
-                    </div>
-
                     {{-- Periode Evaluasi & Sertifikat (Clean, No Icon) --}}
                     <div class="p-4 rounded-md border border-slate-200 bg-white space-y-3">
                         <div class="flex items-center justify-between border-b border-slate-100 pb-2">
@@ -488,20 +455,20 @@
                         </div>
                     </div>
 
-                    {{-- Ringkasan Linimasa & Estimasi Status Otomatis (Biru Sirenata #13416B) --}}
-                    <div class="p-5 sm:p-6 rounded-md bg-[#13416B] text-white shadow-sm space-y-3.5">
-                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-white/15 pb-3">
+                    {{-- Ringkasan Linimasa & Estimasi Status Otomatis (Ocean Blue Solid bg-sky-700) --}}
+                    <div class="p-5 sm:p-6 rounded-md bg-sky-700 text-white shadow-sm space-y-3.5">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-white/20 pb-3">
                             <div>
-                                <span class="text-xs sm:text-sm font-semibold text-slate-200 block">Rentang Waktu Keseluruhan Program:</span>
+                                <span class="text-xs sm:text-sm font-semibold text-white/85 block">Rentang Waktu Keseluruhan Program:</span>
                                 <p id="summary-timeline-text" class="text-base sm:text-xl font-extrabold text-white mt-0.5">
                                     Silakan atur tanggal periode di atas...
                                 </p>
                             </div>
                             <div class="flex items-center gap-2 flex-wrap">
-                                <span id="summary-duration-tag" class="hidden px-2.5 py-1 rounded-md text-xs sm:text-sm font-semibold bg-white/15 border border-white/20 text-white">
+                                <span id="summary-duration-tag" class="hidden px-2.5 py-1 rounded-md text-xs sm:text-sm font-semibold bg-white/15 border border-white/25 text-white">
                                     <span id="summary-duration-text">-</span>
                                 </span>
-                                <span id="summary-status-tag" class="px-2.5 py-1 rounded-md text-xs sm:text-sm font-semibold bg-white/15 border border-white/20 text-white">
+                                <span id="summary-status-tag" class="px-2.5 py-1 rounded-md text-xs sm:text-sm font-semibold bg-white/15 border border-white/25 text-white">
                                     Status Otomatis: <strong id="summary-status-text" class="text-white">Menyesuaikan Tanggal</strong>
                                 </span>
                             </div>
@@ -509,16 +476,16 @@
 
                         {{-- Step Flow Review --}}
                         <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-xs sm:text-sm">
-                            <div class="bg-white/10 rounded-md p-2.5 border border-white/15 text-white">
-                                <span class="text-xs font-semibold text-slate-200 block">1. Periode Pendaftaran</span>
+                            <div class="bg-white/15 rounded-md p-3 border border-white/20 text-white">
+                                <span class="text-xs font-semibold text-white/85 block">1. Periode Pendaftaran</span>
                                 <span id="flow-reg-text" class="font-bold text-white mt-0.5 block">-</span>
                             </div>
-                            <div class="bg-white/10 rounded-md p-2.5 border border-white/15 text-white">
-                                <span class="text-xs font-semibold text-slate-200 block">2. Periode Pelaksanaan & Zoom</span>
+                            <div class="bg-white/15 rounded-md p-3 border border-white/20 text-white">
+                                <span class="text-xs font-semibold text-white/85 block">2. Periode Pelaksanaan</span>
                                 <span id="flow-exec-text" class="font-bold text-white mt-0.5 block">-</span>
                             </div>
-                            <div class="bg-white/10 rounded-md p-2.5 border border-white/15 text-white">
-                                <span class="text-xs font-semibold text-slate-200 block">3. Evaluasi & Sertifikat</span>
+                            <div class="bg-white/15 rounded-md p-3 border border-white/20 text-white">
+                                <span class="text-xs font-semibold text-white/85 block">3. Periode Evaluasi</span>
                                 <span id="flow-eval-text" class="font-bold text-white mt-0.5 block">-</span>
                             </div>
                         </div>
@@ -535,7 +502,8 @@
                     </div>
                 </div>
 
-            </form>
+                </form>
+            </div>
         </div>
 
     </div>
@@ -750,7 +718,23 @@
                                 return false;
                             }
 
+                            const selectedAgendas = window._getSelectedCourseAgendas ? window._getSelectedCourseAgendas() : [];
+                            if (selectedAgendas.length > 0) {
+                                const dS = new Date(execStart.value + 'T00:00:00');
+                                const dE = new Date(execEnd.value + 'T00:00:00');
+                                const execDays = Math.floor((dE - dS) / (1000 * 60 * 60 * 24)) + 1;
+                                if (execDays < selectedAgendas.length) {
+                                    showBimtekAlert(`Durasi pelaksanaan minimal ${selectedAgendas.length} hari sesuai jumlah agenda pada Master Kursus yang dipilih.`, 'Peringatan', execEnd);
+                                    return false;
+                                }
+                            }
+
                             const sessionCards = document.querySelectorAll('#sessions-container .session-card');
+                            if (selectedAgendas.length > 0 && sessionCards.length > 0 && sessionCards.length !== selectedAgendas.length) {
+                                showBimtekAlert(`Jumlah sesi Zoom (${sessionCards.length}) harus sama dengan jumlah agenda Master Kursus (${selectedAgendas.length} agenda). Klik "Generate Sesi Sesuai Agenda" untuk menyelaraskan.`, 'Peringatan');
+                                return false;
+                            }
+
                             for (let card of sessionCards) {
                                 const titleInput = card.querySelector('.session-title-input');
                                 const dateInput = card.querySelector('.session-date-input');
@@ -762,6 +746,10 @@
                                 }
                                 if (!dateInput?.value) {
                                     showBimtekAlert('Tanggal sesi tidak boleh kosong.', 'Peringatan', dateInput);
+                                    return false;
+                                }
+                                if (dateInput.value < execStart.value || dateInput.value > execEnd.value) {
+                                    showBimtekAlert(`Tanggal ${titleInput.value} harus berada di dalam rentang pelaksanaan (${execStart.value} s/d ${execEnd.value}).`, 'Peringatan', dateInput);
                                     return false;
                                 }
                                 if (!startInput?.value) {
@@ -819,19 +807,82 @@
                 const flowEval = document.getElementById('flow-eval-text');
 
                 // ==========================================
-                // MULTI-SESI ZOOM & PRESENSI (SKENARIO 1)
+                // MULTI-SESI ZOOM & PRESENSI 1-KE-1 SESUAI AGENDA MASTER KURSUS
                 // ==========================================
+                const courseSelect = document.getElementById('course_id');
+                const courseAgendaInfo = document.getElementById('course-agenda-info');
+                const courseAgendaSummary = document.getElementById('course-agenda-summary');
+                const courseAgendaList = document.getElementById('course-agenda-list');
+                const execMinDaysHint = document.getElementById('exec-min-days-hint');
+                const courseAgendasMap = @json($courseAgendasMap ?? []);
+
                 const sessionsContainer = document.getElementById('sessions-container');
                 const sessionsEmptyState = document.getElementById('sessions-empty-state');
                 const sessionsCountBadge = document.getElementById('sessions-count-badge');
                 const btnAutoGenerate = document.getElementById('btn-auto-generate-sessions');
-                const btnAddSession = document.getElementById('btn-add-session');
                 const initialSessions = @json(old('sessions', []));
+
+                function getSelectedCourseAgendas() {
+                    const cid = courseSelect?.value;
+                    if (!cid || !Array.isArray(courseAgendasMap[cid])) return [];
+                    return courseAgendasMap[cid];
+                }
+                window._getSelectedCourseAgendas = getSelectedCourseAgendas;
+
+                function escapeHtml(str) {
+                    return String(str ?? '')
+                        .replace(/&/g, '&amp;')
+                        .replace(/"/g, '&quot;')
+                        .replace(/</g, '&lt;')
+                        .replace(/>/g, '&gt;');
+                }
+
+                function updateCourseAgendaPreview(clearSessionsOnChange = false) {
+                    const agendas = getSelectedCourseAgendas();
+                    if (agendas.length > 0) {
+                        if (courseAgendaInfo) courseAgendaInfo.classList.remove('hidden');
+                        if (courseAgendaSummary) {
+                            courseAgendaSummary.textContent = `Master kursus ini memiliki ${agendas.length} Agenda/Hari (1 Agenda = 1 Sesi Zoom):`;
+                        }
+                        if (courseAgendaList) {
+                            courseAgendaList.innerHTML = agendas
+                                .map(a => `<li><span class="font-medium text-slate-700">${escapeHtml(a.name)}</span></li>`)
+                                .join('');
+                        }
+                        if (execMinDaysHint) {
+                            execMinDaysHint.textContent = `Minimal ${agendas.length} hari sesuai jumlah agenda kursus (boleh lebih panjang jika ada jeda belajar mandiri)`;
+                        }
+                    } else {
+                        if (courseAgendaInfo) courseAgendaInfo.classList.add('hidden');
+                        if (execMinDaysHint) {
+                            execMinDaysHint.textContent = 'Jadwal harus setelah periode pendaftaran';
+                        }
+                    }
+
+                    if (clearSessionsOnChange) {
+                        const existingCards = sessionsContainer.querySelectorAll('.session-card');
+                        if (existingCards.length > 0 && existingCards.length !== agendas.length) {
+                            existingCards.forEach(el => el.remove());
+                        }
+                    }
+                    updateSessionNumbersAndBadges();
+                }
+
+                courseSelect?.addEventListener('change', () => updateCourseAgendaPreview(true));
 
                 function updateSessionNumbersAndBadges() {
                     const cards = sessionsContainer.querySelectorAll('.session-card');
+                    const agendas = getSelectedCourseAgendas();
+
                     if (sessionsCountBadge) {
-                        sessionsCountBadge.textContent = `${cards.length} Sesi`;
+                        if (agendas.length > 0) {
+                            sessionsCountBadge.textContent = `${cards.length} / ${agendas.length} Agenda`;
+                            sessionsCountBadge.className = cards.length === agendas.length
+                                ? 'px-2 py-0.5 rounded text-xs font-bold bg-emerald-500 text-white'
+                                : 'px-2 py-0.5 rounded text-xs font-bold bg-white/20 text-white';
+                        } else {
+                            sessionsCountBadge.textContent = `${cards.length} Sesi`;
+                        }
                     }
 
                     if (cards.length === 0) {
@@ -843,7 +894,7 @@
                     cards.forEach((card, index) => {
                         card.dataset.index = index;
                         const badge = card.querySelector('.session-num-badge');
-                        if (badge) badge.textContent = `Sesi Hari ${index + 1}`;
+                        if (badge) badge.textContent = `Agenda Hari ${index + 1}`;
 
                         card.querySelectorAll('input').forEach(input => {
                             if (input.name) {
@@ -853,12 +904,21 @@
                     });
                 }
 
+                function replaceDatetimeDatePart(dtVal, newDate, fallbackTime) {
+                    if (!newDate) return dtVal || '';
+                    const timePart = (dtVal && dtVal.includes('T')) ? dtVal.split('T')[1] : fallbackTime;
+                    return `${newDate}T${timePart}`;
+                }
+
                 function createSessionCard(data = {}, index = 0) {
                     const card = document.createElement('div');
                     card.className = 'session-card p-3.5 sm:p-4 rounded-lg bg-black/25 border border-white/20 space-y-3 transition-all';
                     card.dataset.index = index;
 
-                    const titleVal = data.title || `Sesi Hari ${index + 1}`;
+                    const agendas = getSelectedCourseAgendas();
+                    const matchedAgenda = agendas[index] || null;
+                    const defaultTitle = matchedAgenda ? `Hari ${index + 1}: ${matchedAgenda.name}` : `Sesi Hari ${index + 1}`;
+                    const titleVal = data.title || defaultTitle;
                     const dateVal = data.session_date || (execStart?.value || '');
                     const startVal = data.start_time || (dateVal ? `${dateVal}T09:00` : '');
                     const endVal = data.end_time || (dateVal ? `${dateVal}T12:00` : '');
@@ -867,18 +927,15 @@
                     const sessionId = data.id || '';
 
                     card.innerHTML = `
-                        ${sessionId ? `<input type="hidden" name="sessions[${index}][id]" value="${sessionId}">` : ''}
-                        <div class="flex items-center justify-between border-b border-white/15 pb-2">
-                            <div class="flex items-center gap-2 flex-wrap">
-                                <span class="session-num-badge px-2 py-0.5 rounded text-xs font-bold bg-amber-400 text-slate-900">
-                                    Sesi Hari ${index + 1}
+                        ${sessionId ? `<input type="hidden" name="sessions[${index}][id]" value="${escapeHtml(sessionId)}">` : ''}
+                        <div class="flex items-center justify-between gap-2 border-b border-white/15 pb-2 flex-wrap">
+                            <div class="flex items-center gap-2 flex-1 min-w-0 flex-wrap">
+                                <span class="session-num-badge px-2 py-0.5 rounded text-xs font-bold bg-amber-400 text-slate-900 shrink-0">
+                                    Agenda Hari ${index + 1}
                                 </span>
-                                <input type="text" name="sessions[${index}][title]" value="${titleVal}" placeholder="Judul Sesi (contoh: Sesi Hari ${index + 1})" required
-                                       class="session-title-input px-2.5 py-1 text-xs sm:text-sm font-semibold rounded bg-white text-slate-900 border-0 focus:ring-2 focus:ring-white w-48 sm:w-64">
+                                <input type="text" name="sessions[${index}][title]" value="${escapeHtml(titleVal)}" placeholder="Judul Sesi" required
+                                       class="session-title-input flex-1 min-w-[200px] px-2.5 py-1 text-xs sm:text-sm font-semibold rounded bg-white text-slate-900 border-0 focus:ring-2 focus:ring-white">
                             </div>
-                            <button type="button" class="btn-remove-session text-xs font-semibold text-rose-300 hover:text-rose-100 transition-colors cursor-pointer">
-                                <span>Hapus Sesi</span>
-                            </button>
                         </div>
 
                         <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -886,21 +943,21 @@
                                 <label class="block text-xs font-medium text-blue-100 mb-1">
                                     Tanggal Sesi <span class="text-amber-300">*</span>
                                 </label>
-                                <input type="date" name="sessions[${index}][session_date]" value="${dateVal}" required
+                                <input type="date" name="sessions[${index}][session_date]" value="${escapeHtml(dateVal)}" required
                                        class="session-date-input w-full px-2.5 py-1.5 text-xs sm:text-sm rounded bg-white text-slate-900 border-0 focus:ring-2 focus:ring-white">
                             </div>
                             <div>
                                 <label class="block text-xs font-medium text-blue-100 mb-1">
                                     Mulai Zoom <span class="text-amber-300">*</span>
                                 </label>
-                                <input type="datetime-local" name="sessions[${index}][start_time]" value="${startVal}" required
+                                <input type="datetime-local" name="sessions[${index}][start_time]" value="${escapeHtml(startVal)}" required
                                        class="session-start-input w-full px-2.5 py-1.5 text-xs sm:text-sm rounded bg-white text-slate-900 border-0 focus:ring-2 focus:ring-white">
                             </div>
                             <div>
                                 <label class="block text-xs font-medium text-blue-100 mb-1">
                                     Selesai Zoom (Opsional)
                                 </label>
-                                <input type="datetime-local" name="sessions[${index}][end_time]" value="${endVal}"
+                                <input type="datetime-local" name="sessions[${index}][end_time]" value="${escapeHtml(endVal)}"
                                        class="session-end-input w-full px-2.5 py-1.5 text-xs sm:text-sm rounded bg-white text-slate-900 border-0 focus:ring-2 focus:ring-white">
                             </div>
                         </div>
@@ -916,23 +973,17 @@
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                 <div>
                                     <label class="block text-[11px] text-blue-100 mb-0.5">Buka Presensi</label>
-                                    <input type="datetime-local" name="sessions[${index}][attendance_start_at]" value="${attStartVal}"
+                                    <input type="datetime-local" name="sessions[${index}][attendance_start_at]" value="${escapeHtml(attStartVal)}"
                                            class="session-att-start w-full px-2 py-1 text-xs sm:text-sm rounded bg-white text-slate-900 border-0 focus:ring-2 focus:ring-white">
                                 </div>
                                 <div>
                                     <label class="block text-[11px] text-blue-100 mb-0.5">Tutup Presensi</label>
-                                    <input type="datetime-local" name="sessions[${index}][attendance_end_at]" value="${attEndVal}"
+                                    <input type="datetime-local" name="sessions[${index}][attendance_end_at]" value="${escapeHtml(attEndVal)}"
                                            class="session-att-end w-full px-2 py-1 text-xs sm:text-sm rounded bg-white text-slate-900 border-0 focus:ring-2 focus:ring-white">
                                 </div>
                             </div>
                         </div>
                     `;
-
-                    card.querySelector('.btn-remove-session')?.addEventListener('click', function () {
-                        card.remove();
-                        updateSessionNumbersAndBadges();
-                        updateTimelineSummary();
-                    });
 
                     const dateInput = card.querySelector('.session-date-input');
                     const startInput = card.querySelector('.session-start-input');
@@ -972,6 +1023,18 @@
                         }
                     }
 
+                    // Saat admin mengubah Tanggal Sesi, otomatis sinkronkan tanggal pada jam Zoom & Presensi
+                    dateInput?.addEventListener('change', function () {
+                        const newDate = dateInput.value;
+                        if (newDate) {
+                            if (startInput) startInput.value = replaceDatetimeDatePart(startInput.value, newDate, '09:00');
+                            if (endInput) endInput.value = replaceDatetimeDatePart(endInput.value, newDate, '12:00');
+                            if (attStartInput) attStartInput.value = replaceDatetimeDatePart(attStartInput.value, newDate, '09:15');
+                            if (attEndInput) attEndInput.value = replaceDatetimeDatePart(attEndInput.value, newDate, '10:00');
+                        }
+                        syncCardBounds();
+                    });
+
                     [dateInput, startInput, endInput, attStartInput, attEndInput].forEach(el => {
                         el?.addEventListener('change', syncCardBounds);
                         el?.addEventListener('input', syncCardBounds);
@@ -989,15 +1052,12 @@
                     updateTimelineSummary();
                 }
 
-                btnAddSession?.addEventListener('click', function () {
-                    if (!execStart?.value || !execEnd?.value) {
-                        showBimtekAlert('Silakan tentukan tanggal mulai dan tanggal selesai pelaksanaan terlebih dahulu.', 'Peringatan', execStart);
+                btnAutoGenerate?.addEventListener('click', function () {
+                    const agendas = getSelectedCourseAgendas();
+                    if (!courseSelect?.value) {
+                        showBimtekAlert('Silakan pilih Master Kursus di Langkah 1 terlebih dahulu.', 'Peringatan', courseSelect);
                         return;
                     }
-                    addSession();
-                });
-
-                btnAutoGenerate?.addEventListener('click', function () {
                     if (!execStart?.value || !execEnd?.value) {
                         showBimtekAlert('Silakan tentukan tanggal mulai dan tanggal selesai pelaksanaan terlebih dahulu sebelum membuat sesi otomatis.', 'Peringatan', execStart);
                         return;
@@ -1013,21 +1073,35 @@
                         return;
                     }
 
+                    const totalCalendarDays = Math.floor((dEnd - dStart) / (1000 * 60 * 60 * 24)) + 1;
+                    const targetCount = agendas.length > 0 ? agendas.length : totalCalendarDays;
+
+                    if (agendas.length > 0 && totalCalendarDays < agendas.length) {
+                        showBimtekAlert(`Durasi pelaksanaan (${totalCalendarDays} hari) lebih pendek dari jumlah agenda Master Kursus (${agendas.length} agenda). Perpanjang tanggal selesai pelaksanaan minimal ${agendas.length} hari.`, 'Peringatan', execEnd);
+                        return;
+                    }
+
                     sessionsContainer.querySelectorAll('.session-card').forEach(el => el.remove());
 
-                    let count = 0;
-                    const cur = new Date(dStart.getTime());
-                    while (cur <= dEnd) {
-                        count++;
+                    // Sebar tanggal sesi secara merata dalam rentang pelaksanaan sesuai jumlah agenda
+                    for (let i = 0; i < targetCount; i++) {
+                        let dayOffset = 0;
+                        if (targetCount > 1) {
+                            dayOffset = Math.round((i * (totalCalendarDays - 1)) / (targetCount - 1));
+                        }
+                        const cur = new Date(dStart.getTime());
+                        cur.setDate(cur.getDate() + dayOffset);
+
                         const y = cur.getFullYear();
                         const m = String(cur.getMonth() + 1).padStart(2, '0');
                         const d = String(cur.getDate()).padStart(2, '0');
                         const dateStr = `${y}-${m}-${d}`;
 
-                        const isLast = (cur.getTime() === dEnd.getTime());
-                        const title = `Sesi Hari ${count}`;
+                        const isLast = (i === targetCount - 1);
+                        const agendaItem = agendas[i] || null;
+                        const title = agendaItem ? `Hari ${i + 1}: ${agendaItem.name}` : `Sesi Hari ${i + 1}`;
                         const start = `${dateStr}T09:00`;
-                        const end = (isLast && count > 1) ? `${dateStr}T11:30` : `${dateStr}T12:00`;
+                        const end = (isLast && targetCount > 1) ? `${dateStr}T11:30` : `${dateStr}T12:00`;
                         const aStart = `${dateStr}T09:15`;
                         const aEnd = `${dateStr}T10:00`;
 
@@ -1039,13 +1113,13 @@
                             attendance_start_at: aStart,
                             attendance_end_at: aEnd,
                         });
-
-                        cur.setDate(cur.getDate() + 1);
                     }
                 });
 
+                updateCourseAgendaPreview(false);
+
                 if (Array.isArray(initialSessions) && initialSessions.length > 0) {
-                    initialSessions.forEach((s, idx) => {
+                    initialSessions.forEach((s) => {
                         addSession(s);
                     });
                 }
