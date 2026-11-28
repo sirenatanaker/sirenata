@@ -421,13 +421,31 @@ class UserDashboardService
                     })
                     ->first();
 
-                // 4c. Sesi Terdekat (Live Zoom / Jadwal Mulai dari pelatihan aktif)
+                // 4c. Sesi Terdekat (Prioritas utama: Live Zoom harian -> Pembukaan Kelas -> Evaluasi Harian -> Evaluasi Akhir -> Evaluasi Narasumber)
                 $nearestSession = null;
                 $attendedSessionIds = DB::table('bimtek_session_attendances')
                     ->where('user_id', $user->id)
                     ->pluck('bimtek_event_session_id')
                     ->filter()
                     ->flip();
+                $filledInstructorEvalEventIds = DB::table('bimtek_instructor_evaluations')
+                    ->where('user_id', $user->id)
+                    ->pluck('bimtek_event_id')
+                    ->filter()
+                    ->flip();
+                $submittedPostTestMap = isset($postTestIds) && $postTestIds->isNotEmpty()
+                    ? PostTestResult::selectRaw("
+                            post_test_id,
+                            MAX(CASE WHEN grading_status = 'published' OR status = 'graded' OR (grading_status IS NULL AND score IS NOT NULL) THEN COALESCE(final_score, score, 0) ELSE NULL END) as best_graded_score,
+                            SUM(CASE WHEN grading_status = 'pending' OR (grading_status IS NULL AND score IS NULL) THEN 1 ELSE 0 END) as pending_count,
+                            COUNT(*) as attempts
+                        ")
+                        ->where('user_id', $user->id)
+                        ->whereIn('post_test_id', $postTestIds)
+                        ->groupBy('post_test_id')
+                        ->get()
+                        ->keyBy('post_test_id')
+                    : collect();
 
                 if (!empty($featuredActiveCourse)) {
                     $fcEv = !empty($featuredActiveCourse['bimtek_event_id'])
@@ -435,6 +453,9 @@ class UserDashboardService
                         : null;
                     $fcUrl = $featuredActiveCourse['url'];
                     $fcStatusKey = $featuredActiveCourse['status_key'];
+                    $fcCourseId = $featuredActiveCourse['course_id'] ?? null;
+                    $fcSlug = $featuredActiveCourse['slug'] ?? null;
+                    $fcProgress = (int) ($featuredActiveCourse['progress'] ?? 0);
 
                     if ($fcEv) {
                         $eventDisplayName = $featuredActiveCourse['batch_name']
@@ -450,6 +471,7 @@ class UserDashboardService
                                 ->first();
                         }
 
+                        // Prioritas 1: Live Zoom Harian
                         if ($nextZoomSess && $nextZoomSess->start_time) {
                             $isToday = $nextZoomSess->start_time->isToday();
                             $sessStartId = $nextZoomSess->start_time->copy()->locale('id');
@@ -496,15 +518,16 @@ class UserDashboardService
                                 'action_label' => ($isToday || $fcStatusKey === 'ongoing') ? 'Masuk Sesi' : 'Lihat Detail',
                                 'url'          => $fcUrl,
                             ];
-                        } elseif ($fcEv->start_date && $fcEv->start_date->copy()->endOfDay()->gte($now)) {
+                        } elseif ($fcStatusKey === 'open_registration' && $fcEv->start_date && $fcEv->start_date->copy()->endOfDay()->gte($now)) {
+                            // Prioritas 2: Pembukaan Kelas (menunggu jadwal mulai)
                             $isToday = $fcEv->start_date->isToday();
                             $startId = $fcEv->start_date->copy()->locale('id');
                             $nearestSession = [
                                 'kind'         => 'start',
                                 'is_today'     => $isToday,
                                 'status_label' => $isToday ? 'Dimulai Hari Ini' : 'Pembukaan Kelas',
-                                'subtitle'     => $featuredActiveCourse['course_name'],
-                                'title'        => 'Pelaksanaan Pelatihan Dimulai',
+                                'subtitle'     => $eventDisplayName,
+                                'title'        => 'Pembukaan Kelas: ' . $featuredActiveCourse['course_name'],
                                 'course_name'  => $featuredActiveCourse['course_name'],
                                 'batch_name'   => $featuredActiveCourse['batch_name'],
                                 'day_number'   => $startId->format('d'),
@@ -514,7 +537,126 @@ class UserDashboardService
                                 'action_label' => 'Lihat Jadwal Kelas',
                                 'url'          => $fcUrl,
                             ];
-                        } elseif (($fcEv->assessment_end_at ?? $fcEv->end_date) && ($fcEv->assessment_end_at ?? $fcEv->end_date)->copy()->endOfDay()->gte($now)) {
+                        }
+
+                        // Prioritas 3 & 4: Evaluasi Harian -> Evaluasi Akhir (jika tidak ada Live Zoom mendatang)
+                        if ($nearestSession === null && $fcStatusKey !== 'open_registration' && $fcCourseId && isset($allPostTests)) {
+                            $fcTests = $allPostTests->where('course_id', $fcCourseId);
+                            $fcSectionTestsOrdered = $fcTests->whereNotNull('course_section_id')->values();
+                            $fcPendingTests = $fcTests->filter(function ($test) use ($submittedPostTestMap) {
+                                $res = $submittedPostTestMap->get($test->id);
+                                if (!$res) {
+                                    return true;
+                                }
+                                if ((int) ($res->pending_count ?? 0) > 0 && is_null($res->best_graded_score)) {
+                                    return false;
+                                }
+                                if (is_null($res->best_graded_score)) {
+                                    return true;
+                                }
+                                return (float) $res->best_graded_score < (float) $test->effectivePassingGrade();
+                            });
+
+                            $nextDailyEval = $fcPendingTests->first(fn ($t) => !empty($t->course_section_id));
+                            $nextFinalEval = $fcPendingTests->first(fn ($t) => empty($t->course_section_id));
+                            $chosenEval = $nextDailyEval ?? $nextFinalEval;
+
+                            if ($chosenEval) {
+                                $isDaily = !empty($chosenEval->course_section_id);
+                                if ($isDaily) {
+                                    if (preg_match('/(?:modul|hari|agenda)\s*(?:ke[\-\s]*)?(\d+)/i', (string) $chosenEval->title, $m)) {
+                                        $agendaNum = (int) $m[1];
+                                    } else {
+                                        $pos = $fcSectionTestsOrdered->search(fn ($t) => $t->id === $chosenEval->id);
+                                        $agendaNum = $pos !== false ? ($pos + 1) : 1;
+                                    }
+                                    $evalTitle = 'Evaluasi Agenda ke-' . $agendaNum . ': ' . $featuredActiveCourse['course_name'];
+                                    $evalBadge = 'Evaluasi Harian';
+                                } else {
+                                    $evalTitle = 'Evaluasi Akhir: ' . $featuredActiveCourse['course_name'];
+                                    $evalBadge = 'Evaluasi Akhir';
+                                }
+
+                                $evalDeadline = $fcEv->assessment_end_at ?? $fcEv->end_date;
+                                $evalRef = $evalDeadline ?? $now;
+                                $evalId = $evalRef->copy()->locale('id');
+                                $isToday = $evalDeadline ? $evalDeadline->isToday() : false;
+
+                                $nearestSession = [
+                                    'kind'         => 'evaluation',
+                                    'is_today'     => $isToday,
+                                    'status_label' => $isToday ? 'Batas Hari Ini' : $evalBadge,
+                                    'subtitle'     => $eventDisplayName,
+                                    'title'        => $evalTitle,
+                                    'course_name'  => $featuredActiveCourse['course_name'],
+                                    'batch_name'   => $featuredActiveCourse['batch_name'],
+                                    'day_number'   => $evalId->format('d'),
+                                    'month_short'  => strtoupper($evalId->translatedFormat('M')),
+                                    'date_label'   => $evalDeadline
+                                        ? 'Batas ' . $evalId->translatedFormat('l, d M Y')
+                                        : 'Tersedia untuk dikerjakan',
+                                    'time_label'   => null,
+                                    'action_label' => 'Kerjakan Evaluasi',
+                                    'url'          => $fcUrl,
+                                ];
+                            }
+                        }
+
+                        // Prioritas 5: Evaluasi Narasumber
+                        if ($nearestSession === null && $fcStatusKey !== 'open_registration' && !$filledInstructorEvalEventIds->has($fcEv->id)) {
+                            $inEvalWindow = ($fcEv->end_date && $now->gte($fcEv->end_date->copy()->startOfDay()))
+                                || ($fcEv->assessment_start_at && $now->gte($fcEv->assessment_start_at))
+                                || $fcStatusKey === 'evaluation'
+                                || $fcProgress >= 75;
+
+                            if ($inEvalWindow) {
+                                $naraDeadline = $fcEv->assessment_end_at ?? $fcEv->end_date;
+                                $naraRef = $naraDeadline ?? $now;
+                                $naraId = $naraRef->copy()->locale('id');
+                                $isToday = $naraDeadline ? $naraDeadline->isToday() : false;
+
+                                $nearestSession = [
+                                    'kind'         => 'narasumber',
+                                    'is_today'     => $isToday,
+                                    'status_label' => $isToday ? 'Batas Hari Ini' : 'Evaluasi Narasumber',
+                                    'subtitle'     => $eventDisplayName,
+                                    'title'        => 'Evaluasi Narasumber: ' . $featuredActiveCourse['course_name'],
+                                    'course_name'  => $featuredActiveCourse['course_name'],
+                                    'batch_name'   => $featuredActiveCourse['batch_name'],
+                                    'day_number'   => $naraId->format('d'),
+                                    'month_short'  => strtoupper($naraId->translatedFormat('M')),
+                                    'date_label'   => $naraDeadline
+                                        ? 'Batas ' . $naraId->translatedFormat('l, d M Y')
+                                        : 'Wajib diisi sebelum sertifikat terbit',
+                                    'time_label'   => null,
+                                    'action_label' => 'Isi Evaluasi',
+                                    'url'          => $fcSlug
+                                        ? route('user.course.my-course.evaluasi-narasumber', $fcSlug)
+                                        : $fcUrl,
+                                ];
+                            }
+                        }
+
+                        // Prioritas 6: Fallback Pembukaan Kelas / Batas Evaluasi Umum
+                        if ($nearestSession === null && $fcEv->start_date && $fcEv->start_date->copy()->endOfDay()->gte($now)) {
+                            $isToday = $fcEv->start_date->isToday();
+                            $startId = $fcEv->start_date->copy()->locale('id');
+                            $nearestSession = [
+                                'kind'         => 'start',
+                                'is_today'     => $isToday,
+                                'status_label' => $isToday ? 'Dimulai Hari Ini' : 'Pembukaan Kelas',
+                                'subtitle'     => $eventDisplayName,
+                                'title'        => 'Pembukaan Kelas: ' . $featuredActiveCourse['course_name'],
+                                'course_name'  => $featuredActiveCourse['course_name'],
+                                'batch_name'   => $featuredActiveCourse['batch_name'],
+                                'day_number'   => $startId->format('d'),
+                                'month_short'  => strtoupper($startId->translatedFormat('M')),
+                                'date_label'   => $startId->translatedFormat('l, d M Y'),
+                                'time_label'   => null,
+                                'action_label' => 'Lihat Jadwal Kelas',
+                                'url'          => $fcUrl,
+                            ];
+                        } elseif ($nearestSession === null && ($fcEv->assessment_end_at ?? $fcEv->end_date) && ($fcEv->assessment_end_at ?? $fcEv->end_date)->copy()->endOfDay()->gte($now)) {
                             $evalRef = $fcEv->assessment_end_at ?? $fcEv->end_date;
                             $isToday = $evalRef->isToday();
                             $evalId = $evalRef->copy()->locale('id');
@@ -522,13 +664,13 @@ class UserDashboardService
                                 'kind'         => 'evaluation',
                                 'is_today'     => $isToday,
                                 'status_label' => $isToday ? 'Batas Hari Ini' : 'Batas Evaluasi',
-                                'subtitle'     => $featuredActiveCourse['course_name'],
-                                'title'        => 'Penyelesaian Evaluasi Pelatihan',
+                                'subtitle'     => $eventDisplayName,
+                                'title'        => 'Evaluasi Pelatihan: ' . $featuredActiveCourse['course_name'],
                                 'course_name'  => $featuredActiveCourse['course_name'],
                                 'batch_name'   => $featuredActiveCourse['batch_name'],
                                 'day_number'   => $evalId->format('d'),
                                 'month_short'  => strtoupper($evalId->translatedFormat('M')),
-                                'date_label'   => 'Batas ' . $evalId->translatedFormat('d M Y'),
+                                'date_label'   => 'Batas ' . $evalId->translatedFormat('l, d M Y'),
                                 'time_label'   => null,
                                 'action_label' => 'Kerjakan Evaluasi',
                                 'url'          => $fcUrl,
@@ -539,24 +681,6 @@ class UserDashboardService
 
                 // 5. Agenda & Tindak Lanjut (fokus pada 1 pelatihan aktif user agar tidak terpecah antar banyak kursus)
                 $actionItems = [];
-                $filledInstructorEvalEventIds = DB::table('bimtek_instructor_evaluations')
-                    ->where('user_id', $user->id)
-                    ->pluck('bimtek_event_id')
-                    ->filter()
-                    ->flip();
-                $submittedPostTestMap = isset($postTestIds) && $postTestIds->isNotEmpty()
-                    ? PostTestResult::selectRaw("
-                            post_test_id,
-                            MAX(CASE WHEN grading_status = 'published' OR status = 'graded' OR (grading_status IS NULL AND score IS NOT NULL) THEN COALESCE(final_score, score, 0) ELSE NULL END) as best_graded_score,
-                            SUM(CASE WHEN grading_status = 'pending' OR (grading_status IS NULL AND score IS NULL) THEN 1 ELSE 0 END) as pending_count,
-                            COUNT(*) as attempts
-                        ")
-                        ->where('user_id', $user->id)
-                        ->whereIn('post_test_id', $postTestIds)
-                        ->groupBy('post_test_id')
-                        ->get()
-                        ->keyBy('post_test_id')
-                    : collect();
 
                 $enrolledCoursesById = $myCourses->keyBy('id');
 

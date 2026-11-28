@@ -136,12 +136,14 @@
                                 $nsPillCls = match (true) {
                                     !empty($nearestSession['is_today']) => 'bg-red-50 text-red-600 border-red-200/80',
                                     $nsKind === 'evaluation'            => 'bg-amber-50 text-amber-700 border-amber-200/80',
+                                    $nsKind === 'narasumber'            => 'bg-emerald-50 text-emerald-700 border-emerald-200/80',
                                     $nsKind === 'start'                 => 'bg-sky-50 text-[#2B6496] border-sky-200/80',
                                     default                             => 'bg-sky-50 text-[#13416B] border-sky-200/80',
                                 };
                                 $nsDotCls = match (true) {
                                     !empty($nearestSession['is_today']) => 'bg-red-500 animate-pulse',
                                     $nsKind === 'evaluation'            => 'bg-amber-500',
+                                    $nsKind === 'narasumber'            => 'bg-emerald-600',
                                     $nsKind === 'start'                 => 'bg-[#2B6496]',
                                     default                             => 'bg-[#13416B]',
                                 };
@@ -159,11 +161,13 @@
                             $nsCalHeaderBg = match (true) {
                                 !empty($nearestSession['is_today']) => 'bg-red-500',
                                 $nsKind === 'evaluation'            => 'bg-amber-500',
+                                $nsKind === 'narasumber'            => 'bg-emerald-600',
                                 $nsKind === 'start'                 => 'bg-[#2B6496]',
                                 default                             => 'bg-[#13416B]',
                             };
                             $nsBtnCls = match ($nsKind) {
                                 'evaluation' => 'bg-amber-500 hover:bg-amber-600 text-white',
+                                'narasumber' => 'bg-emerald-600 hover:bg-emerald-700 text-white',
                                 'start'      => 'bg-[#2B6496] hover:bg-[#13416B] text-white',
                                 default      => 'bg-[#13416B] hover:bg-[#0f3354] text-white',
                             };
@@ -171,11 +175,11 @@
                         <div class="space-y-4">
                             <div class="flex items-start gap-3.5">
                                 {{-- Kotak Tanggal Kalender Adaptif Warna per Jenis Sesi --}}
-                                <div class="w-14 shrink-0 rounded-md overflow-hidden border border-slate-200 bg-white shadow-2xs text-center">
+                                <div class="w-16 shrink-0 rounded-md overflow-hidden border border-slate-200 bg-white shadow-2xs text-center flex flex-col">
                                     <div class="{{ $nsCalHeaderBg }} text-white text-[10px] font-extrabold uppercase tracking-wider py-1.5">
                                         {{ $nearestSession['month_short'] ?? strtoupper(now()->locale('id')->translatedFormat('M')) }}
                                     </div>
-                                    <div class="py-2.5 text-xl font-extrabold text-slate-800 leading-none tabular-nums">
+                                    <div class="py-3.5 flex items-center justify-center text-xl font-extrabold text-slate-800 leading-none tabular-nums">
                                         {{ $nearestSession['day_number'] ?? now()->format('d') }}
                                     </div>
                                 </div>
