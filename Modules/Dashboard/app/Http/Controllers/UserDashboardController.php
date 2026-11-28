@@ -26,7 +26,21 @@ class UserDashboardController extends Controller
      */
     public function index(Request $request): View
     {
-        $data = $this->userDashboardService->getDashboardData($request->user());
+        $user = $request->user();
+        $data = $this->userDashboardService->getDashboardData($user);
+
+        $profile = $data['profile'] ?? null;
+        $needsSectorOnboarding = !$profile || (empty($profile->institution_type) && empty($profile->instansi));
+
+        $showProfileReminderModal = false;
+        if (!$needsSectorOnboarding && $user && !$user->hasCompleteCertificateProfile()) {
+            if (!$request->session()->get('profile_reminder_shown_in_session', false)) {
+                $showProfileReminderModal = true;
+                $request->session()->put('profile_reminder_shown_in_session', true);
+            }
+        }
+
+        $data['showProfileReminderModal'] = $showProfileReminderModal;
 
         return view('dashboard::pages.user.index', $data);
     }
@@ -50,6 +64,9 @@ class UserDashboardController extends Controller
     public function updateInstansi(UpdateWebInstansiRequest $request): RedirectResponse
     {
         $this->userDashboardService->updateInstansiWeb($request->user(), $request->validated());
+
+        // Hindari double pop-up tepat setelah onboarding pertama di sesi yang sama
+        $request->session()->put('profile_reminder_shown_in_session', true);
 
         ToastMagic::success('Preferensi berhasil disimpan! Selamat belajar di SIRENATA.');
         return redirect()->route('user.dashboard')->with('success', 'Preferensi berhasil disimpan.');

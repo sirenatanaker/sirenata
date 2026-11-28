@@ -160,3 +160,34 @@ test('instansi users can access both instansi and swasta courses while swasta us
     $enrollSwastaBySwasta = app(CourseService::class)->enrollUser($courseSwasta->slug);
     expect($enrollSwastaBySwasta['success'])->toBeTrue();
 });
+
+test('profile reminder modal shows once per login session and never immediately after onboarding', function () {
+    Role::create(['name' => 'user', 'guard_name' => 'web']);
+
+    // 1. Setelah onboarding di sesi pertama, pop-up pengingat tidak langsung muncul (hindari double pop-up)
+    $newUser = User::create(['name' => 'Onboarding User', 'email' => 'onboard@contoh.id', 'password' => 'password']);
+    $newUser->assignRole('user');
+
+    $this->withoutMiddleware(\Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class)
+        ->actingAs($newUser)
+        ->post(route('user.update-instansi'), ['sector' => 'swasta'])
+        ->assertRedirect(route('user.dashboard'));
+
+    $this->actingAs($newUser)
+        ->get(route('user.dashboard'))
+        ->assertOk()
+        ->assertDontSee('Informasi pribadi &amp; instansi belum dilengkapi', false);
+
+    // 2. Di sesi login baru (session fresh), pop-up pengingat muncul 1x lalu tidak muncul di reload berikutnya
+    $this->flushSession();
+
+    $this->actingAs($newUser)
+        ->get(route('user.dashboard'))
+        ->assertOk()
+        ->assertSee('Informasi pribadi &amp; instansi belum dilengkapi', false);
+
+    $this->actingAs($newUser)
+        ->get(route('user.dashboard'))
+        ->assertOk()
+        ->assertDontSee('Informasi pribadi &amp; instansi belum dilengkapi', false);
+});

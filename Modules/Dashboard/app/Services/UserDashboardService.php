@@ -256,33 +256,37 @@ class UserDashboardService
                     }
                 }
 
-                // 4. Gantt Chart Jadwal Pelatihan Terdaftar (khusus kursus / event yang benar-benar diikuti user)
+                // 4. Gantt Chart Jadwal Pelatihan Tersedia (HANYA pelatihan tersedia di Katalog / belum didaftarkan user)
                 $ganttEvents = [];
-                $seenGanttCourseIds = [];
                 foreach ($allYearEvents as $ev) {
                     $course = $ev->course;
                     if (!$course) {
                         continue;
                     }
+                    if (!$user->canAccessCourseAudience($course->audience)) {
+                        continue;
+                    }
 
-                    $enr = $enrollByEventId->get($ev->id) ?? $enrollByCourseId->get($ev->course_id);
-                    $isEnrolled = $enr !== null && ($enr->bimtek_event_id === $ev->id || $enr->bimtek_event_id === null);
-                    if (!$isEnrolled) {
+                    // Hanya tampilkan pelatihan yang belum didaftarkan oleh user (tersedia di Katalog)
+                    if ($enrollByEventId->has($ev->id) || $enrollByCourseId->has($ev->course_id)) {
                         continue;
                     }
-                    if ($enr->bimtek_event_id === null && isset($seenGanttCourseIds[$ev->course_id])) {
-                        continue;
-                    }
-                    $seenGanttCourseIds[$ev->course_id] = true;
 
                     $meta = $resolveEventMeta($ev);
-
-                    $regStart  = $ev->registration_start_at ?? $ev->start_date?->copy()->subDays(7);
-                    $regEnd    = $ev->registration_end_at ?? $ev->start_date?->copy()->subDay();
                     $execStart = $ev->start_date;
                     $execEnd   = $ev->end_date ?? $ev->start_date;
                     $evalStart = $ev->assessment_start_at ?? $execEnd;
                     $evalEnd   = $ev->assessment_end_at ?? $execEnd?->copy()->addDays(3);
+
+                    // Hilangkan event yang sudah selesai
+                    $isEventCompleted = ($ev->status === 'completed' || $meta['status_key'] === 'completed')
+                        && (!$evalEnd || $now->gt($evalEnd->copy()->endOfDay()));
+                    if ($isEventCompleted) {
+                        continue;
+                    }
+
+                    $regStart  = $ev->registration_start_at ?? $ev->start_date?->copy()->subDays(7);
+                    $regEnd    = $ev->registration_end_at ?? $ev->start_date?->copy()->subDay();
 
                     if ($regStart && $regEnd && $regEnd->lt($regStart)) $regEnd = $regStart->copy();
                     if ($execStart && $execEnd && $execEnd->lt($execStart)) $execEnd = $execStart->copy();
@@ -294,10 +298,10 @@ class UserDashboardService
                         'course_name'     => $course->name,
                         'status_key'      => $meta['status_key'],
                         'status_label'    => $meta['status_label'],
-                        'is_enrolled'     => true,
-                        'user_progress'   => (int) ($enr->progress ?? 0),
-                        'user_completed'  => ($enr->status === 'completed' || (int) ($enr->progress ?? 0) >= 100),
-                        'is_certified'    => (!empty($enr->official_cert_number) || !empty($enr->certificate_file)),
+                        'is_enrolled'     => false,
+                        'user_progress'   => 0,
+                        'user_completed'  => false,
+                        'is_certified'    => false,
                         'next_zoom_label' => $meta['next_zoom'],
                         'reg_start'       => $regStart?->format('Y-m-d'),
                         'reg_end'         => $regEnd?->format('Y-m-d'),
@@ -309,28 +313,232 @@ class UserDashboardService
                         'eval_end'        => $evalEnd?->format('Y-m-d'),
                         'eval_label'      => $fmtRange($evalStart, $evalEnd),
                         'sort_date'       => $execStart?->format('Y-m-d') ?? $regStart?->format('Y-m-d') ?? '9999-12-31',
-                        'url'             => route('user.course.my-course.detail', $course->slug),
+                        'url'             => route('user.catalog.index', ['search' => $course->name]),
                     ];
                 }
 
                 $ganttEvents = collect($ganttEvents)->sortBy('sort_date')->values()->all();
-                $hasEnrolledInGantt = !empty($ganttEvents);
 
                 $userEventGantt = [
                     'year'         => $currentYear,
                     'today'        => $now->format('Y-m-d'),
                     'today_label'  => $now->translatedFormat('d M Y'),
-                    'has_enrolled' => $hasEnrolledInGantt,
+                    'has_enrolled' => !empty($ganttEvents),
                     'events'       => $ganttEvents,
                 ];
 
-                // 5. Agenda & Tindak Lanjut Terdekat (Action Center untuk LMS by Event)
-                $actionItems = [];
+                // 4b. 1 Pelatihan Aktif / Mendekati Pelaksanaan (fokus single active training user)
+                $enrolledCoursesLookup = $myCourses->keyBy('id');
+                $featuredCandidates = [];
+                foreach ($userEnrollments as $enr) {
+                    $progress = (int) ($enr->progress ?? 0);
+                    $isDone = ($enr->status === 'completed') || $progress >= 100;
+                    if ($isDone) {
+                        continue;
+                    }
+
+                    $course = $enrolledCoursesLookup->get($enr->course_id);
+                    if (!$course) {
+                        continue;
+                    }
+
+                    $ev = $enr->bimtek_event_id ? $eventsById->get($enr->bimtek_event_id) : null;
+                    $meta = $resolveEventMeta($ev);
+                    $execStart = $ev?->start_date;
+                    $execEnd = $ev?->end_date ?? $execStart;
+                    $isPastExec = $execEnd && $now->copy()->startOfDay()->gt($execEnd->copy()->startOfDay());
+
+                    if ($meta['status_key'] === 'ongoing') {
+                        $priority = 1;
+                        $displayStatusKey = 'ongoing';
+                        $displayStatusLabel = 'Sedang Berlangsung';
+                        $ctaLabel = 'Lanjutkan Belajar';
+                        $sortTs = ($execEnd ?? $now)->timestamp;
+                    } elseif ($meta['status_key'] === 'open_registration' && $execStart && $execStart->copy()->startOfDay()->gt($now->copy()->startOfDay())) {
+                        $priority = 2;
+                        $displayStatusKey = 'open_registration';
+                        $displayStatusLabel = 'Menunggu Pelaksanaan';
+                        $ctaLabel = 'Lihat Jadwal & Detail';
+                        $sortTs = $execStart->timestamp;
+                    } elseif ($meta['status_key'] === 'completed' || $isPastExec) {
+                        $priority = 3;
+                        $displayStatusKey = 'evaluation';
+                        $displayStatusLabel = 'Periode Evaluasi';
+                        $ctaLabel = 'Kerjakan Evaluasi';
+                        $sortTs = ($ev?->assessment_end_at ?? $execEnd ?? $now)->timestamp;
+                    } else {
+                        $priority = 4;
+                        $displayStatusKey = $meta['status_key'];
+                        $displayStatusLabel = $meta['status_label'];
+                        $ctaLabel = 'Lanjutkan Belajar';
+                        $sortTs = ($execStart ?? $now)->timestamp;
+                    }
+
+                    $countdownLabel = null;
+                    if ($displayStatusKey === 'open_registration' && $execStart) {
+                        $daysDiff = (int) $now->copy()->startOfDay()->diffInDays($execStart->copy()->startOfDay(), false);
+                        if ($daysDiff === 0) {
+                            $countdownLabel = 'Dimulai hari ini';
+                        } elseif ($daysDiff === 1) {
+                            $countdownLabel = 'Mulai besok';
+                        } elseif ($daysDiff > 1) {
+                            $countdownLabel = 'Mulai ' . $daysDiff . ' hari lagi';
+                        }
+                    }
+
+                    $thumbUrl = !empty($course->thumbnail)
+                        ? (str_starts_with($course->thumbnail, 'http') ? $course->thumbnail : asset('storage/' . $course->thumbnail))
+                        : null;
+
+                    $featuredCandidates[] = [
+                        'priority'        => $priority,
+                        'sort_ts'         => $sortTs,
+                        'course_id'       => $course->id,
+                        'bimtek_event_id' => $ev?->id,
+                        'course_name'     => $course->name,
+                        'slug'            => $course->slug,
+                        'thumbnail'       => $thumbUrl,
+                        'batch_name'      => $meta['batch_name']
+                            ? preg_replace('/\bbatch\b/i', 'Gelombang', (string) $meta['batch_name'])
+                            : null,
+                        'status_key'      => $displayStatusKey,
+                        'status_label'    => $displayStatusLabel,
+                        'schedule_label'  => $meta['schedule_label'],
+                        'next_zoom_label' => $meta['next_zoom'],
+                        'progress'        => min(100, max(0, $progress)),
+                        'countdown_label' => $countdownLabel,
+                        'cta_label'       => $ctaLabel,
+                        'url'             => route('user.course.my-course.detail', $course->slug),
+                    ];
+                }
+
+                $featuredActiveCourse = collect($featuredCandidates)
+                    ->sort(function ($a, $b) {
+                        if ($a['priority'] !== $b['priority']) {
+                            return $a['priority'] <=> $b['priority'];
+                        }
+                        return $a['sort_ts'] <=> $b['sort_ts'];
+                    })
+                    ->first();
+
+                // 4c. Sesi Terdekat (Live Zoom / Jadwal Mulai dari pelatihan aktif)
+                $nearestSession = null;
                 $attendedSessionIds = DB::table('bimtek_session_attendances')
                     ->where('user_id', $user->id)
                     ->pluck('bimtek_event_session_id')
                     ->filter()
                     ->flip();
+
+                if (!empty($featuredActiveCourse)) {
+                    $fcEv = !empty($featuredActiveCourse['bimtek_event_id'])
+                        ? $eventsById->get($featuredActiveCourse['bimtek_event_id'])
+                        : null;
+                    $fcUrl = $featuredActiveCourse['url'];
+                    $fcStatusKey = $featuredActiveCourse['status_key'];
+
+                    if ($fcEv) {
+                        $eventDisplayName = $featuredActiveCourse['batch_name']
+                            ?: ($fcEv->name ?: $featuredActiveCourse['course_name']);
+                        $nextZoomSess = null;
+                        if ($fcEv->relationLoaded('sessions') && $fcEv->sessions->isNotEmpty()) {
+                            $nextZoomSess = $fcEv->sessions
+                                ->filter(function ($s) use ($now, $attendedSessionIds) {
+                                    $endRef = $s->end_time ?? $s->start_time;
+                                    return $endRef && $endRef->gte($now) && !$attendedSessionIds->has($s->id);
+                                })
+                                ->sortBy('start_time')
+                                ->first();
+                        }
+
+                        if ($nextZoomSess && $nextZoomSess->start_time) {
+                            $isToday = $nextZoomSess->start_time->isToday();
+                            $sessStartId = $nextZoomSess->start_time->copy()->locale('id');
+                            $zoomDayNumber = (int) ($nextZoomSess->session_number ?? 0);
+                            if ($zoomDayNumber <= 0 && $fcEv->relationLoaded('sessions')) {
+                                $sortedIds = $fcEv->sessions->sortBy('start_time')->pluck('id')->values();
+                                $foundIdx = $sortedIds->search($nextZoomSess->id);
+                                $zoomDayNumber = $foundIdx !== false ? ($foundIdx + 1) : 1;
+                            }
+                            if ($zoomDayNumber <= 0) {
+                                $zoomDayNumber = 1;
+                            }
+                            $nearestSession = [
+                                'kind'         => 'zoom',
+                                'is_today'     => $isToday,
+                                'status_label' => $isToday ? 'Hari Ini' : 'Live Zoom',
+                                'subtitle'     => $eventDisplayName,
+                                'title'        => 'Live Zoom Hari ke-' . $zoomDayNumber . ': ' . $featuredActiveCourse['course_name'],
+                                'course_name'  => $featuredActiveCourse['course_name'],
+                                'batch_name'   => $featuredActiveCourse['batch_name'],
+                                'day_number'   => $sessStartId->format('d'),
+                                'month_short'  => strtoupper($sessStartId->translatedFormat('M')),
+                                'date_label'   => $sessStartId->translatedFormat('l, d M Y'),
+                                'time_label'   => $nextZoomSess->start_time->format('H:i')
+                                    . ($nextZoomSess->end_time ? ' – ' . $nextZoomSess->end_time->format('H:i') : '') . ' WIB',
+                                'action_label' => ($isToday || $fcStatusKey === 'ongoing') ? 'Masuk Sesi' : 'Lihat Detail',
+                                'url'          => $fcUrl,
+                            ];
+                        } elseif ($fcEv->zoom_start_at && $fcEv->zoom_start_at->gte($now)) {
+                            $isToday = $fcEv->zoom_start_at->isToday();
+                            $zoomStartId = $fcEv->zoom_start_at->copy()->locale('id');
+                            $nearestSession = [
+                                'kind'         => 'zoom',
+                                'is_today'     => $isToday,
+                                'status_label' => $isToday ? 'Hari Ini' : 'Live Zoom',
+                                'subtitle'     => $eventDisplayName,
+                                'title'        => 'Live Zoom Hari ke-1: ' . $featuredActiveCourse['course_name'],
+                                'course_name'  => $featuredActiveCourse['course_name'],
+                                'batch_name'   => $featuredActiveCourse['batch_name'],
+                                'day_number'   => $zoomStartId->format('d'),
+                                'month_short'  => strtoupper($zoomStartId->translatedFormat('M')),
+                                'date_label'   => $zoomStartId->translatedFormat('l, d M Y'),
+                                'time_label'   => $fcEv->zoom_start_at->format('H:i') . ' WIB',
+                                'action_label' => ($isToday || $fcStatusKey === 'ongoing') ? 'Masuk Sesi' : 'Lihat Detail',
+                                'url'          => $fcUrl,
+                            ];
+                        } elseif ($fcEv->start_date && $fcEv->start_date->copy()->endOfDay()->gte($now)) {
+                            $isToday = $fcEv->start_date->isToday();
+                            $startId = $fcEv->start_date->copy()->locale('id');
+                            $nearestSession = [
+                                'kind'         => 'start',
+                                'is_today'     => $isToday,
+                                'status_label' => $isToday ? 'Dimulai Hari Ini' : 'Pembukaan Kelas',
+                                'subtitle'     => $featuredActiveCourse['course_name'],
+                                'title'        => 'Pelaksanaan Pelatihan Dimulai',
+                                'course_name'  => $featuredActiveCourse['course_name'],
+                                'batch_name'   => $featuredActiveCourse['batch_name'],
+                                'day_number'   => $startId->format('d'),
+                                'month_short'  => strtoupper($startId->translatedFormat('M')),
+                                'date_label'   => $startId->translatedFormat('l, d M Y'),
+                                'time_label'   => null,
+                                'action_label' => 'Lihat Jadwal Kelas',
+                                'url'          => $fcUrl,
+                            ];
+                        } elseif (($fcEv->assessment_end_at ?? $fcEv->end_date) && ($fcEv->assessment_end_at ?? $fcEv->end_date)->copy()->endOfDay()->gte($now)) {
+                            $evalRef = $fcEv->assessment_end_at ?? $fcEv->end_date;
+                            $isToday = $evalRef->isToday();
+                            $evalId = $evalRef->copy()->locale('id');
+                            $nearestSession = [
+                                'kind'         => 'evaluation',
+                                'is_today'     => $isToday,
+                                'status_label' => $isToday ? 'Batas Hari Ini' : 'Batas Evaluasi',
+                                'subtitle'     => $featuredActiveCourse['course_name'],
+                                'title'        => 'Penyelesaian Evaluasi Pelatihan',
+                                'course_name'  => $featuredActiveCourse['course_name'],
+                                'batch_name'   => $featuredActiveCourse['batch_name'],
+                                'day_number'   => $evalId->format('d'),
+                                'month_short'  => strtoupper($evalId->translatedFormat('M')),
+                                'date_label'   => 'Batas ' . $evalId->translatedFormat('d M Y'),
+                                'time_label'   => null,
+                                'action_label' => 'Kerjakan Evaluasi',
+                                'url'          => $fcUrl,
+                            ];
+                        }
+                    }
+                }
+
+                // 5. Agenda & Tindak Lanjut (fokus pada 1 pelatihan aktif user agar tidak terpecah antar banyak kursus)
+                $actionItems = [];
                 $filledInstructorEvalEventIds = DB::table('bimtek_instructor_evaluations')
                     ->where('user_id', $user->id)
                     ->pluck('bimtek_event_id')
@@ -370,103 +578,155 @@ class UserDashboardService
                     return $palette[$idx];
                 };
 
+                $focusedCourseId = $featuredActiveCourse['course_id'] ?? null;
+
                 foreach ($userEnrollments as $enr) {
                     $course = $enrolledCoursesById->get($enr->course_id);
                     if (!$course) {
                         continue;
                     }
+
+                    $progress = (int) ($enr->progress ?? 0);
+                    $isDone = ($enr->status === 'completed') || $progress >= 100;
+                    $isCertified = !empty($enr->official_cert_number) || !empty($enr->certificate_file);
+
+                    // Jika ada pelatihan aktif, fokuskan agenda hanya pada 1 pelatihan aktif tersebut
+                    if ($focusedCourseId !== null && $course->id !== $focusedCourseId) {
+                        continue;
+                    }
+
                     $courseCardColor = $resolveCardColor($course->thumbnail, $course->id);
                     $ev = $enr->bimtek_event_id ? $eventsById->get($enr->bimtek_event_id) : null;
                     $meta = $resolveEventMeta($ev);
                     $batchLabel = $meta['batch_name']
                         ? preg_replace('/\bbatch\b/i', 'Gelombang', (string) $meta['batch_name'])
                         : null;
-                    $progress = (int) ($enr->progress ?? 0);
-                    $isDone = ($enr->status === 'completed') || $progress >= 100;
-                    $isCertified = !empty($enr->official_cert_number) || !empty($enr->certificate_file);
                     $courseUrl = route('user.course.my-course.detail', $course->slug);
 
-                    // 5a. Sesi Live Zoom Terdekat / Hari Ini
+                    // 5a. Sesi Live Zoom Terdekat / Mendatang pada pelatihan aktif
+                    $addedZoomForCourse = false;
                     if ($ev && !$isDone) {
-                        $nextSess = null;
+                        $upcomingSessions = collect();
                         if ($ev->relationLoaded('sessions') && $ev->sessions->isNotEmpty()) {
-                            $nextSess = $ev->sessions
+                            $upcomingSessions = $ev->sessions
                                 ->filter(function ($s) use ($now, $attendedSessionIds) {
                                     $endRef = $s->end_time ?? $s->start_time;
                                     return $endRef && $endRef->gte($now) && !$attendedSessionIds->has($s->id);
                                 })
                                 ->sortBy('start_time')
-                                ->first();
+                                ->take(3)
+                                ->values();
                         }
-                        if ($nextSess && $nextSess->start_time) {
-                            $isToday = $nextSess->start_time->isToday();
-                            $timeLabel = $nextSess->start_time->translatedFormat('d M Y, H:i')
-                                . ($nextSess->end_time ? '–' . $nextSess->end_time->format('H:i') : '') . ' WIB';
-                            $actionItems[] = [
-                                'priority'    => $isToday ? 10 : 20,
-                                'sort_ts'     => $nextSess->start_time->timestamp,
-                                'type'        => 'zoom',
-                                'icon'        => 'fas fa-video',
-                                'badge'       => $isToday ? 'Zoom Hari Ini' : 'Live Zoom',
-                                'batch_name'  => $batchLabel,
-                                'title'       => $course->name,
-                                'subtitle'    => ($isToday ? 'Zoom Hari Ini — ' : 'Live Zoom — ') . $timeLabel,
-                                'action_text' => 'Masuk',
-                                'card_color'  => $courseCardColor,
-                                'url'         => $courseUrl,
-                            ];
+
+                        if ($upcomingSessions->isNotEmpty()) {
+                            $hasMultiSessions = $upcomingSessions->count() > 1;
+                            foreach ($upcomingSessions as $sIdx => $sess) {
+                                if (!$sess->start_time) {
+                                    continue;
+                                }
+                                $addedZoomForCourse = true;
+                                $isToday = $sess->start_time->isToday();
+                                $timeLabel = $sess->start_time->translatedFormat('d M Y, H:i')
+                                    . ($sess->end_time ? '–' . $sess->end_time->format('H:i') : '') . ' WIB';
+                                $zoomPrefix = $isToday
+                                    ? 'Zoom Hari Ini'
+                                    : ($hasMultiSessions ? 'Live Zoom Sesi ' . ($sIdx + 1) : 'Live Zoom');
+                                $actionItems[] = [
+                                    'priority'    => $isToday ? 10 : 20,
+                                    'sort_ts'     => $sess->start_time->timestamp,
+                                    'type'        => 'zoom',
+                                    'icon'        => 'fas fa-video',
+                                    'badge'       => $zoomPrefix,
+                                    'batch_name'  => $batchLabel,
+                                    'title'       => $zoomPrefix,
+                                    'subtitle'    => $timeLabel,
+                                    'action_text' => $meta['status_key'] === 'open_registration' ? 'Detail' : 'Masuk',
+                                    'card_color'  => $courseCardColor,
+                                    'url'         => $courseUrl,
+                                ];
+                            }
                         } elseif ($ev->zoom_start_at && $ev->zoom_start_at->gte($now)) {
+                            $addedZoomForCourse = true;
                             $isToday = $ev->zoom_start_at->isToday();
+                            $zoomPrefix = $isToday ? 'Zoom Hari Ini' : 'Live Zoom';
                             $actionItems[] = [
                                 'priority'    => $isToday ? 10 : 20,
                                 'sort_ts'     => $ev->zoom_start_at->timestamp,
                                 'type'        => 'zoom',
                                 'icon'        => 'fas fa-video',
-                                'badge'       => $isToday ? 'Zoom Hari Ini' : 'Live Zoom',
+                                'badge'       => $zoomPrefix,
                                 'batch_name'  => $batchLabel,
-                                'title'       => $course->name,
-                                'subtitle'    => ($isToday ? 'Zoom Hari Ini — ' : 'Live Zoom — ') . $ev->zoom_start_at->translatedFormat('d M Y, H:i') . ' WIB',
-                                'action_text' => 'Masuk',
+                                'title'       => $zoomPrefix,
+                                'subtitle'    => $ev->zoom_start_at->translatedFormat('d M Y, H:i') . ' WIB',
+                                'action_text' => $meta['status_key'] === 'open_registration' ? 'Detail' : 'Masuk',
+                                'card_color'  => $courseCardColor,
+                                'url'         => $courseUrl,
+                            ];
+                        }
+
+                        // Jika masih menunggu pelaksanaan & belum ada jadwal sesi Zoom spesifik, tampilkan jadwal mulai pelatihan
+                        if (!$addedZoomForCourse && $meta['status_key'] === 'open_registration' && $ev->start_date) {
+                            $actionItems[] = [
+                                'priority'    => 25,
+                                'sort_ts'     => $ev->start_date->timestamp,
+                                'type'        => 'zoom',
+                                'icon'        => 'fas fa-calendar-day',
+                                'badge'       => 'Jadwal Mulai',
+                                'batch_name'  => $batchLabel,
+                                'title'       => 'Pelaksanaan Dimulai',
+                                'subtitle'    => 'Mulai ' . $ev->start_date->translatedFormat('d M Y'),
+                                'action_text' => 'Detail',
                                 'card_color'  => $courseCardColor,
                                 'url'         => $courseUrl,
                             ];
                         }
                     }
 
-                    // 5b. Evaluasi yang Perlu Diselesaikan (untuk gelombang sedang berlangsung / evaluasi)
+                    // 5b. Evaluasi yang Perlu Diselesaikan pada pelatihan aktif (bisa lebih dari 1 agenda pada kursus yang sama)
                     if (!$isDone && $meta['status_key'] !== 'open_registration' && isset($allPostTests)) {
                         $courseTests = $allPostTests->where('course_id', $course->id);
-                        $pendingTest = $courseTests->first(function ($test) use ($submittedPostTestMap) {
+                        $sectionTestsOrdered = $courseTests->whereNotNull('course_section_id')->values();
+                        $pendingTests = $courseTests->filter(function ($test) use ($submittedPostTestMap) {
                             $res = $submittedPostTestMap->get($test->id);
                             if (!$res) {
                                 return true;
                             }
                             if ((int) ($res->pending_count ?? 0) > 0 && is_null($res->best_graded_score)) {
-                                return false; // sudah dikumpulkan, menunggu penilaian instruktur
+                                return false;
                             }
                             if (is_null($res->best_graded_score)) {
                                 return true;
                             }
                             return (float) $res->best_graded_score < (float) $test->effectivePassingGrade();
-                        });
+                        })->take(4);
 
-                        if ($pendingTest) {
-                            $shortEvalLabel = $pendingTest->course_section_id
-                                ? (preg_match('/(?:modul|hari)\s*(\d+)/i', (string) $pendingTest->title, $m) ? 'Evaluasi Hari ' . $m[1] : 'Evaluasi Harian')
-                                : 'Evaluasi Akhir';
+                        foreach ($pendingTests as $tIdx => $pendingTest) {
+                            $isSectionEval = !empty($pendingTest->course_section_id);
+                            if ($isSectionEval) {
+                                if (preg_match('/(?:modul|hari|agenda)\s*(?:ke[\-\s]*)?(\d+)/i', (string) $pendingTest->title, $m)) {
+                                    $agendaNumber = (int) $m[1];
+                                } else {
+                                    $pos = $sectionTestsOrdered->search(fn ($t) => $t->id === $pendingTest->id);
+                                    $agendaNumber = $pos !== false ? ($pos + 1) : 1;
+                                }
+                                $evalPrefix = 'Evaluasi Agenda ke-' . $agendaNumber;
+                            } else {
+                                $evalPrefix = 'Evaluasi Akhir';
+                            }
+
                             $deadlineRef = $ev ? ($ev->assessment_end_at ?? $ev->end_date) : null;
                             $subInfo = $deadlineRef
-                                ? $shortEvalLabel . ' — Batas ' . $deadlineRef->translatedFormat('d M Y')
-                                : $shortEvalLabel;
+                                ? 'Batas ' . $deadlineRef->translatedFormat('d M Y')
+                                : ($isSectionEval ? 'Evaluasi harian' : 'Evaluasi akhir');
 
                             $actionItems[] = [
-                                'priority'    => 30,
-                                'sort_ts'     => $deadlineRef ? $deadlineRef->timestamp : PHP_INT_MAX,
+                                'priority'    => $isSectionEval ? 30 : 32,
+                                'sort_ts'     => ($deadlineRef ? $deadlineRef->timestamp : PHP_INT_MAX) - (10 - $tIdx),
                                 'type'        => 'evaluation',
                                 'icon'        => 'fas fa-clipboard-check',
-                                'badge'       => 'Evaluasi',
+                                'badge'       => $evalPrefix,
                                 'batch_name'  => $batchLabel,
-                                'title'       => $course->name,
+                                'title'       => $evalPrefix,
                                 'subtitle'    => $subInfo,
                                 'action_text' => 'Kerjakan',
                                 'card_color'  => $courseCardColor,
@@ -475,21 +735,24 @@ class UserDashboardService
                         }
                     }
 
-                    // 5c. Kuesioner Evaluasi Narasumber (jika sudah memasuki akhir pelaksanaan / evaluasi & belum diisi)
+                    // 5c. Kuesioner Evaluasi Narasumber
                     if ($ev && !$isCertified && !$filledInstructorEvalEventIds->has($ev->id) && $meta['status_key'] !== 'open_registration') {
                         $inEvalWindow = ($ev->end_date && $now->gte($ev->end_date->copy()->startOfDay()))
                             || ($ev->assessment_start_at && $now->gte($ev->assessment_start_at))
                             || $progress >= 75;
                         if ($inEvalWindow) {
+                            $narasumberDeadline = $ev->assessment_end_at ?? $ev->end_date;
                             $actionItems[] = [
                                 'priority'    => 35,
-                                'sort_ts'     => ($ev->assessment_end_at ?? $ev->end_date ?? $now)->timestamp,
+                                'sort_ts'     => ($narasumberDeadline ?? $now)->timestamp,
                                 'type'        => 'narasumber',
                                 'icon'        => 'fas fa-comment-dots',
-                                'badge'       => 'Kuesioner',
+                                'badge'       => 'Evaluasi Narasumber',
                                 'batch_name'  => $batchLabel,
-                                'title'       => $course->name,
-                                'subtitle'    => 'Evaluasi narasumber wajib diisi',
+                                'title'       => 'Evaluasi Narasumber',
+                                'subtitle'    => $narasumberDeadline
+                                    ? 'Batas ' . $narasumberDeadline->translatedFormat('d M Y')
+                                    : 'Wajib diisi sebelum sertifikat terbit',
                                 'action_text' => 'Isi',
                                 'card_color'  => $courseCardColor,
                                 'url'         => route('user.course.my-course.evaluasi-narasumber', $course->slug),
@@ -497,17 +760,17 @@ class UserDashboardService
                         }
                     }
 
-                    // 5d. e-Sertifikat Siap Diunduh
-                    if ($isCertified) {
+                    // 5d. E-sertifikat Siap Diunduh (hanya saat tidak ada pelatihan aktif lain yang sedang berjalan)
+                    if ($isCertified && $focusedCourseId === null) {
                         $actionItems[] = [
                             'priority'    => 50,
                             'sort_ts'     => 0,
                             'type'        => 'certificate',
                             'icon'        => 'fas fa-award',
-                            'badge'       => 'Sertifikat',
+                            'badge'       => 'E-sertifikat',
                             'batch_name'  => $batchLabel,
-                            'title'       => $course->name,
-                            'subtitle'    => 'e-Sertifikat siap diunduh',
+                            'title'       => 'E-sertifikat: ' . $course->name,
+                            'subtitle'    => 'Siap diunduh',
                             'action_text' => 'Unduh',
                             'card_color'  => $courseCardColor,
                             'url'         => $courseUrl,
@@ -524,6 +787,20 @@ class UserDashboardService
                     })
                     ->take(8)
                     ->values();
+
+                // Tentukan tahapan / agenda berikutnya untuk ditampilkan di card Lanjutkan Belajar
+                if (!empty($featuredActiveCourse)) {
+                    $firstStep = $actionItemsCollection->first();
+                    if ($featuredActiveCourse['status_key'] === 'open_registration') {
+                        $featuredActiveCourse['next_step_label'] = !empty($featuredActiveCourse['countdown_label'])
+                            ? 'Menunggu pelaksanaan (' . strtolower($featuredActiveCourse['countdown_label']) . ')'
+                            : 'Menunggu jadwal pembukaan kelas';
+                    } elseif ($firstStep) {
+                        $featuredActiveCourse['next_step_label'] = 'Tahap berikutnya: ' . $firstStep['title'];
+                    } else {
+                        $featuredActiveCourse['next_step_label'] = 'Tahap berikutnya: Pelajari materi modul aktif';
+                    }
+                }
 
                 $actionSummary = [
                     'total'       => $actionItemsCollection->count(),
@@ -631,7 +908,9 @@ class UserDashboardService
                     'lastCourse'        => $lastCourse,
                     'recentCourses'     => $recentCourses,
                     'chartDataByCourse' => $chartDataByCourse,
-                    'userEventGantt'    => $userEventGantt,
+                    'userEventGantt'         => $userEventGantt,
+                    'featuredActiveCourse'   => $featuredActiveCourse,
+                    'nearestSession'         => $nearestSession,
                     'actionItems'            => $actionItemsCollection,
                     'actionSummary'          => $actionSummary,
                     'openRegistrationEvents' => $openRegistrationEvents,

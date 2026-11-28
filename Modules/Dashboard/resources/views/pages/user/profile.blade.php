@@ -298,39 +298,27 @@
                             regenciesApiUrl: @js(route('user.get-regencies')),
                         })"
                         x-init="init()"
-                        class="space-y-8">
+                        class="space-y-5">
                         @csrf
                         @if (!empty($returnToUrl))
                             <input type="hidden" name="return_to" value="{{ $returnToUrl }}">
                         @endif
 
-                        {{-- Bagian 1: Identitas Akun --}}
-                        <section class="space-y-4">
-                            <div>
-                                <h3 class="text-base sm:text-lg font-bold text-slate-900 dark:text-white">Informasi Saya</h3>
-                                <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5">Data identitas utama yang digunakan pada akun dan sertifikat Anda.</p>
-                            </div>
+                        <h3 class="text-base sm:text-lg font-bold text-slate-900 dark:text-white">Informasi Saya</h3>
 
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
-                                {{-- Nama Lengkap --}}
-                                @if ($ssoUser)
-                                    <x-form.input name="full_name" label="Nama Lengkap" value="{{ $user->profile?->full_name ?? $user->name }}" disabled helper="Mengikuti nama akun SIAPKerja" class="rounded-md text-xs sm:text-sm" />
-                                @else
-                                    <x-form.input name="full_name" label="Nama Lengkap" :required="true" value="{{ old('full_name', $user->profile?->full_name ?? $user->name) }}" class="rounded-md text-xs sm:text-sm" />
-                                @endif
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
+                            {{-- Nama Lengkap --}}
+                            @if ($ssoUser)
+                                <x-form.input name="full_name" label="Nama Lengkap" value="{{ $user->profile?->full_name ?? $user->name }}" disabled helper="Mengikuti nama akun SIAPKerja" class="rounded-md text-xs sm:text-sm" />
+                            @else
+                                <x-form.input name="full_name" label="Nama Lengkap" :required="true" value="{{ old('full_name', $user->profile?->full_name ?? $user->name) }}" class="rounded-md text-xs sm:text-sm" />
+                            @endif
 
-                                {{-- Email --}}
-                                <x-form.input name="email" label="Email" value="{{ $user->email }}" readonly helper="Mengikuti akun login" class="bg-gray-100 dark:bg-slate-700/50 border border-gray-200 dark:border-slate-600 rounded-md cursor-not-allowed text-xs sm:text-sm" />
-                            </div>
-                        </section>
+                            {{-- Email --}}
+                            <x-form.input name="email" label="Email" value="{{ $user->email }}" readonly helper="Mengikuti akun login" class="bg-gray-100 dark:bg-slate-700/50 border border-gray-200 dark:border-slate-600 rounded-md cursor-not-allowed text-xs sm:text-sm" />
+                        </div>
 
-                        {{-- Bagian 2: Informasi Instansi / Perusahaan --}}
-                        <section class="pt-7 border-t border-slate-100 dark:border-slate-700 space-y-5">
-                            <div>
-                                <h4 class="text-sm sm:text-base font-bold text-slate-900 dark:text-white">Instansi / Perusahaan</h4>
-                                <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5">Sesuaikan latar belakang dan asal instansi atau perusahaan Anda.</p>
-                            </div>
-
+                        <div class="space-y-5">
                             <div>
                                 <label class="block text-xs sm:text-sm font-semibold text-slate-700 dark:text-slate-200 mb-2">
                                     Asal Pengguna <span class="text-red-500">*</span>
@@ -513,9 +501,9 @@
                                         class="w-full h-10 sm:h-11 rounded-md border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 px-3 text-xs sm:text-sm text-slate-800 dark:text-white focus:border-[#13416B] focus:ring-[#13416B]">
                                 </div>
                             </div>
-                        </section>
+                        </div>
 
-                        <div class="pt-5 border-t border-slate-100 dark:border-slate-700 flex justify-end">
+                        <div class="pt-4 flex justify-end">
                             <x-button type="submit" variant="success" size="sm" class="rounded-md text-xs sm:text-sm px-5 py-2.5 font-bold cursor-pointer">
                                 {{ !empty($returnToUrl) ? 'Simpan & Lanjutkan Klaim Sertifikat' : 'Simpan Perubahan' }}
                             </x-button>
@@ -527,7 +515,6 @@
                 <div x-show="tab === 'certificates'" x-cloak>
                     <div class="mb-4 sm:mb-5">
                         <h3 class="text-base sm:text-lg font-bold text-slate-900 dark:text-white">Sertifikat Saya</h3>
-                        <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400">Sertifikat kelulusan yang telah Anda peroleh dari modul kursus.</p>
                     </div>
 
                     @if ($certificates->count() > 0)
@@ -585,7 +572,7 @@
                         <div class="lg:col-span-7 space-y-8 sm:space-y-6">
                             <!-- 1. Mode Tampilan Aplikasi (Dark Mode Seluruh Halaman) -->
                             <div>
-                                <div class="flex items-center justify-between mb-1 mt-4">
+                                <div class="flex items-center justify-between mb-2.5 mt-2">
                                     <label class="block text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-100">Mode Tampilan (Tema Aplikasi)</label>
                                     <span class="text-[10px] sm:text-[11px] font-semibold px-2 py-0.5 rounded-full transition-colors border"
                                         :class="isDark 
@@ -594,7 +581,6 @@
                                         <span x-text="isDark ? 'Mode Gelap Aktif' : 'Mode Terang Aktif'"></span>
                                     </span>
                                 </div>
-                                <p class="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 mb-2.5">Atur tampilan tema terang atau gelap untuk seluruh halaman SIRENATA.</p>
 
                                 <!-- Saklar (Switch Toggle Card) -->
                                 <div @click="setDarkMode(!isDark)"
@@ -659,11 +645,10 @@
 
                             <!-- 2. Ukuran Huruf (Font Size) -->
                             <div>
-                                <div class="flex items-center justify-between mb-1">
+                                <div class="flex items-center justify-between mb-2.5">
                                     <label class="block text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-100">Ukuran Huruf</label>
                                     <span class="text-[11px] sm:text-xs font-semibold text-[#13416B] dark:text-white" x-text="{ 'sm': 'Kecil (14px)', 'normal': 'Standar (16px)', 'lg': 'Besar (18px)', 'xl': 'Sangat Besar (20px)' }[readerPrefs.fontSize]"></span>
                                 </div>
-                                <p class="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 mb-2.5">Atur skala besar huruf teks bacaan materi pembelajaran.</p>
                                 <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 bg-slate-100 dark:bg-slate-700/50 p-1.5 rounded-md border border-slate-200 dark:border-slate-700">
                                     <!-- Sm -->
                                     <button type="button" @click="updatePref('fontSize', 'sm')"
@@ -701,8 +686,7 @@
 
                             <!-- 3. Jenis Huruf (Font Family) -->
                             <div>
-                                <label class="block text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-100 mb-1">Jenis Huruf (Font Family)</label>
-                                <p class="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 mb-2.5">Pilih tipe tipografi yang memudahkan pemahaman Anda.</p>
+                                <label class="block text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-100 mb-2.5">Jenis Huruf (Font Family)</label>
                                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3">
                                     <!-- Sans -->
                                     <button type="button" @click="updatePref('fontFamily', 'sans')"
@@ -739,8 +723,7 @@
                                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-4">
                                     <!-- Line Height -->
                                     <div>
-                                        <label class="block text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-100 mb-1">Jarak Baris Paragraf</label>
-                                        <p class="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 mb-2">Pilihan kerapatan teks antar baris.</p>
+                                        <label class="block text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-100 mb-2">Jarak Baris Paragraf</label>
                                         <div class="grid grid-cols-5 gap-1 bg-slate-100 dark:bg-slate-700/50 p-1 sm:p-1.5 rounded-md border border-slate-200 dark:border-slate-700">
                                             <button type="button" @click="updatePref('lineHeight', '1.0')"
                                                 class="py-1.5 sm:py-2 px-1 rounded-md text-[11px] sm:text-xs font-bold text-center transition-all cursor-pointer flex flex-col items-center justify-center gap-0.5"
@@ -782,8 +765,7 @@
 
                                     <!-- Text Alignment -->
                                     <div>
-                                        <label class="block text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-100 mb-1">Perataan Teks Paragraf</label>
-                                        <p class="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 mb-2">Arah susunan tepi teks materi.</p>
+                                        <label class="block text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-100 mb-2">Perataan Teks Paragraf</label>
                                         <div class="grid grid-cols-2 gap-2">
                                             <button type="button" @click="updatePref('textAlign', 'left')"
                                                 class="py-2 px-2.5 sm:py-2.5 sm:px-3 rounded-md border-2 text-[11px] sm:text-xs font-bold text-center transition-all flex items-center justify-center gap-1.5 cursor-pointer"
@@ -805,8 +787,7 @@
                                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-4">
                                     <!-- Paper Theme -->
                                     <div>
-                                        <label class="block text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-100 mb-1">Warna Kertas Baca</label>
-                                        <p class="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 mb-2">Pilihan latar belakang bacaan.</p>
+                                        <label class="block text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-100 mb-2">Warna Kertas Baca</label>
                                         <div class="grid grid-cols-2 gap-2">
                                             <button type="button" @click="selectPaperTheme('white')"
                                                 class="py-2 px-2.5 sm:py-2.5 sm:px-3 rounded-md border-2 text-[11px] sm:text-xs font-bold text-center transition-all flex items-center justify-center gap-1.5 cursor-pointer"
@@ -825,8 +806,7 @@
 
                                     <!-- Font Weight -->
                                     <div>
-                                        <label class="block text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-100 mb-1">Ketebalan Huruf</label>
-                                        <p class="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 mb-2">Tingkat kepekatan teks bacaan.</p>
+                                        <label class="block text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-100 mb-2">Ketebalan Huruf</label>
                                         <div class="grid grid-cols-2 gap-2">
                                             <button type="button" @click="updatePref('fontWeight', 'normal')"
                                                 class="py-2 px-2.5 sm:py-2.5 sm:px-3 rounded-md border-2 text-[11px] sm:text-xs font-normal text-center transition-all flex items-center justify-center gap-1.5 cursor-pointer"

@@ -26,271 +26,256 @@
     @php
         $authUser = auth()->user();
         $needsSectorOnboarding = !$profile || (empty($profile->institution_type) && empty($profile->instansi));
-        $showProfileReminder = !$needsSectorOnboarding && $authUser && !$authUser->hasCompleteCertificateProfile();
-        $firstName = explode(' ', trim((string) ($authUser?->profile?->full_name ?: $authUser?->name ?: 'Peserta')))[0];
+        $displayName = trim((string) ($authUser?->profile?->full_name ?: $authUser?->name ?: 'Peserta'));
+        $firstName = explode(' ', $displayName)[0];
     @endphp
 
     <div class="px-0 py-3 sm:p-5 lg:p-6 max-w-full mx-auto space-y-5 sm:space-y-6">
 
-        @if ($showProfileReminder)
-            <div x-data="{ dismissed: false }" x-show="!dismissed" x-transition
-                class="rounded-md border border-amber-600 bg-amber-500 text-white px-4 py-3 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                <div class="flex items-start sm:items-center gap-3 min-w-0">
-                    <div class="w-9 h-9 rounded-md bg-white/15 text-white flex items-center justify-center shrink-0 text-sm">
-                        <i class="fas fa-id-card"></i>
-                    </div>
-                    <div class="min-w-0">
-                        <p class="text-xs sm:text-sm font-bold text-white">
-                            Informasi pribadi &amp; instansi belum dilengkapi
-                        </p>
-                        <p class="text-xs text-amber-50 mt-0.5 leading-snug">
-                            Anda tetap bisa mengikuti pelatihan sekarang. Data ini wajib dilengkapi di menu <strong class="text-white">Profil</strong> saat hendak mengklaim sertifikat.
-                        </p>
-                    </div>
-                </div>
-                <div class="flex items-center gap-2 shrink-0 self-end sm:self-center">
-                    <a href="{{ route('user.profile') }}"
-                        class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-md text-xs font-bold text-amber-700 bg-white hover:bg-amber-50 transition-colors shadow-2xs">
-                        <span>Lengkapi Profil</span>
-                        <i class="fas fa-arrow-right text-[10px]"></i>
-                    </a>
-                    <button type="button" @click="dismissed = true"
-                        class="p-1.5 rounded-md text-white/80 hover:text-white hover:bg-white/15 transition-colors cursor-pointer"
-                        aria-label="Tutup pengingat">
-                        <i class="fas fa-times text-xs"></i>
-                    </button>
-                </div>
-            </div>
-        @endif
-
-        <!-- ===================================== -->
-        <!-- 1. STATS GRID (Solid Colored Cards)   -->
-        <!-- ===================================== -->
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
-            <!-- Total Kursus (Dark Navy) -->
-            <div
-                class="relative overflow-hidden bg-[#13416B] rounded-md p-5 sm:p-6 shadow-md transition-all duration-300 hover:shadow-lg hover:-translate-y-1 group z-0">
-                <!-- Efek Dekoratif Bubbles Geometris Profesional -->
-                <div class="absolute inset-0 pointer-events-none z-0">
-                    <div class="absolute -top-12 -right-10 w-44 h-44 border-[16px] border-white/5 rounded-full group-hover:scale-105 transition-transform duration-500"></div>
-                    <div class="absolute -bottom-10 right-10 w-28 h-28 bg-white/5 rounded-full"></div>
-                    <div class="absolute top-3 right-24 w-12 h-12 border-[4px] border-amber-400/20 rounded-full"></div>
-                    <div class="absolute bottom-4 right-32 w-3 h-3 bg-blue-300/20 rounded-full"></div>
-                    <div class="absolute top-5 right-40 w-2 h-2 bg-white/10 rounded-full"></div>
-                </div>
-
-                <div class="relative z-10 flex items-center justify-between gap-3">
-                    <div>
-                        <p class="text-white/85 text-xs sm:text-sm font-bold uppercase mb-1 tracking-wider">Pelatihan Diikuti</p>
-                        <h3 class="text-2xl sm:text-3xl font-extrabold text-white">{{ $eventStats['total_enrolled'] ?? $stats['total'] }}</h3>
-                    </div>
-
-                    <!-- Badge Putih Solid, Ikon Topi Toga / Edukasi -->
-                    <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-white text-[#13416B] flex items-center justify-center shrink-0 shadow-sm group-hover:scale-105 transition-transform duration-300">
-                        <svg class="w-6 h-6 sm:w-7 sm:h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M4.26 10.147a60.438 60.438 0 0 0-.491 6.347A48.62 48.62 0 0 1 12 20.904a48.62 48.62 0 0 1 8.232-4.41 60.46 60.46 0 0 0-.491-6.347m-15.482 0a50.636 50.636 0 0 0-2.658-.813A59.906 59.906 0 0 1 12 3.493a59.903 59.903 0 0 1 10.399 5.84c-.896.248-1.783.52-2.658.814m-15.482 0A50.717 50.717 0 0 1 12 13.489a50.702 50.702 0 0 1 7.74-3.342M6.75 15a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5Zm0 0v-3.675A55.378 55.378 0 0 1 12 8.443m-5.25 6.557q.105.105.215.205" />
-                        </svg>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Rata-rata Progress (Slate Blue) -->
-            <div
-                class="relative overflow-hidden bg-[#547996] rounded-md p-5 sm:p-6 shadow-md transition-all duration-300 hover:shadow-lg hover:-translate-y-1 group z-0">
-                <!-- Efek Dekoratif Bubbles Geometris Profesional -->
-                <div class="absolute inset-0 pointer-events-none z-0">
-                    <div class="absolute -top-12 -right-10 w-44 h-44 border-[16px] border-white/5 rounded-full group-hover:scale-105 transition-transform duration-500"></div>
-                    <div class="absolute -bottom-10 right-10 w-28 h-28 bg-white/5 rounded-full"></div>
-                    <div class="absolute top-3 right-24 w-12 h-12 border-[4px] border-amber-400/25 rounded-full"></div>
-                    <div class="absolute bottom-4 right-32 w-3 h-3 bg-white/20 rounded-full"></div>
-                    <div class="absolute top-5 right-40 w-2 h-2 bg-white/10 rounded-full"></div>
-                </div>
-
-                <div class="relative z-10 flex items-center justify-between gap-3">
-                    <div>
-                        <p class="text-white/85 text-xs sm:text-sm font-bold uppercase mb-1 tracking-wider">Rata-rata Progres</p>
-                        <h3 class="text-2xl sm:text-3xl font-extrabold text-white">{{ $stats['avg_progress'] }}%</h3>
-                    </div>
-
-                    <!-- Badge Putih Solid, Ikon Tren Progress -->
-                    <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-white text-[#547996] flex items-center justify-center shrink-0 shadow-sm group-hover:scale-105 transition-transform duration-300">
-                        <svg class="w-6 h-6 sm:w-7 sm:h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18 9 11.25l4.306 4.306a11.95 11.95 0 0 1 5.814-5.518l2.74-1.22m0 0-5.94-2.281m5.94 2.28-2.28 5.941" />
-                        </svg>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Pelatihan Selesai (Emerald Green) -->
-            <div
-                class="relative overflow-hidden bg-emerald-600 rounded-md p-5 sm:p-6 shadow-md transition-all duration-300 hover:shadow-lg hover:-translate-y-1 group z-0">
-                <!-- Efek Dekoratif Bubbles Geometris Profesional -->
-                <div class="absolute inset-0 pointer-events-none z-0">
-                    <div class="absolute -top-12 -right-10 w-44 h-44 border-[16px] border-white/10 rounded-full group-hover:scale-105 transition-transform duration-500"></div>
-                    <div class="absolute -bottom-10 right-10 w-28 h-28 bg-white/10 rounded-full"></div>
-                    <div class="absolute top-3 right-24 w-12 h-12 border-[4px] border-amber-300/30 rounded-full"></div>
-                    <div class="absolute bottom-4 right-32 w-3 h-3 bg-white/25 rounded-full"></div>
-                    <div class="absolute top-5 right-40 w-2 h-2 bg-white/15 rounded-full"></div>
-                </div>
-
-                <div class="relative z-10 flex items-center justify-between gap-3">
-                    <div>
-                        <p class="text-white/85 text-xs sm:text-sm font-bold uppercase mb-1 tracking-wider">Pelatihan Selesai</p>
-                        <h3 class="text-2xl sm:text-3xl font-extrabold text-white">{{ $stats['selesai'] }}</h3>
-                    </div>
-
-                    <!-- Badge Putih Solid, Ikon Piala Prestasi -->
-                    <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-white text-emerald-600 flex items-center justify-center shrink-0 shadow-sm group-hover:scale-105 transition-transform duration-300">
-                        <svg class="w-6 h-6 sm:w-7 sm:h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 18.75h-9m9 0a3 3 0 0 1 3 3h-15a3 3 0 0 1 3-3m9 0v-3.375c0-.621-.503-1.125-1.125-1.125h-.871M7.5 18.75v-3.375c0-.621.504-1.125 1.125-1.125h.872m5.004 0A6.002 6.002 0 0 0 18 9.75V6A2.25 2.25 0 0 0 15.75 3.75H8.25A2.25 2.25 0 0 0 6 6v3.75a6.002 6.002 0 0 0 3.504 5.625m4.992 0a6.01 6.01 0 0 1-4.992 0M6 6.75H4.875A2.625 2.625 0 0 0 2.25 9.375V9.75a5.25 5.25 0 0 0 4.125 5.143M18 6.75h1.125a2.625 2.625 0 0 1 2.625 2.625V9.75a5.25 5.25 0 0 1-4.125 5.143" />
-                        </svg>
-                    </div>
-                </div>
-            </div>
-        </div>
-
         <!-- ========================================================= -->
-        <!-- 2. JADWAL PELATIHAN (70%) & AGENDA TINDAK LANJUT (30%)    -->
+        <!-- 1. LAYOUT 2 KOLOM SEIMBANG: KIRI (8) & KANAN (4)          -->
         <!-- ========================================================= -->
         @php
             $ganttYear = $userEventGantt['year'] ?? now()->year;
             $ganttHasEvents = !empty($userEventGantt['events']);
             $ganttTodayLabel = $userEventGantt['today_label'] ?? now()->translatedFormat('d M Y');
         @endphp
-        <div class="grid grid-cols-1 lg:grid-cols-10 gap-5 sm:gap-6 items-stretch">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-6 items-stretch">
 
-            <!-- KOLOM KIRI (70%): Gantt Chart Jadwal Pelatihan Terdaftar -->
-            <section class="lg:col-span-7 bg-white rounded-md border border-slate-200 shadow-sm overflow-hidden flex flex-col min-w-0">
-                <header class="px-4 sm:px-6 py-4 border-b border-slate-100 flex flex-col xl:flex-row xl:items-center justify-between gap-4 shrink-0">
-                    <div class="min-w-0">
-                        <h2 class="text-base sm:text-lg font-extrabold text-slate-800">
-                            Jadwal Pelatihan Terdaftar ({{ $ganttYear }})
-                        </h2>
-                        <p class="text-xs sm:text-sm text-slate-500">
-                            Linimasa pendaftaran, pelaksanaan Live Zoom, dan evaluasi gelombang pelatihan Anda
-                        </p>
+            <!-- ===================================================== -->
+            <!-- KOLOM KIRI (8 COLS): JADWAL PELATIHAN TERSEDIA        -->
+            <!-- ===================================================== -->
+            <div class="lg:col-span-8 flex flex-col min-w-0">
+
+                <!-- CARD KIRI: Jadwal Pelatihan Tersedia (Gantt Chart) -->
+                <section class="bg-white rounded-md border border-slate-200 shadow-sm overflow-hidden flex flex-col flex-1 min-w-0">
+                    <header class="px-4 sm:px-6 py-4 border-b border-slate-100 flex flex-col xl:flex-row xl:items-center justify-between gap-4 shrink-0">
+                        <div class="min-w-0">
+                            <h2 class="text-base sm:text-lg font-extrabold text-slate-800">
+                                Jadwal Pelatihan Tersedia
+                            </h2>
+                            <p class="text-xs sm:text-sm text-slate-500">
+                                Linimasa gelombang pelatihan di katalog untuk rencana belajar Anda berikutnya
+                            </p>
+                        </div>
+
+                        <div class="flex flex-wrap items-center gap-2.5 shrink-0">
+                            <label for="userGanttStatusFilter" class="sr-only">Filter status pelatihan</label>
+                            <select id="userGanttStatusFilter"
+                                class="text-xs sm:text-sm border-slate-200 rounded-md focus:ring-[#13416B] focus:border-[#13416B] cursor-pointer bg-white">
+                                <option value="all">Semua Status</option>
+                                <option value="open_registration">Periode Pendaftaran</option>
+                                <option value="ongoing">Periode Pelaksanaan</option>
+                                <option value="evaluation">Periode Evaluasi</option>
+                            </select>
+
+                            <a href="{{ route('user.catalog.index') }}"
+                               class="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs sm:text-sm font-bold text-white bg-[#13416B] hover:bg-[#0f3354] rounded-md transition-colors shadow-2xs">
+                                <span>Jelajahi Katalog</span>
+                            </a>
+                        </div>
+                    </header>
+
+                    {{-- Legenda Fase --}}
+                    <div class="px-4 sm:px-6 py-3 border-b border-slate-100 bg-slate-50/50 shrink-0">
+                        <div class="flex flex-wrap items-center gap-x-5 gap-y-2 text-xs sm:text-sm text-slate-600">
+                            <span class="inline-flex items-center gap-1.5">
+                                <span class="w-3 h-3 rounded-xs bg-sky-300"></span>Pendaftaran
+                            </span>
+                            <span class="inline-flex items-center gap-1.5">
+                                <span class="w-3 h-3 rounded-xs bg-[#2B6496]"></span>Pelaksanaan &amp; Live Zoom
+                            </span>
+                            <span class="inline-flex items-center gap-1.5">
+                                <span class="w-3 h-3 rounded-xs bg-emerald-500"></span>Evaluasi &amp; Sertifikasi
+                            </span>
+                            <span class="inline-flex items-center gap-1.5">
+                                <span class="inline-block w-4 border-t-2 border-dashed border-red-500"></span>Hari Ini ({{ $ganttTodayLabel }})
+                            </span>
+                        </div>
                     </div>
 
-                    <div class="flex flex-wrap items-center gap-2.5 shrink-0">
-                        <label for="userGanttStatusFilter" class="sr-only">Filter status pelatihan</label>
-                        <select id="userGanttStatusFilter"
-                            class="text-xs sm:text-sm border-slate-200 rounded-md focus:ring-[#13416B] focus:border-[#13416B] cursor-pointer bg-white">
-                            <option value="all">Semua Status</option>
-                            <option value="open_registration">Periode Pendaftaran</option>
-                            <option value="ongoing">Periode Pelaksanaan</option>
-                            <option value="evaluation">Periode Evaluasi</option>
-                            <option value="completed">Selesai</option>
-                        </select>
-
-                        <a href="{{ route('user.catalog.index') }}"
-                           class="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs sm:text-sm font-bold text-white bg-[#13416B] hover:bg-[#0f3354] rounded-md transition-colors shadow-2xs">
-                            <span>Jelajahi Katalog</span>
-                        </a>
-                    </div>
-                </header>
-
-                {{-- Legenda Fase --}}
-                <div class="px-4 sm:px-6 py-3 border-b border-slate-100 bg-slate-50/50 shrink-0">
-                    <div class="flex flex-wrap items-center gap-x-5 gap-y-2 text-xs sm:text-sm text-slate-600">
-                        <span class="inline-flex items-center gap-1.5">
-                            <span class="w-3 h-3 rounded-xs bg-sky-300"></span>Pendaftaran
-                        </span>
-                        <span class="inline-flex items-center gap-1.5">
-                            <span class="w-3 h-3 rounded-xs bg-[#2B6496]"></span>Pelaksanaan &amp; Live Zoom
-                        </span>
-                        <span class="inline-flex items-center gap-1.5">
-                            <span class="w-3 h-3 rounded-xs bg-emerald-500"></span>Evaluasi &amp; Sertifikasi
-                        </span>
-                        <span class="inline-flex items-center gap-1.5">
-                            <span class="inline-block w-4 border-t-2 border-dashed border-red-500"></span>Hari Ini ({{ $ganttTodayLabel }})
-                        </span>
-                    </div>
-                </div>
-
-                <div class="p-4 sm:p-6 flex-1 flex flex-col">
-                    {{-- Kontainer Gantt Chart --}}
-                    <div id="userGanttWrapper"
-                         class="border border-slate-200 rounded-md overflow-hidden bg-white {{ $ganttHasEvents ? '' : 'hidden' }}">
-                        <div id="userGanttScrollArea" class="overflow-x-auto overflow-y-auto max-h-[480px] custom-scrollbar relative">
-                            <div id="userGanttInner" class="min-w-[880px] relative">
-                                <div id="userGanttHeader" class="sticky top-0 z-30 bg-slate-50 border-b border-slate-200"></div>
-                                <div id="userGanttRows" class="divide-y divide-slate-100 relative"></div>
+                    <div class="p-4 sm:p-6 flex flex-col flex-1">
+                        {{-- Kontainer Gantt Chart --}}
+                        <div id="userGanttWrapper"
+                             class="border border-slate-200 rounded-md overflow-hidden bg-white flex-1 flex flex-col {{ $ganttHasEvents ? '' : 'hidden' }}">
+                            <div id="userGanttScrollArea" class="overflow-x-auto overflow-y-auto flex-1 max-h-[460px] custom-scrollbar relative">
+                                <div id="userGanttInner" class="min-w-[820px] relative">
+                                    <div id="userGanttHeader" class="sticky top-0 z-30 bg-slate-50 border-b border-slate-200"></div>
+                                    <div id="userGanttRows" class="divide-y divide-slate-100 relative"></div>
+                                </div>
                             </div>
                         </div>
-                    </div>
 
-                    {{-- Empty State --}}
-                    <div id="userGanttEmptyState"
-                         class="flex-1 flex flex-col items-center justify-center py-10 px-4 text-center {{ $ganttHasEvents ? 'hidden' : '' }}">
-                        <i class="fas fa-calendar-xmark text-3xl text-slate-300 mb-3 block"></i>
-                        <p class="text-sm sm:text-base font-semibold text-slate-700">Belum Ada Pelatihan Terdaftar</p>
-                        <p class="text-xs sm:text-sm text-slate-500 mt-1 max-w-md mx-auto">Anda belum mendaftar pada gelombang pelatihan atau tidak ada pelatihan dengan status tersebut. Jelajahi katalog untuk mulai mendaftar.</p>
-                    </div>
-                </div>
-            </section>
-
-            <!-- KOLOM KANAN (30%): Agenda & Tindak Lanjut Terdekat -->
-            <div class="lg:col-span-3 flex flex-col min-h-0 min-w-0">
-                <div
-                    class="bg-white rounded-md p-4 sm:p-5 shadow-sm border border-slate-200 flex flex-col flex-1 min-h-0">
-                    <div class="mb-4 pb-4 border-b border-slate-100 shrink-0">
-                        <h2 class="text-base sm:text-lg font-bold text-slate-800">Agenda &amp; Tindak Lanjut</h2>
-                        <p class="text-xs sm:text-sm text-slate-500 mt-0.5 leading-snug">Tindakan penting yang perlu segera diselesaikan</p>
-                    </div>
-
-                    @if (isset($actionItems) && $actionItems->count() > 0)
-                        <div class="overflow-y-auto custom-scrollbar flex-1 min-h-[280px] max-h-[480px] pr-1 space-y-3">
-                            @foreach ($actionItems as $item)
-                                @php
-                                    $iconBg = match ($item['type']) {
-                                        'zoom'        => 'bg-[#13416B] text-white',
-                                        'evaluation'  => 'bg-amber-500 text-white',
-                                        'narasumber'  => 'bg-[#547996] text-white',
-                                        'certificate' => 'bg-emerald-600 text-white',
-                                        default       => 'bg-slate-600 text-white',
-                                    };
-                                @endphp
-                                <a href="{{ $item['url'] }}"
-                                    class="block p-3.5 rounded-md border border-slate-200/80 bg-slate-50/50 hover:bg-white hover:border-[#13416B]/40 hover:shadow-xs transition-all group">
-                                    <div class="flex items-start gap-3">
-                                        <div class="w-9 h-9 rounded-md {{ $iconBg }} flex items-center justify-center shrink-0 text-sm shadow-2xs mt-0.5">
-                                            <i class="{{ $item['icon'] }}"></i>
-                                        </div>
-
-                                        <div class="min-w-0 flex-1">
-                                            @if (!empty($item['batch_name']))
-                                                <p class="text-xs font-semibold text-[#547996] truncate" title="{{ $item['batch_name'] }}">
-                                                    {{ $item['batch_name'] }}
-                                                </p>
-                                            @endif
-                                            <h3 class="text-sm font-semibold text-slate-800 group-hover:text-[#13416B] transition-colors line-clamp-2 leading-snug {{ !empty($item['batch_name']) ? 'mt-0.5' : '' }}" title="{{ $item['title'] }}">
-                                                {{ $item['title'] }}
-                                            </h3>
-                                            <p class="text-xs text-slate-500 truncate mt-1" title="{{ $item['subtitle'] }}">
-                                                {{ $item['subtitle'] }}
-                                            </p>
-                                        </div>
-                                    </div>
-
-                                    <div class="mt-3 flex items-center justify-end">
-                                        <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-bold text-[#13416B] bg-[#13416B]/10 group-hover:bg-[#13416B] group-hover:text-white transition-colors">
-                                            <span>{{ $item['action_text'] }}</span>
-                                            <i class="fas fa-chevron-right text-[10px]"></i>
-                                        </span>
-                                    </div>
-                                </a>
-                            @endforeach
+                        {{-- Empty State --}}
+                        <div id="userGanttEmptyState"
+                             class="flex-1 flex flex-col items-center justify-center py-10 px-4 text-center {{ $ganttHasEvents ? 'hidden' : '' }}">
+                            <i class="fas fa-calendar-xmark text-3xl text-slate-300 mb-3 block"></i>
+                            <p class="text-sm sm:text-base font-semibold text-slate-700">Belum Ada Jadwal Pelatihan Tersedia</p>
+                            <p class="text-xs sm:text-sm text-slate-500 mt-1 max-w-md mx-auto">Belum ada gelombang pelatihan yang tersedia untuk status tersebut saat ini.</p>
                         </div>
-                    @else
-                        <div class="flex-1 flex flex-col items-center justify-center py-10 px-4 text-center min-h-[240px]">
-                            <i class="fas fa-check-circle text-3xl text-emerald-500 mb-3"></i>
-                            <p class="text-sm sm:text-base font-semibold text-slate-700">Semua agenda sudah tuntas</p>
-                            <p class="text-xs sm:text-sm text-slate-500 mt-1 max-w-xs">Tidak ada sesi Zoom atau evaluasi tertunda saat ini.</p>
-                        </div>
-                    @endif
-                </div>
+                    </div>
+                </section>
+
             </div>
 
+            <!-- ===================================================== -->
+            <!-- KOLOM KANAN (4 COLS): SESI TERDEKAT & TERAKHIR DILIHAT -->
+            <!-- ===================================================== -->
+            <div class="lg:col-span-4 flex flex-col gap-5 sm:gap-6 min-w-0">
+
+                <!-- CARD KANAN 1: Sesi Terdekat (Single Card, Adaptif Zoom / Pembukaan / Evaluasi) -->
+                <section class="bg-white rounded-md p-4 sm:p-5 shadow-sm border border-slate-200 flex flex-col shrink-0">
+                    <div class="mb-4 pb-3 border-b border-slate-100 flex items-center justify-between gap-2">
+                        <div>
+                            <h2 class="text-base sm:text-lg font-extrabold text-slate-800">Sesi Terdekat</h2>
+                            <p class="text-xs text-slate-500">Jadwal sesi atau tenggat terdekat Anda</p>
+                        </div>
+                        @if (!empty($nearestSession))
+                            @php
+                                $nsKind = $nearestSession['kind'] ?? 'zoom';
+                                $nsPillCls = match (true) {
+                                    !empty($nearestSession['is_today']) => 'bg-red-50 text-red-600 border-red-200/80',
+                                    $nsKind === 'evaluation'            => 'bg-amber-50 text-amber-700 border-amber-200/80',
+                                    $nsKind === 'start'                 => 'bg-sky-50 text-[#2B6496] border-sky-200/80',
+                                    default                             => 'bg-sky-50 text-[#13416B] border-sky-200/80',
+                                };
+                                $nsDotCls = match (true) {
+                                    !empty($nearestSession['is_today']) => 'bg-red-500 animate-pulse',
+                                    $nsKind === 'evaluation'            => 'bg-amber-500',
+                                    $nsKind === 'start'                 => 'bg-[#2B6496]',
+                                    default                             => 'bg-[#13416B]',
+                                };
+                            @endphp
+                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold shrink-0 border {{ $nsPillCls }}">
+                                <span class="w-1.5 h-1.5 rounded-full {{ $nsDotCls }}"></span>
+                                {{ $nearestSession['status_label'] }}
+                            </span>
+                        @endif
+                    </div>
+
+                    @if (!empty($nearestSession))
+                        @php
+                            $nsKind = $nearestSession['kind'] ?? 'zoom';
+                            $nsCalHeaderBg = match (true) {
+                                !empty($nearestSession['is_today']) => 'bg-red-500',
+                                $nsKind === 'evaluation'            => 'bg-amber-500',
+                                $nsKind === 'start'                 => 'bg-[#2B6496]',
+                                default                             => 'bg-[#13416B]',
+                            };
+                            $nsBtnCls = match ($nsKind) {
+                                'evaluation' => 'bg-amber-500 hover:bg-amber-600 text-white',
+                                'start'      => 'bg-[#2B6496] hover:bg-[#13416B] text-white',
+                                default      => 'bg-[#13416B] hover:bg-[#0f3354] text-white',
+                            };
+                        @endphp
+                        <div class="space-y-4">
+                            <div class="flex items-start gap-3.5">
+                                {{-- Kotak Tanggal Kalender Adaptif Warna per Jenis Sesi --}}
+                                <div class="w-14 shrink-0 rounded-md overflow-hidden border border-slate-200 bg-white shadow-2xs text-center">
+                                    <div class="{{ $nsCalHeaderBg }} text-white text-[10px] font-extrabold uppercase tracking-wider py-1.5">
+                                        {{ $nearestSession['month_short'] ?? strtoupper(now()->locale('id')->translatedFormat('M')) }}
+                                    </div>
+                                    <div class="py-2.5 text-xl font-extrabold text-slate-800 leading-none tabular-nums">
+                                        {{ $nearestSession['day_number'] ?? now()->format('d') }}
+                                    </div>
+                                </div>
+
+                                <div class="min-w-0 flex-1">
+                                    @php
+                                        $nsSubtitle = $nearestSession['subtitle'] ?? $nearestSession['course_name'];
+                                    @endphp
+                                    <p class="text-xs font-semibold text-[#547996] truncate" title="{{ $nsSubtitle }}">
+                                        {{ $nsSubtitle }}
+                                    </p>
+                                    <h3 class="text-sm sm:text-base font-bold text-slate-800 leading-snug line-clamp-3 mt-0.5" title="{{ $nearestSession['title'] }}">
+                                        {{ $nearestSession['title'] }}
+                                    </h3>
+                                    <div class="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-500">
+                                        <span class="inline-flex items-center gap-1">
+                                            <i class="far fa-calendar-alt text-slate-400 text-[11px]"></i>
+                                            {{ $nearestSession['date_label'] }}
+                                        </span>
+                                        @if (!empty($nearestSession['time_label']))
+                                            <span class="inline-flex items-center gap-1 font-semibold text-slate-700">
+                                                <i class="far fa-clock text-slate-400 text-[11px]"></i>
+                                                {{ $nearestSession['time_label'] }}
+                                            </span>
+                                        @endif
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="flex justify-end">
+                                <a href="{{ $nearestSession['url'] }}"
+                                    class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-md font-bold transition-colors shadow-2xs text-xs sm:text-sm {{ $nsBtnCls }}">
+                                    @if ($nsKind === 'zoom')
+                                        <i class="fas fa-video text-xs"></i>
+                                    @endif
+                                    <span>{{ $nearestSession['action_label'] }}</span>
+                                </a>
+                            </div>
+                        </div>
+                    @else
+                        <div class="py-6 text-center">
+                            <i class="far fa-calendar-check text-2xl text-slate-300 mb-2 block"></i>
+                            <p class="text-xs sm:text-sm font-semibold text-slate-700">Belum ada sesi terjadwal</p>
+                            <p class="text-xs text-slate-500 mt-0.5">Jadwal sesi atau tenggat pelatihan aktif Anda akan tampil di sini.</p>
+                        </div>
+                    @endif
+                </section>
+
+                <!-- CARD KANAN 2: Terakhir Dilihat (Single Card Tanpa Nested Card & Tanpa Badge Kategori) -->
+                <section class="bg-white rounded-md p-4 sm:p-5 shadow-sm border border-slate-200 flex flex-col shrink-0">
+                    <div class="mb-4 pb-3 border-b border-slate-100">
+                        <h2 class="text-base sm:text-lg font-extrabold text-slate-800">Terakhir Dilihat</h2>
+                        <p class="text-xs text-slate-500">Koleksi perpustakaan terakhir diakses</p>
+                    </div>
+
+                    @if (isset($lastLibrary) && $lastLibrary)
+                        <a href="{{ route('user.library.index') }}?open={{ $lastLibrary->id }}"
+                            class="flex items-start gap-3.5 group">
+
+                            <div class="w-20 h-24 rounded-md overflow-hidden shrink-0 shadow-2xs relative bg-slate-50 border border-slate-200 flex items-center justify-center">
+                                @if ($lastLibrary->cover_image)
+                                    <img src="{{ $lastLibrary->cover_image_url }}"
+                                        alt="{{ $lastLibrary->title }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                                    <div class="absolute bottom-1 right-1 w-5 h-5 bg-[#13416B] text-white rounded-full flex items-center justify-center text-[10px] shadow-sm">
+                                        <i class="{{ $lastLibrary->icon }}"></i>
+                                    </div>
+                                @else
+                                    <i class="{{ $lastLibrary->icon }} text-[#547996] text-2xl group-hover:scale-110 transition-transform"></i>
+                                @endif
+                            </div>
+
+                            <div class="flex-1 min-w-0 flex flex-col justify-between">
+                                <div>
+                                    <h3 class="text-sm sm:text-base font-bold text-slate-800 leading-snug line-clamp-2 group-hover:text-[#13416B] transition-colors">
+                                        {{ $lastLibrary->title }}
+                                    </h3>
+                                    <p class="line-clamp-2 text-xs text-slate-500 leading-relaxed mt-1">
+                                        {{ $lastLibrary->description ?? 'Klik untuk membuka kembali koleksi perpustakaan ini.' }}
+                                    </p>
+                                </div>
+                                @if (!empty($lastLibrary->last_accessed_at))
+                                    <p class="text-[11px] text-slate-400 mt-2">
+                                        Diakses {{ \Carbon\Carbon::parse($lastLibrary->last_accessed_at)->locale('id')->diffForHumans() }}
+                                    </p>
+                                @endif
+                            </div>
+                        </a>
+                    @else
+                        <div class="py-6 text-center">
+                            <i class="fas fa-book-reader text-2xl text-slate-300 mb-2 block"></i>
+                            <p class="text-xs sm:text-sm font-semibold text-slate-700 mb-1">Belum ada riwayat baca</p>
+                            <a href="{{ route('user.library.index') }}"
+                                class="text-xs font-bold text-[#13416B] hover:underline">
+                                Jelajahi Perpustakaan
+                            </a>
+                        </div>
+                    @endif
+                </section>
+
+            </div>
         </div>
 
         {{-- Floating Tooltip Gantt Chart --}}
@@ -426,6 +411,66 @@
                             </button>
                         </div>
                     </form>
+                </div>
+            </div>
+        </div>
+    @elseif (!empty($showProfileReminderModal))
+        <!-- ===================================== -->
+        <!-- 3B. POP-UP PENGINGAT PROFIL (1X/SESI) -->
+        <!-- ===================================== -->
+        <div x-data="{ open: true }"
+            x-show="open"
+            x-cloak
+            @keydown.escape.window="open = false"
+            x-transition:enter="transition ease-out duration-200"
+            x-transition:enter-start="opacity-0"
+            x-transition:enter-end="opacity-100"
+            x-transition:leave="transition ease-in duration-150"
+            x-transition:leave-start="opacity-100"
+            x-transition:leave-end="opacity-0"
+            class="fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-xs"
+            style="background-color: rgba(15, 23, 42, 0.55)"
+            @click.self="open = false">
+            <div x-show="open"
+                x-transition:enter="transition ease-out duration-200"
+                x-transition:enter-start="opacity-0 scale-95 translate-y-2"
+                x-transition:enter-end="opacity-100 scale-100 translate-y-0"
+                x-transition:leave="transition ease-in duration-150"
+                x-transition:leave-start="opacity-100 scale-100 translate-y-0"
+                x-transition:leave-end="opacity-0 scale-95 translate-y-2"
+                class="bg-white rounded-xl shadow-xl max-w-md w-full border border-slate-200 overflow-hidden">
+                <div class="p-5 sm:p-6">
+                    <div class="flex items-start justify-between gap-3 mb-3">
+                        <div class="w-10 h-10 rounded-lg bg-amber-100 text-amber-600 flex items-center justify-center shrink-0">
+                            <i class="fas fa-id-card text-base"></i>
+                        </div>
+                        <button type="button" @click="open = false"
+                            class="p-1.5 rounded-md text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer"
+                            aria-label="Tutup">
+                            <i class="fas fa-times text-sm"></i>
+                        </button>
+                    </div>
+
+                    <div class="text-left">
+                        <h3 class="text-base sm:text-lg font-bold text-slate-900 leading-snug">
+                            Informasi pribadi &amp; instansi belum dilengkapi
+                        </h3>
+                        <p class="text-xs sm:text-sm text-slate-500 mt-2 leading-relaxed">
+                            Anda tetap bisa mengikuti pelatihan sekarang. Data ini wajib dilengkapi di menu <strong class="text-slate-700">Profil</strong> saat hendak mengklaim sertifikat.
+                        </p>
+                    </div>
+
+                    <div class="mt-6 flex items-center justify-end gap-2.5">
+                        <button type="button" @click="open = false"
+                            class="px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-colors cursor-pointer">
+                            Nanti Saja
+                        </button>
+                        <a href="{{ route('user.profile') }}"
+                            class="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs sm:text-sm font-bold text-white bg-[#13416B] hover:bg-[#0f3354] transition-colors shadow-xs">
+                            <span>Lengkapi Profil</span>
+                            <i class="fas fa-arrow-right text-[10px]"></i>
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
@@ -640,7 +685,10 @@
                     function render() {
                         const todayMs = parseIsoDate(data.today);
                         const allEvents = Array.isArray(data.events) ? data.events : Object.values(data.events || {});
-                        const baseEvents = allEvents.filter((ev) => ev.is_enrolled);
+                        const baseEvents = allEvents.filter((ev) => {
+                            if (ev.user_completed) return false;
+                            return resolveDisplayStatus(ev, todayMs).key !== 'completed';
+                        });
                         const filtered = baseEvents.filter((ev) => {
                             const st = resolveDisplayStatus(ev, todayMs);
                             if (currentStatus !== 'all' && st.key !== currentStatus) return false;
@@ -733,6 +781,7 @@
                                         </a>
                                         <div class="flex flex-wrap items-center gap-1.5 text-xs pt-0.5">
                                             <span class="inline-flex px-2 py-0.5 rounded font-bold ${displayStatus.cls}">${escapeHtml(displayStatus.label)}</span>
+                                            ${ev.is_enrolled ? '<span class="inline-flex px-2 py-0.5 rounded font-bold bg-[#13416B]/10 text-[#13416B]">Terdaftar</span>' : ''}
                                         </div>
                                     </div>
                                     <div class="relative min-h-[84px] overflow-hidden">
