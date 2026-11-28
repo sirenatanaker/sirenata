@@ -207,64 +207,55 @@
                 <div class="absolute inset-0 bg-black/10 dark:bg-black/30"></div>
                 <div class="absolute -bottom-12 sm:-bottom-16 md:-bottom-20 left-4 sm:left-6 md:left-10">
                     <div class="relative">
-                        <img src="https://ui-avatars.com/api/?name={{ urlencode($user->profile?->full_name ?? $user->name) }}&background=6366f1&color=fff&size=160"
+                        <img src="https://ui-avatars.com/api/?name={{ urlencode($user->profile?->full_name ?? $user->name) }}&background=13416b&color=fff&size=160"
                             alt="Profile" class="w-24 h-24 sm:w-32 sm:h-32 md:w-36 md:h-36 rounded-full border-4 border-white dark:border-slate-800 shadow-md object-cover">
                     </div>
                 </div>
             </div>
 
-            <div class="pt-14 sm:pt-18 md:pt-22 px-4 sm:px-6 md:px-8 pb-4 sm:pb-6 text-left">
-                <h1 class="text-xl sm:text-2xl md:text-3xl font-bold text-slate-900 dark:text-white mb-1">
+            <div class="pt-16 sm:pt-20 md:pt-24 px-5 sm:px-7 md:px-10 pb-6 sm:pb-7 text-left">
+                <h1 class="text-xl sm:text-2xl md:text-3xl font-bold text-slate-900 dark:text-white tracking-tight mb-2.5 sm:mb-3">
                     {{ $user->profile?->full_name ?? $user->name }}
                 </h1>
-                <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 flex flex-wrap items-center justify-start gap-4 sm:gap-2">
-                    <span class="flex items-center gap-1.5"><i class="fas fa-envelope text-slate-400"></i> {{ $user->email }}</span>
-                    <span class="hidden md:inline text-slate-300 dark:text-slate-600">•</span>
-                    <span class="flex items-center gap-1.5"><i class="fas fa-calendar text-slate-400"></i> Bergabung sejak {{ $user->created_at->translatedFormat('M Y') }}</span>
-                </p>
 
-                <!-- Quick Stats -->
-                <div class="grid grid-cols-2 sm:grid-cols-3 gap-2.5 sm:gap-3.5 pt-4 sm:pt-5 max-w-2xl text-left">
-                    <div class="p-2.5 sm:p-3.5 rounded-md bg-slate-50 dark:bg-slate-700/50 border border-slate-100 dark:border-slate-700 flex flex-col items-start">
-                        <p class="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wide font-semibold mb-0.5 sm:mb-1">Kursus Diikuti</p>
-                        <p class="text-sm sm:text-base md:text-lg font-bold text-slate-800 dark:text-white">{{ $stats['enrolled'] }} Kursus</p>
-                    </div>
-                    <div class="p-2.5 sm:p-3.5 rounded-md bg-slate-50 dark:bg-slate-700/50 border border-slate-100 dark:border-slate-700 flex flex-col items-start">
-                        <p class="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wide font-semibold mb-0.5 sm:mb-1">Selesai</p>
-                        <p class="text-sm sm:text-base md:text-lg font-bold text-slate-800 dark:text-white">{{ $stats['completed'] }} Kursus</p>
-                    </div>
-                    <div class="col-span-2 sm:col-span-1 p-2.5 sm:p-3.5 rounded-md bg-slate-50 dark:bg-slate-700/50 border border-slate-100 dark:border-slate-700 flex flex-col items-start">
-                        <p class="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wide font-semibold mb-0.5 sm:mb-1">Sertifikat</p>
-                        <p class="text-sm sm:text-base md:text-lg font-bold text-[#13416B] dark:text-white">{{ $stats['certificates'] }}</p>
-                    </div>
+                <div class="flex flex-wrap items-center justify-start gap-x-5 gap-y-2 text-xs sm:text-sm text-slate-500 dark:text-slate-400">
+                    <span class="inline-flex items-center gap-2">
+                        <i class="fas fa-envelope text-slate-400 text-xs"></i>
+                        <span>{{ $user->email }}</span>
+                    </span>
+                    <span class="hidden sm:inline text-slate-300 dark:text-slate-600">•</span>
+                    <span class="inline-flex items-center gap-2">
+                        <i class="fas fa-calendar text-slate-400 text-xs"></i>
+                        <span>Bergabung sejak {{ $user->created_at->translatedFormat('M Y') }}</span>
+                    </span>
                 </div>
             </div>
         </div>
 
         <!-- Tabs -->
         <div id="profile-tabs-section" class="scroll-mt-20 sm:scroll-mt-24 bg-white dark:bg-slate-800 rounded-md shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
-            <div x-ref="tabContainer" class="flex gap-1 px-3 sm:px-6 pt-2.5 sm:pt-3.5 border-b border-slate-200 dark:border-slate-700 overflow-x-auto hide-scrollbar scroll-smooth">
+            <div x-ref="tabContainer" class="flex gap-2 px-4 sm:px-7 pt-3 sm:pt-4 border-b border-slate-200 dark:border-slate-700 overflow-x-auto hide-scrollbar scroll-smooth">
                 <button type="button" data-tab="personal" @click="tab = 'personal'; window.location.hash = 'personal'"
                     :class="tab === 'personal' ? 'text-[#13416B] dark:text-white border-[#13416B] dark:border-white' : 'text-slate-500 dark:text-slate-400 border-transparent hover:text-slate-800 dark:hover:text-white'"
-                    class="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-bold border-b-2 -mb-px transition-colors whitespace-nowrap cursor-pointer">
+                    class="flex items-center gap-2 px-3 sm:px-4 py-2.5 text-xs sm:text-sm font-bold border-b-2 -mb-px transition-colors whitespace-nowrap cursor-pointer">
                     <i class="fas fa-user text-xs sm:text-sm"></i> Informasi Saya
                 </button>
                 <button type="button" data-tab="certificates" @click="tab = 'certificates'; window.location.hash = 'certificates'"
                     :class="tab === 'certificates' ? 'text-[#13416B] dark:text-white border-[#13416B] dark:border-white' : 'text-slate-500 dark:text-slate-400 border-transparent hover:text-slate-800 dark:hover:text-white'"
-                    class="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-bold border-b-2 -mb-px transition-colors whitespace-nowrap cursor-pointer">
+                    class="flex items-center gap-2 px-3 sm:px-4 py-2.5 text-xs sm:text-sm font-bold border-b-2 -mb-px transition-colors whitespace-nowrap cursor-pointer">
                     <i class="fas fa-award text-xs sm:text-sm"></i> Sertifikat Saya
                     <span class="text-[10px] sm:text-xs font-bold bg-[#13416B]/10 dark:bg-white/10 text-[#13416B] dark:text-white rounded-full px-1.5 sm:px-2 py-0.5">{{ $stats['certificates'] }}</span>
                 </button>
                 <button type="button" data-tab="settings" @click="tab = 'settings'; window.location.hash = 'pengaturan'"
                     :class="tab === 'settings' ? 'text-[#13416B] dark:text-white border-[#13416B] dark:border-white' : 'text-slate-500 dark:text-slate-400 border-transparent hover:text-slate-800 dark:hover:text-white'"
-                    class="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-bold border-b-2 -mb-px transition-colors whitespace-nowrap cursor-pointer">
+                    class="flex items-center gap-2 px-3 sm:px-4 py-2.5 text-xs sm:text-sm font-bold border-b-2 -mb-px transition-colors whitespace-nowrap cursor-pointer">
                     <i class="fas fa-gear text-xs sm:text-sm"></i> Pengaturan
                 </button>
             </div>
 
-            <div class="p-3.5 sm:p-5 lg:p-6">
+            <div class="p-5 sm:p-7 lg:p-8">
                 <!-- Tab: Personal (Informasi Saya) -->
-                <div x-show="tab === 'personal'" x-cloak>
+                <div x-show="tab === 'personal'" x-cloak class="max-w-3xl">
                     @php
                         $ssoUser = ! empty($user->siapkerja_id);
                         $rawType = $user->profile?->institution_type;
@@ -287,28 +278,12 @@
                     @endphp
 
                     @if (!$isProfileCompleteForCert)
-                        <div class="mb-5 rounded-md border {{ $fromCertClaim ? 'border-amber-300 bg-amber-50 dark:bg-amber-900/20 dark:border-amber-700/60' : 'border-sky-200 bg-sky-50/90 dark:bg-slate-700/50 dark:border-slate-600' }} p-4">
-                            <div class="flex items-start gap-3">
-                                <div class="w-9 h-9 rounded-md {{ $fromCertClaim ? 'bg-amber-500' : 'bg-[#13416B]' }} text-white flex items-center justify-center shrink-0 mt-0.5">
-                                    <i class="fas {{ $fromCertClaim ? 'fa-award' : 'fa-id-card' }} text-sm"></i>
-                                </div>
-                                <div class="min-w-0 flex-1">
-                                    <h4 class="text-xs sm:text-sm font-bold {{ $fromCertClaim ? 'text-amber-900 dark:text-amber-200' : 'text-slate-900 dark:text-white' }}">
-                                        {{ $fromCertClaim ? 'Lengkapi Informasi Pribadi untuk Mengklaim Sertifikat' : 'Lengkapi Data Informasi Pribadi & Instansi' }}
-                                    </h4>
-                                    <p class="text-xs {{ $fromCertClaim ? 'text-amber-800 dark:text-amber-200/90' : 'text-slate-600 dark:text-slate-300' }} mt-1 leading-relaxed">
-                                        Data berikut wajib dilengkapi sebelum Anda dapat menerbitkan dan mengunduh sertifikat kelulusan:
-                                    </p>
-                                    <div class="mt-2 flex flex-wrap gap-1.5">
-                                        @foreach ($missingCertFields as $fieldLabel)
-                                            <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold {{ $fromCertClaim ? 'bg-amber-100 text-amber-900 border border-amber-200' : 'bg-white text-slate-700 border border-slate-200' }}">
-                                                <i class="fas fa-circle-exclamation text-[10px] {{ $fromCertClaim ? 'text-amber-600' : 'text-[#13416B]' }}"></i>
-                                                {{ $fieldLabel }}
-                                            </span>
-                                        @endforeach
-                                    </div>
-                                </div>
-                            </div>
+                        <div class="mb-6 rounded-md border border-amber-600 bg-amber-500 text-white px-4 py-3 shadow-xs flex items-start gap-3">
+                            <i class="fas fa-circle-exclamation text-white mt-0.5 text-sm shrink-0"></i>
+                            <p class="text-xs sm:text-sm leading-relaxed text-white">
+                                <span class="font-bold">{{ $fromCertClaim ? 'Lengkapi profil untuk klaim sertifikat:' : 'Lengkapi data berikut sebelum mengklaim sertifikat:' }}</span>
+                                {{ implode(', ', $missingCertFields) }}.
+                            </p>
                         </div>
                     @endif
 
@@ -322,92 +297,98 @@
                             institutionsApiUrl: @js(route('api.masterdata.institutions.index')),
                             regenciesApiUrl: @js(route('user.get-regencies')),
                         })"
-                        x-init="init()">
+                        x-init="init()"
+                        class="space-y-8">
                         @csrf
                         @if (!empty($returnToUrl))
                             <input type="hidden" name="return_to" value="{{ $returnToUrl }}">
                         @endif
 
-                        <div class="mb-4 sm:mb-5">
-                            <h3 class="text-base sm:text-lg font-bold text-slate-900 dark:text-white">Informasi Saya</h3>
-                            <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400">Kelola data identitas serta instansi atau perusahaan Anda untuk kebutuhan sertifikasi.</p>
-                        </div>
-
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-5 mb-5">
-                            {{-- Nama Lengkap --}}
-                            @if ($ssoUser)
-                                <x-form.input name="full_name" label="Nama Lengkap" value="{{ $user->profile?->full_name ?? $user->name }}" disabled helper="Mengikuti nama akun SIAPKerja" class="rounded-md text-xs sm:text-sm" />
-                            @else
-                                <x-form.input name="full_name" label="Nama Lengkap" :required="true" value="{{ old('full_name', $user->profile?->full_name ?? $user->name) }}" class="rounded-md text-xs sm:text-sm" />
-                            @endif
-
-                            {{-- Email --}}
-                            <x-form.input name="email" label="Email" value="{{ $user->email }}" readonly helper="Mengikuti akun login" class="bg-gray-100 dark:bg-slate-700/50 border border-gray-200 dark:border-slate-600 rounded-md cursor-not-allowed text-xs sm:text-sm" />
-                        </div>
-
-                        {{-- Bagian Informasi Instansi / Perusahaan --}}
-                        <div class="pt-4 border-t border-slate-100 dark:border-slate-700 space-y-4 sm:space-y-5 mb-6">
+                        {{-- Bagian 1: Identitas Akun --}}
+                        <section class="space-y-4">
                             <div>
-                                <label class="block text-xs sm:text-sm font-bold text-slate-800 dark:text-white mb-2">
+                                <h3 class="text-base sm:text-lg font-bold text-slate-900 dark:text-white">Informasi Saya</h3>
+                                <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5">Data identitas utama yang digunakan pada akun dan sertifikat Anda.</p>
+                            </div>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
+                                {{-- Nama Lengkap --}}
+                                @if ($ssoUser)
+                                    <x-form.input name="full_name" label="Nama Lengkap" value="{{ $user->profile?->full_name ?? $user->name }}" disabled helper="Mengikuti nama akun SIAPKerja" class="rounded-md text-xs sm:text-sm" />
+                                @else
+                                    <x-form.input name="full_name" label="Nama Lengkap" :required="true" value="{{ old('full_name', $user->profile?->full_name ?? $user->name) }}" class="rounded-md text-xs sm:text-sm" />
+                                @endif
+
+                                {{-- Email --}}
+                                <x-form.input name="email" label="Email" value="{{ $user->email }}" readonly helper="Mengikuti akun login" class="bg-gray-100 dark:bg-slate-700/50 border border-gray-200 dark:border-slate-600 rounded-md cursor-not-allowed text-xs sm:text-sm" />
+                            </div>
+                        </section>
+
+                        {{-- Bagian 2: Informasi Instansi / Perusahaan --}}
+                        <section class="pt-7 border-t border-slate-100 dark:border-slate-700 space-y-5">
+                            <div>
+                                <h4 class="text-sm sm:text-base font-bold text-slate-900 dark:text-white">Instansi / Perusahaan</h4>
+                                <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5">Sesuaikan latar belakang dan asal instansi atau perusahaan Anda.</p>
+                            </div>
+
+                            <div>
+                                <label class="block text-xs sm:text-sm font-semibold text-slate-700 dark:text-slate-200 mb-2">
                                     Asal Pengguna <span class="text-red-500">*</span>
                                 </label>
-                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                                     <label
-                                        class="flex items-start gap-3 p-3.5 rounded-md border-2 cursor-pointer transition-all"
+                                        class="flex items-start gap-3 p-3.5 rounded-md border cursor-pointer transition-all"
                                         :class="sector === 'instansi'
-                                            ? 'border-[#13416B] bg-[#13416B]/5 dark:border-sky-400 dark:bg-sky-400/10'
+                                            ? 'border-[#13416B] bg-[#13416B]/[0.04] ring-1 ring-[#13416B]/20 dark:border-sky-400 dark:bg-sky-400/10'
                                             : 'border-slate-200 dark:border-slate-700 hover:border-slate-300'">
                                         <input type="radio" name="sector" value="instansi" x-model="sector" @change="onSectorChange()"
                                             class="mt-0.5 text-[#13416B] focus:ring-[#13416B]">
                                         <span class="min-w-0">
                                             <span class="block text-xs sm:text-sm font-bold text-slate-800 dark:text-white">Instansi / Lembaga</span>
-                                            <span class="block text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 mt-0.5">Kementerian/lembaga pusat maupun instansi pemerintah daerah</span>
+                                            <span class="block text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 mt-0.5 leading-relaxed">Kementerian/lembaga pusat maupun instansi pemerintah daerah</span>
                                         </span>
                                     </label>
                                     <label
-                                        class="flex items-start gap-3 p-3.5 rounded-md border-2 cursor-pointer transition-all"
+                                        class="flex items-start gap-3 p-3.5 rounded-md border cursor-pointer transition-all"
                                         :class="sector === 'swasta'
-                                            ? 'border-[#13416B] bg-[#13416B]/5 dark:border-emerald-400 dark:bg-emerald-400/10'
+                                            ? 'border-[#13416B] bg-[#13416B]/[0.04] ring-1 ring-[#13416B]/20 dark:border-emerald-400 dark:bg-emerald-400/10'
                                             : 'border-slate-200 dark:border-slate-700 hover:border-slate-300'">
                                         <input type="radio" name="sector" value="swasta" x-model="sector" @change="onSectorChange()"
                                             class="mt-0.5 text-[#13416B] focus:ring-[#13416B]">
                                         <span class="min-w-0">
                                             <span class="block text-xs sm:text-sm font-bold text-slate-800 dark:text-white">Swasta</span>
-                                            <span class="block text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 mt-0.5">Perusahaan, pelaku usaha, atau profesional non-pemerintah</span>
+                                            <span class="block text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 mt-0.5 leading-relaxed">Perusahaan, pelaku usaha, atau profesional non-pemerintah</span>
                                         </span>
                                     </label>
                                 </div>
                             </div>
 
                             {{-- FORM INSTANSI / LEMBAGA --}}
-                            <div x-show="sector === 'instansi'" class="space-y-4">
+                            <div x-show="sector === 'instansi'" class="space-y-5">
                                 <div>
-                                    <label class="block text-xs sm:text-sm font-bold text-slate-800 dark:text-white mb-2">
-                                        Tingkat Asal Instansi <span class="text-red-500">*</span>
+                                    <label class="block text-xs sm:text-sm font-semibold text-slate-700 dark:text-slate-200 mb-2">
+                                        Tingkat Instansi <span class="text-red-500">*</span>
                                     </label>
-                                    <div class="grid grid-cols-3 gap-2 sm:gap-3">
-                                        <label class="flex items-center justify-center gap-1.5 px-2 py-2.5 rounded-md border-2 cursor-pointer text-xs sm:text-sm font-semibold transition-all"
-                                            :class="asalInstansi === 'pusat' ? 'border-[#13416B] bg-[#13416B]/5 text-[#13416B] dark:border-sky-400 dark:text-white' : 'border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300'">
-                                            <input type="radio" name="asal_instansi" value="pusat" x-model="asalInstansi" :disabled="sector !== 'instansi'" @change="onAsalChange()"
-                                                class="text-[#13416B] focus:ring-[#13416B]">
+                                    <div class="grid grid-cols-3 gap-1.5 p-1 rounded-md bg-slate-100/90 dark:bg-slate-700/60 border border-slate-200/80 dark:border-slate-600/80 max-w-md">
+                                        <label class="flex items-center justify-center py-2 px-3 rounded text-xs sm:text-sm font-semibold cursor-pointer transition-all"
+                                            :class="asalInstansi === 'pusat' ? 'bg-white dark:bg-slate-800 text-[#13416B] dark:text-white shadow-2xs' : 'text-slate-600 dark:text-slate-300 hover:text-slate-900'">
+                                            <input type="radio" name="asal_instansi" value="pusat" x-model="asalInstansi" :disabled="sector !== 'instansi'" @change="onAsalChange()" class="sr-only">
                                             <span>Pusat</span>
                                         </label>
-                                        <label class="flex items-center justify-center gap-1.5 px-2 py-2.5 rounded-md border-2 cursor-pointer text-xs sm:text-sm font-semibold transition-all"
-                                            :class="asalInstansi === 'provinsi' ? 'border-[#13416B] bg-[#13416B]/5 text-[#13416B] dark:border-sky-400 dark:text-white' : 'border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300'">
-                                            <input type="radio" name="asal_instansi" value="provinsi" x-model="asalInstansi" :disabled="sector !== 'instansi'" @change="onAsalChange()"
-                                                class="text-[#13416B] focus:ring-[#13416B]">
+                                        <label class="flex items-center justify-center py-2 px-3 rounded text-xs sm:text-sm font-semibold cursor-pointer transition-all"
+                                            :class="asalInstansi === 'provinsi' ? 'bg-white dark:bg-slate-800 text-[#13416B] dark:text-white shadow-2xs' : 'text-slate-600 dark:text-slate-300 hover:text-slate-900'">
+                                            <input type="radio" name="asal_instansi" value="provinsi" x-model="asalInstansi" :disabled="sector !== 'instansi'" @change="onAsalChange()" class="sr-only">
                                             <span>Provinsi</span>
                                         </label>
-                                        <label class="flex items-center justify-center gap-1.5 px-2 py-2.5 rounded-md border-2 cursor-pointer text-xs sm:text-sm font-semibold transition-all"
-                                            :class="asalInstansi === 'kab_kota' ? 'border-[#13416B] bg-[#13416B]/5 text-[#13416B] dark:border-sky-400 dark:text-white' : 'border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300'">
-                                            <input type="radio" name="asal_instansi" value="kab_kota" x-model="asalInstansi" :disabled="sector !== 'instansi'" @change="onAsalChange()"
-                                                class="text-[#13416B] focus:ring-[#13416B]">
+                                        <label class="flex items-center justify-center py-2 px-3 rounded text-xs sm:text-sm font-semibold cursor-pointer transition-all"
+                                            :class="asalInstansi === 'kab_kota' ? 'bg-white dark:bg-slate-800 text-[#13416B] dark:text-white shadow-2xs' : 'text-slate-600 dark:text-slate-300 hover:text-slate-900'">
+                                            <input type="radio" name="asal_instansi" value="kab_kota" x-model="asalInstansi" :disabled="sector !== 'instansi'" @change="onAsalChange()" class="sr-only">
                                             <span>Kab/Kota</span>
                                         </label>
                                     </div>
                                 </div>
 
-                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-5">
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
                                     {{-- Provinsi (untuk Provinsi & Kab/Kota) --}}
                                     <div x-show="asalInstansi === 'provinsi' || asalInstansi === 'kab_kota'">
                                         <label for="profileInstansiProvinsi" class="block text-xs sm:text-sm font-semibold text-slate-700 dark:text-slate-200 mb-1.5">
@@ -416,7 +397,7 @@
                                         <select id="profileInstansiProvinsi" name="province_code" x-model="provinceCode"
                                             :disabled="sector !== 'instansi' || !(asalInstansi === 'provinsi' || asalInstansi === 'kab_kota')"
                                             @change="onProvinceChange()"
-                                            class="w-full rounded-md border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 px-3 py-2 text-xs sm:text-sm text-slate-800 dark:text-white focus:border-[#13416B] focus:ring-[#13416B]">
+                                            class="w-full h-10 sm:h-11 rounded-md border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 px-3 text-xs sm:text-sm text-slate-800 dark:text-white focus:border-[#13416B] focus:ring-[#13416B]">
                                             <option value="">Pilih Provinsi</option>
                                             @foreach ($provinces as $prov)
                                                 <option value="{{ $prov->code }}">{{ $prov->name }}</option>
@@ -432,7 +413,7 @@
                                         <select id="profileInstansiKabkota" name="regency_code" x-model="regencyCode"
                                             :disabled="sector !== 'instansi' || asalInstansi !== 'kab_kota'"
                                             @change="loadInstitutions()"
-                                            class="w-full rounded-md border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 px-3 py-2 text-xs sm:text-sm text-slate-800 dark:text-white focus:border-[#13416B] focus:ring-[#13416B]">
+                                            class="w-full h-10 sm:h-11 rounded-md border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 px-3 text-xs sm:text-sm text-slate-800 dark:text-white focus:border-[#13416B] focus:ring-[#13416B]">
                                             <option value="">Pilih Kabupaten/Kota</option>
                                             <template x-for="reg in regencies" :key="reg.code">
                                                 <option :value="reg.code" x-text="reg.name" :selected="reg.code == regencyCode"></option>
@@ -448,7 +429,7 @@
                                         </label>
                                         <select id="profileInstansiSelect" name="instansi" x-model="selectedInstansi"
                                             :disabled="sector !== 'instansi' || asalInstansi === ''"
-                                            class="w-full rounded-md border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 px-3 py-2 text-xs sm:text-sm text-slate-800 dark:text-white focus:border-[#13416B] focus:ring-[#13416B]">
+                                            class="w-full h-10 sm:h-11 rounded-md border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 px-3 text-xs sm:text-sm text-slate-800 dark:text-white focus:border-[#13416B] focus:ring-[#13416B]">
                                             <option value="" x-text="loadingInstitutions ? 'Memuat daftar instansi...' : 'Pilih Instansi'"></option>
                                             <template x-for="inst in institutions" :key="inst">
                                                 <option :value="inst" x-text="inst" :selected="inst === selectedInstansi"></option>
@@ -465,7 +446,7 @@
                                         <input id="profileInstansiCustom" type="text" name="instansi_lainnya" x-model="customInstansi"
                                             :disabled="sector !== 'instansi' || selectedInstansi !== 'lainnya'"
                                             placeholder="Masukkan nama lengkap instansi Anda"
-                                            class="w-full rounded-md border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 px-3 py-2 text-xs sm:text-sm text-slate-800 dark:text-white focus:border-[#13416B] focus:ring-[#13416B]">
+                                            class="w-full h-10 sm:h-11 rounded-md border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 px-3 text-xs sm:text-sm text-slate-800 dark:text-white focus:border-[#13416B] focus:ring-[#13416B]">
                                     </div>
 
                                     {{-- Unit Kerja --}}
@@ -476,13 +457,13 @@
                                         <input id="profileInstansiUnitKerja" type="text" name="unit_kerja" value="{{ $initialUnitKerja }}"
                                             :disabled="sector !== 'instansi'"
                                             placeholder="Contoh: Pusat Pasar Kerja / Bidang Perencanaan SDM"
-                                            class="w-full rounded-md border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 px-3 py-2 text-xs sm:text-sm text-slate-800 dark:text-white focus:border-[#13416B] focus:ring-[#13416B]">
+                                            class="w-full h-10 sm:h-11 rounded-md border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 px-3 text-xs sm:text-sm text-slate-800 dark:text-white focus:border-[#13416B] focus:ring-[#13416B]">
                                     </div>
                                 </div>
                             </div>
 
                             {{-- FORM SWASTA --}}
-                            <div x-show="sector === 'swasta'" class="grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-5">
+                            <div x-show="sector === 'swasta'" class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
                                 <div class="sm:col-span-2">
                                     <label for="profileSwastaCompany" class="block text-xs sm:text-sm font-semibold text-slate-700 dark:text-slate-200 mb-1.5">
                                         Nama Perusahaan / Lembaga Swasta <span class="text-red-500">*</span>
@@ -490,7 +471,7 @@
                                     <input id="profileSwastaCompany" type="text" name="instansi" x-model="swastaCompany"
                                         :disabled="sector !== 'swasta'"
                                         placeholder="Contoh: PT Maju Bersama"
-                                        class="w-full rounded-md border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 px-3 py-2 text-xs sm:text-sm text-slate-800 dark:text-white focus:border-[#13416B] focus:ring-[#13416B]">
+                                        class="w-full h-10 sm:h-11 rounded-md border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 px-3 text-xs sm:text-sm text-slate-800 dark:text-white focus:border-[#13416B] focus:ring-[#13416B]">
                                 </div>
 
                                 <div>
@@ -500,7 +481,7 @@
                                     <select id="profileSwastaProvinsi" name="province_code" x-model="provinceCode"
                                         :disabled="sector !== 'swasta'"
                                         @change="onProvinceChange()"
-                                        class="w-full rounded-md border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 px-3 py-2 text-xs sm:text-sm text-slate-800 dark:text-white focus:border-[#13416B] focus:ring-[#13416B]">
+                                        class="w-full h-10 sm:h-11 rounded-md border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 px-3 text-xs sm:text-sm text-slate-800 dark:text-white focus:border-[#13416B] focus:ring-[#13416B]">
                                         <option value="">Pilih Provinsi</option>
                                         @foreach ($provinces as $prov)
                                             <option value="{{ $prov->code }}">{{ $prov->name }}</option>
@@ -514,7 +495,7 @@
                                     </label>
                                     <select id="profileSwastaKabkota" name="regency_code" x-model="regencyCode"
                                         :disabled="sector !== 'swasta'"
-                                        class="w-full rounded-md border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 px-3 py-2 text-xs sm:text-sm text-slate-800 dark:text-white focus:border-[#13416B] focus:ring-[#13416B]">
+                                        class="w-full h-10 sm:h-11 rounded-md border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 px-3 text-xs sm:text-sm text-slate-800 dark:text-white focus:border-[#13416B] focus:ring-[#13416B]">
                                         <option value="">Pilih Kabupaten/Kota</option>
                                         <template x-for="reg in regencies" :key="reg.code">
                                             <option :value="reg.code" x-text="reg.name" :selected="reg.code == regencyCode"></option>
@@ -529,13 +510,13 @@
                                     <input id="profileSwastaUnitKerja" type="text" name="unit_kerja" value="{{ $initialUnitKerja }}"
                                         :disabled="sector !== 'swasta'"
                                         placeholder="Contoh: Human Resources / Operasional"
-                                        class="w-full rounded-md border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 px-3 py-2 text-xs sm:text-sm text-slate-800 dark:text-white focus:border-[#13416B] focus:ring-[#13416B]">
+                                        class="w-full h-10 sm:h-11 rounded-md border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 px-3 text-xs sm:text-sm text-slate-800 dark:text-white focus:border-[#13416B] focus:ring-[#13416B]">
                                 </div>
                             </div>
-                        </div>
+                        </section>
 
-                        <div class="flex justify-end">
-                            <x-button type="submit" variant="success" size="sm" class="rounded-md text-xs sm:text-sm px-4 py-2 font-bold cursor-pointer">
+                        <div class="pt-5 border-t border-slate-100 dark:border-slate-700 flex justify-end">
+                            <x-button type="submit" variant="success" size="sm" class="rounded-md text-xs sm:text-sm px-5 py-2.5 font-bold cursor-pointer">
                                 {{ !empty($returnToUrl) ? 'Simpan & Lanjutkan Klaim Sertifikat' : 'Simpan Perubahan' }}
                             </x-button>
                         </div>

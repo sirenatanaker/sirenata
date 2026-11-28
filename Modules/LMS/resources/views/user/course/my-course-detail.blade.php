@@ -919,17 +919,17 @@
                                     @endphp
 
                                     @if (!$isProfileCompleteForCert)
-                                        <div class="rounded-md border border-amber-200 bg-amber-50 p-4 space-y-2.5 text-left">
+                                        <div class="rounded-md border border-amber-600 bg-amber-500 text-white p-4 space-y-2.5 text-left shadow-xs">
                                             <div class="flex items-start gap-2.5">
-                                                <i class="fas fa-user-edit text-amber-600 mt-0.5 shrink-0"></i>
+                                                <i class="fas fa-user-edit text-white mt-0.5 shrink-0"></i>
                                                 <div>
-                                                    <p class="text-xs font-bold text-amber-900">Lengkapi Informasi Pribadi Terlebih Dahulu</p>
-                                                    <p class="text-[11px] text-amber-800/90 mt-0.5 leading-relaxed">
-                                                        Sebelum mengklaim sertifikat kelulusan, lengkapi data profil berikut pada menu <strong>Informasi Saya</strong>:
+                                                    <p class="text-xs font-bold text-white">Lengkapi Informasi Pribadi Terlebih Dahulu</p>
+                                                    <p class="text-[11px] text-amber-50 mt-0.5 leading-relaxed">
+                                                        Sebelum mengklaim sertifikat kelulusan, lengkapi data profil berikut pada menu <strong class="text-white">Informasi Saya</strong>:
                                                     </p>
                                                 </div>
                                             </div>
-                                            <ul class="list-disc list-inside text-[11px] text-amber-900/90 space-y-0.5 pl-1 font-medium">
+                                            <ul class="list-disc list-inside text-[11px] text-white space-y-0.5 pl-1 font-medium">
                                                 @foreach ($missingCertFields as $fieldLabel)
                                                     <li>{{ $fieldLabel }}</li>
                                                 @endforeach

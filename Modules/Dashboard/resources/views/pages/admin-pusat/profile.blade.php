@@ -13,7 +13,7 @@
                     <div class="absolute inset-0 bg-black/10"></div>
                     <div class="absolute -bottom-20 left-1/2 transform -translate-x-1/2">
                         <div class="relative">
-                            <img src="https://ui-avatars.com/api/?name={{ $user->profile?->full_name ?? $user->name }}&background=6366f1&color=fff&size=160"
+                            <img src="https://ui-avatars.com/api/?name={{ $user->profile?->full_name ?? $user->name }}&background=13416b&color=fff&size=160"
                                 alt="Profile" class="w-40 h-40 rounded-full border-4 border-white shadow-xl">
                             <div
                                 class="absolute bottom-3 right-3 w-7 h-7 bg-green-500 border-2 border-white rounded-full">

@@ -34,28 +34,28 @@
 
         @if ($showProfileReminder)
             <div x-data="{ dismissed: false }" x-show="!dismissed" x-transition
-                class="rounded-md border border-sky-200 bg-sky-50/90 px-4 py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                class="rounded-md border border-amber-600 bg-amber-500 text-white px-4 py-3 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div class="flex items-start sm:items-center gap-3 min-w-0">
-                    <div class="w-9 h-9 rounded-md bg-[#13416B] text-white flex items-center justify-center shrink-0 text-sm">
+                    <div class="w-9 h-9 rounded-md bg-white/15 text-white flex items-center justify-center shrink-0 text-sm">
                         <i class="fas fa-id-card"></i>
                     </div>
                     <div class="min-w-0">
-                        <p class="text-xs sm:text-sm font-bold text-slate-800">
+                        <p class="text-xs sm:text-sm font-bold text-white">
                             Informasi pribadi &amp; instansi belum dilengkapi
                         </p>
-                        <p class="text-xs text-slate-600 mt-0.5 leading-snug">
-                            Anda tetap bisa mengikuti pelatihan sekarang. Data ini wajib dilengkapi di menu <strong>Profil</strong> saat hendak mengklaim sertifikat.
+                        <p class="text-xs text-amber-50 mt-0.5 leading-snug">
+                            Anda tetap bisa mengikuti pelatihan sekarang. Data ini wajib dilengkapi di menu <strong class="text-white">Profil</strong> saat hendak mengklaim sertifikat.
                         </p>
                     </div>
                 </div>
                 <div class="flex items-center gap-2 shrink-0 self-end sm:self-center">
                     <a href="{{ route('user.profile') }}"
-                        class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-md text-xs font-bold text-white bg-[#13416B] hover:bg-[#0f3354] transition-colors shadow-2xs">
+                        class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-md text-xs font-bold text-amber-700 bg-white hover:bg-amber-50 transition-colors shadow-2xs">
                         <span>Lengkapi Profil</span>
                         <i class="fas fa-arrow-right text-[10px]"></i>
                     </a>
                     <button type="button" @click="dismissed = true"
-                        class="p-1.5 rounded-md text-slate-400 hover:text-slate-600 hover:bg-sky-100 transition-colors cursor-pointer"
+                        class="p-1.5 rounded-md text-white/80 hover:text-white hover:bg-white/15 transition-colors cursor-pointer"
                         aria-label="Tutup pengingat">
                         <i class="fas fa-times text-xs"></i>
                     </button>
