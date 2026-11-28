@@ -12,6 +12,14 @@ class UpdateWebInstansiRequest extends FormRequest
      */
     public function rules(): array
     {
+        $hasDetailPayload = $this->filled('instansi') || $this->filled('asalInstansi');
+
+        if (!$hasDetailPayload) {
+            return [
+                'sector' => ['required', Rule::in(['instansi', 'swasta'])],
+            ];
+        }
+
         return [
             'sector' => ['required', Rule::in(['instansi', 'swasta'])],
             'asalInstansi' => ['required_if:sector,instansi', Rule::in(['pusat', 'provinsi', 'kabkota'])],

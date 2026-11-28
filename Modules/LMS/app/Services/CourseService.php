@@ -1459,6 +1459,14 @@ class CourseService
             ->withCount(['sections', 'students'])
             ->when($search, fn($q) => $q->where('name', 'like', "%{$search}%"));
 
+        // Filter akses kursus berdasarkan sektor:
+        // - Instansi / Lembaga: dapat mengakses kursus Instansi & Swasta (semua).
+        // - Swasta: hanya dapat mengakses kursus Swasta.
+        $authUser = Auth::user();
+        if ($authUser && $authUser->isSwastaUser()) {
+            $query->where('audience', 'swasta');
+        }
+
         // Kecualikan kursus yang sudah didaftarkan / diselesaikan
         if (!empty($excludedCourseIds)) {
             $query->whereNotIn('id', $excludedCourseIds);
@@ -1498,6 +1506,15 @@ class CourseService
             /** @var User $user */
             $user = Auth::user();
 
+            // Validasi akses kursus berdasarkan sektor:
+            // Instansi/Lembaga dapat mengakses kursus Instansi & Swasta; Swasta hanya kursus Swasta.
+            if ($user && !$user->canAccessCourseAudience($course->audience)) {
+                return [
+                    'success' => false,
+                    'message' => 'Kursus ini khusus diperuntukkan bagi peserta dari Instansi / Lembaga.',
+                ];
+            }
+
             // Cek apakah ada gelombang Bimtek aktif
             $activeBimtek = null;
             if ($bimtekEventId) {
@@ -1506,7 +1523,7 @@ class CourseService
             if (!$activeBimtek) {
                 $activeBimtek = BimtekEvent::where('course_id', $course->id)
                     ->whereIn('status', ['open_registration', 'ongoing'])
-                    ->orderByRaw("FIELD(status, 'open_registration', 'ongoing')")
+                    ->orderByRaw("CASE WHEN status = 'open_registration' THEN 0 ELSE 1 END ASC")
                     ->latest()
                     ->first();
             }

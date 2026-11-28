@@ -3,8 +3,10 @@
 namespace Modules\Dashboard\Services;
 
 use App\Models\User;
+use App\Support\SmartCache;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
+use Modules\MasterData\Models\Institution;
 use Modules\User\Enums\InstitutionType;
 use Modules\User\Models\UserProfile;
 use Modules\User\Models\UserScope;
@@ -13,22 +15,91 @@ class DashboardService
 {
     public function updateProfile($user, $validated)
     {
+        $existingProfile = $user->profile;
+        $rawExistingType = $existingProfile?->institution_type;
+        $existingType = $rawExistingType instanceof InstitutionType ? $rawExistingType->value : (string) $rawExistingType;
+
+        $sector = $validated['sector'] ?? null;
+        $asalInstansi = $validated['asal_instansi'] ?? null;
+
+        $institutionType = $existingType !== '' ? $existingType : null;
+        if ($sector === 'swasta') {
+            $institutionType = InstitutionType::SWASTA->value;
+        } elseif ($sector === 'instansi' || !empty($asalInstansi)) {
+            $institutionType = match ($asalInstansi) {
+                'pusat' => InstitutionType::PUSAT->value,
+                'provinsi' => InstitutionType::PROVINSI->value,
+                'kabkota', 'kab_kota' => InstitutionType::KAB_KOTA->value,
+                default => in_array($existingType, [
+                    InstitutionType::PUSAT->value,
+                    InstitutionType::PROVINSI->value,
+                    InstitutionType::KAB_KOTA->value,
+                ], true) ? $existingType : InstitutionType::INSTANSI->value,
+            };
+        }
+
+        $instansiValue = $validated['instansi'] ?? $existingProfile?->instansi;
+        if (($validated['instansi'] ?? null) === 'lainnya') {
+            $customName = trim((string) ($validated['instansi_lainnya'] ?? ''));
+            $instansiValue = $customName !== '' ? $customName : $existingProfile?->instansi;
+
+            if ($customName !== '' && $institutionType !== InstitutionType::SWASTA->value) {
+                Institution::firstOrCreate(
+                    [
+                        'name' => $customName,
+                        'type' => $institutionType === InstitutionType::PUSAT->value ? 'pusat' : 'daerah',
+                        'province_code' => $validated['province_code'] ?? null,
+                        'regency_code' => $institutionType === InstitutionType::PROVINSI->value ? null : ($validated['regency_code'] ?? null),
+                    ],
+                    [
+                        'is_active' => true,
+                    ]
+                );
+            }
+        } elseif (is_string($instansiValue)) {
+            $instansiValue = trim($instansiValue);
+        }
+
+        $unitKerjaValue = array_key_exists('unit_kerja', $validated)
+            ? (is_string($validated['unit_kerja']) ? trim($validated['unit_kerja']) : $validated['unit_kerja'])
+            : $existingProfile?->unit_kerja;
+
+        $profilePayload = [
+            'full_name' => !empty($validated['full_name']) ? trim((string) $validated['full_name']) : $existingProfile?->full_name,
+            'phone' => array_key_exists('phone', $validated) ? ($validated['phone'] ?: null) : $existingProfile?->phone,
+            'gender' => $validated['gender'] ?? $existingProfile?->gender,
+            'instansi' => $instansiValue !== '' ? $instansiValue : null,
+            'unit_kerja' => $unitKerjaValue !== '' ? $unitKerjaValue : null,
+        ];
+
+        if ($institutionType !== null) {
+            $profilePayload['institution_type'] = $institutionType;
+        }
+
         $user->profile()->updateOrCreate(
             ['user_id' => $user->id],
-            [
-                'full_name' => $validated['full_name'] ?? $user->profile?->full_name,
-                'phone' => $validated['phone'] ?? $user->profile?->phone,
-                'gender' => $validated['gender'] ?? $user->profile?->gender,
-                'instansi' => $validated['instansi'] ?? $user->profile?->instansi,
-                'unit_kerja' => $validated['unit_kerja'] ?? $user->profile?->unit_kerja,
-            ]
+            $profilePayload
         );
+
+        $provinceCode = array_key_exists('province_code', $validated)
+            ? ($validated['province_code'] ?: null)
+            : $user->scopeArea?->province_code;
+        $regencyCode = array_key_exists('regency_code', $validated)
+            ? ($validated['regency_code'] ?: null)
+            : $user->scopeArea?->regency_code;
+
+        if ($institutionType === InstitutionType::PUSAT->value) {
+            $provinceCode = null;
+            $regencyCode = null;
+        } elseif ($institutionType === InstitutionType::PROVINSI->value) {
+            $regencyCode = null;
+        }
 
         $user->scopeArea()->updateOrCreate(
             ['user_id' => $user->id],
             [
-                'province_code' => $validated['province_code'] ?? $user->scopeArea?->province_code,
-                'regency_code' => $validated['regency_code'] ?? $user->scopeArea?->regency_code,
+                'province_code' => $provinceCode,
+                'regency_code' => $regencyCode,
             ]
         );
 
@@ -42,6 +113,11 @@ class DashboardService
                 'password' => Hash::make($validated['password']),
             ]);
         }
+
+        SmartCache::bump([
+            SmartCache::userDomain($user->id),
+        ]);
+
         return $user;
     }
 

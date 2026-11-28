@@ -51,8 +51,8 @@ class UserDashboardController extends Controller
     {
         $this->userDashboardService->updateInstansiWeb($request->user(), $request->validated());
 
-        ToastMagic::success('Data instansi berhasil disimpan!');
-        return redirect()->route('user.dashboard')->with('success', 'Data instansi berhasil disimpan.');
+        ToastMagic::success('Preferensi berhasil disimpan! Selamat belajar di SIRENATA.');
+        return redirect()->route('user.dashboard')->with('success', 'Preferensi berhasil disimpan.');
     }
 
     /**
@@ -71,6 +71,18 @@ class UserDashboardController extends Controller
     public function storeOrUpdateProfile(UpdateProfileRequest $request): RedirectResponse
     {
         $this->dashboardService->updateProfile($request->user(), $request->validated());
+
+        $user = $request->user()->fresh(['profile', 'scopeArea']);
+        $returnTo = (string) $request->input('return_to', '');
+        $isSafeReturn = $returnTo !== '' && (
+            str_starts_with($returnTo, '/') ||
+            str_starts_with($returnTo, url('/'))
+        );
+
+        if ($isSafeReturn && $user->hasCompleteCertificateProfile()) {
+            ToastMagic::success('Informasi pribadi berhasil disimpan! Anda kini dapat mengklaim sertifikat.');
+            return redirect()->to($returnTo);
+        }
 
         ToastMagic::success('Profile berhasil diupdate!');
         return to_route('user.profile');

@@ -3,6 +3,7 @@
 namespace Modules\User\Enums;
 
 enum InstitutionType: string {
+    case INSTANSI = 'instansi';
     case PUSAT = 'pusat';
     case PROVINSI = 'provinsi';
     case KAB_KOTA = 'kab_kota';

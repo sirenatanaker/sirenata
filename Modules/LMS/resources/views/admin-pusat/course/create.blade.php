@@ -31,7 +31,7 @@
                                     @checked(old('audience', 'instansi') === 'instansi')>
                                 <span>
                                     <span class="block text-sm font-bold text-slate-800">Instansi / Lembaga</span>
-                                    <span class="block text-xs text-slate-500">Untuk aparatur pemerintah</span>
+                                    <span class="block text-xs text-slate-500">Khusus peserta Instansi / Lembaga</span>
                                 </span>
                             </label>
                             <label
@@ -41,7 +41,7 @@
                                     @checked(old('audience') === 'swasta')>
                                 <span>
                                     <span class="block text-sm font-bold text-slate-800">Swasta</span>
-                                    <span class="block text-xs text-slate-500">Untuk karyawan perusahaan</span>
+                                    <span class="block text-xs text-slate-500">Dapat diakses peserta Swasta &amp; Instansi / Lembaga</span>
                                 </span>
                             </label>
                         </div>

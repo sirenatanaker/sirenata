@@ -912,22 +912,53 @@
                                         </p>
                                     </div>
                                 @else
-                                    <form
-                                        action="{{ route('user.course.my-course.generate-certificate', ['slug' => request()->route('slug')]) }}"
-                                        method="POST" x-data="{ loading: false }" @submit="loading = true">
-                                        @csrf
-                                        <button type="submit" :disabled="loading"
-                                            class="w-full bg-[#1E568A] hover:bg-[#13416B] text-white py-3 rounded-md font-bold transition-all shadow-sm flex items-center justify-center gap-2 text-sm disabled:opacity-70 disabled:cursor-not-allowed">
-                                            <template x-if="!loading">
-                                                <span class="flex items-center gap-2"><i class="fas fa-cogs"></i>
-                                                    Terbitkan Sertifikat</span>
-                                            </template>
-                                            <template x-if="loading">
-                                                <span class="flex items-center gap-2"><i
-                                                        class="fas fa-spinner fa-spin"></i> Memproses...</span>
-                                            </template>
-                                        </button>
-                                    </form>
+                                    @php
+                                        $authUserForCert = auth()->user();
+                                        $missingCertFields = $authUserForCert ? $authUserForCert->missingCertificateProfileFields() : [];
+                                        $isProfileCompleteForCert = empty($missingCertFields);
+                                    @endphp
+
+                                    @if (!$isProfileCompleteForCert)
+                                        <div class="rounded-md border border-amber-200 bg-amber-50 p-4 space-y-2.5 text-left">
+                                            <div class="flex items-start gap-2.5">
+                                                <i class="fas fa-user-edit text-amber-600 mt-0.5 shrink-0"></i>
+                                                <div>
+                                                    <p class="text-xs font-bold text-amber-900">Lengkapi Informasi Pribadi Terlebih Dahulu</p>
+                                                    <p class="text-[11px] text-amber-800/90 mt-0.5 leading-relaxed">
+                                                        Sebelum mengklaim sertifikat kelulusan, lengkapi data profil berikut pada menu <strong>Informasi Saya</strong>:
+                                                    </p>
+                                                </div>
+                                            </div>
+                                            <ul class="list-disc list-inside text-[11px] text-amber-900/90 space-y-0.5 pl-1 font-medium">
+                                                @foreach ($missingCertFields as $fieldLabel)
+                                                    <li>{{ $fieldLabel }}</li>
+                                                @endforeach
+                                            </ul>
+                                        </div>
+
+                                        <a href="{{ route('user.profile', ['complete_profile' => 1, 'return_to' => route('user.course.my-course.detail', request()->route('slug'))]) }}"
+                                            class="w-full bg-amber-500 hover:bg-amber-600 text-white py-3 px-4 rounded-md font-bold transition-all shadow-sm flex items-center justify-center gap-2 text-sm">
+                                            <i class="fas fa-id-card"></i>
+                                            <span>Lengkapi Profil &amp; Klaim Sertifikat</span>
+                                        </a>
+                                    @else
+                                        <form
+                                            action="{{ route('user.course.my-course.generate-certificate', ['slug' => request()->route('slug')]) }}"
+                                            method="POST" x-data="{ loading: false }" @submit="loading = true">
+                                            @csrf
+                                            <button type="submit" :disabled="loading"
+                                                class="w-full bg-[#1E568A] hover:bg-[#13416B] text-white py-3 rounded-md font-bold transition-all shadow-sm flex items-center justify-center gap-2 text-sm disabled:opacity-70 disabled:cursor-not-allowed">
+                                                <template x-if="!loading">
+                                                    <span class="flex items-center gap-2"><i class="fas fa-cogs"></i>
+                                                        Terbitkan Sertifikat</span>
+                                                </template>
+                                                <template x-if="loading">
+                                                    <span class="flex items-center gap-2"><i
+                                                            class="fas fa-spinner fa-spin"></i> Memproses...</span>
+                                                </template>
+                                            </button>
+                                        </form>
+                                    @endif
                                 @endif
                             </div>
                         @endif

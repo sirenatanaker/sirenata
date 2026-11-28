@@ -13,7 +13,12 @@ test('certificate cannot be reissued after it already exists', function () {
 
     $user = User::create(['name' => 'Lulus', 'email' => 'lulus@kemnaker.go.id', 'password' => 'password']);
     $user->assignRole('user');
-    $user->profile()->create(['full_name' => 'Lulus Asli']);
+    $user->profile()->create([
+        'full_name' => 'Lulus Asli',
+        'institution_type' => 'pusat',
+        'instansi' => 'Kementerian Ketenagakerjaan',
+        'unit_kerja' => 'Pusat Pasar Kerja',
+    ]);
 
     $course = Course::create([
         'name' => 'Kursus Lulus',
@@ -47,4 +52,39 @@ test('certificate cannot be reissued after it already exists', function () {
 
     expect($pivot->certificate_code)->toBe($firstCode)
         ->and($pivot->certificate_file)->toBe($firstFile);
+});
+
+test('certificate claim requires completed personal and institution profile', function () {
+    Role::create(['name' => 'user', 'guard_name' => 'web']);
+
+    $user = User::create(['name' => 'Baru', 'email' => 'baru@contoh.id', 'password' => 'password']);
+    $user->assignRole('user');
+    // User baru selesai quick onboarding sektor saja (belum isi detail profil)
+    $user->profile()->create([
+        'institution_type' => 'swasta',
+    ]);
+
+    $course = Course::create([
+        'name' => 'Kursus Swasta',
+        'slug' => 'kursus-swasta',
+        'description' => 'Deskripsi.',
+        'audience' => 'swasta',
+    ]);
+    $user->enrolledCourses()->attach($course->id, ['status' => 'completed', 'progress' => 100]);
+
+    CertificateSetting::create([
+        'signer_name' => 'Pejabat',
+        'signer_title' => 'Kepala',
+        'is_active' => true,
+    ]);
+
+    $response = $this->actingAs($user)
+        ->post(route('user.course.my-course.generate-certificate', ['slug' => $course->slug]));
+
+    $response->assertRedirect();
+    expect($response->headers->get('Location'))->toContain(route('user.profile'));
+
+    $pivot = $user->fresh()->enrolledCourses()->first()->pivot;
+    expect($pivot->certificate_code)->toBeNull()
+        ->and($pivot->certificate_file)->toBeNull();
 });

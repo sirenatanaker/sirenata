@@ -15,11 +15,15 @@ trait ProfileValidationRules {
             'full_name' => $this->fullNameRules(),
             'phone' => $this->phoneRules(),
             'gender' => $this->genderRules(),
+            'sector' => ['nullable', Rule::in(['instansi', 'swasta'])],
+            'asal_instansi' => ['nullable', Rule::in(['pusat', 'provinsi', 'kabkota', 'kab_kota'])],
             'instansi' => $this->instansiRules(),
+            'instansi_lainnya' => ['nullable', 'string', 'max:255'],
             'unit_kerja' => $this->unitKerjaRules(),
-            
+
             'province_code' => $this->provinceRules(),
             'regency_code' => $this->regencyRules(),
+            'return_to' => ['nullable', 'string', 'max:500'],
         ];
     }
 
@@ -67,12 +71,12 @@ trait ProfileValidationRules {
      */
     protected function provinceRules(): array
     {
-        return ['required_if:asal_instansi,provinsi,kabkota'];
+        return ['nullable', 'required_if:asal_instansi,provinsi,kabkota,kab_kota'];
     }
 
     protected function regencyRules(): array
     {
-        return ['nullable|required_if:asal_instansi,kabkota'];
+        return ['nullable', 'required_if:asal_instansi,kabkota,kab_kota'];
     }
 
 

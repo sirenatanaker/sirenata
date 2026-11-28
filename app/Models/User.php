@@ -145,6 +145,137 @@ class User extends Authenticatable
         return $this->hasOne(UserScope::class);
     }
 
+    /**
+     * Sektor pengguna yang dipilih: 'instansi', 'swasta', atau null jika belum memilih.
+     */
+    public function userSector(): ?string
+    {
+        $rawType = $this->profile?->institution_type;
+        $type = $rawType instanceof InstitutionType ? $rawType->value : (string) $rawType;
+
+        if ($type === InstitutionType::SWASTA->value) {
+            return 'swasta';
+        }
+
+        if (in_array($type, [
+            InstitutionType::INSTANSI->value,
+            InstitutionType::PUSAT->value,
+            InstitutionType::PROVINSI->value,
+            InstitutionType::KAB_KOTA->value,
+            'kabkota',
+        ], true)) {
+            return 'instansi';
+        }
+
+        return null;
+    }
+
+    public function isSwastaUser(): bool
+    {
+        return $this->userSector() === 'swasta';
+    }
+
+    public function isInstansiUser(): bool
+    {
+        return $this->userSector() === 'instansi';
+    }
+
+    /**
+     * Aturan akses kursus berdasarkan sektor:
+     * - Instansi / Lembaga: dapat mengakses kursus Instansi DAN kursus Swasta.
+     * - Swasta: hanya dapat mengakses kursus Swasta.
+     */
+    public function canAccessCourseAudience(?string $audience): bool
+    {
+        $normalizedAudience = $audience ?: 'instansi';
+
+        if ($this->isSwastaUser()) {
+            return $normalizedAudience === 'swasta';
+        }
+
+        return true;
+    }
+
+    /**
+     * Daftar informasi pribadi / instansi yang masih wajib dilengkapi di Profil
+     * sebelum peserta dapat mengklaim sertifikat kelulusan.
+     *
+     * @return list<string>
+     */
+    public function missingCertificateProfileFields(): array
+    {
+        $profile = $this->profile;
+        $scope = $this->scopeArea;
+        $missing = [];
+
+        $effectiveName = $this->siapkerja_id
+            ? trim((string) $this->name)
+            : trim((string) ($profile?->full_name ?? ''));
+
+        if ($effectiveName === '') {
+            $missing[] = 'Nama Lengkap';
+        }
+
+        $rawType = $profile?->institution_type;
+        $type = $rawType instanceof InstitutionType ? $rawType->value : (string) $rawType;
+        if ($type === 'kabkota') {
+            $type = InstitutionType::KAB_KOTA->value;
+        }
+
+        if ($type === '') {
+            $missing[] = 'Asal Pengguna (Instansi/Lembaga atau Swasta)';
+            $missing[] = 'Nama Instansi / Perusahaan';
+
+            return $missing;
+        }
+
+        if ($type === InstitutionType::SWASTA->value) {
+            if (trim((string) ($profile?->instansi ?? '')) === '') {
+                $missing[] = 'Nama Perusahaan / Lembaga Swasta';
+            }
+            if (empty($scope?->province_code)) {
+                $missing[] = 'Provinsi Domisili';
+            }
+            if (empty($scope?->regency_code)) {
+                $missing[] = 'Kabupaten/Kota Domisili';
+            }
+
+            return $missing;
+        }
+
+        // Instansi / Lembaga (pusat, provinsi, kab_kota)
+        if (!in_array($type, [
+            InstitutionType::PUSAT->value,
+            InstitutionType::PROVINSI->value,
+            InstitutionType::KAB_KOTA->value,
+        ], true)) {
+            $missing[] = 'Tingkat Asal Instansi (Pusat/Provinsi/Kab/Kota)';
+        }
+
+        if (trim((string) ($profile?->instansi ?? '')) === '') {
+            $missing[] = 'Nama Instansi / Kementerian / Lembaga';
+        }
+
+        if (trim((string) ($profile?->unit_kerja ?? '')) === '') {
+            $missing[] = 'Unit Kerja';
+        }
+
+        if (in_array($type, [InstitutionType::PROVINSI->value, InstitutionType::KAB_KOTA->value], true) && empty($scope?->province_code)) {
+            $missing[] = 'Provinsi Instansi';
+        }
+
+        if ($type === InstitutionType::KAB_KOTA->value && empty($scope?->regency_code)) {
+            $missing[] = 'Kabupaten/Kota Instansi';
+        }
+
+        return $missing;
+    }
+
+    public function hasCompleteCertificateProfile(): bool
+    {
+        return empty($this->missingCertificateProfileFields());
+    }
+
     public function enrolledCourses(): BelongsToMany
     {
         return $this->belongsToMany(Course::class, 'course_student')

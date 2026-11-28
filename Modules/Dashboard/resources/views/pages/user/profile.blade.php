@@ -265,69 +265,278 @@
             <div class="p-3.5 sm:p-5 lg:p-6">
                 <!-- Tab: Personal (Informasi Saya) -->
                 <div x-show="tab === 'personal'" x-cloak>
-                    <form action="{{ route('user.profile.update') }}" method="POST" enctype="multipart/form-data">
+                    @php
+                        $ssoUser = ! empty($user->siapkerja_id);
+                        $rawType = $user->profile?->institution_type;
+                        $typeStr = is_object($rawType) ? ($rawType->value ?? '') : (string) $rawType;
+                        if ($typeStr === 'kabkota') {
+                            $typeStr = 'kab_kota';
+                        }
+
+                        $initialSector = old('sector', $typeStr === 'swasta' ? 'swasta' : 'instansi');
+                        $initialAsal = old('asal_instansi', in_array($typeStr, ['pusat', 'provinsi', 'kab_kota'], true) ? $typeStr : '');
+                        $initialProvince = old('province_code', $user->scopeArea?->province_code ?? '');
+                        $initialRegency = old('regency_code', $user->scopeArea?->regency_code ?? '');
+                        $initialInstansi = old('instansi', $user->profile?->instansi ?? '');
+                        $initialUnitKerja = old('unit_kerja', $user->profile?->unit_kerja ?? '');
+
+                        $missingCertFields = $user->missingCertificateProfileFields();
+                        $isProfileCompleteForCert = empty($missingCertFields);
+                        $fromCertClaim = request()->boolean('complete_profile');
+                        $returnToUrl = request()->query('return_to', old('return_to', ''));
+                    @endphp
+
+                    @if (!$isProfileCompleteForCert)
+                        <div class="mb-5 rounded-md border {{ $fromCertClaim ? 'border-amber-300 bg-amber-50 dark:bg-amber-900/20 dark:border-amber-700/60' : 'border-sky-200 bg-sky-50/90 dark:bg-slate-700/50 dark:border-slate-600' }} p-4">
+                            <div class="flex items-start gap-3">
+                                <div class="w-9 h-9 rounded-md {{ $fromCertClaim ? 'bg-amber-500' : 'bg-[#13416B]' }} text-white flex items-center justify-center shrink-0 mt-0.5">
+                                    <i class="fas {{ $fromCertClaim ? 'fa-award' : 'fa-id-card' }} text-sm"></i>
+                                </div>
+                                <div class="min-w-0 flex-1">
+                                    <h4 class="text-xs sm:text-sm font-bold {{ $fromCertClaim ? 'text-amber-900 dark:text-amber-200' : 'text-slate-900 dark:text-white' }}">
+                                        {{ $fromCertClaim ? 'Lengkapi Informasi Pribadi untuk Mengklaim Sertifikat' : 'Lengkapi Data Informasi Pribadi & Instansi' }}
+                                    </h4>
+                                    <p class="text-xs {{ $fromCertClaim ? 'text-amber-800 dark:text-amber-200/90' : 'text-slate-600 dark:text-slate-300' }} mt-1 leading-relaxed">
+                                        Data berikut wajib dilengkapi sebelum Anda dapat menerbitkan dan mengunduh sertifikat kelulusan:
+                                    </p>
+                                    <div class="mt-2 flex flex-wrap gap-1.5">
+                                        @foreach ($missingCertFields as $fieldLabel)
+                                            <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold {{ $fromCertClaim ? 'bg-amber-100 text-amber-900 border border-amber-200' : 'bg-white text-slate-700 border border-slate-200' }}">
+                                                <i class="fas fa-circle-exclamation text-[10px] {{ $fromCertClaim ? 'text-amber-600' : 'text-[#13416B]' }}"></i>
+                                                {{ $fieldLabel }}
+                                            </span>
+                                        @endforeach
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    @endif
+
+                    <form id="profilePersonalForm" action="{{ route('user.profile.update') }}" method="POST" enctype="multipart/form-data"
+                        x-data="profileInstitutionForm({
+                            sector: @js($initialSector),
+                            asalInstansi: @js($initialAsal),
+                            provinceCode: @js($initialProvince),
+                            regencyCode: @js($initialRegency),
+                            savedInstansi: @js($initialInstansi),
+                            institutionsApiUrl: @js(route('api.masterdata.institutions.index')),
+                            regenciesApiUrl: @js(route('user.get-regencies')),
+                        })"
+                        x-init="init()">
                         @csrf
+                        @if (!empty($returnToUrl))
+                            <input type="hidden" name="return_to" value="{{ $returnToUrl }}">
+                        @endif
+
                         <div class="mb-4 sm:mb-5">
                             <h3 class="text-base sm:text-lg font-bold text-slate-900 dark:text-white">Informasi Saya</h3>
-                            <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400">Kelola data identitas dan instansi akun Anda.</p>
+                            <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400">Kelola data identitas serta instansi atau perusahaan Anda untuk kebutuhan sertifikasi.</p>
                         </div>
 
-                        @php
-                            $ssoUser = ! empty($user->siapkerja_id);
-                            $rawType = $user->profile?->institution_type;
-                            $typeStr = is_object($rawType) ? ($rawType->value ?? '') : (string) $rawType;
-
-                            // Lembaga / Kementerian Pusat
-                            $isPusat = ($typeStr === 'pusat' || (empty($typeStr) && empty($user->scopeArea?->province_code)));
-
-                            // Wilayah (Provinsi & Kab/Kota) HANYA untuk:
-                            // 1. Instansi Provinsi
-                            // 2. Instansi Kabupaten/Kota
-                            // 3. Orang / Lembaga Swasta
-                            $isProvinsi = ($typeStr === 'provinsi');
-                            $isKabKota  = in_array($typeStr, ['kab_kota', 'kabkota']);
-                            $isSwasta   = ($typeStr === 'swasta');
-                            $showRegion = ! $isPusat && ($isProvinsi || $isKabKota || $isSwasta || ! empty($user->scopeArea?->province_code));
-
-                            $instansiLabel = match ($typeStr) {
-                                'pusat'               => 'Kementerian / Lembaga',
-                                'provinsi'            => 'Instansi (Provinsi)',
-                                'kab_kota', 'kabkota' => 'Instansi (Kabupaten/Kota)',
-                                'swasta'              => 'Perusahaan / Lembaga Swasta',
-                                default               => ($isPusat ? 'Kementerian / Lembaga' : 'Instansi'),
-                            };
-                        @endphp
-
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-5 mb-4 sm:mb-5">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-5 mb-5">
                             {{-- Nama Lengkap --}}
                             @if ($ssoUser)
                                 <x-form.input name="full_name" label="Nama Lengkap" value="{{ $user->profile?->full_name ?? $user->name }}" disabled helper="Mengikuti nama akun SIAPKerja" class="rounded-md text-xs sm:text-sm" />
                             @else
-                                <x-form.input name="full_name" label="Nama Lengkap" :required="true" value="{{ $user->profile?->full_name }}" class="rounded-md text-xs sm:text-sm" />
+                                <x-form.input name="full_name" label="Nama Lengkap" :required="true" value="{{ old('full_name', $user->profile?->full_name ?? $user->name) }}" class="rounded-md text-xs sm:text-sm" />
                             @endif
 
                             {{-- Email --}}
                             <x-form.input name="email" label="Email" value="{{ $user->email }}" readonly helper="Mengikuti akun login" class="bg-gray-100 dark:bg-slate-700/50 border border-gray-200 dark:border-slate-600 rounded-md cursor-not-allowed text-xs sm:text-sm" />
+                        </div>
 
-                            {{-- Instansi / Kementerian / Lembaga --}}
-                            <x-form.input name="instansi" :label="$instansiLabel" value="{{ $user->profile?->instansi }}" placeholder="Contoh: Kementerian Ketenagakerjaan RI" class="rounded-md text-xs sm:text-sm" />
+                        {{-- Bagian Informasi Instansi / Perusahaan --}}
+                        <div class="pt-4 border-t border-slate-100 dark:border-slate-700 space-y-4 sm:space-y-5 mb-6">
+                            <div>
+                                <label class="block text-xs sm:text-sm font-bold text-slate-800 dark:text-white mb-2">
+                                    Asal Pengguna <span class="text-red-500">*</span>
+                                </label>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                    <label
+                                        class="flex items-start gap-3 p-3.5 rounded-md border-2 cursor-pointer transition-all"
+                                        :class="sector === 'instansi'
+                                            ? 'border-[#13416B] bg-[#13416B]/5 dark:border-sky-400 dark:bg-sky-400/10'
+                                            : 'border-slate-200 dark:border-slate-700 hover:border-slate-300'">
+                                        <input type="radio" name="sector" value="instansi" x-model="sector" @change="onSectorChange()"
+                                            class="mt-0.5 text-[#13416B] focus:ring-[#13416B]">
+                                        <span class="min-w-0">
+                                            <span class="block text-xs sm:text-sm font-bold text-slate-800 dark:text-white">Instansi / Lembaga</span>
+                                            <span class="block text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 mt-0.5">Kementerian/lembaga pusat maupun instansi pemerintah daerah</span>
+                                        </span>
+                                    </label>
+                                    <label
+                                        class="flex items-start gap-3 p-3.5 rounded-md border-2 cursor-pointer transition-all"
+                                        :class="sector === 'swasta'
+                                            ? 'border-[#13416B] bg-[#13416B]/5 dark:border-emerald-400 dark:bg-emerald-400/10'
+                                            : 'border-slate-200 dark:border-slate-700 hover:border-slate-300'">
+                                        <input type="radio" name="sector" value="swasta" x-model="sector" @change="onSectorChange()"
+                                            class="mt-0.5 text-[#13416B] focus:ring-[#13416B]">
+                                        <span class="min-w-0">
+                                            <span class="block text-xs sm:text-sm font-bold text-slate-800 dark:text-white">Swasta</span>
+                                            <span class="block text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 mt-0.5">Perusahaan, pelaku usaha, atau profesional non-pemerintah</span>
+                                        </span>
+                                    </label>
+                                </div>
+                            </div>
 
-                            {{-- Unit Kerja --}}
-                            <x-form.input name="unit_kerja" label="Unit Kerja" value="{{ $user->profile?->unit_kerja }}" placeholder="Contoh: Pusat Pasar Kerja / Bidang SDM" class="rounded-md text-xs sm:text-sm" />
+                            {{-- FORM INSTANSI / LEMBAGA --}}
+                            <div x-show="sector === 'instansi'" class="space-y-4">
+                                <div>
+                                    <label class="block text-xs sm:text-sm font-bold text-slate-800 dark:text-white mb-2">
+                                        Tingkat Asal Instansi <span class="text-red-500">*</span>
+                                    </label>
+                                    <div class="grid grid-cols-3 gap-2 sm:gap-3">
+                                        <label class="flex items-center justify-center gap-1.5 px-2 py-2.5 rounded-md border-2 cursor-pointer text-xs sm:text-sm font-semibold transition-all"
+                                            :class="asalInstansi === 'pusat' ? 'border-[#13416B] bg-[#13416B]/5 text-[#13416B] dark:border-sky-400 dark:text-white' : 'border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300'">
+                                            <input type="radio" name="asal_instansi" value="pusat" x-model="asalInstansi" :disabled="sector !== 'instansi'" @change="onAsalChange()"
+                                                class="text-[#13416B] focus:ring-[#13416B]">
+                                            <span>Pusat</span>
+                                        </label>
+                                        <label class="flex items-center justify-center gap-1.5 px-2 py-2.5 rounded-md border-2 cursor-pointer text-xs sm:text-sm font-semibold transition-all"
+                                            :class="asalInstansi === 'provinsi' ? 'border-[#13416B] bg-[#13416B]/5 text-[#13416B] dark:border-sky-400 dark:text-white' : 'border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300'">
+                                            <input type="radio" name="asal_instansi" value="provinsi" x-model="asalInstansi" :disabled="sector !== 'instansi'" @change="onAsalChange()"
+                                                class="text-[#13416B] focus:ring-[#13416B]">
+                                            <span>Provinsi</span>
+                                        </label>
+                                        <label class="flex items-center justify-center gap-1.5 px-2 py-2.5 rounded-md border-2 cursor-pointer text-xs sm:text-sm font-semibold transition-all"
+                                            :class="asalInstansi === 'kab_kota' ? 'border-[#13416B] bg-[#13416B]/5 text-[#13416B] dark:border-sky-400 dark:text-white' : 'border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300'">
+                                            <input type="radio" name="asal_instansi" value="kab_kota" x-model="asalInstansi" :disabled="sector !== 'instansi'" @change="onAsalChange()"
+                                                class="text-[#13416B] focus:ring-[#13416B]">
+                                            <span>Kab/Kota</span>
+                                        </label>
+                                    </div>
+                                </div>
 
-                            {{-- Wilayah (HANYA untuk Instansi Provinsi, Kab/Kota, dan Swasta) --}}
-                            @if ($showRegion)
-                                <x-form.input name="province_name" label="Provinsi" value="{{ $user->scopeArea?->province?->name ?? '-' }}" readonly helper="Mengikuti data wilayah instansi" class="bg-gray-100 dark:bg-slate-700/50 border border-gray-200 dark:border-slate-600 rounded-md cursor-not-allowed text-xs sm:text-sm" />
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-5">
+                                    {{-- Provinsi (untuk Provinsi & Kab/Kota) --}}
+                                    <div x-show="asalInstansi === 'provinsi' || asalInstansi === 'kab_kota'">
+                                        <label for="profileInstansiProvinsi" class="block text-xs sm:text-sm font-semibold text-slate-700 dark:text-slate-200 mb-1.5">
+                                            Provinsi <span class="text-red-500">*</span>
+                                        </label>
+                                        <select id="profileInstansiProvinsi" name="province_code" x-model="provinceCode"
+                                            :disabled="sector !== 'instansi' || !(asalInstansi === 'provinsi' || asalInstansi === 'kab_kota')"
+                                            @change="onProvinceChange()"
+                                            class="w-full rounded-md border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 px-3 py-2 text-xs sm:text-sm text-slate-800 dark:text-white focus:border-[#13416B] focus:ring-[#13416B]">
+                                            <option value="">Pilih Provinsi</option>
+                                            @foreach ($provinces as $prov)
+                                                <option value="{{ $prov->code }}">{{ $prov->name }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
 
-                                @if ($isKabKota || $isSwasta || ! empty($user->scopeArea?->regency?->name))
-                                    <x-form.input name="regency_name" label="Kab/Kota" value="{{ $user->scopeArea?->regency?->name ?? '-' }}" readonly helper="Mengikuti data wilayah instansi" class="bg-gray-100 dark:bg-slate-700/50 border border-gray-200 dark:border-slate-600 rounded-md cursor-not-allowed text-xs sm:text-sm" />
-                                @endif
-                            @endif
+                                    {{-- Kab/Kota (khusus Kab/Kota) --}}
+                                    <div x-show="asalInstansi === 'kab_kota'">
+                                        <label for="profileInstansiKabkota" class="block text-xs sm:text-sm font-semibold text-slate-700 dark:text-slate-200 mb-1.5">
+                                            Kabupaten / Kota <span class="text-red-500">*</span>
+                                        </label>
+                                        <select id="profileInstansiKabkota" name="regency_code" x-model="regencyCode"
+                                            :disabled="sector !== 'instansi' || asalInstansi !== 'kab_kota'"
+                                            @change="loadInstitutions()"
+                                            class="w-full rounded-md border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 px-3 py-2 text-xs sm:text-sm text-slate-800 dark:text-white focus:border-[#13416B] focus:ring-[#13416B]">
+                                            <option value="">Pilih Kabupaten/Kota</option>
+                                            <template x-for="reg in regencies" :key="reg.code">
+                                                <option :value="reg.code" x-text="reg.name" :selected="reg.code == regencyCode"></option>
+                                            </template>
+                                        </select>
+                                    </div>
+
+                                    {{-- Nama Instansi / Kementerian / Lembaga --}}
+                                    <div x-show="asalInstansi !== ''" class="sm:col-span-2">
+                                        <label for="profileInstansiSelect" class="block text-xs sm:text-sm font-semibold text-slate-700 dark:text-slate-200 mb-1.5">
+                                            <span x-text="asalInstansi === 'pusat' ? 'Kementerian / Lembaga' : (asalInstansi === 'provinsi' ? 'Instansi (Provinsi)' : 'Instansi (Kabupaten/Kota)')"></span>
+                                            <span class="text-red-500">*</span>
+                                        </label>
+                                        <select id="profileInstansiSelect" name="instansi" x-model="selectedInstansi"
+                                            :disabled="sector !== 'instansi' || asalInstansi === ''"
+                                            class="w-full rounded-md border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 px-3 py-2 text-xs sm:text-sm text-slate-800 dark:text-white focus:border-[#13416B] focus:ring-[#13416B]">
+                                            <option value="" x-text="loadingInstitutions ? 'Memuat daftar instansi...' : 'Pilih Instansi'"></option>
+                                            <template x-for="inst in institutions" :key="inst">
+                                                <option :value="inst" x-text="inst" :selected="inst === selectedInstansi"></option>
+                                            </template>
+                                            <option value="lainnya">Lainnya (tulis manual jika belum terdaftar)</option>
+                                        </select>
+                                    </div>
+
+                                    {{-- Instansi Manual jika pilih Lainnya --}}
+                                    <div x-show="asalInstansi !== '' && selectedInstansi === 'lainnya'" class="sm:col-span-2">
+                                        <label for="profileInstansiCustom" class="block text-xs sm:text-sm font-semibold text-slate-700 dark:text-slate-200 mb-1.5">
+                                            Nama Instansi (Manual) <span class="text-red-500">*</span>
+                                        </label>
+                                        <input id="profileInstansiCustom" type="text" name="instansi_lainnya" x-model="customInstansi"
+                                            :disabled="sector !== 'instansi' || selectedInstansi !== 'lainnya'"
+                                            placeholder="Masukkan nama lengkap instansi Anda"
+                                            class="w-full rounded-md border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 px-3 py-2 text-xs sm:text-sm text-slate-800 dark:text-white focus:border-[#13416B] focus:ring-[#13416B]">
+                                    </div>
+
+                                    {{-- Unit Kerja --}}
+                                    <div class="sm:col-span-2">
+                                        <label for="profileInstansiUnitKerja" class="block text-xs sm:text-sm font-semibold text-slate-700 dark:text-slate-200 mb-1.5">
+                                            Unit Kerja <span class="text-red-500">*</span>
+                                        </label>
+                                        <input id="profileInstansiUnitKerja" type="text" name="unit_kerja" value="{{ $initialUnitKerja }}"
+                                            :disabled="sector !== 'instansi'"
+                                            placeholder="Contoh: Pusat Pasar Kerja / Bidang Perencanaan SDM"
+                                            class="w-full rounded-md border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 px-3 py-2 text-xs sm:text-sm text-slate-800 dark:text-white focus:border-[#13416B] focus:ring-[#13416B]">
+                                    </div>
+                                </div>
+                            </div>
+
+                            {{-- FORM SWASTA --}}
+                            <div x-show="sector === 'swasta'" class="grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-5">
+                                <div class="sm:col-span-2">
+                                    <label for="profileSwastaCompany" class="block text-xs sm:text-sm font-semibold text-slate-700 dark:text-slate-200 mb-1.5">
+                                        Nama Perusahaan / Lembaga Swasta <span class="text-red-500">*</span>
+                                    </label>
+                                    <input id="profileSwastaCompany" type="text" name="instansi" x-model="swastaCompany"
+                                        :disabled="sector !== 'swasta'"
+                                        placeholder="Contoh: PT Maju Bersama"
+                                        class="w-full rounded-md border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 px-3 py-2 text-xs sm:text-sm text-slate-800 dark:text-white focus:border-[#13416B] focus:ring-[#13416B]">
+                                </div>
+
+                                <div>
+                                    <label for="profileSwastaProvinsi" class="block text-xs sm:text-sm font-semibold text-slate-700 dark:text-slate-200 mb-1.5">
+                                        Provinsi Domisili <span class="text-red-500">*</span>
+                                    </label>
+                                    <select id="profileSwastaProvinsi" name="province_code" x-model="provinceCode"
+                                        :disabled="sector !== 'swasta'"
+                                        @change="onProvinceChange()"
+                                        class="w-full rounded-md border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 px-3 py-2 text-xs sm:text-sm text-slate-800 dark:text-white focus:border-[#13416B] focus:ring-[#13416B]">
+                                        <option value="">Pilih Provinsi</option>
+                                        @foreach ($provinces as $prov)
+                                            <option value="{{ $prov->code }}">{{ $prov->name }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label for="profileSwastaKabkota" class="block text-xs sm:text-sm font-semibold text-slate-700 dark:text-slate-200 mb-1.5">
+                                        Kabupaten / Kota Domisili <span class="text-red-500">*</span>
+                                    </label>
+                                    <select id="profileSwastaKabkota" name="regency_code" x-model="regencyCode"
+                                        :disabled="sector !== 'swasta'"
+                                        class="w-full rounded-md border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 px-3 py-2 text-xs sm:text-sm text-slate-800 dark:text-white focus:border-[#13416B] focus:ring-[#13416B]">
+                                        <option value="">Pilih Kabupaten/Kota</option>
+                                        <template x-for="reg in regencies" :key="reg.code">
+                                            <option :value="reg.code" x-text="reg.name" :selected="reg.code == regencyCode"></option>
+                                        </template>
+                                    </select>
+                                </div>
+
+                                <div class="sm:col-span-2">
+                                    <label for="profileSwastaUnitKerja" class="block text-xs sm:text-sm font-semibold text-slate-700 dark:text-slate-200 mb-1.5">
+                                        Divisi / Unit Kerja <span class="text-slate-400 font-normal">(Opsional)</span>
+                                    </label>
+                                    <input id="profileSwastaUnitKerja" type="text" name="unit_kerja" value="{{ $initialUnitKerja }}"
+                                        :disabled="sector !== 'swasta'"
+                                        placeholder="Contoh: Human Resources / Operasional"
+                                        class="w-full rounded-md border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 px-3 py-2 text-xs sm:text-sm text-slate-800 dark:text-white focus:border-[#13416B] focus:ring-[#13416B]">
+                                </div>
+                            </div>
                         </div>
 
                         <div class="flex justify-end">
                             <x-button type="submit" variant="success" size="sm" class="rounded-md text-xs sm:text-sm px-4 py-2 font-bold cursor-pointer">
-                                Simpan Perubahan
+                                {{ !empty($returnToUrl) ? 'Simpan & Lanjutkan Klaim Sertifikat' : 'Simpan Perubahan' }}
                             </x-button>
                         </div>
                     </form>
@@ -765,6 +974,153 @@
             @include('lms::partials.quill-content-style')
             @include('lms::partials.reader-styles')
         </style>
+    @endpush
+
+    @push('scripts')
+        <script>
+            function profileInstitutionForm(config) {
+                return {
+                    sector: config.sector || 'instansi',
+                    asalInstansi: config.asalInstansi || '',
+                    provinceCode: config.provinceCode || '',
+                    regencyCode: config.regencyCode || '',
+                    savedInstansi: config.savedInstansi || '',
+                    selectedInstansi: '',
+                    customInstansi: '',
+                    swastaCompany: config.sector === 'swasta' ? (config.savedInstansi || '') : '',
+                    regencies: [],
+                    institutions: [],
+                    loadingInstitutions: false,
+
+                    async init() {
+                        if (this.provinceCode && (this.sector === 'swasta' || this.asalInstansi === 'kab_kota')) {
+                            await this.loadRegencies(true);
+                        }
+                        if (this.sector === 'instansi' && this.asalInstansi) {
+                            await this.loadInstitutions(true);
+                        }
+                    },
+
+                    onSectorChange() {
+                        if (this.sector === 'swasta') {
+                            if (this.provinceCode) {
+                                this.loadRegencies(true);
+                            }
+                        } else if (this.asalInstansi) {
+                            this.loadInstitutions(false);
+                        }
+                    },
+
+                    async onAsalChange() {
+                        this.selectedInstansi = '';
+                        this.customInstansi = '';
+                        this.institutions = [];
+
+                        if (this.asalInstansi === 'pusat') {
+                            await this.loadInstitutions(false);
+                        } else if (this.asalInstansi === 'provinsi' && this.provinceCode) {
+                            await this.loadInstitutions(false);
+                        } else if (this.asalInstansi === 'kab_kota' && this.provinceCode) {
+                            await this.loadRegencies(false);
+                        }
+                    },
+
+                    async onProvinceChange() {
+                        this.regencyCode = '';
+                        this.regencies = [];
+
+                        if (!this.provinceCode) {
+                            if (this.sector === 'instansi' && this.asalInstansi !== 'pusat') {
+                                this.institutions = [];
+                                this.selectedInstansi = '';
+                            }
+                            return;
+                        }
+
+                        if (this.sector === 'swasta' || this.asalInstansi === 'kab_kota') {
+                            await this.loadRegencies(false);
+                        }
+
+                        if (this.sector === 'instansi' && this.asalInstansi === 'provinsi') {
+                            await this.loadInstitutions(false);
+                        }
+                    },
+
+                    async loadRegencies(preserveSelection = false) {
+                        if (!this.provinceCode) {
+                            this.regencies = [];
+                            return;
+                        }
+                        try {
+                            const url = new URL(config.regenciesApiUrl, window.location.origin);
+                            url.searchParams.set('province_code', this.provinceCode);
+                            const res = await fetch(url.toString(), { headers: { 'Accept': 'application/json' } });
+                            const json = await res.json();
+                            this.regencies = json.success && Array.isArray(json.data) ? json.data : [];
+                            if (!preserveSelection) {
+                                this.regencyCode = '';
+                            }
+                        } catch (e) {
+                            this.regencies = [];
+                        }
+                    },
+
+                    async loadInstitutions(preserveSaved = false) {
+                        if (this.sector !== 'instansi' || !this.asalInstansi) {
+                            this.institutions = [];
+                            return;
+                        }
+                        if (this.asalInstansi === 'provinsi' && !this.provinceCode) {
+                            this.institutions = [];
+                            return;
+                        }
+                        if (this.asalInstansi === 'kab_kota' && (!this.provinceCode || !this.regencyCode)) {
+                            this.institutions = [];
+                            return;
+                        }
+
+                        this.loadingInstitutions = true;
+                        try {
+                            const url = new URL(config.institutionsApiUrl, window.location.origin);
+                            if (this.asalInstansi === 'pusat') {
+                                url.searchParams.set('type', 'pusat');
+                            } else {
+                                url.searchParams.set('type', 'daerah');
+                                url.searchParams.set('province_code', this.provinceCode);
+                                if (this.asalInstansi === 'kab_kota') {
+                                    url.searchParams.set('regency_code', this.regencyCode);
+                                }
+                                url.searchParams.set('regional_level', this.asalInstansi === 'kab_kota' ? 'kabkota' : 'provinsi');
+                            }
+
+                            const res = await fetch(url.toString(), { headers: { 'Accept': 'application/json' } });
+                            const json = await res.json();
+                            const names = (json.success && Array.isArray(json.data))
+                                ? json.data
+                                    .map(i => (i.name || '').trim())
+                                    .filter(n => n !== '' && n.toLowerCase() !== 'lainnya')
+                                : [];
+
+                            if (preserveSaved && this.savedInstansi) {
+                                if (!names.includes(this.savedInstansi)) {
+                                    names.unshift(this.savedInstansi);
+                                }
+                                this.selectedInstansi = this.savedInstansi;
+                            }
+
+                            this.institutions = [...new Set(names)];
+                        } catch (e) {
+                            this.institutions = preserveSaved && this.savedInstansi ? [this.savedInstansi] : [];
+                            if (preserveSaved && this.savedInstansi) {
+                                this.selectedInstansi = this.savedInstansi;
+                            }
+                        } finally {
+                            this.loadingInstitutions = false;
+                        }
+                    }
+                };
+            }
+        </script>
     @endpush
 
 </x-dashboard::layouts.dashboard>

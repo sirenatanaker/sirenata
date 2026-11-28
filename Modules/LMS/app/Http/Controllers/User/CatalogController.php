@@ -25,9 +25,11 @@ class CatalogController extends Controller
         $page = max(1, (int) $request->get('page', 1));
         $perPage = 10;
         $userId = auth()->id();
+        $userSector = auth()->user()?->userSector() ?? 'all';
 
         $cacheKey = 'user_catalog:' . md5(json_encode([
             'uid'        => $userId,
+            'sector'     => $userSector,
             'search'     => $search,
             'status'     => $waveStatus,
             'page'       => $page,
@@ -137,7 +139,7 @@ class CatalogController extends Controller
                 'thumbnail'              => ! empty($c->thumbnail)
                     ? (str_starts_with($c->thumbnail, 'http') ? $c->thumbnail : asset('storage/' . $c->thumbnail))
                     : null,
-                'audienceLabel'          => ($c->audience ?? 'instansi') === 'swasta' ? 'Swasta' : 'Instansi',
+                'audienceLabel'          => ($c->audience ?? 'instansi') === 'swasta' ? 'Swasta & Instansi' : 'Instansi / Lembaga',
                 'sections'               => $sections,
                 'enrollUrl'              => route('user.catalog.enroll', $c->slug),
                 'isEvent'                => (bool) $activeB,

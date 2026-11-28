@@ -156,6 +156,19 @@ class CertificateService
             }
         }
 
+        // Wajib melengkapi informasi pribadi & instansi di profil sebelum klaim sertifikat
+        $user->loadMissing(['profile', 'scopeArea']);
+        if (!$user->hasCompleteCertificateProfile()) {
+            $missing = $user->missingCertificateProfileFields();
+
+            return [
+                'success'          => false,
+                'requires_profile' => true,
+                'missing_fields'   => $missing,
+                'message'          => 'Lengkapi informasi pribadi di halaman Profil terlebih dahulu sebelum mengklaim sertifikat (' . implode(', ', $missing) . ').',
+            ];
+        }
+
         $activeSetting = CertificateSetting::getActive();
         if (!$activeSetting) {
             return ['success' => false, 'message' => 'Pengaturan sertifikat aktif belum diatur oleh admin.'];

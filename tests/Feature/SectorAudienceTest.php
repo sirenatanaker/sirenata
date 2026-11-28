@@ -3,6 +3,7 @@
 use App\Livewire\Dashboard\SuperAdmin\UserManagementTable;
 use App\Models\User;
 use Livewire\Livewire;
+use Modules\LMS\Models\BimtekEvent;
 use Modules\LMS\Models\Course;
 use Modules\LMS\Services\CourseService;
 use Modules\Roles\Models\Role;
@@ -67,4 +68,95 @@ test('user table shows sector badges', function () {
         ->assertOk()
         ->assertSee('Swasta', false)
         ->assertSee('Instansi', false);
+});
+
+test('new users can complete quick onboarding by choosing only sector', function () {
+    Role::create(['name' => 'user', 'guard_name' => 'web']);
+
+    $instansiUser = User::create(['name' => 'ASN Baru', 'email' => 'asn.baru@kemnaker.go.id', 'password' => 'password']);
+    $instansiUser->assignRole('user');
+
+    $this->withoutMiddleware(\Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class)
+        ->actingAs($instansiUser)
+        ->post(route('user.update-instansi'), ['sector' => 'instansi'])
+        ->assertRedirect(route('user.dashboard'));
+
+    expect($instansiUser->fresh()->profile->institution_type)->toBe('instansi')
+        ->and($instansiUser->fresh()->profile->instansi)->toBeNull()
+        ->and($instansiUser->fresh()->isInstansiUser())->toBeTrue()
+        ->and($instansiUser->fresh()->hasCompleteCertificateProfile())->toBeFalse();
+
+    $swastaUser = User::create(['name' => 'Swasta Baru', 'email' => 'swasta.baru@contoh.id', 'password' => 'password']);
+    $swastaUser->assignRole('user');
+
+    $this->withoutMiddleware(\Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class)
+        ->actingAs($swastaUser)
+        ->post(route('user.update-instansi'), ['sector' => 'swasta'])
+        ->assertRedirect(route('user.dashboard'));
+
+    expect($swastaUser->fresh()->profile->institution_type)->toBe('swasta')
+        ->and($swastaUser->fresh()->isSwastaUser())->toBeTrue()
+        ->and($swastaUser->fresh()->hasCompleteCertificateProfile())->toBeFalse();
+});
+
+test('instansi users can access both instansi and swasta courses while swasta users only access swasta courses', function () {
+    Role::create(['name' => 'user', 'guard_name' => 'web']);
+
+    $courseInstansi = Course::create([
+        'name' => 'Kursus Khusus Instansi',
+        'slug' => 'kursus-khusus-instansi',
+        'description' => 'Untuk instansi.',
+        'audience' => 'instansi',
+    ]);
+    BimtekEvent::create([
+        'course_id' => $courseInstansi->id,
+        'batch_name' => 'Gelombang 1 Instansi',
+        'batch_code' => 'INST-001',
+        'status' => 'open_registration',
+        'start_date' => now()->addDays(10),
+        'end_date' => now()->addDays(12),
+    ]);
+
+    $courseSwasta = Course::create([
+        'name' => 'Kursus Terbuka Swasta',
+        'slug' => 'kursus-terbuka-swasta',
+        'description' => 'Untuk swasta.',
+        'audience' => 'swasta',
+    ]);
+    BimtekEvent::create([
+        'course_id' => $courseSwasta->id,
+        'batch_name' => 'Gelombang 1 Swasta',
+        'batch_code' => 'SWST-001',
+        'status' => 'open_registration',
+        'start_date' => now()->addDays(10),
+        'end_date' => now()->addDays(12),
+    ]);
+
+    // 1. User Instansi bisa melihat & mendaftar kursus Instansi DAN Swasta
+    $instansiUser = User::create(['name' => 'Pegawai Instansi', 'email' => 'pegawai@kemnaker.go.id', 'password' => 'password']);
+    $instansiUser->assignRole('user');
+    $instansiUser->profile()->create(['institution_type' => 'instansi']);
+
+    $this->actingAs($instansiUser);
+    $instansiCatalogIds = app(CourseService::class)->getCatalogCourses(20)->pluck('id')->all();
+    expect($instansiCatalogIds)->toContain($courseInstansi->id, $courseSwasta->id);
+
+    $enrollSwastaByInstansi = app(CourseService::class)->enrollUser($courseSwasta->slug);
+    expect($enrollSwastaByInstansi['success'])->toBeTrue();
+
+    // 2. User Swasta hanya melihat kursus Swasta & ditolak saat coba daftar kursus Instansi
+    $swastaUser = User::create(['name' => 'Karyawan Swasta', 'email' => 'karyawan@perusahaan.id', 'password' => 'password']);
+    $swastaUser->assignRole('user');
+    $swastaUser->profile()->create(['institution_type' => 'swasta']);
+
+    $this->actingAs($swastaUser);
+    $swastaCatalogIds = app(CourseService::class)->getCatalogCourses(20)->pluck('id')->all();
+    expect($swastaCatalogIds)->toContain($courseSwasta->id)
+        ->not->toContain($courseInstansi->id);
+
+    $enrollInstansiBySwasta = app(CourseService::class)->enrollUser($courseInstansi->slug);
+    expect($enrollInstansiBySwasta['success'])->toBeFalse();
+
+    $enrollSwastaBySwasta = app(CourseService::class)->enrollUser($courseSwasta->slug);
+    expect($enrollSwastaBySwasta['success'])->toBeTrue();
 });

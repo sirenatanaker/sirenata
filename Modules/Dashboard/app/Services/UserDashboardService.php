@@ -533,8 +533,11 @@ class UserDashboardService
                 ];
 
                 // 6. Gelombang Pendaftaran Dibuka (rekomendasi dari Katalog yang belum diikuti user)
-                $openCandidateEvents = $allYearEvents->filter(function ($ev) use ($resolveEventMeta, $enrollByEventId, $enrollByCourseId) {
+                $openCandidateEvents = $allYearEvents->filter(function ($ev) use ($resolveEventMeta, $enrollByEventId, $enrollByCourseId, $user) {
                     if (!$ev->course) {
+                        return false;
+                    }
+                    if (!$user->canAccessCourseAudience($ev->course->audience)) {
                         return false;
                     }
                     $meta = $resolveEventMeta($ev);
@@ -688,16 +691,32 @@ class UserDashboardService
     }
 
     /**
-     * Update user instansi via web form.
+     * Update user instansi / sektor via web onboarding atau form lengkap.
      */
     public function updateInstansiWeb(User $user, array $data): void
     {
         $profile = UserProfile::firstOrNew(['user_id' => $user->id]);
+        $sector = $data['sector'] ?? 'instansi';
+        $hasDetail = !empty($data['instansi']) || !empty($data['asalInstansi']);
 
-        if (($data['sector'] ?? '') === 'swasta') {
+        // Mode quick onboarding (cukup pilih Instansi/Lembaga atau Swasta di awal login)
+        if (!$hasDetail) {
+            $profile->institution_type = $sector === 'swasta'
+                ? InstitutionType::SWASTA->value
+                : InstitutionType::INSTANSI->value;
+            $profile->save();
+
+            SmartCache::bump([
+                SmartCache::userDomain($user->id),
+            ]);
+
+            return;
+        }
+
+        if ($sector === 'swasta') {
             $profile->institution_type = InstitutionType::SWASTA->value;
-            $profile->instansi = trim($data['instansi']);
-            $profile->unit_kerja = !empty($data['unit_kerja']) ? trim($data['unit_kerja']) : null;
+            $profile->instansi = trim((string) $data['instansi']);
+            $profile->unit_kerja = !empty($data['unit_kerja']) ? trim((string) $data['unit_kerja']) : null;
             $profile->save();
 
             UserScope::updateOrCreate(
@@ -707,21 +726,25 @@ class UserDashboardService
                     'regency_code' => $data['regency_code'] ?? null,
                 ]
             );
+
+            SmartCache::bump([
+                SmartCache::userDomain($user->id),
+            ]);
             return;
         }
 
         $institutionType = match ($data['asalInstansi'] ?? '') {
             'pusat' => InstitutionType::PUSAT,
             'provinsi' => InstitutionType::PROVINSI,
-            'kabkota' => InstitutionType::KAB_KOTA,
+            'kabkota', 'kab_kota' => InstitutionType::KAB_KOTA,
             default => InstitutionType::PUSAT,
         };
 
         $instansi = ($data['instansi'] ?? '') === 'lainnya'
-            ? trim($data['instansi_lainnya'] ?? '')
+            ? trim((string) ($data['instansi_lainnya'] ?? ''))
             : ($data['instansi'] ?? '');
 
-        if (($data['instansi'] ?? '') === 'lainnya') {
+        if (($data['instansi'] ?? '') === 'lainnya' && $instansi !== '') {
             Institution::firstOrCreate(
                 [
                     'name' => $instansi,
@@ -737,7 +760,7 @@ class UserDashboardService
 
         $profile->institution_type = $institutionType->value;
         $profile->instansi = $instansi;
-        $profile->unit_kerja = $data['unit_kerja'];
+        $profile->unit_kerja = $data['unit_kerja'] ?? null;
         $profile->save();
 
         UserScope::updateOrCreate(
@@ -747,6 +770,10 @@ class UserDashboardService
                 'regency_code' => $data['regency_code'] ?? null,
             ]
         );
+
+        SmartCache::bump([
+            SmartCache::userDomain($user->id),
+        ]);
     }
 
     /**
@@ -797,6 +824,7 @@ class UserDashboardService
             });
 
         $availableCatalogs = Course::whereNotIn('id', $enrolledCourseIds)
+            ->when($user->isSwastaUser(), fn ($q) => $q->where('audience', 'swasta'))
             ->where(function ($query) use ($keyword) {
                 $query->where('name', 'like', "%{$keyword}%")
                     ->orWhere('description', 'like', "%{$keyword}%");

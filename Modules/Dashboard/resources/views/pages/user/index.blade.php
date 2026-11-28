@@ -1,24 +1,6 @@
 <x-dashboard::layouts.dashboard title="Dashboard Pembelajaran">
     @push('styles')
-        <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
         <style>
-            #instansiForm .select2-container .select2-selection--single {
-                height: 44px;
-                border: 1px solid #e2e8f0;
-                border-radius: 0.5rem;
-            }
-
-            #instansiForm .select2-container .select2-selection__rendered {
-                line-height: 42px;
-                padding-left: 12px;
-                padding-right: 32px;
-            }
-
-            #instansiForm .select2-container .select2-selection__arrow {
-                height: 42px;
-                right: 8px;
-            }
-
             #chartScrollContainer::-webkit-scrollbar,
             .custom-scrollbar::-webkit-scrollbar {
                 width: 6px;
@@ -41,7 +23,45 @@
         </style>
     @endpush
 
+    @php
+        $authUser = auth()->user();
+        $needsSectorOnboarding = !$profile || (empty($profile->institution_type) && empty($profile->instansi));
+        $showProfileReminder = !$needsSectorOnboarding && $authUser && !$authUser->hasCompleteCertificateProfile();
+        $firstName = explode(' ', trim((string) ($authUser?->profile?->full_name ?: $authUser?->name ?: 'Peserta')))[0];
+    @endphp
+
     <div class="px-0 py-3 sm:p-5 lg:p-6 max-w-full mx-auto space-y-5 sm:space-y-6">
+
+        @if ($showProfileReminder)
+            <div x-data="{ dismissed: false }" x-show="!dismissed" x-transition
+                class="rounded-md border border-sky-200 bg-sky-50/90 px-4 py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div class="flex items-start sm:items-center gap-3 min-w-0">
+                    <div class="w-9 h-9 rounded-md bg-[#13416B] text-white flex items-center justify-center shrink-0 text-sm">
+                        <i class="fas fa-id-card"></i>
+                    </div>
+                    <div class="min-w-0">
+                        <p class="text-xs sm:text-sm font-bold text-slate-800">
+                            Informasi pribadi &amp; instansi belum dilengkapi
+                        </p>
+                        <p class="text-xs text-slate-600 mt-0.5 leading-snug">
+                            Anda tetap bisa mengikuti pelatihan sekarang. Data ini wajib dilengkapi di menu <strong>Profil</strong> saat hendak mengklaim sertifikat.
+                        </p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2 shrink-0 self-end sm:self-center">
+                    <a href="{{ route('user.profile') }}"
+                        class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-md text-xs font-bold text-white bg-[#13416B] hover:bg-[#0f3354] transition-colors shadow-2xs">
+                        <span>Lengkapi Profil</span>
+                        <i class="fas fa-arrow-right text-[10px]"></i>
+                    </a>
+                    <button type="button" @click="dismissed = true"
+                        class="p-1.5 rounded-md text-slate-400 hover:text-slate-600 hover:bg-sky-100 transition-colors cursor-pointer"
+                        aria-label="Tutup pengingat">
+                        <i class="fas fa-times text-xs"></i>
+                    </button>
+                </div>
+            </div>
+        @endif
 
         <!-- ===================================== -->
         <!-- 1. STATS GRID (Solid Colored Cards)   -->
@@ -281,153 +301,128 @@
     </div>
 
     <!-- ===================================== -->
-    <!-- 3. MODAL INSTANSI                     -->
+    <!-- 3. MODAL ONBOARDING MINIMALIS         -->
     <!-- ===================================== -->
-    @if (!$profile || empty($profile->instansi))
-        <div class="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 backdrop-blur-sm"
-            style="background-color: rgba(15, 23, 42, 0.6)">
+    @if ($needsSectorOnboarding)
+        <div class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 backdrop-blur-xs overflow-y-auto"
+            style="background-color: rgba(15, 23, 42, 0.55)"
+            x-data="{ selectedSector: '{{ old('sector', 'instansi') }}', submitting: false }">
             <div
-                class="bg-white rounded-2xl shadow-xl max-w-2xl w-full max-h-[calc(100dvh-1rem)] sm:max-h-[90vh] overflow-y-auto border border-slate-200 overscroll-contain">
-                <div class="p-4 sm:p-8">
-                    <div class="text-center mb-8">
-                        <h2 class="text-lg sm:text-xl font-extrabold text-slate-900">Pilih Instansi Anda</h2>
-                        <p class="text-xs sm:text-sm text-slate-500 mt-1">Lengkapi informasi institusi untuk melanjutkan akses
-                            pembelajaran</p>
+                class="relative bg-white rounded-xl sm:rounded-2xl shadow-xl max-w-md sm:max-w-2xl w-full max-h-[calc(100dvh-1.5rem)] overflow-y-auto border border-slate-200 overscroll-contain my-auto overflow-x-hidden">
+                <div class="relative p-4 sm:p-7">
+                    {{-- Header Rata Kiri dengan Jarak Lega --}}
+                    <div class="text-left mb-6 sm:mb-8 relative z-10">
+                        <h2 class="text-base sm:text-xl font-extrabold text-[#0F2544] leading-snug">
+                            Selamat datang, {{ $firstName }}
+                        </h2>
+                        <p class="text-xs sm:text-sm text-slate-500 mt-1 leading-relaxed">
+                            Pilih latar belakang Anda untuk menyesuaikan katalog pelatihan.
+                        </p>
                     </div>
 
                     <form id="instansiForm" method="POST" action="{{ route('user.update-instansi') }}"
-                        class="space-y-5">
+                        @submit="if (!selectedSector) { $event.preventDefault(); return; } submitting = true;"
+                        class="relative space-y-5 sm:space-y-6">
                         @csrf
+
                         @if ($errors->any())
-                            <div class="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700" role="alert">
-                                <p class="font-semibold">Periksa kembali data yang diisi:</p>
-                                <ul class="mt-1 list-inside list-disc">
-                                    @foreach ($errors->all() as $error)
-                                        <li>{{ $error }}</li>
-                                    @endforeach
-                                </ul>
+                            <div class="relative z-10 rounded-lg border border-red-200 bg-red-50 p-2.5 sm:p-3 text-xs sm:text-sm text-red-700 text-left" role="alert">
+                                Silakan pilih salah satu latar belakang Anda terlebih dahulu.
                             </div>
                         @endif
-                        <div>
-                            <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">Anda
-                                berasal dari <span class="text-red-500">*</span></label>
-                            <div class="grid grid-cols-2 gap-1.5 sm:gap-3">
-                                <label
-                                    class="flex items-center justify-center min-w-0 px-1.5 py-2 sm:px-3 sm:py-2.5 border border-slate-200 rounded-lg cursor-pointer hover:border-[#13416B] hover:bg-[#13416B]/5 transition-all font-semibold text-xs sm:text-sm text-slate-700">
-                                    <input type="radio" name="sector" value="instansi" checked
-                                        class="mr-1.5 shrink-0 text-[#13416B] focus:ring-[#13416B]"> <span class="whitespace-nowrap">Instansi / Lembaga</span>
+
+                        {{-- Wrapper Kartu + Ornamen Gelembung Organik Pastel (Ramping di Atas, Lembut di Sisi Kartu) --}}
+                        <div class="relative py-1 sm:py-2">
+                            {{-- Ornamen Gelembung Kiri: ramping di atas, memeluk lembut sudut kiri-bawah --}}
+                            <svg aria-hidden="true" viewBox="0 0 360 320" fill="none"
+                                class="pointer-events-none select-none absolute -left-4 sm:-left-6 -bottom-3 sm:-bottom-5 w-44 sm:w-64 h-auto text-[#E8F1FD] opacity-90 z-0">
+                                <path fill="currentColor" d="M244 16C274 10 292 34 284 78C274 134 246 254 156 292C76 326 8 282 10 202C12 132 76 92 152 54C194 33 220 21 244 16Z" />
+                            </svg>
+
+                            {{-- Ornamen Gelembung Kanan: ramping/thin di atas, melengkung lembut di sisi kanan --}}
+                            <svg aria-hidden="true" viewBox="0 0 340 340" fill="none"
+                                class="pointer-events-none select-none absolute -right-4 sm:-right-6 -top-2 sm:-top-3 w-44 sm:w-64 h-auto text-[#E8F1FD] opacity-90 z-0">
+                                <path fill="currentColor" d="M254 14C294 6 328 42 330 108C332 184 298 286 238 320C188 348 128 314 108 254C86 190 104 112 154 64C190 29 222 20 254 14Z" />
+                            </svg>
+
+                            {{-- 2 Kartu Pilihan Proporsional (Ringkas di Mobile, Normal di Desktop) --}}
+                            <div class="relative z-10 grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                                {{-- Kartu 1: Instansi / Lembaga --}}
+                                <label @click="selectedSector = 'instansi'"
+                                    class="group flex flex-col rounded-xl border-2 bg-white overflow-hidden cursor-pointer transition-all duration-200 select-none text-left"
+                                    :class="selectedSector === 'instansi'
+                                        ? 'border-[#2563EB] shadow-md ring-2 ring-[#2563EB]/15'
+                                        : 'border-slate-200 hover:border-blue-300 shadow-2xs'">
+                                    <input type="radio" name="sector" value="instansi" x-model="selectedSector" class="sr-only">
+
+                                    {{-- Ilustrasi Gedung Instansi --}}
+                                    <div class="w-full h-28 sm:h-32 bg-[#EEF4FD] overflow-hidden">
+                                        <img src="{{ asset('images/onboarding_instansi_bg.jpg') }}"
+                                            alt="Ilustrasi Gedung Instansi dan Lembaga"
+                                            class="w-full h-full object-fill sm:object-cover sm:object-center" />
+                                    </div>
+
+                                    {{-- Konten Radio Normal + Teks Rata Kiri --}}
+                                    <div class="flex items-start gap-2.5 p-3 sm:p-3.5 bg-white border-t border-slate-100 flex-1 text-left">
+                                        <span class="w-4 h-4 sm:w-5 sm:h-5 rounded-full border-2 flex items-center justify-center shrink-0 mt-0.5 transition-colors"
+                                            :class="selectedSector === 'instansi' ? 'border-[#2563EB]' : 'border-slate-300'">
+                                            <span class="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-[#2563EB] transition-transform duration-150"
+                                                :class="selectedSector === 'instansi' ? 'scale-100' : 'scale-0'"></span>
+                                        </span>
+                                        <div class="min-w-0 text-left">
+                                            <span class="block text-sm sm:text-[15px] font-bold text-[#0F2544] leading-snug">
+                                                Instansi / Lembaga
+                                            </span>
+                                            <span class="block text-[11px] sm:text-xs text-slate-500 mt-0.5 sm:mt-1 leading-relaxed">
+                                                Pegawai kementerian/lembaga di tingkat pusat maupun instansi pemerintah provinsi dan kabupaten/kota.
+                                            </span>
+                                        </div>
+                                    </div>
                                 </label>
-                                <label
-                                    class="flex items-center justify-center min-w-0 px-1.5 py-2 sm:px-3 sm:py-2.5 border border-slate-200 rounded-lg cursor-pointer hover:border-[#13416B] hover:bg-[#13416B]/5 transition-all font-semibold text-xs sm:text-sm text-slate-700">
-                                    <input type="radio" name="sector" value="swasta"
-                                        class="mr-1.5 shrink-0 text-[#13416B] focus:ring-[#13416B]"> <span class="whitespace-nowrap">Swasta</span>
+
+                                {{-- Kartu 2: Swasta --}}
+                                <label @click="selectedSector = 'swasta'"
+                                    class="group flex flex-col rounded-xl border-2 bg-white overflow-hidden cursor-pointer transition-all duration-200 select-none text-left"
+                                    :class="selectedSector === 'swasta'
+                                        ? 'border-[#2563EB] shadow-md ring-2 ring-[#2563EB]/15'
+                                        : 'border-slate-200 hover:border-blue-300 shadow-2xs'">
+                                    <input type="radio" name="sector" value="swasta" x-model="selectedSector" class="sr-only">
+
+                                    {{-- Ilustrasi Gedung Swasta --}}
+                                    <div class="w-full h-28 sm:h-32 bg-[#EEF4FD] overflow-hidden">
+                                        <img src="{{ asset('images/onboarding_swasta_bg.jpg') }}"
+                                            alt="Ilustrasi Gedung Perkantoran Swasta"
+                                            class="w-full h-full object-fill sm:object-cover sm:object-center" />
+                                    </div>
+
+                                    {{-- Konten Radio Normal + Teks Rata Kiri --}}
+                                    <div class="flex items-start gap-2.5 p-3 sm:p-3.5 bg-white border-t border-slate-100 flex-1 text-left">
+                                        <span class="w-4 h-4 sm:w-5 sm:h-5 rounded-full border-2 flex items-center justify-center shrink-0 mt-0.5 transition-colors"
+                                            :class="selectedSector === 'swasta' ? 'border-[#2563EB]' : 'border-slate-300'">
+                                            <span class="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-[#2563EB] transition-transform duration-150"
+                                                :class="selectedSector === 'swasta' ? 'scale-100' : 'scale-0'"></span>
+                                        </span>
+                                        <div class="min-w-0 text-left">
+                                            <span class="block text-sm sm:text-[15px] font-bold text-[#0F2544] leading-snug">
+                                                Swasta
+                                            </span>
+                                            <span class="block text-[11px] sm:text-xs text-slate-500 mt-0.5 sm:mt-1 leading-relaxed">
+                                                Karyawan perusahaan, pelaku usaha, atau praktisi profesional di luar instansi pemerintah.
+                                            </span>
+                                        </div>
+                                    </div>
                                 </label>
                             </div>
                         </div>
 
-                        <div id="asalInstansiSection">
-                            <div>
-                                <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">Asal
-                                    Instansi <span class="text-red-500">*</span></label>
-                                <div class="grid grid-cols-3 gap-1.5 sm:gap-3">
-                                    <label
-                                        class="flex items-center justify-center min-w-0 px-1.5 py-2 sm:px-3 sm:py-2.5 border border-slate-200 rounded-lg cursor-pointer hover:border-[#13416B] hover:bg-[#13416B]/5 transition-all font-semibold text-xs sm:text-sm text-slate-700">
-                                        <input type="radio" name="asalInstansi" value="pusat"
-                                            class="mr-1.5 shrink-0 text-[#13416B] focus:ring-[#13416B]"> <span class="whitespace-nowrap">Pusat</span>
-                                    </label>
-                                    <label
-                                        class="flex items-center justify-center min-w-0 px-1.5 py-2 sm:px-3 sm:py-2.5 border border-slate-200 rounded-lg cursor-pointer hover:border-[#13416B] hover:bg-[#13416B]/5 transition-all font-semibold text-xs sm:text-sm text-slate-700">
-                                        <input type="radio" name="asalInstansi" value="provinsi"
-                                            class="mr-1.5 shrink-0 text-[#13416B] focus:ring-[#13416B]"> <span class="whitespace-nowrap">Provinsi</span>
-                                    </label>
-                                    <label
-                                        class="flex items-center justify-center min-w-0 px-1.5 py-2 sm:px-3 sm:py-2.5 border border-slate-200 rounded-lg cursor-pointer hover:border-[#13416B] hover:bg-[#13416B]/5 transition-all font-semibold text-xs sm:text-sm text-slate-700">
-                                        <input type="radio" name="asalInstansi" value="kabkota"
-                                            class="mr-1.5 shrink-0 text-[#13416B] focus:ring-[#13416B]"> <span class="whitespace-nowrap">Kab/Kota</span>
-                                    </label>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div id="swastaSection" class="hidden">
-                            <label for="companyName"
-                                class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">Nama
-                                Perusahaan <span class="text-red-500">*</span></label>
-                            <input type="text" name="instansi" id="companyName" maxlength="255"
-                                placeholder="Contoh: PT Maju Bersama"
-                                class="w-full min-h-11 px-3 py-2 border border-slate-200 rounded-lg text-sm placeholder:text-slate-400 placeholder:font-normal focus:ring-2 focus:ring-[#13416B] focus:border-[#13416B]" />
-                            <p class="mt-1.5 text-xs text-slate-500">Nama perusahaan tempat Anda bekerja.</p>
-                        </div>
-
-                        <div id="kementerianSection" class="hidden">
-                            <label for="kementerian"
-                                class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">Kementerian/Lembaga
-                                <span class="text-red-500">*</span></label>
-                            <select id="kementerian" class="w-full">
-                                <option value="">Pilih Kementerian/Lembaga</option>
-                            </select>
-                            <input type="hidden" name="instansi" id="finalInstansiPusat" />
-                        </div>
-
-                        <div id="provinsiSection" class="hidden">
-                            <label for="provinsi"
-                                class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">Provinsi
-                                <span class="text-red-500">*</span></label>
-                            <select id="provinsi" class="w-full" name="province_code">
-                                <option value="">Pilih Provinsi</option>
-                                @foreach ($provinces as $prov)
-                                    <option value="{{ $prov->code }}" data-name="{{ $prov->name }}">
-                                        {{ $prov->name }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-
-                        <div id="kabkotaSection" class="hidden">
-                            <label for="kabkota"
-                                class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">Kabupaten/Kota
-                                <span class="text-red-500">*</span></label>
-                            <select id="kabkota" class="w-full" name="regency_code">
-                                <option value="">Pilih Kabupaten/Kota</option>
-                            </select>
-                        </div>
-
-                        <div id="instansiSection" class="hidden">
-                            <label for="instansi"
-                                class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">Instansi
-                                <span class="text-red-500">*</span></label>
-                            <select id="instansi" name="instansi" class="w-full">
-                                <option value="">Pilih Instansi</option>
-                            </select>
-                            <p class="mt-1.5 text-xs text-slate-500">Pilih opsi "Lainnya" apabila instansi Anda tidak
-                                ditemukan.</p>
-                        </div>
-
-                        <div id="customInstansiSection" class="hidden">
-                            <label for="customInstansi"
-                                class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">Nama
-                                Instansi <span class="text-red-500">*</span></label>
-                            <input type="text" name="instansi_lainnya" id="customInstansi" maxlength="255"
-                                placeholder="Masukkan nama instansi"
-                                class="w-full min-h-11 px-3 py-2 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-[#13416B] focus:border-[#13416B]" />
-                        </div>
-
-                        <div id="unitKerjaSection" class="hidden">
-                            <label for="unitKerja"
-                                class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">Unit Kerja
-                                <span class="text-red-500">*</span></label>
-                            <input type="text" name="unit_kerja" id="unitKerja" maxlength="255" placeholder="Contoh: Bagian SDM"
-                                class="w-full min-h-11 px-3 py-2 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-[#13416B] focus:border-[#13416B]" />
-                        </div>
-
-                        <div id="instansiClientError" class="hidden rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700 flex items-start gap-2" role="alert" aria-live="assertive">
-                            <i class="fas fa-exclamation-circle mt-0.5"></i>
-                            <span id="instansiClientErrorText"></span>
-                        </div>
-
-                        <div class="pt-3">
-                            <button type="submit"
-                                class="w-full bg-[#13416B] text-white py-3 px-5 rounded-lg text-sm font-bold hover:bg-[#0f3354] transition-colors shadow-sm flex items-center justify-center gap-2">
-                                <i class="fas fa-save"></i> <span>Simpan & Lanjutkan</span>
+                        {{-- Tombol Lanjutkan --}}
+                        <div class="relative z-10 pt-1 flex justify-end">
+                            <button type="submit" :disabled="!selectedSector || submitting"
+                                class="w-auto min-w-[130px] sm:min-w-[150px] bg-[#13416B] text-white py-2 sm:py-2.5 px-5 rounded-lg text-xs sm:text-sm font-bold hover:bg-[#0f3354] transition-colors shadow-xs flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed">
+                                <span x-show="!submitting">Lanjutkan</span>
+                                <span x-show="submitting" x-cloak class="inline-flex items-center gap-2">
+                                    <i class="fas fa-spinner fa-spin text-xs"></i> Menyimpan...
+                                </span>
                             </button>
                         </div>
                     </form>
@@ -440,8 +435,6 @@
     <!-- 4. SCRIPTS SECTION                    -->
     <!-- ===================================== -->
     @push('scripts')
-        <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
         <script>
             document.addEventListener('DOMContentLoaded', function() {
                 // =========================================================
@@ -771,331 +764,6 @@
                     render();
                 })();
             });
-
-            @if (!$profile || empty($profile->instansi))
-                $(document).ready(function() {
-                    function showFormError(message) {
-                        $('#instansiClientErrorText').text(message);
-                        $('#instansiClientError').removeClass('hidden');
-                        const box = document.getElementById('instansiClientError');
-                        if (box && box.scrollIntoView) box.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-                    }
-                    function clearFormError() {
-                        $('#instansiClientError').addClass('hidden');
-                    }
-                    $('#instansiForm').on('change input', clearFormError);
-
-                    $('input[name="sector"]').on('change', function() {
-                        const sector = $(this).val();
-                        if (sector === 'swasta') {
-                            $('#asalInstansiSection').addClass('hidden');
-                            $('#kementerianSection, #provinsiSection, #kabkotaSection, #instansiSection, #customInstansiSection, #unitKerjaSection')
-                                .addClass('hidden');
-                            $('input[name="asalInstansi"]').prop('checked', false);
-                            $('#provinsi').val('').trigger('change');
-                            $('#kabkota').empty().append(new Option('Pilih Kabupaten/Kota', ''));
-                            $('#swastaSection').removeClass('hidden');
-                            $('#provinsiSection').removeClass('hidden');
-                            $('#companyName').prop('required', true);
-                            $('#unitKerja').val('').prop('required', false);
-                            $('#customInstansi').prop('required', false);
-                        } else {
-                            $('#swastaSection').addClass('hidden');
-                            $('#companyName').val('').prop('required', false);
-                            $('#asalInstansiSection').removeClass('hidden');
-                            $('#provinsi').val('').trigger('change');
-                            $('#kabkota').empty().append(new Option('Pilih Kabupaten/Kota', ''));
-                            $('#kabkotaSection, #instansiSection, #customInstansiSection, #unitKerjaSection')
-                                .addClass('hidden');
-                            $('#unitKerja').prop('required', false);
-                        }
-                        clearFormError();
-                    });
-
-                    $.ajax({
-                        url: '{{ route('api.masterdata.institutions.index') }}?type=pusat',
-                        type: 'GET',
-                        success: function(response) {
-                            if (response.success) {
-                                response.data
-                                    .filter(institution => institution.name.trim().toLowerCase() !== 'lainnya')
-                                    .forEach(institution => {
-                                        $('#kementerian').append(new Option(institution.name, institution.name));
-                                });
-                                $('#kementerian').append(new Option(
-                                    'Lainnya (instansi belum terdaftar)', 'lainnya'));
-                                $('#kementerian').trigger('change');
-                            }
-                        },
-                        error: function() {
-                            $('#kementerian').append(new Option(
-                                'Daftar instansi gagal dimuat; pilih Lainnya untuk melanjutkan',
-                                '', true, true));
-                            $('#kementerian').append(new Option(
-                                'Lainnya (instansi belum terdaftar)', 'lainnya'));
-                            $('#kementerian').trigger('change');
-                        }
-                    });
-
-                    $('#kementerian, #provinsi, #kabkota, #instansi').select2({
-                        placeholder: function() {
-                            return $(this).find('option:first').text();
-                        },
-                        allowClear: false,
-                        width: '100%'
-                    });
-
-                    $('#kementerian').on('change', function() {
-                        const isOther = $(this).val() === 'lainnya';
-                        $('#customInstansiSection').toggleClass('hidden', !isOther);
-                        $('#unitKerjaSection').toggleClass('hidden', !isOther && !$(this).val());
-                        $('#customInstansi').val('').prop('required', isOther);
-                        $('#unitKerja').prop('required', Boolean($(this).val()));
-                        if (isOther) {
-                            $('#unitKerjaSection').removeClass('hidden');
-                        }
-                    });
-
-                    $('input[name="asalInstansi"]').on('change', function() {
-                        const value = $(this).val();
-                        $('#kementerianSection, #provinsiSection, #kabkotaSection, #instansiSection, #customInstansiSection, #unitKerjaSection')
-                            .addClass('hidden');
-                        $('#kementerian, #provinsi, #kabkota, #instansi, #customInstansi, #unitKerja').val('')
-                            .trigger('change');
-                        $('#finalInstansiPusat').val('');
-                        $('#customInstansi, #unitKerja').prop('required', false);
-
-                        if (value === 'pusat') {
-                            $('#kementerianSection').removeClass('hidden');
-                        } else if (value === 'provinsi' || value === 'kabkota') {
-                            $('#provinsiSection').removeClass('hidden');
-                        }
-                    });
-
-                    function populateInstansi() {
-                        $('#instansi').empty().append(new Option('Pilih Instansi', ''));
-
-                        const provinceCode = $('#provinsi').val();
-                        const regencyCode = $('#kabkota').val();
-                        const asalInstansi = $('input[name="asalInstansi"]:checked').val();
-
-                        $.ajax({
-                            url: '{{ route('api.masterdata.institutions.index') }}',
-                            type: 'GET',
-                            data: {
-                                type: 'daerah',
-                                province_code: provinceCode,
-                                regency_code: regencyCode,
-                                regional_level: asalInstansi
-                            },
-                            success: function(response) {
-                                if (response.success) {
-                                    const institutions = response.data.filter(institution =>
-                                        institution.name.trim().toLowerCase() !== 'lainnya');
-
-                                    if (institutions.length > 0) {
-                                        institutions.forEach(institution => {
-                                            $('#instansi').append(new Option(institution.name, institution.name));
-                                        });
-                                    }
-
-                                    $('#instansi').append(new Option(
-                                        'Lainnya (instansi belum terdaftar)', 'lainnya'));
-                                    $('#instansi').trigger('change');
-                                }
-                            },
-                            error: function() {
-                                $('#instansi').append(new Option(
-                                    'Lainnya (instansi belum terdaftar)', 'lainnya'));
-                                $('#instansi').trigger('change');
-                            }
-                        });
-                    }
-
-                    $('#provinsi').on('change', function() {
-                        const provinsiCode = $(this).val();
-                        const sector = $('input[name="sector"]:checked').val();
-                        const asalInstansi = $('input[name="asalInstansi"]:checked').val();
-
-                        if (provinsiCode) {
-                            if (sector === 'swasta') {
-                                $.ajax({
-                                    url: '{{ route('user.get-regencies') }}',
-                                    type: 'GET',
-                                    data: {
-                                        province_code: provinsiCode
-                                    },
-                                    success: function(response) {
-                                        if (response.success) {
-                                            $('#kabkota').empty().append(new Option(
-                                                'Pilih Kabupaten/Kota', ''));
-                                            response.data.forEach(regency => {
-                                                $('#kabkota').append(new Option(regency.name, regency.code));
-                                            });
-                                            $('#kabkota').trigger('change');
-                                            $('#kabkotaSection').removeClass('hidden');
-                                        }
-                                    }
-                                });
-                            } else if (asalInstansi === 'kabkota') {
-                                $.ajax({
-                                    url: '{{ route('user.get-regencies') }}',
-                                    type: 'GET',
-                                    data: {
-                                        province_code: provinsiCode
-                                    },
-                                    success: function(response) {
-                                        if (response.success) {
-                                            $('#kabkota').empty().append(new Option(
-                                                'Pilih Kabupaten/Kota', ''));
-                                            response.data.forEach(regency => {
-                                                $('#kabkota').append(new Option(regency.name, regency.code));
-                                            });
-                                            $('#kabkota').trigger('change');
-                                            $('#kabkotaSection').removeClass('hidden');
-                                            $('#instansiSection, #customInstansiSection, #unitKerjaSection')
-                                                .addClass('hidden');
-                                        }
-                                    }
-                                });
-                            } else if (asalInstansi === 'provinsi') {
-                                populateInstansi();
-                                $('#instansiSection').removeClass('hidden');
-                                $('#kabkotaSection, #customInstansiSection').addClass('hidden');
-                            }
-                        } else {
-                            $('#kabkotaSection, #instansiSection, #customInstansiSection, #unitKerjaSection')
-                                .addClass('hidden');
-                        }
-                    });
-
-                    $('#kabkota').on('change', function() {
-                        const sector = $('input[name="sector"]:checked').val();
-                        if (sector === 'swasta') {
-                            return;
-                        }
-                        if ($(this).val()) {
-                            populateInstansi();
-                            $('#instansiSection').removeClass('hidden');
-                            $('#customInstansiSection, #unitKerjaSection').addClass('hidden');
-                        } else {
-                            $('#instansiSection, #customInstansiSection, #unitKerjaSection').addClass('hidden');
-                        }
-                    });
-
-                    $('#instansi').on('change', function() {
-                        const value = $(this).val();
-                        if (value === 'lainnya') {
-                            $('#customInstansiSection').removeClass('hidden');
-                            $('#unitKerjaSection').toggleClass('hidden', !$('#customInstansi').val().trim());
-                            $('#customInstansi').prop('required', true);
-                            $('#unitKerja').prop('required', Boolean($('#customInstansi').val().trim()));
-                        } else if (value) {
-                            $('#customInstansiSection').addClass('hidden');
-                            $('#unitKerjaSection').removeClass('hidden');
-                            $('#customInstansi').val('').prop('required', false);
-                            $('#unitKerja').prop('required', true);
-                        } else {
-                            $('#customInstansiSection, #unitKerjaSection').addClass('hidden');
-                            $('#customInstansi, #unitKerja').prop('required', false);
-                        }
-                    });
-
-                    $('#customInstansi').on('input', function() {
-                        const isValid = Boolean($(this).val().trim());
-                        const isOtherSelected = $('#instansi').val() === 'lainnya' ||
-                            $('#kementerian').val() === 'lainnya';
-                        if (isValid && isOtherSelected) {
-                            $('#unitKerjaSection').removeClass('hidden');
-                            $('#unitKerja').prop('required', true);
-                        } else {
-                            $('#unitKerjaSection').addClass('hidden');
-                            $('#unitKerja').prop('required', false);
-                        }
-                    });
-
-                    $('#instansiForm').on('submit', function(e) {
-                        const sector = $('input[name="sector"]:checked').val();
-                        if (!sector) {
-                            e.preventDefault();
-                            showFormError('Pilih asal pengguna terlebih dahulu!');
-                            return;
-                        }
-
-                        if (sector === 'swasta') {
-                            if (!$('#companyName').val().trim()) {
-                                e.preventDefault();
-                                showFormError('Masukkan nama perusahaan!');
-                                return;
-                            }
-                            if (!$('#provinsi').val()) {
-                                e.preventDefault();
-                                showFormError('Pilih provinsi domisili!');
-                                return;
-                            }
-                            if (!$('#kabkota').val()) {
-                                e.preventDefault();
-                                showFormError('Pilih kabupaten/kota domisili!');
-                                return;
-                            }
-                            $('#unitKerja').val('');
-                            $('#asalInstansiSection input, #kementerian, #instansi, #customInstansi, #finalInstansiPusat')
-                                .prop('disabled', true);
-                            return;
-                        }
-
-                        const asalInstansi = $('input[name="asalInstansi"]:checked').val();
-                        if (!asalInstansi) {
-                            e.preventDefault();
-                            showFormError('Pilih asal instansi terlebih dahulu!');
-                            return;
-                        }
-
-                        if (asalInstansi === 'pusat') {
-                            const kemVal = $('#kementerian').val();
-                            if (!kemVal) {
-                                e.preventDefault();
-                                showFormError('Pilih Kementerian/Lembaga!');
-                                return;
-                            }
-
-                            const isOther = kemVal === 'lainnya';
-                            if (isOther && !$('#customInstansi').val().trim()) {
-                                e.preventDefault();
-                                showFormError('Masukkan nama instansi yang belum terdaftar.');
-                                return;
-                            }
-
-                            $('#customInstansi').prop('required', isOther);
-                            $('#unitKerja').prop('required', true);
-                            $('#instansi').prop('disabled', true);
-                            $('#finalInstansiPusat').val(isOther ? 'lainnya' : kemVal);
-                        } else {
-                            $('#instansi').prop('disabled', false);
-                        }
-
-                        if (asalInstansi === 'provinsi' || asalInstansi === 'kabkota') {
-                            const instansiVal = $('#instansi').val();
-                            if (instansiVal === 'lainnya') {
-                                const customVal = $('#customInstansi').val().trim();
-                                if (!customVal) {
-                                    e.preventDefault();
-                                    showFormError('Masukkan nama instansi secara manual!');
-                                    return;
-                                }
-                            } else {
-                                if (!instansiVal) {
-                                    e.preventDefault();
-                                    showFormError('Pilih instansi terlebih dahulu!');
-                                    return;
-                                }
-                            }
-
-                            $('#unitKerja').prop('required', true);
-                        }
-                    });
-                });
-            @endif
         </script>
     @endpush
 </x-dashboard::layouts.dashboard>

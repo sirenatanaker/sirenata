@@ -857,9 +857,19 @@ class CourseController extends Controller
 
         if ($result['success']) {
             ToastMagic::success($result['message']);
-        } else {
-            ToastMagic::error($result['message']);
+            return redirect()->back();
         }
+
+        if (!empty($result['requires_profile'])) {
+            ToastMagic::warning($result['message']);
+
+            return redirect()->route('user.profile', [
+                'complete_profile' => 1,
+                'return_to'        => route('user.course.my-course.detail', $slug),
+            ])->with('warning', $result['message']);
+        }
+
+        ToastMagic::error($result['message']);
 
         return redirect()->back();
     }
